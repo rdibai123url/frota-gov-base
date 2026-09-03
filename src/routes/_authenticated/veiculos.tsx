@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Pencil, Search } from "lucide-react";
+import { Plus, Pencil, Search, History } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -332,11 +332,18 @@ function Veiculos() {
                   <Badge variant={statusVariant(v.status)}>{label(VEHICLE_STATUS, v.status)}</Badge>
                 </TableCell>
                 <TableCell className="text-right">
-                  {canWrite && (
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(v)}>
-                      <Pencil className="size-4" />
+                  <div className="flex justify-end gap-1">
+                    <Button asChild variant="ghost" size="icon" aria-label="Histórico do veículo">
+                      <Link to="/veiculo/$id" params={{ id: v.id }}>
+                        <History className="size-4" />
+                      </Link>
                     </Button>
-                  )}
+                    {canWrite && (
+                      <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => openEdit(v)}>
+                        <Pencil className="size-4" />
+                      </Button>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
