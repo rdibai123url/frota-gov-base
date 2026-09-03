@@ -222,3 +222,7 @@ export async function checkCompatibility(partId: string, vehicleId: string | nul
   if (error) throw error;
   return Boolean(data);
 }
+
+/** Remove chaves indefinidas antes de enviar os parâmetros ao banco. */
+export const rpcArgs = (o: Record<string, unknown>) =>
+  Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) as never;
