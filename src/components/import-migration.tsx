@@ -457,7 +457,7 @@ function ImportWizard({ orgId }: { orgId: string }) {
     if (!batchId) return;
     setBusy(true);
     try {
-      const { data, error } = await supabase.rpc("commit_import_batch_v2", { _batch: batchId });
+      const { data, error } = await supabase.rpc("commit_import_batch_v3", { _batch: batchId });
       if (error) throw error;
       const result = data as unknown as { criados: number; atualizados: number; ignorados: number };
       setReport(result);
