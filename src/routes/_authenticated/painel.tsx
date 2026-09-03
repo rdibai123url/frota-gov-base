@@ -115,6 +115,28 @@ function Painel() {
   const { data: alerts = [] } = useFuelingAlerts();
   const { data: drivers = [] } = useDrivers();
   const { data: auths = [] } = useAuthorizations();
+  const { data: contracts = [] } = useContracts();
+  const { data: commitments = [] } = useCommitments();
+  const { data: quotas = [] } = useQuotas();
+
+  const financeiro = useMemo(() => {
+    const vigentes = contracts.filter((c) => c.status === "vigente");
+    const saldoContratual = vigentes.reduce((s, c) => s + contractTotals(c).balance, 0);
+    const empenhosAtivos = commitments.filter((c) => c.status === "ativo");
+    return {
+      contratosVigentes: vigentes.length,
+      saldoContratual,
+      empenhosAtivos: empenhosAtivos.length,
+      saldoEmpenhos: empenhosAtivos.reduce((s, c) => s + Number(c.available_value ?? 0), 0),
+      cotasCriticas: quotas.filter(
+        (q) => q.active && Number(q.granted_amount) > 0 && 100 - quotaPercent(q) <= 20,
+      ).length,
+      contratosAVencer: vigentes.filter((c) => {
+        const d = daysUntil(c.valid_to);
+        return d !== null && d >= 0 && d <= 60;
+      }).length,
+    };
+  }, [contracts, commitments, quotas]);
 
   const ativos = vehicles.filter((v) => v.status === "ativo").length;
   const manutencao = vehicles.filter((v) => v.status === "manutencao").length;
