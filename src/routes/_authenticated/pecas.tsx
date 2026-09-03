@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { PageHeader } from "@/components/app-shell";
+import { PartCompatibilityPanel } from "@/components/part-compatibility-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -156,8 +157,13 @@ function Pecas() {
       <Tabs defaultValue="catalogo">
         <TabsList className="mb-4">
           <TabsTrigger value="catalogo">Catálogo</TabsTrigger>
+          <TabsTrigger value="compatibilidade">Compatibilidade</TabsTrigger>
           <TabsTrigger value="historico">Histórico por veículo</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="compatibilidade">
+          <PartCompatibilityPanel />
+        </TabsContent>
 
         <TabsContent value="catalogo">
           <div className="mb-4 max-w-sm">
