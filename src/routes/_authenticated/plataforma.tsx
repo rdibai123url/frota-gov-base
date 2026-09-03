@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DocsTab, MatrixTab } from "@/components/homologacao";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -114,7 +115,7 @@ function Plataforma() {
           <DocsTab
             environment={[
               { label: "Ambiente", value: typeof window === "undefined" ? "—" : window.location.host },
-              { label: "Rotinas automáticas", value: "Alertas e expiração a cada hora; limpeza de logos às 03:20" },
+              { label: "Rotinas automáticas", value: "Alertas e expiração a cada hora; limpeza de logs às 03:20" },
             ]}
           />
         </TabsContent>
