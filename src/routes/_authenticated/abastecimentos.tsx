@@ -858,6 +858,15 @@ function DetailDialog({ fueling, onClose }: { fueling: FuelingRow | null; onClos
           <Row label="Nota fiscal" value={fueling.invoice_number} />
           <Row label="Autorização" value={fueling.authorization_number} />
           <Row label="Atualizou o veículo" value={fueling.vehicle_updated ? "Sim" : "Não"} />
+          <div className="sm:col-span-3 border-t pt-3">
+            <p className="gov-title text-sm">Origem do recurso</p>
+          </div>
+          <Row label="Origem da despesa" value={EXPENSE_ORIGIN_LABELS[fueling.expense_origin] ?? fueling.expense_origin} />
+          <Row label="Contrato" value={fueling.contract?.number ?? "—"} />
+          <Row label="Item contratual" value={fueling.contract_item?.description ?? "—"} />
+          <Row label="Empenho" value={fueling.commitment ? `${fueling.commitment.number}/${fueling.commitment.exercise}` : "—"} />
+          <Row label="Centro de custo" value={fueling.cost_center ? `${fueling.cost_center.code} — ${fueling.cost_center.name}` : "—"} />
+          <Row label="Cota" value={fueling.quota?.name ?? "—"} />
           <Row label="Registrado em" value={dateTimeBR(fueling.created_at)} />
           <div className="sm:col-span-3">
             <Row label="Observações" value={fueling.notes} />
