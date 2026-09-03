@@ -93,8 +93,27 @@ const NAV: NavGroup[] = [
     ],
   },
 
+  {
+    id: "relatorios",
+    label: "Relatórios e integrações",
+    icon: FileBarChart,
+    items: [
+      { to: "/relatorios", label: "Relatórios avançados" },
+      { to: "/transparencia", label: "Portal da Transparência" },
+      { to: "/chaves-api", label: "Chaves de API" },
+    ],
+  },
+
   { id: "alertas", label: "Alertas e inconsistências", icon: BellRing, to: "/alertas" },
 ];
+
+const PLATFORM_NAV: NavGroup = {
+  id: "plataforma",
+  label: "Administração da Plataforma",
+  icon: ShieldCheck,
+  to: "/plataforma",
+};
+
 
 const EXTRA_MATCHES: Record<string, string[]> = {
   frota: ["/veiculo/"],
