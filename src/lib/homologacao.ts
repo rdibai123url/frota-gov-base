@@ -45,6 +45,8 @@ export const ACTIVE_MODULES: ModuleInfo[] = [
   { module: "Portal da Transparência", route: "/transparencia", status: "ativo", note: "Desabilitado por padrão em cada órgão." },
   { module: "API pública v1 (leitura)", route: "/chaves-api", status: "ativo", note: "Somente leitura, com chave por órgão." },
   { module: "Administração da Plataforma", route: "/plataforma", status: "ativo", note: "Exclusivo do Super Admin." },
+  { module: "Importação e migração de dados", route: "/plataforma", status: "ativo", note: "Assistente por módulo, lotes rastreáveis e posição de abertura." },
+
 ];
 
 export type ChecklistItem = { item: string; status: "ok" | "parcial"; detail: string };
