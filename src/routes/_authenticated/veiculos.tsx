@@ -502,7 +502,14 @@ function Veiculos() {
                     ))}
                   </SelectContent>
                 </Select>
+                {editing && (
+                  <p className="text-xs text-muted-foreground">
+                    A troca de secretaria/unidade é feita em Frota → Movimentação patrimonial, para preservar o
+                    histórico do bem.
+                  </p>
+                )}
               </div>
+
               <div className="space-y-1.5">
                 <Label>Situação</Label>
                 <Select value={status} onValueChange={(v) => setStatus(v as VehicleStatus)}>
