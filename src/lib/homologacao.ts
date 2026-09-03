@@ -19,7 +19,10 @@ export const VERSION_HISTORY: VersionEntry[] = [
   { version: "7.0.0", date: "Fase 7", title: "Legal e patrimonial", summary: "Multas, sinistros, seguros, obrigações legais, movimentação patrimonial e entidades externas." },
   { version: "8.0.0", date: "Fase 8", title: "Plataforma e integrações", summary: "Super Admin, onboarding controlado, logs globais, relatórios, Portal da Transparência e API v1." },
   { version: "9.0.0", date: "Fase 9", title: "Homologação e comercialização", summary: "Endurecimento de segurança, agendamento automático de rotinas, exportação .xlsx e impressão/PDF, painel executivo agrupado, dados abertos em CSV, paginação da API, documentação e matriz de licitações." },
+  { version: "9.2.0", date: "Pós-Fase 9 — Bloco B", title: "Fechamento mensal da transparência", summary: "Competência mensal por órgão, checklist obrigatório, publicação versionada, bloqueio de competência fechada e reabertura por chamado." },
+  { version: "9.3.0", date: "Pós-Fase 9 — Bloco C", title: "Importação e migração em massa", summary: "Assistente de importação em 16 módulos com modelo de planilha, mapeamento de colunas, simulação sem gravar, correção de linhas, importação transacional, lotes rastreáveis, anulação de lote e posição de abertura de saldos." },
 ];
+
 
 export type ModuleInfo = { module: string; route: string; status: "ativo" | "parcial"; note?: string };
 
