@@ -93,6 +93,8 @@ export function useMyPartner() {
       const { data: auth } = await supabase.auth.getUser();
       const uid = auth.user?.id;
       if (!uid) return null;
+      // Vincula o usuário ao cadastro do credenciado pelo e-mail e registra o acesso.
+      await supabase.rpc("partner_session_touch");
       const { data: link, error } = await supabase
         .from("partner_users")
         .select("*")
