@@ -121,18 +121,26 @@ function Relatorios() {
   const [to, setTo] = useState(today());
   const [unitId, setUnitId] = useState("todas");
   const [vehicleId, setVehicleId] = useState("todos");
+  const [driverId, setDriverId] = useState("todos");
   const [page, setPage] = useState(1);
 
   const { data: units = [] } = useUnits();
   const { data: vehicles = [] } = useVehicles();
+  const { data: drivers = [] } = useDrivers();
   const { data: org } = useOrganization();
+  const { data: me } = useProfile();
+  const { data: logoUrl } = useBrasaoUrl(org?.logo_url);
+
+  const caps = CAPS[report];
 
   const { data, isLoading } = useQuery({
-    queryKey: ["report", report, from, to, unitId, vehicleId],
+    queryKey: ["report", report, from, to, unitId, vehicleId, driverId],
     queryFn: async (): Promise<Record<string, unknown>[]> => {
-      const unit = unitId === "todas" ? null : unitId;
-      const vehicle = vehicleId === "todos" ? null : vehicleId;
+      const unit = caps.unit && unitId !== "todas" ? unitId : null;
+      const vehicle = caps.vehicle && vehicleId !== "todos" ? vehicleId : null;
+      const driver = caps.driver && driverId !== "todos" ? driverId : null;
       const start = `${from}T00:00:00`;
+
       const end = `${to}T23:59:59`;
 
       if (report === "frota") {
