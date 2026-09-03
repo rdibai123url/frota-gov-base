@@ -63,6 +63,41 @@ export const Route = createFileRoute("/api/public/v1/transparencia/$slug")({
 
         const periodo = { de: from, ate: to };
 
+        // Competências fechadas e publicadas (fechamento mensal)
+        const { data: pubs } = await supabaseAdmin
+          .from("transparency_publications")
+          .select("version, published_at, snapshot, superseded_at, period:transparency_periods(year, month)")
+          .eq("organization_id", orgId)
+          .is("superseded_at", null)
+          .order("published_at", { ascending: false });
+
+        const competencias = (pubs ?? [])
+          .filter((p: any) => p.period)
+          .map((p: any) => ({
+            competencia: `${String(p.period.month).padStart(2, "0")}/${p.period.year}`,
+            chave: `${p.period.year}-${String(p.period.month).padStart(2, "0")}`,
+            versao: p.version,
+            publicado_em: p.published_at,
+          }));
+
+        const compParam = url.searchParams.get("competencia");
+        if (compParam) {
+          if (!/^\d{4}-\d{2}$/.test(compParam)) return json({ error: "Competência inválida. Use AAAA-MM." }, 400);
+          const found = (pubs ?? []).find(
+            (p: any) => p.period && `${p.period.year}-${String(p.period.month).padStart(2, "0")}` === compParam,
+          ) as any;
+          if (!found) return json({ error: "Competência não publicada." }, 404);
+          return json({
+            orgao: org ?? null,
+            apresentacao: settings.headline ?? null,
+            competencia: `${String(found.period.month).padStart(2, "0")}/${found.period.year}`,
+            versao: found.version,
+            publicado_em: found.published_at,
+            competencias_publicadas: competencias,
+            dados: found.snapshot,
+          });
+        }
+
         async function loadVehicles() {
           const { data } = await supabaseAdmin
             .from("vehicles")
