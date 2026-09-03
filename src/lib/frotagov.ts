@@ -211,7 +211,10 @@ export type FuelingRow = Fueling & {
   unit: Pick<Unit, "id" | "name" | "acronym"> | null;
   supplier: Pick<Supplier, "id" | "legal_name" | "trade_name"> | null;
   fuel: Pick<FuelType, "id" | "name" | "measure_unit"> | null;
+  driver: { id: string; full_name: string } | null;
+  authorization: { id: string; code: string | null; max_quantity: number; consumed_quantity: number } | null;
 };
+
 
 export const MEASURE_UNITS = ["litro", "m³", "kWh", "kg", "outra"];
 
@@ -237,9 +240,11 @@ export function usePerms() {
     canWrite: roles.some((r) => WRITE_ROLES.includes(r)),
     canRegister: roles.some((r) => REGISTER_ROLES.includes(r)),
     canCancel: roles.some((r) => CANCEL_ROLES.includes(r)),
+    canManageFleet: roles.some((r) => (["super_admin", "org_admin", "fleet_manager"] as AppRole[]).includes(r)),
     isAuditor: roles.length > 0 && roles.every((r) => r === "auditor"),
   };
 }
+
 
 /* ------------------------------ máscaras ------------------------------ */
 
@@ -316,7 +321,8 @@ export function useSuppliers() {
 }
 
 const FUELING_SELECT =
-  "*, vehicle:vehicles(id, plate, asset_code, fuel_type, tank_capacity, status), unit:units(id, name, acronym), supplier:suppliers(id, legal_name, trade_name), fuel:fuel_types(id, name, measure_unit)";
+  "*, vehicle:vehicles(id, plate, asset_code, fuel_type, tank_capacity, status), unit:units(id, name, acronym), supplier:suppliers(id, legal_name, trade_name), fuel:fuel_types(id, name, measure_unit), driver:drivers(id, full_name), authorization:fuel_authorizations(id, code, max_quantity, consumed_quantity)";
+
 
 export function useFuelings() {
   return useQuery({
@@ -378,7 +384,15 @@ export const ALERT_TYPE_LABELS: Record<string, string> = {
   possivel_duplicidade: "Possível duplicidade",
   veiculo_manutencao: "Veículo em manutenção abastecido",
   veiculo_bloqueado: "Veículo indisponível para abastecimento",
+  cnh_vencida: "CNH vencida",
+  cnh_a_vencer: "CNH a vencer em 30 dias",
+  autorizacao_a_expirar: "Autorização prestes a expirar",
+  autorizacao_expirada_nao_utilizada: "Autorização expirada sem utilização",
+  acima_do_autorizado: "Registro acima do limite autorizado",
+  abastecimento_sem_autorizacao: "Abastecimento sem autorização prévia",
+  excesso_limite: "Excesso de limite diário/mensal",
 };
+
 
 /** Normaliza nomes de combustível para comparação (Diesel S10 x diesel s10). */
 function normalizeFuel(v: string | null | undefined) {
@@ -538,3 +552,212 @@ export function evaluateFueling(draft: FuelingDraft, history: FuelingRow[]): Rul
 
 export { useMutation, supabase };
 
+
+/* ===================== FASE 3 — CONDUTORES / UTILIZAÇÃO / AUTORIZAÇÃO ===================== */
+
+export type Driver = Database["public"]["Tables"]["drivers"]["Row"];
+export type VehicleUsage = Database["public"]["Tables"]["vehicle_usages"]["Row"];
+export type FuelAuthorization = Database["public"]["Tables"]["fuel_authorizations"]["Row"];
+export type FuelLimit = Database["public"]["Tables"]["fuel_limits"]["Row"];
+export type DriverBond = Database["public"]["Enums"]["driver_bond"];
+export type UsageStatus = Database["public"]["Enums"]["usage_status"];
+export type FuelAuthStatus = Database["public"]["Enums"]["fuel_auth_status"];
+export type LimitScope = Database["public"]["Enums"]["limit_scope"];
+
+export type DriverRow = Driver & { unit: Pick<Unit, "id" | "name" | "acronym"> | null };
+
+export type UsageRow = VehicleUsage & {
+  vehicle: Pick<Vehicle, "id" | "plate" | "status"> | null;
+  unit: Pick<Unit, "id" | "name" | "acronym"> | null;
+  driver: Pick<Driver, "id" | "full_name" | "license_expiry" | "active"> | null;
+};
+
+export type AuthorizationRow = FuelAuthorization & {
+  vehicle: Pick<Vehicle, "id" | "plate" | "fuel_type" | "status"> | null;
+  unit: Pick<Unit, "id" | "name" | "acronym"> | null;
+  driver: Pick<Driver, "id" | "full_name" | "license_expiry" | "active"> | null;
+  fuel: Pick<FuelType, "id" | "name" | "measure_unit"> | null;
+  supplier: Pick<Supplier, "id" | "legal_name" | "trade_name"> | null;
+};
+
+export const DRIVER_BONDS: { value: DriverBond; label: string }[] = [
+  { value: "efetivo", label: "Servidor efetivo" },
+  { value: "comissionado", label: "Comissionado" },
+  { value: "contratado", label: "Contratado" },
+  { value: "terceirizado", label: "Terceirizado" },
+  { value: "outro", label: "Outro" },
+];
+
+export const USAGE_STATUS: { value: UsageStatus; label: string }[] = [
+  { value: "solicitada", label: "Solicitada" },
+  { value: "autorizada", label: "Autorizada" },
+  { value: "em_uso", label: "Em uso" },
+  { value: "concluida", label: "Concluída" },
+  { value: "cancelada", label: "Cancelada" },
+];
+
+export const AUTH_STATUS: { value: FuelAuthStatus; label: string }[] = [
+  { value: "pendente", label: "Pendente" },
+  { value: "autorizada", label: "Autorizada" },
+  { value: "utilizada_parcial", label: "Utilizada parcialmente" },
+  { value: "utilizada", label: "Utilizada" },
+  { value: "expirada", label: "Expirada" },
+  { value: "cancelada", label: "Cancelada" },
+];
+
+export const LIMIT_SCOPES: { value: LimitScope; label: string }[] = [
+  { value: "organizacao", label: "Órgão (global)" },
+  { value: "unidade", label: "Secretaria / unidade" },
+  { value: "veiculo", label: "Veículo" },
+];
+
+/** Categorias de CNH — estrutura preparada para validação técnica futura por tipo de veículo. */
+export const CNH_CATEGORIES = ["ACC", "A", "B", "C", "D", "E"];
+
+/** Regra mínima sugerida por tipo de veículo (arquitetura preparada, ainda não bloqueante). */
+export const VEHICLE_CATEGORY_HINT: Record<string, string[]> = {
+  Motocicleta: ["A"],
+  "Automóvel": ["B", "C", "D", "E"],
+  Caminhonete: ["B", "C", "D", "E"],
+  "Van / Micro-ônibus": ["D", "E"],
+  "Ônibus": ["D", "E"],
+  "Caminhão": ["C", "D", "E"],
+  Ambulância: ["B", "C", "D", "E"],
+  "Máquina / Equipamento": ["C", "D", "E"],
+  Trator: ["C", "D", "E"],
+};
+
+export const maskCPF = (v: string) =>
+  v
+    .replace(/\D/g, "")
+    .slice(0, 11)
+    .replace(/^(\d{3})(\d)/, "$1.$2")
+    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1-$2");
+
+export function isValidCPF(v: string) {
+  const d = v.replace(/\D/g, "");
+  if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
+  const calc = (len: number) => {
+    let sum = 0;
+    for (let i = 0; i < len; i++) sum += Number(d[i]) * (len + 1 - i);
+    const r = (sum * 10) % 11;
+    return r === 10 ? 0 : r;
+  };
+  return calc(9) === Number(d[9]) && calc(10) === Number(d[10]);
+}
+
+export const dateBR = (iso: string | null | undefined) =>
+  iso ? new Date(`${iso}T12:00:00`).toLocaleDateString("pt-BR") : "—";
+
+/** Situação da CNH do condutor. */
+export type CnhState = "ok" | "a_vencer" | "vencida" | "sem_registro";
+
+export function cnhState(expiry: string | null | undefined, days = 30): CnhState {
+  if (!expiry) return "sem_registro";
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const d = new Date(`${expiry}T12:00:00`);
+  const diff = Math.floor((d.getTime() - today.getTime()) / 86400000);
+  if (diff < 0) return "vencida";
+  if (diff <= days) return "a_vencer";
+  return "ok";
+}
+
+export const CNH_LABELS: Record<CnhState, string> = {
+  ok: "Regular",
+  a_vencer: "A vencer em 30 dias",
+  vencida: "Vencida",
+  sem_registro: "Sem validade informada",
+};
+
+/** Condutor apto a nova autorização/utilização. */
+export function driverEligible(d: Pick<Driver, "active" | "license_expiry">) {
+  return d.active && cnhState(d.license_expiry) !== "vencida";
+}
+
+export function authorizationBalance(a: Pick<FuelAuthorization, "max_quantity" | "consumed_quantity">) {
+  return Number(a.max_quantity ?? 0) - Number(a.consumed_quantity ?? 0);
+}
+
+export function authorizationUsable(a: AuthorizationRow, at: Date = new Date()) {
+  if (["cancelada", "expirada", "utilizada"].includes(a.status)) return false;
+  if (new Date(a.valid_until) < at) return false;
+  if (new Date(a.valid_from) > at) return false;
+  return authorizationBalance(a) > 0.001;
+}
+
+/* --------------------------------- hooks -------------------------------- */
+
+export function useDrivers() {
+  return useQuery({
+    queryKey: ["drivers"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("drivers")
+        .select("*, unit:units(id, name, acronym)")
+        .order("full_name");
+      if (error) throw error;
+      return (data ?? []) as unknown as DriverRow[];
+    },
+  });
+}
+
+export function useVehicleUsages() {
+  return useQuery({
+    queryKey: ["vehicle-usages"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("vehicle_usages")
+        .select(
+          "*, vehicle:vehicles(id, plate, status), unit:units(id, name, acronym), driver:drivers(id, full_name, license_expiry, active)",
+        )
+        .order("planned_departure", { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return (data ?? []) as unknown as UsageRow[];
+    },
+  });
+}
+
+export function useAuthorizations() {
+  return useQuery({
+    queryKey: ["fuel-authorizations"],
+    queryFn: async () => {
+      await supabase.rpc("expire_fuel_authorizations");
+      const { data, error } = await supabase
+        .from("fuel_authorizations")
+        .select(
+          "*, vehicle:vehicles(id, plate, fuel_type, status), unit:units(id, name, acronym), driver:drivers(id, full_name, license_expiry, active), fuel:fuel_types(id, name, measure_unit), supplier:suppliers(id, legal_name, trade_name)",
+        )
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return (data ?? []) as unknown as AuthorizationRow[];
+    },
+  });
+}
+
+export function useFuelLimits() {
+  return useQuery({
+    queryKey: ["fuel-limits"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("fuel_limits").select("*").order("created_at");
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+/** Localiza quem conduzia um veículo em determinado momento. */
+export function findDriverAt(usages: UsageRow[], vehicleId: string, at: Date) {
+  const t = at.getTime();
+  return (
+    usages.find((u) => {
+      if (u.vehicle_id !== vehicleId || u.status === "cancelada") return false;
+      const ini = new Date(u.actual_departure ?? u.planned_departure).getTime();
+      const fim = new Date(u.actual_return ?? u.planned_return ?? u.actual_departure ?? u.planned_departure).getTime();
+      return t >= ini && t <= Math.max(fim, ini);
+    }) ?? null
+  );
+}

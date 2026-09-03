@@ -14,12 +14,15 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAbastecimentosRouteImport } from './routes/_authenticated/abastecimentos'
 import { Route as AuthenticatedAlertasRouteImport } from './routes/_authenticated/alertas'
+import { Route as AuthenticatedAutorizacoesRouteImport } from './routes/_authenticated/autorizacoes'
 import { Route as AuthenticatedCombustiveisRouteImport } from './routes/_authenticated/combustiveis'
+import { Route as AuthenticatedCondutoresRouteImport } from './routes/_authenticated/condutores'
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
 import { Route as AuthenticatedOrgaoRouteImport } from './routes/_authenticated/orgao'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 import { Route as AuthenticatedUnidadesRouteImport } from './routes/_authenticated/unidades'
 import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
+import { Route as AuthenticatedUtilizacaoRouteImport } from './routes/_authenticated/utilizacao'
 import { Route as AuthenticatedVeiculosRouteImport } from './routes/_authenticated/veiculos'
 
 const IndexRoute = IndexRouteImport.update({
@@ -47,12 +50,23 @@ const AuthenticatedAlertasRoute = AuthenticatedAlertasRouteImport.update({
   path: '/alertas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAutorizacoesRoute =
+  AuthenticatedAutorizacoesRouteImport.update({
+    id: '/autorizacoes',
+    path: '/autorizacoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCombustiveisRoute =
   AuthenticatedCombustiveisRouteImport.update({
     id: '/combustiveis',
     path: '/combustiveis',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCondutoresRoute = AuthenticatedCondutoresRouteImport.update({
+  id: '/condutores',
+  path: '/condutores',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedFornecedoresRoute =
   AuthenticatedFornecedoresRouteImport.update({
     id: '/fornecedores',
@@ -79,6 +93,11 @@ const AuthenticatedUsuariosRoute = AuthenticatedUsuariosRouteImport.update({
   path: '/usuarios',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedUtilizacaoRoute = AuthenticatedUtilizacaoRouteImport.update({
+  id: '/utilizacao',
+  path: '/utilizacao',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedVeiculosRoute = AuthenticatedVeiculosRouteImport.update({
   id: '/veiculos',
   path: '/veiculos',
@@ -90,12 +109,15 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/abastecimentos': typeof AuthenticatedAbastecimentosRoute
   '/alertas': typeof AuthenticatedAlertasRoute
+  '/autorizacoes': typeof AuthenticatedAutorizacoesRoute
   '/combustiveis': typeof AuthenticatedCombustiveisRoute
+  '/condutores': typeof AuthenticatedCondutoresRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/orgao': typeof AuthenticatedOrgaoRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/unidades': typeof AuthenticatedUnidadesRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
+  '/utilizacao': typeof AuthenticatedUtilizacaoRoute
   '/veiculos': typeof AuthenticatedVeiculosRoute
 }
 export interface FileRoutesByTo {
@@ -103,12 +125,15 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/abastecimentos': typeof AuthenticatedAbastecimentosRoute
   '/alertas': typeof AuthenticatedAlertasRoute
+  '/autorizacoes': typeof AuthenticatedAutorizacoesRoute
   '/combustiveis': typeof AuthenticatedCombustiveisRoute
+  '/condutores': typeof AuthenticatedCondutoresRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/orgao': typeof AuthenticatedOrgaoRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/unidades': typeof AuthenticatedUnidadesRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
+  '/utilizacao': typeof AuthenticatedUtilizacaoRoute
   '/veiculos': typeof AuthenticatedVeiculosRoute
 }
 export interface FileRoutesById {
@@ -118,12 +143,15 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/abastecimentos': typeof AuthenticatedAbastecimentosRoute
   '/_authenticated/alertas': typeof AuthenticatedAlertasRoute
+  '/_authenticated/autorizacoes': typeof AuthenticatedAutorizacoesRoute
   '/_authenticated/combustiveis': typeof AuthenticatedCombustiveisRoute
+  '/_authenticated/condutores': typeof AuthenticatedCondutoresRoute
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/_authenticated/orgao': typeof AuthenticatedOrgaoRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
   '/_authenticated/unidades': typeof AuthenticatedUnidadesRoute
   '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
+  '/_authenticated/utilizacao': typeof AuthenticatedUtilizacaoRoute
   '/_authenticated/veiculos': typeof AuthenticatedVeiculosRoute
 }
 export interface FileRouteTypes {
@@ -133,12 +161,15 @@ export interface FileRouteTypes {
     | '/auth'
     | '/abastecimentos'
     | '/alertas'
+    | '/autorizacoes'
     | '/combustiveis'
+    | '/condutores'
     | '/fornecedores'
     | '/orgao'
     | '/painel'
     | '/unidades'
     | '/usuarios'
+    | '/utilizacao'
     | '/veiculos'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -146,12 +177,15 @@ export interface FileRouteTypes {
     | '/auth'
     | '/abastecimentos'
     | '/alertas'
+    | '/autorizacoes'
     | '/combustiveis'
+    | '/condutores'
     | '/fornecedores'
     | '/orgao'
     | '/painel'
     | '/unidades'
     | '/usuarios'
+    | '/utilizacao'
     | '/veiculos'
   id:
     | '__root__'
@@ -160,12 +194,15 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/abastecimentos'
     | '/_authenticated/alertas'
+    | '/_authenticated/autorizacoes'
     | '/_authenticated/combustiveis'
+    | '/_authenticated/condutores'
     | '/_authenticated/fornecedores'
     | '/_authenticated/orgao'
     | '/_authenticated/painel'
     | '/_authenticated/unidades'
     | '/_authenticated/usuarios'
+    | '/_authenticated/utilizacao'
     | '/_authenticated/veiculos'
   fileRoutesById: FileRoutesById
 }
@@ -212,11 +249,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAlertasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/autorizacoes': {
+      id: '/_authenticated/autorizacoes'
+      path: '/autorizacoes'
+      fullPath: '/autorizacoes'
+      preLoaderRoute: typeof AuthenticatedAutorizacoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/combustiveis': {
       id: '/_authenticated/combustiveis'
       path: '/combustiveis'
       fullPath: '/combustiveis'
       preLoaderRoute: typeof AuthenticatedCombustiveisRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/condutores': {
+      id: '/_authenticated/condutores'
+      path: '/condutores'
+      fullPath: '/condutores'
+      preLoaderRoute: typeof AuthenticatedCondutoresRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/fornecedores': {
@@ -254,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUsuariosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/utilizacao': {
+      id: '/_authenticated/utilizacao'
+      path: '/utilizacao'
+      fullPath: '/utilizacao'
+      preLoaderRoute: typeof AuthenticatedUtilizacaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/veiculos': {
       id: '/_authenticated/veiculos'
       path: '/veiculos'
@@ -267,24 +325,30 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAbastecimentosRoute: typeof AuthenticatedAbastecimentosRoute
   AuthenticatedAlertasRoute: typeof AuthenticatedAlertasRoute
+  AuthenticatedAutorizacoesRoute: typeof AuthenticatedAutorizacoesRoute
   AuthenticatedCombustiveisRoute: typeof AuthenticatedCombustiveisRoute
+  AuthenticatedCondutoresRoute: typeof AuthenticatedCondutoresRoute
   AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
   AuthenticatedOrgaoRoute: typeof AuthenticatedOrgaoRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
   AuthenticatedUnidadesRoute: typeof AuthenticatedUnidadesRoute
   AuthenticatedUsuariosRoute: typeof AuthenticatedUsuariosRoute
+  AuthenticatedUtilizacaoRoute: typeof AuthenticatedUtilizacaoRoute
   AuthenticatedVeiculosRoute: typeof AuthenticatedVeiculosRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAbastecimentosRoute: AuthenticatedAbastecimentosRoute,
   AuthenticatedAlertasRoute: AuthenticatedAlertasRoute,
+  AuthenticatedAutorizacoesRoute: AuthenticatedAutorizacoesRoute,
   AuthenticatedCombustiveisRoute: AuthenticatedCombustiveisRoute,
+  AuthenticatedCondutoresRoute: AuthenticatedCondutoresRoute,
   AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,
   AuthenticatedOrgaoRoute: AuthenticatedOrgaoRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
   AuthenticatedUnidadesRoute: AuthenticatedUnidadesRoute,
   AuthenticatedUsuariosRoute: AuthenticatedUsuariosRoute,
+  AuthenticatedUtilizacaoRoute: AuthenticatedUtilizacaoRoute,
   AuthenticatedVeiculosRoute: AuthenticatedVeiculosRoute,
 }
 

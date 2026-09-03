@@ -50,6 +50,317 @@ export type Database = {
         }
         Relationships: []
       }
+      drivers: {
+        Row: {
+          active: boolean
+          bond_type: Database["public"]["Enums"]["driver_bond"]
+          cpf: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          full_name: string
+          id: string
+          license_categories: string[]
+          license_expiry: string | null
+          license_first_issue: string | null
+          license_number: string | null
+          notes: string | null
+          organization_id: string
+          phone: string | null
+          registration_number: string | null
+          unit_id: string | null
+          updated_at: string
+          updated_by: string | null
+          user_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          bond_type?: Database["public"]["Enums"]["driver_bond"]
+          cpf?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          license_categories?: string[]
+          license_expiry?: string | null
+          license_first_issue?: string | null
+          license_number?: string | null
+          notes?: string | null
+          organization_id: string
+          phone?: string | null
+          registration_number?: string | null
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          bond_type?: Database["public"]["Enums"]["driver_bond"]
+          cpf?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          license_categories?: string[]
+          license_expiry?: string | null
+          license_first_issue?: string | null
+          license_number?: string | null
+          notes?: string | null
+          organization_id?: string
+          phone?: string | null
+          registration_number?: string | null
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drivers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drivers_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fuel_authorizations: {
+        Row: {
+          authorizer_id: string | null
+          authorizer_name: string | null
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          code: string | null
+          consumed_quantity: number
+          consumed_value: number
+          created_at: string
+          created_by: string | null
+          driver_id: string | null
+          fuel_type_id: string | null
+          hour_meter: number | null
+          id: string
+          justification: string | null
+          limit_exception_reason: string | null
+          max_quantity: number
+          max_unit_price: number | null
+          max_value: number | null
+          odometer_km: number | null
+          organization_id: string
+          purpose: string | null
+          qr_token: string
+          security_code: string | null
+          status: Database["public"]["Enums"]["fuel_auth_status"]
+          supplier_id: string | null
+          unit_id: string | null
+          updated_at: string
+          updated_by: string | null
+          valid_from: string
+          valid_until: string
+          vehicle_id: string
+        }
+        Insert: {
+          authorizer_id?: string | null
+          authorizer_name?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          code?: string | null
+          consumed_quantity?: number
+          consumed_value?: number
+          created_at?: string
+          created_by?: string | null
+          driver_id?: string | null
+          fuel_type_id?: string | null
+          hour_meter?: number | null
+          id?: string
+          justification?: string | null
+          limit_exception_reason?: string | null
+          max_quantity: number
+          max_unit_price?: number | null
+          max_value?: number | null
+          odometer_km?: number | null
+          organization_id: string
+          purpose?: string | null
+          qr_token?: string
+          security_code?: string | null
+          status?: Database["public"]["Enums"]["fuel_auth_status"]
+          supplier_id?: string | null
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          valid_from?: string
+          valid_until: string
+          vehicle_id: string
+        }
+        Update: {
+          authorizer_id?: string | null
+          authorizer_name?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          code?: string | null
+          consumed_quantity?: number
+          consumed_value?: number
+          created_at?: string
+          created_by?: string | null
+          driver_id?: string | null
+          fuel_type_id?: string | null
+          hour_meter?: number | null
+          id?: string
+          justification?: string | null
+          limit_exception_reason?: string | null
+          max_quantity?: number
+          max_unit_price?: number | null
+          max_value?: number | null
+          odometer_km?: number | null
+          organization_id?: string
+          purpose?: string | null
+          qr_token?: string
+          security_code?: string | null
+          status?: Database["public"]["Enums"]["fuel_auth_status"]
+          supplier_id?: string | null
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          valid_from?: string
+          valid_until?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fuel_authorizations_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_authorizations_fuel_type_id_fkey"
+            columns: ["fuel_type_id"]
+            isOneToOne: false
+            referencedRelation: "fuel_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_authorizations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_authorizations_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_authorizations_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_authorizations_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fuel_limits: {
+        Row: {
+          active: boolean
+          allow_exception: boolean
+          created_at: string
+          created_by: string | null
+          daily_quantity: number | null
+          daily_value: number | null
+          id: string
+          monthly_quantity: number | null
+          monthly_value: number | null
+          notes: string | null
+          organization_id: string
+          scope: Database["public"]["Enums"]["limit_scope"]
+          unit_id: string | null
+          updated_at: string
+          updated_by: string | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          allow_exception?: boolean
+          created_at?: string
+          created_by?: string | null
+          daily_quantity?: number | null
+          daily_value?: number | null
+          id?: string
+          monthly_quantity?: number | null
+          monthly_value?: number | null
+          notes?: string | null
+          organization_id: string
+          scope?: Database["public"]["Enums"]["limit_scope"]
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          allow_exception?: boolean
+          created_at?: string
+          created_by?: string | null
+          daily_quantity?: number | null
+          daily_value?: number | null
+          id?: string
+          monthly_quantity?: number | null
+          monthly_value?: number | null
+          notes?: string | null
+          organization_id?: string
+          scope?: Database["public"]["Enums"]["limit_scope"]
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fuel_limits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_limits_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_limits_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fuel_types: {
         Row: {
           acronym: string | null
@@ -100,8 +411,10 @@ export type Database = {
       fueling_alerts: {
         Row: {
           alert_type: string
+          authorization_id: string | null
           created_at: string
           created_by: string | null
+          driver_id: string | null
           fueling_id: string | null
           id: string
           justification: string | null
@@ -117,8 +430,10 @@ export type Database = {
         }
         Insert: {
           alert_type: string
+          authorization_id?: string | null
           created_at?: string
           created_by?: string | null
+          driver_id?: string | null
           fueling_id?: string | null
           id?: string
           justification?: string | null
@@ -134,8 +449,10 @@ export type Database = {
         }
         Update: {
           alert_type?: string
+          authorization_id?: string | null
           created_at?: string
           created_by?: string | null
+          driver_id?: string | null
           fueling_id?: string | null
           id?: string
           justification?: string | null
@@ -150,6 +467,20 @@ export type Database = {
           vehicle_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fueling_alerts_authorization_id_fkey"
+            columns: ["authorization_id"]
+            isOneToOne: false
+            referencedRelation: "fuel_authorizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fueling_alerts_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fueling_alerts_fueling_id_fkey"
             columns: ["fueling_id"]
@@ -178,12 +509,14 @@ export type Database = {
           alert_flags: string[]
           alert_justification: string | null
           attachment_path: string | null
+          authorization_id: string | null
           authorization_number: string | null
           cancel_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
           created_at: string
           created_by: string | null
+          driver_id: string | null
           driver_name: string | null
           fuel_type_id: string | null
           fueled_at: string
@@ -204,17 +537,20 @@ export type Database = {
           updated_by: string | null
           vehicle_id: string
           vehicle_updated: boolean
+          without_authorization_reason: string | null
         }
         Insert: {
           alert_flags?: string[]
           alert_justification?: string | null
           attachment_path?: string | null
+          authorization_id?: string | null
           authorization_number?: string | null
           cancel_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
           created_at?: string
           created_by?: string | null
+          driver_id?: string | null
           driver_name?: string | null
           fuel_type_id?: string | null
           fueled_at?: string
@@ -235,17 +571,20 @@ export type Database = {
           updated_by?: string | null
           vehicle_id: string
           vehicle_updated?: boolean
+          without_authorization_reason?: string | null
         }
         Update: {
           alert_flags?: string[]
           alert_justification?: string | null
           attachment_path?: string | null
+          authorization_id?: string | null
           authorization_number?: string | null
           cancel_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
           created_at?: string
           created_by?: string | null
+          driver_id?: string | null
           driver_name?: string | null
           fuel_type_id?: string | null
           fueled_at?: string
@@ -266,8 +605,23 @@ export type Database = {
           updated_by?: string | null
           vehicle_id?: string
           vehicle_updated?: boolean
+          without_authorization_reason?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fuelings_authorization_id_fkey"
+            columns: ["authorization_id"]
+            isOneToOne: false
+            referencedRelation: "fuel_authorizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuelings_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fuelings_fuel_type_id_fkey"
             columns: ["fuel_type_id"]
@@ -304,6 +658,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      org_counters: {
+        Row: {
+          counter_key: string
+          organization_id: string
+          value: number
+        }
+        Insert: {
+          counter_key: string
+          organization_id: string
+          value?: number
+        }
+        Update: {
+          counter_key?: string
+          organization_id?: string
+          value?: number
+        }
+        Relationships: []
       }
       organizations: {
         Row: {
@@ -602,6 +974,131 @@ export type Database = {
           },
         ]
       }
+      vehicle_usages: {
+        Row: {
+          actual_departure: string | null
+          actual_return: string | null
+          authorizer_id: string | null
+          authorizer_name: string | null
+          cancel_reason: string | null
+          code: string | null
+          created_at: string
+          created_by: string | null
+          destination: string | null
+          driver_id: string | null
+          end_km: number | null
+          id: string
+          maintenance_justification: string | null
+          notes: string | null
+          organization_id: string
+          origin: string | null
+          passengers: string[]
+          planned_departure: string
+          planned_return: string | null
+          purpose: string | null
+          requester_id: string | null
+          requester_name: string | null
+          start_km: number | null
+          status: Database["public"]["Enums"]["usage_status"]
+          unit_id: string | null
+          updated_at: string
+          updated_by: string | null
+          vehicle_id: string
+          vehicle_updated: boolean
+        }
+        Insert: {
+          actual_departure?: string | null
+          actual_return?: string | null
+          authorizer_id?: string | null
+          authorizer_name?: string | null
+          cancel_reason?: string | null
+          code?: string | null
+          created_at?: string
+          created_by?: string | null
+          destination?: string | null
+          driver_id?: string | null
+          end_km?: number | null
+          id?: string
+          maintenance_justification?: string | null
+          notes?: string | null
+          organization_id: string
+          origin?: string | null
+          passengers?: string[]
+          planned_departure: string
+          planned_return?: string | null
+          purpose?: string | null
+          requester_id?: string | null
+          requester_name?: string | null
+          start_km?: number | null
+          status?: Database["public"]["Enums"]["usage_status"]
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id: string
+          vehicle_updated?: boolean
+        }
+        Update: {
+          actual_departure?: string | null
+          actual_return?: string | null
+          authorizer_id?: string | null
+          authorizer_name?: string | null
+          cancel_reason?: string | null
+          code?: string | null
+          created_at?: string
+          created_by?: string | null
+          destination?: string | null
+          driver_id?: string | null
+          end_km?: number | null
+          id?: string
+          maintenance_justification?: string | null
+          notes?: string | null
+          organization_id?: string
+          origin?: string | null
+          passengers?: string[]
+          planned_departure?: string
+          planned_return?: string | null
+          purpose?: string | null
+          requester_id?: string | null
+          requester_name?: string | null
+          start_km?: number | null
+          status?: Database["public"]["Enums"]["usage_status"]
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id?: string
+          vehicle_updated?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_usages_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_usages_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_usages_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_usages_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicles: {
         Row: {
           asset_code: string | null
@@ -702,10 +1199,23 @@ export type Database = {
     Functions: {
       can_cancel_fueling: { Args: never; Returns: boolean }
       can_fuel_vehicle: { Args: { _vehicle: string }; Returns: boolean }
+      can_manage_fleet: { Args: never; Returns: boolean }
       can_manage_users: { Args: never; Returns: boolean }
+      can_operate_usage: { Args: never; Returns: boolean }
       can_register_fueling: { Args: never; Returns: boolean }
       can_write: { Args: never; Returns: boolean }
       current_org_id: { Args: never; Returns: string }
+      expire_fuel_authorizations: { Args: never; Returns: undefined }
+      fuel_limit_breach: {
+        Args: {
+          _at: string
+          _org: string
+          _qty: number
+          _unit: string
+          _vehicle: string
+        }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -715,6 +1225,11 @@ export type Database = {
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       my_unit_id: { Args: never; Returns: string }
+      next_org_code: {
+        Args: { _key: string; _org: string; _prefix: string }
+        Returns: string
+      }
+      unit_scope_ok: { Args: { _unit: string }; Returns: boolean }
     }
     Enums: {
       alert_severity: "info" | "alerta" | "erro"
@@ -726,7 +1241,21 @@ export type Database = {
         | "unit_manager"
         | "operator"
         | "auditor"
+      driver_bond:
+        | "efetivo"
+        | "comissionado"
+        | "contratado"
+        | "terceirizado"
+        | "outro"
+      fuel_auth_status:
+        | "pendente"
+        | "autorizada"
+        | "utilizada_parcial"
+        | "utilizada"
+        | "expirada"
+        | "cancelada"
       fueling_status: "valido" | "cancelado"
+      limit_scope: "organizacao" | "unidade" | "veiculo"
       org_type:
         | "prefeitura"
         | "camara"
@@ -742,6 +1271,12 @@ export type Database = {
         | "coordenacao"
         | "unidade"
         | "outro"
+      usage_status:
+        | "solicitada"
+        | "autorizada"
+        | "em_uso"
+        | "concluida"
+        | "cancelada"
       vehicle_status: "ativo" | "manutencao" | "cedido" | "inativo" | "baixado"
     }
     CompositeTypes: {
@@ -880,7 +1415,23 @@ export const Constants = {
         "operator",
         "auditor",
       ],
+      driver_bond: [
+        "efetivo",
+        "comissionado",
+        "contratado",
+        "terceirizado",
+        "outro",
+      ],
+      fuel_auth_status: [
+        "pendente",
+        "autorizada",
+        "utilizada_parcial",
+        "utilizada",
+        "expirada",
+        "cancelada",
+      ],
       fueling_status: ["valido", "cancelado"],
+      limit_scope: ["organizacao", "unidade", "veiculo"],
       org_type: [
         "prefeitura",
         "camara",
@@ -897,6 +1448,13 @@ export const Constants = {
         "coordenacao",
         "unidade",
         "outro",
+      ],
+      usage_status: [
+        "solicitada",
+        "autorizada",
+        "em_uso",
+        "concluida",
+        "cancelada",
       ],
       vehicle_status: ["ativo", "manutencao", "cedido", "inativo", "baixado"],
     },

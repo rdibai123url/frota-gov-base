@@ -12,6 +12,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 
 export const Route = createFileRoute("/auth")({
+  // Renderização apenas no cliente: evita divergência de hidratação causada pelo
+  // formulário controlado (ids gerados) e por extensões de navegador que alteram o DOM.
+  ssr: false,
   head: () => ({
     meta: [
       { title: "Acesso ao sistema — FrotaGov" },
