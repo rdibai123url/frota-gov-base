@@ -18,6 +18,7 @@ import {
   ChevronDown,
   FolderCog,
   FileBarChart,
+  UserRound,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -248,11 +249,23 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="border-t border-sidebar-border px-4 py-4 text-xs">
         <p className="truncate font-medium">{me?.profile?.full_name || me?.email}</p>
         <p className="mt-0.5 truncate opacity-70">{primaryRoleLabel}</p>
+        <Link
+          to="/perfil"
+          onClick={() => setOpen(false)}
+          className={cn(
+            "mt-3 flex items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors hover:bg-sidebar-accent",
+            pathname.startsWith("/perfil")
+              ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+              : "opacity-85",
+          )}
+        >
+          <UserRound className="size-4" /> Perfil e segurança
+        </Link>
         <Button
           variant="ghost"
           size="sm"
           onClick={handleSignOut}
-          className="mt-3 w-full justify-start gap-2 px-2 text-sidebar-foreground hover:bg-sidebar-accent"
+          className="mt-1 w-full justify-start gap-2 px-2 text-sidebar-foreground hover:bg-sidebar-accent"
         >
           <LogOut className="size-4" /> Sair
         </Button>

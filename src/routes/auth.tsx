@@ -32,21 +32,52 @@ const signInSchema = z.object({
   password: z.string().min(6, "A senha deve ter ao menos 6 caracteres").max(72),
 });
 
+const emailSchema = z.string().trim().email("Informe um e-mail válido").max(255);
+
 function AuthPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<"login" | "recuperar">("login");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) navigate({ to: "/painel", replace: true });
     });
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        navigate({ to: "/redefinir-senha", replace: true });
+        return;
+      }
       if (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
         navigate({ to: "/painel", replace: true });
       }
     });
     return () => sub.subscription.unsubscribe();
   }, [navigate]);
+
+  async function handleRecover(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const parsed = emailSchema.safeParse(form.get("email"));
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "E-mail inválido");
+      return;
+    }
+    setSending(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
+      redirectTo: `${window.location.origin}/redefinir-senha`,
+    });
+    setSending(false);
+    if (error) {
+      toast.error("Não foi possível enviar o e-mail de recuperação. Tente novamente em instantes.");
+      return;
+    }
+    setSent(true);
+    toast.success("Se o e-mail estiver cadastrado, enviaremos o link de recuperação.");
+  }
+
 
   async function handleSignIn(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -97,27 +128,75 @@ function AuthPage() {
           </Link>
 
           <div className="rounded-lg border bg-card p-6 shadow-panel">
-            <form onSubmit={handleSignIn} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="in-email">E-mail institucional</Label>
-                <Input id="in-email" name="email" type="email" autoComplete="email" required />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="in-pass">Senha</Label>
-                <Input id="in-pass" name="password" type="password" autoComplete="current-password" required />
-              </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                Entrar
-              </Button>
-            </form>
+            {mode === "login" ? (
+              <>
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="in-email">E-mail institucional</Label>
+                    <Input id="in-email" name="email" type="email" autoComplete="email" required />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="in-pass">Senha</Label>
+                    <Input id="in-pass" name="password" type="password" autoComplete="current-password" required />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    Entrar
+                  </Button>
+                </form>
 
-            <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
-              <span className="h-px flex-1 bg-border" /> ou <span className="h-px flex-1 bg-border" />
-            </div>
-            <Button variant="outline" className="w-full" onClick={handleGoogle}>
-              Continuar com Google
-            </Button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSent(false);
+                    setMode("recuperar");
+                  }}
+                  className="mt-3 w-full text-center text-xs text-primary underline-offset-4 hover:underline"
+                >
+                  Esqueci minha senha
+                </button>
+
+                <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
+                  <span className="h-px flex-1 bg-border" /> ou <span className="h-px flex-1 bg-border" />
+                </div>
+                <Button variant="outline" className="w-full" onClick={handleGoogle}>
+                  Continuar com Google
+                </Button>
+              </>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <h2 className="gov-title text-lg">Recuperar acesso</h2>
+                  <p className="text-xs text-muted-foreground">
+                    Informe seu e-mail institucional para receber o link de redefinição de senha.
+                  </p>
+                </div>
+                {sent ? (
+                  <p className="rounded-md bg-secondary/60 p-3 text-sm text-muted-foreground">
+                    Se o e-mail informado estiver cadastrado, o link de redefinição foi enviado. Verifique
+                    também a caixa de spam. O link tem validade limitada.
+                  </p>
+                ) : (
+                  <form onSubmit={handleRecover} className="space-y-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="rec-email">E-mail institucional</Label>
+                      <Input id="rec-email" name="email" type="email" autoComplete="email" required />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={sending}>
+                      Enviar link de recuperação
+                    </Button>
+                  </form>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setMode("login")}
+                  className="w-full text-center text-xs text-primary underline-offset-4 hover:underline"
+                >
+                  Voltar ao login
+                </button>
+              </div>
+            )}
           </div>
+
 
           <p className="mt-4 text-center text-xs text-muted-foreground">
             Acesso restrito a servidores e gestores autorizados. O cadastro de órgãos e do
