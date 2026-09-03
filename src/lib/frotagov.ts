@@ -327,7 +327,7 @@ export function useSuppliers() {
 }
 
 const FUELING_SELECT =
-  "*, vehicle:vehicles(id, plate, asset_code, fuel_type, tank_capacity, status), unit:units(id, name, acronym), supplier:suppliers(id, legal_name, trade_name), fuel:fuel_types(id, name, measure_unit), driver:drivers(id, full_name), authorization:fuel_authorizations(id, code, max_quantity, consumed_quantity)";
+  "*, vehicle:vehicles(id, plate, asset_code, fuel_type, tank_capacity, status), unit:units(id, name, acronym), supplier:suppliers(id, legal_name, trade_name), fuel:fuel_types(id, name, measure_unit), driver:drivers(id, full_name), authorization:fuel_authorizations(id, code, max_quantity, consumed_quantity), contract:contracts(id, number), contract_item:contract_items(id, description, measure_unit), commitment:commitments(id, number, exercise), cost_center:cost_centers(id, code, name), quota:quotas(id, name)";
 
 
 export function useFuelings() {
