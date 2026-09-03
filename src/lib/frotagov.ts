@@ -869,7 +869,15 @@ export const ALERT_CATEGORIES: { value: string; label: string }[] = [
   { value: "ordem_servico", label: "Ordem de serviço" },
   { value: "credenciamento", label: "Credenciamento" },
   { value: "frota", label: "Frota (multas, sinistros, seguros e documentos)" },
+  { value: "backup", label: "Backup externo" },
 ];
+
+export const BACKUP_ALERT_LABELS: Record<string, string> = {
+  backup_atrasado: "Sem backup concluído nas últimas 48 horas",
+  backup_falhou: "Última execução de backup falhou",
+  backup_integridade: "Falha na validação de integridade do backup",
+  backup_destino: "Teste de conexão com o destino falhou",
+};
 
 export const FINANCE_ALERT_LABELS: Record<string, string> = {
   contrato_80: "Contrato com 80% executado",

@@ -4,7 +4,7 @@
  * "Matriz de Funcionalidades", exclusivas do Super Admin.
  */
 
-export const APP_VERSION = "9.0.0";
+export const APP_VERSION = "9.5.0";
 export const APP_STAGE = "Homologação geral (Fase 9)";
 
 export type VersionEntry = { version: string; date: string; title: string; summary: string };
@@ -21,6 +21,7 @@ export const VERSION_HISTORY: VersionEntry[] = [
   { version: "9.0.0", date: "Fase 9", title: "Homologação e comercialização", summary: "Endurecimento de segurança, agendamento automático de rotinas, exportação .xlsx e impressão/PDF, painel executivo agrupado, dados abertos em CSV, paginação da API, documentação e matriz de licitações." },
   { version: "9.2.0", date: "Pós-Fase 9 — Bloco B", title: "Fechamento mensal da transparência", summary: "Competência mensal por órgão, checklist obrigatório, publicação versionada, bloqueio de competência fechada e reabertura por chamado." },
   { version: "9.3.0", date: "Pós-Fase 9 — Bloco C", title: "Importação e migração em massa", summary: "Assistente de importação em 16 módulos com modelo de planilha, mapeamento de colunas, simulação sem gravar, correção de linhas, importação transacional, lotes rastreáveis, anulação de lote e posição de abertura de saldos." },
+  { version: "9.5.0", date: "Pós-Fase 9 — Bloco D", title: "Backup externo diário", summary: "Backup automático diário por órgão com horário e fuso configuráveis, destino em armazenamento compatível com S3, servidor próprio do órgão ou armazenamento privado da plataforma, credenciais apenas em segredos, checksum SHA-256, verificação de integridade, retenção com proteção contra expurgo, alertas de falha e restauração assistida com backup de segurança prévio." },
   { version: "9.4.0", date: "Pós-Fase 9 — Diárias e migração por tipo", title: "Diárias e migração individual", summary: "Módulo de diárias (RD e CD) com fluxo de aprovação, impressão institucional, indicadores, alertas e relatório próprio; migração de dados visível em Cadastros, por tipo individual, agrupada em cadastros básicos, contratos e orçamento, operação e legal/patrimonial, com suporte a CSV, XLSX e JSON." },
 ];
 
@@ -48,6 +49,7 @@ export const ACTIVE_MODULES: ModuleInfo[] = [
   { module: "Portal da Transparência", route: "/transparencia", status: "ativo", note: "Desabilitado por padrão em cada órgão." },
   { module: "API pública v1 (leitura)", route: "/chaves-api", status: "ativo", note: "Somente leitura, com chave por órgão." },
   { module: "Administração da Plataforma", route: "/plataforma", status: "ativo", note: "Exclusivo do Super Admin." },
+  { module: "Backup externo diário", route: "/plataforma", status: "ativo", note: "Configuração, histórico, integridade e restauração por órgão; exclusivo do Super Admin." },
   { module: "Importação e migração de dados", route: "/plataforma", status: "ativo", note: "Assistente por módulo, lotes rastreáveis e posição de abertura." },
 
 ];
@@ -59,7 +61,10 @@ export const TECH_CHECKLIST: ChecklistItem[] = [
   { item: "Perfis e permissões", status: "ok", detail: "Seis perfis com regras de leitura, escrita e ações sensíveis aplicadas no banco e na interface." },
   { item: "Funções internas do banco protegidas", status: "ok", detail: "Gatilhos e rotinas internas não são executáveis pelo aplicativo nem por visitantes." },
   { item: "Funções de permissão executáveis por usuários autenticados", status: "parcial", detail: "As funções de verificação de perfil e de órgão precisam ser executáveis para que as regras de acesso funcionem; é o comportamento esperado." },
-  { item: "Rotinas automáticas", status: "ok", detail: "Alertas e expiração de autorizações a cada hora; limpeza de logs por retenção diariamente às 03:20." },
+  { item: "Rotinas automáticas", status: "ok", detail: "Alertas e expiração de autorizações a cada hora; limpeza de logs por retenção diariamente às 03:20; backup externo verificado de hora em hora e executado no horário definido por cada órgão; retenção de backups às 04:40." },
+  { item: "Backup externo diário", status: "ok", detail: "Execução automática e manual pela mesma rotina, com execução única por ciclo, pacote com dados do órgão e inventário de anexos, checksum SHA-256, verificação de integridade, retenção configurável e proteção contra expurgo." },
+  { item: "Credenciais do destino de backup", status: "ok", detail: "Guardadas apenas nos segredos do projeto; o sistema armazena somente o nome do segredo e nunca o exibe em tela, log ou exportação." },
+  { item: "Entrega em servidor próprio (SFTP)", status: "parcial", detail: "O servidor da aplicação não abre conexões SSH: com destino SFTP o pacote fica disponível na plataforma para coleta pelo agente instalado no servidor do órgão, e a execução é registrada como concluída com aviso." },
   { item: "Auditoria e logs globais", status: "ok", detail: "Trilha de auditoria por tabela e log funcional com órgão, responsável, marcação de Super Admin, filtros, paginação e exportação." },
   { item: "Sem exclusão física de dados operacionais", status: "ok", detail: "As telas oferecem cancelamento, inativação ou revogação; não há botão de exclusão definitiva." },
   { item: "Recuperação e troca de senha", status: "ok", detail: "Recuperação por e-mail, senha temporária com troca obrigatória e alteração de senha em Perfil e segurança." },
@@ -117,6 +122,9 @@ export const FEATURE_MATRIX: MatrixRow[] = [
   { module: "Diárias", feature: "Comprovação de diária (CD) com saldo e prestação de contas", status: "Sim", note: "Bloqueia encerramento sem relatório de atividades ou com saldo a restituir pendente.", evidence: "/diarias" },
   { module: "Diárias", feature: "Assinatura digital da RD", status: "Não", note: "Impressão institucional para assinatura física nesta versão.", evidence: "—" },
   { module: "Implantação", feature: "Migração de dados por tipo individual", status: "Sim", note: "23 tipos agrupados em cadastros básicos, contratos e orçamento, operação e legal/patrimonial; CSV, XLSX e JSON.", evidence: "/migracao" },
+  { module: "Operação", feature: "Backup externo automático diário por órgão", status: "Sim", note: "Horário e fuso configuráveis, com execução única por ciclo e histórico completo.", evidence: "/plataforma → Backup externo" },
+  { module: "Operação", feature: "Destino externo do backup (S3 compatível ou servidor próprio)", status: "Parcial", note: "Envio a armazenamento compatível com S3 é executado pelo sistema; para SFTP o pacote é disponibilizado para coleta pelo agente do órgão.", evidence: "/plataforma → Backup externo" },
+  { module: "Operação", feature: "Verificação de integridade e restauração assistida", status: "Sim", note: "Checksum SHA-256, teste de restauração com justificativa, confirmação digitada e backup de segurança automático.", evidence: "/plataforma → Backup externo" },
   { module: "Implantação", feature: "Importação de anexos legados", status: "Não", note: "Somente dados estruturados nesta versão.", evidence: "—" },
   { module: "Relatórios", feature: "Exportação CSV e Excel nativo (.xlsx)", status: "Sim", note: "Disponível em relatórios, logs e matriz de funcionalidades.", evidence: "/relatorios" },
   { module: "Relatórios", feature: "Impressão / PDF com cabeçalho institucional", status: "Sim", note: "Gerado pelo navegador, com filtros e data/hora.", evidence: "/relatorios → Imprimir" },
@@ -144,6 +152,8 @@ export const KNOWN_LIMITATIONS: string[] = [
   "Os e-mails de autenticação usam o remetente padrão do provedor enquanto o domínio institucional não for verificado.",
   "A API pública v1 é somente de leitura, sem escopos de escrita.",
   "Em navegação muito rápida entre telas o ambiente de desenvolvimento pode registrar um aviso do React sobre atualização de estado; não ocorre na versão publicada.",
+  "Com destino SFTP o envio final é feito pelo agente instalado no servidor do órgão; o servidor da aplicação não abre conexões SSH.",
+  "O pacote de backup inclui todos os dados do órgão e o inventário dos anexos (caminho, tamanho e data); os arquivos binários permanecem no armazenamento privado da plataforma.",
   "Não há autenticação em dois fatores nem assinatura digital de documentos.",
   "O ambiente de demonstração é um órgão comum identificado como DEMONSTRAÇÃO; a limpeza é feita manualmente, sem rotina destrutiva automática.",
 ];
