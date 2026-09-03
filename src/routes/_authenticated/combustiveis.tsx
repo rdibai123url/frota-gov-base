@@ -27,7 +27,9 @@ import {
 } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
-  MEASURE_UNITS,
+  PRODUCT_CATEGORIES,
+  PRODUCT_CATEGORY_LABELS,
+  PRODUCT_UNITS,
   supabase,
   useFuelTypes,
   useInvalidate,
@@ -38,13 +40,14 @@ import {
 export const Route = createFileRoute("/_authenticated/combustiveis")({
   head: () => ({
     meta: [
-      { title: "Combustíveis — FrotaGov" },
+      { title: "Combustíveis e produtos automotivos — FrotaGov" },
       {
         name: "description",
-        content: "Cadastro dos tipos de combustível utilizados pela frota do órgão, com unidade padrão e situação.",
+        content:
+          "Cadastro de combustíveis, óleos lubrificantes, fluidos e aditivos utilizados pela frota do órgão, com categoria, unidade padrão e situação.",
       },
-      { property: "og:title", content: "Combustíveis — FrotaGov" },
-      { property: "og:description", content: "Tipos de combustível do órgão público." },
+      { property: "og:title", content: "Combustíveis e produtos automotivos — FrotaGov" },
+      { property: "og:description", content: "Combustíveis e produtos automotivos do órgão público." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -64,12 +67,14 @@ function Combustiveis() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<FuelType | null>(null);
   const [unit, setUnit] = useState("litro");
+  const [category, setCategory] = useState("combustivel");
   const [active, setActive] = useState(true);
   const [saving, setSaving] = useState(false);
 
   function openNew() {
     setEditing(null);
     setUnit("litro");
+    setCategory("combustivel");
     setActive(true);
     setOpen(true);
   }
@@ -77,6 +82,7 @@ function Combustiveis() {
   function openEdit(f: FuelType) {
     setEditing(f);
     setUnit(f.measure_unit);
+    setCategory(f.category ?? "combustivel");
     setActive(f.active);
     setOpen(true);
   }
@@ -93,6 +99,7 @@ function Combustiveis() {
       name: parsed.data.name,
       acronym: parsed.data.acronym || null,
       measure_unit: unit,
+      category,
       active,
     };
     const { error } = editing
@@ -107,7 +114,7 @@ function Combustiveis() {
       );
       return;
     }
-    toast.success(editing ? "Combustível atualizado." : "Combustível cadastrado.");
+    toast.success(editing ? "Produto atualizado." : "Produto cadastrado.");
     invalidate(["fuel-types"]);
     setOpen(false);
   }
@@ -116,12 +123,12 @@ function Combustiveis() {
   return (
     <>
       <PageHeader
-        title="Combustíveis"
-        description="Tipos de combustível disponíveis para os abastecimentos do órgão."
+        title="Combustíveis e produtos automotivos"
+        description="Combustíveis, óleos lubrificantes, fluidos e aditivos disponíveis para o órgão. Somente itens da categoria Combustível entram nos indicadores de litros e média km/l."
         action={
           canWrite && orgId ? (
             <Button onClick={openNew} className="gap-2">
-              <Plus className="size-4" /> Novo combustível
+              <Plus className="size-4" /> Novo produto
             </Button>
           ) : undefined
         }
@@ -133,6 +140,7 @@ function Combustiveis() {
             <TableRow>
               <TableHead>Nome</TableHead>
               <TableHead>Sigla</TableHead>
+              <TableHead>Categoria</TableHead>
               <TableHead>Unidade padrão</TableHead>
               <TableHead>Situação</TableHead>
               <TableHead className="w-16" />
@@ -141,15 +149,15 @@ function Combustiveis() {
           <TableBody>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
                   Carregando…
                 </TableCell>
               </TableRow>
             )}
             {!isLoading && fuels.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
-                  Nenhum combustível cadastrado.
+                <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                  Nenhum produto cadastrado.
                 </TableCell>
               </TableRow>
             )}
@@ -157,6 +165,11 @@ function Combustiveis() {
               <TableRow key={f.id}>
                 <TableCell className="font-medium">{f.name}</TableCell>
                 <TableCell>{f.acronym || "—"}</TableCell>
+                <TableCell>
+                  <Badge variant={(f.category ?? "combustivel") === "combustivel" ? "default" : "outline"}>
+                    {PRODUCT_CATEGORY_LABELS[f.category ?? "combustivel"] ?? "Combustível"}
+                  </Badge>
+                </TableCell>
                 <TableCell>{f.measure_unit}</TableCell>
                 <TableCell>
                   <Badge variant={f.active ? "default" : "secondary"}>
@@ -180,7 +193,7 @@ function Combustiveis() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editing ? "Editar combustível" : "Novo combustível"}</DialogTitle>
+            <DialogTitle>{editing ? "Editar produto" : "Novo combustível / produto automotivo"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
@@ -193,13 +206,35 @@ function Combustiveis() {
                 <Input id="acronym" name="acronym" defaultValue={editing?.acronym ?? ""} maxLength={10} />
               </div>
               <div>
+                <Label>Categoria *</Label>
+                <Select
+                  value={category}
+                  onValueChange={(v) => {
+                    setCategory(v);
+                    const allowed = PRODUCT_CATEGORIES.find((c) => c.value === v)?.units ?? PRODUCT_UNITS;
+                    if (!allowed.includes(unit)) setUnit(allowed[0] ?? "litro");
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PRODUCT_CATEGORIES.map((c) => (
+                      <SelectItem key={c.value} value={c.value}>
+                        {c.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
                 <Label>Unidade padrão</Label>
                 <Select value={unit} onValueChange={setUnit}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {MEASURE_UNITS.map((u) => (
+                    {(PRODUCT_CATEGORIES.find((c) => c.value === category)?.units ?? PRODUCT_UNITS).map((u) => (
                       <SelectItem key={u} value={u}>
                         {u}
                       </SelectItem>
@@ -208,6 +243,11 @@ function Combustiveis() {
                 </Select>
               </div>
             </div>
+            {category !== "combustivel" && (
+              <p className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+                Produtos que não são combustível não entram no cálculo de litros de combustível nem na média km/l.
+              </p>
+            )}
             <div className="flex items-center gap-3">
               <Switch id="active" checked={active} onCheckedChange={setActive} />
               <Label htmlFor="active">Ativo</Label>

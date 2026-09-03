@@ -1943,3 +1943,217 @@ export async function openFleetFile(path: string) {
 export async function refreshFleetAlerts() {
   await supabase.rpc("refresh_fleet_alerts");
 }
+
+/* ======================================================================== */
+/*   MELHORIAS OPERACIONAIS — PRODUTOS, VÍNCULOS, ADITIVOS E EMPENHOS       */
+/* ======================================================================== */
+
+export type SupplierContract = Database["public"]["Tables"]["supplier_contracts"]["Row"];
+export type ContractPeriod = Database["public"]["Tables"]["contract_periods"]["Row"];
+export type ContractAmendment = Database["public"]["Tables"]["contract_amendments"]["Row"];
+export type CommitmentMovement = Database["public"]["Tables"]["commitment_movements"]["Row"];
+export type ContractAmendmentKind = Database["public"]["Enums"]["contract_amendment_kind"];
+
+/** Categorias de produto do cadastro antes chamado apenas de "combustíveis". */
+export const PRODUCT_CATEGORIES: { value: string; label: string; units: string[] }[] = [
+  { value: "combustivel", label: "Combustível", units: ["litro", "m³", "kWh", "kg"] },
+  { value: "lubrificante", label: "Óleo lubrificante", units: ["litro", "unidade", "kg"] },
+  { value: "fluido", label: "Fluido", units: ["litro", "unidade", "kg"] },
+  { value: "aditivo", label: "Aditivo automotivo", units: ["litro", "unidade", "kg"] },
+  { value: "outro", label: "Outro produto automotivo", units: ["litro", "unidade", "kg", "m³", "outra"] },
+];
+
+export const PRODUCT_CATEGORY_LABELS: Record<string, string> = Object.fromEntries(
+  PRODUCT_CATEGORIES.map((c) => [c.value, c.label]),
+);
+
+export const PRODUCT_UNITS = ["litro", "m³", "kWh", "kg", "unidade", "outra"];
+
+/** Somente estes itens contam nos indicadores de litros de combustível e média km/l. */
+export function isFuelProduct(p: { category?: string | null } | null | undefined) {
+  return (p?.category ?? "combustivel") === "combustivel";
+}
+
+/** Filtra abastecimentos deixando apenas os de combustível de fato. */
+export function onlyFuelRows<T extends { fuel_type_id?: string | null }>(
+  rows: T[],
+  products: Pick<FuelType, "id" | "category">[],
+): T[] {
+  const fuelIds = new Set(products.filter((p) => isFuelProduct(p)).map((p) => p.id));
+  return rows.filter((r) => !r.fuel_type_id || fuelIds.has(r.fuel_type_id));
+}
+
+/** Tipos de documento fiscal aceitos no abastecimento. */
+export const DOCUMENT_KINDS: { value: string; label: string; needsKey?: boolean }[] = [
+  { value: "cupom", label: "Cupom fiscal" },
+  { value: "nfce", label: "NFC-e", needsKey: true },
+  { value: "nfe", label: "NF-e", needsKey: true },
+  { value: "nota", label: "Nota fiscal" },
+  { value: "recibo", label: "Recibo" },
+  { value: "outro", label: "Outro documento" },
+];
+
+export const DOCUMENT_KIND_LABELS: Record<string, string> = Object.fromEntries(
+  DOCUMENT_KINDS.map((d) => [d.value, d.label]),
+);
+
+export const CONTRACT_AMENDMENT_KINDS: { value: ContractAmendmentKind; label: string; help: string }[] = [
+  {
+    value: "prorrogacao",
+    label: "Prorrogação de vigência (sem alteração do valor-base)",
+    help: "Cria uma nova vigência que inicia com o valor contratual definido para o período, sem herdar saldo remanescente.",
+  },
+  {
+    value: "acrescimo",
+    label: "Acréscimo de valor",
+    help: "Aumenta o valor vigente do contrato preservando o valor original.",
+  },
+  {
+    value: "supressao",
+    label: "Supressão de valor",
+    help: "Reduz o valor vigente do contrato preservando o valor original.",
+  },
+  { value: "reajuste", label: "Reajuste", help: "Aplica índice/percentual sobre o valor vigente." },
+  {
+    value: "reequilibrio",
+    label: "Reequilíbrio econômico-financeiro",
+    help: "Recompõe o valor vigente mediante fundamento específico.",
+  },
+  {
+    value: "prorrogacao_valor",
+    label: "Prorrogação com novo valor",
+    help: "Nova vigência iniciando com o novo valor integral informado.",
+  },
+  {
+    value: "combinado",
+    label: "Aditivo combinado",
+    help: "Altera valor e vigência no mesmo instrumento.",
+  },
+];
+
+export const AMENDMENT_KIND_LABELS: Record<string, string> = Object.fromEntries(
+  CONTRACT_AMENDMENT_KINDS.map((k) => [k.value, k.label]),
+);
+
+/** Aditivos que criam nova vigência. */
+export const AMENDMENT_CREATES_PERIOD: ContractAmendmentKind[] = [
+  "prorrogacao",
+  "prorrogacao_valor",
+  "combinado",
+];
+/** Aditivos que alteram valor. */
+export const AMENDMENT_CHANGES_VALUE: ContractAmendmentKind[] = [
+  "acrescimo",
+  "supressao",
+  "reajuste",
+  "reequilibrio",
+  "combinado",
+];
+
+/* --------------------------------- hooks -------------------------------- */
+
+export type SupplierContractRow = SupplierContract & {
+  contract: Pick<
+    Contract,
+    "id" | "number" | "object" | "valid_from" | "valid_to" | "status" | "current_value" | "initial_value"
+  > | null;
+  supplier: Pick<Supplier, "id" | "legal_name" | "cnpj"> | null;
+};
+
+export function useSupplierContracts() {
+  return useQuery({
+    queryKey: ["supplier-contracts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("supplier_contracts")
+        .select(
+          "*, contract:contracts(id, number, object, valid_from, valid_to, status, current_value, initial_value), supplier:suppliers(id, legal_name, cnpj)",
+        )
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as SupplierContractRow[];
+    },
+  });
+}
+
+export function useContractPeriods() {
+  return useQuery({
+    queryKey: ["contract-periods"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("contract_periods")
+        .select("*")
+        .order("sequence", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as ContractPeriod[];
+    },
+  });
+}
+
+export function useContractAmendments() {
+  return useQuery({
+    queryKey: ["contract-amendments"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("contract_amendments")
+        .select("*")
+        .order("signed_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as ContractAmendment[];
+    },
+  });
+}
+
+export function useCommitmentMovements() {
+  return useQuery({
+    queryKey: ["commitment-movements"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("commitment_movements")
+        .select("*")
+        .order("moved_on", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as CommitmentMovement[];
+    },
+  });
+}
+
+/* ------------------------------- cálculos ------------------------------- */
+
+/** Consolidado financeiro do empenho, incluindo reforços e reduções. */
+export function commitmentTotals(e: Commitment, movements: CommitmentMovement[] = []) {
+  const mine = movements.filter((m) => m.commitment_id === e.id);
+  const reinforced = mine.filter((m) => m.kind === "reforco").reduce((s, m) => s + Number(m.value ?? 0), 0);
+  const reduced = mine.filter((m) => m.kind === "reducao").reduce((s, m) => s + Number(m.value ?? 0), 0);
+  const committed = Number(e.committed_value ?? 0);
+  const cancelled = Number(e.cancelled_value ?? 0);
+  const reserved = Number(e.reserved_value ?? 0);
+  const consumed = Number(e.consumed_value ?? 0);
+  return {
+    original: committed - reinforced,
+    reinforced,
+    reduced,
+    committed,
+    cancelled,
+    current: committed - cancelled,
+    reserved,
+    consumed,
+    available: Number(e.available_value ?? committed - cancelled - reserved - consumed),
+  };
+}
+
+/** Vigência aplicável a uma data (ou a vigência corrente). */
+export function periodAt(periods: ContractPeriod[], contractId: string, at: Date = new Date()) {
+  const list = periods.filter((p) => p.contract_id === contractId);
+  const day = at.toISOString().slice(0, 10);
+  return (
+    list.find((p) => p.valid_from <= day && day <= p.valid_to) ??
+    list.find((p) => p.is_current) ??
+    list[list.length - 1] ??
+    null
+  );
+}
+
+export function periodBalance(p: ContractPeriod) {
+  return Number(p.period_value ?? 0) - Number(p.reserved_value ?? 0) - Number(p.consumed_value ?? 0);
+}
