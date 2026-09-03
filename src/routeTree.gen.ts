@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as AuthenticatedAbastecimentosRouteImport } from './routes/_authenticated/abastecimentos'
 import { Route as AuthenticatedAlertasRouteImport } from './routes/_authenticated/alertas'
+import { Route as AuthenticatedAlmoxarifadoRouteImport } from './routes/_authenticated/almoxarifado'
 import { Route as AuthenticatedAutorizacoesRouteImport } from './routes/_authenticated/autorizacoes'
 import { Route as AuthenticatedCentrosCustoRouteImport } from './routes/_authenticated/centros-custo'
 import { Route as AuthenticatedChavesApiRouteImport } from './routes/_authenticated/chaves-api'
@@ -92,6 +93,12 @@ const AuthenticatedAlertasRoute = AuthenticatedAlertasRouteImport.update({
   path: '/alertas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAlmoxarifadoRoute =
+  AuthenticatedAlmoxarifadoRouteImport.update({
+    id: '/almoxarifado',
+    path: '/almoxarifado',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAutorizacoesRoute =
   AuthenticatedAutorizacoesRouteImport.update({
     id: '/autorizacoes',
@@ -347,6 +354,7 @@ export interface FileRoutesByFullPath {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/abastecimentos': typeof AuthenticatedAbastecimentosRoute
   '/alertas': typeof AuthenticatedAlertasRoute
+  '/almoxarifado': typeof AuthenticatedAlmoxarifadoRoute
   '/autorizacoes': typeof AuthenticatedAutorizacoesRoute
   '/centros-custo': typeof AuthenticatedCentrosCustoRoute
   '/chaves-api': typeof AuthenticatedChavesApiRoute
@@ -400,6 +408,7 @@ export interface FileRoutesByTo {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/abastecimentos': typeof AuthenticatedAbastecimentosRoute
   '/alertas': typeof AuthenticatedAlertasRoute
+  '/almoxarifado': typeof AuthenticatedAlmoxarifadoRoute
   '/autorizacoes': typeof AuthenticatedAutorizacoesRoute
   '/centros-custo': typeof AuthenticatedCentrosCustoRoute
   '/chaves-api': typeof AuthenticatedChavesApiRoute
@@ -455,6 +464,7 @@ export interface FileRoutesById {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/_authenticated/abastecimentos': typeof AuthenticatedAbastecimentosRoute
   '/_authenticated/alertas': typeof AuthenticatedAlertasRoute
+  '/_authenticated/almoxarifado': typeof AuthenticatedAlmoxarifadoRoute
   '/_authenticated/autorizacoes': typeof AuthenticatedAutorizacoesRoute
   '/_authenticated/centros-custo': typeof AuthenticatedCentrosCustoRoute
   '/_authenticated/chaves-api': typeof AuthenticatedChavesApiRoute
@@ -510,6 +520,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/abastecimentos'
     | '/alertas'
+    | '/almoxarifado'
     | '/autorizacoes'
     | '/centros-custo'
     | '/chaves-api'
@@ -563,6 +574,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/abastecimentos'
     | '/alertas'
+    | '/almoxarifado'
     | '/autorizacoes'
     | '/centros-custo'
     | '/chaves-api'
@@ -617,6 +629,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/_authenticated/abastecimentos'
     | '/_authenticated/alertas'
+    | '/_authenticated/almoxarifado'
     | '/_authenticated/autorizacoes'
     | '/_authenticated/centros-custo'
     | '/_authenticated/chaves-api'
@@ -718,6 +731,13 @@ declare module '@tanstack/react-router' {
       path: '/alertas'
       fullPath: '/alertas'
       preLoaderRoute: typeof AuthenticatedAlertasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/almoxarifado': {
+      id: '/_authenticated/almoxarifado'
+      path: '/almoxarifado'
+      fullPath: '/almoxarifado'
+      preLoaderRoute: typeof AuthenticatedAlmoxarifadoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/autorizacoes': {
@@ -1048,6 +1068,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAbastecimentosRoute: typeof AuthenticatedAbastecimentosRoute
   AuthenticatedAlertasRoute: typeof AuthenticatedAlertasRoute
+  AuthenticatedAlmoxarifadoRoute: typeof AuthenticatedAlmoxarifadoRoute
   AuthenticatedAutorizacoesRoute: typeof AuthenticatedAutorizacoesRoute
   AuthenticatedCentrosCustoRoute: typeof AuthenticatedCentrosCustoRoute
   AuthenticatedChavesApiRoute: typeof AuthenticatedChavesApiRoute
@@ -1095,6 +1116,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAbastecimentosRoute: AuthenticatedAbastecimentosRoute,
   AuthenticatedAlertasRoute: AuthenticatedAlertasRoute,
+  AuthenticatedAlmoxarifadoRoute: AuthenticatedAlmoxarifadoRoute,
   AuthenticatedAutorizacoesRoute: AuthenticatedAutorizacoesRoute,
   AuthenticatedCentrosCustoRoute: AuthenticatedCentrosCustoRoute,
   AuthenticatedChavesApiRoute: AuthenticatedChavesApiRoute,
