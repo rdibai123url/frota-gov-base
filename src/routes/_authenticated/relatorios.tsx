@@ -419,12 +419,15 @@ function Relatorios() {
 
       let q = supabase
         .from("vehicle_usages")
-        .select("id, code, status, planned_departure, actual_departure, actual_return, start_km, end_km, purpose, vehicle:vehicles(plate, asset_code), driver:drivers(full_name), unit:units(name)")
+        .select(
+          "id, code, status, planned_departure, actual_departure, actual_return, start_km, end_km, purpose, destination, vehicle:vehicles(plate, asset_code), driver:drivers(full_name), unit:units(name)",
+        )
         .gte("planned_departure", start)
         .lte("planned_departure", end)
         .order("planned_departure", { ascending: false });
       if (unit) q = q.eq("unit_id", unit);
       if (vehicle) q = q.eq("vehicle_id", vehicle);
+      if (driver) q = q.eq("driver_id", driver);
       const { data: rows, error } = await q;
       if (error) throw error;
       return (rows ?? []).map((u) => ({
@@ -432,6 +435,8 @@ function Relatorios() {
         veiculo: u.vehicle?.plate ?? u.vehicle?.asset_code ?? "—",
         condutor: u.driver?.full_name ?? "—",
         unidade: u.unit?.name ?? "—",
+        finalidade: u.purpose ?? "—",
+        destino: u.destination ?? "—",
         saida: new Date(u.actual_departure ?? u.planned_departure).toLocaleString("pt-BR"),
         retorno: u.actual_return ? new Date(u.actual_return).toLocaleString("pt-BR") : "—",
         km: u.start_km != null && u.end_km != null ? String(Number(u.end_km) - Number(u.start_km)) : "—",
@@ -447,44 +452,55 @@ function Relatorios() {
     return Object.keys(first).map((k) => ({ key: k, label: label(k) }));
   }, [rows]);
 
-  useEffect(() => setPage(1), [report, from, to, unitId, vehicleId]);
+  useEffect(() => setPage(1), [report, from, to, unitId, vehicleId, driverId]);
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const pageRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const reportLabel = REPORTS.find((r) => r.value === report)?.label ?? "Relatório";
-  const usesDate = !NO_DATE.includes(report);
+  const usesDate = caps.date;
+
+  const unitName = unitId === "todas" ? "Todas" : (units.find((u) => u.id === unitId)?.name ?? "—");
+  const vehicleName =
+    vehicleId === "todos"
+      ? "Todos"
+      : (vehicles.find((v) => v.id === vehicleId)?.plate ??
+        vehicles.find((v) => v.id === vehicleId)?.asset_code ??
+        "—");
+  const driverName = driverId === "todos" ? "Todos" : (drivers.find((d) => d.id === driverId)?.full_name ?? "—");
+  const periodText = usesDate ? `${day(from)} a ${day(to)}` : "Posição atual";
+  const issuedBy = [me?.profile?.full_name, me?.email].filter(Boolean).join(" — ") || "—";
 
   const filters = [
-    { label: "Período", value: usesDate ? `${day(from)} a ${day(to)}` : "Posição atual" },
-    { label: "Unidade", value: unitId === "todas" ? "Todas" : units.find((u) => u.id === unitId)?.name ?? "" },
-    {
-      label: "Veículo",
-      value:
-        vehicleId === "todos"
-          ? "Todos"
-          : vehicles.find((v) => v.id === vehicleId)?.plate ?? vehicles.find((v) => v.id === vehicleId)?.asset_code ?? "",
-    },
+    { label: "Veículo", value: caps.vehicle ? vehicleName : "Não se aplica" },
+    { label: "Condutor", value: caps.driver ? driverName : "Não se aplica" },
   ];
+
+  const meta: ReportMeta = {
+    title: reportLabel,
+    organization: org?.legal_name ?? "FrotaGov",
+    logoUrl: logoUrl ?? null,
+    subtitle: org?.short_name ?? null,
+    unit: caps.unit ? unitName : "Não se aplica",
+    period: periodText,
+    issuedBy,
+    filters,
+  };
 
   async function handleExport(kind: "csv" | "xlsx" | "pdf") {
     const name = `relatorio-${report}-${from}-a-${to}`;
-    if (kind === "csv") exportReportCsv(name, columns, rows);
-    else if (kind === "xlsx") exportXlsx(name, columns, rows, reportLabel.slice(0, 28));
-    else
-      printReport(
-        { title: reportLabel, organization: org?.legal_name ?? "FrotaGov", subtitle: org?.short_name ?? null, filters },
-        columns,
-        rows,
-      );
+    if (kind === "csv") exportReportCsv(name, columns, rows, meta);
+    else if (kind === "xlsx") exportXlsx(name, columns, rows, reportLabel.slice(0, 28), meta);
+    else printReport(meta, columns, rows);
     await logEvent({
       eventType: "exportacao",
       area: "Relatórios",
       screen: "Relatórios avançados",
       route: "/relatorios",
       action: kind.toUpperCase(),
-      summary: `Exportação do relatório "${reportLabel}" (${rows.length} linhas)`,
+      summary: `Exportação do relatório "${reportLabel}" (${rows.length} linhas) — unidade: ${meta.unit}, período: ${periodText}`,
     });
   }
+
 
   return (
     <>
