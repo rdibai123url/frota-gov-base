@@ -449,7 +449,11 @@ function Painel() {
         <StatCard label="Baixas e alienações acumuladas" value={admin.baixas} icon={Landmark} />
       </div>
 
+        </TabsContent>
+      </Tabs>
+
       <h2 className="gov-title mt-10 mb-4 text-lg">Gasto dos últimos 6 meses</h2>
+
       <div className="rounded-lg border bg-card p-5 shadow-card">
         {maxTotal === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
