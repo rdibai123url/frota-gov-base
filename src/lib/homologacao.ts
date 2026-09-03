@@ -4,7 +4,7 @@
  * "Matriz de Funcionalidades", exclusivas do Super Admin.
  */
 
-export const APP_VERSION = "9.6.0";
+export const APP_VERSION = "9.7.0";
 export const APP_STAGE = "Homologação geral (Fase 9)";
 
 export type VersionEntry = { version: string; date: string; title: string; summary: string };
@@ -23,6 +23,7 @@ export const VERSION_HISTORY: VersionEntry[] = [
   { version: "9.3.0", date: "Pós-Fase 9 — Bloco C", title: "Importação e migração em massa", summary: "Assistente de importação em 16 módulos com modelo de planilha, mapeamento de colunas, simulação sem gravar, correção de linhas, importação transacional, lotes rastreáveis, anulação de lote e posição de abertura de saldos." },
   { version: "9.5.0", date: "Pós-Fase 9 — Bloco D", title: "Backup externo diário", summary: "Backup automático diário por órgão com horário e fuso configuráveis, destino em armazenamento compatível com S3, servidor próprio do órgão ou armazenamento privado da plataforma, credenciais apenas em segredos, checksum SHA-256, verificação de integridade, retenção com proteção contra expurgo, alertas de falha e restauração assistida com backup de segurança prévio." },
   { version: "9.6.0", date: "Pós-Fase 9 — Limpeza da frota", title: "Limpeza de veículos", summary: "Novo módulo de limpeza dentro de Manutenção: tipos de serviço configuráveis por órgão, registro de lavagem e higienização com fornecedor, contrato, empenho, cota e centro de custo, consumo e estorno orçamentário automáticos, anexo de comprovante, cancelamento com motivo, indicadores no painel, histórico do veículo, relatório próprio, importação de dados legados e divulgação agregada na transparência." },
+  { version: "9.7.0", date: "Pós-Fase 9 — Bloco D funcional", title: "Objeto do contrato, itens e cota de servidor", summary: "Classificação obrigatória do objeto do contrato com tipos configuráveis, itens numerados com total calculado, valor do contrato pela soma dos itens, inativação de item com movimentação, veículo particular de servidor com cota de combustível por ciclo semanal ou mensal, bloqueio ao esgotar a cota com exceção justificada e auditada, alertas de cota próxima e esgotada, e filtros de objeto e cotas nos relatórios." },
   { version: "9.4.0", date: "Pós-Fase 9 — Diárias e migração por tipo", title: "Diárias e migração individual", summary: "Módulo de diárias (RD e CD) com fluxo de aprovação, impressão institucional, indicadores, alertas e relatório próprio; migração de dados visível em Cadastros, por tipo individual, agrupada em cadastros básicos, contratos e orçamento, operação e legal/patrimonial, com suporte a CSV, XLSX e JSON." },
 ];
 
@@ -36,6 +37,7 @@ export const ACTIVE_MODULES: ModuleInfo[] = [
   { module: "Condutores", route: "/condutores", status: "ativo" },
   { module: "Diárias (RD e CD)", route: "/diarias", status: "ativo" },
   { module: "Limpeza da frota", route: "/limpeza", status: "ativo" },
+  { module: "Cotas de combustível de servidor", route: "/cotas-servidor", status: "ativo" },
   { module: "Migração de dados por tipo", route: "/migracao", status: "ativo" },
   { module: "Autorização de abastecimento", route: "/autorizacoes", status: "ativo" },
   { module: "Abastecimentos", route: "/abastecimentos", status: "ativo" },
