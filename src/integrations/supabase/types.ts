@@ -4968,6 +4968,7 @@ export type Database = {
       can_write: { Args: never; Returns: boolean }
       current_org_id: { Args: never; Returns: string }
       expire_fuel_authorizations: { Args: never; Returns: undefined }
+      expire_fuel_authorizations_all: { Args: never; Returns: number }
       fuel_limit_breach: {
         Args: {
           _at: string
