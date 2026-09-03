@@ -95,6 +95,53 @@ function PortalTransparencia() {
       <main className="mx-auto max-w-5xl space-y-6 px-5 py-10">
         {data.apresentacao && <p className="text-muted-foreground">{data.apresentacao}</p>}
 
+        <section className="rounded-lg border bg-card p-5 shadow-card">
+          <h2 className="gov-title text-lg">Consulta por período e dados abertos</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Os números de abastecimento, manutenção e contratos consideram o período informado.
+          </p>
+          <div className="mt-4 flex flex-wrap items-end gap-3">
+            <label className="text-sm">
+              <span className="mb-1 block text-muted-foreground">De</span>
+              <input
+                type="date"
+                value={from}
+                onChange={(e) => setFrom(e.target.value)}
+                className="rounded-md border bg-background px-3 py-2 text-sm"
+              />
+            </label>
+            <label className="text-sm">
+              <span className="mb-1 block text-muted-foreground">Até</span>
+              <input
+                type="date"
+                value={to}
+                onChange={(e) => setTo(e.target.value)}
+                className="rounded-md border bg-background px-3 py-2 text-sm"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => setPeriod({ from, to })}
+              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            >
+              Aplicar período
+            </button>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {(data.conjuntos_disponiveis ?? []).map((ds) => (
+              <a
+                key={ds}
+                href={`/api/public/v1/transparencia/${slug}?formato=csv&conjunto=${ds}&de=${period.from}&ate=${period.to}`}
+                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-secondary"
+              >
+                <Download className="size-4" /> {DATASET_LABELS[ds] ?? ds} (CSV)
+              </a>
+            ))}
+          </div>
+        </section>
+
+
+
         {data.frota && (
           <section className="rounded-lg border bg-card p-5 shadow-card">
             <h2 className="gov-title text-lg">Frota</h2>
