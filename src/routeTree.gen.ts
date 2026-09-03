@@ -31,6 +31,7 @@ import { Route as AuthenticatedObrigacoesRouteImport } from './routes/_authentic
 import { Route as AuthenticatedOrdensServicoRouteImport } from './routes/_authenticated/ordens-servico'
 import { Route as AuthenticatedOrgaoRouteImport } from './routes/_authenticated/orgao'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
+import { Route as AuthenticatedPatrimonioRouteImport } from './routes/_authenticated/patrimonio'
 import { Route as AuthenticatedPecasRouteImport } from './routes/_authenticated/pecas'
 import { Route as AuthenticatedPlanosManutencaoRouteImport } from './routes/_authenticated/planos-manutencao'
 import { Route as AuthenticatedPneusRouteImport } from './routes/_authenticated/pneus'
@@ -161,6 +162,11 @@ const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
   path: '/painel',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPatrimonioRoute = AuthenticatedPatrimonioRouteImport.update({
+  id: '/patrimonio',
+  path: '/patrimonio',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPecasRoute = AuthenticatedPecasRouteImport.update({
   id: '/pecas',
   path: '/pecas',
@@ -241,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/ordens-servico': typeof AuthenticatedOrdensServicoRoute
   '/orgao': typeof AuthenticatedOrgaoRoute
   '/painel': typeof AuthenticatedPainelRoute
+  '/patrimonio': typeof AuthenticatedPatrimonioRoute
   '/pecas': typeof AuthenticatedPecasRoute
   '/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/pneus': typeof AuthenticatedPneusRoute
@@ -275,6 +282,7 @@ export interface FileRoutesByTo {
   '/ordens-servico': typeof AuthenticatedOrdensServicoRoute
   '/orgao': typeof AuthenticatedOrgaoRoute
   '/painel': typeof AuthenticatedPainelRoute
+  '/patrimonio': typeof AuthenticatedPatrimonioRoute
   '/pecas': typeof AuthenticatedPecasRoute
   '/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/pneus': typeof AuthenticatedPneusRoute
@@ -311,6 +319,7 @@ export interface FileRoutesById {
   '/_authenticated/ordens-servico': typeof AuthenticatedOrdensServicoRoute
   '/_authenticated/orgao': typeof AuthenticatedOrgaoRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
+  '/_authenticated/patrimonio': typeof AuthenticatedPatrimonioRoute
   '/_authenticated/pecas': typeof AuthenticatedPecasRoute
   '/_authenticated/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/_authenticated/pneus': typeof AuthenticatedPneusRoute
@@ -347,6 +356,7 @@ export interface FileRouteTypes {
     | '/ordens-servico'
     | '/orgao'
     | '/painel'
+    | '/patrimonio'
     | '/pecas'
     | '/planos-manutencao'
     | '/pneus'
@@ -381,6 +391,7 @@ export interface FileRouteTypes {
     | '/ordens-servico'
     | '/orgao'
     | '/painel'
+    | '/patrimonio'
     | '/pecas'
     | '/planos-manutencao'
     | '/pneus'
@@ -416,6 +427,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ordens-servico'
     | '/_authenticated/orgao'
     | '/_authenticated/painel'
+    | '/_authenticated/patrimonio'
     | '/_authenticated/pecas'
     | '/_authenticated/planos-manutencao'
     | '/_authenticated/pneus'
@@ -591,6 +603,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPainelRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/patrimonio': {
+      id: '/_authenticated/patrimonio'
+      path: '/patrimonio'
+      fullPath: '/patrimonio'
+      preLoaderRoute: typeof AuthenticatedPatrimonioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/pecas': {
       id: '/_authenticated/pecas'
       path: '/pecas'
@@ -691,6 +710,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOrdensServicoRoute: typeof AuthenticatedOrdensServicoRoute
   AuthenticatedOrgaoRoute: typeof AuthenticatedOrgaoRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
+  AuthenticatedPatrimonioRoute: typeof AuthenticatedPatrimonioRoute
   AuthenticatedPecasRoute: typeof AuthenticatedPecasRoute
   AuthenticatedPlanosManutencaoRoute: typeof AuthenticatedPlanosManutencaoRoute
   AuthenticatedPneusRoute: typeof AuthenticatedPneusRoute
@@ -724,6 +744,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOrdensServicoRoute: AuthenticatedOrdensServicoRoute,
   AuthenticatedOrgaoRoute: AuthenticatedOrgaoRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
+  AuthenticatedPatrimonioRoute: AuthenticatedPatrimonioRoute,
   AuthenticatedPecasRoute: AuthenticatedPecasRoute,
   AuthenticatedPlanosManutencaoRoute: AuthenticatedPlanosManutencaoRoute,
   AuthenticatedPneusRoute: AuthenticatedPneusRoute,
