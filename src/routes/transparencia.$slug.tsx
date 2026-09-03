@@ -46,6 +46,7 @@ type Payload = {
 const DATASET_LABELS: Record<string, string> = {
   frota: "Frota",
   abastecimento: "Abastecimento",
+  limpeza: "Limpeza da frota",
   manutencao: "Manutenção",
   contratos: "Contratos",
 };

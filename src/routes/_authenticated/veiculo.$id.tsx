@@ -41,6 +41,8 @@ import {
   useVehicles,
   onlyFuelRows,
   useFuelTypes,
+  useVehicleCleanings,
+  CLEANING_STATUS,
 } from "@/lib/frotagov";
 
 
@@ -77,6 +79,7 @@ function HistoricoVeiculo() {
   const { data: obligations = [] } = useVehicleObligations();
   const { data: movements = [] } = useAssetMovements();
   const { data: diaries = [] } = useDiaries();
+  const { data: cleanings = [] } = useVehicleCleanings(id);
 
   const vehicle = vehicles.find((v) => v.id === id) ?? null;
   const vUsages = useMemo(() => usages.filter((u) => u.vehicle_id === id), [usages, id]);
@@ -155,6 +158,16 @@ function HistoricoVeiculo() {
     );
     vAuths.forEach((a) =>
       push(a.valid_from, "autorizacao", "Autorização", `${a.code ?? "AUT"} · ${a.status}`, a.purpose ?? "—"),
+    );
+    cleanings.forEach((c) =>
+      push(
+        c.performed_at,
+        "limpeza",
+        "Limpeza",
+        `${c.code ?? "LIMP"} · ${label(CLEANING_STATUS, c.status)}`,
+        (c.service_types ?? []).join(", ") || "—",
+        brl(Number(c.total_value ?? 0)),
+      ),
     );
     vRecords.forEach((r) =>
       push(
@@ -320,6 +333,7 @@ function HistoricoVeiculo() {
             <TabsList className="mb-4 flex-wrap">
               <TabsTrigger value="linha">Linha do tempo</TabsTrigger>
               <TabsTrigger value="manutencoes">Manutenções</TabsTrigger>
+              <TabsTrigger value="limpeza">Limpeza</TabsTrigger>
               <TabsTrigger value="pecas">Peças</TabsTrigger>
               <TabsTrigger value="pneus">Pneus</TabsTrigger>
               <TabsTrigger value="abastecimentos">Abastecimentos</TabsTrigger>
@@ -350,6 +364,7 @@ function HistoricoVeiculo() {
                         ["abastecimento", "Abastecimentos"],
                         ["autorizacao", "Autorizações"],
                         ["manutencao", "Manutenções e OS"],
+                        ["limpeza", "Limpeza"],
                         ["peca", "Peças"],
                         ["pneu", "Pneus"],
                         ["sinistro", "Acidentes e sinistros"],
@@ -378,6 +393,21 @@ function HistoricoVeiculo() {
                 head={["Data", "Categoria", "Evento", "Detalhe", "Valor", ""]}
                 empty="Nenhum evento no período selecionado."
                 rows={timeline.map((i) => [dateTimeBR(i.at), i.catLabel, i.title, i.detail, i.value, ""])}
+              />
+            </TabsContent>
+
+            <TabsContent value="limpeza">
+              <HistTable
+                head={["Código", "Data", "Serviços", "Fornecedor", "Valor", "Situação"]}
+                empty="Nenhum serviço de limpeza registrado."
+                rows={cleanings.map((c) => [
+                  c.code ?? "—",
+                  dateTimeBR(c.performed_at),
+                  (c.service_types ?? []).join(", ") || "—",
+                  c.supplier?.trade_name ?? c.supplier?.legal_name ?? "—",
+                  brl(Number(c.total_value ?? 0)),
+                  label(CLEANING_STATUS, c.status),
+                ])}
               />
             </TabsContent>
 

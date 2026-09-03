@@ -66,6 +66,7 @@ const NAV: NavGroup[] = [
     items: [
       { to: "/manutencoes", label: "Manutenções" },
       { to: "/planos-manutencao", label: "Planos preventivos" },
+      { to: "/limpeza", label: "Limpeza da frota" },
       { to: "/pecas", label: "Peças e acessórios" },
       { to: "/pneus", label: "Pneus" },
       { to: "/rede-credenciada", label: "Rede credenciada" },

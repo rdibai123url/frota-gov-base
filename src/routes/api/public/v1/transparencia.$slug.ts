@@ -163,6 +163,30 @@ export const Route = createFileRoute("/api/public/v1/transparencia/$slug")({
           };
         }
 
+        async function loadCleanings() {
+          let q = supabaseAdmin
+            .from("vehicle_cleanings")
+            .select("total_value, status, performed_at")
+            .eq("organization_id", orgId);
+          if (from) q = q.gte("performed_at", `${from}T00:00:00`);
+          if (to) q = q.lte("performed_at", `${to}T23:59:59`);
+          const { data } = await q;
+          const valid = (data ?? []).filter((c) => c.status === "realizada");
+          const porMes = new Map<string, { valor: number; registros: number }>();
+          for (const c of valid) {
+            const key = monthOf(c.performed_at);
+            const row = porMes.get(key) ?? { valor: 0, registros: 0 };
+            row.valor += Number(c.total_value ?? 0);
+            row.registros += 1;
+            porMes.set(key, row);
+          }
+          return {
+            registros: valid.length,
+            valor_total: valid.reduce((s, c) => s + Number(c.total_value ?? 0), 0),
+            por_mes: Array.from(porMes, ([mes, v]) => ({ mes, ...v })).sort((a, b) => a.mes.localeCompare(b.mes)),
+          };
+        }
+
         async function loadContracts() {
           let q = supabaseAdmin
             .from("contracts")
@@ -201,6 +225,14 @@ export const Route = createFileRoute("/api/public/v1/transparencia/$slug")({
               m.por_mes.map((r) => [r.mes, r.registros, r.valor.toFixed(2)]),
             );
           }
+          if (dataset === "limpeza" && datasets["limpeza"]) {
+            const l = await loadCleanings();
+            return csv(
+              base,
+              ["mes", "registros", "valor_total"],
+              l.por_mes.map((r) => [r.mes, r.registros, r.valor.toFixed(2)]),
+            );
+          }
           if (dataset === "contratos" && datasets["contratos"]) {
             const c = await loadContracts();
             return csv(
@@ -234,6 +266,7 @@ export const Route = createFileRoute("/api/public/v1/transparencia/$slug")({
         if (datasets["frota"]) payload["frota"] = await loadVehicles();
         if (datasets["abastecimento"]) payload["abastecimento"] = await loadFuelings();
         if (datasets["manutencao"]) payload["manutencao"] = await loadMaintenance();
+        if (datasets["limpeza"]) payload["limpeza"] = await loadCleanings();
         if (datasets["contratos"]) payload["contratos"] = await loadContracts();
 
         return json(payload);

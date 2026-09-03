@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.seed_cleaning_types(uuid) FROM authenticated;
