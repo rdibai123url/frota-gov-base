@@ -445,6 +445,7 @@ export async function runBackup(
   } catch (error) {
     const finishedAt = new Date();
     const message = sanitizeLog(error instanceof Error ? error.message : "Falha desconhecida.");
+    console.error("[backup] falha:", message);
     await admin
       .from("backup_runs")
       .update({
