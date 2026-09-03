@@ -121,7 +121,13 @@ export const FEATURE_MATRIX: MatrixRow[] = [
   { module: "Operação", feature: "Rotinas automáticas de alertas e retenção de logs", status: "Sim", note: "Agendadas no banco de dados (horária e diária).", evidence: "/alertas" },
   { module: "Operação", feature: "Notificações por e-mail ou WhatsApp", status: "Não", note: "Os alertas são exibidos no sistema.", evidence: "—" },
   { module: "Operação", feature: "Aplicativo móvel nativo", status: "Parcial", note: "Interface responsiva em navegador; não há aplicativo publicado em lojas.", evidence: "Qualquer tela" },
+  { module: "Implantação", feature: "Importação em massa por planilha (CSV/XLSX) em 16 módulos", status: "Sim", note: "Modelo por módulo, mapeamento de colunas e ordem recomendada.", evidence: "/plataforma → Importação e migração" },
+  { module: "Implantação", feature: "Simulação sem gravar dados, com relatório de erros", status: "Sim", note: "Planilha de ocorrências com linha, campo, valor recebido e motivo.", evidence: "/plataforma → Importação e migração" },
+  { module: "Implantação", feature: "Importação transacional com lote rastreável e anulação", status: "Sim", note: "Tudo ou nada por lote; anulação apenas pelo Super Admin, sem exclusão física.", evidence: "/plataforma → Lotes do órgão" },
+  { module: "Implantação", feature: "Migração de histórico sem consumir saldo de contrato, empenho ou cota", status: "Sim", note: "Registros marcados como legado com o sistema de origem.", evidence: "Abastecimentos, manutenções e utilizações legados" },
+  { module: "Implantação", feature: "Posição de abertura de saldos com data-base e justificativa", status: "Sim", note: "Rotina exclusiva de implantação, fora do fluxo operacional.", evidence: "/plataforma → Saldos iniciais" },
 ];
+
 
 export const KNOWN_LIMITATIONS: string[] = [
   "Não há integração com DETRAN, importação automática de multas nem portal de seguradoras.",
