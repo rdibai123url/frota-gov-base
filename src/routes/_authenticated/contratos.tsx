@@ -1,7 +1,7 @@
 import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Pencil, FileText, Package, Upload, ExternalLink } from "lucide-react";
+import { Plus, Pencil, FileText, Package, Upload, ExternalLink, GitBranch } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -40,6 +40,14 @@ import {
   parseBRNumber,
   formatLiters,
   onlyDigits,
+  AMENDMENT_CHANGES_VALUE,
+  AMENDMENT_CREATES_PERIOD,
+  AMENDMENT_KIND_LABELS,
+  CONTRACT_AMENDMENT_KINDS,
+  periodBalance,
+  useContractAmendments,
+  useContractPeriods,
+  type ContractAmendmentKind,
 } from "@/lib/frotagov";
 
 export const Route = createFileRoute("/_authenticated/contratos")({
@@ -113,6 +121,10 @@ function Contratos() {
   const [itemFuel, setItemFuel] = useState(NONE);
   const [itemKind, setItemKind] = useState("combustivel");
   const [itemUnit, setItemUnit] = useState("litro");
+
+  const { data: periods = [] } = useContractPeriods();
+  const { data: amendments = [] } = useContractAmendments();
+  const [amendFor, setAmendFor] = useState<ContractRow | null>(null);
 
   const [fStatus, setFStatus] = useState(ALL);
   const [fSupplier, setFSupplier] = useState(ALL);
@@ -400,6 +412,9 @@ function Contratos() {
                       <Button variant="outline" size="sm" className="gap-2" onClick={() => openNewItem(c)}>
                         <Package className="size-4" /> Novo item
                       </Button>
+                      <Button variant="outline" size="sm" className="gap-2" onClick={() => setAmendFor(c)}>
+                        <GitBranch className="size-4" /> Novo aditivo
+                      </Button>
                       <Button variant="ghost" size="icon" aria-label="Editar contrato" onClick={() => openEdit(c)}>
                         <Pencil className="size-4" />
                       </Button>
@@ -437,6 +452,12 @@ function Contratos() {
                   </p>
                 </div>
               </div>
+
+              <ContractPeriodsPanel
+                  contract={c}
+                  periods={periods.filter((p) => p.contract_id === c.id)}
+                  amendments={amendments.filter((a) => a.contract_id === c.id)}
+                />
 
               <div className="overflow-x-auto">
                 <Table>
@@ -501,6 +522,8 @@ function Contratos() {
         })}
         <ListPagination state={paged} />
       </div>
+
+      <AmendmentDialog contract={amendFor} onClose={() => setAmendFor(null)} />
 
       {/* contrato */}
       <Dialog open={open} onOpenChange={setOpen}>
@@ -736,5 +759,314 @@ function Contratos() {
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+
+/* ---------------------- vigências e aditivos ---------------------- */
+
+function ContractPeriodsPanel({
+  contract,
+  periods,
+  amendments,
+}: {
+  contract: ContractRow;
+  periods: import("@/lib/frotagov").ContractPeriod[];
+  amendments: import("@/lib/frotagov").ContractAmendment[];
+}) {
+  const ordered = [...periods].sort((a, b) => a.sequence - b.sequence);
+  const current = ordered.find((p) => p.is_current) ?? ordered[ordered.length - 1] ?? null;
+  return (
+    <div className="border-b p-5">
+      <div className="mb-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <div>
+          <p className="text-xs text-muted-foreground">Valor original</p>
+          <p className="gov-title text-base">{brl(Number(contract.initial_value ?? 0))}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Valor atual</p>
+          <p className="gov-title text-base">{brl(Number(contract.current_value ?? 0))}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Vigência original</p>
+          <p className="text-sm">
+            {dateBR(contract.original_valid_from ?? contract.valid_from)} a{" "}
+            {dateBR(contract.original_valid_to ?? contract.valid_to)}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Vigência atual</p>
+          <p className="text-sm">
+            {dateBR(contract.valid_from)} a {dateBR(contract.valid_to)}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Aditivos · saldo da vigência</p>
+          <p className="gov-title text-base">
+            {amendments.length} · {current ? brl(periodBalance(current)) : "—"}
+          </p>
+        </div>
+      </div>
+
+      <details className="rounded-md border bg-muted/20 p-3">
+        <summary className="cursor-pointer text-sm font-medium">
+          Histórico de vigências e aditivos ({ordered.length} vigência(s), {amendments.length} aditivo(s))
+        </summary>
+        <div className="mt-3 overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Vigência</TableHead>
+                <TableHead>Período</TableHead>
+                <TableHead className="text-right">Valor da vigência</TableHead>
+                <TableHead className="text-right">Reservado</TableHead>
+                <TableHead className="text-right">Consumido</TableHead>
+                <TableHead className="text-right">Saldo</TableHead>
+                <TableHead>Situação</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {ordered.map((p) => (
+                <TableRow key={p.id}>
+                  <TableCell className="font-medium">{p.sequence}ª</TableCell>
+                  <TableCell>
+                    {dateBR(p.valid_from)} a {dateBR(p.valid_to)}
+                  </TableCell>
+                  <TableCell className="text-right">{brl(Number(p.period_value))}</TableCell>
+                  <TableCell className="text-right">{brl(Number(p.reserved_value))}</TableCell>
+                  <TableCell className="text-right">{brl(Number(p.consumed_value))}</TableCell>
+                  <TableCell className="text-right font-medium">{brl(periodBalance(p))}</TableCell>
+                  <TableCell>
+                    <Badge variant={p.is_current ? "default" : "secondary"}>
+                      {p.is_current ? "Vigência corrente" : "Encerrada"}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+
+          {amendments.length > 0 && (
+            <Table className="mt-4">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Aditivo</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Assinatura</TableHead>
+                  <TableHead>Nova vigência</TableHead>
+                  <TableHead className="text-right">Valor anterior</TableHead>
+                  <TableHead className="text-right">Valor posterior</TableHead>
+                  <TableHead>Fundamento</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[...amendments]
+                  .sort((a, b) => a.signed_at.localeCompare(b.signed_at))
+                  .map((a) => (
+                    <TableRow key={a.id}>
+                      <TableCell className="font-medium">{a.number}</TableCell>
+                      <TableCell>{AMENDMENT_KIND_LABELS[a.kind] ?? a.kind}</TableCell>
+                      <TableCell>{dateBR(a.signed_at)}</TableCell>
+                      <TableCell>
+                        {a.new_valid_from ? `${dateBR(a.new_valid_from)} a ${dateBR(a.new_valid_to)}` : "—"}
+                      </TableCell>
+                      <TableCell className="text-right">{brl(Number(a.previous_contract_value ?? 0))}</TableCell>
+                      <TableCell className="text-right">{brl(Number(a.new_contract_value ?? 0))}</TableCell>
+                      <TableCell className="max-w-[240px] truncate">{a.justification || "—"}</TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+      </details>
+    </div>
+  );
+}
+
+function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; onClose: () => void }) {
+  const { orgId, userId } = usePerms();
+  const invalidate = useInvalidate();
+  const [kind, setKind] = useState<ContractAmendmentKind>("prorrogacao");
+  const [saving, setSaving] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+
+  const createsPeriod = AMENDMENT_CREATES_PERIOD.includes(kind);
+  const changesValue = AMENDMENT_CHANGES_VALUE.includes(kind);
+  const help = CONTRACT_AMENDMENT_KINDS.find((k) => k.value === kind)?.help ?? "";
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!contract) return;
+    const fd = new FormData(e.currentTarget);
+    const get = (k: string) => String(fd.get(k) ?? "").trim();
+
+    if (!get("number")) {
+      toast.error("Informe o número do aditivo.");
+      return;
+    }
+    if (!get("justification")) {
+      toast.error("Informe o fundamento/justificativa do aditivo.");
+      return;
+    }
+    if (createsPeriod && (!get("new_valid_from") || !get("new_valid_to"))) {
+      toast.error("Informe a data inicial e final da nova vigência.");
+      return;
+    }
+    const delta = parseBRNumber(get("delta_value"));
+    const percent = parseBRNumber(get("percent"));
+    if (changesValue && !delta && !percent) {
+      toast.error("Informe o valor ou o percentual da alteração.");
+      return;
+    }
+
+    setSaving(true);
+    let attachment: string | null = null;
+    if (file && orgId) {
+      const path = `${orgId}/aditivos/${Date.now()}-${file.name.replace(/[^\w.\-]+/g, "_")}`;
+      const up = await supabase.storage.from("contratos").upload(path, file);
+      if (!up.error) attachment = path;
+    }
+
+    const periodValue = parseBRNumber(get("period_value"));
+    const { error } = await supabase.from("contract_amendments").insert({
+      organization_id: orgId!,
+      contract_id: contract.id,
+      number: get("number"),
+      kind,
+      signed_at: get("signed_at") || new Date().toISOString().slice(0, 10),
+      effect_date: get("effect_date") || get("signed_at") || new Date().toISOString().slice(0, 10),
+      new_valid_from: createsPeriod ? get("new_valid_from") : null,
+      new_valid_to: createsPeriod ? get("new_valid_to") : null,
+      delta_value: changesValue && delta ? delta : null,
+      percent: changesValue && percent ? percent : null,
+      period_value: createsPeriod && periodValue ? periodValue : null,
+      index_name: get("index_name") || null,
+      justification: get("justification"),
+      attachment_path: attachment,
+      created_by: userId,
+    });
+    setSaving(false);
+    if (error) {
+      toast.error(error.message || "Não foi possível registrar o aditivo.");
+      return;
+    }
+    toast.success("Aditivo registrado. Contrato e vigências atualizados.");
+    invalidate(["contracts", "contract-periods", "contract-amendments", "contract-items"]);
+    setFile(null);
+    onClose();
+  }
+
+  return (
+    <Dialog open={!!contract} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Novo aditivo — Contrato {contract?.number}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div>
+            <Label>Tipo de aditivo *</Label>
+            <Select value={kind} onValueChange={(v) => setKind(v as ContractAmendmentKind)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CONTRACT_AMENDMENT_KINDS.map((k) => (
+                  <SelectItem key={k.value} value={k.value}>
+                    {k.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="mt-1 text-xs text-muted-foreground">{help}</p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <Label htmlFor="number">Número do aditivo *</Label>
+              <Input id="number" name="number" required maxLength={40} />
+            </div>
+            <div>
+              <Label htmlFor="signed_at">Data de assinatura</Label>
+              <Input id="signed_at" name="signed_at" type="date" defaultValue={new Date().toISOString().slice(0, 10)} />
+            </div>
+            <div>
+              <Label htmlFor="effect_date">Data de efeito</Label>
+              <Input id="effect_date" name="effect_date" type="date" />
+            </div>
+          </div>
+
+          {createsPeriod && (
+            <div className="grid gap-4 rounded-md border bg-muted/30 p-4 sm:grid-cols-3">
+              <div>
+                <Label htmlFor="new_valid_from">Início da nova vigência *</Label>
+                <Input id="new_valid_from" name="new_valid_from" type="date" />
+              </div>
+              <div>
+                <Label htmlFor="new_valid_to">Fim da nova vigência *</Label>
+                <Input id="new_valid_to" name="new_valid_to" type="date" />
+              </div>
+              <div>
+                <Label htmlFor="period_value">Valor da nova vigência (R$)</Label>
+                <MoneyInput id="period_value" name="period_value" />
+              </div>
+              <p className="text-xs text-muted-foreground sm:col-span-3">
+                A nova vigência inicia com o valor informado (ou, em prorrogação simples, com o valor-base do
+                contrato). O saldo não utilizado da vigência anterior <strong>não</strong> é transportado e permanece
+                registrado no histórico.
+              </p>
+            </div>
+          )}
+
+          {changesValue && (
+            <div className="grid gap-4 rounded-md border bg-muted/30 p-4 sm:grid-cols-3">
+              <div>
+                <Label htmlFor="delta_value">Valor do acréscimo/supressão (R$)</Label>
+                <MoneyInput id="delta_value" name="delta_value" />
+              </div>
+              <div>
+                <Label htmlFor="percent">Percentual (%)</Label>
+                <MoneyInput id="percent" name="percent" />
+              </div>
+              <div>
+                <Label htmlFor="index_name">Índice / critério</Label>
+                <Input id="index_name" name="index_name" placeholder="IPCA, INPC, IGP-M…" />
+              </div>
+              <p className="text-xs text-muted-foreground sm:col-span-3">
+                Valor atual do contrato: <strong>{brl(Number(contract?.current_value ?? 0))}</strong>. O valor original
+                é preservado e o histórico registra valor anterior e posterior.
+              </p>
+            </div>
+          )}
+
+          <div>
+            <Label htmlFor="justification">Fundamento / justificativa *</Label>
+            <Textarea id="justification" name="justification" rows={3} required />
+          </div>
+
+          <div>
+            <Label htmlFor="amend_file">Anexo do aditivo (PDF)</Label>
+            <div className="flex items-center gap-2">
+              <Upload className="size-4 text-muted-foreground" />
+              <Input
+                id="amend_file"
+                type="file"
+                accept="application/pdf,image/*"
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={saving}>
+              {saving ? "Registrando…" : "Registrar aditivo"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

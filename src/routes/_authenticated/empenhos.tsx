@@ -1,7 +1,7 @@
 import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Pencil, Landmark, AlertTriangle } from "lucide-react";
+import { Plus, Pencil, Landmark, AlertTriangle, Scale } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -33,6 +33,8 @@ import {
   useSuppliers,
   useUnits,
   type CommitmentRow,
+  commitmentTotals,
+  useCommitmentMovements,
 } from "@/lib/frotagov";
 
 export const Route = createFileRoute("/_authenticated/empenhos")({
@@ -89,6 +91,8 @@ function Empenhos() {
   const [saving, setSaving] = useState(false);
 
   const [fExercise, setFExercise] = useState(ALL);
+  const [detailOf, setDetailOf] = useState<CommitmentRow | null>(null);
+
   const [fStatus, setFStatus] = useState(ALL);
   const [fUnit, setFUnit] = useState(ALL);
   const [fCenter, setFCenter] = useState(ALL);
@@ -372,11 +376,21 @@ function Empenhos() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {canManageFinance && (
-                      <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => openEdit(c)}>
-                        <Pencil className="size-4" />
+                    <div className="flex">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Detalhe e movimentações"
+                        onClick={() => setDetailOf(c)}
+                      >
+                        <Scale className="size-4" />
                       </Button>
-                    )}
+                      {canManageFinance && (
+                        <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => openEdit(c)}>
+                          <Pencil className="size-4" />
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               );
@@ -385,6 +399,8 @@ function Empenhos() {
         </Table>
         <ListPagination state={paged} />
       </div>
+
+      <CommitmentDetailDialog commitment={detailOf} onClose={() => setDetailOf(null)} />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
@@ -565,5 +581,199 @@ function Empenhos() {
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+
+/* ------------------- reforço e redução/anulação de empenho ------------------- */
+
+function CommitmentDetailDialog({
+  commitment,
+  onClose,
+}: {
+  commitment: CommitmentRow | null;
+  onClose: () => void;
+}) {
+  const { canManageFinance, orgId, userId } = usePerms();
+  const { data: movements = [] } = useCommitmentMovements();
+  const invalidate = useInvalidate();
+  const [kind, setKind] = useState<"reforco" | "reducao">("reforco");
+  const [saving, setSaving] = useState(false);
+
+  if (!commitment) return <Dialog open={false} onOpenChange={() => undefined} />;
+
+  const t = commitmentTotals(commitment, movements);
+  const mine = movements
+    .filter((m) => m.commitment_id === commitment.id)
+    .sort((a, b) => a.moved_on.localeCompare(b.moved_on));
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!commitment) return;
+    const fd = new FormData(e.currentTarget);
+    const value = parseBRNumber(String(fd.get("value") ?? ""));
+    const justification = String(fd.get("justification") ?? "").trim();
+    if (!value || value <= 0) {
+      toast.error("Informe um valor maior que zero.");
+      return;
+    }
+    if (justification.length < 5) {
+      toast.error("Informe a justificativa da movimentação.");
+      return;
+    }
+    if (kind === "reducao" && value > t.available + 0.005) {
+      toast.error(
+        `Redução acima do saldo disponível (${brl(t.available)}). O valor já reservado/consumido não pode ser reduzido.`,
+      );
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase.from("commitment_movements").insert({
+      organization_id: orgId!,
+      commitment_id: commitment.id,
+      kind,
+      moved_on: String(fd.get("moved_on") ?? "") || new Date().toISOString().slice(0, 10),
+      value,
+      document: String(fd.get("document") ?? "").trim() || null,
+      justification,
+      created_by: userId,
+    });
+    setSaving(false);
+    if (error) {
+      toast.error(error.message || "Não foi possível registrar a movimentação.");
+      return;
+    }
+    toast.success(kind === "reforco" ? "Reforço registrado." : "Redução/anulação registrada.");
+    invalidate(["commitments", "commitment-movements", "budget-movements"]);
+    (e.target as HTMLFormElement).reset();
+  }
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Empenho {commitment.number} — saldo e movimentações</DialogTitle>
+        </DialogHeader>
+
+        <div className="grid gap-3 sm:grid-cols-4">
+          {[
+            { label: "Valor original", value: brl(t.original) },
+            { label: "Reforços acumulados", value: brl(t.reinforced) },
+            { label: "Reduções/anulações", value: brl(t.cancelled) },
+            { label: "Valor atualizado", value: brl(t.current) },
+            { label: "Reservado/comprometido", value: brl(t.reserved) },
+            { label: "Consumido", value: brl(t.consumed) },
+            { label: "Saldo disponível", value: brl(t.available) },
+            { label: "Situação", value: label(COMMITMENT_STATUS, commitment.status) },
+          ].map((c) => (
+            <div key={c.label} className="rounded-md border bg-muted/20 p-3">
+              <p className="text-xs text-muted-foreground">{c.label}</p>
+              <p className="gov-title text-base">{c.value}</p>
+            </div>
+          ))}
+        </div>
+
+        {canManageFinance && (
+          <form onSubmit={onSubmit} className="space-y-3 rounded-lg border p-4">
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant={kind === "reforco" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setKind("reforco")}
+              >
+                Reforçar empenho
+              </Button>
+              <Button
+                type="button"
+                variant={kind === "reducao" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setKind("reducao")}
+              >
+                Reduzir / anular saldo
+              </Button>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div>
+                <Label htmlFor="moved_on">Data *</Label>
+                <Input
+                  id="moved_on"
+                  name="moved_on"
+                  type="date"
+                  defaultValue={new Date().toISOString().slice(0, 10)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="value">Valor (R$) *</Label>
+                <MoneyInput id="value" name="value" />
+              </div>
+              <div>
+                <Label htmlFor="document">Documento / número</Label>
+                <Input id="document" name="document" />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="justification">Justificativa / observação *</Label>
+              <Textarea id="justification" name="justification" rows={2} required />
+            </div>
+            {kind === "reducao" && (
+              <p className="text-xs text-muted-foreground">
+                A redução abate apenas o saldo ainda disponível ({brl(t.available)}). Valores já
+                reservados ou consumidos não podem ser reduzidos.
+              </p>
+            )}
+            <Button type="submit" disabled={saving}>
+              {saving ? "Registrando…" : kind === "reforco" ? "Registrar reforço" : "Registrar redução/anulação"}
+            </Button>
+          </form>
+        )}
+
+        <div className="overflow-x-auto rounded-lg border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Data</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead className="text-right">Valor</TableHead>
+                <TableHead className="text-right">Antes</TableHead>
+                <TableHead className="text-right">Depois</TableHead>
+                <TableHead>Documento</TableHead>
+                <TableHead>Justificativa</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {mine.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="py-6 text-center text-muted-foreground">
+                    Nenhuma movimentação registrada para este empenho.
+                  </TableCell>
+                </TableRow>
+              )}
+              {mine.map((m) => (
+                <TableRow key={m.id}>
+                  <TableCell>{dateBR(m.moved_on)}</TableCell>
+                  <TableCell>
+                    <Badge variant={m.kind === "reforco" ? "default" : "secondary"}>
+                      {m.kind === "reforco" ? "Reforço" : "Redução/anulação"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">{brl(Number(m.value))}</TableCell>
+                  <TableCell className="text-right">{brl(Number(m.previous_value ?? 0))}</TableCell>
+                  <TableCell className="text-right">{brl(Number(m.new_value ?? 0))}</TableCell>
+                  <TableCell>{m.document || "—"}</TableCell>
+                  <TableCell className="max-w-[220px] truncate">{m.justification || "—"}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Fechar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

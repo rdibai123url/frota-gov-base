@@ -62,6 +62,14 @@ import {
   type Vehicle,
   parseBRNumber,
   formatLiters,
+  dateBR,
+  DOCUMENT_KINDS,
+  DOCUMENT_KIND_LABELS,
+  useCommitments,
+  useContractItems,
+  useContracts,
+  useCostCenters,
+  useQuotas,
 } from "@/lib/frotagov";
 
 export const Route = createFileRoute("/_authenticated/abastecimentos")({
@@ -387,6 +395,11 @@ function NewFuelingDialog({
   const { data: history = [] } = useFuelings();
   const { data: auths = [] } = useAuthorizations();
   const { data: drivers = [] } = useDrivers();
+  const { data: contracts = [] } = useContracts();
+  const { data: contractItems = [] } = useContractItems();
+  const { data: commitments = [] } = useCommitments();
+  const { data: centers = [] } = useCostCenters();
+  const { data: quotas = [] } = useQuotas();
   const perms = usePerms();
 
   const now = new Date();
@@ -405,6 +418,8 @@ function NewFuelingDialog({
   const [quantity, setQuantity] = useState("");
   const [unitPrice, setUnitPrice] = useState("");
   const [invoice, setInvoice] = useState("");
+  const [documentKind, setDocumentKind] = useState("cupom");
+  const [documentKey, setDocumentKey] = useState("");
   const [authorization, setAuthorization] = useState("");
   const [notes, setNotes] = useState("");
   const [justification, setJustification] = useState("");
@@ -493,6 +508,18 @@ function NewFuelingDialog({
     });
   }
 
+  const minKm = Math.max(
+    Number(vehicle?.current_km ?? 0),
+    Number(selectedAuth?.odometer_km ?? 0),
+  );
+  const informedKm = odometer === "" ? null : Number(odometer.replace(",", "."));
+  if (informedKm != null && minKm > 0 && informedKm < minKm)
+    authIssues.push({
+      level: "erro",
+      type: "km_regressivo",
+      message: `A quilometragem informada (${num(informedKm, 0)} km) é inferior ao último KM válido (${num(minKm, 0)} km). O hodômetro só pode avançar.`,
+    });
+
   const allIssues = [...issues, ...authIssues];
   const errors = allIssues.filter((i) => i.level === "erro");
   const alerts = allIssues.filter((i) => i.level === "alerta");
@@ -558,6 +585,8 @@ function NewFuelingDialog({
         quantity: qty,
         unit_price: price,
         invoice_number: invoice || null,
+        document_kind: documentKind,
+        document_key: documentKey.trim() || null,
         authorization_number: selectedAuth?.code ?? (authorization || null),
         notes: notes || null,
         alert_flags: alerts.map((a) => a.type),
@@ -644,6 +673,65 @@ function NewFuelingDialog({
                 {selectedAuth.max_value ? ` valor máx. ${brl(selectedAuth.max_value)} ·` : ""} válida até {dateTimeBR(selectedAuth.valid_until)}
               </p>
             )}
+            {selectedAuth && (
+              <div className="mt-3 grid gap-3 rounded-md border bg-background p-3 sm:grid-cols-3">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground sm:col-span-3">
+                  Dados herdados da autorização (somente leitura)
+                </p>
+                {(
+                  [
+                    ["Autorização", selectedAuth.code ?? "—"],
+                    ["Veículo / placa", selectedAuth.vehicle?.plate ?? "—"],
+                    ["Unidade / secretaria", selectedAuth.unit?.name ?? unit?.name ?? "—"],
+                    ["Condutor", selectedAuth.driver?.full_name ?? "—"],
+                    [
+                      "KM autorizado / último válido",
+                      minKm > 0 ? `${num(minKm, 0)} km` : "—",
+                    ],
+                    ["Combustível / produto", selectedAuth.fuel?.name ?? "—"],
+                    [
+                      "Fornecedor / posto",
+                      selectedAuth.supplier?.trade_name || selectedAuth.supplier?.legal_name || "—",
+                    ],
+                    [
+                      "Contrato",
+                      contracts.find((c) => c.id === selectedAuth.contract_id)?.number ?? "—",
+                    ],
+                    [
+                      "Item do contrato",
+                      contractItems.find((i) => i.id === selectedAuth.contract_item_id)?.description ?? "—",
+                    ],
+                    [
+                      "Empenho",
+                      commitments.find((c) => c.id === selectedAuth.commitment_id)?.number ?? "—",
+                    ],
+                    [
+                      "Centro de custo",
+                      centers.find((c) => c.id === selectedAuth.cost_center_id)?.name ?? "—",
+                    ],
+                    ["Cota", quotas.find((q) => q.id === selectedAuth.quota_id)?.name ?? "—"],
+                    [
+                      "Limite autorizado",
+                      `${formatLiters(Number(selectedAuth.max_quantity))} ${selectedAuth.fuel?.measure_unit ?? "L"}` +
+                        (selectedAuth.max_value ? ` · ${brl(Number(selectedAuth.max_value))}` : ""),
+                    ],
+                    [
+                      "Saldo ainda disponível",
+                      `${formatLiters(authorizationBalance(selectedAuth))} ${selectedAuth.fuel?.measure_unit ?? "L"}`,
+                    ],
+                    [
+                      "Emissão / validade",
+                      `${dateBR(selectedAuth.valid_from)} a ${dateTimeBR(selectedAuth.valid_until)}`,
+                    ],
+                  ] as [string, string][]
+                ).map(([l, v]) => (
+                  <div key={l}>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{l}</p>
+                    <p className="text-sm">{v}</p>
+                  </div>
+                ))}
+              </div>
+            )}
             {needsAuthReason && (
               <div className="mt-3">
                 <Label htmlFor="noauth">Justificativa da ausência de autorização *</Label>
@@ -654,7 +742,7 @@ function NewFuelingDialog({
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label>Veículo / equipamento *</Label>
-              <Select value={vehicleId} onValueChange={setVehicleId}>
+              <Select value={vehicleId} onValueChange={setVehicleId} disabled={!!selectedAuth}>
                 <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Selecione</SelectItem>
@@ -672,7 +760,7 @@ function NewFuelingDialog({
             </div>
             <div>
               <Label>Fornecedor / posto</Label>
-              <Select value={supplierId} onValueChange={setSupplierId}>
+              <Select value={supplierId} onValueChange={setSupplierId} disabled={!!selectedAuth?.supplier_id}>
                 <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Não informado</SelectItem>
@@ -687,7 +775,7 @@ function NewFuelingDialog({
             </div>
             <div>
               <Label>Combustível *</Label>
-              <Select value={fuelId} onValueChange={setFuelId}>
+              <Select value={fuelId} onValueChange={setFuelId} disabled={!!selectedAuth?.fuel_type_id}>
                 <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Selecione</SelectItem>
@@ -759,8 +847,29 @@ function NewFuelingDialog({
               <Input value={brl(total)} readOnly disabled />
             </div>
             <div>
-              <Label htmlFor="invoice">Nota fiscal / documento</Label>
+              <Label>Tipo de documento fiscal</Label>
+              <Select value={documentKind} onValueChange={setDocumentKind}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {DOCUMENT_KINDS.map((d) => (
+                    <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="invoice">Número do documento</Label>
               <Input id="invoice" value={invoice} onChange={(e) => setInvoice(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="dockey">Chave de acesso (NFC-e / NF-e)</Label>
+              <Input
+                id="dockey"
+                value={documentKey}
+                onChange={(e) => setDocumentKey(e.target.value)}
+                maxLength={60}
+                placeholder="Quando aplicável"
+              />
             </div>
             <div>
               <Label htmlFor="auth">Número da autorização</Label>
@@ -857,6 +966,11 @@ function DetailDialog({ fueling, onClose }: { fueling: FuelingRow | null; onClos
             label="Autorização"
             value={fueling.authorization?.code ?? (fueling.without_authorization_reason ? "Sem autorização prévia" : "—")}
           />
+          <Row
+            label="Documento fiscal"
+            value={`${DOCUMENT_KIND_LABELS[fueling.document_kind ?? ""] ?? "—"}${fueling.invoice_number ? ` nº ${fueling.invoice_number}` : ""}`}
+          />
+          <Row label="Chave do documento" value={fueling.document_key ?? "—"} />
           <Row label="Justificativa (sem autorização)" value={fueling.without_authorization_reason ?? "—"} />
           <Row label="Registrado por" value={fueling.operator_name} />
           <Row label="Nota fiscal" value={fueling.invoice_number} />

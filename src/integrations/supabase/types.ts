@@ -607,6 +607,69 @@ export type Database = {
           },
         ]
       }
+      commitment_movements: {
+        Row: {
+          attachment_path: string | null
+          commitment_id: string
+          created_at: string
+          created_by: string | null
+          document: string | null
+          id: string
+          justification: string | null
+          kind: string
+          moved_on: string
+          new_value: number | null
+          organization_id: string
+          previous_value: number | null
+          value: number
+        }
+        Insert: {
+          attachment_path?: string | null
+          commitment_id: string
+          created_at?: string
+          created_by?: string | null
+          document?: string | null
+          id?: string
+          justification?: string | null
+          kind: string
+          moved_on?: string
+          new_value?: number | null
+          organization_id: string
+          previous_value?: number | null
+          value: number
+        }
+        Update: {
+          attachment_path?: string | null
+          commitment_id?: string
+          created_at?: string
+          created_by?: string | null
+          document?: string | null
+          id?: string
+          justification?: string | null
+          kind?: string
+          moved_on?: string
+          new_value?: number | null
+          organization_id?: string
+          previous_value?: number | null
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commitment_movements_commitment_id_fkey"
+            columns: ["commitment_id"]
+            isOneToOne: false
+            referencedRelation: "commitments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commitment_movements_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       commitments: {
         Row: {
           available_value: number | null
@@ -724,6 +787,106 @@ export type Database = {
           },
         ]
       }
+      contract_amendments: {
+        Row: {
+          attachment_path: string | null
+          contract_id: string
+          created_at: string
+          created_by: string | null
+          delta_value: number | null
+          effect_date: string
+          id: string
+          index_name: string | null
+          justification: string | null
+          kind: Database["public"]["Enums"]["contract_amendment_kind"]
+          new_contract_value: number | null
+          new_valid_from: string | null
+          new_valid_to: string | null
+          notes: string | null
+          number: string
+          organization_id: string
+          percent: number | null
+          period_id: string | null
+          period_value: number | null
+          previous_contract_value: number | null
+          signed_at: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          attachment_path?: string | null
+          contract_id: string
+          created_at?: string
+          created_by?: string | null
+          delta_value?: number | null
+          effect_date?: string
+          id?: string
+          index_name?: string | null
+          justification?: string | null
+          kind: Database["public"]["Enums"]["contract_amendment_kind"]
+          new_contract_value?: number | null
+          new_valid_from?: string | null
+          new_valid_to?: string | null
+          notes?: string | null
+          number: string
+          organization_id: string
+          percent?: number | null
+          period_id?: string | null
+          period_value?: number | null
+          previous_contract_value?: number | null
+          signed_at?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          attachment_path?: string | null
+          contract_id?: string
+          created_at?: string
+          created_by?: string | null
+          delta_value?: number | null
+          effect_date?: string
+          id?: string
+          index_name?: string | null
+          justification?: string | null
+          kind?: Database["public"]["Enums"]["contract_amendment_kind"]
+          new_contract_value?: number | null
+          new_valid_from?: string | null
+          new_valid_to?: string | null
+          notes?: string | null
+          number?: string
+          organization_id?: string
+          percent?: number | null
+          period_id?: string | null
+          period_value?: number | null
+          previous_contract_value?: number | null
+          signed_at?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_amendments_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_amendments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_amendments_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "contract_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contract_items: {
         Row: {
           active: boolean
@@ -818,6 +981,91 @@ export type Database = {
           },
         ]
       }
+      contract_periods: {
+        Row: {
+          balance_value: number | null
+          closed_at: string | null
+          consumed_value: number
+          contract_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_current: boolean
+          notes: string | null
+          organization_id: string
+          origin_amendment_id: string | null
+          period_value: number
+          reserved_value: number
+          sequence: number
+          updated_at: string
+          updated_by: string | null
+          valid_from: string
+          valid_to: string
+        }
+        Insert: {
+          balance_value?: number | null
+          closed_at?: string | null
+          consumed_value?: number
+          contract_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_current?: boolean
+          notes?: string | null
+          organization_id: string
+          origin_amendment_id?: string | null
+          period_value?: number
+          reserved_value?: number
+          sequence: number
+          updated_at?: string
+          updated_by?: string | null
+          valid_from: string
+          valid_to: string
+        }
+        Update: {
+          balance_value?: number | null
+          closed_at?: string | null
+          consumed_value?: number
+          contract_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_current?: boolean
+          notes?: string | null
+          organization_id?: string
+          origin_amendment_id?: string | null
+          period_value?: number
+          reserved_value?: number
+          sequence?: number
+          updated_at?: string
+          updated_by?: string | null
+          valid_from?: string
+          valid_to?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_periods_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_periods_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_periods_origin_fk"
+            columns: ["origin_amendment_id"]
+            isOneToOne: false
+            referencedRelation: "contract_amendments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contracts: {
         Row: {
           allows_amendment: boolean
@@ -826,6 +1074,7 @@ export type Database = {
           cnpj: string | null
           created_at: string
           created_by: string | null
+          current_period_id: string | null
           current_value: number
           id: string
           initial_value: number
@@ -834,6 +1083,8 @@ export type Database = {
           number: string
           object: string
           organization_id: string
+          original_valid_from: string | null
+          original_valid_to: string | null
           process_number: string | null
           signed_at: string | null
           status: Database["public"]["Enums"]["contract_status"]
@@ -850,6 +1101,7 @@ export type Database = {
           cnpj?: string | null
           created_at?: string
           created_by?: string | null
+          current_period_id?: string | null
           current_value?: number
           id?: string
           initial_value?: number
@@ -858,6 +1110,8 @@ export type Database = {
           number: string
           object: string
           organization_id: string
+          original_valid_from?: string | null
+          original_valid_to?: string | null
           process_number?: string | null
           signed_at?: string | null
           status?: Database["public"]["Enums"]["contract_status"]
@@ -874,6 +1128,7 @@ export type Database = {
           cnpj?: string | null
           created_at?: string
           created_by?: string | null
+          current_period_id?: string | null
           current_value?: number
           id?: string
           initial_value?: number
@@ -882,6 +1137,8 @@ export type Database = {
           number?: string
           object?: string
           organization_id?: string
+          original_valid_from?: string | null
+          original_valid_to?: string | null
           process_number?: string | null
           signed_at?: string | null
           status?: Database["public"]["Enums"]["contract_status"]
@@ -892,6 +1149,13 @@ export type Database = {
           valid_to?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "contracts_current_period_id_fkey"
+            columns: ["current_period_id"]
+            isOneToOne: false
+            referencedRelation: "contract_periods"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "contracts_organization_id_fkey"
             columns: ["organization_id"]
@@ -1410,6 +1674,7 @@ export type Database = {
         Row: {
           acronym: string | null
           active: boolean
+          category: string
           created_at: string
           created_by: string | null
           id: string
@@ -1422,6 +1687,7 @@ export type Database = {
         Insert: {
           acronym?: string | null
           active?: boolean
+          category?: string
           created_at?: string
           created_by?: string | null
           id?: string
@@ -1434,6 +1700,7 @@ export type Database = {
         Update: {
           acronym?: string | null
           active?: boolean
+          category?: string
           created_at?: string
           created_by?: string | null
           id?: string
@@ -1574,6 +1841,8 @@ export type Database = {
           cost_center_id: string | null
           created_at: string
           created_by: string | null
+          document_key: string | null
+          document_kind: string | null
           driver_id: string | null
           driver_name: string | null
           expense_origin: Database["public"]["Enums"]["expense_origin"]
@@ -1614,6 +1883,8 @@ export type Database = {
           cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
+          document_key?: string | null
+          document_kind?: string | null
           driver_id?: string | null
           driver_name?: string | null
           expense_origin?: Database["public"]["Enums"]["expense_origin"]
@@ -1654,6 +1925,8 @@ export type Database = {
           cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
+          document_key?: string | null
+          document_kind?: string | null
           driver_id?: string | null
           driver_name?: string | null
           expense_origin?: Database["public"]["Enums"]["expense_origin"]
@@ -3848,6 +4121,73 @@ export type Database = {
           },
         ]
       }
+      supplier_contracts: {
+        Row: {
+          active: boolean
+          cnpj_match: boolean
+          contract_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          justification: string | null
+          notes: string | null
+          organization_id: string
+          supplier_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          active?: boolean
+          cnpj_match?: boolean
+          contract_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          justification?: string | null
+          notes?: string | null
+          organization_id: string
+          supplier_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          active?: boolean
+          cnpj_match?: boolean
+          contract_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          justification?: string | null
+          notes?: string | null
+          organization_id?: string
+          supplier_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_contracts_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_contracts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_contracts_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           active: boolean
@@ -5265,6 +5605,10 @@ export type Database = {
         }
         Returns: Json
       }
+      contract_period_at: {
+        Args: { _at: string; _contract: string }
+        Returns: string
+      }
       current_org_id: { Args: never; Returns: string }
       ensure_transparency_period: {
         Args: { _month: number; _year: number }
@@ -5407,6 +5751,14 @@ export type Database = {
         | "suplementacao"
       commitment_kind: "ordinario" | "estimativo" | "global"
       commitment_status: "ativo" | "esgotado" | "anulado" | "encerrado"
+      contract_amendment_kind:
+        | "prorrogacao"
+        | "acrescimo"
+        | "supressao"
+        | "reajuste"
+        | "reequilibrio"
+        | "prorrogacao_valor"
+        | "combinado"
       contract_modality:
         | "pregao"
         | "concorrencia"
@@ -5729,6 +6081,15 @@ export const Constants = {
       ],
       commitment_kind: ["ordinario", "estimativo", "global"],
       commitment_status: ["ativo", "esgotado", "anulado", "encerrado"],
+      contract_amendment_kind: [
+        "prorrogacao",
+        "acrescimo",
+        "supressao",
+        "reajuste",
+        "reequilibrio",
+        "prorrogacao_valor",
+        "combinado",
+      ],
       contract_modality: [
         "pregao",
         "concorrencia",

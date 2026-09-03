@@ -1,7 +1,7 @@
 import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Pencil, Search } from "lucide-react";
+import { Plus, Pencil, Search, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -40,6 +40,12 @@ import {
   type Supplier,
   formatCNPJ,
   onlyDigits,
+  brl,
+  dateBR,
+  label as labelOf,
+  CONTRACT_STATUS,
+  useContracts,
+  useSupplierContracts,
 } from "@/lib/frotagov";
 
 export const Route = createFileRoute("/_authenticated/fornecedores")({
@@ -87,6 +93,8 @@ function Fornecedores() {
   const [cep, setCep] = useState("");
   const [saving, setSaving] = useState(false);
   const [q, setQ] = useState("");
+  const [linkFor, setLinkFor] = useState<Supplier | null>(null);
+  const { data: links = [] } = useSupplierContracts();
 
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase();
@@ -190,6 +198,7 @@ function Fornecedores() {
               <TableHead>CNPJ</TableHead>
               <TableHead>Município / UF</TableHead>
               <TableHead>Contato</TableHead>
+              <TableHead>Contratos</TableHead>
               <TableHead>Situação</TableHead>
               <TableHead className="w-16" />
             </TableRow>
@@ -197,14 +206,14 @@ function Fornecedores() {
           <TableBody>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+                <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
                   Carregando…
                 </TableCell>
               </TableRow>
             )}
             {!isLoading && filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+                <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
                   Nenhum fornecedor cadastrado.
                 </TableCell>
               </TableRow>
@@ -216,6 +225,18 @@ function Fornecedores() {
                 <TableCell>{formatCNPJ(s.cnpj)}</TableCell>
                 <TableCell>{[s.city, s.state].filter(Boolean).join(" / ") || "—"}</TableCell>
                 <TableCell>{s.contact_name || s.phone || "—"}</TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => setLinkFor(s)}
+                    aria-label="Contratos vinculados"
+                  >
+                    <FileText className="size-4" />
+                    {links.filter((l) => l.supplier_id === s.id && l.active).length}
+                  </Button>
+                </TableCell>
                 <TableCell>
                   <Badge variant={s.active ? "default" : "secondary"}>
                     {s.active ? "Ativo" : "Inativo"}
@@ -328,6 +349,179 @@ function Fornecedores() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <SupplierContractsDialog supplier={linkFor} onClose={() => setLinkFor(null)} />
     </>
+  );
+}
+
+/* --------------------- vínculo fornecedor x contrato --------------------- */
+
+function SupplierContractsDialog({
+  supplier,
+  onClose,
+}: {
+  supplier: Supplier | null;
+  onClose: () => void;
+}) {
+  const { canWrite, orgId, userId } = usePerms();
+  const { data: contracts = [] } = useContracts();
+  const { data: links = [] } = useSupplierContracts();
+  const invalidate = useInvalidate();
+  const [contractId, setContractId] = useState("");
+  const [justification, setJustification] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const mine = links.filter((l) => l.supplier_id === supplier?.id);
+  const linkedIds = new Set(mine.filter((l) => l.active).map((l) => l.contract_id));
+  const supplierDigits = onlyDigits(supplier?.cnpj ?? "");
+  const selected = contracts.find((c) => c.id === contractId) ?? null;
+  const sameCnpj = !!selected && !!supplierDigits && onlyDigits(selected.cnpj ?? "") === supplierDigits;
+  const available = contracts.filter(
+    (c) => !linkedIds.has(c.id) && ["vigente", "suspenso", "rascunho"].includes(c.status),
+  );
+
+  async function addLink() {
+    if (!supplier || !contractId) return;
+    if (!sameCnpj && justification.trim().length < 10) {
+      toast.error("CNPJ divergente do contrato: informe a justificativa administrativa (mín. 10 caracteres).");
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase.from("supplier_contracts").insert({
+      organization_id: orgId!,
+      supplier_id: supplier.id,
+      contract_id: contractId,
+      justification: justification.trim() || null,
+      created_by: userId,
+    });
+    setSaving(false);
+    if (error) {
+      toast.error(error.message || "Não foi possível vincular o contrato.");
+      return;
+    }
+    toast.success("Contrato vinculado ao fornecedor.");
+    setContractId("");
+    setJustification("");
+    invalidate(["supplier-contracts"]);
+  }
+
+  async function toggleLink(id: string, active: boolean) {
+    const { error } = await supabase
+      .from("supplier_contracts")
+      .update({ active, updated_by: userId })
+      .eq("id", id);
+    if (error) {
+      toast.error("Não foi possível atualizar o vínculo.");
+      return;
+    }
+    toast.success(active ? "Vínculo reativado." : "Vínculo desativado.");
+    invalidate(["supplier-contracts"]);
+  }
+
+  return (
+    <Dialog open={!!supplier} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Contratos vinculados — {supplier?.legal_name}</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="overflow-x-auto rounded-lg border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Contrato</TableHead>
+                  <TableHead>Objeto</TableHead>
+                  <TableHead>Vigência</TableHead>
+                  <TableHead>Situação</TableHead>
+                  <TableHead>Valor atual</TableHead>
+                  <TableHead>CNPJ</TableHead>
+                  <TableHead className="w-28" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {mine.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="py-6 text-center text-muted-foreground">
+                      Nenhum contrato vinculado a este fornecedor.
+                    </TableCell>
+                  </TableRow>
+                )}
+                {mine.map((l) => (
+                  <TableRow key={l.id} className={l.active ? "" : "opacity-50"}>
+                    <TableCell className="font-medium">{l.contract?.number ?? "—"}</TableCell>
+                    <TableCell className="max-w-[220px] truncate">{l.contract?.object ?? "—"}</TableCell>
+                    <TableCell>
+                      {dateBR(l.contract?.valid_from)} a {dateBR(l.contract?.valid_to)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={l.contract?.status === "vigente" ? "default" : "secondary"}>
+                        {labelOf(CONTRACT_STATUS, l.contract?.status ?? null)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{brl(Number(l.contract?.current_value ?? 0))}</TableCell>
+                    <TableCell>
+                      <Badge variant={l.cnpj_match ? "default" : "outline"}>
+                        {l.cnpj_match ? "Compatível" : "Divergente (justificado)"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {canWrite && (
+                        <Button variant="ghost" size="sm" onClick={() => toggleLink(l.id, !l.active)}>
+                          {l.active ? "Desativar" : "Reativar"}
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {canWrite && (
+            <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
+              <Label>Vincular novo contrato</Label>
+              <Select value={contractId} onValueChange={setContractId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um contrato do órgão" />
+                </SelectTrigger>
+                <SelectContent>
+                  {available.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.number} · {c.object?.slice(0, 40)} · {dateBR(c.valid_from)}–{dateBR(c.valid_to)} ·{" "}
+                      {labelOf(CONTRACT_STATUS, c.status)} · {brl(Number(c.current_value ?? 0))}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selected && !sameCnpj && (
+                <>
+                  <p className="text-sm text-amber-700">
+                    O CNPJ do contratado ({formatCNPJ(selected.cnpj)}) não corresponde ao do fornecedor (
+                    {formatCNPJ(supplier?.cnpj ?? null)}). Justificativa administrativa obrigatória.
+                  </p>
+                  <Textarea
+                    rows={2}
+                    value={justification}
+                    onChange={(e) => setJustification(e.target.value)}
+                    placeholder="Justificativa administrativa do vínculo"
+                  />
+                </>
+              )}
+              <Button onClick={addLink} disabled={!contractId || saving} className="gap-2">
+                <Plus className="size-4" /> Vincular contrato
+              </Button>
+            </div>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Fechar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
