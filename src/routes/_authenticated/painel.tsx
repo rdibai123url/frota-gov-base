@@ -73,7 +73,10 @@ function StatCard({
 }
 
 const SHORTCUTS = [
+  { to: "/abastecimentos", label: "Abastecimentos", text: "Registrar e consultar abastecimentos", icon: Fuel },
   { to: "/veiculos", label: "Veículos", text: "Cadastrar e consultar a frota", icon: Truck },
+  { to: "/fornecedores", label: "Fornecedores / Postos", text: "Postos habilitados para o órgão", icon: Store },
+  { to: "/combustiveis", label: "Combustíveis", text: "Tipos de combustível do órgão", icon: Droplets },
   { to: "/unidades", label: "Secretarias / Unidades", text: "Estrutura administrativa do órgão", icon: Building2 },
   { to: "/usuarios", label: "Usuários", text: "Perfis e permissões de acesso", icon: Users },
   { to: "/orgao", label: "Dados do Órgão", text: "Identificação institucional e brasão", icon: Landmark },
@@ -84,9 +87,44 @@ function Painel() {
   const { data: units = [] } = useUnits();
   const { data: users = [] } = useOrgUsers();
   const { data: org } = useOrganization();
+  const { data: fuelings = [] } = useFuelings();
+  const { data: alerts = [] } = useFuelingAlerts();
 
   const ativos = vehicles.filter((v) => v.status === "ativo").length;
   const manutencao = vehicles.filter((v) => v.status === "manutencao").length;
+
+  const mes = useMemo(() => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const list = fuelings.filter((f) => f.status === "valido" && new Date(f.fueled_at) >= start);
+    return {
+      count: list.length,
+      quantity: list.reduce((s, f) => s + Number(f.quantity ?? 0), 0),
+      total: list.reduce((s, f) => s + Number(f.total_value ?? 0), 0),
+      vehicles: new Set(list.map((f) => f.vehicle_id)).size,
+    };
+  }, [fuelings]);
+
+  const abertos = alerts.filter((a) => a.status === "aberto").length;
+
+  const ultimos6 = useMemo(() => {
+    const base = new Date();
+    return Array.from({ length: 6 }, (_, i) => {
+      const d = new Date(base.getFullYear(), base.getMonth() - (5 - i), 1);
+      const next = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+      const list = fuelings.filter((f) => {
+        const t = new Date(f.fueled_at);
+        return f.status === "valido" && t >= d && t < next;
+      });
+      return {
+        label: d.toLocaleDateString("pt-BR", { month: "short" }),
+        total: list.reduce((s, f) => s + Number(f.total_value ?? 0), 0),
+        quantity: list.reduce((s, f) => s + Number(f.quantity ?? 0), 0),
+      };
+    });
+  }, [fuelings]);
+
+  const maxTotal = Math.max(...ultimos6.map((m) => m.total), 0);
 
   return (
     <>
@@ -106,6 +144,39 @@ function Painel() {
         <StatCard label="Secretarias / Unidades" value={units.length} icon={Building2} />
         <StatCard label="Usuários" value={users.length} icon={Users} />
       </div>
+
+      <h2 className="gov-title mt-10 mb-4 text-lg">Abastecimento no mês</h2>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <StatCard label="Abastecimentos no mês" value={mes.count} icon={Fuel} />
+        <StatCard label="Quantidade abastecida" value={num(mes.quantity, 2)} icon={Droplets} />
+        <StatCard label="Valor gasto no mês" value={brl(mes.total)} icon={Banknote} />
+        <StatCard label="Veículos abastecidos" value={mes.vehicles} icon={Truck} />
+        <StatCard label="Alertas em aberto" value={abertos} icon={BellRing} tone={abertos > 0 ? "warning" : "default"} />
+      </div>
+
+      <h2 className="gov-title mt-10 mb-4 text-lg">Gasto dos últimos 6 meses</h2>
+      <div className="rounded-lg border bg-card p-5 shadow-card">
+        {maxTotal === 0 ? (
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            Ainda não há abastecimentos registrados para exibir o histórico.
+          </p>
+        ) : (
+          <div className="flex h-48 items-end gap-3">
+            {ultimos6.map((m) => (
+              <div key={m.label} className="flex flex-1 flex-col items-center gap-2">
+                <span className="text-[11px] text-muted-foreground">{m.total > 0 ? brl(m.total) : ""}</span>
+                <div
+                  className="w-full rounded-t bg-primary/80"
+                  style={{ height: `${Math.max(4, (m.total / maxTotal) * 140)}px` }}
+                  title={`${num(m.quantity, 2)} abastecidos`}
+                />
+                <span className="text-xs capitalize text-muted-foreground">{m.label}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
 
       <h2 className="gov-title mt-10 mb-4 text-lg">Atalhos</h2>
       <div className="grid gap-4 sm:grid-cols-2">
