@@ -488,6 +488,317 @@ export type Database = {
         }
         Relationships: []
       }
+      backup_restores: {
+        Row: {
+          confirmation_text: string
+          created_at: string
+          error_summary: string | null
+          finished_at: string | null
+          id: string
+          justification: string
+          organization_id: string
+          requested_by: string
+          result_summary: string | null
+          run_id: string
+          safety_run_id: string | null
+          started_at: string | null
+          status: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          confirmation_text: string
+          created_at?: string
+          error_summary?: string | null
+          finished_at?: string | null
+          id?: string
+          justification: string
+          organization_id: string
+          requested_by: string
+          result_summary?: string | null
+          run_id: string
+          safety_run_id?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          confirmation_text?: string
+          created_at?: string
+          error_summary?: string | null
+          finished_at?: string | null
+          id?: string
+          justification?: string
+          organization_id?: string
+          requested_by?: string
+          result_summary?: string | null
+          run_id?: string
+          safety_run_id?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "backup_restores_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "backup_restores_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "backup_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "backup_restores_safety_run_id_fkey"
+            columns: ["safety_run_id"]
+            isOneToOne: false
+            referencedRelation: "backup_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      backup_runs: {
+        Row: {
+          checksum: string | null
+          checksum_algo: string | null
+          created_at: string
+          cycle_key: string
+          destination_kind: string | null
+          destination_path: string | null
+          duration_ms: number | null
+          error_summary: string | null
+          expires_at: string | null
+          file_count: number | null
+          finished_at: string | null
+          id: string
+          included_database: boolean
+          included_storage: boolean
+          integrity_checked_at: string | null
+          integrity_valid: boolean | null
+          is_protected: boolean
+          kind: string
+          manifest: Json | null
+          object_key: string | null
+          organization_id: string
+          protected_at: string | null
+          protected_by: string | null
+          protected_reason: string | null
+          purge_reason: string | null
+          purged_at: string | null
+          reason: string | null
+          record_count: number | null
+          requested_by: string | null
+          scheduled_for: string
+          started_at: string | null
+          status: string
+          tech_log: string | null
+          total_bytes: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          checksum?: string | null
+          checksum_algo?: string | null
+          created_at?: string
+          cycle_key: string
+          destination_kind?: string | null
+          destination_path?: string | null
+          duration_ms?: number | null
+          error_summary?: string | null
+          expires_at?: string | null
+          file_count?: number | null
+          finished_at?: string | null
+          id?: string
+          included_database?: boolean
+          included_storage?: boolean
+          integrity_checked_at?: string | null
+          integrity_valid?: boolean | null
+          is_protected?: boolean
+          kind?: string
+          manifest?: Json | null
+          object_key?: string | null
+          organization_id: string
+          protected_at?: string | null
+          protected_by?: string | null
+          protected_reason?: string | null
+          purge_reason?: string | null
+          purged_at?: string | null
+          reason?: string | null
+          record_count?: number | null
+          requested_by?: string | null
+          scheduled_for?: string
+          started_at?: string | null
+          status?: string
+          tech_log?: string | null
+          total_bytes?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          checksum?: string | null
+          checksum_algo?: string | null
+          created_at?: string
+          cycle_key?: string
+          destination_kind?: string | null
+          destination_path?: string | null
+          duration_ms?: number | null
+          error_summary?: string | null
+          expires_at?: string | null
+          file_count?: number | null
+          finished_at?: string | null
+          id?: string
+          included_database?: boolean
+          included_storage?: boolean
+          integrity_checked_at?: string | null
+          integrity_valid?: boolean | null
+          is_protected?: boolean
+          kind?: string
+          manifest?: Json | null
+          object_key?: string | null
+          organization_id?: string
+          protected_at?: string | null
+          protected_by?: string | null
+          protected_reason?: string | null
+          purge_reason?: string | null
+          purged_at?: string | null
+          reason?: string | null
+          record_count?: number | null
+          requested_by?: string | null
+          scheduled_for?: string
+          started_at?: string | null
+          status?: string
+          tech_log?: string | null
+          total_bytes?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "backup_runs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      backup_settings: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          credentials_secret_name: string | null
+          destination_kind: string
+          enabled: boolean
+          hour: number
+          id: string
+          include_database: boolean
+          include_storage: boolean
+          last_test_at: string | null
+          last_test_message: string | null
+          last_test_ok: boolean | null
+          minute: number
+          notes: string | null
+          organization_id: string
+          platform_copy: boolean
+          retention_daily: number
+          retention_days: number | null
+          retention_monthly: number
+          retention_weekly: number
+          s3_bucket: string | null
+          s3_endpoint: string | null
+          s3_prefix: string | null
+          s3_region: string | null
+          sftp_base_path: string | null
+          sftp_host: string | null
+          sftp_port: number | null
+          sftp_user: string | null
+          timezone: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          credentials_secret_name?: string | null
+          destination_kind?: string
+          enabled?: boolean
+          hour?: number
+          id?: string
+          include_database?: boolean
+          include_storage?: boolean
+          last_test_at?: string | null
+          last_test_message?: string | null
+          last_test_ok?: boolean | null
+          minute?: number
+          notes?: string | null
+          organization_id: string
+          platform_copy?: boolean
+          retention_daily?: number
+          retention_days?: number | null
+          retention_monthly?: number
+          retention_weekly?: number
+          s3_bucket?: string | null
+          s3_endpoint?: string | null
+          s3_prefix?: string | null
+          s3_region?: string | null
+          sftp_base_path?: string | null
+          sftp_host?: string | null
+          sftp_port?: number | null
+          sftp_user?: string | null
+          timezone?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          credentials_secret_name?: string | null
+          destination_kind?: string
+          enabled?: boolean
+          hour?: number
+          id?: string
+          include_database?: boolean
+          include_storage?: boolean
+          last_test_at?: string | null
+          last_test_message?: string | null
+          last_test_ok?: boolean | null
+          minute?: number
+          notes?: string | null
+          organization_id?: string
+          platform_copy?: boolean
+          retention_daily?: number
+          retention_days?: number | null
+          retention_monthly?: number
+          retention_weekly?: number
+          s3_bucket?: string | null
+          s3_endpoint?: string | null
+          s3_prefix?: string | null
+          s3_region?: string | null
+          sftp_base_path?: string | null
+          sftp_host?: string | null
+          sftp_port?: number | null
+          sftp_user?: string | null
+          timezone?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "backup_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budget_movements: {
         Row: {
           authorization_id: string | null
@@ -1249,6 +1560,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      cron_secrets: {
+        Row: {
+          created_at: string
+          name: string
+          token_hash: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          name: string
+          token_hash: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          name?: string
+          token_hash?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       diaries: {
         Row: {
@@ -6203,6 +6538,13 @@ export type Database = {
         Args: { _batch: string; _reason: string }
         Returns: Json
       }
+      backup_due_organizations: {
+        Args: never
+        Returns: {
+          cycle_key: string
+          organization_id: string
+        }[]
+      }
       budget_consume: {
         Args: {
           _commitment: string
@@ -6297,6 +6639,7 @@ export type Database = {
         Args: { _justification: string; _request: string }
         Returns: undefined
       }
+      expire_backups: { Args: never; Returns: number }
       expire_fuel_authorizations: { Args: never; Returns: undefined }
       expire_fuel_authorizations_all: { Args: never; Returns: number }
       fuel_limit_breach: {
@@ -6373,6 +6716,7 @@ export type Database = {
         Returns: string
       }
       purge_activity_logs: { Args: never; Returns: number }
+      refresh_backup_alerts: { Args: never; Returns: undefined }
       refresh_financial_alerts: { Args: never; Returns: undefined }
       refresh_fleet_alerts: { Args: never; Returns: undefined }
       refresh_maintenance_alerts: { Args: never; Returns: undefined }

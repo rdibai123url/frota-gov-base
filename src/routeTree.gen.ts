@@ -52,6 +52,7 @@ import { Route as AuthenticatedUtilizacaoRouteImport } from './routes/_authentic
 import { Route as AuthenticatedVeiculosRouteImport } from './routes/_authenticated/veiculos'
 import { Route as TransparenciaSlugRouteImport } from './routes/transparencia.$slug'
 import { Route as AuthenticatedVeiculoIdRouteImport } from './routes/_authenticated/veiculo.$id'
+import { Route as ApiPublicHooksBackupDiarioRouteImport } from './routes/api/public/hooks/backup-diario'
 import { Route as ApiPublicV1FrotaRouteImport } from './routes/api/public/v1/frota'
 import { Route as ApiPublicV1TransparenciaSlugRouteImport } from './routes/api/public/v1/transparencia.$slug'
 
@@ -281,6 +282,12 @@ const AuthenticatedVeiculoIdRoute = AuthenticatedVeiculoIdRouteImport.update({
   path: '/veiculo/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicHooksBackupDiarioRoute =
+  ApiPublicHooksBackupDiarioRouteImport.update({
+    id: '/api/public/hooks/backup-diario',
+    path: '/api/public/hooks/backup-diario',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicV1FrotaRoute = ApiPublicV1FrotaRouteImport.update({
   id: '/api/public/v1/frota',
   path: '/api/public/v1/frota',
@@ -336,6 +343,7 @@ export interface FileRoutesByFullPath {
   '/veiculos': typeof AuthenticatedVeiculosRoute
   '/transparencia/$slug': typeof TransparenciaSlugRoute
   '/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
+  '/api/public/hooks/backup-diario': typeof ApiPublicHooksBackupDiarioRoute
   '/api/public/v1/frota': typeof ApiPublicV1FrotaRoute
   '/api/public/v1/transparencia/$slug': typeof ApiPublicV1TransparenciaSlugRoute
 }
@@ -382,6 +390,7 @@ export interface FileRoutesByTo {
   '/veiculos': typeof AuthenticatedVeiculosRoute
   '/transparencia/$slug': typeof TransparenciaSlugRoute
   '/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
+  '/api/public/hooks/backup-diario': typeof ApiPublicHooksBackupDiarioRoute
   '/api/public/v1/frota': typeof ApiPublicV1FrotaRoute
   '/api/public/v1/transparencia/$slug': typeof ApiPublicV1TransparenciaSlugRoute
 }
@@ -430,6 +439,7 @@ export interface FileRoutesById {
   '/_authenticated/veiculos': typeof AuthenticatedVeiculosRoute
   '/transparencia/$slug': typeof TransparenciaSlugRoute
   '/_authenticated/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
+  '/api/public/hooks/backup-diario': typeof ApiPublicHooksBackupDiarioRoute
   '/api/public/v1/frota': typeof ApiPublicV1FrotaRoute
   '/api/public/v1/transparencia/$slug': typeof ApiPublicV1TransparenciaSlugRoute
 }
@@ -478,6 +488,7 @@ export interface FileRouteTypes {
     | '/veiculos'
     | '/transparencia/$slug'
     | '/veiculo/$id'
+    | '/api/public/hooks/backup-diario'
     | '/api/public/v1/frota'
     | '/api/public/v1/transparencia/$slug'
   fileRoutesByTo: FileRoutesByTo
@@ -524,6 +535,7 @@ export interface FileRouteTypes {
     | '/veiculos'
     | '/transparencia/$slug'
     | '/veiculo/$id'
+    | '/api/public/hooks/backup-diario'
     | '/api/public/v1/frota'
     | '/api/public/v1/transparencia/$slug'
   id:
@@ -571,6 +583,7 @@ export interface FileRouteTypes {
     | '/_authenticated/veiculos'
     | '/transparencia/$slug'
     | '/_authenticated/veiculo/$id'
+    | '/api/public/hooks/backup-diario'
     | '/api/public/v1/frota'
     | '/api/public/v1/transparencia/$slug'
   fileRoutesById: FileRoutesById
@@ -581,6 +594,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   TransparenciaSlugRoute: typeof TransparenciaSlugRoute
+  ApiPublicHooksBackupDiarioRoute: typeof ApiPublicHooksBackupDiarioRoute
   ApiPublicV1FrotaRoute: typeof ApiPublicV1FrotaRoute
   ApiPublicV1TransparenciaSlugRoute: typeof ApiPublicV1TransparenciaSlugRoute
 }
@@ -888,6 +902,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVeiculoIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/hooks/backup-diario': {
+      id: '/api/public/hooks/backup-diario'
+      path: '/api/public/hooks/backup-diario'
+      fullPath: '/api/public/hooks/backup-diario'
+      preLoaderRoute: typeof ApiPublicHooksBackupDiarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/v1/frota': {
       id: '/api/public/v1/frota'
       path: '/api/public/v1/frota'
@@ -996,6 +1017,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   TransparenciaSlugRoute: TransparenciaSlugRoute,
+  ApiPublicHooksBackupDiarioRoute: ApiPublicHooksBackupDiarioRoute,
   ApiPublicV1FrotaRoute: ApiPublicV1FrotaRoute,
   ApiPublicV1TransparenciaSlugRoute: ApiPublicV1TransparenciaSlugRoute,
 }
