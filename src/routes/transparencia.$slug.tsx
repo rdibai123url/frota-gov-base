@@ -29,22 +29,37 @@ type Payload = {
   orgao?: { legal_name: string; short_name: string | null; city: string | null; state: string | null } | null;
   apresentacao?: string | null;
   atualizado_em?: string;
+  conjuntos_disponiveis?: string[];
   frota?: { total: number; por_situacao: Record<string, number>; por_categoria: Record<string, number> };
   abastecimento?: { registros: number; litros: number; valor_total: number };
   manutencao?: { registros: number; valor_total: number };
-  contratos?: { number: string; object: string | null; start_date: string | null; end_date: string | null; status: string; total_value: number | null }[];
+  contratos?: { number: string; object: string | null; valid_from: string | null; valid_to: string | null; status: string; current_value: number | null }[];
   error?: string;
+};
+
+const DATASET_LABELS: Record<string, string> = {
+  frota: "Frota",
+  abastecimento: "Abastecimento",
+  manutencao: "Manutenção",
+  contratos: "Contratos",
 };
 
 function PortalTransparencia() {
   const { slug } = Route.useParams();
+  const [from, setFrom] = useState(`${new Date().getFullYear()}-01-01`);
+  const [to, setTo] = useState(new Date().toISOString().slice(0, 10));
+  const [period, setPeriod] = useState({ from, to });
+
   const { data, isLoading } = useQuery({
-    queryKey: ["transparencia", slug],
+    queryKey: ["transparencia", slug, period.from, period.to],
     queryFn: async (): Promise<Payload> => {
-      const response = await fetch(`/api/public/v1/transparencia/${slug}`);
+      const response = await fetch(
+        `/api/public/v1/transparencia/${slug}?de=${period.from}&ate=${period.to}`,
+      );
       return (await response.json()) as Payload;
     },
   });
+
 
   if (isLoading) return <p className="p-10 text-center text-muted-foreground">Carregando dados abertos...</p>;
 
