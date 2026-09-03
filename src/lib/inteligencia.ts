@@ -68,12 +68,12 @@ export function useConsumptionSegments(f: IntelFilters, enabled = true) {
       const { data, error } = await supabase.rpc("fleet_consumption_segments", {
         _from: f.from,
         _to: f.to,
-        _unit: nn(f.unitId),
-        _cost_center: nn(f.costCenterId),
-        _vehicle: nn(f.vehicleId),
-        _asset_class: nn(f.assetClass),
-        _driver: nn(f.driverId),
-        _fuel: nn(f.fuelTypeId),
+        ...(nn(f.unitId) ? { _unit: nn(f.unitId)! } : {}),
+        ...(nn(f.costCenterId) ? { _cost_center: nn(f.costCenterId)! } : {}),
+        ...(nn(f.vehicleId) ? { _vehicle: nn(f.vehicleId)! } : {}),
+        ...(nn(f.assetClass) ? { _asset_class: nn(f.assetClass)! } : {}),
+        ...(nn(f.driverId) ? { _driver: nn(f.driverId)! } : {}),
+        ...(nn(f.fuelTypeId) ? { _fuel: nn(f.fuelTypeId)! } : {}),
       });
       if (error) throw error;
       return (data ?? []) as ConsumptionSegment[];
@@ -89,10 +89,10 @@ export function useCostRows(f: IntelFilters, enabled = true) {
       const { data, error } = await supabase.rpc("fleet_cost_rows", {
         _from: f.from,
         _to: f.to,
-        _unit: nn(f.unitId),
-        _cost_center: nn(f.costCenterId),
-        _vehicle: nn(f.vehicleId),
-        _asset_class: nn(f.assetClass),
+        ...(nn(f.unitId) ? { _unit: nn(f.unitId)! } : {}),
+        ...(nn(f.costCenterId) ? { _cost_center: nn(f.costCenterId)! } : {}),
+        ...(nn(f.vehicleId) ? { _vehicle: nn(f.vehicleId)! } : {}),
+        ...(nn(f.assetClass) ? { _asset_class: nn(f.assetClass)! } : {}),
       });
       if (error) throw error;
       return (data ?? []) as CostRow[];
@@ -439,13 +439,20 @@ export type CostCategory = (typeof COST_CATEGORIES)[number]["value"];
 export const costCategoryLabel = (v: string) =>
   COST_CATEGORIES.find((c) => c.value === v)?.label ?? v;
 
-export type CostTotals = Record<string, number> & { total: number };
+export type CostTotals = { total: number; values: Record<string, number> };
 
 const emptyTotals = (): CostTotals => {
-  const base = { total: 0 } as CostTotals;
-  for (const c of COST_CATEGORIES) base[c.value] = 0;
-  return base;
+  const values: Record<string, number> = {};
+  for (const c of COST_CATEGORIES) values[c.value] = 0;
+  return { total: 0, values };
 };
+
+const addCost = (t: CostTotals, category: string, value: number) => {
+  t.values[category] = (t.values[category] ?? 0) + value;
+  t.total += value;
+};
+
+export const catValue = (t: CostTotals, category: string) => t.values[category] ?? 0;
 
 export type AssetCost = {
   vehicleId: string;
@@ -471,30 +478,32 @@ export function costsByAsset(rows: CostRow[]): AssetCost[] {
       };
       map.set(r.vehicle_id, a);
     }
-    a.totals[r.category] = (a.totals[r.category] ?? 0) + Number(r.value ?? 0);
-    a.totals.total += Number(r.value ?? 0);
+    addCost(a.totals, r.category, Number(r.value ?? 0));
   }
   return Array.from(map.values()).sort((a, b) => b.totals.total - a.totals.total);
 }
 
-/** Série mensal por categoria: [{ competencia: '2026-01', combustivel: x, ..., total }] */
-export function costsByMonth(rows: CostRow[]) {
-  const map = new Map<string, CostTotals & { competencia: string }>();
+export type MonthCost = { competencia: string; totals: CostTotals };
+
+/** Série mensal por categoria. */
+export function costsByMonth(rows: CostRow[]): MonthCost[] {
+  const map = new Map<string, MonthCost>();
   for (const r of rows) {
     const key = String(r.competence).slice(0, 7);
     let m = map.get(key);
     if (!m) {
-      m = { competencia: key, ...emptyTotals() };
+      m = { competencia: key, totals: emptyTotals() };
       map.set(key, m);
     }
-    m[r.category] = (m[r.category] ?? 0) + Number(r.value ?? 0);
-    m.total += Number(r.value ?? 0);
+    addCost(m.totals, r.category, Number(r.value ?? 0));
   }
   return Array.from(map.values()).sort((a, b) => a.competencia.localeCompare(b.competencia));
 }
 
-export function costsByGroup(rows: CostRow[], group: "unidade" | "centro_custo") {
-  const map = new Map<string, CostTotals & { label: string }>();
+export type GroupCost = { label: string; totals: CostTotals };
+
+export function costsByGroup(rows: CostRow[], group: "unidade" | "centro_custo"): GroupCost[] {
+  const map = new Map<string, GroupCost>();
   for (const r of rows) {
     const lbl =
       group === "unidade"
@@ -502,13 +511,12 @@ export function costsByGroup(rows: CostRow[], group: "unidade" | "centro_custo")
         : (r.cost_center_name ?? "Sem centro de custo");
     let m = map.get(lbl);
     if (!m) {
-      m = { label: lbl, ...emptyTotals() };
+      m = { label: lbl, totals: emptyTotals() };
       map.set(lbl, m);
     }
-    m[r.category] = (m[r.category] ?? 0) + Number(r.value ?? 0);
-    m.total += Number(r.value ?? 0);
+    addCost(m.totals, r.category, Number(r.value ?? 0));
   }
-  return Array.from(map.values()).sort((a, b) => b.total - a.total);
+  return Array.from(map.values()).sort((a, b) => b.totals.total - a.totals.total);
 }
 
 /* ------------------------------ economicidade ---------------------------- */
@@ -607,7 +615,7 @@ export function economicity(input: {
           reasons.push(`Custos do período equivalem a ${(share * 100).toFixed(1)}% do valor de aquisição.`);
       }
 
-      const maint = (c.totals["manutencao"] ?? 0) + (c.totals["pecas"] ?? 0);
+      const maint = catValue(c.totals, "manutencao") + catValue(c.totals, "pecas");
       if (c.totals.total > 0) {
         const share = maint / c.totals.total;
         score += Math.min(20, share * 25);
