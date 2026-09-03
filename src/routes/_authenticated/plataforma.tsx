@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReopenReviewTab } from "@/components/reopen-review";
 import { ImportMigrationTab } from "@/components/import-migration";
+import { BackupTab } from "@/components/backup-admin";
 
 import { exportXlsx } from "@/lib/reports";
 import { DocsTab, MatrixTab } from "@/components/homologacao";
@@ -101,6 +102,7 @@ function Plataforma() {
           <TabsTrigger value="reaberturas">Reaberturas</TabsTrigger>
           <TabsTrigger value="importacao">Importação e migração</TabsTrigger>
 
+          <TabsTrigger value="backup">Backup externo</TabsTrigger>
           <TabsTrigger value="config">Configurações</TabsTrigger>
           <TabsTrigger value="documentacao">Documentação / Homologação</TabsTrigger>
           <TabsTrigger value="matriz">Matriz de funcionalidades</TabsTrigger>
@@ -121,6 +123,9 @@ function Plataforma() {
           <ImportMigrationTab />
         </TabsContent>
 
+        <TabsContent value="backup" className="pt-5">
+          <BackupTab />
+        </TabsContent>
         <TabsContent value="config" className="pt-5">
           <SettingsTab />
         </TabsContent>
@@ -128,7 +133,7 @@ function Plataforma() {
           <DocsTab
             environment={[
               { label: "Ambiente", value: typeof window === "undefined" ? "—" : window.location.host },
-              { label: "Rotinas automáticas", value: "Alertas e expiração a cada hora; limpeza de logs às 03:20" },
+              { label: "Rotinas automáticas", value: "Alertas e expiração a cada hora; limpeza de logs às 03:20; backup externo diário por órgão" },
             ]}
           />
         </TabsContent>
