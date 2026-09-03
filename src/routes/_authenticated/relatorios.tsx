@@ -54,8 +54,21 @@ const REPORTS = [
 
 type ReportKey = (typeof REPORTS)[number]["value"];
 
-/** Relatórios que não filtram por data de ocorrência. */
-const NO_DATE: ReportKey[] = ["frota"];
+/**
+ * Filtros suportados por relatório. Um filtro só é habilitado quando a origem
+ * de dados possui a coluna correspondente — nunca exibimos filtro que não filtra.
+ */
+const CAPS: Record<ReportKey, { date: boolean; unit: boolean; vehicle: boolean; driver: boolean }> = {
+  frota: { date: false, unit: true, vehicle: true, driver: false },
+  abastecimento: { date: true, unit: true, vehicle: true, driver: true },
+  manutencao: { date: true, unit: true, vehicle: true, driver: false },
+  utilizacao: { date: true, unit: true, vehicle: true, driver: true },
+  custo_veiculo: { date: true, unit: true, vehicle: true, driver: false },
+  contratos: { date: true, unit: false, vehicle: false, driver: false },
+  legal: { date: true, unit: true, vehicle: true, driver: true },
+  patrimonio: { date: true, unit: true, vehicle: true, driver: false },
+};
+
 
 const LABELS: Record<string, string> = {
   data: "Data",
