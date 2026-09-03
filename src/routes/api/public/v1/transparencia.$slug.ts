@@ -1,4 +1,8 @@
-/** Dados agregados do Portal da Transparência — somente órgãos com publicação ativa. */
+/**
+ * Dados agregados do Portal da Transparência — somente órgãos com publicação ativa.
+ * Aceita `de` e `ate` (AAAA-MM-DD) e `formato=csv` com `conjunto=frota|abastecimento|manutencao|contratos`
+ * para download de dados abertos. Nenhum dado pessoal é publicado.
+ */
 import { createFileRoute } from "@tanstack/react-router";
 
 const json = (body: unknown, status = 200) =>
@@ -7,12 +11,38 @@ const json = (body: unknown, status = 200) =>
     headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=300" },
   });
 
+const csv = (filename: string, columns: string[], rows: (string | number)[][]) => {
+  const cell = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const body = [columns.map(cell).join(";"), ...rows.map((r) => r.map(cell).join(";"))].join("\n");
+  return new Response("\uFEFF" + body, {
+    status: 200,
+    headers: {
+      "content-type": "text/csv; charset=utf-8",
+      "content-disposition": `attachment; filename="${filename}.csv"`,
+      "cache-control": "public, max-age=300",
+    },
+  });
+};
+
+const isDate = (v: string | null): v is string => !!v && /^\d{4}-\d{2}-\d{2}$/.test(v);
+const monthOf = (v?: string | null) => (v ? String(v).slice(0, 7) : "não informado");
+
 export const Route = createFileRoute("/api/public/v1/transparencia/$slug")({
   server: {
     handlers: {
-      GET: async ({ params }) => {
+      GET: async ({ params, request }) => {
         const slug = String(params.slug || "").slice(0, 60);
         if (!/^[a-z0-9-]+$/.test(slug)) return json({ error: "Endereço inválido." }, 400);
+
+        const url = new URL(request.url);
+        const format = url.searchParams.get("formato") === "csv" ? "csv" : "json";
+        const dataset = url.searchParams.get("conjunto") ?? "frota";
+        const fromParam = url.searchParams.get("de");
+        const toParam = url.searchParams.get("ate");
+        if ((fromParam && !isDate(fromParam)) || (toParam && !isDate(toParam)))
+          return json({ error: "Período inválido. Use o formato AAAA-MM-DD." }, 400);
+        const from = isDate(fromParam) ? fromParam : null;
+        const to = isDate(toParam) ? toParam : null;
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data: settings } = await supabaseAdmin
@@ -31,60 +61,144 @@ export const Route = createFileRoute("/api/public/v1/transparencia/$slug")({
           .eq("id", orgId)
           .maybeSingle();
 
-        const payload: Record<string, unknown> = {
-          orgao: org ?? null,
-          apresentacao: settings.headline ?? null,
-          atualizado_em: new Date().toISOString(),
-        };
+        const periodo = { de: from, ate: to };
 
-        if (datasets["frota"]) {
-          const { data: vehicles } = await supabaseAdmin
+        async function loadVehicles() {
+          const { data } = await supabaseAdmin
             .from("vehicles")
             .select("status, vehicle_type")
             .eq("organization_id", orgId);
           const porSituacao: Record<string, number> = {};
           const porCategoria: Record<string, number> = {};
-          for (const v of vehicles ?? []) {
+          for (const v of data ?? []) {
             porSituacao[v.status] = (porSituacao[v.status] ?? 0) + 1;
             const cat = v.vehicle_type ?? "não informado";
             porCategoria[cat] = (porCategoria[cat] ?? 0) + 1;
           }
-          payload["frota"] = { total: vehicles?.length ?? 0, por_situacao: porSituacao, por_categoria: porCategoria };
+          return { total: data?.length ?? 0, por_situacao: porSituacao, por_categoria: porCategoria };
         }
 
-        if (datasets["abastecimento"]) {
-          const { data: fuelings } = await supabaseAdmin
+        async function loadFuelings() {
+          let q = supabaseAdmin
             .from("fuelings")
-            .select("quantity, total_value, status")
+            .select("quantity, total_value, status, fueled_at")
             .eq("organization_id", orgId);
-          const valid = (fuelings ?? []).filter((f) => f.status !== "cancelado");
-          payload["abastecimento"] = {
+          if (from) q = q.gte("fueled_at", `${from}T00:00:00`);
+          if (to) q = q.lte("fueled_at", `${to}T23:59:59`);
+          const { data } = await q;
+          const valid = (data ?? []).filter((f) => f.status !== "cancelado");
+          const porMes = new Map<string, { litros: number; valor: number; registros: number }>();
+          for (const f of valid) {
+            const key = monthOf(f.fueled_at);
+            const row = porMes.get(key) ?? { litros: 0, valor: 0, registros: 0 };
+            row.litros += Number(f.quantity ?? 0);
+            row.valor += Number(f.total_value ?? 0);
+            row.registros += 1;
+            porMes.set(key, row);
+          }
+          return {
             registros: valid.length,
             litros: valid.reduce((s, f) => s + Number(f.quantity ?? 0), 0),
             valor_total: valid.reduce((s, f) => s + Number(f.total_value ?? 0), 0),
+            por_mes: Array.from(porMes, ([mes, v]) => ({ mes, ...v })).sort((a, b) => a.mes.localeCompare(b.mes)),
           };
         }
 
-        if (datasets["manutencao"]) {
-          const { data: maints } = await supabaseAdmin
+        async function loadMaintenance() {
+          let q = supabaseAdmin
             .from("maintenance_records")
-            .select("total_value, status")
+            .select("total_value, status, entry_at")
             .eq("organization_id", orgId);
-          const valid = (maints ?? []).filter((m) => m.status !== "cancelada");
-          payload["manutencao"] = {
+          if (from) q = q.gte("entry_at", `${from}T00:00:00`);
+          if (to) q = q.lte("entry_at", `${to}T23:59:59`);
+          const { data } = await q;
+          const valid = (data ?? []).filter((m) => m.status !== "cancelada");
+          const porMes = new Map<string, { valor: number; registros: number }>();
+          for (const m of valid) {
+            const key = monthOf(m.entry_at);
+            const row = porMes.get(key) ?? { valor: 0, registros: 0 };
+            row.valor += Number(m.total_value ?? 0);
+            row.registros += 1;
+            porMes.set(key, row);
+          }
+          return {
             registros: valid.length,
             valor_total: valid.reduce((s, m) => s + Number(m.total_value ?? 0), 0),
+            por_mes: Array.from(porMes, ([mes, v]) => ({ mes, ...v })).sort((a, b) => a.mes.localeCompare(b.mes)),
           };
         }
 
-        if (datasets["contratos"]) {
-          const { data: contracts } = await supabaseAdmin
+        async function loadContracts() {
+          let q = supabaseAdmin
             .from("contracts")
-            .select("number, object, start_date, end_date, status, total_value")
+            .select("number, object, modality, valid_from, valid_to, status, current_value")
             .eq("organization_id", orgId)
-            .order("start_date", { ascending: false });
-          payload["contratos"] = contracts ?? [];
+            .order("valid_from", { ascending: false });
+          if (from) q = q.gte("valid_to", from);
+          if (to) q = q.lte("valid_from", to);
+          const { data } = await q;
+          return data ?? [];
         }
+
+        if (format === "csv") {
+          const base = `dados-abertos-${slug}-${dataset}`;
+          if (dataset === "frota" && datasets["frota"]) {
+            const f = await loadVehicles();
+            const rows: (string | number)[][] = [
+              ...Object.entries(f.por_situacao).map(([k, v]) => ["situacao", k, v] as (string | number)[]),
+              ...Object.entries(f.por_categoria).map(([k, v]) => ["categoria", k, v] as (string | number)[]),
+            ];
+            return csv(base, ["agrupamento", "valor", "quantidade_veiculos"], rows);
+          }
+          if (dataset === "abastecimento" && datasets["abastecimento"]) {
+            const f = await loadFuelings();
+            return csv(
+              base,
+              ["mes", "registros", "litros", "valor_total"],
+              f.por_mes.map((m) => [m.mes, m.registros, m.litros.toFixed(4), m.valor.toFixed(2)]),
+            );
+          }
+          if (dataset === "manutencao" && datasets["manutencao"]) {
+            const m = await loadMaintenance();
+            return csv(
+              base,
+              ["mes", "registros", "valor_total"],
+              m.por_mes.map((r) => [r.mes, r.registros, r.valor.toFixed(2)]),
+            );
+          }
+          if (dataset === "contratos" && datasets["contratos"]) {
+            const c = await loadContracts();
+            return csv(
+              base,
+              ["numero", "objeto", "modalidade", "vigencia_inicio", "vigencia_fim", "situacao", "valor_atual"],
+              c.map((r) => [
+                r.number ?? "",
+                r.object ?? "",
+                r.modality ?? "",
+                r.valid_from ?? "",
+                r.valid_to ?? "",
+                r.status ?? "",
+                Number(r.current_value ?? 0).toFixed(2),
+              ]),
+            );
+          }
+          return json({ error: "Conjunto de dados não publicado por este órgão." }, 404);
+        }
+
+        const payload: Record<string, unknown> = {
+          orgao: org ?? null,
+          apresentacao: settings.headline ?? null,
+          periodo,
+          atualizado_em: new Date().toISOString(),
+          conjuntos_disponiveis: Object.entries(datasets)
+            .filter(([, v]) => v)
+            .map(([k]) => k),
+        };
+
+        if (datasets["frota"]) payload["frota"] = await loadVehicles();
+        if (datasets["abastecimento"]) payload["abastecimento"] = await loadFuelings();
+        if (datasets["manutencao"]) payload["manutencao"] = await loadMaintenance();
+        if (datasets["contratos"]) payload["contratos"] = await loadContracts();
 
         return json(payload);
       },
