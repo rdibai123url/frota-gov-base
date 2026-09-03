@@ -489,7 +489,7 @@ function Veiculos() {
               </div>
               <div className="space-y-1.5">
                 <Label>Secretaria / unidade</Label>
-                <Select value={unitId} onValueChange={setUnitId}>
+                <Select value={unitId} onValueChange={setUnitId} disabled={!!editing}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
