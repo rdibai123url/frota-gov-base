@@ -896,7 +896,22 @@ function BatchesTab({ orgId }: { orgId: string }) {
   const [annulling, setAnnulling] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
-  const paged = usePaged(batches);
+  const [fModule, setFModule] = useState("__all__");
+  const [fStatus, setFStatus] = useState("__all__");
+  const [fFrom, setFFrom] = useState("");
+  const [fTo, setFTo] = useState("");
+  const [fText, setFText] = useState("");
+
+  const filtered = batches.filter((b) => {
+    if (fModule !== "__all__" && b.module !== fModule) return false;
+    if (fStatus !== "__all__" && b.status !== fStatus) return false;
+    if (fFrom && new Date(b.created_at) < new Date(`${fFrom}T00:00:00`)) return false;
+    if (fTo && new Date(b.created_at) > new Date(`${fTo}T23:59:59`)) return false;
+    const t = fText.trim().toLowerCase();
+    if (t && ![b.file_name, b.source_system].filter(Boolean).join(" ").toLowerCase().includes(t)) return false;
+    return true;
+  });
+  const paged = usePaged(filtered);
 
   async function annul() {
     if (!annulling) return;
@@ -917,6 +932,44 @@ function BatchesTab({ orgId }: { orgId: string }) {
 
   return (
     <>
+      <div className="mb-4 grid gap-3 rounded-lg border bg-card p-4 shadow-card sm:grid-cols-5">
+        <div>
+          <Label className="text-xs">Módulo</Label>
+          <Select value={fModule} onValueChange={setFModule}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">Todos</SelectItem>
+              {[...IMPORT_MODULES].sort((a, b) => a.order - b.order).map((m) => (
+                <SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="text-xs">Situação</Label>
+          <Select value={fStatus} onValueChange={setFStatus}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">Todas</SelectItem>
+              {Object.entries(BATCH_STATUS_LABELS).map(([k, v]) => (
+                <SelectItem key={k} value={k}>{v}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="text-xs">De</Label>
+          <Input type="date" value={fFrom} onChange={(e) => setFFrom(e.target.value)} />
+        </div>
+        <div>
+          <Label className="text-xs">Até</Label>
+          <Input type="date" value={fTo} onChange={(e) => setFTo(e.target.value)} />
+        </div>
+        <div>
+          <Label className="text-xs">Arquivo / sistema de origem</Label>
+          <Input value={fText} onChange={(e) => setFText(e.target.value)} placeholder="Buscar…" />
+        </div>
+      </div>
       <div className="overflow-x-auto rounded-lg border bg-card shadow-card">
         <Table>
           <TableHeader>
@@ -941,10 +994,10 @@ function BatchesTab({ orgId }: { orgId: string }) {
                 </TableCell>
               </TableRow>
             )}
-            {!isLoading && batches.length === 0 && (
+            {!isLoading && filtered.length === 0 && (
               <TableRow>
                 <TableCell colSpan={10} className="py-8 text-center text-muted-foreground">
-                  Nenhum lote de importação neste órgão.
+                  Nenhum lote de importação para os filtros informados.
                 </TableCell>
               </TableRow>
             )}
