@@ -128,16 +128,35 @@ export function useProfile() {
   });
 }
 
-export function useOrganization() {
+/** Órgão em contexto: perfil do usuário ou órgão escolhido pelo Super Admin. */
+export function useActiveOrgId() {
   return useQuery({
-    queryKey: ["organization"],
+    queryKey: ["active-org-id"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("organizations").select("*").limit(1).maybeSingle();
+      const { data, error } = await supabase.rpc("active_org_id");
+      if (error) throw error;
+      return (data as string | null) ?? null;
+    },
+  });
+}
+
+export function useOrganization() {
+  const { data: orgId } = useActiveOrgId();
+  return useQuery({
+    queryKey: ["organization", orgId],
+    queryFn: async () => {
+      if (!orgId) return null;
+      const { data, error } = await supabase
+        .from("organizations")
+        .select("*")
+        .eq("id", orgId)
+        .maybeSingle();
       if (error) throw error;
       return data;
     },
   });
 }
+
 
 export function useBrasaoUrl(path: string | null | undefined) {
   return useQuery({

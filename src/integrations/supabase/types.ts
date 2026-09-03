@@ -205,6 +205,83 @@ export type Database = {
           },
         ]
       }
+      activity_logs: {
+        Row: {
+          action: string | null
+          actor_email: string | null
+          actor_id: string | null
+          actor_name: string | null
+          actor_role: string | null
+          area: string | null
+          as_super_admin: boolean
+          created_at: string
+          entity: string | null
+          event_type: string
+          id: string
+          ip: string | null
+          new_data: Json | null
+          old_data: Json | null
+          organization_id: string | null
+          record_id: string | null
+          route: string | null
+          screen: string | null
+          summary: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action?: string | null
+          actor_email?: string | null
+          actor_id?: string | null
+          actor_name?: string | null
+          actor_role?: string | null
+          area?: string | null
+          as_super_admin?: boolean
+          created_at?: string
+          entity?: string | null
+          event_type: string
+          id?: string
+          ip?: string | null
+          new_data?: Json | null
+          old_data?: Json | null
+          organization_id?: string | null
+          record_id?: string | null
+          route?: string | null
+          screen?: string | null
+          summary?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string | null
+          actor_email?: string | null
+          actor_id?: string | null
+          actor_name?: string | null
+          actor_role?: string | null
+          area?: string | null
+          as_super_admin?: boolean
+          created_at?: string
+          entity?: string | null
+          event_type?: string
+          id?: string
+          ip?: string | null
+          new_data?: Json | null
+          old_data?: Json | null
+          organization_id?: string | null
+          record_id?: string | null
+          route?: string | null
+          screen?: string | null
+          summary?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asset_movements: {
         Row: {
           accident_id: string | null
@@ -2460,6 +2537,65 @@ export type Database = {
           },
         ]
       }
+      org_api_keys: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          key_hash: string
+          last_used_at: string | null
+          name: string
+          organization_id: string
+          prefix: string
+          revoked_at: string | null
+          revoked_by: string | null
+          scopes: string[]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          key_hash: string
+          last_used_at?: string | null
+          name: string
+          organization_id: string
+          prefix: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          scopes?: string[]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          key_hash?: string
+          last_used_at?: string | null
+          name?: string
+          organization_id?: string
+          prefix?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          scopes?: string[]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_api_keys_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_counters: {
         Row: {
           counter_key: string
@@ -2615,14 +2751,69 @@ export type Database = {
           },
         ]
       }
+      platform_sessions: {
+        Row: {
+          organization_id: string | null
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          organization_id?: string | null
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          organization_id?: string | null
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_sessions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_settings: {
+        Row: {
+          id: boolean
+          log_retention_days: number
+          platform_name: string
+          support_email: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: boolean
+          log_retention_days?: number
+          platform_name?: string
+          support_email?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: boolean
+          log_retention_days?: number
+          platform_name?: string
+          support_email?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           active: boolean
+          cpf: string | null
           created_at: string
           email: string | null
           full_name: string | null
           id: string
           job_title: string | null
+          must_change_password: boolean
           organization_id: string | null
           phone: string | null
           unit_id: string | null
@@ -2630,11 +2821,13 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          cpf?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
           id: string
           job_title?: string | null
+          must_change_password?: boolean
           organization_id?: string | null
           phone?: string | null
           unit_id?: string | null
@@ -2642,11 +2835,13 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          cpf?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
           id?: string
           job_title?: string | null
+          must_change_password?: boolean
           organization_id?: string | null
           phone?: string | null
           unit_id?: string | null
@@ -3280,6 +3475,47 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      report_presets: {
+        Row: {
+          created_at: string
+          filters: Json
+          id: string
+          name: string
+          organization_id: string
+          report_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          filters?: Json
+          id?: string
+          name: string
+          organization_id: string
+          report_key: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          filters?: Json
+          id?: string
+          name?: string
+          organization_id?: string
+          report_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_presets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -4041,6 +4277,47 @@ export type Database = {
           },
         ]
       }
+      transparency_settings: {
+        Row: {
+          created_at: string
+          datasets: Json
+          enabled: boolean
+          headline: string | null
+          organization_id: string
+          slug: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          datasets?: Json
+          enabled?: boolean
+          headline?: string | null
+          organization_id: string
+          slug?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          datasets?: Json
+          enabled?: boolean
+          headline?: string | null
+          organization_id?: string
+          slug?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transparency_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       units: {
         Row: {
           acronym: string | null
@@ -4618,6 +4895,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      active_org_id: { Args: never; Returns: string }
       budget_consume: {
         Args: {
           _commitment: string
@@ -4712,11 +4990,27 @@ export type Database = {
         Args: { _entity_id: string; _entity_type: string; _message: string }
         Returns: undefined
       }
+      log_event: {
+        Args: {
+          _action?: string
+          _area?: string
+          _entity?: string
+          _event_type: string
+          _new?: Json
+          _old?: Json
+          _record_id?: string
+          _route?: string
+          _screen?: string
+          _summary?: string
+        }
+        Returns: undefined
+      }
       my_unit_id: { Args: never; Returns: string }
       next_org_code: {
         Args: { _key: string; _org: string; _prefix: string }
         Returns: string
       }
+      purge_activity_logs: { Args: never; Returns: number }
       refresh_financial_alerts: { Args: never; Returns: undefined }
       refresh_fleet_alerts: { Args: never; Returns: undefined }
       refresh_maintenance_alerts: { Args: never; Returns: undefined }
