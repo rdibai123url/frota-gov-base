@@ -161,6 +161,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const primaryRole = me?.roles?.[0];
   const primaryRoleLabel = primaryRole ? ROLE_LABELS[primaryRole] : "Sem perfil atribuído";
+  /** Órgãos de demonstração são identificados pelo próprio nome cadastrado. */
+  const isDemoOrg = /demonstra|\bdemo\b/i.test(`${org?.legal_name ?? ""} ${org?.short_name ?? ""}`);
 
   const sidebar = (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
