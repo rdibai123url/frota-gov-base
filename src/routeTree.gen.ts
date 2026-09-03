@@ -34,6 +34,7 @@ import { Route as AuthenticatedPecasRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedPlanosManutencaoRouteImport } from './routes/_authenticated/planos-manutencao'
 import { Route as AuthenticatedPneusRouteImport } from './routes/_authenticated/pneus'
 import { Route as AuthenticatedRedeCredenciadaRouteImport } from './routes/_authenticated/rede-credenciada'
+import { Route as AuthenticatedSegurosRouteImport } from './routes/_authenticated/seguros'
 import { Route as AuthenticatedSinistrosRouteImport } from './routes/_authenticated/sinistros'
 import { Route as AuthenticatedUnidadesRouteImport } from './routes/_authenticated/unidades'
 import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
@@ -176,6 +177,11 @@ const AuthenticatedRedeCredenciadaRoute =
     path: '/rede-credenciada',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedSegurosRoute = AuthenticatedSegurosRouteImport.update({
+  id: '/seguros',
+  path: '/seguros',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSinistrosRoute = AuthenticatedSinistrosRouteImport.update({
   id: '/sinistros',
   path: '/sinistros',
@@ -232,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/pneus': typeof AuthenticatedPneusRoute
   '/rede-credenciada': typeof AuthenticatedRedeCredenciadaRoute
+  '/seguros': typeof AuthenticatedSegurosRoute
   '/sinistros': typeof AuthenticatedSinistrosRoute
   '/unidades': typeof AuthenticatedUnidadesRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
@@ -264,6 +271,7 @@ export interface FileRoutesByTo {
   '/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/pneus': typeof AuthenticatedPneusRoute
   '/rede-credenciada': typeof AuthenticatedRedeCredenciadaRoute
+  '/seguros': typeof AuthenticatedSegurosRoute
   '/sinistros': typeof AuthenticatedSinistrosRoute
   '/unidades': typeof AuthenticatedUnidadesRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
@@ -298,6 +306,7 @@ export interface FileRoutesById {
   '/_authenticated/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/_authenticated/pneus': typeof AuthenticatedPneusRoute
   '/_authenticated/rede-credenciada': typeof AuthenticatedRedeCredenciadaRoute
+  '/_authenticated/seguros': typeof AuthenticatedSegurosRoute
   '/_authenticated/sinistros': typeof AuthenticatedSinistrosRoute
   '/_authenticated/unidades': typeof AuthenticatedUnidadesRoute
   '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
@@ -332,6 +341,7 @@ export interface FileRouteTypes {
     | '/planos-manutencao'
     | '/pneus'
     | '/rede-credenciada'
+    | '/seguros'
     | '/sinistros'
     | '/unidades'
     | '/usuarios'
@@ -364,6 +374,7 @@ export interface FileRouteTypes {
     | '/planos-manutencao'
     | '/pneus'
     | '/rede-credenciada'
+    | '/seguros'
     | '/sinistros'
     | '/unidades'
     | '/usuarios'
@@ -397,6 +408,7 @@ export interface FileRouteTypes {
     | '/_authenticated/planos-manutencao'
     | '/_authenticated/pneus'
     | '/_authenticated/rede-credenciada'
+    | '/_authenticated/seguros'
     | '/_authenticated/sinistros'
     | '/_authenticated/unidades'
     | '/_authenticated/usuarios'
@@ -588,6 +600,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRedeCredenciadaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/seguros': {
+      id: '/_authenticated/seguros'
+      path: '/seguros'
+      fullPath: '/seguros'
+      preLoaderRoute: typeof AuthenticatedSegurosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/sinistros': {
       id: '/_authenticated/sinistros'
       path: '/sinistros'
@@ -656,6 +675,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPlanosManutencaoRoute: typeof AuthenticatedPlanosManutencaoRoute
   AuthenticatedPneusRoute: typeof AuthenticatedPneusRoute
   AuthenticatedRedeCredenciadaRoute: typeof AuthenticatedRedeCredenciadaRoute
+  AuthenticatedSegurosRoute: typeof AuthenticatedSegurosRoute
   AuthenticatedSinistrosRoute: typeof AuthenticatedSinistrosRoute
   AuthenticatedUnidadesRoute: typeof AuthenticatedUnidadesRoute
   AuthenticatedUsuariosRoute: typeof AuthenticatedUsuariosRoute
@@ -687,6 +707,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPlanosManutencaoRoute: AuthenticatedPlanosManutencaoRoute,
   AuthenticatedPneusRoute: AuthenticatedPneusRoute,
   AuthenticatedRedeCredenciadaRoute: AuthenticatedRedeCredenciadaRoute,
+  AuthenticatedSegurosRoute: AuthenticatedSegurosRoute,
   AuthenticatedSinistrosRoute: AuthenticatedSinistrosRoute,
   AuthenticatedUnidadesRoute: AuthenticatedUnidadesRoute,
   AuthenticatedUsuariosRoute: AuthenticatedUsuariosRoute,
