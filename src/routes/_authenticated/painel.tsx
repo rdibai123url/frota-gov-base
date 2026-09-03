@@ -70,6 +70,8 @@ import {
   useInsurancePolicies,
   useTrafficFines,
   useVehicleObligations,
+  onlyFuelRows,
+  useFuelTypes,
 } from "@/lib/frotagov";
 
 
@@ -174,17 +176,20 @@ function Painel() {
   const ativos = vehicles.filter((v) => v.status === "ativo").length;
   const manutencao = vehicles.filter((v) => v.status === "manutencao").length;
 
+  const { data: fuelProducts = [] } = useFuelTypes();
+
   const mes = useMemo(() => {
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth(), 1);
     const list = fuelings.filter((f) => f.status === "valido" && new Date(f.fueled_at) >= start);
     return {
       count: list.length,
-      quantity: list.reduce((s, f) => s + Number(f.quantity ?? 0), 0),
+      // Somente itens categorizados como combustível entram no indicador de litros.
+      quantity: onlyFuelRows(list, fuelProducts).reduce((s, f) => s + Number(f.quantity ?? 0), 0),
       total: list.reduce((s, f) => s + Number(f.total_value ?? 0), 0),
       vehicles: new Set(list.map((f) => f.vehicle_id)).size,
     };
-  }, [fuelings]);
+  }, [fuelings, fuelProducts]);
 
   const abertos = alerts.filter((a) => a.status === "aberto").length;
 
@@ -307,10 +312,10 @@ function Painel() {
       return {
         label: d.toLocaleDateString("pt-BR", { month: "short" }),
         total: list.reduce((s, f) => s + Number(f.total_value ?? 0), 0),
-        quantity: list.reduce((s, f) => s + Number(f.quantity ?? 0), 0),
+        quantity: onlyFuelRows(list, fuelProducts).reduce((s, f) => s + Number(f.quantity ?? 0), 0),
       };
     });
-  }, [fuelings]);
+  }, [fuelings, fuelProducts]);
 
   const maxTotal = Math.max(...ultimos6.map((m) => m.total), 0);
 

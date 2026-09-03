@@ -177,7 +177,7 @@ function Relatorios() {
         let q = supabase
           .from("fuelings")
           .select(
-            "id, fueled_at, quantity, unit_price, total_value, status, odometer_km, vehicle:vehicles(id, plate, asset_code), unit:units(name), driver:drivers(full_name), fuel_type:fuel_types(name), supplier:suppliers(trade_name, legal_name)",
+            "id, fueled_at, quantity, unit_price, total_value, status, odometer_km, vehicle:vehicles(id, plate, asset_code), unit:units(name), driver:drivers(full_name), fuel_type:fuel_types(name, category), supplier:suppliers(trade_name, legal_name)",
           )
           .gte("fueled_at", start)
           .lte("fueled_at", end)
@@ -227,7 +227,8 @@ function Relatorios() {
           const key = f.vehicle?.id ?? "—";
           const row =
             acc.get(key) ?? blank(f.vehicle?.plate ?? f.vehicle?.asset_code ?? "—", f.unit?.name ?? "—");
-          row.litros += Number(f.quantity ?? 0);
+          // Óleos, fluidos e aditivos não entram no total de litros de combustível.
+          if ((f.fuel_type?.category ?? "combustivel") === "combustivel") row.litros += Number(f.quantity ?? 0);
           row.combustivel += Number(f.total_value ?? 0);
           acc.set(key, row);
         }

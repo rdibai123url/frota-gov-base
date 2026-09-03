@@ -38,6 +38,8 @@ import {
   useVehicleStatusHistory,
   useVehicleUsages,
   useVehicles,
+  onlyFuelRows,
+  useFuelTypes,
 } from "@/lib/frotagov";
 
 
@@ -242,13 +244,18 @@ function HistoricoVeiculo() {
     to,
   ]);
 
+  const { data: fuelProducts = [] } = useFuelTypes();
+
   const totals = useMemo(
     () => ({
       manutencao: vRecords.filter((r) => r.status === "concluida").reduce((s, r) => s + maintenanceTotal(r), 0),
       combustivel: vFuelings.filter((f) => f.status === "valido").reduce((s, f) => s + Number(f.total_value ?? 0), 0),
-      litros: vFuelings.filter((f) => f.status === "valido").reduce((s, f) => s + Number(f.quantity ?? 0), 0),
+      litros: onlyFuelRows(
+        vFuelings.filter((f) => f.status === "valido"),
+        fuelProducts,
+      ).reduce((s, f) => s + Number(f.quantity ?? 0), 0),
     }),
-    [vRecords, vFuelings],
+    [vRecords, vFuelings, fuelProducts],
   );
 
   return (
