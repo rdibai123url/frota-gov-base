@@ -92,7 +92,21 @@ function Alertas() {
         description="Ocorrências geradas automaticamente pelas regras de validação dos abastecimentos."
       />
 
-      <div className="mb-4 grid gap-3 rounded-lg border bg-card p-4 shadow-card sm:grid-cols-2 lg:w-2/3">
+      <div className="mb-4 grid gap-3 rounded-lg border bg-card p-4 shadow-card sm:grid-cols-3">
+        <div>
+          <Label className="text-xs">Categoria</Label>
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>Todas</SelectItem>
+              {ALERT_CATEGORIES.map((c) => (
+                <SelectItem key={c.value} value={c.value}>
+                  {c.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <div>
           <Label className="text-xs">Situação</Label>
           <Select value={status} onValueChange={setStatus}>
