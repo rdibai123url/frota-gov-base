@@ -17,11 +17,13 @@ import {
   ClipboardList,
   ChevronDown,
   FolderCog,
+  FileBarChart,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase, useBrasaoUrl, useOrganization, useProfile, ROLE_LABELS } from "@/lib/frotagov";
+import { useIsSuperAdmin, usePlatformSession, usePlatformContextActions } from "@/lib/platform";
 
 type NavLeaf = { to: string; label: string };
 type NavGroup = { id: string; label: string; icon: typeof Truck; to?: string; items?: NavLeaf[] };
@@ -121,7 +123,7 @@ const EXTRA_MATCHES: Record<string, string[]> = {
 };
 
 function groupForPath(pathname: string) {
-  for (const g of NAV) {
+  for (const g of [PLATFORM_NAV, ...NAV]) {
     if (g.to && pathname.startsWith(g.to)) return g.id;
     if (g.items?.some((i) => pathname.startsWith(i.to))) return g.id;
     if (EXTRA_MATCHES[g.id]?.some((p) => pathname.startsWith(p))) return g.id;
@@ -143,6 +145,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { data: org } = useOrganization();
   const { data: me } = useProfile();
   const { data: brasao } = useBrasaoUrl(org?.logo_url);
+  const { isSuperAdmin } = useIsSuperAdmin();
+  const { data: platformSession } = usePlatformSession();
+  const { exitOrg } = usePlatformContextActions();
+  const navGroups = isSuperAdmin ? [PLATFORM_NAV, ...NAV] : NAV;
 
 
   async function handleSignOut() {
@@ -168,7 +174,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        {NAV.map((group) => {
+        {navGroups.map((group) => {
           if (group.to) {
             const active = pathname.startsWith(group.to);
             return (
@@ -301,6 +307,30 @@ export function AppShell({ children }: { children: ReactNode }) {
             </p>
           </div>
         </header>
+
+        {isSuperAdmin && platformSession?.organization_id && (
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b bg-accent/15 px-4 py-2.5 text-sm sm:px-6">
+            <p className="font-medium">
+              Visualizando órgão: {platformSession.organization?.legal_name ?? org?.legal_name ?? "—"}
+            </p>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={async () => {
+                await exitOrg();
+                navigate({ to: "/plataforma" });
+              }}
+            >
+              Sair do órgão
+            </Button>
+          </div>
+        )}
+        {isSuperAdmin && !platformSession?.organization_id && (
+          <div className="border-b bg-muted/50 px-4 py-2.5 text-sm text-muted-foreground sm:px-6">
+            Nenhum órgão em contexto. Selecione um órgão em Administração da Plataforma para operar
+            as telas do órgão.
+          </div>
+        )}
 
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
           <div className="mx-auto w-full max-w-6xl">{children}</div>
