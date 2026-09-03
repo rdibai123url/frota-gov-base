@@ -653,6 +653,8 @@ function AuthorizationDetail({ auth, onClose }: { auth: AuthorizationRow; onClos
     ["Finalidade", auth.purpose ?? "—"],
     ["Justificativa", auth.justification ?? "—"],
     ["Exceção de limite", auth.limit_exception_reason ?? "—"],
+    ["Cota de servidor", auth.server_quota_id ? "Vinculada" : "—"],
+    ["Exceção de cota de servidor", auth.server_quota_override_reason ?? "—"],
   ];
 
   return (
