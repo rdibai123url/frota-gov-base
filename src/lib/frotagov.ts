@@ -844,6 +844,7 @@ export const ALERT_CATEGORIES: { value: string; label: string }[] = [
   { value: "cotacao", label: "Cotação" },
   { value: "ordem_servico", label: "Ordem de serviço" },
   { value: "credenciamento", label: "Credenciamento" },
+  { value: "frota", label: "Frota (multas, sinistros, seguros e documentos)" },
 ];
 
 export const FINANCE_ALERT_LABELS: Record<string, string> = {
@@ -870,7 +871,16 @@ export const FINANCE_ALERT_LABELS: Record<string, string> = {
   cotacao_insuficiente: "Processo com menos de 3 propostas válidas",
   os_atrasada: "Ordem de serviço atrasada",
   credenciamento_vencendo: "Credenciamento de oficina vencendo",
+  multa_a_vencer: "Multa a vencer",
+  multa_vencida: "Multa vencida",
+  obrigacao_a_vencer: "Obrigação legal a vencer",
+  obrigacao_vencida: "Obrigação legal vencida",
+  seguro_a_vencer: "Seguro a vencer",
+  seguro_vencido: "Seguro vencido",
+  sinistro_em_aberto: "Sinistro em aberto há mais de 30 dias",
+  perda_total_sem_baixa: "Perda total sem movimentação patrimonial",
 };
+
 
 export function alertLabel(type: string) {
   return ALERT_TYPE_LABELS[type] ?? FINANCE_ALERT_LABELS[type] ?? type;
@@ -1620,4 +1630,292 @@ export async function openMaintenanceFile(path: string) {
 
 export async function refreshProcurementAlerts() {
   await supabase.rpc("refresh_procurement_alerts");
+}
+
+/* ======================================================================== */
+/*   FASE 7 — MULTAS, SINISTROS, SEGUROS, OBRIGAÇÕES E PATRIMÔNIO           */
+/* ======================================================================== */
+
+export type ExternalEntity = Database["public"]["Tables"]["external_entities"]["Row"];
+export type TrafficFine = Database["public"]["Tables"]["traffic_fines"]["Row"];
+export type Accident = Database["public"]["Tables"]["accidents"]["Row"];
+export type InsurancePolicy = Database["public"]["Tables"]["insurance_policies"]["Row"];
+export type InsuranceVehicle = Database["public"]["Tables"]["insurance_vehicles"]["Row"];
+export type VehicleObligation = Database["public"]["Tables"]["vehicle_obligations"]["Row"];
+export type AssetMovement = Database["public"]["Tables"]["asset_movements"]["Row"];
+
+export type EntityKind = Database["public"]["Enums"]["entity_kind"];
+export type FineStatus = Database["public"]["Enums"]["fine_status"];
+export type FineLiability = Database["public"]["Enums"]["fine_liability"];
+export type AccidentKind = Database["public"]["Enums"]["accident_kind"];
+export type AccidentStatus = Database["public"]["Enums"]["accident_status"];
+export type InsuranceStatus = Database["public"]["Enums"]["insurance_status"];
+export type ObligationStatus = Database["public"]["Enums"]["obligation_status"];
+export type AssetMovementKind = Database["public"]["Enums"]["asset_movement_kind"];
+
+type PlateRef = Pick<Vehicle, "id" | "plate" | "brand" | "model" | "status" | "current_km" | "unit_id">;
+
+export type TrafficFineRow = TrafficFine & {
+  vehicle: PlateRef | null;
+  unit: Pick<Unit, "id" | "name" | "acronym"> | null;
+  driver: Pick<Driver, "id" | "full_name" | "cpf"> | null;
+  usage: Pick<VehicleUsage, "id" | "code" | "planned_departure"> | null;
+};
+export type AccidentRow = Accident & {
+  vehicle: PlateRef | null;
+  unit: Pick<Unit, "id" | "name" | "acronym"> | null;
+  driver: Pick<Driver, "id" | "full_name"> | null;
+  usage: Pick<VehicleUsage, "id" | "code"> | null;
+  policy: Pick<InsurancePolicy, "id" | "policy_number" | "insurer_name"> | null;
+  entity: Pick<ExternalEntity, "id" | "name" | "document"> | null;
+};
+export type InsurancePolicyRow = InsurancePolicy & {
+  supplier: Pick<Supplier, "id" | "legal_name" | "trade_name"> | null;
+  contract: Pick<Contract, "id" | "number"> | null;
+  vehicles: (InsuranceVehicle & { vehicle: PlateRef | null })[] | null;
+};
+export type VehicleObligationRow = VehicleObligation & { vehicle: PlateRef | null };
+export type AssetMovementRow = AssetMovement & {
+  vehicle: PlateRef | null;
+  from_unit: Pick<Unit, "id" | "name" | "acronym"> | null;
+  unit: Pick<Unit, "id" | "name" | "acronym"> | null;
+  entity: Pick<ExternalEntity, "id" | "name" | "document" | "kind"> | null;
+  winner: Pick<ExternalEntity, "id" | "name" | "document"> | null;
+  accident: Pick<Accident, "id" | "code" | "kind"> | null;
+};
+
+export const ENTITY_KINDS: { value: EntityKind; label: string }[] = [
+  { value: "pj", label: "Pessoa jurídica" },
+  { value: "pf", label: "Pessoa física" },
+];
+
+export const FINE_STATUS: { value: FineStatus; label: string }[] = [
+  { value: "recebida", label: "Recebida" },
+  { value: "em_analise", label: "Em análise" },
+  { value: "defesa_apresentada", label: "Defesa apresentada" },
+  { value: "deferida", label: "Deferida" },
+  { value: "indeferida", label: "Indeferida" },
+  { value: "paga", label: "Paga" },
+  { value: "cancelada", label: "Cancelada" },
+];
+
+export const FINE_LIABILITY: { value: FineLiability; label: string }[] = [
+  { value: "nao_definida", label: "Não definida" },
+  { value: "condutor", label: "Do condutor" },
+  { value: "orgao", label: "Do órgão" },
+];
+
+export const ACCIDENT_KINDS: { value: AccidentKind; label: string }[] = [
+  { value: "colisao", label: "Colisão" },
+  { value: "tombamento", label: "Tombamento" },
+  { value: "atropelamento", label: "Atropelamento" },
+  { value: "dano_estacionado", label: "Dano com veículo estacionado" },
+  { value: "furto_roubo", label: "Furto / roubo" },
+  { value: "incendio", label: "Incêndio" },
+  { value: "perda_total", label: "Perda total" },
+  { value: "outro", label: "Outro" },
+];
+
+export const ACCIDENT_STATUS: { value: AccidentStatus; label: string }[] = [
+  { value: "registrado", label: "Registrado" },
+  { value: "em_apuracao", label: "Em apuração" },
+  { value: "seguradora_acionada", label: "Seguradora acionada" },
+  { value: "reparo_autorizado", label: "Reparo autorizado" },
+  { value: "encerrado", label: "Encerrado" },
+];
+
+export const INSURANCE_STATUS: { value: InsuranceStatus; label: string }[] = [
+  { value: "ativa", label: "Ativa" },
+  { value: "a_vencer", label: "A vencer" },
+  { value: "vencida", label: "Vencida" },
+  { value: "cancelada", label: "Cancelada" },
+];
+
+export const OBLIGATION_STATUS: { value: ObligationStatus; label: string }[] = [
+  { value: "pendente", label: "Pendente" },
+  { value: "quitada", label: "Quitada" },
+  { value: "vencida", label: "Vencida" },
+  { value: "nao_aplicavel", label: "Não aplicável" },
+  { value: "cancelada", label: "Cancelada" },
+];
+
+export const OBLIGATION_TYPES = [
+  "Licenciamento / CRLV",
+  "IPVA",
+  "Seguro obrigatório (DPVAT)",
+  "Inspeção veicular",
+  "Tacógrafo / cronotacógrafo",
+  "Registro ANTT",
+  "Inspeção ambiental",
+  "Outra obrigação",
+];
+
+export const ASSET_MOVEMENT_KINDS: { value: AssetMovementKind; label: string }[] = [
+  { value: "proprio_em_uso", label: "Próprio em uso" },
+  { value: "cedido_ao_orgao", label: "Cedido ao órgão" },
+  { value: "cedido_a_terceiros", label: "Cedido a terceiros" },
+  { value: "locado", label: "Locado" },
+  { value: "fiel_depositario", label: "Fiel depositário" },
+  { value: "remanejamento", label: "Remanejamento entre unidades" },
+  { value: "baixa_manutencao", label: "Baixa para manutenção / remanejamento" },
+  { value: "alienacao_em_processo", label: "Em processo de alienação" },
+  { value: "doacao", label: "Doação" },
+  { value: "leilao", label: "Leilão" },
+  { value: "furto_roubo", label: "Furto / roubo" },
+  { value: "perda_total", label: "Perda total" },
+  { value: "alienado", label: "Alienado" },
+  { value: "desativado", label: "Desativado" },
+];
+
+/** Movimentações que encerram a vida útil do bem no órgão. */
+export const DISPOSAL_KINDS: AssetMovementKind[] = ["doacao", "leilao", "alienado", "desativado", "perda_total"];
+/** Movimentações que envolvem entidade externa. */
+export const EXTERNAL_KINDS: AssetMovementKind[] = [
+  "cedido_ao_orgao",
+  "cedido_a_terceiros",
+  "locado",
+  "fiel_depositario",
+  "doacao",
+  "leilao",
+  "alienado",
+];
+
+export const CONDITION_STATES = ["Ótimo", "Bom", "Regular", "Ruim", "Inservível"];
+
+/* --------------------------------- hooks -------------------------------- */
+
+export function useExternalEntities() {
+  return useQuery({
+    queryKey: ["external-entities"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("external_entities").select("*").order("name");
+      if (error) throw error;
+      return (data ?? []) as ExternalEntity[];
+    },
+  });
+}
+
+const VEHICLE_REF = "vehicles(id, plate, brand, model, status, current_km, unit_id)";
+
+export function useTrafficFines() {
+  return useQuery({
+    queryKey: ["traffic-fines"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("traffic_fines")
+        .select(
+          `*, vehicle:${VEHICLE_REF}, unit:units(id, name, acronym), driver:drivers(id, full_name, cpf), usage:vehicle_usages(id, code, planned_departure)`,
+        )
+        .order("occurred_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as TrafficFineRow[];
+    },
+  });
+}
+
+export function useAccidents() {
+  return useQuery({
+    queryKey: ["accidents"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("accidents")
+        .select(
+          `*, vehicle:${VEHICLE_REF}, unit:units(id, name, acronym), driver:drivers(id, full_name), usage:vehicle_usages(id, code), policy:insurance_policies(id, policy_number, insurer_name), entity:external_entities!accidents_third_party_entity_id_fkey(id, name, document)`,
+        )
+        .order("occurred_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as AccidentRow[];
+    },
+  });
+}
+
+export function useInsurancePolicies() {
+  return useQuery({
+    queryKey: ["insurance-policies"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("insurance_policies")
+        .select(
+          `*, supplier:suppliers(id, legal_name, trade_name), contract:contracts(id, number), vehicles:insurance_vehicles(*, vehicle:${VEHICLE_REF})`,
+        )
+        .order("valid_to", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as InsurancePolicyRow[];
+    },
+  });
+}
+
+export function useVehicleObligations() {
+  return useQuery({
+    queryKey: ["vehicle-obligations"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("vehicle_obligations")
+        .select(`*, vehicle:${VEHICLE_REF}`)
+        .order("due_date", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as unknown as VehicleObligationRow[];
+    },
+  });
+}
+
+export function useAssetMovements() {
+  return useQuery({
+    queryKey: ["asset-movements"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("asset_movements")
+        .select(
+          `*, vehicle:${VEHICLE_REF}, from_unit:units!asset_movements_from_unit_id_fkey(id, name, acronym), unit:units!asset_movements_unit_id_fkey(id, name, acronym), entity:external_entities!asset_movements_entity_id_fkey(id, name, document, kind), winner:external_entities!asset_movements_auction_winner_entity_id_fkey(id, name, document), accident:accidents(id, code, kind)`,
+        )
+        .order("moved_on", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as AssetMovementRow[];
+    },
+  });
+}
+
+/** Sugere o condutor que estava com o veículo no momento da infração/sinistro. */
+export function suggestDriverForMoment(
+  usages: UsageRow[],
+  vehicleId: string | null,
+  moment: Date | null,
+): UsageRow | null {
+  if (!vehicleId || !moment || Number.isNaN(moment.getTime())) return null;
+  const ts = moment.getTime();
+  const candidates = usages.filter((u) => {
+    if (u.vehicle_id !== vehicleId || u.status === "cancelada") return false;
+    const start = new Date(u.actual_departure ?? u.planned_departure).getTime();
+    const end = new Date(u.actual_return ?? u.planned_return ?? u.planned_departure).getTime();
+    return ts >= start - 36e5 && ts <= end + 36e5;
+  });
+  return candidates[0] ?? null;
+}
+
+/** Situação de vencimento para multas, seguros e obrigações. */
+export function dueState(date: string | null | undefined, lead = 30): DueState {
+  const d = daysUntil(date);
+  if (d === null) return "sem_criterio";
+  if (d < 0) return "vencido";
+  if (d <= lead) return "proximo";
+  return "ok";
+}
+
+/** Upload de anexo privado da frota (pasta por órgão). */
+export async function uploadFleetFile(orgId: string, file: File, folder: string) {
+  const safe = file.name.replace(/[^\w.\-]+/g, "_");
+  const path = `${orgId}/${folder}/${Date.now()}-${safe}`;
+  const { error } = await supabase.storage.from("frota").upload(path, file, { upsert: false });
+  if (error) throw error;
+  return path;
+}
+
+export async function openFleetFile(path: string) {
+  const { data, error } = await supabase.storage.from("frota").createSignedUrl(path, 60 * 60);
+  if (error || !data?.signedUrl) throw error ?? new Error("Não foi possível abrir o anexo");
+  window.open(data.signedUrl, "_blank", "noopener");
+}
+
+export async function refreshFleetAlerts() {
+  await supabase.rpc("refresh_fleet_alerts");
 }
