@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReopenReviewTab } from "@/components/reopen-review";
+import { ImportMigrationTab } from "@/components/import-migration";
+
 import { exportXlsx } from "@/lib/reports";
 import { DocsTab, MatrixTab } from "@/components/homologacao";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -97,6 +99,8 @@ function Plataforma() {
           <TabsTrigger value="usuarios">Usuários globais</TabsTrigger>
           <TabsTrigger value="logs">Logs globais</TabsTrigger>
           <TabsTrigger value="reaberturas">Reaberturas</TabsTrigger>
+          <TabsTrigger value="importacao">Importação e migração</TabsTrigger>
+
           <TabsTrigger value="config">Configurações</TabsTrigger>
           <TabsTrigger value="documentacao">Documentação / Homologação</TabsTrigger>
           <TabsTrigger value="matriz">Matriz de funcionalidades</TabsTrigger>
@@ -113,6 +117,10 @@ function Plataforma() {
         <TabsContent value="reaberturas" className="pt-5">
           <ReopenReviewTab />
         </TabsContent>
+        <TabsContent value="importacao" className="pt-5">
+          <ImportMigrationTab />
+        </TabsContent>
+
         <TabsContent value="config" className="pt-5">
           <SettingsTab />
         </TabsContent>

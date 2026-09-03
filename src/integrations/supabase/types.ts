@@ -304,7 +304,9 @@ export type Database = {
           holder_name: string | null
           hour_meter: number | null
           id: string
+          import_batch_id: string | null
           kind: Database["public"]["Enums"]["asset_movement_kind"]
+          legacy_source: string | null
           moved_on: string
           notes: string | null
           odometer_km: number | null
@@ -339,7 +341,9 @@ export type Database = {
           holder_name?: string | null
           hour_meter?: number | null
           id?: string
+          import_batch_id?: string | null
           kind: Database["public"]["Enums"]["asset_movement_kind"]
+          legacy_source?: string | null
           moved_on?: string
           notes?: string | null
           odometer_km?: number | null
@@ -374,7 +378,9 @@ export type Database = {
           holder_name?: string | null
           hour_meter?: number | null
           id?: string
+          import_batch_id?: string | null
           kind?: Database["public"]["Enums"]["asset_movement_kind"]
+          legacy_source?: string | null
           moved_on?: string
           notes?: string | null
           odometer_km?: number | null
@@ -684,6 +690,7 @@ export type Database = {
           exercise: number
           expense_element: string | null
           id: string
+          import_batch_id: string | null
           issued_at: string
           kind: Database["public"]["Enums"]["commitment_kind"]
           notes: string | null
@@ -710,6 +717,7 @@ export type Database = {
           exercise?: number
           expense_element?: string | null
           id?: string
+          import_batch_id?: string | null
           issued_at?: string
           kind?: Database["public"]["Enums"]["commitment_kind"]
           notes?: string | null
@@ -736,6 +744,7 @@ export type Database = {
           exercise?: number
           expense_element?: string | null
           id?: string
+          import_batch_id?: string | null
           issued_at?: string
           kind?: Database["public"]["Enums"]["commitment_kind"]
           notes?: string | null
@@ -1077,6 +1086,7 @@ export type Database = {
           current_period_id: string | null
           current_value: number
           id: string
+          import_batch_id: string | null
           initial_value: number
           modality: Database["public"]["Enums"]["contract_modality"]
           notes: string | null
@@ -1104,6 +1114,7 @@ export type Database = {
           current_period_id?: string | null
           current_value?: number
           id?: string
+          import_batch_id?: string | null
           initial_value?: number
           modality?: Database["public"]["Enums"]["contract_modality"]
           notes?: string | null
@@ -1131,6 +1142,7 @@ export type Database = {
           current_period_id?: string | null
           current_value?: number
           id?: string
+          import_batch_id?: string | null
           initial_value?: number
           modality?: Database["public"]["Enums"]["contract_modality"]
           notes?: string | null
@@ -1180,6 +1192,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           id: string
+          import_batch_id: string | null
           name: string
           organization_id: string
           unit_id: string | null
@@ -1193,6 +1206,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          import_batch_id?: string | null
           name: string
           organization_id: string
           unit_id?: string | null
@@ -1206,6 +1220,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          import_batch_id?: string | null
           name?: string
           organization_id?: string
           unit_id?: string | null
@@ -1239,6 +1254,7 @@ export type Database = {
           email: string | null
           full_name: string
           id: string
+          import_batch_id: string | null
           license_categories: string[]
           license_expiry: string | null
           license_first_issue: string | null
@@ -1261,6 +1277,7 @@ export type Database = {
           email?: string | null
           full_name: string
           id?: string
+          import_batch_id?: string | null
           license_categories?: string[]
           license_expiry?: string | null
           license_first_issue?: string | null
@@ -1283,6 +1300,7 @@ export type Database = {
           email?: string | null
           full_name?: string
           id?: string
+          import_batch_id?: string | null
           license_categories?: string[]
           license_expiry?: string | null
           license_first_issue?: string | null
@@ -1323,6 +1341,7 @@ export type Database = {
           document: string | null
           email: string | null
           id: string
+          import_batch_id: string | null
           kind: Database["public"]["Enums"]["entity_kind"]
           name: string
           notes: string | null
@@ -1342,6 +1361,7 @@ export type Database = {
           document?: string | null
           email?: string | null
           id?: string
+          import_batch_id?: string | null
           kind?: Database["public"]["Enums"]["entity_kind"]
           name: string
           notes?: string | null
@@ -1361,6 +1381,7 @@ export type Database = {
           document?: string | null
           email?: string | null
           id?: string
+          import_batch_id?: string | null
           kind?: Database["public"]["Enums"]["entity_kind"]
           name?: string
           notes?: string | null
@@ -1678,6 +1699,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          import_batch_id: string | null
           measure_unit: string
           name: string
           organization_id: string
@@ -1691,6 +1713,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          import_batch_id?: string | null
           measure_unit?: string
           name: string
           organization_id: string
@@ -1704,6 +1727,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          import_batch_id?: string | null
           measure_unit?: string
           name?: string
           organization_id?: string
@@ -1850,7 +1874,9 @@ export type Database = {
           fueled_at: string
           hour_meter: number | null
           id: string
+          import_batch_id: string | null
           invoice_number: string | null
+          legacy_source: string | null
           notes: string | null
           odometer_km: number | null
           operator_name: string | null
@@ -1892,7 +1918,9 @@ export type Database = {
           fueled_at?: string
           hour_meter?: number | null
           id?: string
+          import_batch_id?: string | null
           invoice_number?: string | null
+          legacy_source?: string | null
           notes?: string | null
           odometer_km?: number | null
           operator_name?: string | null
@@ -1934,7 +1962,9 @@ export type Database = {
           fueled_at?: string
           hour_meter?: number | null
           id?: string
+          import_batch_id?: string | null
           invoice_number?: string | null
+          legacy_source?: string | null
           notes?: string | null
           odometer_km?: number | null
           operator_name?: string | null
@@ -2039,6 +2069,167 @@ export type Database = {
           },
         ]
       }
+      import_batches: {
+        Row: {
+          annul_reason: string | null
+          annulled_at: string | null
+          annulled_by: string | null
+          cancel_reason: string | null
+          completed_at: string | null
+          create_missing: boolean
+          created_at: string
+          created_by: string | null
+          duplicate_rows: number
+          duplicate_strategy: string
+          error_rows: number
+          file_name: string | null
+          file_type: string | null
+          headers: Json
+          id: string
+          imported_rows: number
+          mapping: Json
+          module: string
+          notes: string | null
+          organization_id: string
+          result: Json | null
+          source_system: string | null
+          status: string
+          total_rows: number
+          updated_at: string
+          updated_by: string | null
+          valid_rows: number
+          warning_rows: number
+        }
+        Insert: {
+          annul_reason?: string | null
+          annulled_at?: string | null
+          annulled_by?: string | null
+          cancel_reason?: string | null
+          completed_at?: string | null
+          create_missing?: boolean
+          created_at?: string
+          created_by?: string | null
+          duplicate_rows?: number
+          duplicate_strategy?: string
+          error_rows?: number
+          file_name?: string | null
+          file_type?: string | null
+          headers?: Json
+          id?: string
+          imported_rows?: number
+          mapping?: Json
+          module: string
+          notes?: string | null
+          organization_id: string
+          result?: Json | null
+          source_system?: string | null
+          status?: string
+          total_rows?: number
+          updated_at?: string
+          updated_by?: string | null
+          valid_rows?: number
+          warning_rows?: number
+        }
+        Update: {
+          annul_reason?: string | null
+          annulled_at?: string | null
+          annulled_by?: string | null
+          cancel_reason?: string | null
+          completed_at?: string | null
+          create_missing?: boolean
+          created_at?: string
+          created_by?: string | null
+          duplicate_rows?: number
+          duplicate_strategy?: string
+          error_rows?: number
+          file_name?: string | null
+          file_type?: string | null
+          headers?: Json
+          id?: string
+          imported_rows?: number
+          mapping?: Json
+          module?: string
+          notes?: string | null
+          organization_id?: string
+          result?: Json | null
+          source_system?: string | null
+          status?: string
+          total_rows?: number
+          updated_at?: string
+          updated_by?: string | null
+          valid_rows?: number
+          warning_rows?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_batches_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_rows: {
+        Row: {
+          batch_id: string
+          created_at: string
+          duplicate_of: string | null
+          id: string
+          imported: boolean
+          issues: Json
+          normalized: Json
+          organization_id: string
+          raw: Json
+          row_number: number
+          status: string
+          target_id: string | null
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          duplicate_of?: string | null
+          id?: string
+          imported?: boolean
+          issues?: Json
+          normalized?: Json
+          organization_id: string
+          raw?: Json
+          row_number: number
+          status?: string
+          target_id?: string | null
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          duplicate_of?: string | null
+          id?: string
+          imported?: boolean
+          issues?: Json
+          normalized?: Json
+          organization_id?: string
+          raw?: Json
+          row_number?: number
+          status?: string
+          target_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_rows_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "import_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_rows_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       insurance_policies: {
         Row: {
           attachment_path: string | null
@@ -2050,7 +2241,9 @@ export type Database = {
           deductible_value: number | null
           entity_id: string | null
           id: string
+          import_batch_id: string | null
           insurer_name: string
+          legacy_source: string | null
           limits_notes: string | null
           notes: string | null
           organization_id: string
@@ -2074,7 +2267,9 @@ export type Database = {
           deductible_value?: number | null
           entity_id?: string | null
           id?: string
+          import_batch_id?: string | null
           insurer_name: string
+          legacy_source?: string | null
           limits_notes?: string | null
           notes?: string | null
           organization_id: string
@@ -2098,7 +2293,9 @@ export type Database = {
           deductible_value?: number | null
           entity_id?: string | null
           id?: string
+          import_batch_id?: string | null
           insurer_name?: string
+          legacy_source?: string | null
           limits_notes?: string | null
           notes?: string | null
           organization_id?: string
@@ -2474,9 +2671,11 @@ export type Database = {
           expense_origin: Database["public"]["Enums"]["expense_origin"]
           hour_meter: number | null
           id: string
+          import_batch_id: string | null
           invoice_number: string | null
           kind: Database["public"]["Enums"]["maintenance_kind"]
           labor_value: number
+          legacy_source: string | null
           notes: string | null
           odometer_km: number | null
           organization_id: string
@@ -2512,9 +2711,11 @@ export type Database = {
           expense_origin?: Database["public"]["Enums"]["expense_origin"]
           hour_meter?: number | null
           id?: string
+          import_batch_id?: string | null
           invoice_number?: string | null
           kind?: Database["public"]["Enums"]["maintenance_kind"]
           labor_value?: number
+          legacy_source?: string | null
           notes?: string | null
           odometer_km?: number | null
           organization_id: string
@@ -2550,9 +2751,11 @@ export type Database = {
           expense_origin?: Database["public"]["Enums"]["expense_origin"]
           hour_meter?: number | null
           id?: string
+          import_batch_id?: string | null
           invoice_number?: string | null
           kind?: Database["public"]["Enums"]["maintenance_kind"]
           labor_value?: number
+          legacy_source?: string | null
           notes?: string | null
           odometer_km?: number | null
           organization_id?: string
@@ -2805,6 +3008,87 @@ export type Database = {
             foreignKeyName: "maintenance_settings_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opening_balances: {
+        Row: {
+          applied: boolean
+          applied_at: string | null
+          applied_by: string | null
+          base_date: string
+          batch_id: string | null
+          cancel_reason: string | null
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          justification: string
+          kind: string
+          organization_id: string
+          quantity: number | null
+          reference_id: string | null
+          reference_label: string
+          updated_at: string
+          updated_by: string | null
+          value: number | null
+        }
+        Insert: {
+          applied?: boolean
+          applied_at?: string | null
+          applied_by?: string | null
+          base_date: string
+          batch_id?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          justification: string
+          kind: string
+          organization_id: string
+          quantity?: number | null
+          reference_id?: string | null
+          reference_label: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: number | null
+        }
+        Update: {
+          applied?: boolean
+          applied_at?: string | null
+          applied_by?: string | null
+          base_date?: string
+          batch_id?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          justification?: string
+          kind?: string
+          organization_id?: string
+          quantity?: number | null
+          reference_id?: string | null
+          reference_label?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opening_balances_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "import_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opening_balances_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -4199,6 +4483,7 @@ export type Database = {
           created_by: string | null
           email: string | null
           id: string
+          import_batch_id: string | null
           legal_name: string
           notes: string | null
           organization_id: string
@@ -4220,6 +4505,7 @@ export type Database = {
           created_by?: string | null
           email?: string | null
           id?: string
+          import_batch_id?: string | null
           legal_name: string
           notes?: string | null
           organization_id: string
@@ -4241,6 +4527,7 @@ export type Database = {
           created_by?: string | null
           email?: string | null
           id?: string
+          import_batch_id?: string | null
           legal_name?: string
           notes?: string | null
           organization_id?: string
@@ -4468,8 +4755,10 @@ export type Database = {
           driver_id: string | null
           due_date: string | null
           id: string
+          import_batch_id: string | null
           infraction_code: string | null
           issuing_authority: string
+          legacy_source: string | null
           liability: Database["public"]["Enums"]["fine_liability"]
           location: string | null
           notes: string | null
@@ -4509,8 +4798,10 @@ export type Database = {
           driver_id?: string | null
           due_date?: string | null
           id?: string
+          import_batch_id?: string | null
           infraction_code?: string | null
           issuing_authority: string
+          legacy_source?: string | null
           liability?: Database["public"]["Enums"]["fine_liability"]
           location?: string | null
           notes?: string | null
@@ -4550,8 +4841,10 @@ export type Database = {
           driver_id?: string | null
           due_date?: string | null
           id?: string
+          import_batch_id?: string | null
           infraction_code?: string | null
           issuing_authority?: string
+          legacy_source?: string | null
           liability?: Database["public"]["Enums"]["fine_liability"]
           location?: string | null
           notes?: string | null
@@ -4956,6 +5249,7 @@ export type Database = {
           created_by: string | null
           email: string | null
           id: string
+          import_batch_id: string | null
           manager_name: string | null
           manager_role: string | null
           name: string
@@ -4972,6 +5266,7 @@ export type Database = {
           created_by?: string | null
           email?: string | null
           id?: string
+          import_batch_id?: string | null
           manager_name?: string | null
           manager_role?: string | null
           name: string
@@ -4988,6 +5283,7 @@ export type Database = {
           created_by?: string | null
           email?: string | null
           id?: string
+          import_batch_id?: string | null
           manager_name?: string | null
           manager_role?: string | null
           name?: string
@@ -5050,6 +5346,8 @@ export type Database = {
           due_date: string | null
           exercise: number | null
           id: string
+          import_batch_id: string | null
+          legacy_source: string | null
           not_applicable: boolean
           notes: string | null
           obligation_type: string
@@ -5071,6 +5369,8 @@ export type Database = {
           due_date?: string | null
           exercise?: number | null
           id?: string
+          import_batch_id?: string | null
+          legacy_source?: string | null
           not_applicable?: boolean
           notes?: string | null
           obligation_type: string
@@ -5092,6 +5392,8 @@ export type Database = {
           due_date?: string | null
           exercise?: number | null
           id?: string
+          import_batch_id?: string | null
+          legacy_source?: string | null
           not_applicable?: boolean
           notes?: string | null
           obligation_type?: string
@@ -5215,6 +5517,8 @@ export type Database = {
           driver_id: string | null
           end_km: number | null
           id: string
+          import_batch_id: string | null
+          legacy_source: string | null
           maintenance_justification: string | null
           notes: string | null
           organization_id: string
@@ -5246,6 +5550,8 @@ export type Database = {
           driver_id?: string | null
           end_km?: number | null
           id?: string
+          import_batch_id?: string | null
+          legacy_source?: string | null
           maintenance_justification?: string | null
           notes?: string | null
           organization_id: string
@@ -5277,6 +5583,8 @@ export type Database = {
           driver_id?: string | null
           end_km?: number | null
           id?: string
+          import_batch_id?: string | null
+          legacy_source?: string | null
           maintenance_justification?: string | null
           notes?: string | null
           organization_id?: string
@@ -5338,6 +5646,7 @@ export type Database = {
           fuel_type: string | null
           hour_meter: number | null
           id: string
+          import_batch_id: string | null
           model: string | null
           notes: string | null
           organization_id: string
@@ -5363,6 +5672,7 @@ export type Database = {
           fuel_type?: string | null
           hour_meter?: number | null
           id?: string
+          import_batch_id?: string | null
           model?: string | null
           notes?: string | null
           organization_id: string
@@ -5388,6 +5698,7 @@ export type Database = {
           fuel_type?: string | null
           hour_meter?: number | null
           id?: string
+          import_batch_id?: string | null
           model?: string | null
           notes?: string | null
           organization_id?: string
@@ -5526,6 +5837,10 @@ export type Database = {
     }
     Functions: {
       active_org_id: { Args: never; Returns: string }
+      annul_import_batch: {
+        Args: { _batch: string; _reason: string }
+        Returns: Json
+      }
       budget_consume: {
         Args: {
           _commitment: string
@@ -5605,6 +5920,7 @@ export type Database = {
         }
         Returns: Json
       }
+      commit_import_batch: { Args: { _batch: string }; Returns: Json }
       contract_period_at: {
         Args: { _at: string; _contract: string }
         Returns: string
@@ -5636,6 +5952,28 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      import_ref_contract: {
+        Args: { _org: string; _txt: string }
+        Returns: string
+      }
+      import_ref_cost_center: {
+        Args: { _org: string; _txt: string }
+        Returns: string
+      }
+      import_ref_driver: {
+        Args: { _org: string; _txt: string }
+        Returns: string
+      }
+      import_ref_fuel: { Args: { _org: string; _txt: string }; Returns: string }
+      import_ref_supplier: {
+        Args: { _org: string; _txt: string }
+        Returns: string
+      }
+      import_ref_unit: { Args: { _org: string; _txt: string }; Returns: string }
+      import_ref_vehicle: {
+        Args: { _org: string; _txt: string }
+        Returns: string
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       log_budget_block: {

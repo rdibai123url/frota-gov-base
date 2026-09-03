@@ -19,7 +19,10 @@ export const VERSION_HISTORY: VersionEntry[] = [
   { version: "7.0.0", date: "Fase 7", title: "Legal e patrimonial", summary: "Multas, sinistros, seguros, obrigações legais, movimentação patrimonial e entidades externas." },
   { version: "8.0.0", date: "Fase 8", title: "Plataforma e integrações", summary: "Super Admin, onboarding controlado, logs globais, relatórios, Portal da Transparência e API v1." },
   { version: "9.0.0", date: "Fase 9", title: "Homologação e comercialização", summary: "Endurecimento de segurança, agendamento automático de rotinas, exportação .xlsx e impressão/PDF, painel executivo agrupado, dados abertos em CSV, paginação da API, documentação e matriz de licitações." },
+  { version: "9.2.0", date: "Pós-Fase 9 — Bloco B", title: "Fechamento mensal da transparência", summary: "Competência mensal por órgão, checklist obrigatório, publicação versionada, bloqueio de competência fechada e reabertura por chamado." },
+  { version: "9.3.0", date: "Pós-Fase 9 — Bloco C", title: "Importação e migração em massa", summary: "Assistente de importação em 16 módulos com modelo de planilha, mapeamento de colunas, simulação sem gravar, correção de linhas, importação transacional, lotes rastreáveis, anulação de lote e posição de abertura de saldos." },
 ];
+
 
 export type ModuleInfo = { module: string; route: string; status: "ativo" | "parcial"; note?: string };
 
@@ -42,6 +45,8 @@ export const ACTIVE_MODULES: ModuleInfo[] = [
   { module: "Portal da Transparência", route: "/transparencia", status: "ativo", note: "Desabilitado por padrão em cada órgão." },
   { module: "API pública v1 (leitura)", route: "/chaves-api", status: "ativo", note: "Somente leitura, com chave por órgão." },
   { module: "Administração da Plataforma", route: "/plataforma", status: "ativo", note: "Exclusivo do Super Admin." },
+  { module: "Importação e migração de dados", route: "/plataforma", status: "ativo", note: "Assistente por módulo, lotes rastreáveis e posição de abertura." },
+
 ];
 
 export type ChecklistItem = { item: string; status: "ok" | "parcial"; detail: string };
@@ -116,7 +121,13 @@ export const FEATURE_MATRIX: MatrixRow[] = [
   { module: "Operação", feature: "Rotinas automáticas de alertas e retenção de logs", status: "Sim", note: "Agendadas no banco de dados (horária e diária).", evidence: "/alertas" },
   { module: "Operação", feature: "Notificações por e-mail ou WhatsApp", status: "Não", note: "Os alertas são exibidos no sistema.", evidence: "—" },
   { module: "Operação", feature: "Aplicativo móvel nativo", status: "Parcial", note: "Interface responsiva em navegador; não há aplicativo publicado em lojas.", evidence: "Qualquer tela" },
+  { module: "Implantação", feature: "Importação em massa por planilha (CSV/XLSX) em 16 módulos", status: "Sim", note: "Modelo por módulo, mapeamento de colunas e ordem recomendada.", evidence: "/plataforma → Importação e migração" },
+  { module: "Implantação", feature: "Simulação sem gravar dados, com relatório de erros", status: "Sim", note: "Planilha de ocorrências com linha, campo, valor recebido e motivo.", evidence: "/plataforma → Importação e migração" },
+  { module: "Implantação", feature: "Importação transacional com lote rastreável e anulação", status: "Sim", note: "Tudo ou nada por lote; anulação apenas pelo Super Admin, sem exclusão física.", evidence: "/plataforma → Lotes do órgão" },
+  { module: "Implantação", feature: "Migração de histórico sem consumir saldo de contrato, empenho ou cota", status: "Sim", note: "Registros marcados como legado com o sistema de origem.", evidence: "Abastecimentos, manutenções e utilizações legados" },
+  { module: "Implantação", feature: "Posição de abertura de saldos com data-base e justificativa", status: "Sim", note: "Rotina exclusiva de implantação, fora do fluxo operacional.", evidence: "/plataforma → Saldos iniciais" },
 ];
+
 
 export const KNOWN_LIMITATIONS: string[] = [
   "Não há integração com DETRAN, importação automática de multas nem portal de seguradoras.",
