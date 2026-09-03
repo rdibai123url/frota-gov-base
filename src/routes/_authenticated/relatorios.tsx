@@ -245,29 +245,46 @@ function Relatorios() {
       if (report === "manutencao") {
         let q = supabase
           .from("maintenance_records")
-          .select("id, code, kind, status, entry_at, exit_at, total_value, vehicle:vehicles(plate, asset_code), supplier:suppliers(trade_name, legal_name)")
+          .select(
+            "id, code, kind, status, entry_at, exit_at, total_value, parts_value, labor_value, odometer_km, vehicle:vehicles(plate, asset_code), unit:units(name), supplier:suppliers(trade_name, legal_name), workshop:workshops(trade_name, legal_name)",
+          )
           .gte("entry_at", start)
           .lte("entry_at", end)
           .order("entry_at", { ascending: false });
+        if (unit) q = q.eq("unit_id", unit);
         if (vehicle) q = q.eq("vehicle_id", vehicle);
         const { data: rows, error } = await q;
         if (error) throw error;
         return (rows ?? []).map((m) => ({
           codigo: m.code ?? "—",
           veiculo: m.vehicle?.plate ?? m.vehicle?.asset_code ?? "—",
+          unidade: m.unit?.name ?? "—",
           tipo: m.kind,
-          fornecedor: m.supplier?.trade_name ?? m.supplier?.legal_name ?? "—",
+          fornecedor:
+            m.workshop?.trade_name ??
+            m.workshop?.legal_name ??
+            m.supplier?.trade_name ??
+            m.supplier?.legal_name ??
+            "—",
           entrada: day(m.entry_at),
           saida: day(m.exit_at),
+          hodometro: m.odometer_km ?? "—",
+          pecas: formatMoney(m.parts_value),
+          mao_obra: formatMoney(m.labor_value),
           valor: formatMoney(m.total_value),
           situacao: m.status,
         }));
       }
 
       if (report === "contratos") {
+        // Contratos não possuem unidade: filtramos pela vigência que intersecta o período.
         const { data: contracts, error } = await supabase
           .from("contracts")
-          .select("id, number, object, modality, status, valid_from, valid_to, current_value, supplier:suppliers(trade_name, legal_name)")
+          .select(
+            "id, number, object, modality, status, valid_from, valid_to, initial_value, current_value, supplier:suppliers(trade_name, legal_name)",
+          )
+          .lte("valid_from", to)
+          .or(`valid_to.is.null,valid_to.gte.${from}`)
           .order("valid_from", { ascending: false });
         if (error) throw error;
         const { data: commitments } = await supabase
@@ -283,6 +300,7 @@ function Relatorios() {
             contratado: c.supplier?.trade_name ?? c.supplier?.legal_name ?? "—",
             tipo: c.modality ?? "—",
             vigencia: `${day(c.valid_from)} a ${day(c.valid_to)}`,
+            valor_inicial: formatMoney(c.initial_value),
             valor: formatMoney(c.current_value),
             empenhado: formatMoney(empenhado),
             saldo: formatMoney(saldo),
@@ -292,30 +310,58 @@ function Relatorios() {
       }
 
       if (report === "legal") {
+        // Obrigações legais não têm unidade/condutor próprios: quando o usuário
+        // filtra por unidade, restringimos pelos veículos daquela unidade.
+        const unitVehicleIds = unit
+          ? vehicles.filter((v) => v.unit_id === unit).map((v) => v.id)
+          : null;
+
+        let fq = supabase
+          .from("traffic_fines")
+          .select(
+            "code, occurred_at, status, amount, infraction_description, vehicle:vehicles(plate, asset_code), unit:units(name), driver:drivers(full_name)",
+          )
+          .gte("occurred_at", start)
+          .lte("occurred_at", end);
+        if (unit) fq = fq.eq("unit_id", unit);
+        if (vehicle) fq = fq.eq("vehicle_id", vehicle);
+        if (driver) fq = fq.eq("driver_id", driver);
+
+        let aq = supabase
+          .from("accidents")
+          .select(
+            "code, occurred_at, status, expenses_value, description, vehicle:vehicles(plate, asset_code), unit:units(name), driver:drivers(full_name)",
+          )
+          .gte("occurred_at", start)
+          .lte("occurred_at", end);
+        if (unit) aq = aq.eq("unit_id", unit);
+        if (vehicle) aq = aq.eq("vehicle_id", vehicle);
+        if (driver) aq = aq.eq("driver_id", driver);
+
+        let oq = supabase
+          .from("vehicle_obligations")
+          .select("obligation_type, due_date, status, amount, notes, vehicle:vehicles(plate, asset_code, unit:units(name))")
+          .gte("due_date", from)
+          .lte("due_date", to);
+        if (vehicle) oq = oq.eq("vehicle_id", vehicle);
+        if (unitVehicleIds) oq = oq.in("vehicle_id", unitVehicleIds.length ? unitVehicleIds : [""]);
+
+        // Obrigações não são atribuíveis a condutor — omitidas quando há filtro de condutor.
         const [fines, accidents, obligations] = await Promise.all([
-          supabase
-            .from("traffic_fines")
-            .select("code, occurred_at, status, amount, vehicle:vehicles(plate, asset_code), driver:drivers(full_name)")
-            .gte("occurred_at", start)
-            .lte("occurred_at", end),
-          supabase
-            .from("accidents")
-            .select("code, occurred_at, status, expenses_value, vehicle:vehicles(plate, asset_code), driver:drivers(full_name)")
-            .gte("occurred_at", start)
-            .lte("occurred_at", end),
-          supabase
-            .from("vehicle_obligations")
-            .select("obligation_type, due_date, status, amount, vehicle:vehicles(plate, asset_code)")
-            .gte("due_date", from)
-            .lte("due_date", to),
+          fq,
+          aq,
+          driver ? Promise.resolve({ data: [] as never[] }) : oq,
         ]);
+
         const rows: Record<string, unknown>[] = [];
         for (const f of fines.data ?? [])
           rows.push({
             registro: "Multa",
             codigo: f.code ?? "—",
             veiculo: f.vehicle?.plate ?? f.vehicle?.asset_code ?? "—",
+            unidade: f.unit?.name ?? "—",
             responsavel: f.driver?.full_name ?? "—",
+            descricao: f.infraction_description ?? "—",
             data: day(f.occurred_at),
             valor: formatMoney(f.amount),
             situacao: f.status,
@@ -325,7 +371,9 @@ function Relatorios() {
             registro: "Sinistro",
             codigo: a.code ?? "—",
             veiculo: a.vehicle?.plate ?? a.vehicle?.asset_code ?? "—",
+            unidade: a.unit?.name ?? "—",
             responsavel: a.driver?.full_name ?? "—",
+            descricao: a.description ?? "—",
             data: day(a.occurred_at),
             valor: formatMoney(a.expenses_value),
             situacao: a.status,
@@ -335,22 +383,27 @@ function Relatorios() {
             registro: "Obrigação legal",
             codigo: o.obligation_type ?? "—",
             veiculo: o.vehicle?.plate ?? o.vehicle?.asset_code ?? "—",
+            unidade: o.vehicle?.unit?.name ?? "—",
             responsavel: "—",
+            descricao: o.notes ?? "—",
             data: day(o.due_date),
             valor: formatMoney(o.amount),
             situacao: o.status,
           });
-        return rows;
+        return rows.sort((a, b) => String(a['data']).localeCompare(String(b['data'])));
       }
 
       if (report === "patrimonio") {
         let q = supabase
           .from("asset_movements")
-          .select("code, kind, moved_on, from_unit_id, unit_id, to_status, vehicle:vehicles(plate, asset_code)")
+          .select(
+            "code, kind, moved_on, from_unit_id, unit_id, to_status, document_number, notes, vehicle:vehicles(plate, asset_code), entity:external_entities(name)",
+          )
           .gte("moved_on", from)
           .lte("moved_on", to)
           .order("moved_on", { ascending: false });
         if (vehicle) q = q.eq("vehicle_id", vehicle);
+        if (unit) q = q.or(`unit_id.eq.${unit},from_unit_id.eq.${unit}`);
         const { data: rows, error } = await q;
         if (error) throw error;
         const unitName = (id?: string | null) => units.find((u) => u.id === id)?.name ?? "—";
@@ -361,9 +414,12 @@ function Relatorios() {
           data: day(m.moved_on),
           origem: unitName(m.from_unit_id),
           destino: unitName(m.unit_id),
+          entidade: m.entity?.name ?? "—",
+          documento: m.document_number ?? "—",
           situacao: m.to_status ?? "—",
         }));
       }
+
 
 
       let q = supabase
