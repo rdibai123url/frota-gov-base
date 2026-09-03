@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Search, Pencil, IdCard } from "lucide-react";
+import { Plus, Search, Pencil, IdCard, Plane } from "lucide-react";
 import { toast } from "sonner";
 
 import { CpfInput } from "@/components/form-fields";
@@ -33,6 +33,7 @@ import {
   DRIVER_BONDS,
   cnhState,
   dateBR,
+  dateTimeBR,
   isValidCPF,
   label,
   maskCPF,
@@ -43,6 +44,8 @@ import {
   useUnits,
   type DriverRow,
 } from "@/lib/frotagov";
+import { formatMoney } from "@/lib/format";
+import { useDiaries, DIARY_STATUS } from "@/lib/diarias";
 
 export const Route = createFileRoute("/_authenticated/condutores")({
   head: () => ({
@@ -86,6 +89,8 @@ function Condutores() {
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<DriverRow | null>(null);
   const [openNew, setOpenNew] = useState(false);
+  const [history, setHistory] = useState<string | null>(null);
+  const { data: diaries = [] } = useDiaries();
 
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase();
