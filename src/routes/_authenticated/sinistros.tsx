@@ -308,7 +308,7 @@ function Sinistros() {
               <SelectItem value={ALL}>Todos</SelectItem>
               {vehicles.map((v) => (
                 <SelectItem key={v.id} value={v.id}>
-                  {v.plate}
+                  {(v.plate ?? v.asset_code)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -350,7 +350,7 @@ function Sinistros() {
               <TableRow key={a.id}>
                 <TableCell className="font-medium">{a.code ?? "—"}</TableCell>
                 <TableCell>
-                  {a.vehicle?.plate ?? "—"}
+                  {(a.vehicle?.plate ?? a.vehicle?.asset_code ?? "—")}
                   {a.blocks_use && a.status !== "encerrado" && (
                     <span className="block text-xs text-destructive">Indisponível</span>
                   )}
@@ -414,7 +414,7 @@ function Sinistros() {
                     <SelectItem value={NONE}>Selecione</SelectItem>
                     {vehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        {v.plate} — {v.brand ?? ""} {v.model ?? ""}
+                        {(v.plate ?? v.asset_code)} — {v.brand ?? ""} {v.model ?? ""}
                       </SelectItem>
                     ))}
                   </SelectContent>

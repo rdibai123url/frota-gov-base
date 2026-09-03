@@ -140,7 +140,7 @@ function Multas() {
         const q = search.trim().toLowerCase();
         return (
           !q ||
-          `${f.code ?? ""} ${f.notice_number} ${f.issuing_authority} ${f.description} ${f.vehicle?.plate ?? ""}`
+          `${f.code ?? ""} ${f.notice_number} ${f.issuing_authority} ${f.description} ${(f.vehicle?.plate ?? f.vehicle?.asset_code ?? "")}`
             .toLowerCase()
             .includes(q)
         );
@@ -328,7 +328,7 @@ function Multas() {
               <SelectItem value={ALL}>Todos</SelectItem>
               {vehicles.map((v) => (
                 <SelectItem key={v.id} value={v.id}>
-                  {v.plate}
+                  {(v.plate ?? v.asset_code)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -381,7 +381,7 @@ function Multas() {
                     <span className="block text-xs text-muted-foreground">{f.notice_number}</span>
                   </TableCell>
                   <TableCell>
-                    {f.vehicle?.plate ?? "—"}
+                    {(f.vehicle?.plate ?? f.vehicle?.asset_code ?? "—")}
                     <span className="block text-xs text-muted-foreground">{f.unit?.acronym ?? ""}</span>
                   </TableCell>
                   <TableCell className="max-w-[260px]">
@@ -465,7 +465,7 @@ function Multas() {
                     <SelectItem value={NONE}>Selecione</SelectItem>
                     {vehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        {v.plate} — {v.brand ?? ""} {v.model ?? ""}
+                        {(v.plate ?? v.asset_code)} — {v.brand ?? ""} {v.model ?? ""}
                       </SelectItem>
                     ))}
                   </SelectContent>

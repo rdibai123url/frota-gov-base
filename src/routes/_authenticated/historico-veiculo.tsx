@@ -78,7 +78,7 @@ function HistoricoVeiculoIndex() {
             )}
             {filtered.map((v) => (
               <TableRow key={v.id}>
-                <TableCell className="font-medium">{v.plate}</TableCell>
+                <TableCell className="font-medium">{(v.plate ?? v.asset_code)}</TableCell>
                 <TableCell>{[v.brand, v.model].filter(Boolean).join(" ") || "—"}</TableCell>
                 <TableCell>
                   <Badge variant="secondary">{label(VEHICLE_STATUS, v.status)}</Badge>

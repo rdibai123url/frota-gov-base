@@ -290,7 +290,7 @@ function Pneus() {
               <SelectItem value={ALL}>Todos</SelectItem>
               {vehicles.map((v) => (
                 <SelectItem key={v.id} value={v.id}>
-                  {v.plate}
+                  {(v.plate ?? v.asset_code)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -509,7 +509,7 @@ function Pneus() {
                       <SelectItem value={NONE}>Selecione</SelectItem>
                       {vehicles.map((v) => (
                         <SelectItem key={v.id} value={v.id}>
-                          {v.plate}
+                          {(v.plate ?? v.asset_code)}
                         </SelectItem>
                       ))}
                     </SelectContent>

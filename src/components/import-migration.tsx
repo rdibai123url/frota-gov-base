@@ -104,7 +104,7 @@ function useLookups(orgId: string | null) {
         (rows ?? []).map((r) => ({ id: id(r), keys: keys(r).filter(Boolean) as string[], label: label(r) }));
       return {
         unit: map(units.data, (u) => [u.name, u.acronym], (u) => u.name, (u) => u.id),
-        vehicle: map(vehicles.data, (v) => [v.plate, v.renavam, v.chassis, v.asset_code], (v) => v.plate, (v) => v.id),
+        vehicle: map(vehicles.data, (v) => [v.plate, v.renavam, v.chassis, v.asset_code], (v) => v.plate ?? v.asset_code ?? "Sem identificação", (v) => v.id),
         supplier: map(suppliers.data, (s) => [s.cnpj, s.legal_name, s.trade_name], (s) => s.legal_name, (s) => s.id),
         driver: map(drivers.data, (d) => [d.cpf, d.full_name, d.license_number], (d) => d.full_name, (d) => d.id),
         fuel: map(fuels.data, (f) => [f.name, f.acronym], (f) => f.name, (f) => f.id),

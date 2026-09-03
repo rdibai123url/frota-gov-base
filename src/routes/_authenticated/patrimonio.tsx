@@ -218,7 +218,7 @@ function Patrimonio() {
       ["Código da movimentação", m.code ?? "—"],
       ["Tipo", label(ASSET_MOVEMENT_KINDS, m.kind)],
       ["Data", dateBR(m.moved_on)],
-      ["Veículo", `${m.vehicle?.plate ?? "—"} — ${m.vehicle?.brand ?? ""} ${m.vehicle?.model ?? ""}`],
+      ["Veículo", `${(m.vehicle?.plate ?? m.vehicle?.asset_code ?? "—")} — ${m.vehicle?.brand ?? ""} ${m.vehicle?.model ?? ""}`],
       ["Código patrimonial", m.asset_code ?? "—"],
       ["Unidade de origem", m.from_unit?.name ?? "—"],
       ["Unidade de destino", m.unit?.name ?? "—"],
@@ -302,7 +302,7 @@ td:first-child{width:34%;font-weight:bold}
               <SelectItem value={ALL}>Todos</SelectItem>
               {vehicles.map((v) => (
                 <SelectItem key={v.id} value={v.id}>
-                  {v.plate}
+                  {(v.plate ?? v.asset_code)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -358,7 +358,7 @@ td:first-child{width:34%;font-weight:bold}
             {paged.rows.map((m) => (
               <TableRow key={m.id}>
                 <TableCell className="font-medium">{m.code ?? "—"}</TableCell>
-                <TableCell>{m.vehicle?.plate ?? "—"}</TableCell>
+                <TableCell>{(m.vehicle?.plate ?? m.vehicle?.asset_code ?? "—")}</TableCell>
                 <TableCell>
                   <Badge variant={DISPOSAL_KINDS.includes(m.kind) ? "destructive" : "outline"}>
                     {label(ASSET_MOVEMENT_KINDS, m.kind)}
@@ -412,7 +412,7 @@ td:first-child{width:34%;font-weight:bold}
                     <SelectItem value={NONE}>Selecione</SelectItem>
                     {vehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        {v.plate} — {v.brand ?? ""} {v.model ?? ""}
+                        {(v.plate ?? v.asset_code)} — {v.brand ?? ""} {v.model ?? ""}
                       </SelectItem>
                     ))}
                   </SelectContent>

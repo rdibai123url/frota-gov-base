@@ -196,6 +196,60 @@ export function useVehicles() {
   });
 }
 
+/* ===== FASE 10 — Bloco 1: máquinas e equipamentos ===== */
+
+export type AssetClass = "veiculo" | "equipamento";
+export type EquipmentType = Database["public"]["Tables"]["equipment_types"]["Row"];
+
+export const ASSET_CLASSES = [
+  { value: "veiculo", label: "Veículo" },
+  { value: "equipamento", label: "Máquina / equipamento" },
+];
+
+export const METER_KINDS = [
+  { value: "hodometro", label: "Hodômetro (km)" },
+  { value: "horimetro", label: "Horímetro (h)" },
+  { value: "ambos", label: "Hodômetro e horímetro" },
+  { value: "nenhum", label: "Sem medidor" },
+];
+
+export const ASSET_OWNERSHIP = [
+  { value: "proprio", label: "Próprio" },
+  { value: "locado", label: "Locado" },
+  { value: "cedido", label: "Cedido" },
+  { value: "emprestado", label: "Emprestado" },
+  { value: "comodato", label: "Comodato" },
+  { value: "doado", label: "Doado" },
+  { value: "fiel_depositario", label: "Fiel depositário" },
+  { value: "baixado", label: "Baixado" },
+  { value: "alienado", label: "Alienado" },
+  { value: "leiloado", label: "Leiloado" },
+  { value: "perdido_furtado", label: "Perdido / furtado" },
+  { value: "outro", label: "Outro" },
+];
+
+/** Identificação de exibição: placa para veículos, patrimônio para equipamentos. */
+export function assetLabel(v?: Pick<Vehicle, "plate" | "asset_code"> | null) {
+  if (!v) return "—";
+  return v.plate || v.asset_code || "Sem identificação";
+}
+
+export function useEquipmentTypes() {
+  return useQuery({
+    queryKey: ["equipment-types"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("equipment_types")
+        .select("*")
+        .eq("active", true)
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+
 export function useOrgUsers() {
   return useQuery({
     queryKey: ["org-users"],

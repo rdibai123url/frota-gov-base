@@ -118,6 +118,7 @@ function Veiculos() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return vehicles.filter((v) => {
+      if (v.asset_class === "equipamento") return false;
       if (statusFilter !== "all" && v.status !== statusFilter) return false;
       if (unitFilter !== "all" && (v.unit_id ?? NONE) !== unitFilter) return false;
       if (ownershipFilter === "servidor" && !v.is_private_server_vehicle) return false;
@@ -165,6 +166,7 @@ function Veiculos() {
     const safeUnitId = unitId !== NONE && units.some((u) => u.id === unitId) ? unitId : null;
 
     const payload = {
+      asset_class: "veiculo",
       plate: d.plate.toUpperCase(),
       asset_code: d.asset_code || null,
       renavam: d.renavam || null,

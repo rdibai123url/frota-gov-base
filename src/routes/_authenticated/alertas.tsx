@@ -197,7 +197,7 @@ function Alertas() {
                 <TableCell>
                   <Badge variant="outline">{label(ALERT_CATEGORIES, a.category ?? "abastecimento")}</Badge>
                 </TableCell>
-                <TableCell>{a.vehicle?.plate ?? "—"}</TableCell>
+                <TableCell>{(a.vehicle?.plate ?? a.vehicle?.asset_code ?? "—")}</TableCell>
                 <TableCell className="max-w-sm text-sm text-muted-foreground">{a.message}</TableCell>
                 <TableCell className="max-w-xs text-sm">{a.justification || "—"}</TableCell>
                 <TableCell className="whitespace-nowrap">{dateTimeBR(a.created_at)}</TableCell>

@@ -119,7 +119,7 @@ function CotasServidor() {
           const s = search.trim().toLowerCase();
           return (
             !s ||
-            `${q.beneficiary_name} ${q.beneficiary_cpf} ${q.registration_code ?? ""} ${q.vehicle?.plate ?? ""}`
+            `${q.beneficiary_name} ${q.beneficiary_cpf} ${q.registration_code ?? ""} ${(q.vehicle?.plate ?? q.vehicle?.asset_code ?? "")}`
               .toLowerCase()
               .includes(s)
           );
@@ -340,7 +340,7 @@ function CotasServidor() {
                     </span>
                   </TableCell>
                   <TableCell>
-                    {q.vehicle?.plate ?? "—"}
+                    {(q.vehicle?.plate ?? q.vehicle?.asset_code ?? "—")}
                     <span className="block text-xs text-muted-foreground">
                       {[q.vehicle?.brand, q.vehicle?.model].filter(Boolean).join(" ") || "—"}
                       {q.fuel ? ` · ${q.fuel.name}` : " · qualquer combustível"}
@@ -464,7 +464,7 @@ function CotasServidor() {
                     <SelectItem value={NONE}>Selecione</SelectItem>
                     {serverVehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        {v.plate} — {[v.brand, v.model].filter(Boolean).join(" ") || "sem modelo"}
+                        {(v.plate ?? v.asset_code)} — {[v.brand, v.model].filter(Boolean).join(" ") || "sem modelo"}
                       </SelectItem>
                     ))}
                   </SelectContent>

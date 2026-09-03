@@ -37,6 +37,7 @@ const NAV: NavGroup[] = [
     icon: Truck,
     items: [
       { to: "/veiculos", label: "Veículos" },
+      { to: "/equipamentos", label: "Máquinas e equipamentos" },
       { to: "/utilizacao", label: "Utilização e reservas" },
       { to: "/diarias", label: "Diárias" },
       { to: "/multas", label: "Multas e infrações" },

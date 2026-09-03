@@ -110,7 +110,7 @@ function Diarias() {
       if (fStatus !== ALL && d.status !== fStatus) return false;
       if (fUnit !== ALL && d.unit_id !== fUnit) return false;
       if (t) {
-        const hay = [d.code, d.beneficiary_name, d.destination_city, d.purpose, d.vehicle?.plate]
+        const hay = [d.code, d.beneficiary_name, d.destination_city, d.purpose, (d.vehicle?.plate ?? d.vehicle?.asset_code ?? "")]
           .filter(Boolean)
           .join(" ")
           .toLowerCase();
@@ -172,7 +172,7 @@ ${line("Solicitante", d.requester_name)}${line("Situação", DIARY_STATUS[d.stat
 ${line("Origem", [d.origin_city, d.origin_state].filter(Boolean).join("/"))}
 ${line("Destino", [d.destination_city, d.destination_state].filter(Boolean).join("/"))}
 ${line("Saída", dt(d.departure_at))}${line("Retorno", dt(d.return_at))}
-${line("Veículo", d.vehicle?.plate)}${line("Utilização vinculada", d.usage?.code)}
+${line("Veículo", (d.vehicle?.plate ?? d.vehicle?.asset_code ?? ""))}${line("Utilização vinculada", d.usage?.code)}
 ${line("Evento / atividade", d.event_name)}${line("Local do evento", d.event_location)}
 <div class="full">${line("Finalidade / motivo", d.purpose)}</div></div></section>
 <section><div class="t">Valores</div><div class="g">
@@ -408,7 +408,7 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Sem veículo</SelectItem>
-                  {vehicles.map((v) => <SelectItem key={v.id} value={v.id}>{v.plate}</SelectItem>)}
+                  {vehicles.map((v) => <SelectItem key={v.id} value={v.id}>{(v.plate ?? v.asset_code)}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -420,7 +420,7 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
                   <SelectItem value={NONE}>Sem vínculo</SelectItem>
                   {linkedUsages.map((u) => (
                     <SelectItem key={u.id} value={u.id}>
-                      {u.code} — {u.vehicle?.plate} — {u.destination}
+                      {u.code} — {(u.vehicle?.plate ?? u.vehicle?.asset_code ?? "")} — {u.destination}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -485,7 +485,7 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
                 <Field l="Cargo / função" v={detail.beneficiary_role} />
                 <Field l="Unidade" v={detail.unit?.name} />
                 <Field l="Destino" v={[detail.destination_city, detail.destination_state].filter(Boolean).join("/")} />
-                <Field l="Veículo" v={detail.vehicle?.plate} />
+                <Field l="Veículo" v={(detail.vehicle?.plate ?? detail.vehicle?.asset_code ?? "")} />
                 <Field l="Utilização vinculada" v={detail.usage?.code} />
                 <Field l="Saída" v={dt(detail.departure_at)} />
                 <Field l="Retorno" v={dt(detail.return_at)} />

@@ -102,7 +102,7 @@ function Cotacoes() {
       (c) =>
         (fStatus === ALL || c.status === fStatus) &&
         (!q ||
-          `${c.code ?? ""} ${c.description} ${c.vehicle?.plate ?? ""}`.toLowerCase().includes(q)),
+          `${c.code ?? ""} ${c.description} ${(c.vehicle?.plate ?? c.vehicle?.asset_code ?? "")}`.toLowerCase().includes(q)),
     );
   }, [quotations, fStatus, search]);
 
@@ -242,7 +242,7 @@ function Cotacoes() {
                   {q.code || "—"}
                   <span className="block text-xs text-muted-foreground">{q.specialty || ""}</span>
                 </TableCell>
-                <TableCell>{q.vehicle?.plate ?? "—"}</TableCell>
+                <TableCell>{(q.vehicle?.plate ?? q.vehicle?.asset_code ?? "—")}</TableCell>
                 <TableCell className="max-w-[260px] truncate">{q.description}</TableCell>
                 <TableCell className="text-sm">{q.deadline_at ? dateTimeBR(q.deadline_at) : "—"}</TableCell>
                 <TableCell className="text-right text-sm">
@@ -284,7 +284,7 @@ function Cotacoes() {
                   <SelectContent>
                     {vehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        {v.plate} — {v.brand} {v.model}
+                        {(v.plate ?? v.asset_code)} — {v.brand} {v.model}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -604,7 +604,7 @@ function QuotationDetail({
 
       <div className="grid gap-2 rounded-md border bg-muted/30 p-3 text-sm sm:grid-cols-3">
         <p>
-          <span className="text-muted-foreground">Veículo:</span> {quotation.vehicle?.plate ?? "—"}
+          <span className="text-muted-foreground">Veículo:</span> {(quotation.vehicle?.plate ?? quotation.vehicle?.asset_code ?? "—")}
         </p>
         <p>
           <span className="text-muted-foreground">Solicitação:</span> {quotation.request?.code ?? "—"}
