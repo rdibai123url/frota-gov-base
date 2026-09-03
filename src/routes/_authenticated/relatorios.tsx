@@ -17,8 +17,11 @@ import {
   useProfile,
   useUnits,
   useVehicles,
+  useContractObjectKinds,
+  objectKindLabel,
+  CONTRACT_OBJECT_KIND_FALLBACK,
 } from "@/lib/frotagov";
-import { formatMoney, formatLiters, formatNumberBR } from "@/lib/format";
+import { formatMoney, formatLiters, formatNumberBR, formatCPF } from "@/lib/format";
 import { DIARY_STATUS } from "@/lib/diarias";
 import { logEvent } from "@/lib/platform";
 import { exportReportCsv, exportXlsx, printReport, type ReportMeta } from "@/lib/reports";
@@ -53,6 +56,7 @@ const REPORTS = [
   { value: "patrimonio", label: "Movimentação patrimonial" },
   { value: "diarias", label: "Diárias — requisições e comprovações" },
   { value: "limpeza", label: "Limpeza da frota" },
+  { value: "cotas_servidor", label: "Cotas de combustível de servidor" },
 ] as const;
 
 type ReportKey = (typeof REPORTS)[number]["value"];
@@ -72,6 +76,7 @@ const CAPS: Record<ReportKey, { date: boolean; unit: boolean; vehicle: boolean; 
   patrimonio: { date: true, unit: true, vehicle: true, driver: false },
   diarias: { date: true, unit: true, vehicle: false, driver: true },
   limpeza: { date: true, unit: true, vehicle: true, driver: false },
+  cotas_servidor: { date: true, unit: true, vehicle: true, driver: false },
 };
 
 
@@ -127,6 +132,15 @@ const LABELS: Record<string, string> = {
   valor_unitario: "Valor unitário (R$)",
   valor_total: "Valor total (R$)",
   comprovacao: "Comprovação",
+  objeto_tipo: "Objeto do contrato",
+  servidor: "Servidor",
+  cpf: "CPF",
+  matricula: "Matrícula",
+  cargo: "Cargo",
+  periodicidade: "Periodicidade",
+  cota: "Cota por ciclo",
+  consumido: "Consumido no período",
+  propriedade: "Propriedade",
 };
 
 const label = (k: string) => LABELS[k] ?? k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, " ");
@@ -144,6 +158,7 @@ function Relatorios() {
   const [unitId, setUnitId] = useState("todas");
   const [vehicleId, setVehicleId] = useState("todos");
   const [driverId, setDriverId] = useState("todos");
+  const [objectKind, setObjectKind] = useState("todos");
   const [page, setPage] = useState(1);
 
   const { data: units = [] } = useUnits();
@@ -152,11 +167,15 @@ function Relatorios() {
   const { data: org } = useOrganization();
   const { data: me } = useProfile();
   const { data: logoUrl } = useBrasaoUrl(org?.logo_url);
+  const { data: objectKinds = [] } = useContractObjectKinds();
+  const kindOptions = objectKinds.length
+    ? objectKinds.map((k) => ({ value: k.code, label: k.label }))
+    : CONTRACT_OBJECT_KIND_FALLBACK;
 
   const caps = CAPS[report];
 
   const { data, isLoading } = useQuery({
-    queryKey: ["report", report, from, to, unitId, vehicleId, driverId],
+    queryKey: ["report", report, from, to, unitId, vehicleId, driverId, objectKind],
     queryFn: async (): Promise<Record<string, unknown>[]> => {
       const unit = caps.unit && unitId !== "todas" ? unitId : null;
       const vehicle = caps.vehicle && vehicleId !== "todos" ? vehicleId : null;
@@ -168,7 +187,9 @@ function Relatorios() {
       if (report === "frota") {
         let q = supabase
           .from("vehicles")
-          .select("id, plate, asset_code, brand, model, year_model, status, current_km, unit:units(name)")
+          .select(
+            "id, plate, asset_code, brand, model, year_model, status, current_km, is_private_server_vehicle, unit:units(name)",
+          )
           .order("asset_code");
         if (unit) q = q.eq("unit_id", unit);
         if (vehicle) q = q.eq("id", vehicle);
@@ -181,6 +202,7 @@ function Relatorios() {
           modelo: v.model ?? "—",
           ano: v.year_model ?? "—",
           unidade: v.unit?.name ?? "—",
+          propriedade: v.is_private_server_vehicle ? "Particular de servidor (cota)" : "Frota oficial",
           hodometro: v.current_km ?? "—",
           situacao: v.status,
         }));
@@ -323,14 +345,16 @@ function Relatorios() {
 
       if (report === "contratos") {
         // Contratos não possuem unidade: filtramos pela vigência que intersecta o período.
-        const { data: contracts, error } = await supabase
+        let cq = supabase
           .from("contracts")
           .select(
-            "id, number, object, modality, status, valid_from, valid_to, initial_value, current_value, supplier:suppliers(trade_name, legal_name)",
+            "id, number, object, object_kind, modality, status, valid_from, valid_to, initial_value, current_value, supplier:suppliers(trade_name, legal_name)",
           )
           .lte("valid_from", to)
           .or(`valid_to.is.null,valid_to.gte.${from}`)
           .order("valid_from", { ascending: false });
+        if (objectKind !== "todos") cq = cq.eq("object_kind", objectKind);
+        const { data: contracts, error } = await cq;
         if (error) throw error;
         const { data: commitments } = await supabase
           .from("commitments")
@@ -341,6 +365,7 @@ function Relatorios() {
           const saldo = mine.reduce((s, k) => s + Number(k.available_value ?? 0), 0);
           return {
             numero: c.number ?? "—",
+            objeto_tipo: objectKindLabel(c.object_kind, objectKinds),
             objeto: c.object ?? "—",
             contratado: c.supplier?.trade_name ?? c.supplier?.legal_name ?? "—",
             tipo: c.modality ?? "—",
@@ -350,6 +375,50 @@ function Relatorios() {
             empenhado: formatMoney(empenhado),
             saldo: formatMoney(saldo),
             situacao: c.status,
+          };
+        });
+      }
+
+      if (report === "cotas_servidor") {
+        let qq = supabase
+          .from("server_fuel_quotas")
+          .select(
+            "id, beneficiary_name, beneficiary_cpf, registration_code, job_title, period, quota_quantity, quota_value, start_date, end_date, status, vehicle:vehicles(id, plate, asset_code), unit:units(name), fuel:fuel_types(name)",
+          )
+          .order("beneficiary_name");
+        if (unit) qq = qq.eq("unit_id", unit);
+        if (vehicle) qq = qq.eq("vehicle_id", vehicle);
+        const { data: quotas, error } = await qq;
+        if (error) throw error;
+
+        let fq = supabase
+          .from("fuelings")
+          .select("server_quota_id, quantity, total_value, fueled_at, status")
+          .not("server_quota_id", "is", null)
+          .eq("status", "valido")
+          .gte("fueled_at", start)
+          .lte("fueled_at", end);
+        if (vehicle) fq = fq.eq("vehicle_id", vehicle);
+        const { data: consumo } = await fq;
+
+        return (quotas ?? []).map((q) => {
+          const mine = (consumo ?? []).filter((f) => f.server_quota_id === q.id);
+          const litros = mine.reduce((s2, f) => s2 + Number(f.quantity ?? 0), 0);
+          const valor = mine.reduce((s2, f) => s2 + Number(f.total_value ?? 0), 0);
+          return {
+            servidor: q.beneficiary_name,
+            cpf: formatCPF(q.beneficiary_cpf),
+            matricula: q.registration_code ?? "—",
+            cargo: q.job_title ?? "—",
+            veiculo: q.vehicle?.plate ?? q.vehicle?.asset_code ?? "—",
+            unidade: q.unit?.name ?? "—",
+            combustivel_tipo: q.fuel?.name ?? "Qualquer",
+            periodicidade: q.period === "semanal" ? "Semanal" : "Mensal",
+            cota: `${Number(q.quota_quantity ?? 0).toLocaleString("pt-BR")} L`,
+            consumido: `${litros.toLocaleString("pt-BR")} L`,
+            valor: formatMoney(valor),
+            vigencia: `${day(q.start_date)} a ${q.end_date ? day(q.end_date) : "indeterminado"}`,
+            situacao: q.status,
           };
         });
       }
@@ -538,7 +607,7 @@ function Relatorios() {
     return Object.keys(first).map((k) => ({ key: k, label: label(k) }));
   }, [rows]);
 
-  useEffect(() => setPage(1), [report, from, to, unitId, vehicleId, driverId]);
+  useEffect(() => setPage(1), [report, from, to, unitId, vehicleId, driverId, objectKind]);
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const pageRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
@@ -559,6 +628,15 @@ function Relatorios() {
   const filters = [
     { label: "Veículo", value: caps.vehicle ? vehicleName : "Não se aplica" },
     { label: "Condutor", value: caps.driver ? driverName : "Não se aplica" },
+    {
+      label: "Objeto do contrato",
+      value:
+        report !== "contratos"
+          ? "Não se aplica"
+          : objectKind === "todos"
+            ? "Todos"
+            : objectKindLabel(objectKind, objectKinds),
+    },
   ];
 
   const meta: ReportMeta = {
@@ -647,6 +725,18 @@ function Relatorios() {
               <SelectItem value="todos">Todos</SelectItem>
               {drivers.map((d) => (
                 <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Objeto do contrato</Label>
+          <Select value={objectKind} onValueChange={setObjectKind} disabled={report !== "contratos"}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              {kindOptions.map((k) => (
+                <SelectItem key={k.value} value={k.value}>{k.label}</SelectItem>
               ))}
             </SelectContent>
           </Select>

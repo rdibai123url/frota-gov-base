@@ -56,6 +56,7 @@ const NAV: NavGroup[] = [
       { to: "/autorizacoes", label: "Autorizações" },
       { to: "/abastecimentos", label: "Abastecimentos" },
       { to: "/combustiveis", label: "Combustíveis" },
+      { to: "/cotas-servidor", label: "Cotas de servidor" },
       { to: "/fornecedores", label: "Fornecedores / Postos" },
     ],
   },

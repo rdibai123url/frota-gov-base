@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   FUEL_TYPES,
   VEHICLE_STATUS,
@@ -99,6 +100,7 @@ function Veiculos() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [unitFilter, setUnitFilter] = useState<string>("all");
+  const [ownershipFilter, setOwnershipFilter] = useState<string>("all");
   const [page, setPage] = useState(0);
 
   const [open, setOpen] = useState(false);
@@ -107,6 +109,7 @@ function Veiculos() {
   const [unitId, setUnitId] = useState<string>(NONE);
   const [vehicleType, setVehicleType] = useState<string>(NONE);
   const [fuelType, setFuelType] = useState<string>(NONE);
+  const [serverVehicle, setServerVehicle] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const canWrite = Boolean(perms.orgId) && (me?.roles ?? []).some((r) => WRITE_ROLES.includes(r));
@@ -117,12 +120,14 @@ function Veiculos() {
     return vehicles.filter((v) => {
       if (statusFilter !== "all" && v.status !== statusFilter) return false;
       if (unitFilter !== "all" && (v.unit_id ?? NONE) !== unitFilter) return false;
+      if (ownershipFilter === "servidor" && !v.is_private_server_vehicle) return false;
+      if (ownershipFilter === "oficial" && v.is_private_server_vehicle) return false;
       if (!q) return true;
       return [v.plate, v.asset_code, v.brand, v.model, v.renavam, v.chassis]
         .filter(Boolean)
         .some((f) => String(f).toLowerCase().includes(q));
     });
-  }, [vehicles, search, statusFilter, unitFilter]);
+  }, [vehicles, search, statusFilter, unitFilter, ownershipFilter]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const current = Math.min(page, pageCount - 1);
@@ -134,6 +139,7 @@ function Veiculos() {
     setUnitId(NONE);
     setVehicleType(NONE);
     setFuelType(NONE);
+    setServerVehicle(false);
     setOpen(true);
   }
 
@@ -143,6 +149,7 @@ function Veiculos() {
     setUnitId(v.unit_id ?? NONE);
     setVehicleType(v.vehicle_type ?? NONE);
     setFuelType(v.fuel_type ?? NONE);
+    setServerVehicle(Boolean(v.is_private_server_vehicle));
     setOpen(true);
   }
 
@@ -175,6 +182,7 @@ function Veiculos() {
       // A unidade só muda pelo fluxo de movimentação patrimonial (Frota → Movimentação patrimonial).
       ...(editing ? {} : { unit_id: safeUnitId }),
       status,
+      is_private_server_vehicle: serverVehicle,
       notes: d.notes || null,
     };
 
@@ -261,6 +269,16 @@ function Veiculos() {
             ))}
           </SelectContent>
         </Select>
+        <Select value={ownershipFilter} onValueChange={(v) => { setOwnershipFilter(v); setPage(0); }}>
+          <SelectTrigger>
+            <SelectValue placeholder="Propriedade" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Oficiais e de servidor</SelectItem>
+            <SelectItem value="oficial">Somente frota oficial</SelectItem>
+            <SelectItem value="servidor">Somente particulares de servidor</SelectItem>
+          </SelectContent>
+        </Select>
         <Select
           value={unitFilter}
           onValueChange={(v) => {
@@ -316,7 +334,14 @@ function Veiculos() {
             )}
             {rows.map((v) => (
               <TableRow key={v.id}>
-                <TableCell className="font-medium">{v.plate}</TableCell>
+                <TableCell className="font-medium">
+                  {v.plate}
+                  {v.is_private_server_vehicle && (
+                    <Badge variant="outline" className="ml-2 align-middle text-[10px]">
+                      Servidor · cota
+                    </Badge>
+                  )}
+                </TableCell>
                 <TableCell>{v.asset_code || "—"}</TableCell>
                 <TableCell>
                   {[v.brand, v.model].filter(Boolean).join(" ") || "—"}
@@ -526,6 +551,22 @@ function Veiculos() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="flex items-start gap-2 rounded-md border p-3 sm:col-span-2 lg:col-span-3">
+                <Checkbox
+                  id="server_vehicle"
+                  checked={serverVehicle}
+                  onCheckedChange={(v) => setServerVehicle(v === true)}
+                />
+                <div>
+                  <Label htmlFor="server_vehicle" className="cursor-pointer">
+                    Veículo particular de servidor com cota de combustível
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    O abastecimento passa a exigir cota vigente do servidor, cadastrada em Abastecimento → Cotas de
+                    servidor, e é bloqueado quando a cota do ciclo se esgota.
+                  </p>
+                </div>
               </div>
               <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
                 <Label htmlFor="notes">Observações</Label>
