@@ -341,7 +341,19 @@ function Painel() {
         <StatCard label="Secretarias / Unidades" value={units.length} icon={Building2} />
         <StatCard label="Usuários" value={users.length} icon={Users} />
       </div>
+        </TabsContent>
 
+        <TabsContent value="abastecimento" className="pt-5">
+      <h2 className="gov-title mb-4 text-lg">Abastecimento no mês</h2>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <StatCard label="Abastecimentos no mês" value={mes.count} icon={Fuel} />
+        <StatCard label="Quantidade abastecida" value={num(mes.quantity, 2)} icon={Droplets} />
+        <StatCard label="Valor gasto no mês" value={brl(mes.total)} icon={Banknote} />
+        <StatCard label="Veículos abastecidos" value={mes.vehicles} icon={Truck} />
+        <StatCard label="Alertas em aberto" value={abertos} icon={BellRing} tone={abertos > 0 ? "warning" : "default"} />
+      </div>
+
+      <h2 className="gov-title mt-10 mb-4 text-lg">Condutores e autorizações</h2>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard label="Condutores ativos" value={condutoresAtivos} icon={IdCard} />
         <StatCard label="CNHs vencidas" value={cnhVencidas} icon={IdCard} tone={cnhVencidas > 0 ? "warning" : "default"} />
@@ -349,8 +361,11 @@ function Painel() {
         <StatCard label="Autorizações abertas" value={autAbertas} icon={Ticket} />
         <StatCard label="Autorizações utilizadas no mês" value={autUsadasMes} icon={Ticket} tone="success" />
       </div>
+        </TabsContent>
 
-      <h2 className="gov-title mt-10 mb-4 text-lg">Manutenção, peças e pneus</h2>
+        <TabsContent value="manutencao" className="pt-5">
+      <h2 className="gov-title mb-4 text-lg">Manutenção, peças e pneus</h2>
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
         <StatCard
           label="Preventivas vencidas"
