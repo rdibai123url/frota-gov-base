@@ -862,7 +862,7 @@ function DetailDialog({ fueling, onClose }: { fueling: FuelingRow | null; onClos
           <div className="sm:col-span-3 border-t pt-3">
             <p className="gov-title text-sm">Origem do recurso</p>
           </div>
-          <Row label="Origem da despesa" value={EXPENSE_ORIGIN_LABELS[fueling.expense_origin] ?? fueling.expense_origin} />
+          <Row label="Origem da despesa" value={EXPENSE_ORIGINS.find((o) => o.value === fueling.expense_origin)?.label ?? fueling.expense_origin} />
           <Row label="Contrato" value={fueling.contract?.number ?? "—"} />
           <Row label="Item contratual" value={fueling.contract_item?.description ?? "—"} />
           <Row label="Empenho" value={fueling.commitment ? `${fueling.commitment.number}/${fueling.commitment.exercise}` : "—"} />
