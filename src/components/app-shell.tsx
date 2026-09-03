@@ -41,6 +41,9 @@ export function AppShell({ children }: { children: ReactNode }) {
     navigate({ to: "/auth", replace: true });
   }
 
+  const primaryRole = me?.roles?.[0];
+  const primaryRoleLabel = primaryRole ? ROLE_LABELS[primaryRole] : "Sem perfil atribuído";
+
   const sidebar = (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
       <div className="flex items-center gap-3 border-b border-sidebar-border px-5 py-5">
@@ -77,9 +80,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <div className="border-t border-sidebar-border px-4 py-4 text-xs">
         <p className="truncate font-medium">{me?.profile?.full_name || me?.email}</p>
-        <p className="mt-0.5 truncate opacity-70">
-          {me?.roles?.length ? ROLE_LABELS[me.roles[0]] : "Sem perfil atribuído"}
-        </p>
+        <p className="mt-0.5 truncate opacity-70">{primaryRoleLabel}</p>
         <Button
           variant="ghost"
           size="sm"
