@@ -425,6 +425,7 @@ function NewFuelingDialog({
   const [notes, setNotes] = useState("");
   const [justification, setJustification] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [closeAuth, setCloseAuth] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const usableAuths = useMemo(() => auths.filter((a) => authorizationUsable(a)), [auths]);
