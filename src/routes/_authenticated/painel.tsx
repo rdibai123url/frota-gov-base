@@ -13,12 +13,19 @@ import {
   Banknote,
   BellRing,
   Store,
+  IdCard,
+  Ticket,
+  CalendarClock,
 } from "lucide-react";
 
 import { PageHeader } from "@/components/app-shell";
 import {
+  authorizationBalance,
   brl,
+  cnhState,
   num,
+  useAuthorizations,
+  useDrivers,
   useFuelingAlerts,
   useFuelings,
   useOrgUsers,
@@ -75,6 +82,9 @@ function StatCard({
 const SHORTCUTS = [
   { to: "/abastecimentos", label: "Abastecimentos", text: "Registrar e consultar abastecimentos", icon: Fuel },
   { to: "/veiculos", label: "Veículos", text: "Cadastrar e consultar a frota", icon: Truck },
+  { to: "/condutores", label: "Condutores", text: "Habilitação e vínculo dos condutores", icon: IdCard },
+  { to: "/utilizacao", label: "Utilização e reservas", text: "Reservas, saídas e retornos de veículos", icon: CalendarClock },
+  { to: "/autorizacoes", label: "Autorizações", text: "Autorizar abastecimentos antes da compra", icon: Ticket },
   { to: "/fornecedores", label: "Fornecedores / Postos", text: "Postos habilitados para o órgão", icon: Store },
   { to: "/combustiveis", label: "Combustíveis", text: "Tipos de combustível do órgão", icon: Droplets },
   { to: "/unidades", label: "Secretarias / Unidades", text: "Estrutura administrativa do órgão", icon: Building2 },
@@ -89,6 +99,8 @@ function Painel() {
   const { data: org } = useOrganization();
   const { data: fuelings = [] } = useFuelings();
   const { data: alerts = [] } = useFuelingAlerts();
+  const { data: drivers = [] } = useDrivers();
+  const { data: auths = [] } = useAuthorizations();
 
   const ativos = vehicles.filter((v) => v.status === "ativo").length;
   const manutencao = vehicles.filter((v) => v.status === "manutencao").length;
@@ -106,6 +118,19 @@ function Painel() {
   }, [fuelings]);
 
   const abertos = alerts.filter((a) => a.status === "aberto").length;
+
+  const condutoresAtivos = drivers.filter((d) => d.active).length;
+  const cnhVencidas = drivers.filter((d) => cnhState(d.license_expiry) === "vencida").length;
+  const cnhAVencer = drivers.filter((d) => cnhState(d.license_expiry) === "a_vencer").length;
+  const autAbertas = auths.filter(
+    (a) => ["autorizada", "pendente", "utilizada_parcial"].includes(a.status) && authorizationBalance(a) > 0,
+  ).length;
+  const autUsadasMes = useMemo(() => {
+    const start = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    return auths.filter(
+      (a) => ["utilizada", "utilizada_parcial"].includes(a.status) && new Date(a.updated_at) >= start,
+    ).length;
+  }, [auths]);
 
   const ultimos6 = useMemo(() => {
     const base = new Date();
@@ -152,6 +177,15 @@ function Painel() {
         <StatCard label="Valor gasto no mês" value={brl(mes.total)} icon={Banknote} />
         <StatCard label="Veículos abastecidos" value={mes.vehicles} icon={Truck} />
         <StatCard label="Alertas em aberto" value={abertos} icon={BellRing} tone={abertos > 0 ? "warning" : "default"} />
+      </div>
+
+      <h2 className="gov-title mt-10 mb-4 text-lg">Condutores e autorizações</h2>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <StatCard label="Condutores ativos" value={condutoresAtivos} icon={IdCard} />
+        <StatCard label="CNHs vencidas" value={cnhVencidas} icon={IdCard} tone={cnhVencidas > 0 ? "warning" : "default"} />
+        <StatCard label="CNHs a vencer (30 dias)" value={cnhAVencer} icon={IdCard} tone={cnhAVencer > 0 ? "warning" : "default"} />
+        <StatCard label="Autorizações abertas" value={autAbertas} icon={Ticket} />
+        <StatCard label="Autorizações utilizadas no mês" value={autUsadasMes} icon={Ticket} tone="success" />
       </div>
 
       <h2 className="gov-title mt-10 mb-4 text-lg">Gasto dos últimos 6 meses</h2>

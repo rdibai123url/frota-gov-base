@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Plus,
   Search,
@@ -37,12 +37,16 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   ALERT_TYPE_LABELS,
+  authorizationBalance,
+  authorizationUsable,
   brl,
   dateTimeBR,
   evaluateFueling,
   num,
   supabase,
+  useAuthorizations,
   useComprovanteUrl,
+  useDrivers,
   useFuelTypes,
   useFuelings,
   useInvalidate,
@@ -50,6 +54,7 @@ import {
   useSuppliers,
   useUnits,
   useVehicles,
+  type AuthorizationRow,
   type FuelingRow,
   type RuleIssue,
   type Vehicle,
@@ -376,9 +381,14 @@ function NewFuelingDialog({
   const { data: suppliers = [] } = useSuppliers();
   const { data: fuels = [] } = useFuelTypes();
   const { data: history = [] } = useFuelings();
+  const { data: auths = [] } = useAuthorizations();
+  const { data: drivers = [] } = useDrivers();
   const perms = usePerms();
 
   const now = new Date();
+  const [authId, setAuthId] = useState(NONE);
+  const [driverId, setDriverId] = useState(NONE);
+  const [noAuthReason, setNoAuthReason] = useState("");
   const [vehicleId, setVehicleId] = useState(NONE);
   const [supplierId, setSupplierId] = useState(NONE);
   const [fuelId, setFuelId] = useState(NONE);
@@ -396,6 +406,18 @@ function NewFuelingDialog({
   const [justification, setJustification] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const usableAuths = useMemo(() => auths.filter((a) => authorizationUsable(a)), [auths]);
+  const selectedAuth: AuthorizationRow | null = usableAuths.find((a) => a.id === authId) ?? null;
+
+  // Ao escolher a autorização, os dados já definidos são preenchidos automaticamente.
+  useEffect(() => {
+    if (!selectedAuth) return;
+    setVehicleId(selectedAuth.vehicle_id);
+    if (selectedAuth.fuel_type_id) setFuelId(selectedAuth.fuel_type_id);
+    if (selectedAuth.supplier_id) setSupplierId(selectedAuth.supplier_id);
+    if (selectedAuth.driver_id) setDriverId(selectedAuth.driver_id);
+  }, [selectedAuth]);
 
   const vehicle: Vehicle | null = vehicles.find((v) => v.id === vehicleId) ?? null;
   const unit = units.find((u) => u.id === vehicle?.unit_id) ?? null;
@@ -424,13 +446,66 @@ function NewFuelingDialog({
     [vehicle, fuel, supplier, date, time, qty, price, odometer, hourMeter, history],
   );
 
-  const errors = issues.filter((i) => i.level === "erro");
-  const alerts = issues.filter((i) => i.level === "alerta");
+  const authIssues: RuleIssue[] = [];
+  if (selectedAuth) {
+    const saldo = authorizationBalance(selectedAuth);
+    if (qty > saldo + 0.001)
+      authIssues.push({
+        level: "erro",
+        type: "acima_do_autorizado",
+        message: `Quantidade (${num(qty, 2)}) excede o saldo autorizado (${num(saldo, 2)}).`,
+      });
+    if (selectedAuth.max_unit_price && price > Number(selectedAuth.max_unit_price) + 0.0001)
+      authIssues.push({
+        level: "erro",
+        type: "acima_do_autorizado",
+        message: `Preço unitário acima do máximo autorizado (${brl(selectedAuth.max_unit_price)}).`,
+      });
+    if (selectedAuth.max_value && total > Number(selectedAuth.max_value) + 0.01)
+      authIssues.push({
+        level: "erro",
+        type: "acima_do_autorizado",
+        message: `Valor total acima do máximo autorizado (${brl(selectedAuth.max_value)}).`,
+      });
+    if (new Date(`${date}T${time}:00`) > new Date(selectedAuth.valid_until))
+      authIssues.push({
+        level: "erro",
+        type: "autorizacao_expirada",
+        message: "A autorização selecionada já expirou para a data informada.",
+      });
+    if (vehicleId !== selectedAuth.vehicle_id)
+      authIssues.push({
+        level: "erro",
+        type: "acima_do_autorizado",
+        message: "O veículo deve ser o mesmo da autorização.",
+      });
+  } else {
+    authIssues.push({
+      level: "alerta",
+      type: "abastecimento_sem_autorizacao",
+      message: perms.canWrite
+        ? "Abastecimento sem autorização prévia: exige justificativa e gera alerta na auditoria."
+        : "Seu perfil só pode registrar abastecimentos vinculados a uma autorização válida.",
+    });
+  }
+
+  const allIssues = [...issues, ...authIssues];
+  const errors = allIssues.filter((i) => i.level === "erro");
+  const alerts = allIssues.filter((i) => i.level === "alerta");
+  const needsAuthReason = !selectedAuth;
   const needsJustification = alerts.some((a) => JUSTIFY_TYPES.includes(a.type));
 
   async function submit() {
     if (errors.length > 0) {
       toast.error("Corrija os erros antes de salvar.");
+      return;
+    }
+    if (needsAuthReason && !perms.canWrite) {
+      toast.error("Somente gestores podem registrar abastecimento sem autorização prévia.");
+      return;
+    }
+    if (needsAuthReason && noAuthReason.trim().length < 10) {
+      toast.error("Justifique o abastecimento sem autorização (mínimo de 10 caracteres).");
       return;
     }
     if (needsJustification && !perms.canWrite) {
@@ -469,14 +544,17 @@ function NewFuelingDialog({
         supplier_id: supplier?.id ?? null,
         fuel_type_id: fuel!.id,
         fueled_at: new Date(`${date}T${time}:00`).toISOString(),
-        driver_name: driver || null,
+        driver_id: driverId === NONE ? null : driverId,
+        driver_name: driverId === NONE ? driver || null : null,
+        authorization_id: selectedAuth?.id ?? null,
+        without_authorization_reason: needsAuthReason ? noAuthReason.trim() : null,
         operator_name: operator || perms.userName || null,
         odometer_km: odometer === "" ? null : Number(odometer.replace(",", ".")),
         hour_meter: hourMeter === "" ? null : Number(hourMeter.replace(",", ".")),
         quantity: qty,
         unit_price: price,
         invoice_number: invoice || null,
-        authorization_number: authorization || null,
+        authorization_number: selectedAuth?.code ?? (authorization || null),
         notes: notes || null,
         alert_flags: alerts.map((a) => a.type),
         alert_justification: needsJustification ? justification.trim() : null,
@@ -500,7 +578,11 @@ function NewFuelingDialog({
           alert_type: a.type,
           severity: "alerta" as const,
           message: a.message,
-          justification: JUSTIFY_TYPES.includes(a.type) ? justification.trim() : null,
+          justification: JUSTIFY_TYPES.includes(a.type)
+            ? justification.trim()
+            : a.type === "abastecimento_sem_autorizacao"
+              ? noAuthReason.trim()
+              : null,
           created_by: perms.userId,
         })),
       );
@@ -538,6 +620,33 @@ function NewFuelingDialog({
         </DialogHeader>
 
         <div className="space-y-4">
+          <div className="rounded-lg border bg-muted/30 p-4">
+            <Label>Autorização de abastecimento</Label>
+            <Select value={authId} onValueChange={setAuthId}>
+              <SelectTrigger className="mt-1"><SelectValue placeholder="Selecione a autorização" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>Sem autorização prévia (exige justificativa)</SelectItem>
+                {usableAuths.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>
+                    {a.code} — {a.vehicle?.plate} · saldo {num(authorizationBalance(a), 2)} {a.fuel?.measure_unit ?? "L"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {selectedAuth && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Saldo disponível: <strong>{num(authorizationBalance(selectedAuth), 2)}</strong> ·
+                {selectedAuth.max_unit_price ? ` preço máx. ${brl(selectedAuth.max_unit_price)} ·` : ""}
+                {selectedAuth.max_value ? ` valor máx. ${brl(selectedAuth.max_value)} ·` : ""} válida até {dateTimeBR(selectedAuth.valid_until)}
+              </p>
+            )}
+            {needsAuthReason && (
+              <div className="mt-3">
+                <Label htmlFor="noauth">Justificativa da ausência de autorização *</Label>
+                <Textarea id="noauth" rows={2} value={noAuthReason} onChange={(e) => setNoAuthReason(e.target.value)} />
+              </div>
+            )}
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label>Veículo / equipamento *</Label>
@@ -600,8 +709,18 @@ function NewFuelingDialog({
               <Input id="operator" value={operator} onChange={(e) => setOperator(e.target.value)} />
             </div>
             <div>
-              <Label htmlFor="driver">Condutor (opcional)</Label>
-              <Input id="driver" value={driver} onChange={(e) => setDriver(e.target.value)} />
+              <Label>Condutor</Label>
+              <Select value={driverId} onValueChange={setDriverId}>
+                <SelectTrigger><SelectValue placeholder="Selecione o condutor" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>Não informado</SelectItem>
+                  {drivers.map((d) => (
+                    <SelectItem key={d.id} value={d.id} disabled={!d.active}>
+                      {d.full_name}{d.active ? "" : " (inativo)"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="odometer">Quilometragem atual (km)</Label>
@@ -658,7 +777,7 @@ function NewFuelingDialog({
             </div>
           </div>
 
-          <IssueList issues={issues} />
+          <IssueList issues={allIssues} />
 
           {needsJustification && (
             <div>
@@ -723,7 +842,18 @@ function DetailDialog({ fueling, onClose }: { fueling: FuelingRow | null; onClos
           <Row label="Valor total" value={brl(Number(fueling.total_value))} />
           <Row label="KM registrado" value={fueling.odometer_km != null ? num(Number(fueling.odometer_km), 0) : null} />
           <Row label="Horímetro" value={fueling.hour_meter != null ? num(Number(fueling.hour_meter), 1) : null} />
-          <Row label="Condutor" value={fueling.driver_name} />
+          <Row
+            label="Condutor"
+            value={
+              fueling.driver?.full_name ??
+              (fueling.driver_name ? `${fueling.driver_name} (condutor histórico não vinculado)` : "—")
+            }
+          />
+          <Row
+            label="Autorização"
+            value={fueling.authorization?.code ?? (fueling.without_authorization_reason ? "Sem autorização prévia" : "—")}
+          />
+          <Row label="Justificativa (sem autorização)" value={fueling.without_authorization_reason ?? "—"} />
           <Row label="Registrado por" value={fueling.operator_name} />
           <Row label="Nota fiscal" value={fueling.invoice_number} />
           <Row label="Autorização" value={fueling.authorization_number} />
