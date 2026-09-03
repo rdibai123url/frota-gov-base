@@ -18,7 +18,8 @@ import {
   useUnits,
   useVehicles,
 } from "@/lib/frotagov";
-import { formatMoney, formatLiters } from "@/lib/format";
+import { formatMoney, formatLiters, formatNumberBR } from "@/lib/format";
+import { DIARY_STATUS } from "@/lib/diarias";
 import { logEvent } from "@/lib/platform";
 import { exportReportCsv, exportXlsx, printReport, type ReportMeta } from "@/lib/reports";
 
@@ -129,6 +130,7 @@ const label = (k: string) => LABELS[k] ?? k.charAt(0).toUpperCase() + k.slice(1)
 const firstDayOfYear = () => `${new Date().getFullYear()}-01-01`;
 const today = () => new Date().toISOString().slice(0, 10);
 const day = (v?: string | null) => (v ? new Date(v).toLocaleDateString("pt-BR") : "—");
+const dt = (v?: string | null) => (v ? new Date(v).toLocaleString("pt-BR") : "—");
 const PAGE_SIZE = 50;
 
 function Relatorios() {
