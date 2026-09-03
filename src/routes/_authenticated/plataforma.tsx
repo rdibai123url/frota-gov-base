@@ -97,6 +97,8 @@ function Plataforma() {
           <TabsTrigger value="usuarios">Usuários globais</TabsTrigger>
           <TabsTrigger value="logs">Logs globais</TabsTrigger>
           <TabsTrigger value="reaberturas">Reaberturas</TabsTrigger>
+          <TabsTrigger value="importacao">Importação e migração</TabsTrigger>
+
           <TabsTrigger value="config">Configurações</TabsTrigger>
           <TabsTrigger value="documentacao">Documentação / Homologação</TabsTrigger>
           <TabsTrigger value="matriz">Matriz de funcionalidades</TabsTrigger>
