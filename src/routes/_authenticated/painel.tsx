@@ -316,7 +316,7 @@ function Painel() {
   return (
     <>
       <PageHeader
-        title="Painel"
+        title="Painel executivo"
         description={
           org?.legal_name
             ? `Visão geral da frota de ${org.short_name || org.legal_name}.`
@@ -324,6 +324,16 @@ function Painel() {
         }
       />
 
+      <Tabs defaultValue="geral">
+        <TabsList className="flex h-auto flex-wrap justify-start">
+          <TabsTrigger value="geral">Visão geral</TabsTrigger>
+          <TabsTrigger value="abastecimento">Abastecimento</TabsTrigger>
+          <TabsTrigger value="manutencao">Manutenção</TabsTrigger>
+          <TabsTrigger value="financeiro">Financeiro / Contratual</TabsTrigger>
+          <TabsTrigger value="administrativo">Administrativo / Legal</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="geral" className="pt-5">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard label="Total de veículos" value={isLoading ? "—" : vehicles.length} icon={Truck} />
         <StatCard label="Veículos ativos" value={ativos} icon={CircleCheck} tone="success" />
@@ -332,16 +342,6 @@ function Painel() {
         <StatCard label="Usuários" value={users.length} icon={Users} />
       </div>
 
-      <h2 className="gov-title mt-10 mb-4 text-lg">Abastecimento no mês</h2>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <StatCard label="Abastecimentos no mês" value={mes.count} icon={Fuel} />
-        <StatCard label="Quantidade abastecida" value={num(mes.quantity, 2)} icon={Droplets} />
-        <StatCard label="Valor gasto no mês" value={brl(mes.total)} icon={Banknote} />
-        <StatCard label="Veículos abastecidos" value={mes.vehicles} icon={Truck} />
-        <StatCard label="Alertas em aberto" value={abertos} icon={BellRing} tone={abertos > 0 ? "warning" : "default"} />
-      </div>
-
-      <h2 className="gov-title mt-10 mb-4 text-lg">Condutores e autorizações</h2>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard label="Condutores ativos" value={condutoresAtivos} icon={IdCard} />
         <StatCard label="CNHs vencidas" value={cnhVencidas} icon={IdCard} tone={cnhVencidas > 0 ? "warning" : "default"} />
