@@ -14,6 +14,7 @@ import {
   BellRing,
   Store,
   IdCard,
+  Plane,
   Ticket,
   CalendarClock,
   FileText,
@@ -33,6 +34,7 @@ import {
 } from "lucide-react";
 
 import { PageHeader } from "@/components/app-shell";
+import { useDiaries, diaryIndicators } from "@/lib/diarias";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   authorizationBalance,
@@ -153,6 +155,8 @@ function Painel() {
   const { data: contracts = [] } = useContracts();
   const { data: commitments = [] } = useCommitments();
   const { data: quotas = [] } = useQuotas();
+  const { data: diaries = [] } = useDiaries();
+  const diariasKpi = useMemo(() => diaryIndicators(diaries), [diaries]);
 
   const financeiro = useMemo(() => {
     const vigentes = contracts.filter((c) => c.status === "vigente");
@@ -476,6 +480,25 @@ function Painel() {
         />
         <StatCard label="Movimentações patrimoniais no mês" value={admin.movimentacoesMes} icon={ArrowLeftRight} />
         <StatCard label="Baixas e alienações acumuladas" value={admin.baixas} icon={Landmark} />
+      </div>
+
+      <h2 className="gov-title mb-4 mt-8 text-lg">Diárias</h2>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <StatCard label="Solicitadas no mês" value={diariasKpi.requestedMonth} icon={Plane} />
+        <StatCard label="Autorizadas" value={diariasKpi.authorized} icon={FileCheck2} tone="success" />
+        <StatCard
+          label="Aguardando comprovação"
+          value={diariasKpi.awaitingProof}
+          icon={FileWarning}
+          tone={diariasKpi.awaitingProof > 0 ? "warning" : "default"}
+        />
+        <StatCard
+          label="Comprovações vencidas"
+          value={diariasKpi.overdue}
+          icon={AlertTriangle}
+          tone={diariasKpi.overdue > 0 ? "warning" : "default"}
+        />
+        <StatCard label="Valor de diárias no mês" value={brl(diariasKpi.totalValue)} icon={Banknote} />
       </div>
 
         </TabsContent>
