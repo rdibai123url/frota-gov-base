@@ -115,6 +115,10 @@ function Plataforma() {
         <TabsContent value="reaberturas" className="pt-5">
           <ReopenReviewTab />
         </TabsContent>
+        <TabsContent value="importacao" className="pt-5">
+          <ImportMigrationTab />
+        </TabsContent>
+
         <TabsContent value="config" className="pt-5">
           <SettingsTab />
         </TabsContent>
