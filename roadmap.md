@@ -3,7 +3,7 @@
 Execução em etapas. Cada bloco só é marcado como concluído após migração + UI + teste.
 
 ## Blocos
-- [ ] 1. Máquinas e equipamentos (cadastro próprio integrado à frota)
+- [x] 1. Máquinas e equipamentos (cadastro próprio integrado à frota) — migração, página /equipamentos, menu, identificação por patrimônio em todas as telas e 5 bens demonstrativos
 - [ ] 2. Inteligência de consumo e custos (km/L, L/h, rankings, desvios)
 - [ ] 3. TCO e economicidade
 - [ ] 4. FIPE / valor de referência (conector não configurado)
