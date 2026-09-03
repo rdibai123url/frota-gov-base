@@ -37,6 +37,8 @@ import {
   useMaintenanceRequests,
   usePartsCatalog,
   usePerms,
+  uploadMaintenanceFile,
+  openMaintenanceFile,
   useQuotas,
   useSuppliers,
   useUnits,
@@ -130,6 +132,7 @@ function Manutencoes() {
   const [reqPriority, setReqPriority] = useState<MaintenancePriority>("normal");
   const [reqStatus, setReqStatus] = useState<MaintenanceRequestStatus>("aberta");
   const [savingReq, setSavingReq] = useState(false);
+  const [reqFile, setReqFile] = useState<File | null>(null);
 
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelTarget, setCancelTarget] = useState<MaintenanceRequestRow | null>(null);
@@ -145,6 +148,7 @@ function Manutencoes() {
   const [recCommitment, setRecCommitment] = useState(NONE);
   const [recQuota, setRecQuota] = useState(NONE);
   const [savingRec, setSavingRec] = useState(false);
+  const [recFile, setRecFile] = useState<File | null>(null);
 
   const [partsOpen, setPartsOpen] = useState(false);
   const [partsTarget, setPartsTarget] = useState<MaintenanceRecordRow | null>(null);
@@ -229,6 +233,16 @@ function Manutencoes() {
     }
     const d = parsed.data;
     setSavingReq(true);
+    let reqAttachment: string | null = null;
+    if (reqFile) {
+      try {
+        reqAttachment = await uploadMaintenanceFile(orgId!, reqFile, "solicitacoes");
+      } catch (err) {
+        setSavingReq(false);
+        toast.error(err instanceof Error ? err.message : "Falha ao enviar o anexo.");
+        return;
+      }
+    }
     const payload = {
       vehicle_id: reqVehicle,
       unit_id: reqUnit === NONE ? null : reqUnit,
@@ -241,6 +255,7 @@ function Manutencoes() {
       odometer_km: numOrNull(d.odometer_km ?? null),
       hour_meter: numOrNull(d.hour_meter ?? null),
       notes: d.notes || null,
+      ...(reqAttachment ? { attachment_path: reqAttachment } : {}),
     };
     const { error } = editingReq
       ? await supabase.from("maintenance_requests").update({ ...payload, updated_by: userId }).eq("id", editingReq.id)
@@ -257,6 +272,7 @@ function Manutencoes() {
       return;
     }
     toast.success(editingReq ? "Solicitação atualizada." : "Solicitação registrada.");
+    setReqFile(null);
     invalidate(["maintenance-requests", "vehicles", "vehicle-status-history"]);
     setReqOpen(false);
   }
@@ -324,6 +340,16 @@ function Manutencoes() {
       return;
     }
     setSavingRec(true);
+    let recAttachment: string | null = null;
+    if (recFile) {
+      try {
+        recAttachment = await uploadMaintenanceFile(orgId!, recFile, "manutencoes");
+      } catch (err) {
+        setSavingRec(false);
+        toast.error(err instanceof Error ? err.message : "Falha ao enviar o anexo.");
+        return;
+      }
+    }
     const payload = {
       vehicle_id: recVehicle,
       request_id: recRequest === NONE ? null : recRequest,
@@ -345,6 +371,7 @@ function Manutencoes() {
       commitment_id: recCommitment === NONE ? null : recCommitment,
       quota_id: recQuota === NONE ? null : recQuota,
       expense_origin: (recCommitment !== NONE ? "contrato" : "compra_direta") as "contrato" | "compra_direta",
+      ...(recAttachment ? { attachment_path: recAttachment } : {}),
     };
     const { error } = editingRec
       ? await supabase.from("maintenance_records").update({ ...payload, updated_by: userId }).eq("id", editingRec.id)
@@ -355,6 +382,7 @@ function Manutencoes() {
       return;
     }
     toast.success(editingRec ? "Manutenção atualizada." : "Manutenção registrada.");
+    setRecFile(null);
     invalidate(["maintenance-records", "maintenance-requests", "vehicles"]);
     setRecOpen(false);
   }
@@ -868,6 +896,25 @@ function Manutencoes() {
                 <Label htmlFor="notes">Observações</Label>
                 <Textarea id="notes" name="notes" rows={2} defaultValue={editingReq?.notes ?? ""} />
               </div>
+              <div className="sm:col-span-3">
+                <Label htmlFor="req-file">Foto ou documento (opcional)</Label>
+                <Input
+                  id="req-file"
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => setReqFile(e.target.files?.[0] ?? null)}
+                />
+                {editingReq?.attachment_path && (
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="h-auto p-0 text-xs"
+                    onClick={() => openMaintenanceFile(editingReq.attachment_path!)}
+                  >
+                    Ver anexo atual
+                  </Button>
+                )}
+              </div>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setReqOpen(false)}>
@@ -1077,6 +1124,25 @@ function Manutencoes() {
               <div className="sm:col-span-3">
                 <Label htmlFor="notes">Observações</Label>
                 <Textarea id="notes" name="notes" rows={2} defaultValue={editingRec?.notes ?? ""} />
+              </div>
+              <div className="sm:col-span-3">
+                <Label htmlFor="rec-file">Nota fiscal ou documento (opcional)</Label>
+                <Input
+                  id="rec-file"
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => setRecFile(e.target.files?.[0] ?? null)}
+                />
+                {editingRec?.attachment_path && (
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="h-auto p-0 text-xs"
+                    onClick={() => openMaintenanceFile(editingRec.attachment_path!)}
+                  >
+                    Ver anexo atual
+                  </Button>
+                )}
               </div>
             </div>
             <p className="text-xs text-muted-foreground">

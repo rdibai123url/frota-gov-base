@@ -841,6 +841,9 @@ export const ALERT_CATEGORIES: { value: string; label: string }[] = [
   { value: "cota", label: "Cota" },
   { value: "bloqueio", label: "Bloqueio por saldo" },
   { value: "manutencao", label: "Manutenção" },
+  { value: "cotacao", label: "Cotação" },
+  { value: "ordem_servico", label: "Ordem de serviço" },
+  { value: "credenciamento", label: "Credenciamento" },
 ];
 
 export const FINANCE_ALERT_LABELS: Record<string, string> = {
@@ -862,6 +865,11 @@ export const FINANCE_ALERT_LABELS: Record<string, string> = {
   manutencao_vencido: "Manutenção preventiva vencida",
   manutencao_proximo: "Manutenção preventiva próxima do vencimento",
   garantia_a_vencer: "Garantia a vencer",
+  cotacao_prazo_proximo: "Prazo de propostas próximo do fim",
+  cotacao_prazo_vencido: "Prazo de propostas encerrado",
+  cotacao_insuficiente: "Processo com menos de 3 propostas válidas",
+  os_atrasada: "Ordem de serviço atrasada",
+  credenciamento_vencendo: "Credenciamento de oficina vencendo",
 };
 
 export function alertLabel(type: string) {
@@ -1346,4 +1354,270 @@ export function useVehicleStatusHistory(vehicleId: string | null) {
 
 export async function refreshMaintenanceAlerts() {
   await supabase.rpc("refresh_maintenance_alerts");
+}
+
+/* ===================== FASE 6 — REDE CREDENCIADA, COTAÇÕES E OS ===================== */
+
+export type Workshop = Database["public"]["Tables"]["workshops"]["Row"];
+export type Quotation = Database["public"]["Tables"]["quotations"]["Row"];
+export type QuotationItem = Database["public"]["Tables"]["quotation_items"]["Row"];
+export type QuotationInvitation = Database["public"]["Tables"]["quotation_invitations"]["Row"];
+export type QuotationProposal = Database["public"]["Tables"]["quotation_proposals"]["Row"];
+export type QuotationProposalItem = Database["public"]["Tables"]["quotation_proposal_items"]["Row"];
+export type ServiceOrder = Database["public"]["Tables"]["service_orders"]["Row"];
+export type ServiceOrderItem = Database["public"]["Tables"]["service_order_items"]["Row"];
+
+export type WorkshopStatus = Database["public"]["Enums"]["workshop_status"];
+export type QuotationStatus = Database["public"]["Enums"]["quotation_status"];
+export type ProposalStatus = Database["public"]["Enums"]["proposal_status"];
+export type InvitationStatus = Database["public"]["Enums"]["invitation_status"];
+export type ServiceOrderStatus = Database["public"]["Enums"]["service_order_status"];
+
+export type QuotationRow = Quotation & {
+  vehicle: Pick<Vehicle, "id" | "plate" | "brand" | "model"> | null;
+  request: Pick<MaintenanceRequest, "id" | "code" | "description"> | null;
+  unit: Pick<Unit, "id" | "name" | "acronym"> | null;
+};
+export type ProposalRow = QuotationProposal & {
+  workshop: Pick<Workshop, "id" | "legal_name" | "trade_name" | "cnpj"> | null;
+};
+export type InvitationRow = QuotationInvitation & {
+  workshop: Pick<Workshop, "id" | "legal_name" | "trade_name" | "specialties" | "status"> | null;
+};
+export type ServiceOrderRow = ServiceOrder & {
+  vehicle: Pick<Vehicle, "id" | "plate" | "brand" | "model"> | null;
+  workshop: Pick<Workshop, "id" | "legal_name" | "trade_name" | "cnpj" | "phone"> | null;
+  quotation: Pick<Quotation, "id" | "code"> | null;
+  unit: Pick<Unit, "id" | "name" | "acronym"> | null;
+};
+
+export const WORKSHOP_STATUS: { value: WorkshopStatus; label: string }[] = [
+  { value: "em_analise", label: "Em análise" },
+  { value: "ativo", label: "Ativo" },
+  { value: "suspenso", label: "Suspenso" },
+  { value: "inativo", label: "Inativo" },
+];
+
+export const QUOTATION_STATUS: { value: QuotationStatus; label: string }[] = [
+  { value: "rascunho", label: "Rascunho" },
+  { value: "aberta", label: "Aberta" },
+  { value: "em_analise", label: "Em análise" },
+  { value: "encerrada", label: "Encerrada" },
+  { value: "cancelada", label: "Cancelada" },
+];
+
+export const PROPOSAL_STATUS: { value: ProposalStatus; label: string }[] = [
+  { value: "recebida", label: "Recebida" },
+  { value: "desclassificada", label: "Desclassificada" },
+  { value: "selecionada", label: "Selecionada" },
+  { value: "nao_selecionada", label: "Não selecionada" },
+];
+
+export const INVITATION_STATUS: { value: InvitationStatus; label: string }[] = [
+  { value: "convidada", label: "Convidada" },
+  { value: "respondida", label: "Respondida" },
+  { value: "recusada", label: "Recusou" },
+  { value: "sem_resposta", label: "Sem resposta" },
+];
+
+export const SERVICE_ORDER_STATUS: { value: ServiceOrderStatus; label: string }[] = [
+  { value: "emitida", label: "Emitida" },
+  { value: "veiculo_recebido", label: "Veículo recebido" },
+  { value: "em_execucao", label: "Em execução" },
+  { value: "aguardando_peca", label: "Aguardando peça" },
+  { value: "concluida", label: "Concluída" },
+  { value: "cancelada", label: "Cancelada" },
+];
+
+export const WORKSHOP_SPECIALTIES = [
+  "Mecânica",
+  "Elétrica",
+  "Funilaria",
+  "Pintura",
+  "Pneus",
+  "Alinhamento/Balanceamento",
+  "Ar-condicionado",
+  "Vidraçaria",
+  "Chaveiro",
+  "Lavagem",
+  "Reboque",
+  "Concessionária/Autorizada",
+  "Outras",
+];
+
+/** Meta legal de propostas por processo de cotação. */
+export const MIN_PROPOSALS = 3;
+
+export function labelOf<T extends string>(list: { value: T; label: string }[], v: T | null | undefined) {
+  return list.find((i) => i.value === v)?.label ?? "—";
+}
+
+export function useWorkshops() {
+  return useQuery({
+    queryKey: ["workshops"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("workshops").select("*").order("legal_name");
+      if (error) throw error;
+      return (data ?? []) as Workshop[];
+    },
+  });
+}
+
+export function useQuotations() {
+  return useQuery({
+    queryKey: ["quotations"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quotations")
+        .select(
+          "*, vehicle:vehicles(id, plate, brand, model), request:maintenance_requests(id, code, description), unit:units(id, name, acronym)",
+        )
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as QuotationRow[];
+    },
+  });
+}
+
+export function useQuotationItems(quotationId: string | null) {
+  return useQuery({
+    queryKey: ["quotation-items", quotationId],
+    enabled: !!quotationId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quotation_items")
+        .select("*")
+        .eq("quotation_id", quotationId!)
+        .order("sequence");
+      if (error) throw error;
+      return (data ?? []) as QuotationItem[];
+    },
+  });
+}
+
+export function useQuotationInvitations(quotationId: string | null) {
+  return useQuery({
+    queryKey: ["quotation-invitations", quotationId],
+    enabled: !!quotationId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quotation_invitations")
+        .select("*, workshop:workshops(id, legal_name, trade_name, specialties, status)")
+        .eq("quotation_id", quotationId!)
+        .order("invited_at");
+      if (error) throw error;
+      return (data ?? []) as unknown as InvitationRow[];
+    },
+  });
+}
+
+export function useQuotationProposals(quotationId: string | null) {
+  return useQuery({
+    queryKey: ["quotation-proposals", quotationId],
+    enabled: !!quotationId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quotation_proposals")
+        .select("*, workshop:workshops(id, legal_name, trade_name, cnpj)")
+        .eq("quotation_id", quotationId!)
+        .order("total_value");
+      if (error) throw error;
+      return (data ?? []) as unknown as ProposalRow[];
+    },
+  });
+}
+
+export function useProposalItems(quotationId: string | null) {
+  return useQuery({
+    queryKey: ["proposal-items", quotationId],
+    enabled: !!quotationId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quotation_proposal_items")
+        .select("*, proposal:quotation_proposals!inner(quotation_id)")
+        .eq("proposal.quotation_id", quotationId!);
+      if (error) throw error;
+      return (data ?? []) as unknown as QuotationProposalItem[];
+    },
+  });
+}
+
+export function useServiceOrders() {
+  return useQuery({
+    queryKey: ["service-orders"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_orders")
+        .select(
+          "*, vehicle:vehicles(id, plate, brand, model), workshop:workshops(id, legal_name, trade_name, cnpj, phone), quotation:quotations(id, code), unit:units(id, name, acronym)",
+        )
+        .order("issued_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as ServiceOrderRow[];
+    },
+  });
+}
+
+export function useServiceOrderItems(serviceOrderId: string | null) {
+  return useQuery({
+    queryKey: ["service-order-items", serviceOrderId],
+    enabled: !!serviceOrderId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_order_items")
+        .select("*")
+        .eq("service_order_id", serviceOrderId!)
+        .order("created_at");
+      if (error) throw error;
+      return (data ?? []) as ServiceOrderItem[];
+    },
+  });
+}
+
+export function useMaintenancePlanItems(planId: string | null) {
+  return useQuery({
+    queryKey: ["maintenance-plan-items", planId],
+    enabled: !!planId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("maintenance_plan_items")
+        .select("*")
+        .eq("plan_id", planId!)
+        .order("sequence");
+      if (error) throw error;
+      return (data ?? []) as MaintenancePlanItem[];
+    },
+  });
+}
+
+/** Upload de anexo privado no bucket de manutenção (pasta por órgão). */
+export async function uploadMaintenanceFile(orgId: string, file: File, folder: string) {
+  const safe = file.name.replace(/[^\w.\-]+/g, "_");
+  const path = `${orgId}/${folder}/${Date.now()}-${safe}`;
+  const { error } = await supabase.storage.from("manutencao").upload(path, file, { upsert: false });
+  if (error) throw error;
+  return path;
+}
+
+export function useMaintenanceFileUrl(path: string | null | undefined) {
+  return useQuery({
+    queryKey: ["manutencao-arquivo", path],
+    enabled: !!path,
+    staleTime: 1000 * 60 * 30,
+    queryFn: async () => {
+      if (!path) return null;
+      const { data } = await supabase.storage.from("manutencao").createSignedUrl(path, 60 * 60);
+      return data?.signedUrl ?? null;
+    },
+  });
+}
+
+export async function openMaintenanceFile(path: string) {
+  const { data, error } = await supabase.storage.from("manutencao").createSignedUrl(path, 60 * 60);
+  if (error || !data?.signedUrl) throw error ?? new Error("Não foi possível abrir o anexo");
+  window.open(data.signedUrl, "_blank", "noopener");
+}
+
+export async function refreshProcurementAlerts() {
+  await supabase.rpc("refresh_procurement_alerts");
 }

@@ -67,6 +67,7 @@ export type Database = {
           quantity: number
           quota_id: string | null
           reason: string | null
+          service_order_id: string | null
           value: number
         }
         Insert: {
@@ -85,6 +86,7 @@ export type Database = {
           quantity?: number
           quota_id?: string | null
           reason?: string | null
+          service_order_id?: string | null
           value?: number
         }
         Update: {
@@ -103,6 +105,7 @@ export type Database = {
           quantity?: number
           quota_id?: string | null
           reason?: string | null
+          service_order_id?: string | null
           value?: number
         }
         Relationships: [
@@ -167,6 +170,13 @@ export type Database = {
             columns: ["quota_id"]
             isOneToOne: false
             referencedRelation: "quotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_movements_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "service_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -2229,6 +2239,773 @@ export type Database = {
           },
         ]
       }
+      quotation_invitations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          invited_at: string
+          organization_id: string
+          quotation_id: string
+          reason: string | null
+          responded_at: string | null
+          status: Database["public"]["Enums"]["invitation_status"]
+          updated_at: string
+          updated_by: string | null
+          workshop_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invited_at?: string
+          organization_id: string
+          quotation_id: string
+          reason?: string | null
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["invitation_status"]
+          updated_at?: string
+          updated_by?: string | null
+          workshop_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invited_at?: string
+          organization_id?: string
+          quotation_id?: string
+          reason?: string | null
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["invitation_status"]
+          updated_at?: string
+          updated_by?: string | null
+          workshop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotation_invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotation_invitations_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "quotations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotation_invitations_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotation_items: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          measure_unit: string
+          notes: string | null
+          organization_id: string
+          part_id: string | null
+          quantity: number
+          quotation_id: string
+          sequence: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description: string
+          id?: string
+          measure_unit?: string
+          notes?: string | null
+          organization_id: string
+          part_id?: string | null
+          quantity?: number
+          quotation_id: string
+          sequence?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          measure_unit?: string
+          notes?: string | null
+          organization_id?: string
+          part_id?: string | null
+          quantity?: number
+          quotation_id?: string
+          sequence?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotation_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotation_items_part_id_fkey"
+            columns: ["part_id"]
+            isOneToOne: false
+            referencedRelation: "parts_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotation_items_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "quotations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotation_proposal_items: {
+        Row: {
+          brand: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          notes: string | null
+          organization_id: string
+          proposal_id: string
+          quantity: number
+          quotation_item_id: string | null
+          total_value: number | null
+          unit_value: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          brand?: string | null
+          created_at?: string
+          created_by?: string | null
+          description: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          proposal_id: string
+          quantity?: number
+          quotation_item_id?: string | null
+          total_value?: number | null
+          unit_value?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          brand?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          proposal_id?: string
+          quantity?: number
+          quotation_item_id?: string | null
+          total_value?: number | null
+          unit_value?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotation_proposal_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotation_proposal_items_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "quotation_proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotation_proposal_items_quotation_item_id_fkey"
+            columns: ["quotation_item_id"]
+            isOneToOne: false
+            referencedRelation: "quotation_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotation_proposals: {
+        Row: {
+          attachment_path: string | null
+          created_at: string
+          created_by: string | null
+          discount_value: number
+          disqualify_reason: string | null
+          execution_days: number | null
+          id: string
+          labor_value: number
+          notes: string | null
+          organization_id: string
+          parts_value: number
+          payment_terms: string | null
+          quotation_id: string
+          received_at: string
+          status: Database["public"]["Enums"]["proposal_status"]
+          total_value: number
+          updated_at: string
+          updated_by: string | null
+          valid_until: string | null
+          warranty_days: number | null
+          workshop_id: string
+        }
+        Insert: {
+          attachment_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          discount_value?: number
+          disqualify_reason?: string | null
+          execution_days?: number | null
+          id?: string
+          labor_value?: number
+          notes?: string | null
+          organization_id: string
+          parts_value?: number
+          payment_terms?: string | null
+          quotation_id: string
+          received_at?: string
+          status?: Database["public"]["Enums"]["proposal_status"]
+          total_value?: number
+          updated_at?: string
+          updated_by?: string | null
+          valid_until?: string | null
+          warranty_days?: number | null
+          workshop_id: string
+        }
+        Update: {
+          attachment_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          discount_value?: number
+          disqualify_reason?: string | null
+          execution_days?: number | null
+          id?: string
+          labor_value?: number
+          notes?: string | null
+          organization_id?: string
+          parts_value?: number
+          payment_terms?: string | null
+          quotation_id?: string
+          received_at?: string
+          status?: Database["public"]["Enums"]["proposal_status"]
+          total_value?: number
+          updated_at?: string
+          updated_by?: string | null
+          valid_until?: string | null
+          warranty_days?: number | null
+          workshop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotation_proposals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotation_proposals_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "quotations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotation_proposals_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotations: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          approved_by_name: string | null
+          attachment_path: string | null
+          cancel_reason: string | null
+          choice_justification: string | null
+          code: string | null
+          cost_center_id: string | null
+          created_at: string
+          created_by: string | null
+          deadline_at: string | null
+          description: string
+          few_proposals_justification: string | null
+          id: string
+          invited_count: number
+          no_response_count: number
+          notes: string | null
+          organization_id: string
+          proposals_count: number
+          refusals_count: number
+          reject_reason: string | null
+          request_id: string | null
+          selected_proposal_id: string | null
+          specialty: string | null
+          status: Database["public"]["Enums"]["quotation_status"]
+          technical_analysis: string | null
+          unit_id: string | null
+          updated_at: string
+          updated_by: string | null
+          valid_proposals_count: number
+          vehicle_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_by_name?: string | null
+          attachment_path?: string | null
+          cancel_reason?: string | null
+          choice_justification?: string | null
+          code?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deadline_at?: string | null
+          description: string
+          few_proposals_justification?: string | null
+          id?: string
+          invited_count?: number
+          no_response_count?: number
+          notes?: string | null
+          organization_id: string
+          proposals_count?: number
+          refusals_count?: number
+          reject_reason?: string | null
+          request_id?: string | null
+          selected_proposal_id?: string | null
+          specialty?: string | null
+          status?: Database["public"]["Enums"]["quotation_status"]
+          technical_analysis?: string | null
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          valid_proposals_count?: number
+          vehicle_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_by_name?: string | null
+          attachment_path?: string | null
+          cancel_reason?: string | null
+          choice_justification?: string | null
+          code?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deadline_at?: string | null
+          description?: string
+          few_proposals_justification?: string | null
+          id?: string
+          invited_count?: number
+          no_response_count?: number
+          notes?: string | null
+          organization_id?: string
+          proposals_count?: number
+          refusals_count?: number
+          reject_reason?: string | null
+          request_id?: string | null
+          selected_proposal_id?: string | null
+          specialty?: string | null
+          status?: Database["public"]["Enums"]["quotation_status"]
+          technical_analysis?: string | null
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          valid_proposals_count?: number
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotations_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotations_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotations_selected_proposal_fk"
+            columns: ["selected_proposal_id"]
+            isOneToOne: false
+            referencedRelation: "quotation_proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotations_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotations_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_order_items: {
+        Row: {
+          brand: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          kind: string
+          notes: string | null
+          organization_id: string
+          part_id: string | null
+          quantity: number
+          replaced_part_returned: boolean
+          return_attachment_path: string | null
+          return_notes: string | null
+          returned_at: string | null
+          returned_to: string | null
+          service_order_id: string
+          total_value: number | null
+          unit_value: number
+          updated_at: string
+          updated_by: string | null
+          warranty_days: number | null
+          warranty_until: string | null
+        }
+        Insert: {
+          brand?: string | null
+          created_at?: string
+          created_by?: string | null
+          description: string
+          id?: string
+          kind?: string
+          notes?: string | null
+          organization_id: string
+          part_id?: string | null
+          quantity?: number
+          replaced_part_returned?: boolean
+          return_attachment_path?: string | null
+          return_notes?: string | null
+          returned_at?: string | null
+          returned_to?: string | null
+          service_order_id: string
+          total_value?: number | null
+          unit_value?: number
+          updated_at?: string
+          updated_by?: string | null
+          warranty_days?: number | null
+          warranty_until?: string | null
+        }
+        Update: {
+          brand?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          kind?: string
+          notes?: string | null
+          organization_id?: string
+          part_id?: string | null
+          quantity?: number
+          replaced_part_returned?: boolean
+          return_attachment_path?: string | null
+          return_notes?: string | null
+          returned_at?: string | null
+          returned_to?: string | null
+          service_order_id?: string
+          total_value?: number | null
+          unit_value?: number
+          updated_at?: string
+          updated_by?: string | null
+          warranty_days?: number | null
+          warranty_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_order_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_order_items_part_id_fkey"
+            columns: ["part_id"]
+            isOneToOne: false
+            referencedRelation: "parts_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_order_items_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "service_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_orders: {
+        Row: {
+          approved_value: number
+          attachment_path: string | null
+          authorizer_id: string | null
+          authorizer_name: string | null
+          budget_reserved: boolean
+          cancel_reason: string | null
+          code: string | null
+          commitment_id: string | null
+          consumed_value: number
+          contract_id: string | null
+          contract_item_id: string | null
+          cost_center_id: string | null
+          created_at: string
+          created_by: string | null
+          deadline_at: string | null
+          executed_value: number | null
+          execution_days: number | null
+          expense_origin: Database["public"]["Enums"]["expense_origin"]
+          finished_at: string | null
+          hour_meter: number | null
+          id: string
+          issued_at: string
+          maintenance_record_id: string | null
+          notes: string | null
+          odometer_km: number | null
+          organization_id: string
+          proposal_id: string | null
+          quota_id: string | null
+          quotation_id: string | null
+          request_id: string | null
+          reserved_value: number
+          services: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["service_order_status"]
+          unit_id: string | null
+          updated_at: string
+          updated_by: string | null
+          vehicle_id: string
+          warranty_days: number | null
+          workshop_id: string
+        }
+        Insert: {
+          approved_value?: number
+          attachment_path?: string | null
+          authorizer_id?: string | null
+          authorizer_name?: string | null
+          budget_reserved?: boolean
+          cancel_reason?: string | null
+          code?: string | null
+          commitment_id?: string | null
+          consumed_value?: number
+          contract_id?: string | null
+          contract_item_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deadline_at?: string | null
+          executed_value?: number | null
+          execution_days?: number | null
+          expense_origin?: Database["public"]["Enums"]["expense_origin"]
+          finished_at?: string | null
+          hour_meter?: number | null
+          id?: string
+          issued_at?: string
+          maintenance_record_id?: string | null
+          notes?: string | null
+          odometer_km?: number | null
+          organization_id: string
+          proposal_id?: string | null
+          quota_id?: string | null
+          quotation_id?: string | null
+          request_id?: string | null
+          reserved_value?: number
+          services: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["service_order_status"]
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id: string
+          warranty_days?: number | null
+          workshop_id: string
+        }
+        Update: {
+          approved_value?: number
+          attachment_path?: string | null
+          authorizer_id?: string | null
+          authorizer_name?: string | null
+          budget_reserved?: boolean
+          cancel_reason?: string | null
+          code?: string | null
+          commitment_id?: string | null
+          consumed_value?: number
+          contract_id?: string | null
+          contract_item_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deadline_at?: string | null
+          executed_value?: number | null
+          execution_days?: number | null
+          expense_origin?: Database["public"]["Enums"]["expense_origin"]
+          finished_at?: string | null
+          hour_meter?: number | null
+          id?: string
+          issued_at?: string
+          maintenance_record_id?: string | null
+          notes?: string | null
+          odometer_km?: number | null
+          organization_id?: string
+          proposal_id?: string | null
+          quota_id?: string | null
+          quotation_id?: string | null
+          request_id?: string | null
+          reserved_value?: number
+          services?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["service_order_status"]
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id?: string
+          warranty_days?: number | null
+          workshop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_orders_commitment_id_fkey"
+            columns: ["commitment_id"]
+            isOneToOne: false
+            referencedRelation: "commitments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_contract_item_id_fkey"
+            columns: ["contract_item_id"]
+            isOneToOne: false
+            referencedRelation: "contract_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_maintenance_record_id_fkey"
+            columns: ["maintenance_record_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "quotation_proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_quota_id_fkey"
+            columns: ["quota_id"]
+            isOneToOne: false
+            referencedRelation: "quotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "quotations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           active: boolean
@@ -2859,6 +3636,107 @@ export type Database = {
           },
         ]
       }
+      workshops: {
+        Row: {
+          accredited_at: string | null
+          accredited_until: string | null
+          address: string | null
+          attachment_path: string | null
+          brands: string[]
+          city: string | null
+          cnpj: string | null
+          contact_name: string | null
+          coverage_area: string | null
+          created_at: string
+          created_by: string | null
+          district: string | null
+          email: string | null
+          id: string
+          legal_name: string
+          notes: string | null
+          organization_id: string
+          phone: string | null
+          service_radius_km: number | null
+          specialties: string[]
+          state: string | null
+          status: Database["public"]["Enums"]["workshop_status"]
+          trade_name: string | null
+          updated_at: string
+          updated_by: string | null
+          urgency_24h: boolean
+          weekend_service: boolean
+          zip_code: string | null
+        }
+        Insert: {
+          accredited_at?: string | null
+          accredited_until?: string | null
+          address?: string | null
+          attachment_path?: string | null
+          brands?: string[]
+          city?: string | null
+          cnpj?: string | null
+          contact_name?: string | null
+          coverage_area?: string | null
+          created_at?: string
+          created_by?: string | null
+          district?: string | null
+          email?: string | null
+          id?: string
+          legal_name: string
+          notes?: string | null
+          organization_id: string
+          phone?: string | null
+          service_radius_km?: number | null
+          specialties?: string[]
+          state?: string | null
+          status?: Database["public"]["Enums"]["workshop_status"]
+          trade_name?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          urgency_24h?: boolean
+          weekend_service?: boolean
+          zip_code?: string | null
+        }
+        Update: {
+          accredited_at?: string | null
+          accredited_until?: string | null
+          address?: string | null
+          attachment_path?: string | null
+          brands?: string[]
+          city?: string | null
+          cnpj?: string | null
+          contact_name?: string | null
+          coverage_area?: string | null
+          created_at?: string
+          created_by?: string | null
+          district?: string | null
+          email?: string | null
+          id?: string
+          legal_name?: string
+          notes?: string | null
+          organization_id?: string
+          phone?: string | null
+          service_radius_km?: number | null
+          specialties?: string[]
+          state?: string | null
+          status?: Database["public"]["Enums"]["workshop_status"]
+          trade_name?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          urgency_24h?: boolean
+          weekend_service?: boolean
+          zip_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workshops_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -2964,6 +3842,7 @@ export type Database = {
       }
       refresh_financial_alerts: { Args: never; Returns: undefined }
       refresh_maintenance_alerts: { Args: never; Returns: undefined }
+      refresh_procurement_alerts: { Args: never; Returns: undefined }
       unit_scope_ok: { Args: { _unit: string }; Returns: boolean }
     }
     Enums: {
@@ -3019,6 +3898,11 @@ export type Database = {
         | "expirada"
         | "cancelada"
       fueling_status: "valido" | "cancelado"
+      invitation_status:
+        | "convidada"
+        | "respondida"
+        | "recusada"
+        | "sem_resposta"
       limit_scope: "organizacao" | "unidade" | "veiculo"
       maintenance_kind: "preventiva" | "corretiva"
       maintenance_priority: "baixa" | "normal" | "alta" | "urgente"
@@ -3038,7 +3922,25 @@ export type Database = {
         | "fundacao"
         | "secretaria"
         | "outro"
+      proposal_status:
+        | "recebida"
+        | "desclassificada"
+        | "selecionada"
+        | "nao_selecionada"
       quota_type: "financeira" | "quantitativa"
+      quotation_status:
+        | "rascunho"
+        | "aberta"
+        | "em_analise"
+        | "encerrada"
+        | "cancelada"
+      service_order_status:
+        | "emitida"
+        | "veiculo_recebido"
+        | "em_execucao"
+        | "aguardando_peca"
+        | "concluida"
+        | "cancelada"
       tire_movement_kind:
         | "entrada"
         | "instalacao"
@@ -3068,6 +3970,7 @@ export type Database = {
         | "concluida"
         | "cancelada"
       vehicle_status: "ativo" | "manutencao" | "cedido" | "inativo" | "baixado"
+      workshop_status: "em_analise" | "ativo" | "suspenso" | "inativo"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3254,6 +4157,12 @@ export const Constants = {
         "cancelada",
       ],
       fueling_status: ["valido", "cancelado"],
+      invitation_status: [
+        "convidada",
+        "respondida",
+        "recusada",
+        "sem_resposta",
+      ],
       limit_scope: ["organizacao", "unidade", "veiculo"],
       maintenance_kind: ["preventiva", "corretiva"],
       maintenance_priority: ["baixa", "normal", "alta", "urgente"],
@@ -3275,7 +4184,28 @@ export const Constants = {
         "secretaria",
         "outro",
       ],
+      proposal_status: [
+        "recebida",
+        "desclassificada",
+        "selecionada",
+        "nao_selecionada",
+      ],
       quota_type: ["financeira", "quantitativa"],
+      quotation_status: [
+        "rascunho",
+        "aberta",
+        "em_analise",
+        "encerrada",
+        "cancelada",
+      ],
+      service_order_status: [
+        "emitida",
+        "veiculo_recebido",
+        "em_execucao",
+        "aguardando_peca",
+        "concluida",
+        "cancelada",
+      ],
       tire_movement_kind: [
         "entrada",
         "instalacao",
@@ -3309,6 +4239,7 @@ export const Constants = {
         "cancelada",
       ],
       vehicle_status: ["ativo", "manutencao", "cedido", "inativo", "baixado"],
+      workshop_status: ["em_analise", "ativo", "suspenso", "inativo"],
     },
   },
 } as const
