@@ -19,6 +19,7 @@ import { Route as AuthenticatedCentrosCustoRouteImport } from './routes/_authent
 import { Route as AuthenticatedCombustiveisRouteImport } from './routes/_authenticated/combustiveis'
 import { Route as AuthenticatedCondutoresRouteImport } from './routes/_authenticated/condutores'
 import { Route as AuthenticatedContratosRouteImport } from './routes/_authenticated/contratos'
+import { Route as AuthenticatedEmpenhosRouteImport } from './routes/_authenticated/empenhos'
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
 import { Route as AuthenticatedOrgaoRouteImport } from './routes/_authenticated/orgao'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
@@ -80,6 +81,11 @@ const AuthenticatedContratosRoute = AuthenticatedContratosRouteImport.update({
   path: '/contratos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEmpenhosRoute = AuthenticatedEmpenhosRouteImport.update({
+  id: '/empenhos',
+  path: '/empenhos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedFornecedoresRoute =
   AuthenticatedFornecedoresRouteImport.update({
     id: '/fornecedores',
@@ -127,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/combustiveis': typeof AuthenticatedCombustiveisRoute
   '/condutores': typeof AuthenticatedCondutoresRoute
   '/contratos': typeof AuthenticatedContratosRoute
+  '/empenhos': typeof AuthenticatedEmpenhosRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/orgao': typeof AuthenticatedOrgaoRoute
   '/painel': typeof AuthenticatedPainelRoute
@@ -145,6 +152,7 @@ export interface FileRoutesByTo {
   '/combustiveis': typeof AuthenticatedCombustiveisRoute
   '/condutores': typeof AuthenticatedCondutoresRoute
   '/contratos': typeof AuthenticatedContratosRoute
+  '/empenhos': typeof AuthenticatedEmpenhosRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/orgao': typeof AuthenticatedOrgaoRoute
   '/painel': typeof AuthenticatedPainelRoute
@@ -165,6 +173,7 @@ export interface FileRoutesById {
   '/_authenticated/combustiveis': typeof AuthenticatedCombustiveisRoute
   '/_authenticated/condutores': typeof AuthenticatedCondutoresRoute
   '/_authenticated/contratos': typeof AuthenticatedContratosRoute
+  '/_authenticated/empenhos': typeof AuthenticatedEmpenhosRoute
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/_authenticated/orgao': typeof AuthenticatedOrgaoRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
@@ -185,6 +194,7 @@ export interface FileRouteTypes {
     | '/combustiveis'
     | '/condutores'
     | '/contratos'
+    | '/empenhos'
     | '/fornecedores'
     | '/orgao'
     | '/painel'
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
     | '/combustiveis'
     | '/condutores'
     | '/contratos'
+    | '/empenhos'
     | '/fornecedores'
     | '/orgao'
     | '/painel'
@@ -222,6 +233,7 @@ export interface FileRouteTypes {
     | '/_authenticated/combustiveis'
     | '/_authenticated/condutores'
     | '/_authenticated/contratos'
+    | '/_authenticated/empenhos'
     | '/_authenticated/fornecedores'
     | '/_authenticated/orgao'
     | '/_authenticated/painel'
@@ -309,6 +321,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedContratosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/empenhos': {
+      id: '/_authenticated/empenhos'
+      path: '/empenhos'
+      fullPath: '/empenhos'
+      preLoaderRoute: typeof AuthenticatedEmpenhosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/fornecedores': {
       id: '/_authenticated/fornecedores'
       path: '/fornecedores'
@@ -369,6 +388,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCombustiveisRoute: typeof AuthenticatedCombustiveisRoute
   AuthenticatedCondutoresRoute: typeof AuthenticatedCondutoresRoute
   AuthenticatedContratosRoute: typeof AuthenticatedContratosRoute
+  AuthenticatedEmpenhosRoute: typeof AuthenticatedEmpenhosRoute
   AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
   AuthenticatedOrgaoRoute: typeof AuthenticatedOrgaoRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
@@ -386,6 +406,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCombustiveisRoute: AuthenticatedCombustiveisRoute,
   AuthenticatedCondutoresRoute: AuthenticatedCondutoresRoute,
   AuthenticatedContratosRoute: AuthenticatedContratosRoute,
+  AuthenticatedEmpenhosRoute: AuthenticatedEmpenhosRoute,
   AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,
   AuthenticatedOrgaoRoute: AuthenticatedOrgaoRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
