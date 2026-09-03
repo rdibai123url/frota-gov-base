@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Search, Pencil, IdCard } from "lucide-react";
+import { Plus, Search, Pencil, IdCard, Plane } from "lucide-react";
 import { toast } from "sonner";
 
 import { CpfInput } from "@/components/form-fields";
@@ -33,6 +33,7 @@ import {
   DRIVER_BONDS,
   cnhState,
   dateBR,
+  dateTimeBR,
   isValidCPF,
   label,
   maskCPF,
@@ -43,6 +44,8 @@ import {
   useUnits,
   type DriverRow,
 } from "@/lib/frotagov";
+import { formatMoney } from "@/lib/format";
+import { useDiaries, DIARY_STATUS } from "@/lib/diarias";
 
 export const Route = createFileRoute("/_authenticated/condutores")({
   head: () => ({
@@ -86,6 +89,8 @@ function Condutores() {
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<DriverRow | null>(null);
   const [openNew, setOpenNew] = useState(false);
+  const [history, setHistory] = useState<string | null>(null);
+  const { data: diaries = [] } = useDiaries();
 
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase();
@@ -184,16 +189,17 @@ function Condutores() {
               <TableHead>Validade CNH</TableHead>
               <TableHead>CNH</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Diárias</TableHead>
               <TableHead className="w-16" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading && (
-              <TableRow><TableCell colSpan={9} className="py-8 text-center text-muted-foreground">Carregando…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={10} className="py-8 text-center text-muted-foreground">Carregando…</TableCell></TableRow>
             )}
             {!isLoading && rows.length === 0 && (
               <TableRow>
-                <TableCell colSpan={9} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={10} className="py-10 text-center text-muted-foreground">
                   Nenhum condutor cadastrado para os filtros informados.
                 </TableCell>
               </TableRow>
@@ -209,6 +215,18 @@ function Condutores() {
                 <TableCell><CnhBadge expiry={d.license_expiry} /></TableCell>
                 <TableCell>
                   {d.active ? <Badge variant="default">Ativo</Badge> : <Badge variant="outline">Inativo</Badge>}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => setHistory(d.id)}
+                    aria-label={`Diárias de ${d.full_name}`}
+                  >
+                    <Plane className="size-4" />
+                    {diaries.filter((x) => x.beneficiary_driver_id === d.id).length}
+                  </Button>
                 </TableCell>
                 <TableCell>
                   {perms.canWrite && (
@@ -233,6 +251,54 @@ function Condutores() {
             <Button variant="outline" size="sm" disabled={current >= pages} onClick={() => setPage(current + 1)}>Próxima</Button>
           </div>
         </div>
+      )}
+
+      {history && (
+        <Dialog open onOpenChange={(v) => !v && setHistory(null)}>
+          <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Histórico de diárias</DialogTitle>
+              <DialogDescription>
+                {drivers.find((d) => d.id === history)?.full_name ?? "Condutor"}
+              </DialogDescription>
+            </DialogHeader>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Código</TableHead>
+                  <TableHead>Destino</TableHead>
+                  <TableHead>Saída</TableHead>
+                  <TableHead>Retorno</TableHead>
+                  <TableHead>Valor total</TableHead>
+                  <TableHead>Situação</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {diaries.filter((x) => x.beneficiary_driver_id === history).length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                      Nenhuma diária registrada para este condutor.
+                    </TableCell>
+                  </TableRow>
+                )}
+                {diaries
+                  .filter((x) => x.beneficiary_driver_id === history)
+                  .map((x) => (
+                    <TableRow key={x.id}>
+                      <TableCell className="font-medium">{x.code ?? "—"}</TableCell>
+                      <TableCell>
+                        {[x.destination_city, x.destination_state].filter(Boolean).join("/") || "—"}
+                      </TableCell>
+                      <TableCell>{dateTimeBR(x.departure_at)}</TableCell>
+                      <TableCell>{x.return_at ? dateTimeBR(x.return_at) : "—"}</TableCell>
+                      <TableCell>{formatMoney(Number(x.total_value || 0))}</TableCell>
+                      <TableCell>{DIARY_STATUS[x.status]}</TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </DialogContent>
+        </Dialog>
       )}
 
       {(openNew || editing) && (

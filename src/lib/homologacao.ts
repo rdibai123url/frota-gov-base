@@ -21,6 +21,7 @@ export const VERSION_HISTORY: VersionEntry[] = [
   { version: "9.0.0", date: "Fase 9", title: "Homologação e comercialização", summary: "Endurecimento de segurança, agendamento automático de rotinas, exportação .xlsx e impressão/PDF, painel executivo agrupado, dados abertos em CSV, paginação da API, documentação e matriz de licitações." },
   { version: "9.2.0", date: "Pós-Fase 9 — Bloco B", title: "Fechamento mensal da transparência", summary: "Competência mensal por órgão, checklist obrigatório, publicação versionada, bloqueio de competência fechada e reabertura por chamado." },
   { version: "9.3.0", date: "Pós-Fase 9 — Bloco C", title: "Importação e migração em massa", summary: "Assistente de importação em 16 módulos com modelo de planilha, mapeamento de colunas, simulação sem gravar, correção de linhas, importação transacional, lotes rastreáveis, anulação de lote e posição de abertura de saldos." },
+  { version: "9.4.0", date: "Pós-Fase 9 — Diárias e migração por tipo", title: "Diárias e migração individual", summary: "Módulo de diárias (RD e CD) com fluxo de aprovação, impressão institucional, indicadores, alertas e relatório próprio; migração de dados visível em Cadastros, por tipo individual, agrupada em cadastros básicos, contratos e orçamento, operação e legal/patrimonial, com suporte a CSV, XLSX e JSON." },
 ];
 
 
@@ -31,6 +32,8 @@ export const ACTIVE_MODULES: ModuleInfo[] = [
   { module: "Veículos e frota", route: "/veiculos", status: "ativo" },
   { module: "Utilização e reservas", route: "/utilizacao", status: "ativo" },
   { module: "Condutores", route: "/condutores", status: "ativo" },
+  { module: "Diárias (RD e CD)", route: "/diarias", status: "ativo" },
+  { module: "Migração de dados por tipo", route: "/migracao", status: "ativo" },
   { module: "Autorização de abastecimento", route: "/autorizacoes", status: "ativo" },
   { module: "Abastecimentos", route: "/abastecimentos", status: "ativo" },
   { module: "Manutenção preventiva e corretiva", route: "/manutencoes", status: "ativo" },
@@ -109,7 +112,12 @@ export const FEATURE_MATRIX: MatrixRow[] = [
   { module: "Legal", feature: "Sinistros, seguros e obrigações legais", status: "Sim", note: "Alertas automáticos de vencimento.", evidence: "/sinistros, /seguros, /obrigacoes" },
   { module: "Legal", feature: "Importação automática de multas do DETRAN", status: "Não", note: "Requer convênio e integração específica.", evidence: "—" },
   { module: "Patrimônio", feature: "Cessões, remanejamentos, baixas e alienações", status: "Sim", note: "Atualiza unidade, situação e quilometragem do veículo.", evidence: "/patrimonio" },
-  { module: "Relatórios", feature: "Relatórios gerenciais com filtros e período", status: "Sim", note: "Frota, abastecimento, utilização, manutenção, contratos, legal e custo por veículo.", evidence: "/relatorios" },
+  { module: "Relatórios", feature: "Relatórios gerenciais com filtros e período", status: "Sim", note: "Nove relatórios: frota, abastecimento, manutenção, utilização, custo por veículo, contratos, legal, patrimônio e diárias.", evidence: "/relatorios" },
+  { module: "Diárias", feature: "Requisição de diária (RD) com fluxo de autorização", status: "Sim", note: "Numeração por exercício, tramitação auditada e impressão institucional com valor por extenso.", evidence: "/diarias" },
+  { module: "Diárias", feature: "Comprovação de diária (CD) com saldo e prestação de contas", status: "Sim", note: "Bloqueia encerramento sem relatório de atividades ou com saldo a restituir pendente.", evidence: "/diarias" },
+  { module: "Diárias", feature: "Assinatura digital da RD", status: "Não", note: "Impressão institucional para assinatura física nesta versão.", evidence: "—" },
+  { module: "Implantação", feature: "Migração de dados por tipo individual", status: "Sim", note: "23 tipos agrupados em cadastros básicos, contratos e orçamento, operação e legal/patrimonial; CSV, XLSX e JSON.", evidence: "/migracao" },
+  { module: "Implantação", feature: "Importação de anexos legados", status: "Não", note: "Somente dados estruturados nesta versão.", evidence: "—" },
   { module: "Relatórios", feature: "Exportação CSV e Excel nativo (.xlsx)", status: "Sim", note: "Disponível em relatórios, logs e matriz de funcionalidades.", evidence: "/relatorios" },
   { module: "Relatórios", feature: "Impressão / PDF com cabeçalho institucional", status: "Sim", note: "Gerado pelo navegador, com filtros e data/hora.", evidence: "/relatorios → Imprimir" },
   { module: "Transparência", feature: "Portal público por órgão, desabilitado por padrão", status: "Sim", note: "Somente dados agregados; sem dados pessoais.", evidence: "/transparencia" },

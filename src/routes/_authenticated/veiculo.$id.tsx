@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { ArrowLeft, Truck } from "lucide-react";
 
 import { PageHeader } from "@/components/app-shell";
+import { useDiaries, DIARY_STATUS } from "@/lib/diarias";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,6 +76,7 @@ function HistoricoVeiculo() {
   const { data: policies = [] } = useInsurancePolicies();
   const { data: obligations = [] } = useVehicleObligations();
   const { data: movements = [] } = useAssetMovements();
+  const { data: diaries = [] } = useDiaries();
 
   const vehicle = vehicles.find((v) => v.id === id) ?? null;
   const vUsages = useMemo(() => usages.filter((u) => u.vehicle_id === id), [usages, id]);
@@ -87,6 +89,7 @@ function HistoricoVeiculo() {
   const vAccidents = useMemo(() => accidents.filter((a) => a.vehicle_id === id), [accidents, id]);
   const vObligations = useMemo(() => obligations.filter((o) => o.vehicle_id === id), [obligations, id]);
   const vMovements = useMemo(() => movements.filter((m) => m.vehicle_id === id), [movements, id]);
+  const vDiaries = useMemo(() => diaries.filter((d) => d.vehicle_id === id), [diaries, id]);
   const vPolicies = useMemo(
     () => policies.filter((p) => (p.vehicles ?? []).some((iv) => iv.vehicle_id === id)),
     [policies, id],
@@ -119,6 +122,16 @@ function HistoricoVeiculo() {
           .filter(Boolean)
           .join(" → ") || (m.reason ?? "—"),
         m.book_value !== null ? brl(Number(m.book_value)) : "",
+      ),
+    );
+    vDiaries.forEach((d) =>
+      push(
+        d.departure_at,
+        "diaria",
+        "Diárias",
+        `${d.code ?? "RD"} · ${DIARY_STATUS[d.status]}`,
+        `${d.beneficiary_name} — ${[d.destination_city, d.destination_state].filter(Boolean).join("/")}`,
+        brl(Number(d.total_value || 0)),
       ),
     );
     vUsages.forEach((u) =>
@@ -228,6 +241,7 @@ function HistoricoVeiculo() {
       .sort((a, b) => (a.at < b.at ? 1 : -1));
   }, [
     vMovements,
+    vDiaries,
     vUsages,
     vFuelings,
     vAuths,
@@ -311,6 +325,7 @@ function HistoricoVeiculo() {
               <TabsTrigger value="abastecimentos">Abastecimentos</TabsTrigger>
               <TabsTrigger value="autorizacoes">Autorizações</TabsTrigger>
               <TabsTrigger value="utilizacoes">Utilizações</TabsTrigger>
+              <TabsTrigger value="diarias">Diárias</TabsTrigger>
               <TabsTrigger value="multas">Multas</TabsTrigger>
               <TabsTrigger value="sinistros">Sinistros</TabsTrigger>
               <TabsTrigger value="patrimonio">Patrimônio</TabsTrigger>
@@ -331,6 +346,7 @@ function HistoricoVeiculo() {
                         ["todas", "Todas as categorias"],
                         ["patrimonio", "Movimentações patrimoniais"],
                         ["utilizacao", "Utilizações e reservas"],
+                        ["diaria", "Diárias"],
                         ["abastecimento", "Abastecimentos"],
                         ["autorizacao", "Autorizações"],
                         ["manutencao", "Manutenções e OS"],
@@ -511,6 +527,22 @@ function HistoricoVeiculo() {
                   u.start_km ? num(Number(u.start_km), 0) : "—",
                   u.end_km ? num(Number(u.end_km), 0) : "—",
                   label(USAGE_STATUS, u.status),
+                ])}
+              />
+            </TabsContent>
+
+            <TabsContent value="diarias">
+              <HistTable
+                head={["Código", "Beneficiário", "Destino", "Saída", "Retorno", "Valor total", "Situação"]}
+                empty="Nenhuma diária vinculada a este veículo."
+                rows={vDiaries.map((d) => [
+                  d.code ?? "—",
+                  d.beneficiary_name,
+                  [d.destination_city, d.destination_state].filter(Boolean).join("/") || "—",
+                  dateTimeBR(d.departure_at),
+                  d.return_at ? dateTimeBR(d.return_at) : "—",
+                  brl(Number(d.total_value || 0)),
+                  DIARY_STATUS[d.status],
                 ])}
               />
             </TabsContent>

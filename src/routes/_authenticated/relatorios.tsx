@@ -18,7 +18,8 @@ import {
   useUnits,
   useVehicles,
 } from "@/lib/frotagov";
-import { formatMoney, formatLiters } from "@/lib/format";
+import { formatMoney, formatLiters, formatNumberBR } from "@/lib/format";
+import { DIARY_STATUS } from "@/lib/diarias";
 import { logEvent } from "@/lib/platform";
 import { exportReportCsv, exportXlsx, printReport, type ReportMeta } from "@/lib/reports";
 
@@ -50,6 +51,7 @@ const REPORTS = [
   { value: "contratos", label: "Contratos, empenhos e saldos" },
   { value: "legal", label: "Multas, sinistros e obrigações" },
   { value: "patrimonio", label: "Movimentação patrimonial" },
+  { value: "diarias", label: "Diárias — requisições e comprovações" },
 ] as const;
 
 type ReportKey = (typeof REPORTS)[number]["value"];
@@ -67,6 +69,7 @@ const CAPS: Record<ReportKey, { date: boolean; unit: boolean; vehicle: boolean; 
   contratos: { date: true, unit: false, vehicle: false, driver: false },
   legal: { date: true, unit: true, vehicle: true, driver: true },
   patrimonio: { date: true, unit: true, vehicle: true, driver: false },
+  diarias: { date: true, unit: true, vehicle: false, driver: true },
 };
 
 
@@ -115,6 +118,11 @@ const LABELS: Record<string, string> = {
   finalidade: "Finalidade",
   preco_litro: "Preço/litro (R$)",
   combustivel_tipo: "Combustível",
+  beneficiario: "Beneficiário",
+  quantidade: "Quantidade",
+  valor_unitario: "Valor unitário (R$)",
+  valor_total: "Valor total (R$)",
+  comprovacao: "Comprovação",
 };
 
 const label = (k: string) => LABELS[k] ?? k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, " ");
@@ -122,6 +130,7 @@ const label = (k: string) => LABELS[k] ?? k.charAt(0).toUpperCase() + k.slice(1)
 const firstDayOfYear = () => `${new Date().getFullYear()}-01-01`;
 const today = () => new Date().toISOString().slice(0, 10);
 const day = (v?: string | null) => (v ? new Date(v).toLocaleDateString("pt-BR") : "—");
+const dt = (v?: string | null) => (v ? new Date(v).toLocaleString("pt-BR") : "—");
 const PAGE_SIZE = 50;
 
 function Relatorios() {
@@ -396,6 +405,42 @@ function Relatorios() {
             situacao: o.status,
           });
         return rows.sort((a, b) => String(a['data']).localeCompare(String(b['data'])));
+      }
+
+      if (report === "diarias") {
+        let q = supabase
+          .from("diaries")
+          .select(
+            "code, beneficiary_name, destination_city, destination_state, departure_at, return_at, quantity, unit_value, total_value, status, unit:units(name), proofs:diary_proofs(status, balance_value)",
+          )
+          .gte("departure_at", start)
+          .lte("departure_at", end)
+          .order("departure_at", { ascending: false });
+        if (unit) q = q.eq("unit_id", unit);
+        if (driver) q = q.eq("beneficiary_driver_id", driver);
+        const { data: rows, error } = await q;
+        if (error) throw error;
+        return (rows ?? []).map((d) => {
+          const proofs = (d.proofs ?? []) as { status: string; balance_value: number }[];
+          const approved = proofs.find((pr) => pr.status === "aprovada");
+          return {
+            codigo: d.code ?? "—",
+            beneficiario: d.beneficiary_name,
+            unidade: d.unit?.name ?? "—",
+            destino: [d.destination_city, d.destination_state].filter(Boolean).join("/"),
+            saida: dt(d.departure_at),
+            retorno: d.return_at ? dt(d.return_at) : "—",
+            quantidade: formatNumberBR(d.quantity, 2),
+            valor_unitario: formatMoney(d.unit_value),
+            valor_total: formatMoney(d.total_value),
+            situacao: DIARY_STATUS[d.status as keyof typeof DIARY_STATUS] ?? d.status,
+            comprovacao: approved
+              ? `Aprovada (saldo ${formatMoney(Math.abs(Number(approved.balance_value)))})`
+              : proofs.length
+                ? "Em prestação de contas"
+                : "Sem comprovação",
+          };
+        });
       }
 
       if (report === "patrimonio") {
