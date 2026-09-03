@@ -368,12 +368,20 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
       limit_exception_reason: limitMsg ? exceptionReason.trim() : null,
       authorizer_id: perms.userId,
       authorizer_name: perms.userName,
+      expense_origin: origin,
+      cost_center_id: centerId === NONE ? null : centerId,
+      contract_id: contractId === NONE ? null : contractId,
+      contract_item_id: itemId === NONE ? null : itemId,
+      commitment_id: commitmentId === NONE ? null : commitmentId,
+      quota_id: quotaId === NONE ? null : quotaId,
       status: (perms.canWrite ? "autorizada" : "pendente") as FuelAuthStatus,
       created_by: perms.userId,
     });
     setSaving(false);
     if (error) {
-      toast.error(error.message);
+      const msg = dbMessage(error) || error.message;
+      toast.error(msg);
+      if (/saldo|Saldo/.test(msg)) await logBudgetBlock(msg, "fuel_authorization", null);
       return;
     }
     toast.success("Autorização emitida.");
