@@ -35,6 +35,7 @@ type Payload = {
   frota?: { total: number; por_situacao: Record<string, number>; por_categoria: Record<string, number> };
   abastecimento?: { registros: number; litros: number; valor_total: number };
   manutencao?: { registros: number; valor_total: number };
+  limpeza?: { registros: number; valor_total: number };
   competencia?: string;
   versao?: number;
   publicado_em?: string;
@@ -256,6 +257,16 @@ function PortalTransparencia() {
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               <Metric label="Registros" value={String(data.manutencao.registros)} />
               <Metric label="Valor total" value={`R$ ${formatMoney(data.manutencao.valor_total)}`} />
+            </div>
+          </section>
+        )}
+
+        {data.limpeza && (
+          <section className="rounded-lg border bg-card p-5 shadow-card">
+            <h2 className="gov-title text-lg">Limpeza da frota</h2>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <Metric label="Serviços realizados" value={String(data.limpeza.registros)} />
+              <Metric label="Valor total" value={`R$ ${formatMoney(data.limpeza.valor_total)}`} />
             </div>
           </section>
         )}
