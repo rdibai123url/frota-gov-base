@@ -1,8 +1,32 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Truck, Wrench, Building2, Users, CircleCheck, Landmark, ArrowRight } from "lucide-react";
+import { useMemo } from "react";
+import {
+  Truck,
+  Wrench,
+  Building2,
+  Users,
+  CircleCheck,
+  Landmark,
+  ArrowRight,
+  Fuel,
+  Droplets,
+  Banknote,
+  BellRing,
+  Store,
+} from "lucide-react";
 
 import { PageHeader } from "@/components/app-shell";
-import { useOrgUsers, useOrganization, useUnits, useVehicles } from "@/lib/frotagov";
+import {
+  brl,
+  num,
+  useFuelingAlerts,
+  useFuelings,
+  useOrgUsers,
+  useOrganization,
+  useUnits,
+  useVehicles,
+} from "@/lib/frotagov";
+
 
 export const Route = createFileRoute("/_authenticated/painel")({
   head: () => ({
