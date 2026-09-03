@@ -485,6 +485,104 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
             <Label htmlFor="vu">Validade final *</Label>
             <Input id="vu" type="datetime-local" value={until} onChange={(e) => setUntil(e.target.value)} />
           </div>
+
+          <div className="sm:col-span-2 mt-2 border-t pt-4">
+            <p className="gov-title text-sm">Origem do recurso</p>
+            <p className="text-xs text-muted-foreground">
+              O saldo do contrato, do empenho e da cota é reservado no momento da autorização.
+            </p>
+          </div>
+          <div>
+            <Label>Origem da despesa</Label>
+            <Select value={origin} onValueChange={(v) => setOrigin(v as ExpenseOrigin)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {EXPENSE_ORIGINS.map((o) => (
+                  <SelectItem key={o.value} value={o.value} disabled={!o.ready}>
+                    {o.label}{o.ready ? "" : " (em preparação)"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Centro de custo</Label>
+            <Select value={centerId} onValueChange={setCenterId}>
+              <SelectTrigger><SelectValue placeholder="Opcional" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>Não informar</SelectItem>
+                {centers.filter((c) => c.active).map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.code} — {c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Contrato</Label>
+            <Select
+              value={contractId}
+              onValueChange={(v) => {
+                setContractId(v);
+                setItemId(NONE);
+              }}
+            >
+              <SelectTrigger><SelectValue placeholder="Opcional" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>Sem contrato</SelectItem>
+                {contracts.filter((c) => c.status === "vigente").map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.number}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Item do contrato</Label>
+            <Select value={itemId} onValueChange={setItemId}>
+              <SelectTrigger><SelectValue placeholder="Opcional" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>Sem item</SelectItem>
+                {contractItems
+                  .filter((i) => contractId === NONE || i.contract_id === contractId)
+                  .filter((i) => fuelId === NONE || !i.fuel_type_id || i.fuel_type_id === fuelId)
+                  .map((i) => (
+                    <SelectItem key={i.id} value={i.id}>
+                      {i.description} · saldo {num(Number(i.quantity) - Number(i.reserved_quantity) - Number(i.consumed_quantity), 2)} {i.measure_unit}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Empenho</Label>
+            <Select value={commitmentId} onValueChange={setCommitmentId}>
+              <SelectTrigger><SelectValue placeholder="Opcional" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>Sem empenho</SelectItem>
+                {commitments.filter((c) => c.status === "ativo").map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.number}/{c.exercise} · saldo {brl(Number(c.available_value ?? 0))}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Cota</Label>
+            <Select value={quotaId} onValueChange={setQuotaId}>
+              <SelectTrigger><SelectValue placeholder="Opcional" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>Sem cota</SelectItem>
+                {quotas.filter((q) => q.active).map((q) => (
+                  <SelectItem key={q.id} value={q.id}>
+                    {q.name} · saldo{" "}
+                    {q.quota_type === "financeira"
+                      ? brl(Number(q.balance_amount ?? 0))
+                      : `${num(Number(q.balance_amount ?? 0), 2)} ${q.measure_unit}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="sm:col-span-2">
             <Label htmlFor="pp">Finalidade</Label>
             <Input id="pp" value={purpose} onChange={(e) => setPurpose(e.target.value)} />
