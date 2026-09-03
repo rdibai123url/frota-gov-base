@@ -246,7 +246,7 @@ function Relatorios() {
         let q = supabase
           .from("maintenance_records")
           .select(
-            "id, code, kind, status, entry_at, exit_at, total_value, parts_value, labor_value, odometer_km, vehicle:vehicles(plate, asset_code), unit:units(name), supplier:suppliers(trade_name, legal_name), workshop:workshops(trade_name, legal_name)",
+            "id, code, kind, status, entry_at, exit_at, total_value, parts_value, labor_value, odometer_km, vehicle:vehicles(plate, asset_code), unit:units(name), supplier:suppliers(trade_name, legal_name)",
           )
           .gte("entry_at", start)
           .lte("entry_at", end)
@@ -260,12 +260,7 @@ function Relatorios() {
           veiculo: m.vehicle?.plate ?? m.vehicle?.asset_code ?? "—",
           unidade: m.unit?.name ?? "—",
           tipo: m.kind,
-          fornecedor:
-            m.workshop?.trade_name ??
-            m.workshop?.legal_name ??
-            m.supplier?.trade_name ??
-            m.supplier?.legal_name ??
-            "—",
+          fornecedor: m.supplier?.trade_name ?? m.supplier?.legal_name ?? "—",
           entrada: day(m.entry_at),
           saida: day(m.exit_at),
           hodometro: m.odometer_km ?? "—",
@@ -319,7 +314,7 @@ function Relatorios() {
         let fq = supabase
           .from("traffic_fines")
           .select(
-            "code, occurred_at, status, amount, infraction_description, vehicle:vehicles(plate, asset_code), unit:units(name), driver:drivers(full_name)",
+            "code, occurred_at, status, amount, description, vehicle:vehicles(plate, asset_code), unit:units(name), driver:drivers(full_name)",
           )
           .gte("occurred_at", start)
           .lte("occurred_at", end);
@@ -361,7 +356,7 @@ function Relatorios() {
             veiculo: f.vehicle?.plate ?? f.vehicle?.asset_code ?? "—",
             unidade: f.unit?.name ?? "—",
             responsavel: f.driver?.full_name ?? "—",
-            descricao: f.infraction_description ?? "—",
+            descricao: f.description ?? "—",
             data: day(f.occurred_at),
             valor: formatMoney(f.amount),
             situacao: f.status,
@@ -397,7 +392,7 @@ function Relatorios() {
         let q = supabase
           .from("asset_movements")
           .select(
-            "code, kind, moved_on, from_unit_id, unit_id, to_status, document_number, notes, vehicle:vehicles(plate, asset_code), entity:external_entities(name)",
+            "code, kind, moved_on, from_unit_id, unit_id, to_status, act_number, notes, vehicle:vehicles(plate, asset_code), entity:external_entities(name)",
           )
           .gte("moved_on", from)
           .lte("moved_on", to)
@@ -415,7 +410,7 @@ function Relatorios() {
           origem: unitName(m.from_unit_id),
           destino: unitName(m.unit_id),
           entidade: m.entity?.name ?? "—",
-          documento: m.document_number ?? "—",
+          documento: m.act_number ?? "—",
           situacao: m.to_status ?? "—",
         }));
       }
