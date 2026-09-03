@@ -767,6 +767,36 @@ export type ParsedFile = { headers: string[]; rows: Record<string, string>[] };
 
 /** Lê CSV ou XLSX e devolve cabeçalhos e linhas como texto. */
 export async function parseImportFile(file: File): Promise<ParsedFile> {
+  // JSON estruturado: array de objetos ou { dados: [...] } / { registros: [...] }.
+  if (/\.json$/i.test(file.name) || file.type === "application/json") {
+    const text = await file.text();
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      throw new Error("Arquivo JSON inválido. Envie um array de objetos ou { \"dados\": [...] }.");
+    }
+    const list = Array.isArray(parsed)
+      ? parsed
+      : ((parsed as Record<string, unknown>)?.["dados"] ??
+         (parsed as Record<string, unknown>)?.["registros"] ??
+         (parsed as Record<string, unknown>)?.["data"]);
+    if (!Array.isArray(list)) {
+      throw new Error("JSON sem lista de registros. Use um array de objetos ou { \"dados\": [...] }.");
+    }
+    const headers: string[] = [];
+    const rows: Record<string, string>[] = [];
+    for (const item of list) {
+      if (!item || typeof item !== "object") continue;
+      const record: Record<string, string> = {};
+      for (const [k, v] of Object.entries(item as Record<string, unknown>)) {
+        if (!headers.includes(k)) headers.push(k);
+        record[k] = v === null || v === undefined ? "" : String(v).trim();
+      }
+      rows.push(record);
+    }
+    return { headers, rows };
+  }
   const buffer = await file.arrayBuffer();
   const book = XLSX.read(buffer, { type: "array", cellDates: true, raw: false });
   const sheetName = book.SheetNames[0];
