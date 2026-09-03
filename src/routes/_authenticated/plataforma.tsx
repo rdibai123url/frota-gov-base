@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Building2, LogIn, Plus, RefreshCw, ShieldAlert, Download, Copy } from "lucide-react";
+import { LogIn, Plus, RefreshCw, ShieldAlert, Download, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -27,7 +27,8 @@ import {
   exportExcel,
   LOG_EVENT_TYPES,
 } from "@/lib/platform";
-import { createOrganizationWithAdmin } from "@/lib/platform.functions";
+import { createOrganizationWithAdmin, bootstrapSuperAdmin } from "@/lib/platform.functions";
+import { CredentialDialog } from "@/components/credential-dialog";
 
 export const Route = createFileRoute("/_authenticated/plataforma")({
   head: () => ({
@@ -73,7 +74,10 @@ function Plataforma() {
         <PageHeader title="Administração da Plataforma" />
         <div className="flex items-start gap-3 rounded-lg border bg-muted/40 p-4 text-sm text-muted-foreground">
           <ShieldAlert className="mt-0.5 size-4 shrink-0" />
-          <p>Área restrita ao Super Admin da plataforma.</p>
+          <div className="space-y-3">
+            <p>Área restrita ao Super Admin da plataforma.</p>
+            <BootstrapSuperAdmin />
+          </div>
         </div>
       </>
     );
@@ -106,6 +110,37 @@ function Plataforma() {
         </TabsContent>
       </Tabs>
     </>
+  );
+}
+
+/**
+ * Primeiro acesso da plataforma: enquanto não existir nenhum Super Admin, o
+ * usuário autenticado pode assumir o papel. Depois disso a ação é rejeitada
+ * pelo servidor. Não há senha mestre fixa em nenhum ponto do sistema.
+ */
+function BootstrapSuperAdmin() {
+  const [running, setRunning] = useState(false);
+  const invalidate = useInvalidate();
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={running}
+      onClick={async () => {
+        setRunning(true);
+        try {
+          await bootstrapSuperAdmin();
+          toast.success("Perfil Super Admin concedido a esta conta.");
+          invalidate(["profile"]);
+        } catch (error) {
+          toast.error(error instanceof Error ? error.message : "Ação indisponível.");
+        } finally {
+          setRunning(false);
+        }
+      }}
+    >
+      Assumir Super Admin (somente se a plataforma ainda não tiver um)
+    </Button>
   );
 }
 
@@ -328,56 +363,6 @@ function OrgsTab() {
 
       <CredentialDialog credential={credential} onClose={() => setCredential(null)} />
     </>
-  );
-}
-
-export function CredentialDialog({
-  credential,
-  onClose,
-}: {
-  credential: { email: string; tempPassword: string } | null;
-  onClose: () => void;
-}) {
-  return (
-    <Dialog open={!!credential} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Acesso criado</DialogTitle>
-        </DialogHeader>
-        {credential && (
-          <div className="space-y-3 text-sm">
-            <p className="text-muted-foreground">
-              Entregue estes dados ao usuário por canal seguro. A senha temporária é exibida apenas
-              agora e deve ser trocada no primeiro acesso.
-            </p>
-            <div className="space-y-1.5">
-              <Label>E-mail</Label>
-              <Input readOnly value={credential.email} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Senha temporária</Label>
-              <div className="flex gap-2">
-                <Input readOnly value={credential.tempPassword} />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={() => {
-                    navigator.clipboard.writeText(credential.tempPassword);
-                    toast.success("Senha copiada.");
-                  }}
-                >
-                  <Copy className="size-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-        <DialogFooter>
-          <Button onClick={onClose}>Concluir</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   );
 }
 
@@ -712,5 +697,3 @@ function SettingsTab() {
     </form>
   );
 }
-
-export { Building2 };

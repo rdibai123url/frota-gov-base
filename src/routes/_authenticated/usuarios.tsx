@@ -36,7 +36,7 @@ import {
 } from "@/lib/frotagov";
 import { maskCPF, isValidCPF, onlyDigits } from "@/lib/format";
 import { createOrgUser, resetOrgUserAccess } from "@/lib/platform.functions";
-import { CredentialDialog } from "@/routes/_authenticated/plataforma";
+import { CredentialDialog } from "@/components/credential-dialog";
 
 export const Route = createFileRoute("/_authenticated/usuarios")({
   head: () => ({
