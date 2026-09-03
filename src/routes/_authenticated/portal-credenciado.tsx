@@ -14,6 +14,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { parseBRNumber } from "@/lib/format";
+
+/** Remove chaves indefinidas antes de enviar os parâmetros ao banco. */
+const rpcArgs = (o: Record<string, unknown>) =>
+  Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) as never;
 import { kindsLabel, parseQrToken, useCaptures, useMyPartner } from "@/lib/credenciados";
 import { supplyStatusLabel, supplyStatusTone, useSupplyOrderItems, useSupplyOrders } from "@/lib/almoxarifado";
 import { brl, dateBR, dateTimeBR, dbMessage, num, supabase, useInvalidate } from "@/lib/frotagov";
@@ -220,11 +224,11 @@ function FuelCapture() {
       return;
     }
     setBusy(true);
-    const { data, error } = await supabase.rpc("asset_card_resolve", {
+    const { data, error } = await supabase.rpc("asset_card_resolve", rpcArgs({
       _qr: token ?? undefined,
       _identifier: identifier.trim() || undefined,
       _security: security.trim() || undefined,
-    });
+    }));
     setBusy(false);
     if (error) {
       toast.error(dbMessage(error));
@@ -263,7 +267,7 @@ function FuelCapture() {
       return;
     }
     setBusy(true);
-    const { error } = await supabase.rpc("partner_capture_fueling", {
+    const { error } = await supabase.rpc("partner_capture_fueling", rpcArgs({
       _authorization: auth.id,
       _quantity: quantity,
       _unit_price: price,
@@ -272,7 +276,7 @@ function FuelCapture() {
       _document: form.document.trim() || undefined,
       _notes: form.notes.trim() || undefined,
       _user_agent: typeof navigator === "undefined" ? undefined : navigator.userAgent,
-    });
+    }));
     setBusy(false);
     if (error) {
       toast.error(dbMessage(error));
@@ -420,9 +424,9 @@ function ServiceCapture() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("service_orders")
-        .select("id, code, status, approved_value, executed_value, vehicle_id, opened_at")
+        .select("id, code, status, approved_value, executed_value, vehicle_id, issued_at")
         .in("status", ["emitida", "veiculo_recebido", "em_execucao", "aguardando_peca"])
-        .order("opened_at", { ascending: false });
+        .order("issued_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
@@ -446,7 +450,7 @@ function ServiceCapture() {
     }
     setBusy(true);
     const now = new Date().toISOString();
-    const { error } = await supabase.rpc("partner_capture_service", {
+    const { error } = await supabase.rpc("partner_capture_service", rpcArgs({
       _service_order: selected,
       _started_at: now,
       _finished_at: form.finish === "final" ? now : undefined,
@@ -457,7 +461,7 @@ function ServiceCapture() {
       _notes: form.notes.trim() || undefined,
       _finish: form.finish === "final",
       _user_agent: typeof navigator === "undefined" ? undefined : navigator.userAgent,
-    });
+    }));
     setBusy(false);
     if (error) {
       toast.error(dbMessage(error));
@@ -548,11 +552,11 @@ function PartnerSupplyOrders({ partnerId }: { partnerId: string }) {
       toast.error("Informe a quantidade entregue");
       return;
     }
-    const { error } = await supabase.rpc("supply_order_deliver", {
+    const { error } = await supabase.rpc("supply_order_deliver", rpcArgs({
       _item: itemId,
       _quantity: q,
       _document: doc.trim() || undefined,
-    });
+    }));
     if (error) {
       toast.error(dbMessage(error));
       return;
