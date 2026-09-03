@@ -278,7 +278,7 @@ function Relatorios() {
           if (report === "int_ranking") {
             return rowsOut
               .filter((r) => r.km_l !== "—" || r.l_h !== "—")
-              .sort((a, b) => parseBRNumber(b.km_l) ?? 0 - (parseBRNumber(a.km_l) ?? 0) || 0);
+              .sort((a, b) => (parseBRNumber(b.km_l) ?? 0) - (parseBRNumber(a.km_l) ?? 0));
           }
           return rowsOut;
         }
