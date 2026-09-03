@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Landmark } from "lucide-react";
+import { Download, Landmark } from "lucide-react";
 
 import { formatMoney, formatLiters } from "@/lib/format";
 
