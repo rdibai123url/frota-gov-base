@@ -253,51 +253,40 @@ export function usePerms() {
 
 
 /* ------------------------------ máscaras ------------------------------ */
+/** Padrão global de formatação — implementação única em src/lib/format.ts. */
+export {
+  maskCNPJ,
+  maskCPF,
+  maskCEP,
+  isValidCNPJ,
+  isValidCPF,
+  formatCNPJ,
+  formatCPF,
+  formatMoney,
+  formatLiters,
+  formatLitersUnit,
+  formatNumberBR,
+  parseBRNumber,
+  maskDecimalBR,
+  maskMoneyBR,
+  maskLitersBR,
+  toMaskedNumber,
+  onlyDigits,
+  MONEY_DECIMALS,
+  LITER_DECIMALS,
+} from "@/lib/format";
 
-const digits = (v: string) => v.replace(/\D/g, "");
-
-export function maskCNPJ(v: string) {
-  const d = digits(v).slice(0, 14);
-  return d
-    .replace(/^(\d{2})(\d)/, "$1.$2")
-    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
-    .replace(/\.(\d{3})(\d)/, ".$1/$2")
-    .replace(/(\d{4})(\d)/, "$1-$2");
-}
-
-export function maskCEP(v: string) {
-  const d = digits(v).slice(0, 8);
-  return d.replace(/^(\d{5})(\d)/, "$1-$2");
-}
+import { formatBRL, formatNumberBR as _num } from "@/lib/format";
 
 export function maskPlate(v: string) {
   return v.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 7);
 }
 
-export function isValidCNPJ(v: string) {
-  const d = digits(v);
-  if (d.length !== 14 || /^(\d)\1{13}$/.test(d)) return false;
-  const calc = (len: number) => {
-    let sum = 0;
-    let pos = len - 7;
-    for (let i = 0; i < len; i++) {
-      sum += Number(d[i]) * pos--;
-      if (pos < 2) pos = 9;
-    }
-    const r = sum % 11;
-    return r < 2 ? 0 : 11 - r;
-  };
-  return calc(12) === Number(d[12]) && calc(13) === Number(d[13]);
-}
+/** Moeda com símbolo (R$ 1.234.567,80). */
+export const brl = (n: number | null | undefined) => formatBRL(n);
 
-export const brl = (n: number | null | undefined) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(n ?? 0));
-
-export const num = (n: number | null | undefined, digitsCount = 2) =>
-  new Intl.NumberFormat("pt-BR", {
-    minimumFractionDigits: digitsCount,
-    maximumFractionDigits: digitsCount,
-  }).format(Number(n ?? 0));
+/** Número no padrão brasileiro com casas decimais fixas. */
+export const num = (n: number | null | undefined, digitsCount = 2) => _num(n, digitsCount);
 
 export const dateTimeBR = (iso: string | null | undefined) =>
   iso ? new Date(iso).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "—";
@@ -633,25 +622,7 @@ export const VEHICLE_CATEGORY_HINT: Record<string, string[]> = {
   Trator: ["C", "D", "E"],
 };
 
-export const maskCPF = (v: string) =>
-  v
-    .replace(/\D/g, "")
-    .slice(0, 11)
-    .replace(/^(\d{3})(\d)/, "$1.$2")
-    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
-    .replace(/\.(\d{3})(\d)/, ".$1-$2");
-
-export function isValidCPF(v: string) {
-  const d = v.replace(/\D/g, "");
-  if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
-  const calc = (len: number) => {
-    let sum = 0;
-    for (let i = 0; i < len; i++) sum += Number(d[i]) * (len + 1 - i);
-    const r = (sum * 10) % 11;
-    return r === 10 ? 0 : r;
-  };
-  return calc(9) === Number(d[9]) && calc(10) === Number(d[10]);
-}
+/* maskCPF / isValidCPF: reexportados de @/lib/format (padrão global). */
 
 export const dateBR = (iso: string | null | undefined) =>
   iso ? new Date(`${iso}T12:00:00`).toLocaleDateString("pt-BR") : "—";
@@ -869,6 +840,7 @@ export const ALERT_CATEGORIES: { value: string; label: string }[] = [
   { value: "empenho", label: "Empenho" },
   { value: "cota", label: "Cota" },
   { value: "bloqueio", label: "Bloqueio por saldo" },
+  { value: "manutencao", label: "Manutenção" },
 ];
 
 export const FINANCE_ALERT_LABELS: Record<string, string> = {
@@ -887,6 +859,9 @@ export const FINANCE_ALERT_LABELS: Record<string, string> = {
   cota_saldo_10: "Cota com saldo abaixo de 10%",
   cota_zerada: "Cota sem saldo",
   saldo_insuficiente: "Bloqueio por saldo insuficiente",
+  manutencao_vencido: "Manutenção preventiva vencida",
+  manutencao_proximo: "Manutenção preventiva próxima do vencimento",
+  garantia_a_vencer: "Garantia a vencer",
 };
 
 export function alertLabel(type: string) {
@@ -1059,4 +1034,316 @@ export function itemBalance(i: ContractItem) {
 export function quotaPercent(q: Quota) {
   const granted = Number(q.granted_amount ?? 0);
   return pct(Number(q.consumed_amount ?? 0) + Number(q.reserved_amount ?? 0), granted);
+}
+
+/* ======================================================================== */
+/*                      FASE 5 — MANUTENÇÃO, PEÇAS E PNEUS                  */
+/* ======================================================================== */
+
+export type MaintenancePlan = Database["public"]["Tables"]["maintenance_plans"]["Row"];
+export type MaintenancePlanItem = Database["public"]["Tables"]["maintenance_plan_items"]["Row"];
+export type MaintenanceRequest = Database["public"]["Tables"]["maintenance_requests"]["Row"];
+export type MaintenanceRecord = Database["public"]["Tables"]["maintenance_records"]["Row"];
+export type MaintenancePart = Database["public"]["Tables"]["maintenance_parts"]["Row"];
+export type PartCatalog = Database["public"]["Tables"]["parts_catalog"]["Row"];
+export type Tire = Database["public"]["Tables"]["tires"]["Row"];
+export type TireMovement = Database["public"]["Tables"]["tire_movements"]["Row"];
+export type VehicleStatusHistory = Database["public"]["Tables"]["vehicle_status_history"]["Row"];
+export type MaintenanceSettings = Database["public"]["Tables"]["maintenance_settings"]["Row"];
+
+export type MaintenanceKind = Database["public"]["Enums"]["maintenance_kind"];
+export type MaintenancePriority = Database["public"]["Enums"]["maintenance_priority"];
+export type MaintenanceRequestStatus = Database["public"]["Enums"]["maintenance_request_status"];
+export type MaintenanceRecordStatus = Database["public"]["Enums"]["maintenance_record_status"];
+export type TireStatus = Database["public"]["Enums"]["tire_status"];
+
+type VehicleRef = Pick<Vehicle, "id" | "plate" | "brand" | "model" | "current_km" | "hour_meter" | "status">;
+type UnitRef = Pick<Unit, "id" | "name" | "acronym">;
+
+export type MaintenancePlanRow = MaintenancePlan & {
+  vehicle: VehicleRef | null;
+  items: MaintenancePlanItem[] | null;
+};
+export type MaintenanceRequestRow = MaintenanceRequest & {
+  vehicle: VehicleRef | null;
+  unit: UnitRef | null;
+  cost_center: Pick<CostCenter, "id" | "code" | "name"> | null;
+  plan: Pick<MaintenancePlan, "id" | "name"> | null;
+};
+export type MaintenanceRecordRow = MaintenanceRecord & {
+  vehicle: VehicleRef | null;
+  supplier: Pick<Supplier, "id" | "legal_name" | "trade_name"> | null;
+  request: Pick<MaintenanceRequest, "id" | "code" | "kind"> | null;
+  parts: MaintenancePart[] | null;
+  commitment: Pick<Commitment, "id" | "number"> | null;
+  quota: Pick<Quota, "id" | "name"> | null;
+};
+export type TireRow = Tire & {
+  vehicle: VehicleRef | null;
+  supplier: Pick<Supplier, "id" | "legal_name" | "trade_name"> | null;
+};
+
+export const MAINTENANCE_KINDS: { value: MaintenanceKind; label: string }[] = [
+  { value: "preventiva", label: "Preventiva" },
+  { value: "corretiva", label: "Corretiva" },
+];
+
+export const MAINTENANCE_PRIORITIES: { value: MaintenancePriority; label: string }[] = [
+  { value: "baixa", label: "Baixa" },
+  { value: "normal", label: "Normal" },
+  { value: "alta", label: "Alta" },
+  { value: "urgente", label: "Urgente" },
+];
+
+export const MAINTENANCE_REQUEST_STATUS: { value: MaintenanceRequestStatus; label: string }[] = [
+  { value: "aberta", label: "Aberta" },
+  { value: "em_analise", label: "Em análise" },
+  { value: "aprovada", label: "Aprovada" },
+  { value: "em_manutencao", label: "Em manutenção" },
+  { value: "concluida", label: "Concluída" },
+  { value: "cancelada", label: "Cancelada" },
+];
+
+export const MAINTENANCE_RECORD_STATUS: { value: MaintenanceRecordStatus; label: string }[] = [
+  { value: "em_execucao", label: "Em execução" },
+  { value: "concluida", label: "Concluída" },
+  { value: "cancelada", label: "Cancelada" },
+];
+
+export const TIRE_STATUS: { value: TireStatus; label: string }[] = [
+  { value: "estoque", label: "Em estoque" },
+  { value: "instalado", label: "Instalado" },
+  { value: "em_reparo", label: "Em reparo" },
+  { value: "recapagem", label: "Em recapagem" },
+  { value: "descartado", label: "Descartado" },
+  { value: "baixado", label: "Baixado" },
+];
+
+export const TIRE_POSITIONS = [
+  "Dianteiro esquerdo",
+  "Dianteiro direito",
+  "Traseiro esquerdo",
+  "Traseiro direito",
+  "Traseiro esquerdo interno",
+  "Traseiro direito interno",
+  "Estepe",
+];
+
+export const PART_CATEGORIES = ["Motor", "Freios", "Suspensão", "Elétrica", "Filtros", "Lubrificantes", "Carroceria", "Outros"];
+
+export const MAINTENANCE_SERVICE_TYPES = [
+  "Troca de óleo e filtros",
+  "Revisão geral",
+  "Freios",
+  "Suspensão",
+  "Pneus e alinhamento",
+  "Elétrica",
+  "Motor",
+  "Ar-condicionado",
+  "Outros",
+];
+
+/* ------------------------- regras de vencimento ------------------------- */
+
+export type DueState = "ok" | "proximo" | "vencido" | "sem_criterio";
+
+export const DUE_LABELS: Record<DueState, string> = {
+  ok: "Em dia",
+  proximo: "Próximo do vencimento",
+  vencido: "Vencido",
+  sem_criterio: "Sem critério definido",
+};
+
+export type MaintenanceLead = { km: number; hours: number; days: number };
+export const DEFAULT_LEAD: MaintenanceLead = { km: 500, hours: 20, days: 15 };
+
+export function planDue(
+  plan: MaintenancePlan,
+  vehicle: Pick<Vehicle, "current_km" | "hour_meter"> | null | undefined,
+  lead: MaintenanceLead = DEFAULT_LEAD,
+): { state: DueState; detail: string } {
+  const km = Number(vehicle?.current_km ?? 0);
+  const hm = Number(vehicle?.hour_meter ?? 0);
+  const baseKm = Number(plan.last_done_km ?? 0);
+  const baseH = Number(plan.last_done_hours ?? 0);
+  const baseDate = plan.last_done_at ? new Date(plan.last_done_at) : new Date(plan.created_at);
+
+  let state: DueState = "sem_criterio";
+  const details: string[] = [];
+  const worse = (s: DueState) => {
+    const rank: Record<DueState, number> = { sem_criterio: 0, ok: 1, proximo: 2, vencido: 3 };
+    if (rank[s] > rank[state]) state = s;
+  };
+
+  if (plan.interval_km) {
+    const target = baseKm + Number(plan.interval_km);
+    const rest = target - km;
+    worse(km >= target + Number(plan.tolerance_km ?? 0) ? "vencido" : rest <= lead.km ? "proximo" : "ok");
+    details.push(`${num(Math.abs(rest), 0)} km ${rest >= 0 ? "restantes" : "excedidos"}`);
+  }
+  if (plan.interval_hours) {
+    const target = baseH + Number(plan.interval_hours);
+    const rest = target - hm;
+    worse(hm >= target + Number(plan.tolerance_hours ?? 0) ? "vencido" : rest <= lead.hours ? "proximo" : "ok");
+    details.push(`${num(Math.abs(rest), 1)} h ${rest >= 0 ? "restantes" : "excedidas"}`);
+  }
+  if (plan.interval_months) {
+    const target = new Date(baseDate);
+    target.setMonth(target.getMonth() + Number(plan.interval_months));
+    const rest = Math.ceil((target.getTime() - Date.now()) / 86400000);
+    worse(rest < -Number(plan.tolerance_days ?? 0) ? "vencido" : rest <= lead.days ? "proximo" : "ok");
+    details.push(`${Math.abs(rest)} dia(s) ${rest >= 0 ? "restantes" : "em atraso"} · vence em ${dateBR(target.toISOString())}`);
+  }
+  return { state, detail: details.join(" · ") || "Informe KM, horímetro ou meses" };
+}
+
+export function maintenanceTotal(m: Pick<MaintenanceRecord, "labor_value" | "parts_value" | "other_value">) {
+  return Number(m.labor_value ?? 0) + Number(m.parts_value ?? 0) + Number(m.other_value ?? 0);
+}
+
+/* --------------------------------- hooks -------------------------------- */
+
+export function useMaintenanceSettings() {
+  return useQuery({
+    queryKey: ["maintenance-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("maintenance_settings").select("*").maybeSingle();
+      if (error) throw error;
+      return (data ?? null) as MaintenanceSettings | null;
+    },
+  });
+}
+
+export function useMaintenanceLead(): MaintenanceLead {
+  const { data } = useMaintenanceSettings();
+  return {
+    km: Number(data?.lead_km ?? DEFAULT_LEAD.km),
+    hours: Number(data?.lead_hours ?? DEFAULT_LEAD.hours),
+    days: Number(data?.lead_days ?? DEFAULT_LEAD.days),
+  };
+}
+
+export function useMaintenancePlans() {
+  return useQuery({
+    queryKey: ["maintenance-plans"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("maintenance_plans")
+        .select(
+          "*, vehicle:vehicles(id, plate, brand, model, current_km, hour_meter, status), items:maintenance_plan_items(*)",
+        )
+        .order("name");
+      if (error) throw error;
+      return (data ?? []) as unknown as MaintenancePlanRow[];
+    },
+  });
+}
+
+export function useMaintenanceRequests() {
+  return useQuery({
+    queryKey: ["maintenance-requests"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("maintenance_requests")
+        .select(
+          "*, vehicle:vehicles(id, plate, brand, model, current_km, hour_meter, status), unit:units(id, name, acronym), cost_center:cost_centers(id, code, name), plan:maintenance_plans(id, name)",
+        )
+        .order("requested_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as MaintenanceRequestRow[];
+    },
+  });
+}
+
+export function useMaintenanceRecords() {
+  return useQuery({
+    queryKey: ["maintenance-records"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("maintenance_records")
+        .select(
+          "*, vehicle:vehicles(id, plate, brand, model, current_km, hour_meter, status), supplier:suppliers(id, legal_name, trade_name), request:maintenance_requests(id, code, kind), parts:maintenance_parts(*), commitment:commitments(id, number), quota:quotas(id, name)",
+        )
+        .order("entry_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as MaintenanceRecordRow[];
+    },
+  });
+}
+
+export function usePartsCatalog() {
+  return useQuery({
+    queryKey: ["parts-catalog"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("parts_catalog").select("*").order("description");
+      if (error) throw error;
+      return (data ?? []) as PartCatalog[];
+    },
+  });
+}
+
+export function useMaintenanceParts() {
+  return useQuery({
+    queryKey: ["maintenance-parts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("maintenance_parts")
+        .select("*")
+        .order("installed_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as MaintenancePart[];
+    },
+  });
+}
+
+export function useTires() {
+  return useQuery({
+    queryKey: ["tires"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tires")
+        .select(
+          "*, vehicle:vehicles(id, plate, brand, model, current_km, hour_meter, status), supplier:suppliers(id, legal_name, trade_name)",
+        )
+        .order("code");
+      if (error) throw error;
+      return (data ?? []) as unknown as TireRow[];
+    },
+  });
+}
+
+export function useTireMovements(tireId: string | null) {
+  return useQuery({
+    queryKey: ["tire-movements", tireId],
+    enabled: !!tireId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tire_movements")
+        .select("*")
+        .eq("tire_id", tireId!)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as TireMovement[];
+    },
+  });
+}
+
+export function useVehicleStatusHistory(vehicleId: string | null) {
+  return useQuery({
+    queryKey: ["vehicle-status-history", vehicleId],
+    enabled: !!vehicleId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("vehicle_status_history")
+        .select("*")
+        .eq("vehicle_id", vehicleId!)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as VehicleStatusHistory[];
+    },
+  });
+}
+
+export async function refreshMaintenanceAlerts() {
+  await supabase.rpc("refresh_maintenance_alerts");
 }

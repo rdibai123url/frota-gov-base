@@ -22,6 +22,10 @@ import {
   Menu,
   X,
   ShieldCheck,
+  Wrench,
+  ClipboardList,
+  Cog,
+  CircleDot,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -35,6 +39,10 @@ const NAV = [
   { to: "/utilizacao", label: "Utilização e reservas", icon: CalendarClock },
   { to: "/autorizacoes", label: "Autorizações", icon: Ticket },
   { to: "/abastecimentos", label: "Abastecimentos", icon: Fuel },
+  { to: "/manutencoes", label: "Manutenções", icon: Wrench },
+  { to: "/planos-manutencao", label: "Planos preventivos", icon: ClipboardList },
+  { to: "/pecas", label: "Peças e acessórios", icon: Cog },
+  { to: "/pneus", label: "Pneus", icon: CircleDot },
   { to: "/alertas", label: "Alertas e inconsistências", icon: BellRing },
   { to: "/fornecedores", label: "Fornecedores / Postos", icon: Store },
   { to: "/combustiveis", label: "Combustíveis", icon: Droplets },

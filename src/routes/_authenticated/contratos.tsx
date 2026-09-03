@@ -4,6 +4,7 @@ import { Plus, Pencil, FileText, Package, Upload, ExternalLink } from "lucide-re
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { MoneyInput, LitersInput, CnpjInput } from "@/components/form-fields";
 import { PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,9 @@ import {
   useSuppliers,
   type ContractItem,
   type ContractRow,
+  parseBRNumber,
+  formatLiters,
+  onlyDigits,
 } from "@/lib/frotagov";
 
 export const Route = createFileRoute("/_authenticated/contratos")({
@@ -79,7 +83,7 @@ const itemSchema = z.object({
   notes: z.string().trim().max(300).optional(),
 });
 
-const money = (v: string | undefined) => Number(String(v ?? "0").replace(/\./g, "").replace(",", ".")) || 0;
+const money = (v: string | undefined) => parseBRNumber(v);
 
 function StatusBadge({ status }: { status: ContractRow["status"] }) {
   const tone =
@@ -189,7 +193,7 @@ function Contratos() {
       modality: modality as ContractRow["modality"],
       object: d.object,
       supplier_id: supplierId === NONE ? null : supplierId,
-      cnpj: d.cnpj || null,
+      cnpj: onlyDigits(d.cnpj) || null,
       signed_at: d.signed_at || null,
       valid_from: d.valid_from || null,
       valid_to: d.valid_to || null,
@@ -250,7 +254,7 @@ function Contratos() {
     if (editingItem) {
       const used = Number(editingItem.consumed_quantity) + Number(editingItem.reserved_quantity);
       if (qty < used) {
-        toast.error(`A quantidade não pode ser menor que o já reservado/consumido (${num(used, 3)}).`);
+        toast.error(`A quantidade não pode ser menor que o já reservado/consumido (${formatLiters(used)}).`);
         return;
       }
     }
@@ -465,12 +469,12 @@ function Contratos() {
                           </TableCell>
                           <TableCell>{MATERIAL_KIND_LABELS[i.material_kind] ?? i.material_kind}</TableCell>
                           <TableCell className="text-right">
-                            {num(Number(i.quantity), 3)} {i.measure_unit}
+                            {formatLiters(Number(i.quantity))} {i.measure_unit}
                           </TableCell>
                           <TableCell className="text-right">{brl(Number(i.unit_price))}</TableCell>
-                          <TableCell className="text-right">{num(Number(i.reserved_quantity), 3)}</TableCell>
-                          <TableCell className="text-right">{num(Number(i.consumed_quantity), 3)}</TableCell>
-                          <TableCell className="text-right font-medium">{num(b.quantity, 3)}</TableCell>
+                          <TableCell className="text-right">{formatLiters(Number(i.reserved_quantity))}</TableCell>
+                          <TableCell className="text-right">{formatLiters(Number(i.consumed_quantity))}</TableCell>
+                          <TableCell className="text-right font-medium">{formatLiters(b.quantity)}</TableCell>
                           <TableCell className="text-right font-medium">{brl(b.value)}</TableCell>
                           <TableCell>
                             {canManageFinance && (
@@ -548,11 +552,10 @@ function Contratos() {
               </div>
               <div>
                 <Label htmlFor="cnpj">CNPJ</Label>
-                <Input
+                <CnpjInput
                   id="cnpj"
                   name="cnpj"
                   defaultValue={editing?.cnpj ?? ""}
-                  onChange={(e) => (e.currentTarget.value = maskCNPJ(e.currentTarget.value))}
                 />
               </div>
               <div>
@@ -584,20 +587,18 @@ function Contratos() {
               </div>
               <div>
                 <Label htmlFor="initial_value">Valor global inicial (R$)</Label>
-                <Input
+                <MoneyInput
                   id="initial_value"
                   name="initial_value"
-                  inputMode="decimal"
-                  defaultValue={editing ? String(editing.initial_value) : ""}
+                  defaultValue={editing ? Number(editing.initial_value) : ""}
                 />
               </div>
               <div>
                 <Label htmlFor="current_value">Valor atual (R$)</Label>
-                <Input
+                <MoneyInput
                   id="current_value"
                   name="current_value"
-                  inputMode="decimal"
-                  defaultValue={editing ? String(editing.current_value) : ""}
+                  defaultValue={editing ? Number(editing.current_value) : ""}
                 />
               </div>
               <div>
@@ -699,21 +700,19 @@ function Contratos() {
               </div>
               <div>
                 <Label htmlFor="quantity">Quantidade contratada *</Label>
-                <Input
+                <LitersInput
                   id="quantity"
                   name="quantity"
-                  inputMode="decimal"
-                  defaultValue={editingItem ? String(editingItem.quantity) : ""}
+                  defaultValue={editingItem ? Number(editingItem.quantity) : ""}
                   required
                 />
               </div>
               <div>
                 <Label htmlFor="unit_price">Valor unitário (R$) *</Label>
-                <Input
+                <MoneyInput
                   id="unit_price"
                   name="unit_price"
-                  inputMode="decimal"
-                  defaultValue={editingItem ? String(editingItem.unit_price) : ""}
+                  defaultValue={editingItem ? Number(editingItem.unit_price) : ""}
                   required
                 />
               </div>

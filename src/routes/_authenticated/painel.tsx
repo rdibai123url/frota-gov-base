@@ -20,6 +20,9 @@ import {
   Wallet,
   PiggyBank,
   Coins,
+  ClipboardList,
+  CircleDot,
+  Cog,
 } from "lucide-react";
 
 import { PageHeader } from "@/components/app-shell";
@@ -42,6 +45,13 @@ import {
   useQuotas,
   useUnits,
   useVehicles,
+  maintenanceTotal,
+  planDue,
+  useMaintenanceLead,
+  useMaintenancePlans,
+  useMaintenanceRecords,
+  useMaintenanceRequests,
+  useTires,
 } from "@/lib/frotagov";
 
 
@@ -168,6 +178,40 @@ function Painel() {
     ).length;
   }, [auths]);
 
+  const { data: plans = [] } = useMaintenancePlans();
+  const { data: mRequests = [] } = useMaintenanceRequests();
+  const { data: mRecords = [] } = useMaintenanceRecords();
+  const { data: tires = [] } = useTires();
+  const lead = useMaintenanceLead();
+
+  const manut = useMemo(() => {
+    const dues = plans
+      .filter((p) => p.active)
+      .flatMap((p) => {
+        const targets = p.vehicle_id
+          ? vehicles.filter((v) => v.id === p.vehicle_id)
+          : vehicles.filter((v) => !p.vehicle_type || v.vehicle_type === p.vehicle_type);
+        return targets.map((v) => planDue(p, v, lead).state);
+      });
+    const now = new Date();
+    const custoMes = mRecords
+      .filter((r) => {
+        if (r.status !== "concluida") return false;
+        const d = new Date(r.exit_at ?? r.entry_at);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      })
+      .reduce((s2, r) => s2 + maintenanceTotal(r), 0);
+    return {
+      vencidas: dues.filter((d) => d === "vencido").length,
+      proximas: dues.filter((d) => d === "proximo").length,
+      solicitacoesAbertas: mRequests.filter((r) => !["concluida", "cancelada"].includes(r.status)).length,
+      emOficina: mRequests.filter((r) => r.status === "em_manutencao").length,
+      custoMes,
+      pneusInstalados: tires.filter((t) => t.status === "instalado").length,
+      pneusEstoque: tires.filter((t) => t.status === "estoque").length,
+    };
+  }, [plans, vehicles, lead, mRecords, mRequests, tires]);
+
   const ultimos6 = useMemo(() => {
     const base = new Date();
     return Array.from({ length: 6 }, (_, i) => {
@@ -222,6 +266,26 @@ function Painel() {
         <StatCard label="CNHs a vencer (30 dias)" value={cnhAVencer} icon={IdCard} tone={cnhAVencer > 0 ? "warning" : "default"} />
         <StatCard label="Autorizações abertas" value={autAbertas} icon={Ticket} />
         <StatCard label="Autorizações utilizadas no mês" value={autUsadasMes} icon={Ticket} tone="success" />
+      </div>
+
+      <h2 className="gov-title mt-10 mb-4 text-lg">Manutenção, peças e pneus</h2>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+        <StatCard
+          label="Preventivas vencidas"
+          value={manut.vencidas}
+          icon={ClipboardList}
+          tone={manut.vencidas > 0 ? "warning" : "default"}
+        />
+        <StatCard
+          label="Preventivas a vencer"
+          value={manut.proximas}
+          icon={ClipboardList}
+          tone={manut.proximas > 0 ? "warning" : "default"}
+        />
+        <StatCard label="Solicitações em aberto" value={manut.solicitacoesAbertas} icon={Wrench} />
+        <StatCard label="Veículos em oficina" value={manut.emOficina} icon={Wrench} tone={manut.emOficina > 0 ? "warning" : "default"} />
+        <StatCard label="Custo de manutenção no mês" value={brl(manut.custoMes)} icon={Cog} />
+        <StatCard label="Pneus instalados / estoque" value={`${manut.pneusInstalados} / ${manut.pneusEstoque}`} icon={CircleDot} />
       </div>
 
       <h2 className="gov-title mt-10 mb-4 text-lg">Execução orçamentária</h2>

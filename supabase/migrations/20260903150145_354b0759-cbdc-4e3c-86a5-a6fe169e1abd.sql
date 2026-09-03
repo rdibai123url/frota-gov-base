@@ -1,0 +1,15 @@
+REVOKE ALL ON FUNCTION public.set_maintenance_code() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.log_vehicle_status() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.apply_maintenance_availability() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.guard_maintenance_request() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.guard_maintenance_record() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.apply_maintenance_budget() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.apply_maintenance_completion() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.sync_maintenance_parts_value() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.guard_maintenance_part() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.guard_tire() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.log_tire_movement() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.refresh_maintenance_alerts() FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.can_manage_maintenance() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.refresh_maintenance_alerts() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.can_manage_maintenance() TO authenticated;

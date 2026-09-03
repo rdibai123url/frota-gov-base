@@ -4,6 +4,7 @@ import { Plus, Pencil, PiggyBank, TrendingUp, History } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { MoneyInput, LitersInput } from "@/components/form-fields";
 import { PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,7 @@ import {
   useQuotas,
   useUnits,
   type QuotaRow,
+  parseBRNumber,
 } from "@/lib/frotagov";
 
 export const Route = createFileRoute("/_authenticated/cotas")({
@@ -57,7 +59,7 @@ export const Route = createFileRoute("/_authenticated/cotas")({
 
 const ALL = "__all__";
 const NONE = "__none__";
-const money = (v: string | undefined) => Number(String(v ?? "0").replace(/\./g, "").replace(",", ".")) || 0;
+const money = (v: string | undefined) => parseBRNumber(v);
 
 const schema = z.object({
   name: z.string().trim().min(2, "Informe o nome da cota").max(120),
@@ -571,13 +573,21 @@ function Cotas() {
                 <Label htmlFor="granted_amount">
                   {quotaType === "financeira" ? "Valor concedido (R$) *" : "Quantidade concedida *"}
                 </Label>
-                <Input
-                  id="granted_amount"
-                  name="granted_amount"
-                  inputMode="decimal"
-                  defaultValue={editing ? String(editing.granted_amount) : ""}
-                  required
-                />
+                {quotaType === "financeira" ? (
+                  <MoneyInput
+                    id="granted_amount"
+                    name="granted_amount"
+                    defaultValue={editing ? Number(editing.granted_amount) : ""}
+                    required
+                  />
+                ) : (
+                  <LitersInput
+                    id="granted_amount"
+                    name="granted_amount"
+                    defaultValue={editing ? Number(editing.granted_amount) : ""}
+                    required
+                  />
+                )}
               </div>
               <div>
                 <Label htmlFor="valid_from">Vigência inicial *</Label>
@@ -646,7 +656,11 @@ function Cotas() {
                     <Label htmlFor="amount">
                       {suppOf.quota_type === "financeira" ? "Valor a suplementar (R$)" : "Quantidade a suplementar"}
                     </Label>
-                    <Input id="amount" name="amount" inputMode="decimal" required />
+                    {suppOf.quota_type === "financeira" ? (
+                      <MoneyInput id="amount" name="amount" required />
+                    ) : (
+                      <LitersInput id="amount" name="amount" required />
+                    )}
                   </div>
                   <div className="sm:col-span-2">
                     <Label htmlFor="reason">Justificativa</Label>

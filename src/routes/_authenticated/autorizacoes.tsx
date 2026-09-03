@@ -4,6 +4,7 @@ import { Plus, Search, QrCode, Ban, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import QRCode from "qrcode";
 
+import { LitersInput, MoneyInput } from "@/components/form-fields";
 import { PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +60,8 @@ import {
   type ExpenseOrigin,
   type FuelAuthStatus,
   type LimitScope,
+  parseBRNumber,
+  formatLiters,
 } from "@/lib/frotagov";
 
 export const Route = createFileRoute("/_authenticated/autorizacoes")({
@@ -200,8 +203,8 @@ function Autorizacoes() {
                 <TableCell className="font-medium">{a.vehicle?.plate ?? "—"}</TableCell>
                 <TableCell>{a.driver?.full_name ?? "—"}</TableCell>
                 <TableCell>{a.fuel?.name ?? "—"}</TableCell>
-                <TableCell className="text-right">{num(a.max_quantity, 2)}</TableCell>
-                <TableCell className="text-right">{num(authorizationBalance(a), 2)}</TableCell>
+                <TableCell className="text-right">{formatLiters(a.max_quantity)}</TableCell>
+                <TableCell className="text-right">{formatLiters(authorizationBalance(a))}</TableCell>
                 <TableCell className="whitespace-nowrap text-xs">{dateTimeBR(a.valid_until)}</TableCell>
                 <TableCell>
                   <Badge variant="outline" className={STATUS_STYLE[a.status]}>{label(AUTH_STATUS, a.status)}</Badge>
@@ -287,7 +290,7 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
   const driver = drivers.find((d) => d.id === driverId) ?? null;
   const fuel = fuels.find((f) => f.id === fuelId) ?? null;
   const unit = units.find((u) => u.id === vehicle?.unit_id) ?? null;
-  const qty = Number(maxQty || 0);
+  const qty = parseBRNumber(maxQty);
 
   // verificação de limite diário/mensal no servidor
   useEffect(() => {
@@ -357,8 +360,8 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
       fuel_type_id: fuel.id,
       supplier_id: supplierId === NONE ? null : supplierId,
       max_quantity: qty,
-      max_value: maxValue ? Number(maxValue) : null,
-      max_unit_price: maxUnitPrice ? Number(maxUnitPrice) : null,
+      max_value: maxValue ? parseBRNumber(maxValue) : null,
+      max_unit_price: maxUnitPrice ? parseBRNumber(maxUnitPrice) : null,
       odometer_km: odometer ? Number(odometer) : null,
       hour_meter: hourMeter ? Number(hourMeter) : null,
       valid_from: new Date(from).toISOString(),
@@ -459,15 +462,15 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
           </div>
           <div>
             <Label htmlFor="mq">Quantidade máxima ({fuel?.measure_unit ?? "litros"}) *</Label>
-            <Input id="mq" type="number" step="0.01" value={maxQty} onChange={(e) => setMaxQty(e.target.value)} />
+            <LitersInput id="mq" value={maxQty} onValueChange={setMaxQty} />
           </div>
           <div>
             <Label htmlFor="mv">Valor máximo (R$)</Label>
-            <Input id="mv" type="number" step="0.01" value={maxValue} onChange={(e) => setMaxValue(e.target.value)} />
+            <MoneyInput id="mv" value={maxValue} onValueChange={setMaxValue} />
           </div>
           <div>
             <Label htmlFor="mup">Preço unitário máximo (R$)</Label>
-            <Input id="mup" type="number" step="0.001" value={maxUnitPrice} onChange={(e) => setMaxUnitPrice(e.target.value)} />
+            <MoneyInput id="mup" value={maxUnitPrice} onValueChange={setMaxUnitPrice} />
           </div>
           <div>
             <Label htmlFor="od">KM na autorização</Label>
@@ -546,7 +549,7 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
                   .filter((i) => fuelId === NONE || !i.fuel_type_id || i.fuel_type_id === fuelId)
                   .map((i) => (
                     <SelectItem key={i.id} value={i.id}>
-                      {i.description} · saldo {num(Number(i.quantity) - Number(i.reserved_quantity) - Number(i.consumed_quantity), 2)} {i.measure_unit}
+                      {i.description} · saldo {formatLiters(Number(i.quantity) - Number(i.reserved_quantity) - Number(i.consumed_quantity))} {i.measure_unit}
                     </SelectItem>
                   ))}
               </SelectContent>
@@ -577,7 +580,7 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
                     {q.name} · saldo{" "}
                     {q.quota_type === "financeira"
                       ? brl(Number(q.balance_amount ?? 0))
-                      : `${num(Number(q.balance_amount ?? 0), 2)} ${q.measure_unit}`}
+                      : `${formatLiters(Number(q.balance_amount ?? 0))} ${q.measure_unit}`}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -636,9 +639,9 @@ function AuthorizationDetail({ auth, onClose }: { auth: AuthorizationRow; onClos
     ["Condutor", auth.driver?.full_name ?? "—"],
     ["Combustível", auth.fuel?.name ?? "—"],
     ["Fornecedor", auth.supplier?.trade_name || auth.supplier?.legal_name || "Livre"],
-    ["Quantidade autorizada", num(auth.max_quantity, 2)],
-    ["Consumido", num(auth.consumed_quantity, 2)],
-    ["Saldo", num(authorizationBalance(auth), 2)],
+    ["Quantidade autorizada", formatLiters(auth.max_quantity)],
+    ["Consumido", formatLiters(auth.consumed_quantity)],
+    ["Saldo", formatLiters(authorizationBalance(auth))],
     ["Valor máximo", auth.max_value ? brl(auth.max_value) : "—"],
     ["Preço unitário máximo", auth.max_unit_price ? brl(auth.max_unit_price) : "—"],
     ["Válida de", dateTimeBR(auth.valid_from)],
@@ -756,10 +759,10 @@ function LimitsDialog({ onClose }: { onClose: () => void }) {
       scope,
       unit_id: scope === "unidade" ? unitId : null,
       vehicle_id: scope === "veiculo" ? vehicleId : null,
-      daily_quantity: dailyQty ? Number(dailyQty) : null,
-      monthly_quantity: monthlyQty ? Number(monthlyQty) : null,
-      daily_value: dailyValue ? Number(dailyValue) : null,
-      monthly_value: monthlyValue ? Number(monthlyValue) : null,
+      daily_quantity: dailyQty ? parseBRNumber(dailyQty) : null,
+      monthly_quantity: monthlyQty ? parseBRNumber(monthlyQty) : null,
+      daily_value: dailyValue ? parseBRNumber(dailyValue) : null,
+      monthly_value: monthlyValue ? parseBRNumber(monthlyValue) : null,
       allow_exception: allowException === "sim",
       created_by: perms.userId,
     });
@@ -831,19 +834,19 @@ function LimitsDialog({ onClose }: { onClose: () => void }) {
           )}
           <div>
             <Label className="text-xs">Litros/dia</Label>
-            <Input type="number" step="0.01" value={dailyQty} onChange={(e) => setDailyQty(e.target.value)} />
+            <LitersInput value={dailyQty} onValueChange={setDailyQty} />
           </div>
           <div>
             <Label className="text-xs">Litros/mês</Label>
-            <Input type="number" step="0.01" value={monthlyQty} onChange={(e) => setMonthlyQty(e.target.value)} />
+            <LitersInput value={monthlyQty} onValueChange={setMonthlyQty} />
           </div>
           <div>
             <Label className="text-xs">R$/dia</Label>
-            <Input type="number" step="0.01" value={dailyValue} onChange={(e) => setDailyValue(e.target.value)} />
+            <MoneyInput value={dailyValue} onValueChange={setDailyValue} />
           </div>
           <div>
             <Label className="text-xs">R$/mês</Label>
-            <Input type="number" step="0.01" value={monthlyValue} onChange={(e) => setMonthlyValue(e.target.value)} />
+            <MoneyInput value={monthlyValue} onValueChange={setMonthlyValue} />
           </div>
           <div>
             <Label className="text-xs">Permite exceção?</Label>
@@ -882,8 +885,8 @@ function LimitsDialog({ onClose }: { onClose: () => void }) {
                 <TableCell>
                   {l.unit_id ? units.find((u) => u.id === l.unit_id)?.name : l.vehicle_id ? vehicles.find((v) => v.id === l.vehicle_id)?.plate : "Todo o órgão"}
                 </TableCell>
-                <TableCell className="text-right">{l.daily_quantity ? num(l.daily_quantity, 2) : "—"}</TableCell>
-                <TableCell className="text-right">{l.monthly_quantity ? num(l.monthly_quantity, 2) : "—"}</TableCell>
+                <TableCell className="text-right">{l.daily_quantity ? formatLiters(l.daily_quantity) : "—"}</TableCell>
+                <TableCell className="text-right">{l.monthly_quantity ? formatLiters(l.monthly_quantity) : "—"}</TableCell>
                 <TableCell>{l.allow_exception ? "Com justificativa" : "Bloqueia"}</TableCell>
                 <TableCell>{l.active ? <Badge>Ativo</Badge> : <Badge variant="outline">Inativo</Badge>}</TableCell>
                 <TableCell>

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { LitersInput, MoneyInput } from "@/components/form-fields";
 import { PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +60,8 @@ import {
   type FuelingRow,
   type RuleIssue,
   type Vehicle,
+  parseBRNumber,
+  formatLiters,
 } from "@/lib/frotagov";
 
 export const Route = createFileRoute("/_authenticated/abastecimentos")({
@@ -294,7 +297,7 @@ function Abastecimentos() {
                 <TableCell className="font-medium">{f.vehicle?.plate ?? "—"}</TableCell>
                 <TableCell>{f.unit?.acronym || f.unit?.name || "—"}</TableCell>
                 <TableCell>{f.fuel?.name ?? "—"}</TableCell>
-                <TableCell className="text-right">{num(Number(f.quantity), 2)}</TableCell>
+                <TableCell className="text-right">{formatLiters(Number(f.quantity))}</TableCell>
                 <TableCell className="text-right">{brl(Number(f.unit_price))}</TableCell>
                 <TableCell className="text-right font-medium">{brl(Number(f.total_value))}</TableCell>
                 <TableCell className="text-right">
@@ -425,8 +428,8 @@ function NewFuelingDialog({
   const fuel = fuels.find((f) => f.id === fuelId) ?? null;
   const supplier = suppliers.find((s) => s.id === supplierId) ?? null;
 
-  const qty = Number(quantity.replace(",", ".")) || 0;
-  const price = Number(unitPrice.replace(",", ".")) || 0;
+  const qty = parseBRNumber(quantity);
+  const price = parseBRNumber(unitPrice);
   const total = qty * price;
 
   const issues = useMemo(
@@ -454,7 +457,7 @@ function NewFuelingDialog({
       authIssues.push({
         level: "erro",
         type: "acima_do_autorizado",
-        message: `Quantidade (${num(qty, 2)}) excede o saldo autorizado (${num(saldo, 2)}).`,
+        message: `Quantidade (${formatLiters(qty)}) excede o saldo autorizado (${formatLiters(saldo)}).`,
       });
     if (selectedAuth.max_unit_price && price > Number(selectedAuth.max_unit_price) + 0.0001)
       authIssues.push({
@@ -629,14 +632,14 @@ function NewFuelingDialog({
                 <SelectItem value={NONE}>Sem autorização prévia (exige justificativa)</SelectItem>
                 {usableAuths.map((a) => (
                   <SelectItem key={a.id} value={a.id}>
-                    {a.code} — {a.vehicle?.plate} · saldo {num(authorizationBalance(a), 2)} {a.fuel?.measure_unit ?? "L"}
+                    {a.code} — {a.vehicle?.plate} · saldo {formatLiters(authorizationBalance(a))} {a.fuel?.measure_unit ?? "L"}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {selectedAuth && (
               <p className="mt-2 text-xs text-muted-foreground">
-                Saldo disponível: <strong>{num(authorizationBalance(selectedAuth), 2)}</strong> ·
+                Saldo disponível: <strong>{formatLiters(authorizationBalance(selectedAuth))}</strong> ·
                 {selectedAuth.max_unit_price ? ` preço máx. ${brl(selectedAuth.max_unit_price)} ·` : ""}
                 {selectedAuth.max_value ? ` valor máx. ${brl(selectedAuth.max_value)} ·` : ""} válida até {dateTimeBR(selectedAuth.valid_until)}
               </p>
@@ -745,11 +748,11 @@ function NewFuelingDialog({
             </div>
             <div>
               <Label htmlFor="qty">Quantidade * ({fuel?.measure_unit ?? "litro"})</Label>
-              <Input id="qty" inputMode="decimal" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
+              <LitersInput id="qty" value={quantity} onValueChange={setQuantity} />
             </div>
             <div>
               <Label htmlFor="price">Preço unitário * (R$)</Label>
-              <Input id="price" inputMode="decimal" value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} />
+              <MoneyInput id="price" value={unitPrice} onValueChange={setUnitPrice} />
             </div>
             <div>
               <Label>Valor total</Label>
@@ -838,7 +841,7 @@ function DetailDialog({ fueling, onClose }: { fueling: FuelingRow | null; onClos
           <Row label="Unidade" value={fueling.unit?.name} />
           <Row label="Fornecedor" value={fueling.supplier?.trade_name || fueling.supplier?.legal_name} />
           <Row label="Combustível" value={fueling.fuel?.name} />
-          <Row label="Quantidade" value={`${num(Number(fueling.quantity), 2)} ${fueling.fuel?.measure_unit ?? ""}`} />
+          <Row label="Quantidade" value={`${formatLiters(Number(fueling.quantity))} ${fueling.fuel?.measure_unit ?? ""}`} />
           <Row label="Preço unitário" value={brl(Number(fueling.unit_price))} />
           <Row label="Valor total" value={brl(Number(fueling.total_value))} />
           <Row label="KM registrado" value={fueling.odometer_km != null ? num(Number(fueling.odometer_km), 0) : null} />
