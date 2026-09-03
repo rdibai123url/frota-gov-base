@@ -31,8 +31,10 @@ export type Database = {
           expenses_value: number | null
           has_victims: boolean
           id: string
+          import_batch_id: string | null
           investigator_name: string | null
           kind: Database["public"]["Enums"]["accident_kind"]
+          legacy_source: string | null
           location: string | null
           maintenance_record_id: string | null
           needs_tow: boolean
@@ -70,8 +72,10 @@ export type Database = {
           expenses_value?: number | null
           has_victims?: boolean
           id?: string
+          import_batch_id?: string | null
           investigator_name?: string | null
           kind?: Database["public"]["Enums"]["accident_kind"]
+          legacy_source?: string | null
           location?: string | null
           maintenance_record_id?: string | null
           needs_tow?: boolean
@@ -109,8 +113,10 @@ export type Database = {
           expenses_value?: number | null
           has_victims?: boolean
           id?: string
+          import_batch_id?: string | null
           investigator_name?: string | null
           kind?: Database["public"]["Enums"]["accident_kind"]
+          legacy_source?: string | null
           location?: string | null
           maintenance_record_id?: string | null
           needs_tow?: boolean
@@ -1240,6 +1246,332 @@ export type Database = {
             columns: ["unit_id"]
             isOneToOne: false
             referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diaries: {
+        Row: {
+          application_period: string | null
+          attachment_paths: string[]
+          authorized_at: string | null
+          authorized_by: string | null
+          authorized_by_name: string | null
+          beneficiary_cpf: string | null
+          beneficiary_driver_id: string | null
+          beneficiary_name: string
+          beneficiary_role: string | null
+          budget_note: string | null
+          cancel_reason: string | null
+          closed_at: string | null
+          closed_by: string | null
+          closed_by_name: string | null
+          code: string | null
+          commitment_id: string | null
+          cost_center_id: string | null
+          created_at: string
+          created_by: string | null
+          departure_at: string
+          destination_city: string
+          destination_state: string | null
+          event_location: string | null
+          event_name: string | null
+          exercise: number
+          id: string
+          import_batch_id: string | null
+          legacy_source: string | null
+          legal_basis: string | null
+          notes: string | null
+          organization_id: string
+          origin_city: string | null
+          origin_state: string | null
+          paid_at: string | null
+          purpose: string
+          quantity: number
+          reject_reason: string | null
+          requested_at: string | null
+          requester_id: string | null
+          requester_name: string | null
+          return_at: string | null
+          status: Database["public"]["Enums"]["diary_status"]
+          total_value: number
+          unit_id: string | null
+          unit_value: number
+          updated_at: string
+          updated_by: string | null
+          usage_id: string | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          application_period?: string | null
+          attachment_paths?: string[]
+          authorized_at?: string | null
+          authorized_by?: string | null
+          authorized_by_name?: string | null
+          beneficiary_cpf?: string | null
+          beneficiary_driver_id?: string | null
+          beneficiary_name: string
+          beneficiary_role?: string | null
+          budget_note?: string | null
+          cancel_reason?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
+          closed_by_name?: string | null
+          code?: string | null
+          commitment_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          departure_at: string
+          destination_city: string
+          destination_state?: string | null
+          event_location?: string | null
+          event_name?: string | null
+          exercise?: number
+          id?: string
+          import_batch_id?: string | null
+          legacy_source?: string | null
+          legal_basis?: string | null
+          notes?: string | null
+          organization_id: string
+          origin_city?: string | null
+          origin_state?: string | null
+          paid_at?: string | null
+          purpose: string
+          quantity?: number
+          reject_reason?: string | null
+          requested_at?: string | null
+          requester_id?: string | null
+          requester_name?: string | null
+          return_at?: string | null
+          status?: Database["public"]["Enums"]["diary_status"]
+          total_value?: number
+          unit_id?: string | null
+          unit_value?: number
+          updated_at?: string
+          updated_by?: string | null
+          usage_id?: string | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          application_period?: string | null
+          attachment_paths?: string[]
+          authorized_at?: string | null
+          authorized_by?: string | null
+          authorized_by_name?: string | null
+          beneficiary_cpf?: string | null
+          beneficiary_driver_id?: string | null
+          beneficiary_name?: string
+          beneficiary_role?: string | null
+          budget_note?: string | null
+          cancel_reason?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
+          closed_by_name?: string | null
+          code?: string | null
+          commitment_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          departure_at?: string
+          destination_city?: string
+          destination_state?: string | null
+          event_location?: string | null
+          event_name?: string | null
+          exercise?: number
+          id?: string
+          import_batch_id?: string | null
+          legacy_source?: string | null
+          legal_basis?: string | null
+          notes?: string | null
+          organization_id?: string
+          origin_city?: string | null
+          origin_state?: string | null
+          paid_at?: string | null
+          purpose?: string
+          quantity?: number
+          reject_reason?: string | null
+          requested_at?: string | null
+          requester_id?: string | null
+          requester_name?: string | null
+          return_at?: string | null
+          status?: Database["public"]["Enums"]["diary_status"]
+          total_value?: number
+          unit_id?: string | null
+          unit_value?: number
+          updated_at?: string
+          updated_by?: string | null
+          usage_id?: string | null
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diaries_beneficiary_driver_id_fkey"
+            columns: ["beneficiary_driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diaries_commitment_id_fkey"
+            columns: ["commitment_id"]
+            isOneToOne: false
+            referencedRelation: "commitments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diaries_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diaries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diaries_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diaries_usage_id_fkey"
+            columns: ["usage_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_usages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diaries_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diary_proofs: {
+        Row: {
+          activity_report: string | null
+          actual_departure_at: string | null
+          actual_return_at: string | null
+          attachment_paths: string[]
+          balance_value: number
+          beneficiary_cpf: string | null
+          beneficiary_name: string | null
+          beneficiary_role: string | null
+          code: string | null
+          created_at: string
+          created_by: string | null
+          diary_id: string
+          exercise: number
+          id: string
+          notes: string | null
+          organization_id: string
+          purpose: string | null
+          purpose_complement: string | null
+          received_quantity: number
+          received_total: number
+          received_unit_value: number
+          restitution_note: string | null
+          restitution_resolved: boolean
+          reviewed_at: string | null
+          reviewer_id: string | null
+          reviewer_name: string | null
+          settlement_date: string | null
+          status: Database["public"]["Enums"]["diary_proof_status"]
+          updated_at: string
+          updated_by: string | null
+          used_quantity: number
+          used_total: number
+        }
+        Insert: {
+          activity_report?: string | null
+          actual_departure_at?: string | null
+          actual_return_at?: string | null
+          attachment_paths?: string[]
+          balance_value?: number
+          beneficiary_cpf?: string | null
+          beneficiary_name?: string | null
+          beneficiary_role?: string | null
+          code?: string | null
+          created_at?: string
+          created_by?: string | null
+          diary_id: string
+          exercise?: number
+          id?: string
+          notes?: string | null
+          organization_id: string
+          purpose?: string | null
+          purpose_complement?: string | null
+          received_quantity?: number
+          received_total?: number
+          received_unit_value?: number
+          restitution_note?: string | null
+          restitution_resolved?: boolean
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_name?: string | null
+          settlement_date?: string | null
+          status?: Database["public"]["Enums"]["diary_proof_status"]
+          updated_at?: string
+          updated_by?: string | null
+          used_quantity?: number
+          used_total?: number
+        }
+        Update: {
+          activity_report?: string | null
+          actual_departure_at?: string | null
+          actual_return_at?: string | null
+          attachment_paths?: string[]
+          balance_value?: number
+          beneficiary_cpf?: string | null
+          beneficiary_name?: string | null
+          beneficiary_role?: string | null
+          code?: string | null
+          created_at?: string
+          created_by?: string | null
+          diary_id?: string
+          exercise?: number
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          purpose?: string | null
+          purpose_complement?: string | null
+          received_quantity?: number
+          received_total?: number
+          received_unit_value?: number
+          restitution_note?: string | null
+          restitution_resolved?: boolean
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_name?: string | null
+          settlement_date?: string | null
+          status?: Database["public"]["Enums"]["diary_proof_status"]
+          updated_at?: string
+          updated_by?: string | null
+          used_quantity?: number
+          used_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diary_proofs_diary_id_fkey"
+            columns: ["diary_id"]
+            isOneToOne: false
+            referencedRelation: "diaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diary_proofs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -2571,12 +2903,14 @@ export type Database = {
           created_by: string | null
           description: string | null
           id: string
+          import_batch_id: string | null
           interval_hours: number | null
           interval_km: number | null
           interval_months: number | null
           last_done_at: string | null
           last_done_hours: number | null
           last_done_km: number | null
+          legacy_source: string | null
           name: string
           notes: string | null
           organization_id: string
@@ -2595,12 +2929,14 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          import_batch_id?: string | null
           interval_hours?: number | null
           interval_km?: number | null
           interval_months?: number | null
           last_done_at?: string | null
           last_done_hours?: number | null
           last_done_km?: number | null
+          legacy_source?: string | null
           name: string
           notes?: string | null
           organization_id: string
@@ -2619,12 +2955,14 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          import_batch_id?: string | null
           interval_hours?: number | null
           interval_km?: number | null
           interval_months?: number | null
           last_done_at?: string | null
           last_done_hours?: number | null
           last_done_km?: number | null
+          legacy_source?: string | null
           name?: string
           notes?: string | null
           organization_id?: string
@@ -3258,7 +3596,9 @@ export type Database = {
           created_by: string | null
           description: string
           id: string
+          import_batch_id: string | null
           internal_code: string | null
+          legacy_source: string | null
           measure_unit: string
           notes: string | null
           organization_id: string
@@ -3274,7 +3614,9 @@ export type Database = {
           created_by?: string | null
           description: string
           id?: string
+          import_batch_id?: string | null
           internal_code?: string | null
+          legacy_source?: string | null
           measure_unit?: string
           notes?: string | null
           organization_id: string
@@ -3290,7 +3632,9 @@ export type Database = {
           created_by?: string | null
           description?: string
           id?: string
+          import_batch_id?: string | null
           internal_code?: string | null
+          legacy_source?: string | null
           measure_unit?: string
           notes?: string | null
           organization_id?: string
@@ -3482,6 +3826,8 @@ export type Database = {
           created_by: string | null
           granted_amount: number
           id: string
+          import_batch_id: string | null
+          legacy_source: string | null
           measure_unit: string
           name: string
           notes: string | null
@@ -3506,6 +3852,8 @@ export type Database = {
           created_by?: string | null
           granted_amount?: number
           id?: string
+          import_batch_id?: string | null
+          legacy_source?: string | null
           measure_unit?: string
           name: string
           notes?: string | null
@@ -3530,6 +3878,8 @@ export type Database = {
           created_by?: string | null
           granted_amount?: number
           id?: string
+          import_batch_id?: string | null
+          legacy_source?: string | null
           measure_unit?: string
           name?: string
           notes?: string | null
@@ -4636,8 +4986,10 @@ export type Database = {
           dot: string | null
           expected_life_km: number | null
           id: string
+          import_batch_id: string | null
           install_date: string | null
           install_km: number | null
+          legacy_source: string | null
           model: string | null
           notes: string | null
           organization_id: string
@@ -4664,8 +5016,10 @@ export type Database = {
           dot?: string | null
           expected_life_km?: number | null
           id?: string
+          import_batch_id?: string | null
           install_date?: string | null
           install_km?: number | null
+          legacy_source?: string | null
           model?: string | null
           notes?: string | null
           organization_id: string
@@ -4692,8 +5046,10 @@ export type Database = {
           dot?: string | null
           expected_life_km?: number | null
           id?: string
+          import_batch_id?: string | null
           install_date?: string | null
           install_km?: number | null
+          legacy_source?: string | null
           model?: string | null
           notes?: string | null
           organization_id?: string
@@ -5746,6 +6102,8 @@ export type Database = {
           district: string | null
           email: string | null
           id: string
+          import_batch_id: string | null
+          legacy_source: string | null
           legal_name: string
           notes: string | null
           organization_id: string
@@ -5776,6 +6134,8 @@ export type Database = {
           district?: string | null
           email?: string | null
           id?: string
+          import_batch_id?: string | null
+          legacy_source?: string | null
           legal_name: string
           notes?: string | null
           organization_id: string
@@ -5806,6 +6166,8 @@ export type Database = {
           district?: string | null
           email?: string | null
           id?: string
+          import_batch_id?: string | null
+          legacy_source?: string | null
           legal_name?: string
           notes?: string | null
           organization_id?: string
@@ -5921,6 +6283,7 @@ export type Database = {
         Returns: Json
       }
       commit_import_batch: { Args: { _batch: string }; Returns: Json }
+      commit_import_batch_v2: { Args: { _batch: string }; Returns: Json }
       contract_period_at: {
         Args: { _at: string; _contract: string }
         Returns: string
@@ -6111,6 +6474,23 @@ export type Database = {
         | "suspenso"
         | "encerrado"
         | "rescindido"
+      diary_proof_status:
+        | "em_elaboracao"
+        | "entregue"
+        | "em_conferencia"
+        | "aprovada"
+        | "rejeitada"
+      diary_status:
+        | "rascunho"
+        | "solicitada"
+        | "em_analise"
+        | "autorizada"
+        | "paga"
+        | "viagem_realizada"
+        | "aguardando_comprovacao"
+        | "comprovada"
+        | "rejeitada"
+        | "cancelada"
       driver_bond:
         | "efetivo"
         | "comissionado"
@@ -6443,6 +6823,25 @@ export const Constants = {
         "suspenso",
         "encerrado",
         "rescindido",
+      ],
+      diary_proof_status: [
+        "em_elaboracao",
+        "entregue",
+        "em_conferencia",
+        "aprovada",
+        "rejeitada",
+      ],
+      diary_status: [
+        "rascunho",
+        "solicitada",
+        "em_analise",
+        "autorizada",
+        "paga",
+        "viagem_realizada",
+        "aguardando_comprovacao",
+        "comprovada",
+        "rejeitada",
+        "cancelada",
       ],
       driver_bond: [
         "efetivo",

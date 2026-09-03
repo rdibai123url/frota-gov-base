@@ -38,6 +38,7 @@ const NAV: NavGroup[] = [
     items: [
       { to: "/veiculos", label: "Veículos" },
       { to: "/utilizacao", label: "Utilização e reservas" },
+      { to: "/diarias", label: "Diárias" },
       { to: "/multas", label: "Multas e infrações" },
       { to: "/sinistros", label: "Acidentes e sinistros" },
       { to: "/seguros", label: "Seguros" },
@@ -93,6 +94,7 @@ const NAV: NavGroup[] = [
       { to: "/condutores", label: "Condutores / Motoristas" },
       { to: "/entidades-externas", label: "Entidades externas" },
       { to: "/usuarios", label: "Usuários e Permissões" },
+      { to: "/migracao", label: "Migração de dados" },
     ],
   },
 

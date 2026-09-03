@@ -68,7 +68,14 @@ export type ImportModuleId =
   | "seguros"
   | "obrigacoes"
   | "patrimonio"
-  | "entidades";
+  | "entidades"
+  | "diarias"
+  | "acidentes"
+  | "rede_credenciada"
+  | "pecas"
+  | "pneus"
+  | "planos"
+  | "cotas";
 
 export type ImportModule = {
   id: ImportModuleId;
@@ -124,6 +131,16 @@ const ASSET_KINDS = [
   "alienado",
   "desativado",
 ];
+
+const DIARY_STATUS_IMPORT = [
+  "rascunho", "solicitada", "em_analise", "autorizada", "paga",
+  "viagem_realizada", "aguardando_comprovacao", "comprovada", "rejeitada", "cancelada",
+];
+const ACCIDENT_KINDS_IMPORT = ["colisao", "capotamento", "atropelamento", "incendio", "furto_roubo", "avaria", "outro"];
+const ACCIDENT_STATUS_IMPORT = ["registrado", "em_apuracao", "em_reparo", "encerrado", "cancelado"];
+const WORKSHOP_STATUS_IMPORT = ["ativa", "suspensa", "inativa"];
+const TIRE_STATUS_IMPORT = ["estoque", "em_uso", "recapagem", "descartado"];
+const QUOTA_TYPES_IMPORT = ["valor", "volume", "quantidade"];
 
 const refUnit = (required = false): ImportField => ({
   key: "_unit",
@@ -521,6 +538,199 @@ export const IMPORT_MODULES: ImportModule[] = [
       { key: "email", label: "E-mail", type: "text", aliases: ["email"] },
       { key: "notes", label: "Observações", type: "text", aliases: ["observacao", "obs"] },
     ],
+  },
+  {
+    id: "diarias",
+    label: "Diárias (RD)",
+    description: "Requisições de diária já concedidas em sistema anterior. Registros legados, sem efeito orçamentário corrente.",
+    order: 17,
+    depends: ["unidades", "condutores"],
+    legacy: true,
+    dedupe: ["beneficiary_name", "departure_at"],
+    fields: [
+      refUnit(),
+      refDriver(),
+      refVehicle(false),
+      { key: "beneficiary_name", label: "Beneficiário", type: "text", required: true, aliases: ["nome", "servidor", "beneficiario"] },
+      { key: "beneficiary_role", label: "Cargo / função", type: "text", aliases: ["cargo", "funcao"] },
+      { key: "beneficiary_cpf", label: "CPF do beneficiário", type: "cpf", aliases: ["cpf"] },
+      { key: "requester_name", label: "Solicitante", type: "text", aliases: ["solicitante"] },
+      { key: "origin_city", label: "Cidade de origem", type: "text", aliases: ["origem", "cidade_origem"] },
+      { key: "origin_state", label: "UF de origem", type: "text", aliases: ["uf_origem"] },
+      { key: "destination_city", label: "Cidade de destino", type: "text", required: true, aliases: ["destino", "cidade_destino"] },
+      { key: "destination_state", label: "UF de destino", type: "text", aliases: ["uf_destino"] },
+      { key: "departure_at", label: "Data/hora de saída", type: "datetime", required: true, aliases: ["saida", "data_saida", "partida"] },
+      { key: "return_at", label: "Data/hora de retorno", type: "datetime", aliases: ["retorno", "data_retorno"] },
+      { key: "quantity", label: "Quantidade de diárias", type: "number", aliases: ["qtd", "quantidade", "diarias"] },
+      { key: "unit_value", label: "Valor unitário", type: "money", aliases: ["valor_unitario", "valor_diaria"] },
+      { key: "purpose", label: "Finalidade / motivo", type: "text", aliases: ["motivo", "finalidade", "objetivo"] },
+      { key: "event_name", label: "Evento / atividade", type: "text", aliases: ["evento"] },
+      { key: "event_location", label: "Local do evento", type: "text", aliases: ["local"] },
+      { key: "legal_basis", label: "Dispositivo legal", type: "text", aliases: ["norma", "base_legal", "decreto"] },
+      { key: "status", label: "Situação", type: "enum", options: DIARY_STATUS_IMPORT, aliases: ["situacao", "status"] },
+      { key: "notes", label: "Observações", type: "text", aliases: ["observacao", "obs"] },
+    ],
+  },
+  {
+    id: "acidentes",
+    label: "Acidentes / Sinistros",
+    description: "Ocorrências de sinistro já encerradas ou em andamento no sistema anterior.",
+    order: 18,
+    depends: ["veiculos"],
+    legacy: true,
+    dedupe: ["_vehicle", "occurred_at"],
+    fields: [
+      refVehicle(true),
+      refUnit(),
+      refDriver(),
+      { key: "kind", label: "Natureza", type: "enum", options: ACCIDENT_KINDS_IMPORT, aliases: ["tipo", "natureza"] },
+      { key: "occurred_at", label: "Data/hora da ocorrência", type: "datetime", required: true, aliases: ["data", "data_ocorrencia"] },
+      { key: "location", label: "Local", type: "text", aliases: ["local", "endereco"] },
+      { key: "description", label: "Descrição", type: "text", aliases: ["descricao", "relato"] },
+      { key: "third_parties", label: "Terceiros envolvidos", type: "text", aliases: ["terceiros"] },
+      { key: "police_report_number", label: "Boletim de ocorrência", type: "text", aliases: ["bo", "boletim"] },
+      { key: "damages", label: "Danos", type: "text", aliases: ["danos"] },
+      { key: "deductible_value", label: "Franquia", type: "money", aliases: ["franquia"] },
+      { key: "expenses_value", label: "Despesas", type: "money", aliases: ["despesas", "custo"] },
+      { key: "status", label: "Situação", type: "enum", options: ACCIDENT_STATUS_IMPORT, aliases: ["situacao"] },
+      { key: "reporter_name", label: "Comunicante", type: "text", aliases: ["comunicante", "responsavel"] },
+      { key: "notes", label: "Observações", type: "text", aliases: ["observacao", "obs"] },
+    ],
+  },
+  {
+    id: "rede_credenciada",
+    label: "Rede credenciada (oficinas)",
+    description: "Oficinas e prestadores credenciados para manutenção.",
+    order: 19,
+    depends: [],
+    dedupe: ["cnpj", "legal_name"],
+    fields: [
+      { key: "legal_name", label: "Razão social", type: "text", required: true, aliases: ["razao_social", "nome", "oficina"] },
+      { key: "trade_name", label: "Nome fantasia", type: "text", aliases: ["fantasia"] },
+      { key: "cnpj", label: "CNPJ", type: "cnpj", aliases: ["cnpj", "documento"] },
+      { key: "address", label: "Endereço", type: "text", aliases: ["endereco"] },
+      { key: "city", label: "Município", type: "text", aliases: ["cidade", "municipio"] },
+      { key: "state", label: "UF", type: "text", aliases: ["uf", "estado"] },
+      { key: "zip_code", label: "CEP", type: "text", aliases: ["cep"] },
+      { key: "phone", label: "Telefone", type: "text", aliases: ["telefone"] },
+      { key: "email", label: "E-mail", type: "text", aliases: ["email"] },
+      { key: "contact_name", label: "Contato", type: "text", aliases: ["contato", "responsavel"] },
+      { key: "specialties", label: "Especialidades (separadas por vírgula)", type: "text", aliases: ["especialidades", "servicos"] },
+      { key: "coverage_area", label: "Área de cobertura", type: "text", aliases: ["cobertura", "regiao"] },
+      { key: "status", label: "Situação", type: "enum", options: WORKSHOP_STATUS_IMPORT, aliases: ["situacao"] },
+      { key: "notes", label: "Observações", type: "text", aliases: ["observacao", "obs"] },
+    ],
+  },
+  {
+    id: "pecas",
+    label: "Peças e acessórios",
+    description: "Catálogo de peças, acessórios e materiais aplicados na frota.",
+    order: 20,
+    depends: [],
+    dedupe: ["internal_code", "description"],
+    fields: [
+      { key: "internal_code", label: "Código interno", type: "text", aliases: ["codigo", "cod"] },
+      { key: "description", label: "Descrição", type: "text", required: true, aliases: ["descricao", "peca", "item"] },
+      { key: "brand", label: "Marca", type: "text", aliases: ["marca", "fabricante"] },
+      { key: "reference", label: "Referência", type: "text", aliases: ["referencia", "part_number"] },
+      { key: "measure_unit", label: "Unidade de medida", type: "text", aliases: ["unidade", "un"] },
+      { key: "category", label: "Categoria", type: "text", aliases: ["categoria", "grupo"] },
+      { key: "notes", label: "Observações", type: "text", aliases: ["observacao", "obs"] },
+    ],
+  },
+  {
+    id: "pneus",
+    label: "Pneus",
+    description: "Pneus em estoque ou instalados, com vida útil acumulada.",
+    order: 21,
+    depends: ["veiculos", "fornecedores"],
+    dedupe: ["code", "serial_number"],
+    fields: [
+      { key: "code", label: "Código / número de controle", type: "text", required: true, aliases: ["codigo", "numero"] },
+      { key: "brand", label: "Marca", type: "text", aliases: ["marca"] },
+      { key: "model", label: "Modelo", type: "text", aliases: ["modelo"] },
+      { key: "size", label: "Medida", type: "text", aliases: ["medida", "tamanho"] },
+      { key: "dot", label: "DOT", type: "text", aliases: ["dot"] },
+      { key: "serial_number", label: "Número de série", type: "text", aliases: ["serie", "serial"] },
+      refSupplier(),
+      { key: "purchase_value", label: "Valor de compra", type: "money", aliases: ["valor", "valor_compra"] },
+      { key: "purchase_date", label: "Data da compra", type: "date", aliases: ["data_compra"] },
+      { key: "expected_life_km", label: "Vida útil prevista (km)", type: "number", aliases: ["vida_util", "km_previsto"] },
+      { key: "accumulated_km", label: "Km acumulado", type: "number", aliases: ["km_acumulado", "km_rodado"] },
+      { key: "status", label: "Situação", type: "enum", options: TIRE_STATUS_IMPORT, aliases: ["situacao"] },
+      refVehicle(false),
+      { key: "position", label: "Posição no veículo", type: "text", aliases: ["posicao"] },
+      { key: "install_km", label: "Km na instalação", type: "number", aliases: ["km_instalacao"] },
+      { key: "install_date", label: "Data da instalação", type: "date", aliases: ["data_instalacao"] },
+      { key: "notes", label: "Observações", type: "text", aliases: ["observacao", "obs"] },
+    ],
+  },
+  {
+    id: "planos",
+    label: "Planos preventivos",
+    description: "Planos de manutenção preventiva por veículo ou tipo de veículo.",
+    order: 22,
+    depends: ["veiculos"],
+    dedupe: ["name"],
+    fields: [
+      { key: "name", label: "Nome do plano", type: "text", required: true, aliases: ["plano", "nome"] },
+      { key: "description", label: "Descrição", type: "text", aliases: ["descricao"] },
+      { key: "service_type", label: "Tipo de serviço", type: "text", aliases: ["servico", "tipo"] },
+      refVehicle(false),
+      { key: "vehicle_type", label: "Tipo de veículo", type: "text", aliases: ["tipo_veiculo", "categoria"] },
+      { key: "interval_km", label: "Intervalo (km)", type: "number", aliases: ["km", "intervalo_km"] },
+      { key: "interval_hours", label: "Intervalo (horas)", type: "number", aliases: ["horas", "intervalo_horas"] },
+      { key: "interval_months", label: "Intervalo (meses)", type: "int", aliases: ["meses", "intervalo_meses"] },
+      { key: "tolerance_km", label: "Tolerância (km)", type: "number", aliases: ["tolerancia_km"] },
+      { key: "tolerance_days", label: "Tolerância (dias)", type: "int", aliases: ["tolerancia_dias"] },
+      { key: "last_done_at", label: "Última execução", type: "date", aliases: ["ultima_execucao"] },
+      { key: "last_done_km", label: "Km da última execução", type: "number", aliases: ["km_ultima"] },
+      { key: "notes", label: "Observações", type: "text", aliases: ["observacao", "obs"] },
+    ],
+  },
+  {
+    id: "cotas",
+    label: "Cotas e saldos",
+    description: "Cotas de consumo por unidade, contrato ou centro de custo.",
+    order: 23,
+    depends: ["unidades", "contratos", "centros_custo"],
+    dedupe: ["name"],
+    fields: [
+      { key: "name", label: "Nome da cota", type: "text", required: true, aliases: ["cota", "nome", "descricao"] },
+      { key: "quota_type", label: "Tipo de cota", type: "enum", options: QUOTA_TYPES_IMPORT, aliases: ["tipo"] },
+      { key: "measure_unit", label: "Unidade de medida", type: "text", aliases: ["unidade_medida", "un"] },
+      refContract(),
+      refCostCenter(),
+      refUnit(),
+      { key: "valid_from", label: "Vigência inicial", type: "date", aliases: ["inicio", "vigencia_inicio"] },
+      { key: "valid_to", label: "Vigência final", type: "date", aliases: ["fim", "vigencia_fim"] },
+      { key: "granted_amount", label: "Valor / quantidade concedida", type: "number", aliases: ["concedido", "valor", "quantidade"] },
+      { key: "notes", label: "Observações", type: "text", aliases: ["observacao", "obs"] },
+    ],
+  },
+];
+
+/** Grupos exibidos na tela "Migração de dados" (seleção de um tipo por vez). */
+export const IMPORT_GROUPS: { id: string; label: string; modules: ImportModuleId[] }[] = [
+  {
+    id: "basicos",
+    label: "Cadastros básicos",
+    modules: ["unidades", "condutores", "veiculos", "fornecedores", "produtos", "centros_custo"],
+  },
+  {
+    id: "orcamento",
+    label: "Contratos e orçamento",
+    modules: ["contratos", "empenhos", "cotas"],
+  },
+  {
+    id: "operacao",
+    label: "Operação",
+    modules: ["abastecimentos", "utilizacoes", "diarias", "manutencoes", "planos", "pecas", "pneus", "rede_credenciada"],
+  },
+  {
+    id: "legal",
+    label: "Legal e patrimonial",
+    modules: ["multas", "acidentes", "seguros", "obrigacoes", "patrimonio", "entidades"],
   },
 ];
 
