@@ -16,6 +16,10 @@ import {
   IdCard,
   Ticket,
   CalendarClock,
+  FileText,
+  Wallet,
+  PiggyBank,
+  Coins,
 } from "lucide-react";
 
 import { PageHeader } from "@/components/app-shell";
