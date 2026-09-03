@@ -52,7 +52,7 @@ export const Route = createFileRoute("/_authenticated/contratos")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Contratos;
+  component: Contratos,
 });
 
 const ALL = "__all__";
