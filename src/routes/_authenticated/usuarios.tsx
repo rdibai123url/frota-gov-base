@@ -126,8 +126,8 @@ function Usuarios() {
     }
 
     // Papéis: nunca é possível conceder super_admin por esta tela (bloqueado também no banco).
-    const currentRoles = editing.roles.filter((r) => r !== "super_admin");
-    const desired = role === NONE ? [] : [role as AppRole];
+    const currentRoles: AppRole[] = editing.roles.filter((r) => r !== "super_admin");
+    const desired: AppRole[] = role === NONE ? [] : [role as AppRole];
     const toRemove = currentRoles.filter((r) => !desired.includes(r));
     const toAdd = desired.filter((r) => !currentRoles.includes(r));
 
