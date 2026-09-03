@@ -392,7 +392,11 @@ function Painel() {
         <StatCard label="Valor em manutenção no mês" value={brl(rede.valorMes)} icon={Banknote} />
       </div>
 
-      <h2 className="gov-title mt-10 mb-4 text-lg">Execução orçamentária</h2>
+        </TabsContent>
+
+        <TabsContent value="financeiro" className="pt-5">
+      <h2 className="gov-title mb-4 text-lg">Execução orçamentária</h2>
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
         <StatCard label="Contratos vigentes" value={financeiro.contratosVigentes} icon={FileText} />
         <StatCard label="Saldo contratual" value={brl(financeiro.saldoContratual)} icon={FileText} tone="success" />
