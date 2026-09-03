@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as AuthenticatedAbastecimentosRouteImport } from './routes/_authenticated/abastecimentos'
 import { Route as AuthenticatedAlertasRouteImport } from './routes/_authenticated/alertas'
 import { Route as AuthenticatedAutorizacoesRouteImport } from './routes/_authenticated/autorizacoes'
@@ -34,6 +35,7 @@ import { Route as AuthenticatedOrgaoRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 import { Route as AuthenticatedPatrimonioRouteImport } from './routes/_authenticated/patrimonio'
 import { Route as AuthenticatedPecasRouteImport } from './routes/_authenticated/pecas'
+import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedPlanosManutencaoRouteImport } from './routes/_authenticated/planos-manutencao'
 import { Route as AuthenticatedPlataformaRouteImport } from './routes/_authenticated/plataforma'
 import { Route as AuthenticatedPneusRouteImport } from './routes/_authenticated/pneus'
@@ -63,6 +65,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
+  id: '/redefinir-senha',
+  path: '/redefinir-senha',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAbastecimentosRoute =
@@ -184,6 +191,11 @@ const AuthenticatedPecasRoute = AuthenticatedPecasRouteImport.update({
   path: '/pecas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPlanosManutencaoRoute =
   AuthenticatedPlanosManutencaoRouteImport.update({
     id: '/planos-manutencao',
@@ -272,6 +284,7 @@ const ApiPublicV1TransparenciaSlugRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
   '/abastecimentos': typeof AuthenticatedAbastecimentosRoute
   '/alertas': typeof AuthenticatedAlertasRoute
   '/autorizacoes': typeof AuthenticatedAutorizacoesRoute
@@ -294,6 +307,7 @@ export interface FileRoutesByFullPath {
   '/painel': typeof AuthenticatedPainelRoute
   '/patrimonio': typeof AuthenticatedPatrimonioRoute
   '/pecas': typeof AuthenticatedPecasRoute
+  '/perfil': typeof AuthenticatedPerfilRoute
   '/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/plataforma': typeof AuthenticatedPlataformaRoute
   '/pneus': typeof AuthenticatedPneusRoute
@@ -314,6 +328,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
   '/abastecimentos': typeof AuthenticatedAbastecimentosRoute
   '/alertas': typeof AuthenticatedAlertasRoute
   '/autorizacoes': typeof AuthenticatedAutorizacoesRoute
@@ -336,6 +351,7 @@ export interface FileRoutesByTo {
   '/painel': typeof AuthenticatedPainelRoute
   '/patrimonio': typeof AuthenticatedPatrimonioRoute
   '/pecas': typeof AuthenticatedPecasRoute
+  '/perfil': typeof AuthenticatedPerfilRoute
   '/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/plataforma': typeof AuthenticatedPlataformaRoute
   '/pneus': typeof AuthenticatedPneusRoute
@@ -358,6 +374,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
   '/_authenticated/abastecimentos': typeof AuthenticatedAbastecimentosRoute
   '/_authenticated/alertas': typeof AuthenticatedAlertasRoute
   '/_authenticated/autorizacoes': typeof AuthenticatedAutorizacoesRoute
@@ -380,6 +397,7 @@ export interface FileRoutesById {
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
   '/_authenticated/patrimonio': typeof AuthenticatedPatrimonioRoute
   '/_authenticated/pecas': typeof AuthenticatedPecasRoute
+  '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/_authenticated/plataforma': typeof AuthenticatedPlataformaRoute
   '/_authenticated/pneus': typeof AuthenticatedPneusRoute
@@ -402,6 +420,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/redefinir-senha'
     | '/abastecimentos'
     | '/alertas'
     | '/autorizacoes'
@@ -424,6 +443,7 @@ export interface FileRouteTypes {
     | '/painel'
     | '/patrimonio'
     | '/pecas'
+    | '/perfil'
     | '/planos-manutencao'
     | '/plataforma'
     | '/pneus'
@@ -444,6 +464,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/redefinir-senha'
     | '/abastecimentos'
     | '/alertas'
     | '/autorizacoes'
@@ -466,6 +487,7 @@ export interface FileRouteTypes {
     | '/painel'
     | '/patrimonio'
     | '/pecas'
+    | '/perfil'
     | '/planos-manutencao'
     | '/plataforma'
     | '/pneus'
@@ -487,6 +509,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/redefinir-senha'
     | '/_authenticated/abastecimentos'
     | '/_authenticated/alertas'
     | '/_authenticated/autorizacoes'
@@ -509,6 +532,7 @@ export interface FileRouteTypes {
     | '/_authenticated/painel'
     | '/_authenticated/patrimonio'
     | '/_authenticated/pecas'
+    | '/_authenticated/perfil'
     | '/_authenticated/planos-manutencao'
     | '/_authenticated/plataforma'
     | '/_authenticated/pneus'
@@ -531,6 +555,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   TransparenciaSlugRoute: typeof TransparenciaSlugRoute
   ApiPublicV1FrotaRoute: typeof ApiPublicV1FrotaRoute
   ApiPublicV1TransparenciaSlugRoute: typeof ApiPublicV1TransparenciaSlugRoute
@@ -557,6 +582,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/redefinir-senha': {
+      id: '/redefinir-senha'
+      path: '/redefinir-senha'
+      fullPath: '/redefinir-senha'
+      preLoaderRoute: typeof RedefinirSenhaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/abastecimentos': {
@@ -713,6 +745,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPecasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/perfil': {
+      id: '/_authenticated/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof AuthenticatedPerfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/planos-manutencao': {
       id: '/_authenticated/planos-manutencao'
       path: '/planos-manutencao'
@@ -851,6 +890,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
   AuthenticatedPatrimonioRoute: typeof AuthenticatedPatrimonioRoute
   AuthenticatedPecasRoute: typeof AuthenticatedPecasRoute
+  AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedPlanosManutencaoRoute: typeof AuthenticatedPlanosManutencaoRoute
   AuthenticatedPlataformaRoute: typeof AuthenticatedPlataformaRoute
   AuthenticatedPneusRoute: typeof AuthenticatedPneusRoute
@@ -889,6 +929,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
   AuthenticatedPatrimonioRoute: AuthenticatedPatrimonioRoute,
   AuthenticatedPecasRoute: AuthenticatedPecasRoute,
+  AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedPlanosManutencaoRoute: AuthenticatedPlanosManutencaoRoute,
   AuthenticatedPlataformaRoute: AuthenticatedPlataformaRoute,
   AuthenticatedPneusRoute: AuthenticatedPneusRoute,
@@ -911,6 +952,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  RedefinirSenhaRoute: RedefinirSenhaRoute,
   TransparenciaSlugRoute: TransparenciaSlugRoute,
   ApiPublicV1FrotaRoute: ApiPublicV1FrotaRoute,
   ApiPublicV1TransparenciaSlugRoute: ApiPublicV1TransparenciaSlugRoute,

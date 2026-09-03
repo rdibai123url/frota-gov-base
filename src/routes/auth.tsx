@@ -32,21 +32,52 @@ const signInSchema = z.object({
   password: z.string().min(6, "A senha deve ter ao menos 6 caracteres").max(72),
 });
 
+const emailSchema = z.string().trim().email("Informe um e-mail válido").max(255);
+
 function AuthPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<"login" | "recuperar">("login");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) navigate({ to: "/painel", replace: true });
     });
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        navigate({ to: "/redefinir-senha", replace: true });
+        return;
+      }
       if (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
         navigate({ to: "/painel", replace: true });
       }
     });
     return () => sub.subscription.unsubscribe();
   }, [navigate]);
+
+  async function handleRecover(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const parsed = emailSchema.safeParse(form.get("email"));
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "E-mail inválido");
+      return;
+    }
+    setSending(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
+      redirectTo: `${window.location.origin}/redefinir-senha`,
+    });
+    setSending(false);
+    if (error) {
+      toast.error("Não foi possível enviar o e-mail de recuperação. Tente novamente em instantes.");
+      return;
+    }
+    setSent(true);
+    toast.success("Se o e-mail estiver cadastrado, enviaremos o link de recuperação.");
+  }
+
 
   async function handleSignIn(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
