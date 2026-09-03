@@ -915,7 +915,7 @@ export const FINANCE_ALERT_LABELS: Record<string, string> = {
 
 
 export function alertLabel(type: string) {
-  return ALERT_TYPE_LABELS[type] ?? FINANCE_ALERT_LABELS[type] ?? type;
+  return ALERT_TYPE_LABELS[type] ?? FINANCE_ALERT_LABELS[type] ?? BACKUP_ALERT_LABELS[type] ?? type;
 }
 
 /** Percentual seguro (0–100+). */
