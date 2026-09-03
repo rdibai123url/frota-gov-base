@@ -211,6 +211,125 @@ export type Database = {
           },
         ]
       }
+      accredited_partners: {
+        Row: {
+          address: string | null
+          city: string | null
+          cnpj: string | null
+          contact_name: string | null
+          coverage_area: string | null
+          created_at: string
+          created_by: string | null
+          district: string | null
+          email: string | null
+          id: string
+          import_batch_id: string | null
+          kinds: Database["public"]["Enums"]["partner_kind"][]
+          latitude: number | null
+          legacy_source: string | null
+          legal_name: string
+          longitude: number | null
+          notes: string | null
+          organization_id: string
+          phone: string | null
+          state: string | null
+          status: Database["public"]["Enums"]["partner_status"]
+          supplier_id: string | null
+          trade_name: string | null
+          updated_at: string
+          updated_by: string | null
+          workshop_id: string | null
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          cnpj?: string | null
+          contact_name?: string | null
+          coverage_area?: string | null
+          created_at?: string
+          created_by?: string | null
+          district?: string | null
+          email?: string | null
+          id?: string
+          import_batch_id?: string | null
+          kinds?: Database["public"]["Enums"]["partner_kind"][]
+          latitude?: number | null
+          legacy_source?: string | null
+          legal_name: string
+          longitude?: number | null
+          notes?: string | null
+          organization_id: string
+          phone?: string | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["partner_status"]
+          supplier_id?: string | null
+          trade_name?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          workshop_id?: string | null
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          cnpj?: string | null
+          contact_name?: string | null
+          coverage_area?: string | null
+          created_at?: string
+          created_by?: string | null
+          district?: string | null
+          email?: string | null
+          id?: string
+          import_batch_id?: string | null
+          kinds?: Database["public"]["Enums"]["partner_kind"][]
+          latitude?: number | null
+          legacy_source?: string | null
+          legal_name?: string
+          longitude?: number | null
+          notes?: string | null
+          organization_id?: string
+          phone?: string | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["partner_status"]
+          supplier_id?: string | null
+          trade_name?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          workshop_id?: string | null
+          zip_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accredited_partners_import_batch_id_fkey"
+            columns: ["import_batch_id"]
+            isOneToOne: false
+            referencedRelation: "import_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accredited_partners_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accredited_partners_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accredited_partners_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity_logs: {
         Row: {
           action: string | null
@@ -284,6 +403,136 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asset_card_uses: {
+        Row: {
+          card_id: string
+          created_at: string
+          id: string
+          ip: string | null
+          organization_id: string
+          partner_id: string | null
+          purpose: string | null
+          used_by: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          card_id: string
+          created_at?: string
+          id?: string
+          ip?: string | null
+          organization_id: string
+          partner_id?: string | null
+          purpose?: string | null
+          used_by?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          card_id?: string
+          created_at?: string
+          id?: string
+          ip?: string | null
+          organization_id?: string
+          partner_id?: string | null
+          purpose?: string | null
+          used_by?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_card_uses_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "asset_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_card_uses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_card_uses_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "accredited_partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asset_cards: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          id: string
+          issued_at: string
+          notes: string | null
+          organization_id: string
+          qr_token: string
+          revoke_reason: string | null
+          revoked_at: string | null
+          security_code: string
+          status: Database["public"]["Enums"]["asset_card_status"]
+          updated_at: string
+          updated_by: string | null
+          uses_count: number
+          vehicle_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          issued_at?: string
+          notes?: string | null
+          organization_id: string
+          qr_token?: string
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          security_code: string
+          status?: Database["public"]["Enums"]["asset_card_status"]
+          updated_at?: string
+          updated_by?: string | null
+          uses_count?: number
+          vehicle_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          issued_at?: string
+          notes?: string | null
+          organization_id?: string
+          qr_token?: string
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          security_code?: string
+          status?: Database["public"]["Enums"]["asset_card_status"]
+          updated_at?: string
+          updated_by?: string | null
+          uses_count?: number
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_cards_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_cards_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
         ]
@@ -4323,6 +4572,211 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_captures: {
+        Row: {
+          attachment_path: string | null
+          authorization_id: string | null
+          authorized_quantity: number | null
+          authorized_value: number | null
+          captured_at: string
+          captured_by: string | null
+          captured_quantity: number | null
+          captured_value: number | null
+          created_at: string
+          document_number: string | null
+          fueling_id: string | null
+          id: string
+          ip: string | null
+          kind: Database["public"]["Enums"]["capture_kind"]
+          notes: string | null
+          organization_id: string
+          partner_id: string | null
+          response_minutes: number | null
+          review_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          service_order_id: string | null
+          status: Database["public"]["Enums"]["capture_status"]
+          updated_at: string
+          user_agent: string | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          attachment_path?: string | null
+          authorization_id?: string | null
+          authorized_quantity?: number | null
+          authorized_value?: number | null
+          captured_at?: string
+          captured_by?: string | null
+          captured_quantity?: number | null
+          captured_value?: number | null
+          created_at?: string
+          document_number?: string | null
+          fueling_id?: string | null
+          id?: string
+          ip?: string | null
+          kind: Database["public"]["Enums"]["capture_kind"]
+          notes?: string | null
+          organization_id: string
+          partner_id?: string | null
+          response_minutes?: number | null
+          review_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          service_order_id?: string | null
+          status?: Database["public"]["Enums"]["capture_status"]
+          updated_at?: string
+          user_agent?: string | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          attachment_path?: string | null
+          authorization_id?: string | null
+          authorized_quantity?: number | null
+          authorized_value?: number | null
+          captured_at?: string
+          captured_by?: string | null
+          captured_quantity?: number | null
+          captured_value?: number | null
+          created_at?: string
+          document_number?: string | null
+          fueling_id?: string | null
+          id?: string
+          ip?: string | null
+          kind?: Database["public"]["Enums"]["capture_kind"]
+          notes?: string | null
+          organization_id?: string
+          partner_id?: string | null
+          response_minutes?: number | null
+          review_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          service_order_id?: string | null
+          status?: Database["public"]["Enums"]["capture_status"]
+          updated_at?: string
+          user_agent?: string | null
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_captures_authorization_id_fkey"
+            columns: ["authorization_id"]
+            isOneToOne: false
+            referencedRelation: "fuel_authorizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_captures_fueling_id_fkey"
+            columns: ["fueling_id"]
+            isOneToOne: false
+            referencedRelation: "fuelings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_captures_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_captures_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "accredited_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_captures_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "service_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_captures_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_users: {
+        Row: {
+          blocked_at: string | null
+          blocked_reason: string | null
+          created_at: string
+          created_by: string | null
+          email: string
+          full_name: string
+          id: string
+          last_access_at: string | null
+          notes: string | null
+          organization_id: string
+          partner_id: string
+          phone: string | null
+          role: Database["public"]["Enums"]["partner_user_role"]
+          status: Database["public"]["Enums"]["partner_user_status"]
+          updated_at: string
+          updated_by: string | null
+          user_id: string | null
+        }
+        Insert: {
+          blocked_at?: string | null
+          blocked_reason?: string | null
+          created_at?: string
+          created_by?: string | null
+          email: string
+          full_name: string
+          id?: string
+          last_access_at?: string | null
+          notes?: string | null
+          organization_id: string
+          partner_id: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["partner_user_role"]
+          status?: Database["public"]["Enums"]["partner_user_status"]
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          blocked_at?: string | null
+          blocked_reason?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          last_access_at?: string | null
+          notes?: string | null
+          organization_id?: string
+          partner_id?: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["partner_user_role"]
+          status?: Database["public"]["Enums"]["partner_user_status"]
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_users_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_users_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "accredited_partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       parts_catalog: {
         Row: {
           active: boolean
@@ -7293,6 +7747,52 @@ export type Database = {
         Args: { _batch: string; _reason: string }
         Returns: Json
       }
+      asset_card_issue: {
+        Args: { _notes?: string; _vehicle: string }
+        Returns: {
+          code: string
+          created_at: string
+          created_by: string | null
+          id: string
+          issued_at: string
+          notes: string | null
+          organization_id: string
+          qr_token: string
+          revoke_reason: string | null
+          revoked_at: string | null
+          security_code: string
+          status: Database["public"]["Enums"]["asset_card_status"]
+          updated_at: string
+          updated_by: string | null
+          uses_count: number
+          vehicle_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "asset_cards"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      asset_card_resolve: {
+        Args: { _identifier?: string; _qr?: string; _security?: string }
+        Returns: {
+          asset_class: string
+          asset_label: string
+          card_id: string
+          fuel_type: string
+          meter_kind: string
+          open_authorizations: number
+          org_name: string
+          organization_id: string
+          vehicle_id: string
+          vehicle_status: string
+        }[]
+      }
+      asset_card_revoke: {
+        Args: { _card: string; _reason: string }
+        Returns: undefined
+      }
       backup_due_organizations: {
         Args: never
         Returns: {
@@ -7508,6 +8008,7 @@ export type Database = {
         Args: { _org: string; _txt: string }
         Returns: string
       }
+      is_partner_user: { Args: never; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       log_budget_block: {
         Args: { _entity_id: string; _entity_type: string; _message: string }
@@ -7537,11 +8038,67 @@ export type Database = {
         }
         Returns: undefined
       }
+      my_partner_id: { Args: never; Returns: string }
       my_unit_id: { Args: never; Returns: string }
       next_org_code: {
         Args: { _key: string; _org: string; _prefix: string }
         Returns: string
       }
+      partner_authorizations: {
+        Args: { _code?: string; _vehicle?: string }
+        Returns: {
+          asset_label: string
+          code: string
+          contract_code: string
+          driver_name: string
+          fuel_name: string
+          id: string
+          max_quantity: number
+          max_unit_price: number
+          max_value: number
+          meter_kind: string
+          remaining_quantity: number
+          status: string
+          unit_name: string
+          valid_from: string
+          valid_until: string
+          vehicle_id: string
+        }[]
+      }
+      partner_capture_fueling: {
+        Args: {
+          _attachment?: string
+          _authorization: string
+          _document?: string
+          _fueled_at?: string
+          _hour_meter?: number
+          _ip?: string
+          _notes?: string
+          _odometer?: number
+          _quantity: number
+          _unit_price: number
+          _user_agent?: string
+        }
+        Returns: string
+      }
+      partner_capture_service: {
+        Args: {
+          _attachment?: string
+          _document?: string
+          _executed_value?: number
+          _finish?: boolean
+          _finished_at?: string
+          _hour_meter?: number
+          _ip?: string
+          _notes?: string
+          _odometer?: number
+          _service_order: string
+          _started_at?: string
+          _user_agent?: string
+        }
+        Returns: string
+      }
+      partner_org_id: { Args: never; Returns: string }
       purge_activity_logs: { Args: never; Returns: number }
       refresh_backup_alerts: { Args: never; Returns: undefined }
       refresh_financial_alerts: { Args: never; Returns: undefined }
@@ -7616,6 +8173,7 @@ export type Database = {
         | "unit_manager"
         | "operator"
         | "auditor"
+      asset_card_status: "ativo" | "invalidado"
       asset_movement_kind:
         | "proprio_em_uso"
         | "cedido_ao_orgao"
@@ -7637,6 +8195,8 @@ export type Database = {
         | "consumo"
         | "estorno"
         | "suplementacao"
+      capture_kind: "abastecimento" | "manutencao" | "fornecimento"
+      capture_status: "registrada" | "aceita" | "rejeitada"
       cleaning_status: "agendada" | "realizada" | "cancelada"
       commitment_kind: "ordinario" | "estimativo" | "global"
       commitment_status: "ativo" | "esgotado" | "anulado" | "encerrado"
@@ -7741,6 +8301,15 @@ export type Database = {
         | "fundacao"
         | "secretaria"
         | "outro"
+      partner_kind:
+        | "abastecimento"
+        | "manutencao"
+        | "pecas"
+        | "pneus"
+        | "higienizacao"
+      partner_status: "ativo" | "suspenso" | "inativo"
+      partner_user_role: "responsavel" | "operador"
+      partner_user_status: "ativo" | "bloqueado" | "inativo"
       proposal_status:
         | "recebida"
         | "desclassificada"
@@ -7964,6 +8533,7 @@ export const Constants = {
         "operator",
         "auditor",
       ],
+      asset_card_status: ["ativo", "invalidado"],
       asset_movement_kind: [
         "proprio_em_uso",
         "cedido_ao_orgao",
@@ -7987,6 +8557,8 @@ export const Constants = {
         "estorno",
         "suplementacao",
       ],
+      capture_kind: ["abastecimento", "manutencao", "fornecimento"],
+      capture_status: ["registrada", "aceita", "rejeitada"],
       cleaning_status: ["agendada", "realizada", "cancelada"],
       commitment_kind: ["ordinario", "estimativo", "global"],
       commitment_status: ["ativo", "esgotado", "anulado", "encerrado"],
@@ -8104,6 +8676,16 @@ export const Constants = {
         "secretaria",
         "outro",
       ],
+      partner_kind: [
+        "abastecimento",
+        "manutencao",
+        "pecas",
+        "pneus",
+        "higienizacao",
+      ],
+      partner_status: ["ativo", "suspenso", "inativo"],
+      partner_user_role: ["responsavel", "operador"],
+      partner_user_status: ["ativo", "bloqueado", "inativo"],
       proposal_status: [
         "recebida",
         "desclassificada",
