@@ -4486,6 +4486,7 @@ export type Database = {
           status: Database["public"]["Enums"]["reopen_request_status"]
           support_justification: string | null
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           created_at?: string
@@ -4504,6 +4505,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["reopen_request_status"]
           support_justification?: string | null
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           created_at?: string
@@ -4522,6 +4524,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["reopen_request_status"]
           support_justification?: string | null
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
