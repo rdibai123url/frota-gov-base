@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -16,8 +16,10 @@ import {
 } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
-  ALERT_TYPE_LABELS,
+  ALERT_CATEGORIES,
+  alertLabel,
   dateTimeBR,
+  label,
   supabase,
   useFuelingAlerts,
   useInvalidate,
