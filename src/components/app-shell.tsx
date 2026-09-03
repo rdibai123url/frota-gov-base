@@ -18,6 +18,7 @@ import {
   ChevronDown,
   FolderCog,
   FileBarChart,
+  UserRound,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
