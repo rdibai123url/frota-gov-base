@@ -106,6 +106,15 @@ const LABELS: Record<string, string> = {
   origem: "Origem",
   destino: "Destino",
   movimento: "Movimento",
+  pecas: "Peças (R$)",
+  mao_obra: "Mão de obra (R$)",
+  valor_inicial: "Valor inicial (R$)",
+  entidade: "Entidade externa",
+  documento: "Documento/ato",
+  descricao: "Descrição",
+  finalidade: "Finalidade",
+  preco_litro: "Preço/litro (R$)",
+  combustivel_tipo: "Combustível",
 };
 
 const label = (k: string) => LABELS[k] ?? k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, " ");
