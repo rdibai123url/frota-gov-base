@@ -90,11 +90,13 @@ function Plataforma() {
         description="Órgãos, administradores globais, logs de auditoria e configurações gerais."
       />
       <Tabs defaultValue="orgaos">
-        <TabsList className="flex w-full flex-wrap justify-start">
+        <TabsList className="flex h-auto w-full flex-wrap justify-start">
           <TabsTrigger value="orgaos">Órgãos</TabsTrigger>
           <TabsTrigger value="usuarios">Usuários globais</TabsTrigger>
           <TabsTrigger value="logs">Logs globais</TabsTrigger>
           <TabsTrigger value="config">Configurações</TabsTrigger>
+          <TabsTrigger value="documentacao">Documentação / Homologação</TabsTrigger>
+          <TabsTrigger value="matriz">Matriz de funcionalidades</TabsTrigger>
         </TabsList>
         <TabsContent value="orgaos" className="pt-5">
           <OrgsTab />
@@ -108,7 +110,19 @@ function Plataforma() {
         <TabsContent value="config" className="pt-5">
           <SettingsTab />
         </TabsContent>
+        <TabsContent value="documentacao" className="pt-5">
+          <DocsTab
+            environment={[
+              { label: "Ambiente", value: typeof window === "undefined" ? "—" : window.location.host },
+              { label: "Rotinas automáticas", value: "Alertas e expiração a cada hora; limpeza de logos às 03:20" },
+            ]}
+          />
+        </TabsContent>
+        <TabsContent value="matriz" className="pt-5">
+          <MatrixTab organization="FrotaGov" />
+        </TabsContent>
       </Tabs>
+
     </>
   );
 }
