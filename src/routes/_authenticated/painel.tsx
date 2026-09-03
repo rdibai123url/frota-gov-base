@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 
 import { PageHeader } from "@/components/app-shell";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   authorizationBalance,
   brl,
