@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Pencil, ShieldAlert } from "lucide-react";
+import { Pencil, ShieldAlert, Plus, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -34,6 +34,9 @@ import {
   useUnits,
   type AppRole,
 } from "@/lib/frotagov";
+import { maskCPF, isValidCPF, onlyDigits } from "@/lib/format";
+import { createOrgUser, resetOrgUserAccess } from "@/lib/platform.functions";
+import { CredentialDialog } from "@/components/credential-dialog";
 
 export const Route = createFileRoute("/_authenticated/usuarios")({
   head: () => ({
@@ -83,6 +86,11 @@ function Usuarios() {
   const [unitId, setUnitId] = useState<string>(NONE);
   const [active, setActive] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newRole, setNewRole] = useState<string>("operator");
+  const [newUnit, setNewUnit] = useState<string>(NONE);
+  const [newCpf, setNewCpf] = useState("");
+  const [credential, setCredential] = useState<{ email: string; tempPassword: string } | null>(null);
 
   const myRoles = me?.roles ?? [];
   const canManage = myRoles.includes("org_admin") || myRoles.includes("super_admin");
@@ -96,6 +104,52 @@ function Usuarios() {
     setRole(current ?? NONE);
     setUnitId(u.unit_id ?? NONE);
     setActive(u.active);
+  }
+
+  async function onCreate(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const full_name = String(form.get("full_name") || "").trim();
+    const email = String(form.get("email") || "").trim();
+    if (full_name.length < 3 || !email.includes("@")) {
+      toast.error("Informe nome completo e e-mail válido.");
+      return;
+    }
+    if (newCpf && !isValidCPF(newCpf)) {
+      toast.error("CPF inválido.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const result = await createOrgUser({
+        data: {
+          full_name,
+          email,
+          cpf: onlyDigits(newCpf) || null,
+          phone: String(form.get("phone") || "") || null,
+          job_title: String(form.get("job_title") || "") || null,
+          unit_id: newUnit === NONE ? null : newUnit,
+          role: newRole,
+        },
+      });
+      setCreating(false);
+      setNewCpf("");
+      setCredential({ email: result.email, tempPassword: result.tempPassword });
+      invalidate(["org-users"]);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível criar o usuário.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function onResetAccess(userId: string) {
+    try {
+      const result = await resetOrgUserAccess({ data: { userId } });
+      setCredential({ email: result.email ?? "", tempPassword: result.tempPassword });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível redefinir o acesso.");
+    }
   }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -167,6 +221,13 @@ function Usuarios() {
       <PageHeader
         title="Usuários e permissões"
         description="Usuários vinculados ao órgão e seus perfis de acesso."
+        action={
+          canManage ? (
+            <Button onClick={() => setCreating(true)}>
+              <Plus className="size-4" /> Novo usuário
+            </Button>
+          ) : undefined
+        }
       />
 
       {!canManage && (
@@ -230,6 +291,16 @@ function Usuarios() {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
+                  {canManage && u.id !== me?.profile?.id && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title="Redefinir acesso"
+                      onClick={() => onResetAccess(u.id)}
+                    >
+                      <KeyRound className="size-4" />
+                    </Button>
+                  )}
                   {(canManage || u.id === me?.profile?.id) && (
                     <Button variant="ghost" size="icon" onClick={() => openEdit(u)}>
                       <Pencil className="size-4" />
@@ -336,6 +407,76 @@ function Usuarios() {
           )}
         </DialogContent>
       </Dialog>
+
+      <Dialog open={creating} onOpenChange={setCreating}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Novo usuário do órgão</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={onCreate} className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="new_full_name">Nome completo *</Label>
+                <Input id="new_full_name" name="full_name" required />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="new_email">E-mail institucional *</Label>
+                <Input id="new_email" name="email" type="email" required />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="new_cpf">CPF</Label>
+                <Input
+                  id="new_cpf"
+                  value={newCpf}
+                  onChange={(e) => setNewCpf(maskCPF(e.target.value))}
+                  placeholder="000.000.000-00"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="new_job">Cargo</Label>
+                <Input id="new_job" name="job_title" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="new_phone">Telefone</Label>
+                <Input id="new_phone" name="phone" />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Perfil de acesso *</Label>
+                <Select value={newRole} onValueChange={setNewRole}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {ASSIGNABLE_ROLES.map((r) => (
+                      <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Secretaria / unidade</Label>
+                <Select value={newUnit} onValueChange={setNewUnit}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NONE}>Sem vínculo</SelectItem>
+                    {units.map((u) => (
+                      <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Uma senha temporária será gerada e exibida uma única vez; a troca é obrigatória no
+              primeiro acesso.
+            </p>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setCreating(false)}>Cancelar</Button>
+              <Button type="submit" disabled={saving}>Criar usuário</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <CredentialDialog credential={credential} onClose={() => setCredential(null)} />
 
       {isSuperAdmin && (
         <p className="mt-2 text-xs text-muted-foreground">

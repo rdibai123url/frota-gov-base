@@ -7,7 +7,6 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 
@@ -31,11 +30,6 @@ export const Route = createFileRoute("/auth")({
 const signInSchema = z.object({
   email: z.string().trim().email("Informe um e-mail válido").max(255),
   password: z.string().min(6, "A senha deve ter ao menos 6 caracteres").max(72),
-});
-
-const signUpSchema = signInSchema.extend({
-  fullName: z.string().trim().min(3, "Informe seu nome completo").max(120),
-  orgName: z.string().trim().min(3, "Informe o nome oficial do órgão").max(180),
 });
 
 function AuthPage() {
@@ -76,41 +70,6 @@ function AuthPage() {
     navigate({ to: "/painel", replace: true });
   }
 
-  async function handleSignUp(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    const parsed = signUpSchema.safeParse({
-      email: form.get("email"),
-      password: form.get("password"),
-      fullName: form.get("fullName"),
-      orgName: form.get("orgName"),
-    });
-    if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos");
-      return;
-    }
-
-    setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email: parsed.data.email,
-      password: parsed.data.password,
-      options: {
-        emailRedirectTo: window.location.origin,
-        data: { full_name: parsed.data.fullName, org_name: parsed.data.orgName },
-      },
-    });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    if (!data.session) {
-      toast.success("Cadastro realizado. Confirme o e-mail enviado para ativar o acesso.");
-      return;
-    }
-    navigate({ to: "/painel", replace: true });
-  }
-
   async function handleGoogle() {
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
@@ -138,52 +97,19 @@ function AuthPage() {
           </Link>
 
           <div className="rounded-lg border bg-card p-6 shadow-panel">
-            <Tabs defaultValue="entrar">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="entrar">Entrar</TabsTrigger>
-                <TabsTrigger value="cadastro">Cadastrar órgão</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="entrar">
-                <form onSubmit={handleSignIn} className="space-y-4 pt-4">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="in-email">E-mail institucional</Label>
-                    <Input id="in-email" name="email" type="email" autoComplete="email" required />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="in-pass">Senha</Label>
-                    <Input id="in-pass" name="password" type="password" autoComplete="current-password" required />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    Entrar
-                  </Button>
-                </form>
-              </TabsContent>
-
-              <TabsContent value="cadastro">
-                <form onSubmit={handleSignUp} className="space-y-4 pt-4">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="up-org">Nome oficial do órgão</Label>
-                    <Input id="up-org" name="orgName" placeholder="Prefeitura Municipal de ..." required />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="up-name">Seu nome completo</Label>
-                    <Input id="up-name" name="fullName" required />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="up-email">E-mail institucional</Label>
-                    <Input id="up-email" name="email" type="email" autoComplete="email" required />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="up-pass">Senha</Label>
-                    <Input id="up-pass" name="password" type="password" autoComplete="new-password" required />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    Criar órgão e conta de administrador
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
+            <form onSubmit={handleSignIn} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="in-email">E-mail institucional</Label>
+                <Input id="in-email" name="email" type="email" autoComplete="email" required />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="in-pass">Senha</Label>
+                <Input id="in-pass" name="password" type="password" autoComplete="current-password" required />
+              </div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                Entrar
+              </Button>
+            </form>
 
             <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
               <span className="h-px flex-1 bg-border" /> ou <span className="h-px flex-1 bg-border" />
@@ -194,7 +120,9 @@ function AuthPage() {
           </div>
 
           <p className="mt-4 text-center text-xs text-muted-foreground">
-            Acesso restrito a servidores e gestores autorizados do órgão.
+            Acesso restrito a servidores e gestores autorizados. O cadastro de órgãos e do
+            administrador principal é feito pela administração da plataforma; novos usuários são
+            cadastrados pelo administrador do próprio órgão.
           </p>
         </div>
       </div>
