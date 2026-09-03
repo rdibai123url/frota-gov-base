@@ -17,8 +17,11 @@ import {
   useProfile,
   useUnits,
   useVehicles,
+  useContractObjectKinds,
+  objectKindLabel,
+  CONTRACT_OBJECT_KIND_FALLBACK,
 } from "@/lib/frotagov";
-import { formatMoney, formatLiters, formatNumberBR } from "@/lib/format";
+import { formatMoney, formatLiters, formatNumberBR, formatCPF } from "@/lib/format";
 import { DIARY_STATUS } from "@/lib/diarias";
 import { logEvent } from "@/lib/platform";
 import { exportReportCsv, exportXlsx, printReport, type ReportMeta } from "@/lib/reports";
