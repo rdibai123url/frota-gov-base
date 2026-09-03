@@ -52,13 +52,22 @@ function Alertas() {
   const invalidate = useInvalidate();
   const [status, setStatus] = useState("aberto");
   const [type, setType] = useState(ALL);
+  const [category, setCategory] = useState(ALL);
+
+  useEffect(() => {
+    void supabase.rpc("refresh_financial_alerts").then(() => invalidate(["fueling-alerts"]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filtered = useMemo(
     () =>
       alerts.filter(
-        (a) => (status === ALL || a.status === status) && (type === ALL || a.alert_type === type),
+        (a) =>
+          (status === ALL || a.status === status) &&
+          (type === ALL || a.alert_type === type) &&
+          (category === ALL || (a.category ?? "abastecimento") === category),
       ),
-    [alerts, status, type],
+    [alerts, status, type, category],
   );
 
   const types = useMemo(() => Array.from(new Set(alerts.map((a) => a.alert_type))), [alerts]);
