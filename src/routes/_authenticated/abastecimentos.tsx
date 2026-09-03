@@ -593,6 +593,7 @@ function NewFuelingDialog({
         notes: notes || null,
         alert_flags: alerts.map((a) => a.type),
         alert_justification: needsJustification ? justification.trim() : null,
+        closes_authorization: selectedAuth ? closeAuth : false,
         created_by: perms.userId,
       })
       .select("id")
