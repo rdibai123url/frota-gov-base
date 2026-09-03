@@ -924,7 +924,14 @@ export const ALERT_CATEGORIES: { value: string; label: string }[] = [
   { value: "credenciamento", label: "Credenciamento" },
   { value: "frota", label: "Frota (multas, sinistros, seguros e documentos)" },
   { value: "backup", label: "Backup externo" },
+  { value: "inteligencia", label: "Inteligência (consumo e custos)" },
 ];
+
+/** Fase 10 — Bloco 2: alertas gerados pela inteligência da frota. */
+export const INTELLIGENCE_ALERT_LABELS: Record<string, string> = {
+  consumo_fora_do_parametro: "Consumo fora do parâmetro esperado",
+  custo_manutencao_elevado: "Custo de manutenção elevado",
+};
 
 export const BACKUP_ALERT_LABELS: Record<string, string> = {
   backup_atrasado: "Sem backup concluído nas últimas 48 horas",
@@ -969,7 +976,13 @@ export const FINANCE_ALERT_LABELS: Record<string, string> = {
 
 
 export function alertLabel(type: string) {
-  return ALERT_TYPE_LABELS[type] ?? FINANCE_ALERT_LABELS[type] ?? BACKUP_ALERT_LABELS[type] ?? type;
+  return (
+    ALERT_TYPE_LABELS[type] ??
+    FINANCE_ALERT_LABELS[type] ??
+    BACKUP_ALERT_LABELS[type] ??
+    INTELLIGENCE_ALERT_LABELS[type] ??
+    type
+  );
 }
 
 /** Percentual seguro (0–100+). */
