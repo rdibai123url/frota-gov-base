@@ -9,10 +9,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { supabase, useOrganization, useUnits, useVehicles } from "@/lib/frotagov";
+import {
+  supabase,
+  useBrasaoUrl,
+  useDrivers,
+  useOrganization,
+  useProfile,
+  useUnits,
+  useVehicles,
+} from "@/lib/frotagov";
 import { formatMoney, formatLiters } from "@/lib/format";
 import { logEvent } from "@/lib/platform";
-import { exportReportCsv, exportXlsx, printReport } from "@/lib/reports";
+import { exportReportCsv, exportXlsx, printReport, type ReportMeta } from "@/lib/reports";
+
 
 export const Route = createFileRoute("/_authenticated/relatorios")({
   head: () => ({
@@ -45,8 +54,21 @@ const REPORTS = [
 
 type ReportKey = (typeof REPORTS)[number]["value"];
 
-/** Relatórios que não filtram por data de ocorrência. */
-const NO_DATE: ReportKey[] = ["frota"];
+/**
+ * Filtros suportados por relatório. Um filtro só é habilitado quando a origem
+ * de dados possui a coluna correspondente — nunca exibimos filtro que não filtra.
+ */
+const CAPS: Record<ReportKey, { date: boolean; unit: boolean; vehicle: boolean; driver: boolean }> = {
+  frota: { date: false, unit: true, vehicle: true, driver: false },
+  abastecimento: { date: true, unit: true, vehicle: true, driver: true },
+  manutencao: { date: true, unit: true, vehicle: true, driver: false },
+  utilizacao: { date: true, unit: true, vehicle: true, driver: true },
+  custo_veiculo: { date: true, unit: true, vehicle: true, driver: false },
+  contratos: { date: true, unit: false, vehicle: false, driver: false },
+  legal: { date: true, unit: true, vehicle: true, driver: true },
+  patrimonio: { date: true, unit: true, vehicle: true, driver: false },
+};
+
 
 const LABELS: Record<string, string> = {
   data: "Data",
@@ -84,6 +106,15 @@ const LABELS: Record<string, string> = {
   origem: "Origem",
   destino: "Destino",
   movimento: "Movimento",
+  pecas: "Peças (R$)",
+  mao_obra: "Mão de obra (R$)",
+  valor_inicial: "Valor inicial (R$)",
+  entidade: "Entidade externa",
+  documento: "Documento/ato",
+  descricao: "Descrição",
+  finalidade: "Finalidade",
+  preco_litro: "Preço/litro (R$)",
+  combustivel_tipo: "Combustível",
 };
 
 const label = (k: string) => LABELS[k] ?? k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, " ");
@@ -99,18 +130,26 @@ function Relatorios() {
   const [to, setTo] = useState(today());
   const [unitId, setUnitId] = useState("todas");
   const [vehicleId, setVehicleId] = useState("todos");
+  const [driverId, setDriverId] = useState("todos");
   const [page, setPage] = useState(1);
 
   const { data: units = [] } = useUnits();
   const { data: vehicles = [] } = useVehicles();
+  const { data: drivers = [] } = useDrivers();
   const { data: org } = useOrganization();
+  const { data: me } = useProfile();
+  const { data: logoUrl } = useBrasaoUrl(org?.logo_url);
+
+  const caps = CAPS[report];
 
   const { data, isLoading } = useQuery({
-    queryKey: ["report", report, from, to, unitId, vehicleId],
+    queryKey: ["report", report, from, to, unitId, vehicleId, driverId],
     queryFn: async (): Promise<Record<string, unknown>[]> => {
-      const unit = unitId === "todas" ? null : unitId;
-      const vehicle = vehicleId === "todos" ? null : vehicleId;
+      const unit = caps.unit && unitId !== "todas" ? unitId : null;
+      const vehicle = caps.vehicle && vehicleId !== "todos" ? vehicleId : null;
+      const driver = caps.driver && driverId !== "todos" ? driverId : null;
       const start = `${from}T00:00:00`;
+
       const end = `${to}T23:59:59`;
 
       if (report === "frota") {
@@ -137,12 +176,15 @@ function Relatorios() {
       if (report === "abastecimento" || report === "custo_veiculo") {
         let q = supabase
           .from("fuelings")
-          .select("id, fueled_at, quantity, total_value, status, vehicle:vehicles(id, plate, asset_code), unit:units(name)")
+          .select(
+            "id, fueled_at, quantity, unit_price, total_value, status, odometer_km, vehicle:vehicles(id, plate, asset_code), unit:units(name), driver:drivers(full_name), fuel_type:fuel_types(name), supplier:suppliers(trade_name, legal_name)",
+          )
           .gte("fueled_at", start)
           .lte("fueled_at", end)
           .order("fueled_at", { ascending: false });
         if (unit) q = q.eq("unit_id", unit);
         if (vehicle) q = q.eq("vehicle_id", vehicle);
+        if (driver) q = q.eq("driver_id", driver);
         const { data: fuelings, error } = await q;
         if (error) throw error;
 
@@ -151,7 +193,12 @@ function Relatorios() {
             data: new Date(f.fueled_at).toLocaleDateString("pt-BR"),
             veiculo: f.vehicle?.plate ?? f.vehicle?.asset_code ?? "—",
             unidade: f.unit?.name ?? "—",
+            condutor: f.driver?.full_name ?? "—",
+            combustivel_tipo: f.fuel_type?.name ?? "—",
+            fornecedor: f.supplier?.trade_name ?? f.supplier?.legal_name ?? "—",
+            hodometro: f.odometer_km ?? "—",
             litros: formatLiters(f.quantity),
+            preco_litro: formatMoney(f.unit_price),
             valor: formatMoney(f.total_value),
             situacao: f.status,
           }));
@@ -159,72 +206,89 @@ function Relatorios() {
 
         let mq = supabase
           .from("maintenance_records")
-          .select("id, total_value, vehicle:vehicles(id, plate, asset_code), entry_at")
+          .select("id, total_value, vehicle:vehicles(id, plate, asset_code), unit:units(name), entry_at")
           .gte("entry_at", start)
           .lte("entry_at", end);
+        if (unit) mq = mq.eq("unit_id", unit);
         if (vehicle) mq = mq.eq("vehicle_id", vehicle);
         const { data: maints } = await mq;
 
-        const acc = new Map<string, { veiculo: string; litros: number; combustivel: number; manutencao: number }>();
+        type Acc = { veiculo: string; unidade: string; litros: number; combustivel: number; manutencao: number };
+        const acc = new Map<string, Acc>();
+        const blank = (veiculo: string, unidade: string): Acc => ({
+          veiculo,
+          unidade,
+          litros: 0,
+          combustivel: 0,
+          manutencao: 0,
+        });
         for (const f of fuelings ?? []) {
           if (f.status === "cancelado") continue;
           const key = f.vehicle?.id ?? "—";
-          const row = acc.get(key) ?? {
-            veiculo: f.vehicle?.plate ?? f.vehicle?.asset_code ?? "—",
-            litros: 0,
-            combustivel: 0,
-            manutencao: 0,
-          };
+          const row =
+            acc.get(key) ?? blank(f.vehicle?.plate ?? f.vehicle?.asset_code ?? "—", f.unit?.name ?? "—");
           row.litros += Number(f.quantity ?? 0);
           row.combustivel += Number(f.total_value ?? 0);
           acc.set(key, row);
         }
         for (const m of maints ?? []) {
           const key = m.vehicle?.id ?? "—";
-          const row = acc.get(key) ?? {
-            veiculo: m.vehicle?.plate ?? m.vehicle?.asset_code ?? "—",
-            litros: 0,
-            combustivel: 0,
-            manutencao: 0,
-          };
+          const row =
+            acc.get(key) ?? blank(m.vehicle?.plate ?? m.vehicle?.asset_code ?? "—", m.unit?.name ?? "—");
           row.manutencao += Number(m.total_value ?? 0);
           acc.set(key, row);
         }
-        return Array.from(acc.values()).map((r) => ({
-          veiculo: r.veiculo,
-          litros: formatLiters(r.litros),
-          combustivel: formatMoney(r.combustivel),
-          manutencao: formatMoney(r.manutencao),
-          total: formatMoney(r.combustivel + r.manutencao),
-        }));
+        return Array.from(acc.values())
+          .sort((a, b) => b.combustivel + b.manutencao - (a.combustivel + a.manutencao))
+          .map((r) => ({
+            veiculo: r.veiculo,
+            unidade: r.unidade,
+            litros: formatLiters(r.litros),
+            combustivel: formatMoney(r.combustivel),
+            manutencao: formatMoney(r.manutencao),
+            total: formatMoney(r.combustivel + r.manutencao),
+          }));
       }
+
 
       if (report === "manutencao") {
         let q = supabase
           .from("maintenance_records")
-          .select("id, code, kind, status, entry_at, exit_at, total_value, vehicle:vehicles(plate, asset_code), supplier:suppliers(trade_name, legal_name)")
+          .select(
+            "id, code, kind, status, entry_at, exit_at, total_value, parts_value, labor_value, odometer_km, vehicle:vehicles(plate, asset_code), unit:units(name), supplier:suppliers(trade_name, legal_name)",
+          )
           .gte("entry_at", start)
           .lte("entry_at", end)
           .order("entry_at", { ascending: false });
+        if (unit) q = q.eq("unit_id", unit);
         if (vehicle) q = q.eq("vehicle_id", vehicle);
         const { data: rows, error } = await q;
         if (error) throw error;
         return (rows ?? []).map((m) => ({
           codigo: m.code ?? "—",
           veiculo: m.vehicle?.plate ?? m.vehicle?.asset_code ?? "—",
+          unidade: m.unit?.name ?? "—",
           tipo: m.kind,
           fornecedor: m.supplier?.trade_name ?? m.supplier?.legal_name ?? "—",
           entrada: day(m.entry_at),
           saida: day(m.exit_at),
+          hodometro: m.odometer_km ?? "—",
+          pecas: formatMoney(m.parts_value),
+          mao_obra: formatMoney(m.labor_value),
           valor: formatMoney(m.total_value),
           situacao: m.status,
         }));
       }
 
       if (report === "contratos") {
+        // Contratos não possuem unidade: filtramos pela vigência que intersecta o período.
         const { data: contracts, error } = await supabase
           .from("contracts")
-          .select("id, number, object, modality, status, valid_from, valid_to, current_value, supplier:suppliers(trade_name, legal_name)")
+          .select(
+            "id, number, object, modality, status, valid_from, valid_to, initial_value, current_value, supplier:suppliers(trade_name, legal_name)",
+          )
+          .lte("valid_from", to)
+          .or(`valid_to.is.null,valid_to.gte.${from}`)
           .order("valid_from", { ascending: false });
         if (error) throw error;
         const { data: commitments } = await supabase
@@ -240,6 +304,7 @@ function Relatorios() {
             contratado: c.supplier?.trade_name ?? c.supplier?.legal_name ?? "—",
             tipo: c.modality ?? "—",
             vigencia: `${day(c.valid_from)} a ${day(c.valid_to)}`,
+            valor_inicial: formatMoney(c.initial_value),
             valor: formatMoney(c.current_value),
             empenhado: formatMoney(empenhado),
             saldo: formatMoney(saldo),
@@ -249,30 +314,58 @@ function Relatorios() {
       }
 
       if (report === "legal") {
+        // Obrigações legais não têm unidade/condutor próprios: quando o usuário
+        // filtra por unidade, restringimos pelos veículos daquela unidade.
+        const unitVehicleIds = unit
+          ? vehicles.filter((v) => v.unit_id === unit).map((v) => v.id)
+          : null;
+
+        let fq = supabase
+          .from("traffic_fines")
+          .select(
+            "code, occurred_at, status, amount, description, vehicle:vehicles(plate, asset_code), unit:units(name), driver:drivers(full_name)",
+          )
+          .gte("occurred_at", start)
+          .lte("occurred_at", end);
+        if (unit) fq = fq.eq("unit_id", unit);
+        if (vehicle) fq = fq.eq("vehicle_id", vehicle);
+        if (driver) fq = fq.eq("driver_id", driver);
+
+        let aq = supabase
+          .from("accidents")
+          .select(
+            "code, occurred_at, status, expenses_value, description, vehicle:vehicles(plate, asset_code), unit:units(name), driver:drivers(full_name)",
+          )
+          .gte("occurred_at", start)
+          .lte("occurred_at", end);
+        if (unit) aq = aq.eq("unit_id", unit);
+        if (vehicle) aq = aq.eq("vehicle_id", vehicle);
+        if (driver) aq = aq.eq("driver_id", driver);
+
+        let oq = supabase
+          .from("vehicle_obligations")
+          .select("obligation_type, due_date, status, amount, notes, vehicle:vehicles(plate, asset_code, unit:units(name))")
+          .gte("due_date", from)
+          .lte("due_date", to);
+        if (vehicle) oq = oq.eq("vehicle_id", vehicle);
+        if (unitVehicleIds) oq = oq.in("vehicle_id", unitVehicleIds.length ? unitVehicleIds : [""]);
+
+        // Obrigações não são atribuíveis a condutor — omitidas quando há filtro de condutor.
         const [fines, accidents, obligations] = await Promise.all([
-          supabase
-            .from("traffic_fines")
-            .select("code, occurred_at, status, amount, vehicle:vehicles(plate, asset_code), driver:drivers(full_name)")
-            .gte("occurred_at", start)
-            .lte("occurred_at", end),
-          supabase
-            .from("accidents")
-            .select("code, occurred_at, status, expenses_value, vehicle:vehicles(plate, asset_code), driver:drivers(full_name)")
-            .gte("occurred_at", start)
-            .lte("occurred_at", end),
-          supabase
-            .from("vehicle_obligations")
-            .select("obligation_type, due_date, status, amount, vehicle:vehicles(plate, asset_code)")
-            .gte("due_date", from)
-            .lte("due_date", to),
+          fq,
+          aq,
+          driver ? Promise.resolve({ data: [] as never[] }) : oq,
         ]);
+
         const rows: Record<string, unknown>[] = [];
         for (const f of fines.data ?? [])
           rows.push({
             registro: "Multa",
             codigo: f.code ?? "—",
             veiculo: f.vehicle?.plate ?? f.vehicle?.asset_code ?? "—",
+            unidade: f.unit?.name ?? "—",
             responsavel: f.driver?.full_name ?? "—",
+            descricao: f.description ?? "—",
             data: day(f.occurred_at),
             valor: formatMoney(f.amount),
             situacao: f.status,
@@ -282,7 +375,9 @@ function Relatorios() {
             registro: "Sinistro",
             codigo: a.code ?? "—",
             veiculo: a.vehicle?.plate ?? a.vehicle?.asset_code ?? "—",
+            unidade: a.unit?.name ?? "—",
             responsavel: a.driver?.full_name ?? "—",
+            descricao: a.description ?? "—",
             data: day(a.occurred_at),
             valor: formatMoney(a.expenses_value),
             situacao: a.status,
@@ -292,22 +387,27 @@ function Relatorios() {
             registro: "Obrigação legal",
             codigo: o.obligation_type ?? "—",
             veiculo: o.vehicle?.plate ?? o.vehicle?.asset_code ?? "—",
+            unidade: o.vehicle?.unit?.name ?? "—",
             responsavel: "—",
+            descricao: o.notes ?? "—",
             data: day(o.due_date),
             valor: formatMoney(o.amount),
             situacao: o.status,
           });
-        return rows;
+        return rows.sort((a, b) => String(a['data']).localeCompare(String(b['data'])));
       }
 
       if (report === "patrimonio") {
         let q = supabase
           .from("asset_movements")
-          .select("code, kind, moved_on, from_unit_id, unit_id, to_status, vehicle:vehicles(plate, asset_code)")
+          .select(
+            "code, kind, moved_on, from_unit_id, unit_id, to_status, act_number, notes, vehicle:vehicles(plate, asset_code), entity:external_entities!asset_movements_entity_id_fkey(name)",
+          )
           .gte("moved_on", from)
           .lte("moved_on", to)
           .order("moved_on", { ascending: false });
         if (vehicle) q = q.eq("vehicle_id", vehicle);
+        if (unit) q = q.or(`unit_id.eq.${unit},from_unit_id.eq.${unit}`);
         const { data: rows, error } = await q;
         if (error) throw error;
         const unitName = (id?: string | null) => units.find((u) => u.id === id)?.name ?? "—";
@@ -318,19 +418,25 @@ function Relatorios() {
           data: day(m.moved_on),
           origem: unitName(m.from_unit_id),
           destino: unitName(m.unit_id),
+          entidade: m.entity?.name ?? "—",
+          documento: m.act_number ?? "—",
           situacao: m.to_status ?? "—",
         }));
       }
 
 
+
       let q = supabase
         .from("vehicle_usages")
-        .select("id, code, status, planned_departure, actual_departure, actual_return, start_km, end_km, purpose, vehicle:vehicles(plate, asset_code), driver:drivers(full_name), unit:units(name)")
+        .select(
+          "id, code, status, planned_departure, actual_departure, actual_return, start_km, end_km, purpose, destination, vehicle:vehicles(plate, asset_code), driver:drivers(full_name), unit:units(name)",
+        )
         .gte("planned_departure", start)
         .lte("planned_departure", end)
         .order("planned_departure", { ascending: false });
       if (unit) q = q.eq("unit_id", unit);
       if (vehicle) q = q.eq("vehicle_id", vehicle);
+      if (driver) q = q.eq("driver_id", driver);
       const { data: rows, error } = await q;
       if (error) throw error;
       return (rows ?? []).map((u) => ({
@@ -338,6 +444,8 @@ function Relatorios() {
         veiculo: u.vehicle?.plate ?? u.vehicle?.asset_code ?? "—",
         condutor: u.driver?.full_name ?? "—",
         unidade: u.unit?.name ?? "—",
+        finalidade: u.purpose ?? "—",
+        destino: u.destination ?? "—",
         saida: new Date(u.actual_departure ?? u.planned_departure).toLocaleString("pt-BR"),
         retorno: u.actual_return ? new Date(u.actual_return).toLocaleString("pt-BR") : "—",
         km: u.start_km != null && u.end_km != null ? String(Number(u.end_km) - Number(u.start_km)) : "—",
@@ -353,44 +461,55 @@ function Relatorios() {
     return Object.keys(first).map((k) => ({ key: k, label: label(k) }));
   }, [rows]);
 
-  useEffect(() => setPage(1), [report, from, to, unitId, vehicleId]);
+  useEffect(() => setPage(1), [report, from, to, unitId, vehicleId, driverId]);
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const pageRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const reportLabel = REPORTS.find((r) => r.value === report)?.label ?? "Relatório";
-  const usesDate = !NO_DATE.includes(report);
+  const usesDate = caps.date;
+
+  const unitName = unitId === "todas" ? "Todas" : (units.find((u) => u.id === unitId)?.name ?? "—");
+  const vehicleName =
+    vehicleId === "todos"
+      ? "Todos"
+      : (vehicles.find((v) => v.id === vehicleId)?.plate ??
+        vehicles.find((v) => v.id === vehicleId)?.asset_code ??
+        "—");
+  const driverName = driverId === "todos" ? "Todos" : (drivers.find((d) => d.id === driverId)?.full_name ?? "—");
+  const periodText = usesDate ? `${day(from)} a ${day(to)}` : "Posição atual";
+  const issuedBy = [me?.profile?.full_name, me?.email].filter(Boolean).join(" — ") || "—";
 
   const filters = [
-    { label: "Período", value: usesDate ? `${day(from)} a ${day(to)}` : "Posição atual" },
-    { label: "Unidade", value: unitId === "todas" ? "Todas" : units.find((u) => u.id === unitId)?.name ?? "" },
-    {
-      label: "Veículo",
-      value:
-        vehicleId === "todos"
-          ? "Todos"
-          : vehicles.find((v) => v.id === vehicleId)?.plate ?? vehicles.find((v) => v.id === vehicleId)?.asset_code ?? "",
-    },
+    { label: "Veículo", value: caps.vehicle ? vehicleName : "Não se aplica" },
+    { label: "Condutor", value: caps.driver ? driverName : "Não se aplica" },
   ];
+
+  const meta: ReportMeta = {
+    title: reportLabel,
+    organization: org?.legal_name ?? "FrotaGov",
+    logoUrl: logoUrl ?? null,
+    subtitle: org?.short_name ?? null,
+    unit: caps.unit ? unitName : "Não se aplica",
+    period: periodText,
+    issuedBy,
+    filters,
+  };
 
   async function handleExport(kind: "csv" | "xlsx" | "pdf") {
     const name = `relatorio-${report}-${from}-a-${to}`;
-    if (kind === "csv") exportReportCsv(name, columns, rows);
-    else if (kind === "xlsx") exportXlsx(name, columns, rows, reportLabel.slice(0, 28));
-    else
-      printReport(
-        { title: reportLabel, organization: org?.legal_name ?? "FrotaGov", subtitle: org?.short_name ?? null, filters },
-        columns,
-        rows,
-      );
+    if (kind === "csv") exportReportCsv(name, columns, rows, meta);
+    else if (kind === "xlsx") exportXlsx(name, columns, rows, reportLabel.slice(0, 28), meta);
+    else printReport(meta, columns, rows);
     await logEvent({
       eventType: "exportacao",
       area: "Relatórios",
       screen: "Relatórios avançados",
       route: "/relatorios",
       action: kind.toUpperCase(),
-      summary: `Exportação do relatório "${reportLabel}" (${rows.length} linhas)`,
+      summary: `Exportação do relatório "${reportLabel}" (${rows.length} linhas) — unidade: ${meta.unit}, período: ${periodText}`,
     });
   }
+
 
   return (
     <>
@@ -420,8 +539,8 @@ function Relatorios() {
           <Input type="date" value={to} disabled={!usesDate} onChange={(e) => setTo(e.target.value)} />
         </div>
         <div className="space-y-1.5">
-          <Label>Unidade</Label>
-          <Select value={unitId} onValueChange={setUnitId}>
+          <Label>Secretaria / unidade</Label>
+          <Select value={unitId} onValueChange={setUnitId} disabled={!caps.unit}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="todas">Todas</SelectItem>
@@ -431,9 +550,9 @@ function Relatorios() {
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-1.5 lg:col-span-2">
+        <div className="space-y-1.5">
           <Label>Veículo</Label>
-          <Select value={vehicleId} onValueChange={setVehicleId}>
+          <Select value={vehicleId} onValueChange={setVehicleId} disabled={!caps.vehicle}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Todos</SelectItem>
@@ -442,6 +561,48 @@ function Relatorios() {
               ))}
             </SelectContent>
           </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Condutor / motorista</Label>
+          <Select value={driverId} onValueChange={setDriverId} disabled={!caps.driver}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              {drivers.map((d) => (
+                <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <p className="text-xs text-muted-foreground sm:col-span-2 lg:col-span-5">
+          Filtros desabilitados não se aplicam ao relatório selecionado.
+        </p>
+      </div>
+
+      {/* Cabeçalho institucional — idêntico ao usado na impressão/PDF e nas exportações */}
+      <div className="mb-4 rounded-lg border bg-card p-4 shadow-card">
+        <div className="flex items-start gap-4">
+          {logoUrl ? (
+            <img src={logoUrl} alt={`Brasão de ${meta.organization}`} className="size-14 shrink-0 object-contain" />
+          ) : null}
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold uppercase tracking-wide">{meta.organization}</p>
+            {meta.subtitle ? <p className="text-xs text-muted-foreground">{meta.subtitle}</p> : null}
+            <h2 className="mt-1 text-base font-semibold text-foreground">{reportLabel}</h2>
+            <dl className="mt-2 grid gap-x-6 gap-y-1 text-xs text-muted-foreground sm:grid-cols-2 lg:grid-cols-3">
+              <div><dt className="inline font-medium">Secretaria/unidade: </dt><dd className="inline">{meta.unit}</dd></div>
+              <div><dt className="inline font-medium">Período: </dt><dd className="inline">{periodText}</dd></div>
+              {filters.map((f) => (
+                <div key={f.label}>
+                  <dt className="inline font-medium">{f.label}: </dt>
+                  <dd className="inline">{f.value}</dd>
+                </div>
+              ))}
+              <div><dt className="inline font-medium">Emitido em: </dt><dd className="inline">{new Date().toLocaleString("pt-BR")}</dd></div>
+              <div><dt className="inline font-medium">Emitido por: </dt><dd className="inline">{issuedBy}</dd></div>
+              <div><dt className="inline font-medium">Total de registros: </dt><dd className="inline">{rows.length}</dd></div>
+            </dl>
+          </div>
         </div>
       </div>
 
@@ -461,6 +622,7 @@ function Relatorios() {
           </Button>
         </div>
       </div>
+
 
       <div className="overflow-x-auto rounded-lg border bg-card shadow-card">
         <Table>
