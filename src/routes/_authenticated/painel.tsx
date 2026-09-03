@@ -224,6 +224,26 @@ function Painel() {
         <StatCard label="Autorizações utilizadas no mês" value={autUsadasMes} icon={Ticket} tone="success" />
       </div>
 
+      <h2 className="gov-title mt-10 mb-4 text-lg">Execução orçamentária</h2>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+        <StatCard label="Contratos vigentes" value={financeiro.contratosVigentes} icon={FileText} />
+        <StatCard label="Saldo contratual" value={brl(financeiro.saldoContratual)} icon={FileText} tone="success" />
+        <StatCard label="Empenhos ativos" value={financeiro.empenhosAtivos} icon={Wallet} />
+        <StatCard label="Saldo de empenhos" value={brl(financeiro.saldoEmpenhos)} icon={Wallet} tone="success" />
+        <StatCard
+          label="Cotas com saldo crítico"
+          value={financeiro.cotasCriticas}
+          icon={PiggyBank}
+          tone={financeiro.cotasCriticas > 0 ? "warning" : "default"}
+        />
+        <StatCard
+          label="Contratos a vencer (60 dias)"
+          value={financeiro.contratosAVencer}
+          icon={Coins}
+          tone={financeiro.contratosAVencer > 0 ? "warning" : "default"}
+        />
+      </div>
+
       <h2 className="gov-title mt-10 mb-4 text-lg">Gasto dos últimos 6 meses</h2>
       <div className="rounded-lg border bg-card p-5 shadow-card">
         {maxTotal === 0 ? (
