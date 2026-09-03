@@ -224,23 +224,23 @@ function Relatorios() {
       if (report === "contratos") {
         const { data: contracts, error } = await supabase
           .from("contracts")
-          .select("id, number, object, modality, status, start_date, end_date, total_value, supplier:suppliers(trade_name, legal_name)")
-          .order("start_date", { ascending: false });
+          .select("id, number, object, modality, status, valid_from, valid_to, current_value, supplier:suppliers(trade_name, legal_name)")
+          .order("valid_from", { ascending: false });
         if (error) throw error;
         const { data: commitments } = await supabase
           .from("commitments")
-          .select("contract_id, value, balance, status");
+          .select("contract_id, committed_value, available_value");
         return (contracts ?? []).map((c) => {
           const mine = (commitments ?? []).filter((k) => k.contract_id === c.id);
-          const empenhado = mine.reduce((s, k) => s + Number(k.value ?? 0), 0);
-          const saldo = mine.reduce((s, k) => s + Number(k.balance ?? 0), 0);
+          const empenhado = mine.reduce((s, k) => s + Number(k.committed_value ?? 0), 0);
+          const saldo = mine.reduce((s, k) => s + Number(k.available_value ?? 0), 0);
           return {
             numero: c.number ?? "—",
             objeto: c.object ?? "—",
             contratado: c.supplier?.trade_name ?? c.supplier?.legal_name ?? "—",
             tipo: c.modality ?? "—",
-            vigencia: `${day(c.start_date)} a ${day(c.end_date)}`,
-            valor: formatMoney(c.total_value),
+            vigencia: `${day(c.valid_from)} a ${day(c.valid_to)}`,
+            valor: formatMoney(c.current_value),
             empenhado: formatMoney(empenhado),
             saldo: formatMoney(saldo),
             situacao: c.status,
@@ -252,17 +252,17 @@ function Relatorios() {
         const [fines, accidents, obligations] = await Promise.all([
           supabase
             .from("traffic_fines")
-            .select("code, infraction_at, status, amount, vehicle:vehicles(plate, asset_code), driver:drivers(full_name)")
-            .gte("infraction_at", from)
-            .lte("infraction_at", to),
+            .select("code, occurred_at, status, amount, vehicle:vehicles(plate, asset_code), driver:drivers(full_name)")
+            .gte("occurred_at", start)
+            .lte("occurred_at", end),
           supabase
             .from("accidents")
-            .select("code, occurred_at, status, estimated_cost, vehicle:vehicles(plate, asset_code), driver:drivers(full_name)")
+            .select("code, occurred_at, status, expenses_value, vehicle:vehicles(plate, asset_code), driver:drivers(full_name)")
             .gte("occurred_at", start)
             .lte("occurred_at", end),
           supabase
             .from("vehicle_obligations")
-            .select("kind, due_date, status, amount, vehicle:vehicles(plate, asset_code)")
+            .select("obligation_type, due_date, status, amount, vehicle:vehicles(plate, asset_code)")
             .gte("due_date", from)
             .lte("due_date", to),
         ]);
@@ -273,7 +273,7 @@ function Relatorios() {
             codigo: f.code ?? "—",
             veiculo: f.vehicle?.plate ?? f.vehicle?.asset_code ?? "—",
             responsavel: f.driver?.full_name ?? "—",
-            data: day(f.infraction_at),
+            data: day(f.occurred_at),
             valor: formatMoney(f.amount),
             situacao: f.status,
           });
@@ -284,13 +284,13 @@ function Relatorios() {
             veiculo: a.vehicle?.plate ?? a.vehicle?.asset_code ?? "—",
             responsavel: a.driver?.full_name ?? "—",
             data: day(a.occurred_at),
-            valor: formatMoney(a.estimated_cost),
+            valor: formatMoney(a.expenses_value),
             situacao: a.status,
           });
         for (const o of obligations.data ?? [])
           rows.push({
             registro: "Obrigação legal",
-            codigo: o.kind ?? "—",
+            codigo: o.obligation_type ?? "—",
             veiculo: o.vehicle?.plate ?? o.vehicle?.asset_code ?? "—",
             responsavel: "—",
             data: day(o.due_date),
@@ -303,23 +303,25 @@ function Relatorios() {
       if (report === "patrimonio") {
         let q = supabase
           .from("asset_movements")
-          .select("code, kind, movement_date, notes, status_after, vehicle:vehicles(plate, asset_code), from_unit:units!asset_movements_from_unit_id_fkey(name), to_unit:units!asset_movements_to_unit_id_fkey(name)")
-          .gte("movement_date", from)
-          .lte("movement_date", to)
-          .order("movement_date", { ascending: false });
+          .select("code, kind, moved_on, from_unit_id, unit_id, to_status, vehicle:vehicles(plate, asset_code)")
+          .gte("moved_on", from)
+          .lte("moved_on", to)
+          .order("moved_on", { ascending: false });
         if (vehicle) q = q.eq("vehicle_id", vehicle);
         const { data: rows, error } = await q;
         if (error) throw error;
+        const unitName = (id?: string | null) => units.find((u) => u.id === id)?.name ?? "—";
         return (rows ?? []).map((m) => ({
           codigo: m.code ?? "—",
           veiculo: m.vehicle?.plate ?? m.vehicle?.asset_code ?? "—",
           movimento: m.kind,
-          data: day(m.movement_date),
-          origem: m.from_unit?.name ?? "—",
-          destino: m.to_unit?.name ?? "—",
-          situacao: m.status_after ?? "—",
+          data: day(m.moved_on),
+          origem: unitName(m.from_unit_id),
+          destino: unitName(m.unit_id),
+          situacao: m.to_status ?? "—",
         }));
       }
+
 
       let q = supabase
         .from("vehicle_usages")
