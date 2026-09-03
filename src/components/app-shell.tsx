@@ -88,9 +88,11 @@ const NAV: NavGroup[] = [
       { to: "/orgao", label: "Dados do Órgão" },
       { to: "/unidades", label: "Secretarias / Unidades" },
       { to: "/condutores", label: "Condutores / Motoristas" },
+      { to: "/entidades-externas", label: "Entidades externas" },
       { to: "/usuarios", label: "Usuários e Permissões" },
     ],
   },
+
   { id: "alertas", label: "Alertas e inconsistências", icon: BellRing, to: "/alertas" },
 ];
 
