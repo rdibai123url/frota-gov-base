@@ -228,10 +228,12 @@ function Cotas() {
       return;
     }
     setSaving(true);
-    const { error } = await supabase.rpc("apply_quota_supplement", {
-      _quota: suppOf.id,
-      _amount: amount,
-      _reason: reason,
+    const { error } = await supabase.from("quota_supplements").insert({
+      quota_id: suppOf.id,
+      organization_id: suppOf.organization_id,
+      amount,
+      reason,
+      created_by: userId,
     });
     setSaving(false);
     if (error) {
