@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Landmark } from "lucide-react";
 
@@ -149,12 +150,12 @@ function PortalTransparencia() {
                     <td className="py-2">{c.number}</td>
                     <td>{c.object ?? "—"}</td>
                     <td>
-                      {[c.start_date, c.end_date]
+                      {[c.valid_from, c.valid_to]
                         .filter(Boolean)
                         .map((d) => new Date(d as string).toLocaleDateString("pt-BR"))
                         .join(" a ") || "—"}
                     </td>
-                    <td>R$ {formatMoney(c.total_value)}</td>
+                    <td>R$ {formatMoney(c.current_value)}</td>
                   </tr>
                 ))}
               </tbody>
