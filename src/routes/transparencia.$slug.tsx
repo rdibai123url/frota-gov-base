@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Landmark } from "lucide-react";
+import { Download, Landmark } from "lucide-react";
 
 import { formatMoney, formatLiters } from "@/lib/format";
 
@@ -29,22 +30,37 @@ type Payload = {
   orgao?: { legal_name: string; short_name: string | null; city: string | null; state: string | null } | null;
   apresentacao?: string | null;
   atualizado_em?: string;
+  conjuntos_disponiveis?: string[];
   frota?: { total: number; por_situacao: Record<string, number>; por_categoria: Record<string, number> };
   abastecimento?: { registros: number; litros: number; valor_total: number };
   manutencao?: { registros: number; valor_total: number };
-  contratos?: { number: string; object: string | null; start_date: string | null; end_date: string | null; status: string; total_value: number | null }[];
+  contratos?: { number: string; object: string | null; valid_from: string | null; valid_to: string | null; status: string; current_value: number | null }[];
   error?: string;
+};
+
+const DATASET_LABELS: Record<string, string> = {
+  frota: "Frota",
+  abastecimento: "Abastecimento",
+  manutencao: "Manutenção",
+  contratos: "Contratos",
 };
 
 function PortalTransparencia() {
   const { slug } = Route.useParams();
+  const [from, setFrom] = useState(`${new Date().getFullYear()}-01-01`);
+  const [to, setTo] = useState(new Date().toISOString().slice(0, 10));
+  const [period, setPeriod] = useState({ from, to });
+
   const { data, isLoading } = useQuery({
-    queryKey: ["transparencia", slug],
+    queryKey: ["transparencia", slug, period.from, period.to],
     queryFn: async (): Promise<Payload> => {
-      const response = await fetch(`/api/public/v1/transparencia/${slug}`);
+      const response = await fetch(
+        `/api/public/v1/transparencia/${slug}?de=${period.from}&ate=${period.to}`,
+      );
       return (await response.json()) as Payload;
     },
   });
+
 
   if (isLoading) return <p className="p-10 text-center text-muted-foreground">Carregando dados abertos...</p>;
 
@@ -78,6 +94,53 @@ function PortalTransparencia() {
 
       <main className="mx-auto max-w-5xl space-y-6 px-5 py-10">
         {data.apresentacao && <p className="text-muted-foreground">{data.apresentacao}</p>}
+
+        <section className="rounded-lg border bg-card p-5 shadow-card">
+          <h2 className="gov-title text-lg">Consulta por período e dados abertos</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Os números de abastecimento, manutenção e contratos consideram o período informado.
+          </p>
+          <div className="mt-4 flex flex-wrap items-end gap-3">
+            <label className="text-sm">
+              <span className="mb-1 block text-muted-foreground">De</span>
+              <input
+                type="date"
+                value={from}
+                onChange={(e) => setFrom(e.target.value)}
+                className="rounded-md border bg-background px-3 py-2 text-sm"
+              />
+            </label>
+            <label className="text-sm">
+              <span className="mb-1 block text-muted-foreground">Até</span>
+              <input
+                type="date"
+                value={to}
+                onChange={(e) => setTo(e.target.value)}
+                className="rounded-md border bg-background px-3 py-2 text-sm"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => setPeriod({ from, to })}
+              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            >
+              Aplicar período
+            </button>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {(data.conjuntos_disponiveis ?? []).map((ds) => (
+              <a
+                key={ds}
+                href={`/api/public/v1/transparencia/${slug}?formato=csv&conjunto=${ds}&de=${period.from}&ate=${period.to}`}
+                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-secondary"
+              >
+                <Download className="size-4" /> {DATASET_LABELS[ds] ?? ds} (CSV)
+              </a>
+            ))}
+          </div>
+        </section>
+
+
 
         {data.frota && (
           <section className="rounded-lg border bg-card p-5 shadow-card">
@@ -134,12 +197,12 @@ function PortalTransparencia() {
                     <td className="py-2">{c.number}</td>
                     <td>{c.object ?? "—"}</td>
                     <td>
-                      {[c.start_date, c.end_date]
+                      {[c.valid_from, c.valid_to]
                         .filter(Boolean)
                         .map((d) => new Date(d as string).toLocaleDateString("pt-BR"))
                         .join(" a ") || "—"}
                     </td>
-                    <td>R$ {formatMoney(c.total_value)}</td>
+                    <td>R$ {formatMoney(c.current_value)}</td>
                   </tr>
                 ))}
               </tbody>

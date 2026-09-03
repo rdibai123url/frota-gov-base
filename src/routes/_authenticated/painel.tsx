@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 
 import { PageHeader } from "@/components/app-shell";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   authorizationBalance,
   brl,
@@ -316,7 +317,7 @@ function Painel() {
   return (
     <>
       <PageHeader
-        title="Painel"
+        title="Painel executivo"
         description={
           org?.legal_name
             ? `Visão geral da frota de ${org.short_name || org.legal_name}.`
@@ -324,6 +325,16 @@ function Painel() {
         }
       />
 
+      <Tabs defaultValue="geral">
+        <TabsList className="flex h-auto flex-wrap justify-start">
+          <TabsTrigger value="geral">Visão geral</TabsTrigger>
+          <TabsTrigger value="abastecimento">Abastecimento</TabsTrigger>
+          <TabsTrigger value="manutencao">Manutenção</TabsTrigger>
+          <TabsTrigger value="financeiro">Financeiro / Contratual</TabsTrigger>
+          <TabsTrigger value="administrativo">Administrativo / Legal</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="geral" className="pt-5">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard label="Total de veículos" value={isLoading ? "—" : vehicles.length} icon={Truck} />
         <StatCard label="Veículos ativos" value={ativos} icon={CircleCheck} tone="success" />
@@ -331,8 +342,10 @@ function Painel() {
         <StatCard label="Secretarias / Unidades" value={units.length} icon={Building2} />
         <StatCard label="Usuários" value={users.length} icon={Users} />
       </div>
+        </TabsContent>
 
-      <h2 className="gov-title mt-10 mb-4 text-lg">Abastecimento no mês</h2>
+        <TabsContent value="abastecimento" className="pt-5">
+      <h2 className="gov-title mb-4 text-lg">Abastecimento no mês</h2>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard label="Abastecimentos no mês" value={mes.count} icon={Fuel} />
         <StatCard label="Quantidade abastecida" value={num(mes.quantity, 2)} icon={Droplets} />
@@ -349,8 +362,11 @@ function Painel() {
         <StatCard label="Autorizações abertas" value={autAbertas} icon={Ticket} />
         <StatCard label="Autorizações utilizadas no mês" value={autUsadasMes} icon={Ticket} tone="success" />
       </div>
+        </TabsContent>
 
-      <h2 className="gov-title mt-10 mb-4 text-lg">Manutenção, peças e pneus</h2>
+        <TabsContent value="manutencao" className="pt-5">
+      <h2 className="gov-title mb-4 text-lg">Manutenção, peças e pneus</h2>
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
         <StatCard
           label="Preventivas vencidas"
@@ -392,7 +408,11 @@ function Painel() {
         <StatCard label="Valor em manutenção no mês" value={brl(rede.valorMes)} icon={Banknote} />
       </div>
 
-      <h2 className="gov-title mt-10 mb-4 text-lg">Execução orçamentária</h2>
+        </TabsContent>
+
+        <TabsContent value="financeiro" className="pt-5">
+      <h2 className="gov-title mb-4 text-lg">Execução orçamentária</h2>
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
         <StatCard label="Contratos vigentes" value={financeiro.contratosVigentes} icon={FileText} />
         <StatCard label="Saldo contratual" value={brl(financeiro.saldoContratual)} icon={FileText} tone="success" />
@@ -412,7 +432,11 @@ function Painel() {
         />
       </div>
 
-      <h2 className="gov-title mt-10 mb-4 text-lg">Gestão administrativa, legal e patrimonial</h2>
+        </TabsContent>
+
+        <TabsContent value="administrativo" className="pt-5">
+      <h2 className="gov-title mb-4 text-lg">Gestão administrativa, legal e patrimonial</h2>
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Multas em aberto"
@@ -449,7 +473,11 @@ function Painel() {
         <StatCard label="Baixas e alienações acumuladas" value={admin.baixas} icon={Landmark} />
       </div>
 
+        </TabsContent>
+      </Tabs>
+
       <h2 className="gov-title mt-10 mb-4 text-lg">Gasto dos últimos 6 meses</h2>
+
       <div className="rounded-lg border bg-card p-5 shadow-card">
         {maxTotal === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
