@@ -16,6 +16,10 @@ import {
   IdCard,
   Ticket,
   CalendarClock,
+  FileText,
+  Wallet,
+  PiggyBank,
+  Coins,
 } from "lucide-react";
 
 import { PageHeader } from "@/components/app-shell";
@@ -23,13 +27,19 @@ import {
   authorizationBalance,
   brl,
   cnhState,
+  contractTotals,
+  daysUntil,
   num,
+  quotaPercent,
   useAuthorizations,
+  useCommitments,
+  useContracts,
   useDrivers,
   useFuelingAlerts,
   useFuelings,
   useOrgUsers,
   useOrganization,
+  useQuotas,
   useUnits,
   useVehicles,
 } from "@/lib/frotagov";
@@ -85,6 +95,10 @@ const SHORTCUTS = [
   { to: "/condutores", label: "Condutores", text: "Habilitação e vínculo dos condutores", icon: IdCard },
   { to: "/utilizacao", label: "Utilização e reservas", text: "Reservas, saídas e retornos de veículos", icon: CalendarClock },
   { to: "/autorizacoes", label: "Autorizações", text: "Autorizar abastecimentos antes da compra", icon: Ticket },
+  { to: "/contratos", label: "Contratos", text: "Contratos, itens e saldos contratuais", icon: FileText },
+  { to: "/empenhos", label: "Empenhos", text: "Empenhos e saldos orçamentários", icon: Wallet },
+  { to: "/cotas", label: "Cotas e saldos", text: "Cotas financeiras e quantitativas", icon: PiggyBank },
+  { to: "/centros-custo", label: "Centros de Custo", text: "Centros de custo do órgão e das unidades", icon: Coins },
   { to: "/fornecedores", label: "Fornecedores / Postos", text: "Postos habilitados para o órgão", icon: Store },
   { to: "/combustiveis", label: "Combustíveis", text: "Tipos de combustível do órgão", icon: Droplets },
   { to: "/unidades", label: "Secretarias / Unidades", text: "Estrutura administrativa do órgão", icon: Building2 },
@@ -101,6 +115,28 @@ function Painel() {
   const { data: alerts = [] } = useFuelingAlerts();
   const { data: drivers = [] } = useDrivers();
   const { data: auths = [] } = useAuthorizations();
+  const { data: contracts = [] } = useContracts();
+  const { data: commitments = [] } = useCommitments();
+  const { data: quotas = [] } = useQuotas();
+
+  const financeiro = useMemo(() => {
+    const vigentes = contracts.filter((c) => c.status === "vigente");
+    const saldoContratual = vigentes.reduce((s, c) => s + contractTotals(c).balance, 0);
+    const empenhosAtivos = commitments.filter((c) => c.status === "ativo");
+    return {
+      contratosVigentes: vigentes.length,
+      saldoContratual,
+      empenhosAtivos: empenhosAtivos.length,
+      saldoEmpenhos: empenhosAtivos.reduce((s, c) => s + Number(c.available_value ?? 0), 0),
+      cotasCriticas: quotas.filter(
+        (q) => q.active && Number(q.granted_amount) > 0 && 100 - quotaPercent(q) <= 20,
+      ).length,
+      contratosAVencer: vigentes.filter((c) => {
+        const d = daysUntil(c.valid_to);
+        return d !== null && d >= 0 && d <= 60;
+      }).length,
+    };
+  }, [contracts, commitments, quotas]);
 
   const ativos = vehicles.filter((v) => v.status === "ativo").length;
   const manutencao = vehicles.filter((v) => v.status === "manutencao").length;
@@ -186,6 +222,26 @@ function Painel() {
         <StatCard label="CNHs a vencer (30 dias)" value={cnhAVencer} icon={IdCard} tone={cnhAVencer > 0 ? "warning" : "default"} />
         <StatCard label="Autorizações abertas" value={autAbertas} icon={Ticket} />
         <StatCard label="Autorizações utilizadas no mês" value={autUsadasMes} icon={Ticket} tone="success" />
+      </div>
+
+      <h2 className="gov-title mt-10 mb-4 text-lg">Execução orçamentária</h2>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+        <StatCard label="Contratos vigentes" value={financeiro.contratosVigentes} icon={FileText} />
+        <StatCard label="Saldo contratual" value={brl(financeiro.saldoContratual)} icon={FileText} tone="success" />
+        <StatCard label="Empenhos ativos" value={financeiro.empenhosAtivos} icon={Wallet} />
+        <StatCard label="Saldo de empenhos" value={brl(financeiro.saldoEmpenhos)} icon={Wallet} tone="success" />
+        <StatCard
+          label="Cotas com saldo crítico"
+          value={financeiro.cotasCriticas}
+          icon={PiggyBank}
+          tone={financeiro.cotasCriticas > 0 ? "warning" : "default"}
+        />
+        <StatCard
+          label="Contratos a vencer (60 dias)"
+          value={financeiro.contratosAVencer}
+          icon={Coins}
+          tone={financeiro.contratosAVencer > 0 ? "warning" : "default"}
+        />
       </div>
 
       <h2 className="gov-title mt-10 mb-4 text-lg">Gasto dos últimos 6 meses</h2>

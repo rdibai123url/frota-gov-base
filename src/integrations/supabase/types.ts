@@ -50,6 +50,475 @@ export type Database = {
         }
         Relationships: []
       }
+      budget_movements: {
+        Row: {
+          authorization_id: string | null
+          commitment_id: string | null
+          contract_id: string | null
+          contract_item_id: string | null
+          cost_center_id: string | null
+          created_at: string
+          created_by: string | null
+          fueling_id: string | null
+          id: string
+          kind: Database["public"]["Enums"]["budget_movement_kind"]
+          organization_id: string
+          quantity: number
+          quota_id: string | null
+          reason: string | null
+          value: number
+        }
+        Insert: {
+          authorization_id?: string | null
+          commitment_id?: string | null
+          contract_id?: string | null
+          contract_item_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          fueling_id?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["budget_movement_kind"]
+          organization_id: string
+          quantity?: number
+          quota_id?: string | null
+          reason?: string | null
+          value?: number
+        }
+        Update: {
+          authorization_id?: string | null
+          commitment_id?: string | null
+          contract_id?: string | null
+          contract_item_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          fueling_id?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["budget_movement_kind"]
+          organization_id?: string
+          quantity?: number
+          quota_id?: string | null
+          reason?: string | null
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_movements_authorization_id_fkey"
+            columns: ["authorization_id"]
+            isOneToOne: false
+            referencedRelation: "fuel_authorizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_movements_commitment_id_fkey"
+            columns: ["commitment_id"]
+            isOneToOne: false
+            referencedRelation: "commitments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_movements_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_movements_contract_item_id_fkey"
+            columns: ["contract_item_id"]
+            isOneToOne: false
+            referencedRelation: "contract_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_movements_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_movements_fueling_id_fkey"
+            columns: ["fueling_id"]
+            isOneToOne: false
+            referencedRelation: "fuelings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_movements_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_movements_quota_id_fkey"
+            columns: ["quota_id"]
+            isOneToOne: false
+            referencedRelation: "quotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commitments: {
+        Row: {
+          available_value: number | null
+          budget_allocation: string | null
+          cancelled_value: number
+          committed_value: number
+          consumed_value: number
+          contract_id: string | null
+          cost_center_id: string | null
+          created_at: string
+          created_by: string | null
+          exercise: number
+          expense_element: string | null
+          id: string
+          issued_at: string
+          kind: Database["public"]["Enums"]["commitment_kind"]
+          notes: string | null
+          number: string
+          organization_id: string
+          reserved_value: number
+          resource_source: string | null
+          status: Database["public"]["Enums"]["commitment_status"]
+          supplier_id: string | null
+          unit_id: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          available_value?: number | null
+          budget_allocation?: string | null
+          cancelled_value?: number
+          committed_value?: number
+          consumed_value?: number
+          contract_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          exercise?: number
+          expense_element?: string | null
+          id?: string
+          issued_at?: string
+          kind?: Database["public"]["Enums"]["commitment_kind"]
+          notes?: string | null
+          number: string
+          organization_id: string
+          reserved_value?: number
+          resource_source?: string | null
+          status?: Database["public"]["Enums"]["commitment_status"]
+          supplier_id?: string | null
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          available_value?: number | null
+          budget_allocation?: string | null
+          cancelled_value?: number
+          committed_value?: number
+          consumed_value?: number
+          contract_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          exercise?: number
+          expense_element?: string | null
+          id?: string
+          issued_at?: string
+          kind?: Database["public"]["Enums"]["commitment_kind"]
+          notes?: string | null
+          number?: string
+          organization_id?: string
+          reserved_value?: number
+          resource_source?: string | null
+          status?: Database["public"]["Enums"]["commitment_status"]
+          supplier_id?: string | null
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commitments_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commitments_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commitments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commitments_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commitments_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contract_items: {
+        Row: {
+          active: boolean
+          consumed_quantity: number
+          consumed_value: number
+          contract_id: string
+          created_at: string
+          created_by: string | null
+          description: string
+          fuel_type_id: string | null
+          id: string
+          item_code: string | null
+          material_kind: string
+          measure_unit: string
+          notes: string | null
+          organization_id: string
+          quantity: number
+          reserved_quantity: number
+          reserved_value: number
+          total_value: number | null
+          unit_price: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          active?: boolean
+          consumed_quantity?: number
+          consumed_value?: number
+          contract_id: string
+          created_at?: string
+          created_by?: string | null
+          description: string
+          fuel_type_id?: string | null
+          id?: string
+          item_code?: string | null
+          material_kind?: string
+          measure_unit?: string
+          notes?: string | null
+          organization_id: string
+          quantity?: number
+          reserved_quantity?: number
+          reserved_value?: number
+          total_value?: number | null
+          unit_price?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          active?: boolean
+          consumed_quantity?: number
+          consumed_value?: number
+          contract_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          fuel_type_id?: string | null
+          id?: string
+          item_code?: string | null
+          material_kind?: string
+          measure_unit?: string
+          notes?: string | null
+          organization_id?: string
+          quantity?: number
+          reserved_quantity?: number
+          reserved_value?: number
+          total_value?: number | null
+          unit_price?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_items_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_items_fuel_type_id_fkey"
+            columns: ["fuel_type_id"]
+            isOneToOne: false
+            referencedRelation: "fuel_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contracts: {
+        Row: {
+          allows_amendment: boolean
+          amendment_count: number
+          attachment_path: string | null
+          cnpj: string | null
+          created_at: string
+          created_by: string | null
+          current_value: number
+          id: string
+          initial_value: number
+          modality: Database["public"]["Enums"]["contract_modality"]
+          notes: string | null
+          number: string
+          object: string
+          organization_id: string
+          process_number: string | null
+          signed_at: string | null
+          status: Database["public"]["Enums"]["contract_status"]
+          supplier_id: string | null
+          updated_at: string
+          updated_by: string | null
+          valid_from: string | null
+          valid_to: string | null
+        }
+        Insert: {
+          allows_amendment?: boolean
+          amendment_count?: number
+          attachment_path?: string | null
+          cnpj?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_value?: number
+          id?: string
+          initial_value?: number
+          modality?: Database["public"]["Enums"]["contract_modality"]
+          notes?: string | null
+          number: string
+          object: string
+          organization_id: string
+          process_number?: string | null
+          signed_at?: string | null
+          status?: Database["public"]["Enums"]["contract_status"]
+          supplier_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Update: {
+          allows_amendment?: boolean
+          amendment_count?: number
+          attachment_path?: string | null
+          cnpj?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_value?: number
+          id?: string
+          initial_value?: number
+          modality?: Database["public"]["Enums"]["contract_modality"]
+          notes?: string | null
+          number?: string
+          object?: string
+          organization_id?: string
+          process_number?: string | null
+          signed_at?: string | null
+          status?: Database["public"]["Enums"]["contract_status"]
+          supplier_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cost_centers: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          unit_id: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cost_centers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_centers_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       drivers: {
         Row: {
           active: boolean
@@ -138,15 +607,21 @@ export type Database = {
         Row: {
           authorizer_id: string | null
           authorizer_name: string | null
+          budget_reserved: boolean
           cancel_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
           code: string | null
+          commitment_id: string | null
           consumed_quantity: number
           consumed_value: number
+          contract_id: string | null
+          contract_item_id: string | null
+          cost_center_id: string | null
           created_at: string
           created_by: string | null
           driver_id: string | null
+          expense_origin: Database["public"]["Enums"]["expense_origin"]
           fuel_type_id: string | null
           hour_meter: number | null
           id: string
@@ -159,6 +634,9 @@ export type Database = {
           organization_id: string
           purpose: string | null
           qr_token: string
+          quota_id: string | null
+          reserved_quantity: number
+          reserved_value: number
           security_code: string | null
           status: Database["public"]["Enums"]["fuel_auth_status"]
           supplier_id: string | null
@@ -172,15 +650,21 @@ export type Database = {
         Insert: {
           authorizer_id?: string | null
           authorizer_name?: string | null
+          budget_reserved?: boolean
           cancel_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
           code?: string | null
+          commitment_id?: string | null
           consumed_quantity?: number
           consumed_value?: number
+          contract_id?: string | null
+          contract_item_id?: string | null
+          cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
           driver_id?: string | null
+          expense_origin?: Database["public"]["Enums"]["expense_origin"]
           fuel_type_id?: string | null
           hour_meter?: number | null
           id?: string
@@ -193,6 +677,9 @@ export type Database = {
           organization_id: string
           purpose?: string | null
           qr_token?: string
+          quota_id?: string | null
+          reserved_quantity?: number
+          reserved_value?: number
           security_code?: string | null
           status?: Database["public"]["Enums"]["fuel_auth_status"]
           supplier_id?: string | null
@@ -206,15 +693,21 @@ export type Database = {
         Update: {
           authorizer_id?: string | null
           authorizer_name?: string | null
+          budget_reserved?: boolean
           cancel_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
           code?: string | null
+          commitment_id?: string | null
           consumed_quantity?: number
           consumed_value?: number
+          contract_id?: string | null
+          contract_item_id?: string | null
+          cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
           driver_id?: string | null
+          expense_origin?: Database["public"]["Enums"]["expense_origin"]
           fuel_type_id?: string | null
           hour_meter?: number | null
           id?: string
@@ -227,6 +720,9 @@ export type Database = {
           organization_id?: string
           purpose?: string | null
           qr_token?: string
+          quota_id?: string | null
+          reserved_quantity?: number
+          reserved_value?: number
           security_code?: string | null
           status?: Database["public"]["Enums"]["fuel_auth_status"]
           supplier_id?: string | null
@@ -238,6 +734,34 @@ export type Database = {
           vehicle_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fuel_authorizations_commitment_id_fkey"
+            columns: ["commitment_id"]
+            isOneToOne: false
+            referencedRelation: "commitments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_authorizations_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_authorizations_contract_item_id_fkey"
+            columns: ["contract_item_id"]
+            isOneToOne: false
+            referencedRelation: "contract_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_authorizations_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fuel_authorizations_driver_id_fkey"
             columns: ["driver_id"]
@@ -257,6 +781,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_authorizations_quota_id_fkey"
+            columns: ["quota_id"]
+            isOneToOne: false
+            referencedRelation: "quotas"
             referencedColumns: ["id"]
           },
           {
@@ -412,9 +943,12 @@ export type Database = {
         Row: {
           alert_type: string
           authorization_id: string | null
+          category: string
           created_at: string
           created_by: string | null
           driver_id: string | null
+          entity_id: string | null
+          entity_type: string | null
           fueling_id: string | null
           id: string
           justification: string | null
@@ -431,9 +965,12 @@ export type Database = {
         Insert: {
           alert_type: string
           authorization_id?: string | null
+          category?: string
           created_at?: string
           created_by?: string | null
           driver_id?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
           fueling_id?: string | null
           id?: string
           justification?: string | null
@@ -450,9 +987,12 @@ export type Database = {
         Update: {
           alert_type?: string
           authorization_id?: string | null
+          category?: string
           created_at?: string
           created_by?: string | null
           driver_id?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
           fueling_id?: string | null
           id?: string
           justification?: string | null
@@ -514,10 +1054,15 @@ export type Database = {
           cancel_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
+          commitment_id: string | null
+          contract_id: string | null
+          contract_item_id: string | null
+          cost_center_id: string | null
           created_at: string
           created_by: string | null
           driver_id: string | null
           driver_name: string | null
+          expense_origin: Database["public"]["Enums"]["expense_origin"]
           fuel_type_id: string | null
           fueled_at: string
           hour_meter: number | null
@@ -528,6 +1073,7 @@ export type Database = {
           operator_name: string | null
           organization_id: string
           quantity: number
+          quota_id: string | null
           status: Database["public"]["Enums"]["fueling_status"]
           supplier_id: string | null
           total_value: number | null
@@ -548,10 +1094,15 @@ export type Database = {
           cancel_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
+          commitment_id?: string | null
+          contract_id?: string | null
+          contract_item_id?: string | null
+          cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
           driver_id?: string | null
           driver_name?: string | null
+          expense_origin?: Database["public"]["Enums"]["expense_origin"]
           fuel_type_id?: string | null
           fueled_at?: string
           hour_meter?: number | null
@@ -562,6 +1113,7 @@ export type Database = {
           operator_name?: string | null
           organization_id: string
           quantity: number
+          quota_id?: string | null
           status?: Database["public"]["Enums"]["fueling_status"]
           supplier_id?: string | null
           total_value?: number | null
@@ -582,10 +1134,15 @@ export type Database = {
           cancel_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
+          commitment_id?: string | null
+          contract_id?: string | null
+          contract_item_id?: string | null
+          cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
           driver_id?: string | null
           driver_name?: string | null
+          expense_origin?: Database["public"]["Enums"]["expense_origin"]
           fuel_type_id?: string | null
           fueled_at?: string
           hour_meter?: number | null
@@ -596,6 +1153,7 @@ export type Database = {
           operator_name?: string | null
           organization_id?: string
           quantity?: number
+          quota_id?: string | null
           status?: Database["public"]["Enums"]["fueling_status"]
           supplier_id?: string | null
           total_value?: number | null
@@ -613,6 +1171,34 @@ export type Database = {
             columns: ["authorization_id"]
             isOneToOne: false
             referencedRelation: "fuel_authorizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuelings_commitment_id_fkey"
+            columns: ["commitment_id"]
+            isOneToOne: false
+            referencedRelation: "commitments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuelings_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuelings_contract_item_id_fkey"
+            columns: ["contract_item_id"]
+            isOneToOne: false
+            referencedRelation: "contract_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuelings_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
             referencedColumns: ["id"]
           },
           {
@@ -634,6 +1220,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuelings_quota_id_fkey"
+            columns: ["quota_id"]
+            isOneToOne: false
+            referencedRelation: "quotas"
             referencedColumns: ["id"]
           },
           {
@@ -802,6 +1395,172 @@ export type Database = {
           },
           {
             foreignKeyName: "profiles_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quota_supplements: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          id: string
+          organization_id: string
+          quota_id: string
+          reason: string
+          responsible_name: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id: string
+          quota_id: string
+          reason: string
+          responsible_name?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id?: string
+          quota_id?: string
+          reason?: string
+          responsible_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quota_supplements_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quota_supplements_quota_id_fkey"
+            columns: ["quota_id"]
+            isOneToOne: false
+            referencedRelation: "quotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotas: {
+        Row: {
+          active: boolean
+          balance_amount: number | null
+          commitment_id: string | null
+          consumed_amount: number
+          contract_id: string | null
+          contract_item_id: string | null
+          cost_center_id: string | null
+          created_at: string
+          created_by: string | null
+          granted_amount: number
+          id: string
+          measure_unit: string
+          name: string
+          notes: string | null
+          organization_id: string
+          quota_type: Database["public"]["Enums"]["quota_type"]
+          reserved_amount: number
+          unit_id: string | null
+          updated_at: string
+          updated_by: string | null
+          valid_from: string
+          valid_to: string | null
+        }
+        Insert: {
+          active?: boolean
+          balance_amount?: number | null
+          commitment_id?: string | null
+          consumed_amount?: number
+          contract_id?: string | null
+          contract_item_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          granted_amount?: number
+          id?: string
+          measure_unit?: string
+          name: string
+          notes?: string | null
+          organization_id: string
+          quota_type?: Database["public"]["Enums"]["quota_type"]
+          reserved_amount?: number
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          valid_from?: string
+          valid_to?: string | null
+        }
+        Update: {
+          active?: boolean
+          balance_amount?: number | null
+          commitment_id?: string | null
+          consumed_amount?: number
+          contract_id?: string | null
+          contract_item_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          granted_amount?: number
+          id?: string
+          measure_unit?: string
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          quota_type?: Database["public"]["Enums"]["quota_type"]
+          reserved_amount?: number
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          valid_from?: string
+          valid_to?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotas_commitment_id_fkey"
+            columns: ["commitment_id"]
+            isOneToOne: false
+            referencedRelation: "commitments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotas_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotas_contract_item_id_fkey"
+            columns: ["contract_item_id"]
+            isOneToOne: false
+            referencedRelation: "contract_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotas_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotas_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotas_unit_id_fkey"
             columns: ["unit_id"]
             isOneToOne: false
             referencedRelation: "units"
@@ -1197,8 +1956,69 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      budget_consume: {
+        Args: {
+          _commitment: string
+          _from_reserved: boolean
+          _item: string
+          _org: string
+          _qty: number
+          _quota: string
+          _val: number
+        }
+        Returns: undefined
+      }
+      budget_log: {
+        Args: {
+          _auth: string
+          _commitment: string
+          _fueling: string
+          _item: string
+          _kind: Database["public"]["Enums"]["budget_movement_kind"]
+          _org: string
+          _qty: number
+          _quota: string
+          _reason: string
+          _val: number
+        }
+        Returns: undefined
+      }
+      budget_refund: {
+        Args: {
+          _commitment: string
+          _item: string
+          _org: string
+          _qty: number
+          _quota: string
+          _val: number
+        }
+        Returns: undefined
+      }
+      budget_release: {
+        Args: {
+          _commitment: string
+          _item: string
+          _org: string
+          _qty: number
+          _quota: string
+          _val: number
+        }
+        Returns: undefined
+      }
+      budget_reserve: {
+        Args: {
+          _commitment: string
+          _item: string
+          _org: string
+          _qty: number
+          _quota: string
+          _val: number
+        }
+        Returns: undefined
+      }
       can_cancel_fueling: { Args: never; Returns: boolean }
       can_fuel_vehicle: { Args: { _vehicle: string }; Returns: boolean }
+      can_manage_finance: { Args: never; Returns: boolean }
       can_manage_fleet: { Args: never; Returns: boolean }
       can_manage_users: { Args: never; Returns: boolean }
       can_operate_usage: { Args: never; Returns: boolean }
@@ -1224,11 +2044,16 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      log_budget_block: {
+        Args: { _entity_id: string; _entity_type: string; _message: string }
+        Returns: undefined
+      }
       my_unit_id: { Args: never; Returns: string }
       next_org_code: {
         Args: { _key: string; _org: string; _prefix: string }
         Returns: string
       }
+      refresh_financial_alerts: { Args: never; Returns: undefined }
       unit_scope_ok: { Args: { _unit: string }; Returns: boolean }
     }
     Enums: {
@@ -1241,12 +2066,41 @@ export type Database = {
         | "unit_manager"
         | "operator"
         | "auditor"
+      budget_movement_kind:
+        | "reserva"
+        | "liberacao"
+        | "consumo"
+        | "estorno"
+        | "suplementacao"
+      commitment_kind: "ordinario" | "estimativo" | "global"
+      commitment_status: "ativo" | "esgotado" | "anulado" | "encerrado"
+      contract_modality:
+        | "pregao"
+        | "concorrencia"
+        | "dispensa"
+        | "inexigibilidade"
+        | "adesao_ata"
+        | "contratacao_direta"
+        | "outro"
+      contract_status:
+        | "rascunho"
+        | "vigente"
+        | "suspenso"
+        | "encerrado"
+        | "rescindido"
       driver_bond:
         | "efetivo"
         | "comissionado"
         | "contratado"
         | "terceirizado"
         | "outro"
+      expense_origin:
+        | "contrato"
+        | "compra_direta"
+        | "convenio"
+        | "doacao"
+        | "almoxarifado"
+        | "recurso_proprio"
       fuel_auth_status:
         | "pendente"
         | "autorizada"
@@ -1264,6 +2118,7 @@ export type Database = {
         | "fundacao"
         | "secretaria"
         | "outro"
+      quota_type: "financeira" | "quantitativa"
       unit_type:
         | "secretaria"
         | "departamento"
@@ -1415,12 +2270,45 @@ export const Constants = {
         "operator",
         "auditor",
       ],
+      budget_movement_kind: [
+        "reserva",
+        "liberacao",
+        "consumo",
+        "estorno",
+        "suplementacao",
+      ],
+      commitment_kind: ["ordinario", "estimativo", "global"],
+      commitment_status: ["ativo", "esgotado", "anulado", "encerrado"],
+      contract_modality: [
+        "pregao",
+        "concorrencia",
+        "dispensa",
+        "inexigibilidade",
+        "adesao_ata",
+        "contratacao_direta",
+        "outro",
+      ],
+      contract_status: [
+        "rascunho",
+        "vigente",
+        "suspenso",
+        "encerrado",
+        "rescindido",
+      ],
       driver_bond: [
         "efetivo",
         "comissionado",
         "contratado",
         "terceirizado",
         "outro",
+      ],
+      expense_origin: [
+        "contrato",
+        "compra_direta",
+        "convenio",
+        "doacao",
+        "almoxarifado",
+        "recurso_proprio",
       ],
       fuel_auth_status: [
         "pendente",
@@ -1441,6 +2329,7 @@ export const Constants = {
         "secretaria",
         "outro",
       ],
+      quota_type: ["financeira", "quantitativa"],
       unit_type: [
         "secretaria",
         "departamento",

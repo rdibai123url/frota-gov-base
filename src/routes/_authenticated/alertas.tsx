@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -16,8 +16,10 @@ import {
 } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
-  ALERT_TYPE_LABELS,
+  ALERT_CATEGORIES,
+  alertLabel,
   dateTimeBR,
+  label,
   supabase,
   useFuelingAlerts,
   useInvalidate,
@@ -50,13 +52,22 @@ function Alertas() {
   const invalidate = useInvalidate();
   const [status, setStatus] = useState("aberto");
   const [type, setType] = useState(ALL);
+  const [category, setCategory] = useState(ALL);
+
+  useEffect(() => {
+    void supabase.rpc("refresh_financial_alerts").then(() => invalidate(["fueling-alerts"]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filtered = useMemo(
     () =>
       alerts.filter(
-        (a) => (status === ALL || a.status === status) && (type === ALL || a.alert_type === type),
+        (a) =>
+          (status === ALL || a.status === status) &&
+          (type === ALL || a.alert_type === type) &&
+          (category === ALL || (a.category ?? "abastecimento") === category),
       ),
-    [alerts, status, type],
+    [alerts, status, type, category],
   );
 
   const types = useMemo(() => Array.from(new Set(alerts.map((a) => a.alert_type))), [alerts]);
@@ -81,7 +92,21 @@ function Alertas() {
         description="Ocorrências geradas automaticamente pelas regras de validação dos abastecimentos."
       />
 
-      <div className="mb-4 grid gap-3 rounded-lg border bg-card p-4 shadow-card sm:grid-cols-2 lg:w-2/3">
+      <div className="mb-4 grid gap-3 rounded-lg border bg-card p-4 shadow-card sm:grid-cols-3">
+        <div>
+          <Label className="text-xs">Categoria</Label>
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>Todas</SelectItem>
+              {ALERT_CATEGORIES.map((c) => (
+                <SelectItem key={c.value} value={c.value}>
+                  {c.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <div>
           <Label className="text-xs">Situação</Label>
           <Select value={status} onValueChange={setStatus}>
@@ -101,7 +126,7 @@ function Alertas() {
               <SelectItem value={ALL}>Todos</SelectItem>
               {types.map((t) => (
                 <SelectItem key={t} value={t}>
-                  {ALERT_TYPE_LABELS[t] ?? t}
+                  {alertLabel(t)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -114,6 +139,7 @@ function Alertas() {
           <TableHeader>
             <TableRow>
               <TableHead>Ocorrência</TableHead>
+              <TableHead>Categoria</TableHead>
               <TableHead>Veículo</TableHead>
               <TableHead>Detalhe</TableHead>
               <TableHead>Justificativa</TableHead>
@@ -124,11 +150,11 @@ function Alertas() {
           </TableHeader>
           <TableBody>
             {isLoading && (
-              <TableRow><TableCell colSpan={7} className="py-8 text-center text-muted-foreground">Carregando…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="py-8 text-center text-muted-foreground">Carregando…</TableCell></TableRow>
             )}
             {!isLoading && filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
                   Nenhuma inconsistência registrada.
                 </TableCell>
               </TableRow>
@@ -138,8 +164,11 @@ function Alertas() {
                 <TableCell className="font-medium">
                   <span className="inline-flex items-center gap-2">
                     <AlertTriangle className="size-4 text-warning" />
-                    {ALERT_TYPE_LABELS[a.alert_type] ?? a.alert_type}
+                    {alertLabel(a.alert_type)}
                   </span>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline">{label(ALERT_CATEGORIES, a.category ?? "abastecimento")}</Badge>
                 </TableCell>
                 <TableCell>{a.vehicle?.plate ?? "—"}</TableCell>
                 <TableCell className="max-w-sm text-sm text-muted-foreground">{a.message}</TableCell>

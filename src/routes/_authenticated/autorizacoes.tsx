@@ -28,26 +28,35 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   AUTH_STATUS,
+  EXPENSE_ORIGINS,
   LIMIT_SCOPES,
   authorizationBalance,
   brl,
   cnhState,
   dateTimeBR,
+  dbMessage,
   driverEligible,
   fuelCompatible,
   label,
+  logBudgetBlock,
   num,
   supabase,
   useAuthorizations,
+  useCommitments,
+  useContractItems,
+  useContracts,
+  useCostCenters,
   useDrivers,
   useFuelLimits,
   useFuelTypes,
   useInvalidate,
   usePerms,
+  useQuotas,
   useSuppliers,
   useUnits,
   useVehicles,
   type AuthorizationRow,
+  type ExpenseOrigin,
   type FuelAuthStatus,
   type LimitScope,
 } from "@/lib/frotagov";
@@ -243,6 +252,11 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
   const { data: fuels = [] } = useFuelTypes();
   const { data: suppliers = [] } = useSuppliers();
   const { data: units = [] } = useUnits();
+  const { data: centers = [] } = useCostCenters();
+  const { data: contracts = [] } = useContracts();
+  const { data: contractItems = [] } = useContractItems();
+  const { data: commitments = [] } = useCommitments();
+  const { data: quotas = [] } = useQuotas();
   const perms = usePerms();
 
   const now = new Date();
@@ -261,6 +275,12 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
   const [justification, setJustification] = useState("");
   const [exceptionReason, setExceptionReason] = useState("");
   const [limitMsg, setLimitMsg] = useState<string | null>(null);
+  const [origin, setOrigin] = useState<ExpenseOrigin>("contrato");
+  const [centerId, setCenterId] = useState(NONE);
+  const [contractId, setContractId] = useState(NONE);
+  const [itemId, setItemId] = useState(NONE);
+  const [commitmentId, setCommitmentId] = useState(NONE);
+  const [quotaId, setQuotaId] = useState(NONE);
   const [saving, setSaving] = useState(false);
 
   const vehicle = vehicles.find((v) => v.id === vehicleId) ?? null;
@@ -348,12 +368,20 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
       limit_exception_reason: limitMsg ? exceptionReason.trim() : null,
       authorizer_id: perms.userId,
       authorizer_name: perms.userName,
+      expense_origin: origin,
+      cost_center_id: centerId === NONE ? null : centerId,
+      contract_id: contractId === NONE ? null : contractId,
+      contract_item_id: itemId === NONE ? null : itemId,
+      commitment_id: commitmentId === NONE ? null : commitmentId,
+      quota_id: quotaId === NONE ? null : quotaId,
       status: (perms.canWrite ? "autorizada" : "pendente") as FuelAuthStatus,
       created_by: perms.userId,
     });
     setSaving(false);
     if (error) {
-      toast.error(error.message);
+      const msg = dbMessage(error) || error.message;
+      toast.error(msg);
+      if (/saldo|Saldo/.test(msg)) await logBudgetBlock(msg, "fuel_authorization", null);
       return;
     }
     toast.success("Autorização emitida.");
@@ -456,6 +484,104 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
           <div>
             <Label htmlFor="vu">Validade final *</Label>
             <Input id="vu" type="datetime-local" value={until} onChange={(e) => setUntil(e.target.value)} />
+          </div>
+
+          <div className="sm:col-span-2 mt-2 border-t pt-4">
+            <p className="gov-title text-sm">Origem do recurso</p>
+            <p className="text-xs text-muted-foreground">
+              O saldo do contrato, do empenho e da cota é reservado no momento da autorização.
+            </p>
+          </div>
+          <div>
+            <Label>Origem da despesa</Label>
+            <Select value={origin} onValueChange={(v) => setOrigin(v as ExpenseOrigin)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {EXPENSE_ORIGINS.map((o) => (
+                  <SelectItem key={o.value} value={o.value} disabled={!o.ready}>
+                    {o.label}{o.ready ? "" : " (em preparação)"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Centro de custo</Label>
+            <Select value={centerId} onValueChange={setCenterId}>
+              <SelectTrigger><SelectValue placeholder="Opcional" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>Não informar</SelectItem>
+                {centers.filter((c) => c.active).map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.code} — {c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Contrato</Label>
+            <Select
+              value={contractId}
+              onValueChange={(v) => {
+                setContractId(v);
+                setItemId(NONE);
+              }}
+            >
+              <SelectTrigger><SelectValue placeholder="Opcional" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>Sem contrato</SelectItem>
+                {contracts.filter((c) => c.status === "vigente").map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.number}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Item do contrato</Label>
+            <Select value={itemId} onValueChange={setItemId}>
+              <SelectTrigger><SelectValue placeholder="Opcional" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>Sem item</SelectItem>
+                {contractItems
+                  .filter((i) => contractId === NONE || i.contract_id === contractId)
+                  .filter((i) => fuelId === NONE || !i.fuel_type_id || i.fuel_type_id === fuelId)
+                  .map((i) => (
+                    <SelectItem key={i.id} value={i.id}>
+                      {i.description} · saldo {num(Number(i.quantity) - Number(i.reserved_quantity) - Number(i.consumed_quantity), 2)} {i.measure_unit}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Empenho</Label>
+            <Select value={commitmentId} onValueChange={setCommitmentId}>
+              <SelectTrigger><SelectValue placeholder="Opcional" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>Sem empenho</SelectItem>
+                {commitments.filter((c) => c.status === "ativo").map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.number}/{c.exercise} · saldo {brl(Number(c.available_value ?? 0))}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Cota</Label>
+            <Select value={quotaId} onValueChange={setQuotaId}>
+              <SelectTrigger><SelectValue placeholder="Opcional" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>Sem cota</SelectItem>
+                {quotas.filter((q) => q.active).map((q) => (
+                  <SelectItem key={q.id} value={q.id}>
+                    {q.name} · saldo{" "}
+                    {q.quota_type === "financeira"
+                      ? brl(Number(q.balance_amount ?? 0))
+                      : `${num(Number(q.balance_amount ?? 0), 2)} ${q.measure_unit}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="sm:col-span-2">
             <Label htmlFor="pp">Finalidade</Label>
