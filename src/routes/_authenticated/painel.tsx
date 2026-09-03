@@ -412,7 +412,11 @@ function Painel() {
         />
       </div>
 
-      <h2 className="gov-title mt-10 mb-4 text-lg">Gestão administrativa, legal e patrimonial</h2>
+        </TabsContent>
+
+        <TabsContent value="administrativo" className="pt-5">
+      <h2 className="gov-title mb-4 text-lg">Gestão administrativa, legal e patrimonial</h2>
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Multas em aberto"
