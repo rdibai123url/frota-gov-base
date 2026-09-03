@@ -22,6 +22,7 @@ import { Route as AuthenticatedContratosRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCotasRouteImport } from './routes/_authenticated/cotas'
 import { Route as AuthenticatedEmpenhosRouteImport } from './routes/_authenticated/empenhos'
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
+import { Route as AuthenticatedManutencoesRouteImport } from './routes/_authenticated/manutencoes'
 import { Route as AuthenticatedOrgaoRouteImport } from './routes/_authenticated/orgao'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 import { Route as AuthenticatedPecasRouteImport } from './routes/_authenticated/pecas'
@@ -101,6 +102,12 @@ const AuthenticatedFornecedoresRoute =
     path: '/fornecedores',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedManutencoesRoute =
+  AuthenticatedManutencoesRouteImport.update({
+    id: '/manutencoes',
+    path: '/manutencoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOrgaoRoute = AuthenticatedOrgaoRouteImport.update({
   id: '/orgao',
   path: '/orgao',
@@ -161,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/cotas': typeof AuthenticatedCotasRoute
   '/empenhos': typeof AuthenticatedEmpenhosRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
+  '/manutencoes': typeof AuthenticatedManutencoesRoute
   '/orgao': typeof AuthenticatedOrgaoRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/pecas': typeof AuthenticatedPecasRoute
@@ -184,6 +192,7 @@ export interface FileRoutesByTo {
   '/cotas': typeof AuthenticatedCotasRoute
   '/empenhos': typeof AuthenticatedEmpenhosRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
+  '/manutencoes': typeof AuthenticatedManutencoesRoute
   '/orgao': typeof AuthenticatedOrgaoRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/pecas': typeof AuthenticatedPecasRoute
@@ -209,6 +218,7 @@ export interface FileRoutesById {
   '/_authenticated/cotas': typeof AuthenticatedCotasRoute
   '/_authenticated/empenhos': typeof AuthenticatedEmpenhosRoute
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
+  '/_authenticated/manutencoes': typeof AuthenticatedManutencoesRoute
   '/_authenticated/orgao': typeof AuthenticatedOrgaoRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
   '/_authenticated/pecas': typeof AuthenticatedPecasRoute
@@ -234,6 +244,7 @@ export interface FileRouteTypes {
     | '/cotas'
     | '/empenhos'
     | '/fornecedores'
+    | '/manutencoes'
     | '/orgao'
     | '/painel'
     | '/pecas'
@@ -257,6 +268,7 @@ export interface FileRouteTypes {
     | '/cotas'
     | '/empenhos'
     | '/fornecedores'
+    | '/manutencoes'
     | '/orgao'
     | '/painel'
     | '/pecas'
@@ -281,6 +293,7 @@ export interface FileRouteTypes {
     | '/_authenticated/cotas'
     | '/_authenticated/empenhos'
     | '/_authenticated/fornecedores'
+    | '/_authenticated/manutencoes'
     | '/_authenticated/orgao'
     | '/_authenticated/painel'
     | '/_authenticated/pecas'
@@ -391,6 +404,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFornecedoresRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/manutencoes': {
+      id: '/_authenticated/manutencoes'
+      path: '/manutencoes'
+      fullPath: '/manutencoes'
+      preLoaderRoute: typeof AuthenticatedManutencoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/orgao': {
       id: '/_authenticated/orgao'
       path: '/orgao'
@@ -468,6 +488,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCotasRoute: typeof AuthenticatedCotasRoute
   AuthenticatedEmpenhosRoute: typeof AuthenticatedEmpenhosRoute
   AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
+  AuthenticatedManutencoesRoute: typeof AuthenticatedManutencoesRoute
   AuthenticatedOrgaoRoute: typeof AuthenticatedOrgaoRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
   AuthenticatedPecasRoute: typeof AuthenticatedPecasRoute
@@ -490,6 +511,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCotasRoute: AuthenticatedCotasRoute,
   AuthenticatedEmpenhosRoute: AuthenticatedEmpenhosRoute,
   AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,
+  AuthenticatedManutencoesRoute: AuthenticatedManutencoesRoute,
   AuthenticatedOrgaoRoute: AuthenticatedOrgaoRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
   AuthenticatedPecasRoute: AuthenticatedPecasRoute,
