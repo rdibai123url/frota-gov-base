@@ -350,11 +350,17 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         )}
         {isSuperAdmin && !platformSession?.organization_id && (
-          <div className="border-b bg-muted/50 px-4 py-2.5 text-sm text-muted-foreground sm:px-6">
-            Nenhum órgão em contexto. Selecione um órgão em Administração da Plataforma para operar
-            as telas do órgão.
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-warning/40 bg-warning/20 px-4 py-2.5 text-sm sm:px-6">
+            <p>
+              <strong>Nenhum órgão em contexto.</strong> As ações de cadastro das telas do órgão
+              ficam ocultas até você acessar um órgão.
+            </p>
+            <Button size="sm" onClick={() => navigate({ to: "/plataforma" })}>
+              Acessar um órgão
+            </Button>
           </div>
         )}
+
 
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
           <div className="mx-auto w-full max-w-6xl">{children}</div>
