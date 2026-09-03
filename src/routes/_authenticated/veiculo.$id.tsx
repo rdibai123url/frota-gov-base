@@ -1,15 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ArrowLeft, Truck } from "lucide-react";
 
 import { PageHeader } from "@/components/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  ACCIDENT_KINDS,
+  ASSET_MOVEMENT_KINDS,
+  FINE_STATUS,
   MAINTENANCE_KINDS,
   MAINTENANCE_RECORD_STATUS,
+  OBLIGATION_STATUS,
   TIRE_STATUS,
   USAGE_STATUS,
   VEHICLE_STATUS,
@@ -19,14 +26,20 @@ import {
   label,
   maintenanceTotal,
   num,
+  useAccidents,
+  useAssetMovements,
   useAuthorizations,
   useFuelings,
+  useInsurancePolicies,
   useMaintenanceRecords,
   useTires,
+  useTrafficFines,
+  useVehicleObligations,
   useVehicleStatusHistory,
   useVehicleUsages,
   useVehicles,
 } from "@/lib/frotagov";
+
 
 export const Route = createFileRoute("/_authenticated/veiculo/$id")({
   head: () => ({
