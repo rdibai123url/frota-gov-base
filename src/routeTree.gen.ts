@@ -24,6 +24,7 @@ import { Route as AuthenticatedContratosRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCotacoesRouteImport } from './routes/_authenticated/cotacoes'
 import { Route as AuthenticatedCotasRouteImport } from './routes/_authenticated/cotas'
 import { Route as AuthenticatedCotasServidorRouteImport } from './routes/_authenticated/cotas-servidor'
+import { Route as AuthenticatedCredenciadosRouteImport } from './routes/_authenticated/credenciados'
 import { Route as AuthenticatedDiariasRouteImport } from './routes/_authenticated/diarias'
 import { Route as AuthenticatedEmpenhosRouteImport } from './routes/_authenticated/empenhos'
 import { Route as AuthenticatedEntidadesExternasRouteImport } from './routes/_authenticated/entidades-externas'
@@ -137,6 +138,12 @@ const AuthenticatedCotasServidorRoute =
   AuthenticatedCotasServidorRouteImport.update({
     id: '/cotas-servidor',
     path: '/cotas-servidor',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedCredenciadosRoute =
+  AuthenticatedCredenciadosRouteImport.update({
+    id: '/credenciados',
+    path: '/credenciados',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDiariasRoute = AuthenticatedDiariasRouteImport.update({
@@ -342,6 +349,7 @@ export interface FileRoutesByFullPath {
   '/cotacoes': typeof AuthenticatedCotacoesRoute
   '/cotas': typeof AuthenticatedCotasRoute
   '/cotas-servidor': typeof AuthenticatedCotasServidorRoute
+  '/credenciados': typeof AuthenticatedCredenciadosRoute
   '/diarias': typeof AuthenticatedDiariasRoute
   '/empenhos': typeof AuthenticatedEmpenhosRoute
   '/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
@@ -393,6 +401,7 @@ export interface FileRoutesByTo {
   '/cotacoes': typeof AuthenticatedCotacoesRoute
   '/cotas': typeof AuthenticatedCotasRoute
   '/cotas-servidor': typeof AuthenticatedCotasServidorRoute
+  '/credenciados': typeof AuthenticatedCredenciadosRoute
   '/diarias': typeof AuthenticatedDiariasRoute
   '/empenhos': typeof AuthenticatedEmpenhosRoute
   '/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
@@ -446,6 +455,7 @@ export interface FileRoutesById {
   '/_authenticated/cotacoes': typeof AuthenticatedCotacoesRoute
   '/_authenticated/cotas': typeof AuthenticatedCotasRoute
   '/_authenticated/cotas-servidor': typeof AuthenticatedCotasServidorRoute
+  '/_authenticated/credenciados': typeof AuthenticatedCredenciadosRoute
   '/_authenticated/diarias': typeof AuthenticatedDiariasRoute
   '/_authenticated/empenhos': typeof AuthenticatedEmpenhosRoute
   '/_authenticated/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
@@ -499,6 +509,7 @@ export interface FileRouteTypes {
     | '/cotacoes'
     | '/cotas'
     | '/cotas-servidor'
+    | '/credenciados'
     | '/diarias'
     | '/empenhos'
     | '/entidades-externas'
@@ -550,6 +561,7 @@ export interface FileRouteTypes {
     | '/cotacoes'
     | '/cotas'
     | '/cotas-servidor'
+    | '/credenciados'
     | '/diarias'
     | '/empenhos'
     | '/entidades-externas'
@@ -602,6 +614,7 @@ export interface FileRouteTypes {
     | '/_authenticated/cotacoes'
     | '/_authenticated/cotas'
     | '/_authenticated/cotas-servidor'
+    | '/_authenticated/credenciados'
     | '/_authenticated/diarias'
     | '/_authenticated/empenhos'
     | '/_authenticated/entidades-externas'
@@ -755,6 +768,13 @@ declare module '@tanstack/react-router' {
       path: '/cotas-servidor'
       fullPath: '/cotas-servidor'
       preLoaderRoute: typeof AuthenticatedCotasServidorRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/credenciados': {
+      id: '/_authenticated/credenciados'
+      path: '/credenciados'
+      fullPath: '/credenciados'
+      preLoaderRoute: typeof AuthenticatedCredenciadosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/diarias': {
@@ -1017,6 +1037,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCotacoesRoute: typeof AuthenticatedCotacoesRoute
   AuthenticatedCotasRoute: typeof AuthenticatedCotasRoute
   AuthenticatedCotasServidorRoute: typeof AuthenticatedCotasServidorRoute
+  AuthenticatedCredenciadosRoute: typeof AuthenticatedCredenciadosRoute
   AuthenticatedDiariasRoute: typeof AuthenticatedDiariasRoute
   AuthenticatedEmpenhosRoute: typeof AuthenticatedEmpenhosRoute
   AuthenticatedEntidadesExternasRoute: typeof AuthenticatedEntidadesExternasRoute
@@ -1062,6 +1083,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCotacoesRoute: AuthenticatedCotacoesRoute,
   AuthenticatedCotasRoute: AuthenticatedCotasRoute,
   AuthenticatedCotasServidorRoute: AuthenticatedCotasServidorRoute,
+  AuthenticatedCredenciadosRoute: AuthenticatedCredenciadosRoute,
   AuthenticatedDiariasRoute: AuthenticatedDiariasRoute,
   AuthenticatedEmpenhosRoute: AuthenticatedEmpenhosRoute,
   AuthenticatedEntidadesExternasRoute: AuthenticatedEntidadesExternasRoute,
