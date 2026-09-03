@@ -11,7 +11,7 @@ export type DiaryProofStatus = Database["public"]["Enums"]["diary_proof_status"]
 
 export type DiaryRow = Diary & {
   unit: { id: string; name: string; acronym: string | null } | null;
-  vehicle: { id: string; plate: string; status: string } | null;
+  vehicle: { id: string; plate: string | null; asset_code: string | null; status: string } | null;
   driver: { id: string; full_name: string } | null;
   usage: { id: string; code: string | null; destination: string | null } | null;
   proofs: DiaryProof[];

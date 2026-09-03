@@ -423,7 +423,7 @@ export function useFuelingAlerts() {
         .limit(500);
       if (error) throw error;
       return (data ?? []) as unknown as (FuelingAlert & {
-        vehicle: { id: string; plate: string } | null;
+        vehicle: { id: string; plate: string | null; asset_code: string | null } | null;
         fueling: { id: string; fueled_at: string; status: string } | null;
       })[];
     },
