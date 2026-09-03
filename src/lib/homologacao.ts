@@ -4,7 +4,7 @@
  * "Matriz de Funcionalidades", exclusivas do Super Admin.
  */
 
-export const APP_VERSION = "9.5.0";
+export const APP_VERSION = "9.6.0";
 export const APP_STAGE = "Homologação geral (Fase 9)";
 
 export type VersionEntry = { version: string; date: string; title: string; summary: string };
@@ -22,6 +22,7 @@ export const VERSION_HISTORY: VersionEntry[] = [
   { version: "9.2.0", date: "Pós-Fase 9 — Bloco B", title: "Fechamento mensal da transparência", summary: "Competência mensal por órgão, checklist obrigatório, publicação versionada, bloqueio de competência fechada e reabertura por chamado." },
   { version: "9.3.0", date: "Pós-Fase 9 — Bloco C", title: "Importação e migração em massa", summary: "Assistente de importação em 16 módulos com modelo de planilha, mapeamento de colunas, simulação sem gravar, correção de linhas, importação transacional, lotes rastreáveis, anulação de lote e posição de abertura de saldos." },
   { version: "9.5.0", date: "Pós-Fase 9 — Bloco D", title: "Backup externo diário", summary: "Backup automático diário por órgão com horário e fuso configuráveis, destino em armazenamento compatível com S3, servidor próprio do órgão ou armazenamento privado da plataforma, credenciais apenas em segredos, checksum SHA-256, verificação de integridade, retenção com proteção contra expurgo, alertas de falha e restauração assistida com backup de segurança prévio." },
+  { version: "9.6.0", date: "Pós-Fase 9 — Limpeza da frota", title: "Limpeza de veículos", summary: "Novo módulo de limpeza dentro de Manutenção: tipos de serviço configuráveis por órgão, registro de lavagem e higienização com fornecedor, contrato, empenho, cota e centro de custo, consumo e estorno orçamentário automáticos, anexo de comprovante, cancelamento com motivo, indicadores no painel, histórico do veículo, relatório próprio, importação de dados legados e divulgação agregada na transparência." },
   { version: "9.4.0", date: "Pós-Fase 9 — Diárias e migração por tipo", title: "Diárias e migração individual", summary: "Módulo de diárias (RD e CD) com fluxo de aprovação, impressão institucional, indicadores, alertas e relatório próprio; migração de dados visível em Cadastros, por tipo individual, agrupada em cadastros básicos, contratos e orçamento, operação e legal/patrimonial, com suporte a CSV, XLSX e JSON." },
 ];
 
@@ -34,6 +35,7 @@ export const ACTIVE_MODULES: ModuleInfo[] = [
   { module: "Utilização e reservas", route: "/utilizacao", status: "ativo" },
   { module: "Condutores", route: "/condutores", status: "ativo" },
   { module: "Diárias (RD e CD)", route: "/diarias", status: "ativo" },
+  { module: "Limpeza da frota", route: "/limpeza", status: "ativo" },
   { module: "Migração de dados por tipo", route: "/migracao", status: "ativo" },
   { module: "Autorização de abastecimento", route: "/autorizacoes", status: "ativo" },
   { module: "Abastecimentos", route: "/abastecimentos", status: "ativo" },
@@ -109,6 +111,7 @@ export const FEATURE_MATRIX: MatrixRow[] = [
   { module: "Abastecimento", feature: "Cartão magnético / integração com rede de postos", status: "Não", note: "Fora do escopo das fases entregues.", evidence: "—" },
   { module: "Manutenção", feature: "Planos preventivos por tempo e quilometragem", status: "Sim", note: "Com alertas de vencimento.", evidence: "/planos-manutencao" },
   { module: "Manutenção", feature: "Solicitação, execução e conclusão de manutenção", status: "Sim", note: "Registro imutável após conclusão e indisponibilidade do veículo.", evidence: "/manutencoes" },
+  { module: "Manutenção", feature: "Limpeza de veículos (lavagem e higienização)", status: "Sim", note: "Tipos de serviço por órgão, custo com contrato/empenho/cota, estorno automático no cancelamento e comprovante anexado.", evidence: "/limpeza" },
   { module: "Manutenção", feature: "Peças, pneus e garantias", status: "Sim", note: "Controle documental de peças; sem gestão de estoque de almoxarifado.", evidence: "/pecas, /pneus" },
   { module: "Manutenção", feature: "Rede credenciada, cotações e ordem de serviço eletrônica", status: "Sim", note: "Mínimo de propostas com justificativa obrigatória.", evidence: "/rede-credenciada, /cotacoes, /ordens-servico" },
   { module: "Orçamento", feature: "Contratos, itens, empenhos e cotas", status: "Sim", note: "Motor de saldos com reserva, consumo, liberação e estorno.", evidence: "/contratos, /empenhos, /cotas" },
@@ -121,7 +124,7 @@ export const FEATURE_MATRIX: MatrixRow[] = [
   { module: "Diárias", feature: "Requisição de diária (RD) com fluxo de autorização", status: "Sim", note: "Numeração por exercício, tramitação auditada e impressão institucional com valor por extenso.", evidence: "/diarias" },
   { module: "Diárias", feature: "Comprovação de diária (CD) com saldo e prestação de contas", status: "Sim", note: "Bloqueia encerramento sem relatório de atividades ou com saldo a restituir pendente.", evidence: "/diarias" },
   { module: "Diárias", feature: "Assinatura digital da RD", status: "Não", note: "Impressão institucional para assinatura física nesta versão.", evidence: "—" },
-  { module: "Implantação", feature: "Migração de dados por tipo individual", status: "Sim", note: "23 tipos agrupados em cadastros básicos, contratos e orçamento, operação e legal/patrimonial; CSV, XLSX e JSON.", evidence: "/migracao" },
+  { module: "Implantação", feature: "Migração de dados por tipo individual", status: "Sim", note: "24 tipos agrupados em cadastros básicos, contratos e orçamento, operação e legal/patrimonial; CSV, XLSX e JSON.", evidence: "/migracao" },
   { module: "Operação", feature: "Backup externo automático diário por órgão", status: "Sim", note: "Horário e fuso configuráveis, com execução única por ciclo e histórico completo.", evidence: "/plataforma → Backup externo" },
   { module: "Operação", feature: "Destino externo do backup (S3 compatível ou servidor próprio)", status: "Parcial", note: "Envio a armazenamento compatível com S3 é executado pelo sistema; para SFTP o pacote é disponibilizado para coleta pelo agente do órgão.", evidence: "/plataforma → Backup externo" },
   { module: "Operação", feature: "Verificação de integridade e restauração assistida", status: "Sim", note: "Checksum SHA-256, teste de restauração com justificativa, confirmação digitada e backup de segurança automático.", evidence: "/plataforma → Backup externo" },
