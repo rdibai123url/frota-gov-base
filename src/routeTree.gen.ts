@@ -38,6 +38,7 @@ import { Route as AuthenticatedManutencoesRouteImport } from './routes/_authenti
 import { Route as AuthenticatedMigracaoRouteImport } from './routes/_authenticated/migracao'
 import { Route as AuthenticatedMultasRouteImport } from './routes/_authenticated/multas'
 import { Route as AuthenticatedObrigacoesRouteImport } from './routes/_authenticated/obrigacoes'
+import { Route as AuthenticatedOfpRouteImport } from './routes/_authenticated/ofp'
 import { Route as AuthenticatedOrdensServicoRouteImport } from './routes/_authenticated/ordens-servico'
 import { Route as AuthenticatedOrgaoRouteImport } from './routes/_authenticated/orgao'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
@@ -220,6 +221,11 @@ const AuthenticatedObrigacoesRoute = AuthenticatedObrigacoesRouteImport.update({
   path: '/obrigacoes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedOfpRoute = AuthenticatedOfpRouteImport.update({
+  id: '/ofp',
+  path: '/ofp',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOrdensServicoRoute =
   AuthenticatedOrdensServicoRouteImport.update({
     id: '/ordens-servico',
@@ -377,6 +383,7 @@ export interface FileRoutesByFullPath {
   '/migracao': typeof AuthenticatedMigracaoRoute
   '/multas': typeof AuthenticatedMultasRoute
   '/obrigacoes': typeof AuthenticatedObrigacoesRoute
+  '/ofp': typeof AuthenticatedOfpRoute
   '/ordens-servico': typeof AuthenticatedOrdensServicoRoute
   '/orgao': typeof AuthenticatedOrgaoRoute
   '/painel': typeof AuthenticatedPainelRoute
@@ -431,6 +438,7 @@ export interface FileRoutesByTo {
   '/migracao': typeof AuthenticatedMigracaoRoute
   '/multas': typeof AuthenticatedMultasRoute
   '/obrigacoes': typeof AuthenticatedObrigacoesRoute
+  '/ofp': typeof AuthenticatedOfpRoute
   '/ordens-servico': typeof AuthenticatedOrdensServicoRoute
   '/orgao': typeof AuthenticatedOrgaoRoute
   '/painel': typeof AuthenticatedPainelRoute
@@ -487,6 +495,7 @@ export interface FileRoutesById {
   '/_authenticated/migracao': typeof AuthenticatedMigracaoRoute
   '/_authenticated/multas': typeof AuthenticatedMultasRoute
   '/_authenticated/obrigacoes': typeof AuthenticatedObrigacoesRoute
+  '/_authenticated/ofp': typeof AuthenticatedOfpRoute
   '/_authenticated/ordens-servico': typeof AuthenticatedOrdensServicoRoute
   '/_authenticated/orgao': typeof AuthenticatedOrgaoRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
@@ -543,6 +552,7 @@ export interface FileRouteTypes {
     | '/migracao'
     | '/multas'
     | '/obrigacoes'
+    | '/ofp'
     | '/ordens-servico'
     | '/orgao'
     | '/painel'
@@ -597,6 +607,7 @@ export interface FileRouteTypes {
     | '/migracao'
     | '/multas'
     | '/obrigacoes'
+    | '/ofp'
     | '/ordens-servico'
     | '/orgao'
     | '/painel'
@@ -652,6 +663,7 @@ export interface FileRouteTypes {
     | '/_authenticated/migracao'
     | '/_authenticated/multas'
     | '/_authenticated/obrigacoes'
+    | '/_authenticated/ofp'
     | '/_authenticated/ordens-servico'
     | '/_authenticated/orgao'
     | '/_authenticated/painel'
@@ -894,6 +906,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedObrigacoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/ofp': {
+      id: '/_authenticated/ofp'
+      path: '/ofp'
+      fullPath: '/ofp'
+      preLoaderRoute: typeof AuthenticatedOfpRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/ordens-servico': {
       id: '/_authenticated/ordens-servico'
       path: '/ordens-servico'
@@ -1091,6 +1110,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMigracaoRoute: typeof AuthenticatedMigracaoRoute
   AuthenticatedMultasRoute: typeof AuthenticatedMultasRoute
   AuthenticatedObrigacoesRoute: typeof AuthenticatedObrigacoesRoute
+  AuthenticatedOfpRoute: typeof AuthenticatedOfpRoute
   AuthenticatedOrdensServicoRoute: typeof AuthenticatedOrdensServicoRoute
   AuthenticatedOrgaoRoute: typeof AuthenticatedOrgaoRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
@@ -1139,6 +1159,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMigracaoRoute: AuthenticatedMigracaoRoute,
   AuthenticatedMultasRoute: AuthenticatedMultasRoute,
   AuthenticatedObrigacoesRoute: AuthenticatedObrigacoesRoute,
+  AuthenticatedOfpRoute: AuthenticatedOfpRoute,
   AuthenticatedOrdensServicoRoute: AuthenticatedOrdensServicoRoute,
   AuthenticatedOrgaoRoute: AuthenticatedOrgaoRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
