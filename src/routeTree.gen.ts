@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAbastecimentosRouteImport } from './routes/_authenticated/abastecimentos'
 import { Route as AuthenticatedAlertasRouteImport } from './routes/_authenticated/alertas'
 import { Route as AuthenticatedAutorizacoesRouteImport } from './routes/_authenticated/autorizacoes'
+import { Route as AuthenticatedCentrosCustoRouteImport } from './routes/_authenticated/centros-custo'
 import { Route as AuthenticatedCombustiveisRouteImport } from './routes/_authenticated/combustiveis'
 import { Route as AuthenticatedCondutoresRouteImport } from './routes/_authenticated/condutores'
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
@@ -54,6 +55,12 @@ const AuthenticatedAutorizacoesRoute =
   AuthenticatedAutorizacoesRouteImport.update({
     id: '/autorizacoes',
     path: '/autorizacoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedCentrosCustoRoute =
+  AuthenticatedCentrosCustoRouteImport.update({
+    id: '/centros-custo',
+    path: '/centros-custo',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedCombustiveisRoute =
@@ -110,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/abastecimentos': typeof AuthenticatedAbastecimentosRoute
   '/alertas': typeof AuthenticatedAlertasRoute
   '/autorizacoes': typeof AuthenticatedAutorizacoesRoute
+  '/centros-custo': typeof AuthenticatedCentrosCustoRoute
   '/combustiveis': typeof AuthenticatedCombustiveisRoute
   '/condutores': typeof AuthenticatedCondutoresRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
@@ -126,6 +134,7 @@ export interface FileRoutesByTo {
   '/abastecimentos': typeof AuthenticatedAbastecimentosRoute
   '/alertas': typeof AuthenticatedAlertasRoute
   '/autorizacoes': typeof AuthenticatedAutorizacoesRoute
+  '/centros-custo': typeof AuthenticatedCentrosCustoRoute
   '/combustiveis': typeof AuthenticatedCombustiveisRoute
   '/condutores': typeof AuthenticatedCondutoresRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
@@ -144,6 +153,7 @@ export interface FileRoutesById {
   '/_authenticated/abastecimentos': typeof AuthenticatedAbastecimentosRoute
   '/_authenticated/alertas': typeof AuthenticatedAlertasRoute
   '/_authenticated/autorizacoes': typeof AuthenticatedAutorizacoesRoute
+  '/_authenticated/centros-custo': typeof AuthenticatedCentrosCustoRoute
   '/_authenticated/combustiveis': typeof AuthenticatedCombustiveisRoute
   '/_authenticated/condutores': typeof AuthenticatedCondutoresRoute
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/abastecimentos'
     | '/alertas'
     | '/autorizacoes'
+    | '/centros-custo'
     | '/combustiveis'
     | '/condutores'
     | '/fornecedores'
@@ -178,6 +189,7 @@ export interface FileRouteTypes {
     | '/abastecimentos'
     | '/alertas'
     | '/autorizacoes'
+    | '/centros-custo'
     | '/combustiveis'
     | '/condutores'
     | '/fornecedores'
@@ -195,6 +207,7 @@ export interface FileRouteTypes {
     | '/_authenticated/abastecimentos'
     | '/_authenticated/alertas'
     | '/_authenticated/autorizacoes'
+    | '/_authenticated/centros-custo'
     | '/_authenticated/combustiveis'
     | '/_authenticated/condutores'
     | '/_authenticated/fornecedores'
@@ -254,6 +267,13 @@ declare module '@tanstack/react-router' {
       path: '/autorizacoes'
       fullPath: '/autorizacoes'
       preLoaderRoute: typeof AuthenticatedAutorizacoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/centros-custo': {
+      id: '/_authenticated/centros-custo'
+      path: '/centros-custo'
+      fullPath: '/centros-custo'
+      preLoaderRoute: typeof AuthenticatedCentrosCustoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/combustiveis': {
@@ -326,6 +346,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAbastecimentosRoute: typeof AuthenticatedAbastecimentosRoute
   AuthenticatedAlertasRoute: typeof AuthenticatedAlertasRoute
   AuthenticatedAutorizacoesRoute: typeof AuthenticatedAutorizacoesRoute
+  AuthenticatedCentrosCustoRoute: typeof AuthenticatedCentrosCustoRoute
   AuthenticatedCombustiveisRoute: typeof AuthenticatedCombustiveisRoute
   AuthenticatedCondutoresRoute: typeof AuthenticatedCondutoresRoute
   AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
@@ -341,6 +362,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAbastecimentosRoute: AuthenticatedAbastecimentosRoute,
   AuthenticatedAlertasRoute: AuthenticatedAlertasRoute,
   AuthenticatedAutorizacoesRoute: AuthenticatedAutorizacoesRoute,
+  AuthenticatedCentrosCustoRoute: AuthenticatedCentrosCustoRoute,
   AuthenticatedCombustiveisRoute: AuthenticatedCombustiveisRoute,
   AuthenticatedCondutoresRoute: AuthenticatedCondutoresRoute,
   AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,

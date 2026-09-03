@@ -241,6 +241,7 @@ export function usePerms() {
     canRegister: roles.some((r) => REGISTER_ROLES.includes(r)),
     canCancel: roles.some((r) => CANCEL_ROLES.includes(r)),
     canManageFleet: roles.some((r) => (["super_admin", "org_admin", "fleet_manager"] as AppRole[]).includes(r)),
+    canManageFinance: roles.some((r) => (["super_admin", "org_admin", "fleet_manager"] as AppRole[]).includes(r)),
     isAuditor: roles.length > 0 && roles.every((r) => r === "auditor"),
   };
 }
@@ -760,4 +761,297 @@ export function findDriverAt(usages: UsageRow[], vehicleId: string, at: Date) {
       return t >= ini && t <= Math.max(fim, ini);
     }) ?? null
   );
+}
+
+
+/* ===================== FASE 4 — CONTRATOS / EMPENHOS / CENTROS DE CUSTO / COTAS ===================== */
+
+export type CostCenter = Database["public"]["Tables"]["cost_centers"]["Row"];
+export type Contract = Database["public"]["Tables"]["contracts"]["Row"];
+export type ContractItem = Database["public"]["Tables"]["contract_items"]["Row"];
+export type Commitment = Database["public"]["Tables"]["commitments"]["Row"];
+export type Quota = Database["public"]["Tables"]["quotas"]["Row"];
+export type QuotaSupplement = Database["public"]["Tables"]["quota_supplements"]["Row"];
+export type BudgetMovement = Database["public"]["Tables"]["budget_movements"]["Row"];
+
+export type ContractModality = Database["public"]["Enums"]["contract_modality"];
+export type ContractStatus = Database["public"]["Enums"]["contract_status"];
+export type CommitmentKind = Database["public"]["Enums"]["commitment_kind"];
+export type CommitmentStatus = Database["public"]["Enums"]["commitment_status"];
+export type QuotaType = Database["public"]["Enums"]["quota_type"];
+export type ExpenseOrigin = Database["public"]["Enums"]["expense_origin"];
+
+export type CostCenterRow = CostCenter & { unit: Pick<Unit, "id" | "name" | "acronym"> | null };
+export type ContractRow = Contract & {
+  supplier: Pick<Supplier, "id" | "legal_name" | "trade_name"> | null;
+  items: ContractItem[];
+};
+export type ContractItemRow = ContractItem & {
+  contract: Pick<Contract, "id" | "number" | "status" | "valid_to"> | null;
+  fuel: Pick<FuelType, "id" | "name" | "measure_unit"> | null;
+};
+export type CommitmentRow = Commitment & {
+  contract: Pick<Contract, "id" | "number"> | null;
+  supplier: Pick<Supplier, "id" | "legal_name" | "trade_name"> | null;
+  cost_center: Pick<CostCenter, "id" | "code" | "name"> | null;
+  unit: Pick<Unit, "id" | "name" | "acronym"> | null;
+};
+export type QuotaRow = Quota & {
+  contract: Pick<Contract, "id" | "number"> | null;
+  item: Pick<ContractItem, "id" | "description" | "measure_unit"> | null;
+  commitment: Pick<Commitment, "id" | "number"> | null;
+  cost_center: Pick<CostCenter, "id" | "code" | "name"> | null;
+  unit: Pick<Unit, "id" | "name" | "acronym"> | null;
+};
+
+export const CONTRACT_MODALITIES: { value: ContractModality; label: string }[] = [
+  { value: "pregao", label: "Pregão" },
+  { value: "concorrencia", label: "Concorrência" },
+  { value: "dispensa", label: "Dispensa" },
+  { value: "inexigibilidade", label: "Inexigibilidade" },
+  { value: "adesao_ata", label: "Adesão à Ata" },
+  { value: "contratacao_direta", label: "Contratação Direta" },
+  { value: "outro", label: "Outro" },
+];
+
+export const CONTRACT_STATUS: { value: ContractStatus; label: string }[] = [
+  { value: "rascunho", label: "Rascunho" },
+  { value: "vigente", label: "Vigente" },
+  { value: "suspenso", label: "Suspenso" },
+  { value: "encerrado", label: "Encerrado" },
+  { value: "rescindido", label: "Rescindido" },
+];
+
+export const COMMITMENT_KINDS: { value: CommitmentKind; label: string }[] = [
+  { value: "ordinario", label: "Ordinário" },
+  { value: "estimativo", label: "Estimativo" },
+  { value: "global", label: "Global" },
+];
+
+export const COMMITMENT_STATUS: { value: CommitmentStatus; label: string }[] = [
+  { value: "ativo", label: "Ativo" },
+  { value: "esgotado", label: "Esgotado" },
+  { value: "anulado", label: "Anulado" },
+  { value: "encerrado", label: "Encerrado" },
+];
+
+export const QUOTA_TYPES: { value: QuotaType; label: string }[] = [
+  { value: "financeira", label: "Financeira (R$)" },
+  { value: "quantitativa", label: "Quantitativa (litros/unidades)" },
+];
+
+export const EXPENSE_ORIGINS: { value: ExpenseOrigin; label: string; ready: boolean }[] = [
+  { value: "contrato", label: "Contrato administrativo", ready: true },
+  { value: "compra_direta", label: "Compra direta / pronto pagamento", ready: true },
+  { value: "convenio", label: "Convênio", ready: false },
+  { value: "doacao", label: "Doação / entidade externa", ready: false },
+  { value: "almoxarifado", label: "Almoxarifado", ready: false },
+  { value: "recurso_proprio", label: "Recurso próprio / outro", ready: false },
+];
+
+export const MATERIAL_KINDS = ["combustivel", "lubrificante", "fluido", "aditivo", "outro"];
+export const MATERIAL_KIND_LABELS: Record<string, string> = {
+  combustivel: "Combustível",
+  lubrificante: "Lubrificante",
+  fluido: "Fluido",
+  aditivo: "Aditivo",
+  outro: "Outro material/serviço",
+};
+
+export const ALERT_CATEGORIES: { value: string; label: string }[] = [
+  { value: "abastecimento", label: "Abastecimento" },
+  { value: "contrato", label: "Contrato" },
+  { value: "empenho", label: "Empenho" },
+  { value: "cota", label: "Cota" },
+  { value: "bloqueio", label: "Bloqueio por saldo" },
+];
+
+export const FINANCE_ALERT_LABELS: Record<string, string> = {
+  contrato_80: "Contrato com 80% executado",
+  contrato_90: "Contrato com 90% executado",
+  contrato_esgotado: "Contrato integralmente executado",
+  contrato_vence_60: "Contrato a vencer em 60 dias",
+  contrato_vence_30: "Contrato a vencer em 30 dias",
+  contrato_vence_15: "Contrato a vencer em 15 dias",
+  contrato_vence_7: "Contrato a vencer em 7 dias",
+  contrato_vencido: "Contrato com vigência encerrada",
+  empenho_saldo_20: "Empenho com saldo abaixo de 20%",
+  empenho_saldo_10: "Empenho com saldo abaixo de 10%",
+  empenho_zerado: "Empenho sem saldo",
+  cota_saldo_20: "Cota com saldo abaixo de 20%",
+  cota_saldo_10: "Cota com saldo abaixo de 10%",
+  cota_zerada: "Cota sem saldo",
+  saldo_insuficiente: "Bloqueio por saldo insuficiente",
+};
+
+export function alertLabel(type: string) {
+  return ALERT_TYPE_LABELS[type] ?? FINANCE_ALERT_LABELS[type] ?? type;
+}
+
+/** Percentual seguro (0–100+). */
+export const pct = (part: number, total: number) => (total > 0 ? (part / total) * 100 : 0);
+
+export const daysUntil = (iso: string | null | undefined) =>
+  iso ? Math.ceil((new Date(`${iso}T12:00:00`).getTime() - Date.now()) / 86400000) : null;
+
+/** Extrai a mensagem amigável de um erro do banco. */
+export function dbMessage(e: unknown) {
+  const m = (e as { message?: string } | null)?.message ?? "";
+  return m.replace(/^.*?(?=Saldo|Limite|Autoriza|Contrato|Empenho|Cota|Item|Ve[íi]culo|Condutor)/s, "") || m;
+}
+
+/** Registra alerta de bloqueio por saldo insuficiente. */
+export async function logBudgetBlock(message: string, entityType: string, entityId: string | null) {
+  await supabase.rpc("log_budget_block", {
+    _message: message,
+    _entity_type: entityType,
+    _entity_id: entityId as string,
+  });
+}
+
+/* --------------------------------- hooks -------------------------------- */
+
+export function useCostCenters() {
+  return useQuery({
+    queryKey: ["cost-centers"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("cost_centers")
+        .select("*, unit:units(id, name, acronym)")
+        .order("code");
+      if (error) throw error;
+      return (data ?? []) as unknown as CostCenterRow[];
+    },
+  });
+}
+
+export function useContracts() {
+  return useQuery({
+    queryKey: ["contracts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("contracts")
+        .select("*, supplier:suppliers(id, legal_name, trade_name), items:contract_items(*)")
+        .order("number");
+      if (error) throw error;
+      return (data ?? []) as unknown as ContractRow[];
+    },
+  });
+}
+
+export function useContractItems() {
+  return useQuery({
+    queryKey: ["contract-items"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("contract_items")
+        .select("*, contract:contracts(id, number, status, valid_to), fuel:fuel_types(id, name, measure_unit)")
+        .order("description");
+      if (error) throw error;
+      return (data ?? []) as unknown as ContractItemRow[];
+    },
+  });
+}
+
+export function useCommitments() {
+  return useQuery({
+    queryKey: ["commitments"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("commitments")
+        .select(
+          "*, contract:contracts(id, number), supplier:suppliers(id, legal_name, trade_name), cost_center:cost_centers(id, code, name), unit:units(id, name, acronym)",
+        )
+        .order("issued_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as CommitmentRow[];
+    },
+  });
+}
+
+export function useQuotas() {
+  return useQuery({
+    queryKey: ["quotas"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quotas")
+        .select(
+          "*, contract:contracts(id, number), item:contract_items(id, description, measure_unit), commitment:commitments(id, number), cost_center:cost_centers(id, code, name), unit:units(id, name, acronym)",
+        )
+        .order("name");
+      if (error) throw error;
+      return (data ?? []) as unknown as QuotaRow[];
+    },
+  });
+}
+
+export function useQuotaSupplements(quotaId: string | null) {
+  return useQuery({
+    queryKey: ["quota-supplements", quotaId],
+    enabled: !!quotaId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quota_supplements")
+        .select("*")
+        .eq("quota_id", quotaId!)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useBudgetMovements(authorizationId?: string | null) {
+  return useQuery({
+    queryKey: ["budget-movements", authorizationId ?? "all"],
+    queryFn: async () => {
+      let q = supabase.from("budget_movements").select("*").order("created_at", { ascending: false }).limit(300);
+      if (authorizationId) q = q.eq("authorization_id", authorizationId);
+      const { data, error } = await q;
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useContractFileUrl(path: string | null | undefined) {
+  return useQuery({
+    queryKey: ["contrato-arquivo", path],
+    enabled: !!path,
+    staleTime: 1000 * 60 * 30,
+    queryFn: async () => {
+      if (!path) return null;
+      const { data } = await supabase.storage.from("contratos").createSignedUrl(path, 60 * 60);
+      return data?.signedUrl ?? null;
+    },
+  });
+}
+
+/* ------------------------------- cálculos ------------------------------- */
+
+export function contractTotals(c: ContractRow) {
+  const items = c.items ?? [];
+  const total = items.reduce((s, i) => s + Number(i.total_value ?? 0), 0);
+  const consumed = items.reduce((s, i) => s + Number(i.consumed_value ?? 0), 0);
+  const reserved = items.reduce((s, i) => s + Number(i.reserved_value ?? 0), 0);
+  return {
+    total,
+    consumed,
+    reserved,
+    balance: total - consumed - reserved,
+    percent: pct(consumed, total),
+    days: daysUntil(c.valid_to),
+  };
+}
+
+export function itemBalance(i: ContractItem) {
+  return {
+    quantity: Number(i.quantity ?? 0) - Number(i.reserved_quantity ?? 0) - Number(i.consumed_quantity ?? 0),
+    value: Number(i.total_value ?? 0) - Number(i.reserved_value ?? 0) - Number(i.consumed_value ?? 0),
+  };
+}
+
+export function quotaPercent(q: Quota) {
+  const granted = Number(q.granted_amount ?? 0);
+  return pct(Number(q.consumed_amount ?? 0) + Number(q.reserved_amount ?? 0), granted);
 }
