@@ -112,7 +112,7 @@ function Alertas() {
               <SelectItem value={ALL}>Todos</SelectItem>
               {types.map((t) => (
                 <SelectItem key={t} value={t}>
-                  {ALERT_TYPE_LABELS[t] ?? t}
+                  {alertLabel(t)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -149,7 +149,7 @@ function Alertas() {
                 <TableCell className="font-medium">
                   <span className="inline-flex items-center gap-2">
                     <AlertTriangle className="size-4 text-warning" />
-                    {ALERT_TYPE_LABELS[a.alert_type] ?? a.alert_type}
+                    {alertLabel(a.alert_type)}
                   </span>
                 </TableCell>
                 <TableCell>{a.vehicle?.plate ?? "—"}</TableCell>
