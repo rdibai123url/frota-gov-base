@@ -32,6 +32,7 @@ import { Route as AuthenticatedUnidadesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
 import { Route as AuthenticatedUtilizacaoRouteImport } from './routes/_authenticated/utilizacao'
 import { Route as AuthenticatedVeiculosRouteImport } from './routes/_authenticated/veiculos'
+import { Route as AuthenticatedVeiculoIdRouteImport } from './routes/_authenticated/veiculo.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -154,6 +155,11 @@ const AuthenticatedVeiculosRoute = AuthenticatedVeiculosRouteImport.update({
   path: '/veiculos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedVeiculoIdRoute = AuthenticatedVeiculoIdRouteImport.update({
+  id: '/veiculo/$id',
+  path: '/veiculo/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -178,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/usuarios': typeof AuthenticatedUsuariosRoute
   '/utilizacao': typeof AuthenticatedUtilizacaoRoute
   '/veiculos': typeof AuthenticatedVeiculosRoute
+  '/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -202,6 +209,7 @@ export interface FileRoutesByTo {
   '/usuarios': typeof AuthenticatedUsuariosRoute
   '/utilizacao': typeof AuthenticatedUtilizacaoRoute
   '/veiculos': typeof AuthenticatedVeiculosRoute
+  '/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
   '/_authenticated/utilizacao': typeof AuthenticatedUtilizacaoRoute
   '/_authenticated/veiculos': typeof AuthenticatedVeiculosRoute
+  '/_authenticated/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -254,6 +263,7 @@ export interface FileRouteTypes {
     | '/usuarios'
     | '/utilizacao'
     | '/veiculos'
+    | '/veiculo/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -278,6 +288,7 @@ export interface FileRouteTypes {
     | '/usuarios'
     | '/utilizacao'
     | '/veiculos'
+    | '/veiculo/$id'
   id:
     | '__root__'
     | '/'
@@ -303,6 +314,7 @@ export interface FileRouteTypes {
     | '/_authenticated/usuarios'
     | '/_authenticated/utilizacao'
     | '/_authenticated/veiculos'
+    | '/_authenticated/veiculo/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -474,6 +486,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVeiculosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/veiculo/$id': {
+      id: '/_authenticated/veiculo/$id'
+      path: '/veiculo/$id'
+      fullPath: '/veiculo/$id'
+      preLoaderRoute: typeof AuthenticatedVeiculoIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -498,6 +517,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedUsuariosRoute: typeof AuthenticatedUsuariosRoute
   AuthenticatedUtilizacaoRoute: typeof AuthenticatedUtilizacaoRoute
   AuthenticatedVeiculosRoute: typeof AuthenticatedVeiculosRoute
+  AuthenticatedVeiculoIdRoute: typeof AuthenticatedVeiculoIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -521,6 +541,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedUsuariosRoute: AuthenticatedUsuariosRoute,
   AuthenticatedUtilizacaoRoute: AuthenticatedUtilizacaoRoute,
   AuthenticatedVeiculosRoute: AuthenticatedVeiculosRoute,
+  AuthenticatedVeiculoIdRoute: AuthenticatedVeiculoIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
