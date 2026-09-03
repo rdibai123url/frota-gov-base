@@ -504,6 +504,7 @@ export type Database = {
           started_at: string | null
           status: string
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           confirmation_text: string
@@ -520,6 +521,7 @@ export type Database = {
           started_at?: string | null
           status?: string
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           confirmation_text?: string
@@ -536,6 +538,7 @@ export type Database = {
           started_at?: string | null
           status?: string
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
@@ -598,6 +601,7 @@ export type Database = {
           tech_log: string | null
           total_bytes: number | null
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           checksum?: string | null
@@ -635,6 +639,7 @@ export type Database = {
           tech_log?: string | null
           total_bytes?: number | null
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           checksum?: string | null
@@ -672,6 +677,7 @@ export type Database = {
           tech_log?: string | null
           total_bytes?: number | null
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
