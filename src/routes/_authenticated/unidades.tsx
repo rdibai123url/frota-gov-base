@@ -96,7 +96,12 @@ function Unidades() {
     }
     setSaving(true);
     const payload = {
-      ...parsed.data,
+      name: parsed.data.name,
+      acronym: parsed.data.acronym || null,
+      manager_name: parsed.data.manager_name || null,
+      manager_role: parsed.data.manager_role || null,
+      phone: parsed.data.phone || null,
+      email: parsed.data.email || null,
       unit_type: unitType,
       active,
     };

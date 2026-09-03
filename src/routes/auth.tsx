@@ -12,9 +12,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    modo: search["modo"] === "cadastro" ? "cadastro" : "entrar",
-  }),
   head: () => ({
     meta: [
       { title: "Acesso ao sistema — FrotaGov" },
@@ -40,7 +37,6 @@ const signUpSchema = signInSchema.extend({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const { modo } = Route.useSearch();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -62,12 +58,18 @@ function AuthPage() {
       email: form.get("email"),
       password: form.get("password"),
     });
-    if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos");
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos");
+      return;
+    }
 
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword(parsed.data);
     setLoading(false);
-    if (error) return toast.error("Não foi possível entrar: verifique e-mail e senha.");
+    if (error) {
+      toast.error("Não foi possível entrar: verifique e-mail e senha.");
+      return;
+    }
     navigate({ to: "/painel", replace: true });
   }
 
@@ -80,7 +82,10 @@ function AuthPage() {
       fullName: form.get("fullName"),
       orgName: form.get("orgName"),
     });
-    if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos");
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos");
+      return;
+    }
 
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
@@ -92,7 +97,10 @@ function AuthPage() {
       },
     });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     if (!data.session) {
       toast.success("Cadastro realizado. Confirme o e-mail enviado para ativar o acesso.");
       return;
@@ -104,7 +112,10 @@ function AuthPage() {
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
-    if (result.error) return toast.error("Falha ao entrar com Google.");
+    if (result.error) {
+      toast.error("Falha ao entrar com Google.");
+      return;
+    }
     if (result.redirected) return;
     navigate({ to: "/painel", replace: true });
   }
@@ -124,7 +135,7 @@ function AuthPage() {
           </Link>
 
           <div className="rounded-lg border bg-card p-6 shadow-panel">
-            <Tabs defaultValue={modo}>
+            <Tabs defaultValue="entrar">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="entrar">Entrar</TabsTrigger>
                 <TabsTrigger value="cadastro">Cadastrar órgão</TabsTrigger>

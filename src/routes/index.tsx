@@ -64,9 +64,7 @@ function Landing() {
             <Link to="/auth">Entrar</Link>
           </Button>
           <Button asChild size="lg" variant="outline">
-            <Link to="/auth" search={{ modo: "cadastro" }}>
-              Cadastrar meu órgão
-            </Link>
+            <Link to="/auth">Cadastrar meu órgão</Link>
           </Button>
         </div>
 
