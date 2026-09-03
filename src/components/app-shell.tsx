@@ -35,9 +35,15 @@ const NAV: NavGroup[] = [
     items: [
       { to: "/veiculos", label: "Veículos" },
       { to: "/utilizacao", label: "Utilização e reservas" },
+      { to: "/multas", label: "Multas e infrações" },
+      { to: "/sinistros", label: "Acidentes e sinistros" },
+      { to: "/seguros", label: "Seguros" },
+      { to: "/obrigacoes", label: "Obrigações legais" },
+      { to: "/patrimonio", label: "Movimentação patrimonial" },
       { to: "/historico-veiculo", label: "Histórico do veículo" },
     ],
   },
+
   {
     id: "abastecimento",
     label: "Abastecimento",
@@ -82,9 +88,11 @@ const NAV: NavGroup[] = [
       { to: "/orgao", label: "Dados do Órgão" },
       { to: "/unidades", label: "Secretarias / Unidades" },
       { to: "/condutores", label: "Condutores / Motoristas" },
+      { to: "/entidades-externas", label: "Entidades externas" },
       { to: "/usuarios", label: "Usuários e Permissões" },
     ],
   },
+
   { id: "alertas", label: "Alertas e inconsistências", icon: BellRing, to: "/alertas" },
 ];
 

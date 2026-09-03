@@ -1,15 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ArrowLeft, Truck } from "lucide-react";
 
 import { PageHeader } from "@/components/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  ACCIDENT_KINDS,
+  ASSET_MOVEMENT_KINDS,
+  FINE_STATUS,
   MAINTENANCE_KINDS,
   MAINTENANCE_RECORD_STATUS,
+  OBLIGATION_STATUS,
   TIRE_STATUS,
   USAGE_STATUS,
   VEHICLE_STATUS,
@@ -19,14 +26,20 @@ import {
   label,
   maintenanceTotal,
   num,
+  useAccidents,
+  useAssetMovements,
   useAuthorizations,
   useFuelings,
+  useInsurancePolicies,
   useMaintenanceRecords,
   useTires,
+  useTrafficFines,
+  useVehicleObligations,
   useVehicleStatusHistory,
   useVehicleUsages,
   useVehicles,
 } from "@/lib/frotagov";
+
 
 export const Route = createFileRoute("/_authenticated/veiculo/$id")({
   head: () => ({
@@ -55,6 +68,11 @@ function HistoricoVeiculo() {
   const { data: records = [] } = useMaintenanceRecords();
   const { data: tires = [] } = useTires();
   const { data: statusHistory = [] } = useVehicleStatusHistory(id);
+  const { data: fines = [] } = useTrafficFines();
+  const { data: accidents = [] } = useAccidents();
+  const { data: policies = [] } = useInsurancePolicies();
+  const { data: obligations = [] } = useVehicleObligations();
+  const { data: movements = [] } = useAssetMovements();
 
   const vehicle = vehicles.find((v) => v.id === id) ?? null;
   const vUsages = useMemo(() => usages.filter((u) => u.vehicle_id === id), [usages, id]);
@@ -63,6 +81,166 @@ function HistoricoVeiculo() {
   const vRecords = useMemo(() => records.filter((r) => r.vehicle_id === id), [records, id]);
   const vParts = useMemo(() => vRecords.flatMap((r) => (r.parts ?? []).map((p) => ({ ...p, code: r.code }))), [vRecords]);
   const vTires = useMemo(() => tires.filter((t) => t.vehicle_id === id), [tires, id]);
+  const vFines = useMemo(() => fines.filter((f) => f.vehicle_id === id), [fines, id]);
+  const vAccidents = useMemo(() => accidents.filter((a) => a.vehicle_id === id), [accidents, id]);
+  const vObligations = useMemo(() => obligations.filter((o) => o.vehicle_id === id), [obligations, id]);
+  const vMovements = useMemo(() => movements.filter((m) => m.vehicle_id === id), [movements, id]);
+  const vPolicies = useMemo(
+    () => policies.filter((p) => (p.vehicles ?? []).some((iv) => iv.vehicle_id === id)),
+    [policies, id],
+  );
+
+  const [cat, setCat] = useState("todas");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+
+  const timeline = useMemo(() => {
+    const items: { at: string; cat: string; catLabel: string; title: string; detail: string; value: string }[] = [];
+    const push = (
+      at: string | null | undefined,
+      c: string,
+      cl: string,
+      title: string,
+      detail: string,
+      value = "",
+    ) => {
+      if (at) items.push({ at, cat: c, catLabel: cl, title, detail, value });
+    };
+
+    vMovements.forEach((m) =>
+      push(
+        `${m.moved_on}T12:00:00`,
+        "patrimonio",
+        "Patrimônio",
+        `${m.code ?? "MOV"} · ${label(ASSET_MOVEMENT_KINDS, m.kind)}`,
+        [m.from_unit?.acronym ?? m.from_unit?.name, m.unit?.acronym ?? m.unit?.name ?? m.entity?.name]
+          .filter(Boolean)
+          .join(" → ") || (m.reason ?? "—"),
+        m.book_value !== null ? brl(Number(m.book_value)) : "",
+      ),
+    );
+    vUsages.forEach((u) =>
+      push(
+        u.actual_departure ?? u.planned_departure,
+        "utilizacao",
+        "Utilização",
+        `${u.code ?? "UTL"} · ${label(USAGE_STATUS, u.status)}`,
+        u.destination ?? "—",
+      ),
+    );
+    vFuelings.forEach((f) =>
+      push(
+        f.fueled_at,
+        "abastecimento",
+        "Abastecimento",
+        `${num(Number(f.quantity), 4)} · ${f.status === "valido" ? "Válido" : "Cancelado"}`,
+        f.odometer_km ? `${num(Number(f.odometer_km), 0)} km` : "—",
+        brl(Number(f.total_value ?? 0)),
+      ),
+    );
+    vAuths.forEach((a) =>
+      push(a.valid_from, "autorizacao", "Autorização", `${a.code ?? "AUT"} · ${a.status}`, a.purpose ?? "—"),
+    );
+    vRecords.forEach((r) =>
+      push(
+        r.entry_at,
+        "manutencao",
+        "Manutenção",
+        `${r.code ?? "MNT"} · ${label(MAINTENANCE_KINDS, r.kind)}`,
+        r.services,
+        brl(maintenanceTotal(r)),
+      ),
+    );
+    vParts.forEach((p) =>
+      push(
+        p.installed_at ? `${p.installed_at}T12:00:00` : null,
+        "peca",
+        "Peça",
+        p.description,
+        `${num(Number(p.quantity), 2)} un. · OS ${p.code ?? "—"}`,
+        brl(Number(p.total_value)),
+      ),
+    );
+    vTires.forEach((t) =>
+      push(
+        t.install_date ? `${t.install_date}T12:00:00` : null,
+        "pneu",
+        "Pneu",
+        `${t.code} · ${label(TIRE_STATUS, t.status)}`,
+        `${t.brand ?? "—"} ${t.size ?? ""} · ${t.position ?? "sem posição"}`,
+      ),
+    );
+    vAccidents.forEach((a) =>
+      push(
+        a.occurred_at,
+        "sinistro",
+        "Sinistro",
+        `${a.code ?? "SIN"} · ${label(ACCIDENT_KINDS, a.kind)}`,
+        a.description,
+        a.expenses_value !== null ? brl(Number(a.expenses_value)) : "",
+      ),
+    );
+    vFines.forEach((f) =>
+      push(
+        f.occurred_at,
+        "multa",
+        "Multa",
+        `${f.code ?? "MUL"} · ${label(FINE_STATUS, f.status)}`,
+        `${f.issuing_authority} · ${f.description}`,
+        brl(Number(f.amount ?? 0)),
+      ),
+    );
+    vPolicies.forEach((p) =>
+      push(
+        `${p.valid_from}T12:00:00`,
+        "seguro",
+        "Seguro",
+        `Apólice ${p.policy_number}`,
+        `${p.insurer_name} · vigência até ${dateBR(p.valid_to)}`,
+        brl(Number(p.premium_value ?? 0)),
+      ),
+    );
+    vObligations.forEach((o) =>
+      push(
+        o.due_date ? `${o.due_date}T12:00:00` : null,
+        "obrigacao",
+        "Obrigação legal",
+        `${o.obligation_type} · ${label(OBLIGATION_STATUS, o.status)}`,
+        o.document_number ?? "—",
+        o.amount !== null ? brl(Number(o.amount)) : "",
+      ),
+    );
+    statusHistory.forEach((h) =>
+      push(
+        h.created_at,
+        "situacao",
+        "Situação",
+        `${h.from_status ? label(VEHICLE_STATUS, h.from_status) : "—"} → ${label(VEHICLE_STATUS, h.to_status)}`,
+        h.reason ?? h.source ?? "—",
+      ),
+    );
+
+    return items
+      .filter((i) => cat === "todas" || i.cat === cat)
+      .filter((i) => (!from || i.at >= from) && (!to || i.at <= `${to}T23:59:59`))
+      .sort((a, b) => (a.at < b.at ? 1 : -1));
+  }, [
+    vMovements,
+    vUsages,
+    vFuelings,
+    vAuths,
+    vRecords,
+    vParts,
+    vTires,
+    vAccidents,
+    vFines,
+    vPolicies,
+    vObligations,
+    statusHistory,
+    cat,
+    from,
+    to,
+  ]);
 
   const totals = useMemo(
     () => ({
@@ -117,16 +295,128 @@ function HistoricoVeiculo() {
             ))}
           </div>
 
-          <Tabs defaultValue="manutencoes">
+          <Tabs defaultValue="linha">
             <TabsList className="mb-4 flex-wrap">
+              <TabsTrigger value="linha">Linha do tempo</TabsTrigger>
               <TabsTrigger value="manutencoes">Manutenções</TabsTrigger>
               <TabsTrigger value="pecas">Peças</TabsTrigger>
               <TabsTrigger value="pneus">Pneus</TabsTrigger>
               <TabsTrigger value="abastecimentos">Abastecimentos</TabsTrigger>
               <TabsTrigger value="autorizacoes">Autorizações</TabsTrigger>
               <TabsTrigger value="utilizacoes">Utilizações</TabsTrigger>
+              <TabsTrigger value="multas">Multas</TabsTrigger>
+              <TabsTrigger value="sinistros">Sinistros</TabsTrigger>
+              <TabsTrigger value="patrimonio">Patrimônio</TabsTrigger>
+              <TabsTrigger value="obrigacoes">Obrigações</TabsTrigger>
               <TabsTrigger value="situacao">Situação</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="linha">
+              <div className="mb-4 grid gap-3 sm:grid-cols-3">
+                <div>
+                  <Label>Categoria</Label>
+                  <Select value={cat} onValueChange={setCat}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[
+                        ["todas", "Todas as categorias"],
+                        ["patrimonio", "Movimentações patrimoniais"],
+                        ["utilizacao", "Utilizações e reservas"],
+                        ["abastecimento", "Abastecimentos"],
+                        ["autorizacao", "Autorizações"],
+                        ["manutencao", "Manutenções e OS"],
+                        ["peca", "Peças"],
+                        ["pneu", "Pneus"],
+                        ["sinistro", "Acidentes e sinistros"],
+                        ["multa", "Multas"],
+                        ["seguro", "Seguros"],
+                        ["obrigacao", "Obrigações legais"],
+                        ["situacao", "Alterações de situação"],
+                      ].map(([v, l]) => (
+                        <SelectItem key={v} value={v!}>
+                          {l}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="from">De</Label>
+                  <Input id="from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+                </div>
+                <div>
+                  <Label htmlFor="to">Até</Label>
+                  <Input id="to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+                </div>
+              </div>
+              <HistTable
+                head={["Data", "Categoria", "Evento", "Detalhe", "Valor", ""]}
+                empty="Nenhum evento no período selecionado."
+                rows={timeline.map((i) => [dateTimeBR(i.at), i.catLabel, i.title, i.detail, i.value, ""])}
+              />
+            </TabsContent>
+
+            <TabsContent value="multas">
+              <HistTable
+                head={["Código", "Auto / órgão", "Data", "Descrição", "Valor", "Situação"]}
+                empty="Nenhuma multa registrada."
+                rows={vFines.map((f) => [
+                  f.code ?? "—",
+                  `${f.notice_number} · ${f.issuing_authority}`,
+                  dateTimeBR(f.occurred_at),
+                  f.description,
+                  brl(Number(f.amount ?? 0)),
+                  label(FINE_STATUS, f.status),
+                ])}
+              />
+            </TabsContent>
+
+            <TabsContent value="sinistros">
+              <HistTable
+                head={["Código", "Tipo", "Data", "Descrição", "Despesas", "Situação"]}
+                empty="Nenhum sinistro registrado."
+                rows={vAccidents.map((a) => [
+                  a.code ?? "—",
+                  label(ACCIDENT_KINDS, a.kind),
+                  dateTimeBR(a.occurred_at),
+                  a.description,
+                  brl(Number(a.expenses_value ?? 0)),
+                  a.status,
+                ])}
+              />
+            </TabsContent>
+
+            <TabsContent value="patrimonio">
+              <HistTable
+                head={["Código", "Tipo", "Data", "Origem → destino", "Ato", "Motivo"]}
+                empty="Nenhuma movimentação patrimonial registrada."
+                rows={vMovements.map((m) => [
+                  m.code ?? "—",
+                  label(ASSET_MOVEMENT_KINDS, m.kind),
+                  dateBR(m.moved_on),
+                  `${m.from_unit?.acronym ?? "—"} → ${m.unit?.acronym ?? m.entity?.name ?? "—"}`,
+                  m.act_number ?? "—",
+                  m.reason ?? "—",
+                ])}
+              />
+            </TabsContent>
+
+            <TabsContent value="obrigacoes">
+              <HistTable
+                head={["Obrigação", "Exercício", "Documento", "Vencimento", "Valor", "Situação"]}
+                empty="Nenhuma obrigação registrada."
+                rows={vObligations.map((o) => [
+                  o.obligation_type,
+                  String(o.exercise ?? "—"),
+                  o.document_number ?? "—",
+                  dateBR(o.due_date),
+                  brl(Number(o.amount ?? 0)),
+                  label(OBLIGATION_STATUS, o.status),
+                ])}
+              />
+            </TabsContent>
 
             <TabsContent value="manutencoes">
               <HistTable

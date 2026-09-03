@@ -170,7 +170,8 @@ function Veiculos() {
       tank_capacity: num(d.tank_capacity),
       current_km: num(d.current_km),
       hour_meter: num(d.hour_meter),
-      unit_id: safeUnitId,
+      // A unidade só muda pelo fluxo de movimentação patrimonial (Frota → Movimentação patrimonial).
+      ...(editing ? {} : { unit_id: safeUnitId }),
       status,
       notes: d.notes || null,
     };
@@ -488,7 +489,7 @@ function Veiculos() {
               </div>
               <div className="space-y-1.5">
                 <Label>Secretaria / unidade</Label>
-                <Select value={unitId} onValueChange={setUnitId}>
+                <Select value={unitId} onValueChange={setUnitId} disabled={!!editing}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
@@ -501,7 +502,14 @@ function Veiculos() {
                     ))}
                   </SelectContent>
                 </Select>
+                {editing && (
+                  <p className="text-xs text-muted-foreground">
+                    A troca de secretaria/unidade é feita em Frota → Movimentação patrimonial, para preservar o
+                    histórico do bem.
+                  </p>
+                )}
               </div>
+
               <div className="space-y-1.5">
                 <Label>Situação</Label>
                 <Select value={status} onValueChange={(v) => setStatus(v as VehicleStatus)}>

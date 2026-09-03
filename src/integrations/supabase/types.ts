@@ -14,6 +14,355 @@ export type Database = {
   }
   public: {
     Tables: {
+      accidents: {
+        Row: {
+          attachment_paths: string[]
+          authorization_id: string | null
+          blocks_use: boolean
+          cancel_reason: string | null
+          closed_at: string | null
+          code: string | null
+          created_at: string
+          created_by: string | null
+          damages: string | null
+          deductible_value: number | null
+          description: string
+          driver_id: string | null
+          expenses_value: number | null
+          has_victims: boolean
+          id: string
+          investigator_name: string | null
+          kind: Database["public"]["Enums"]["accident_kind"]
+          location: string | null
+          maintenance_record_id: string | null
+          needs_tow: boolean
+          notes: string | null
+          occurred_at: string
+          organization_id: string
+          police_report_agency: string | null
+          police_report_number: string | null
+          policy_id: string | null
+          reporter_name: string | null
+          service_order_id: string | null
+          status: Database["public"]["Enums"]["accident_status"]
+          third_parties: string | null
+          third_party_entity_id: string | null
+          unit_id: string | null
+          updated_at: string
+          updated_by: string | null
+          usage_id: string | null
+          vehicle_id: string
+          victims_notes: string | null
+        }
+        Insert: {
+          attachment_paths?: string[]
+          authorization_id?: string | null
+          blocks_use?: boolean
+          cancel_reason?: string | null
+          closed_at?: string | null
+          code?: string | null
+          created_at?: string
+          created_by?: string | null
+          damages?: string | null
+          deductible_value?: number | null
+          description: string
+          driver_id?: string | null
+          expenses_value?: number | null
+          has_victims?: boolean
+          id?: string
+          investigator_name?: string | null
+          kind?: Database["public"]["Enums"]["accident_kind"]
+          location?: string | null
+          maintenance_record_id?: string | null
+          needs_tow?: boolean
+          notes?: string | null
+          occurred_at: string
+          organization_id: string
+          police_report_agency?: string | null
+          police_report_number?: string | null
+          policy_id?: string | null
+          reporter_name?: string | null
+          service_order_id?: string | null
+          status?: Database["public"]["Enums"]["accident_status"]
+          third_parties?: string | null
+          third_party_entity_id?: string | null
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          usage_id?: string | null
+          vehicle_id: string
+          victims_notes?: string | null
+        }
+        Update: {
+          attachment_paths?: string[]
+          authorization_id?: string | null
+          blocks_use?: boolean
+          cancel_reason?: string | null
+          closed_at?: string | null
+          code?: string | null
+          created_at?: string
+          created_by?: string | null
+          damages?: string | null
+          deductible_value?: number | null
+          description?: string
+          driver_id?: string | null
+          expenses_value?: number | null
+          has_victims?: boolean
+          id?: string
+          investigator_name?: string | null
+          kind?: Database["public"]["Enums"]["accident_kind"]
+          location?: string | null
+          maintenance_record_id?: string | null
+          needs_tow?: boolean
+          notes?: string | null
+          occurred_at?: string
+          organization_id?: string
+          police_report_agency?: string | null
+          police_report_number?: string | null
+          policy_id?: string | null
+          reporter_name?: string | null
+          service_order_id?: string | null
+          status?: Database["public"]["Enums"]["accident_status"]
+          third_parties?: string | null
+          third_party_entity_id?: string | null
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          usage_id?: string | null
+          vehicle_id?: string
+          victims_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accidents_authorization_id_fkey"
+            columns: ["authorization_id"]
+            isOneToOne: false
+            referencedRelation: "fuel_authorizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accidents_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accidents_maintenance_record_id_fkey"
+            columns: ["maintenance_record_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accidents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accidents_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "insurance_policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accidents_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "service_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accidents_third_party_entity_id_fkey"
+            columns: ["third_party_entity_id"]
+            isOneToOne: false
+            referencedRelation: "external_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accidents_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accidents_usage_id_fkey"
+            columns: ["usage_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_usages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accidents_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asset_movements: {
+        Row: {
+          accident_id: string | null
+          act_number: string | null
+          act_published_on: string | null
+          asset_code: string | null
+          attachment_path: string | null
+          auction_lot: string | null
+          auction_number: string | null
+          auction_value: number | null
+          auction_winner_entity_id: string | null
+          book_value: number | null
+          code: string | null
+          condition_state: string | null
+          created_at: string
+          created_by: string | null
+          entity_id: string | null
+          from_status: Database["public"]["Enums"]["vehicle_status"] | null
+          from_unit_id: string | null
+          holder_name: string | null
+          hour_meter: number | null
+          id: string
+          kind: Database["public"]["Enums"]["asset_movement_kind"]
+          moved_on: string
+          notes: string | null
+          odometer_km: number | null
+          official_gazette: string | null
+          organization_id: string
+          owner_name: string | null
+          reason: string | null
+          to_status: Database["public"]["Enums"]["vehicle_status"] | null
+          unit_id: string | null
+          updated_at: string
+          updated_by: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          accident_id?: string | null
+          act_number?: string | null
+          act_published_on?: string | null
+          asset_code?: string | null
+          attachment_path?: string | null
+          auction_lot?: string | null
+          auction_number?: string | null
+          auction_value?: number | null
+          auction_winner_entity_id?: string | null
+          book_value?: number | null
+          code?: string | null
+          condition_state?: string | null
+          created_at?: string
+          created_by?: string | null
+          entity_id?: string | null
+          from_status?: Database["public"]["Enums"]["vehicle_status"] | null
+          from_unit_id?: string | null
+          holder_name?: string | null
+          hour_meter?: number | null
+          id?: string
+          kind: Database["public"]["Enums"]["asset_movement_kind"]
+          moved_on?: string
+          notes?: string | null
+          odometer_km?: number | null
+          official_gazette?: string | null
+          organization_id: string
+          owner_name?: string | null
+          reason?: string | null
+          to_status?: Database["public"]["Enums"]["vehicle_status"] | null
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          accident_id?: string | null
+          act_number?: string | null
+          act_published_on?: string | null
+          asset_code?: string | null
+          attachment_path?: string | null
+          auction_lot?: string | null
+          auction_number?: string | null
+          auction_value?: number | null
+          auction_winner_entity_id?: string | null
+          book_value?: number | null
+          code?: string | null
+          condition_state?: string | null
+          created_at?: string
+          created_by?: string | null
+          entity_id?: string | null
+          from_status?: Database["public"]["Enums"]["vehicle_status"] | null
+          from_unit_id?: string | null
+          holder_name?: string | null
+          hour_meter?: number | null
+          id?: string
+          kind?: Database["public"]["Enums"]["asset_movement_kind"]
+          moved_on?: string
+          notes?: string | null
+          odometer_km?: number | null
+          official_gazette?: string | null
+          organization_id?: string
+          owner_name?: string | null
+          reason?: string | null
+          to_status?: Database["public"]["Enums"]["vehicle_status"] | null
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_movements_accident_id_fkey"
+            columns: ["accident_id"]
+            isOneToOne: false
+            referencedRelation: "accidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_movements_auction_winner_entity_id_fkey"
+            columns: ["auction_winner_entity_id"]
+            isOneToOne: false
+            referencedRelation: "external_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_movements_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "external_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_movements_from_unit_id_fkey"
+            columns: ["from_unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_movements_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_movements_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_movements_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -619,6 +968,74 @@ export type Database = {
             columns: ["unit_id"]
             isOneToOne: false
             referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_entities: {
+        Row: {
+          active: boolean
+          address: string | null
+          city: string | null
+          created_at: string
+          created_by: string | null
+          document: string | null
+          email: string | null
+          id: string
+          kind: Database["public"]["Enums"]["entity_kind"]
+          name: string
+          notes: string | null
+          organization_id: string
+          phone: string | null
+          state: string | null
+          updated_at: string
+          updated_by: string | null
+          zip_code: string | null
+        }
+        Insert: {
+          active?: boolean
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          document?: string | null
+          email?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["entity_kind"]
+          name: string
+          notes?: string | null
+          organization_id: string
+          phone?: string | null
+          state?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          zip_code?: string | null
+        }
+        Update: {
+          active?: boolean
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          document?: string | null
+          email?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["entity_kind"]
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          phone?: string | null
+          state?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          zip_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_entities_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -1272,6 +1689,175 @@ export type Database = {
           },
         ]
       }
+      insurance_policies: {
+        Row: {
+          attachment_path: string | null
+          cancel_reason: string | null
+          contract_id: string | null
+          coverages: string | null
+          created_at: string
+          created_by: string | null
+          deductible_value: number | null
+          entity_id: string | null
+          id: string
+          insurer_name: string
+          limits_notes: string | null
+          notes: string | null
+          organization_id: string
+          policy_number: string
+          premium_value: number
+          renewed_from_id: string | null
+          status: Database["public"]["Enums"]["insurance_status"]
+          supplier_id: string | null
+          updated_at: string
+          updated_by: string | null
+          valid_from: string
+          valid_to: string
+        }
+        Insert: {
+          attachment_path?: string | null
+          cancel_reason?: string | null
+          contract_id?: string | null
+          coverages?: string | null
+          created_at?: string
+          created_by?: string | null
+          deductible_value?: number | null
+          entity_id?: string | null
+          id?: string
+          insurer_name: string
+          limits_notes?: string | null
+          notes?: string | null
+          organization_id: string
+          policy_number: string
+          premium_value?: number
+          renewed_from_id?: string | null
+          status?: Database["public"]["Enums"]["insurance_status"]
+          supplier_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          valid_from: string
+          valid_to: string
+        }
+        Update: {
+          attachment_path?: string | null
+          cancel_reason?: string | null
+          contract_id?: string | null
+          coverages?: string | null
+          created_at?: string
+          created_by?: string | null
+          deductible_value?: number | null
+          entity_id?: string | null
+          id?: string
+          insurer_name?: string
+          limits_notes?: string | null
+          notes?: string | null
+          organization_id?: string
+          policy_number?: string
+          premium_value?: number
+          renewed_from_id?: string | null
+          status?: Database["public"]["Enums"]["insurance_status"]
+          supplier_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          valid_from?: string
+          valid_to?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurance_policies_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_policies_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "external_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_policies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_policies_renewed_from_id_fkey"
+            columns: ["renewed_from_id"]
+            isOneToOne: false
+            referencedRelation: "insurance_policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_policies_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      insurance_vehicles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deductible_value: number | null
+          id: string
+          insured_value: number | null
+          notes: string | null
+          organization_id: string
+          policy_id: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deductible_value?: number | null
+          id?: string
+          insured_value?: number | null
+          notes?: string | null
+          organization_id: string
+          policy_id: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deductible_value?: number | null
+          id?: string
+          insured_value?: number | null
+          notes?: string | null
+          organization_id?: string
+          policy_id?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurance_vehicles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_vehicles_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "insurance_policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_vehicles_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maintenance_parts: {
         Row: {
           created_at: string
@@ -1523,6 +2109,7 @@ export type Database = {
       }
       maintenance_records: {
         Row: {
+          accident_id: string | null
           attachment_path: string | null
           budget_consumed: boolean
           cancel_reason: string | null
@@ -1560,6 +2147,7 @@ export type Database = {
           warranty_until: string | null
         }
         Insert: {
+          accident_id?: string | null
           attachment_path?: string | null
           budget_consumed?: boolean
           cancel_reason?: string | null
@@ -1597,6 +2185,7 @@ export type Database = {
           warranty_until?: string | null
         }
         Update: {
+          accident_id?: string | null
           attachment_path?: string | null
           budget_consumed?: boolean
           cancel_reason?: string | null
@@ -1634,6 +2223,13 @@ export type Database = {
           warranty_until?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "maintenance_records_accident_id_fkey"
+            columns: ["accident_id"]
+            isOneToOne: false
+            referencedRelation: "accidents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "maintenance_records_commitment_id_fkey"
             columns: ["commitment_id"]
@@ -2787,6 +3383,7 @@ export type Database = {
       }
       service_orders: {
         Row: {
+          accident_id: string | null
           approved_value: number
           attachment_path: string | null
           authorizer_id: string | null
@@ -2829,6 +3426,7 @@ export type Database = {
           workshop_id: string
         }
         Insert: {
+          accident_id?: string | null
           approved_value?: number
           attachment_path?: string | null
           authorizer_id?: string | null
@@ -2871,6 +3469,7 @@ export type Database = {
           workshop_id: string
         }
         Update: {
+          accident_id?: string | null
           approved_value?: number
           attachment_path?: string | null
           authorizer_id?: string | null
@@ -2913,6 +3512,13 @@ export type Database = {
           workshop_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "service_orders_accident_id_fkey"
+            columns: ["accident_id"]
+            isOneToOne: false
+            referencedRelation: "accidents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "service_orders_commitment_id_fkey"
             columns: ["commitment_id"]
@@ -3266,6 +3872,175 @@ export type Database = {
           },
         ]
       }
+      traffic_fines: {
+        Row: {
+          amount: number
+          authorization_id: string | null
+          cancel_reason: string | null
+          code: string | null
+          created_at: string
+          created_by: string | null
+          decision_at: string | null
+          decision_notes: string | null
+          decision_path: string | null
+          defense_at: string | null
+          defense_path: string | null
+          defense_protocol: string | null
+          description: string
+          discount_amount: number | null
+          driver_confirmed: boolean
+          driver_id: string | null
+          due_date: string | null
+          id: string
+          infraction_code: string | null
+          issuing_authority: string
+          liability: Database["public"]["Enums"]["fine_liability"]
+          location: string | null
+          notes: string | null
+          notice_number: string
+          notification_path: string | null
+          occurred_at: string
+          organization_id: string
+          paid_amount: number | null
+          paid_at: string | null
+          payment_path: string | null
+          points: number | null
+          responsible_id: string | null
+          responsible_name: string | null
+          status: Database["public"]["Enums"]["fine_status"]
+          unit_id: string | null
+          updated_at: string
+          updated_by: string | null
+          usage_id: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          amount?: number
+          authorization_id?: string | null
+          cancel_reason?: string | null
+          code?: string | null
+          created_at?: string
+          created_by?: string | null
+          decision_at?: string | null
+          decision_notes?: string | null
+          decision_path?: string | null
+          defense_at?: string | null
+          defense_path?: string | null
+          defense_protocol?: string | null
+          description: string
+          discount_amount?: number | null
+          driver_confirmed?: boolean
+          driver_id?: string | null
+          due_date?: string | null
+          id?: string
+          infraction_code?: string | null
+          issuing_authority: string
+          liability?: Database["public"]["Enums"]["fine_liability"]
+          location?: string | null
+          notes?: string | null
+          notice_number: string
+          notification_path?: string | null
+          occurred_at: string
+          organization_id: string
+          paid_amount?: number | null
+          paid_at?: string | null
+          payment_path?: string | null
+          points?: number | null
+          responsible_id?: string | null
+          responsible_name?: string | null
+          status?: Database["public"]["Enums"]["fine_status"]
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          usage_id?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          amount?: number
+          authorization_id?: string | null
+          cancel_reason?: string | null
+          code?: string | null
+          created_at?: string
+          created_by?: string | null
+          decision_at?: string | null
+          decision_notes?: string | null
+          decision_path?: string | null
+          defense_at?: string | null
+          defense_path?: string | null
+          defense_protocol?: string | null
+          description?: string
+          discount_amount?: number | null
+          driver_confirmed?: boolean
+          driver_id?: string | null
+          due_date?: string | null
+          id?: string
+          infraction_code?: string | null
+          issuing_authority?: string
+          liability?: Database["public"]["Enums"]["fine_liability"]
+          location?: string | null
+          notes?: string | null
+          notice_number?: string
+          notification_path?: string | null
+          occurred_at?: string
+          organization_id?: string
+          paid_amount?: number | null
+          paid_at?: string | null
+          payment_path?: string | null
+          points?: number | null
+          responsible_id?: string | null
+          responsible_name?: string | null
+          status?: Database["public"]["Enums"]["fine_status"]
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          usage_id?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "traffic_fines_authorization_id_fkey"
+            columns: ["authorization_id"]
+            isOneToOne: false
+            referencedRelation: "fuel_authorizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "traffic_fines_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "traffic_fines_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "traffic_fines_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "traffic_fines_usage_id_fkey"
+            columns: ["usage_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_usages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "traffic_fines_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       units: {
         Row: {
           acronym: string | null
@@ -3357,8 +4132,91 @@ export type Database = {
           },
         ]
       }
+      vehicle_obligations: {
+        Row: {
+          amount: number | null
+          attachment_path: string | null
+          cancel_reason: string | null
+          created_at: string
+          created_by: string | null
+          document_number: string | null
+          due_date: string | null
+          exercise: number | null
+          id: string
+          not_applicable: boolean
+          notes: string | null
+          obligation_type: string
+          organization_id: string
+          paid_amount: number | null
+          paid_at: string | null
+          status: Database["public"]["Enums"]["obligation_status"]
+          updated_at: string
+          updated_by: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          amount?: number | null
+          attachment_path?: string | null
+          cancel_reason?: string | null
+          created_at?: string
+          created_by?: string | null
+          document_number?: string | null
+          due_date?: string | null
+          exercise?: number | null
+          id?: string
+          not_applicable?: boolean
+          notes?: string | null
+          obligation_type: string
+          organization_id: string
+          paid_amount?: number | null
+          paid_at?: string | null
+          status?: Database["public"]["Enums"]["obligation_status"]
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          amount?: number | null
+          attachment_path?: string | null
+          cancel_reason?: string | null
+          created_at?: string
+          created_by?: string | null
+          document_number?: string | null
+          due_date?: string | null
+          exercise?: number | null
+          id?: string
+          not_applicable?: boolean
+          notes?: string | null
+          obligation_type?: string
+          organization_id?: string
+          paid_amount?: number | null
+          paid_at?: string | null
+          status?: Database["public"]["Enums"]["obligation_status"]
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_obligations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_obligations_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicle_status_history: {
         Row: {
+          accident_id: string | null
+          asset_movement_id: string | null
           created_at: string
           created_by: string | null
           from_status: Database["public"]["Enums"]["vehicle_status"] | null
@@ -3371,6 +4229,8 @@ export type Database = {
           vehicle_id: string
         }
         Insert: {
+          accident_id?: string | null
+          asset_movement_id?: string | null
           created_at?: string
           created_by?: string | null
           from_status?: Database["public"]["Enums"]["vehicle_status"] | null
@@ -3383,6 +4243,8 @@ export type Database = {
           vehicle_id: string
         }
         Update: {
+          accident_id?: string | null
+          asset_movement_id?: string | null
           created_at?: string
           created_by?: string | null
           from_status?: Database["public"]["Enums"]["vehicle_status"] | null
@@ -3395,6 +4257,20 @@ export type Database = {
           vehicle_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "vehicle_status_history_accident_id_fkey"
+            columns: ["accident_id"]
+            isOneToOne: false
+            referencedRelation: "accidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_status_history_asset_movement_id_fkey"
+            columns: ["asset_movement_id"]
+            isOneToOne: false
+            referencedRelation: "asset_movements"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vehicle_status_history_maintenance_request_id_fkey"
             columns: ["maintenance_request_id"]
@@ -3810,6 +4686,7 @@ export type Database = {
       can_manage_users: { Args: never; Returns: boolean }
       can_operate_usage: { Args: never; Returns: boolean }
       can_register_fueling: { Args: never; Returns: boolean }
+      can_register_occurrence: { Args: never; Returns: boolean }
       can_write: { Args: never; Returns: boolean }
       current_org_id: { Args: never; Returns: string }
       expire_fuel_authorizations: { Args: never; Returns: undefined }
@@ -3841,11 +4718,27 @@ export type Database = {
         Returns: string
       }
       refresh_financial_alerts: { Args: never; Returns: undefined }
+      refresh_fleet_alerts: { Args: never; Returns: undefined }
       refresh_maintenance_alerts: { Args: never; Returns: undefined }
       refresh_procurement_alerts: { Args: never; Returns: undefined }
       unit_scope_ok: { Args: { _unit: string }; Returns: boolean }
     }
     Enums: {
+      accident_kind:
+        | "colisao"
+        | "tombamento"
+        | "atropelamento"
+        | "dano_estacionado"
+        | "furto_roubo"
+        | "incendio"
+        | "perda_total"
+        | "outro"
+      accident_status:
+        | "registrado"
+        | "em_apuracao"
+        | "seguradora_acionada"
+        | "reparo_autorizado"
+        | "encerrado"
       alert_severity: "info" | "alerta" | "erro"
       alert_status: "aberto" | "resolvido"
       app_role:
@@ -3855,6 +4748,21 @@ export type Database = {
         | "unit_manager"
         | "operator"
         | "auditor"
+      asset_movement_kind:
+        | "proprio_em_uso"
+        | "cedido_ao_orgao"
+        | "cedido_a_terceiros"
+        | "locado"
+        | "fiel_depositario"
+        | "remanejamento"
+        | "baixa_manutencao"
+        | "alienacao_em_processo"
+        | "doacao"
+        | "leilao"
+        | "furto_roubo"
+        | "perda_total"
+        | "alienado"
+        | "desativado"
       budget_movement_kind:
         | "reserva"
         | "liberacao"
@@ -3883,6 +4791,7 @@ export type Database = {
         | "contratado"
         | "terceirizado"
         | "outro"
+      entity_kind: "pf" | "pj"
       expense_origin:
         | "contrato"
         | "compra_direta"
@@ -3890,6 +4799,15 @@ export type Database = {
         | "doacao"
         | "almoxarifado"
         | "recurso_proprio"
+      fine_liability: "nao_definida" | "condutor" | "orgao"
+      fine_status:
+        | "recebida"
+        | "em_analise"
+        | "defesa_apresentada"
+        | "deferida"
+        | "indeferida"
+        | "paga"
+        | "cancelada"
       fuel_auth_status:
         | "pendente"
         | "autorizada"
@@ -3898,6 +4816,7 @@ export type Database = {
         | "expirada"
         | "cancelada"
       fueling_status: "valido" | "cancelado"
+      insurance_status: "ativa" | "a_vencer" | "vencida" | "cancelada"
       invitation_status:
         | "convidada"
         | "respondida"
@@ -3913,6 +4832,12 @@ export type Database = {
         | "aprovada"
         | "em_manutencao"
         | "concluida"
+        | "cancelada"
+      obligation_status:
+        | "pendente"
+        | "quitada"
+        | "vencida"
+        | "nao_aplicavel"
         | "cancelada"
       org_type:
         | "prefeitura"
@@ -4098,6 +5023,23 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      accident_kind: [
+        "colisao",
+        "tombamento",
+        "atropelamento",
+        "dano_estacionado",
+        "furto_roubo",
+        "incendio",
+        "perda_total",
+        "outro",
+      ],
+      accident_status: [
+        "registrado",
+        "em_apuracao",
+        "seguradora_acionada",
+        "reparo_autorizado",
+        "encerrado",
+      ],
       alert_severity: ["info", "alerta", "erro"],
       alert_status: ["aberto", "resolvido"],
       app_role: [
@@ -4107,6 +5049,22 @@ export const Constants = {
         "unit_manager",
         "operator",
         "auditor",
+      ],
+      asset_movement_kind: [
+        "proprio_em_uso",
+        "cedido_ao_orgao",
+        "cedido_a_terceiros",
+        "locado",
+        "fiel_depositario",
+        "remanejamento",
+        "baixa_manutencao",
+        "alienacao_em_processo",
+        "doacao",
+        "leilao",
+        "furto_roubo",
+        "perda_total",
+        "alienado",
+        "desativado",
       ],
       budget_movement_kind: [
         "reserva",
@@ -4140,6 +5098,7 @@ export const Constants = {
         "terceirizado",
         "outro",
       ],
+      entity_kind: ["pf", "pj"],
       expense_origin: [
         "contrato",
         "compra_direta",
@@ -4147,6 +5106,16 @@ export const Constants = {
         "doacao",
         "almoxarifado",
         "recurso_proprio",
+      ],
+      fine_liability: ["nao_definida", "condutor", "orgao"],
+      fine_status: [
+        "recebida",
+        "em_analise",
+        "defesa_apresentada",
+        "deferida",
+        "indeferida",
+        "paga",
+        "cancelada",
       ],
       fuel_auth_status: [
         "pendente",
@@ -4157,6 +5126,7 @@ export const Constants = {
         "cancelada",
       ],
       fueling_status: ["valido", "cancelado"],
+      insurance_status: ["ativa", "a_vencer", "vencida", "cancelada"],
       invitation_status: [
         "convidada",
         "respondida",
@@ -4173,6 +5143,13 @@ export const Constants = {
         "aprovada",
         "em_manutencao",
         "concluida",
+        "cancelada",
+      ],
+      obligation_status: [
+        "pendente",
+        "quitada",
+        "vencida",
+        "nao_aplicavel",
         "cancelada",
       ],
       org_type: [

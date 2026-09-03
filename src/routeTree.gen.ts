@@ -22,16 +22,22 @@ import { Route as AuthenticatedContratosRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCotacoesRouteImport } from './routes/_authenticated/cotacoes'
 import { Route as AuthenticatedCotasRouteImport } from './routes/_authenticated/cotas'
 import { Route as AuthenticatedEmpenhosRouteImport } from './routes/_authenticated/empenhos'
+import { Route as AuthenticatedEntidadesExternasRouteImport } from './routes/_authenticated/entidades-externas'
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
 import { Route as AuthenticatedHistoricoVeiculoRouteImport } from './routes/_authenticated/historico-veiculo'
 import { Route as AuthenticatedManutencoesRouteImport } from './routes/_authenticated/manutencoes'
+import { Route as AuthenticatedMultasRouteImport } from './routes/_authenticated/multas'
+import { Route as AuthenticatedObrigacoesRouteImport } from './routes/_authenticated/obrigacoes'
 import { Route as AuthenticatedOrdensServicoRouteImport } from './routes/_authenticated/ordens-servico'
 import { Route as AuthenticatedOrgaoRouteImport } from './routes/_authenticated/orgao'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
+import { Route as AuthenticatedPatrimonioRouteImport } from './routes/_authenticated/patrimonio'
 import { Route as AuthenticatedPecasRouteImport } from './routes/_authenticated/pecas'
 import { Route as AuthenticatedPlanosManutencaoRouteImport } from './routes/_authenticated/planos-manutencao'
 import { Route as AuthenticatedPneusRouteImport } from './routes/_authenticated/pneus'
 import { Route as AuthenticatedRedeCredenciadaRouteImport } from './routes/_authenticated/rede-credenciada'
+import { Route as AuthenticatedSegurosRouteImport } from './routes/_authenticated/seguros'
+import { Route as AuthenticatedSinistrosRouteImport } from './routes/_authenticated/sinistros'
 import { Route as AuthenticatedUnidadesRouteImport } from './routes/_authenticated/unidades'
 import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
 import { Route as AuthenticatedUtilizacaoRouteImport } from './routes/_authenticated/utilizacao'
@@ -106,6 +112,12 @@ const AuthenticatedEmpenhosRoute = AuthenticatedEmpenhosRouteImport.update({
   path: '/empenhos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEntidadesExternasRoute =
+  AuthenticatedEntidadesExternasRouteImport.update({
+    id: '/entidades-externas',
+    path: '/entidades-externas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedFornecedoresRoute =
   AuthenticatedFornecedoresRouteImport.update({
     id: '/fornecedores',
@@ -124,6 +136,16 @@ const AuthenticatedManutencoesRoute =
     path: '/manutencoes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMultasRoute = AuthenticatedMultasRouteImport.update({
+  id: '/multas',
+  path: '/multas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedObrigacoesRoute = AuthenticatedObrigacoesRouteImport.update({
+  id: '/obrigacoes',
+  path: '/obrigacoes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOrdensServicoRoute =
   AuthenticatedOrdensServicoRouteImport.update({
     id: '/ordens-servico',
@@ -138,6 +160,11 @@ const AuthenticatedOrgaoRoute = AuthenticatedOrgaoRouteImport.update({
 const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
   id: '/painel',
   path: '/painel',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPatrimonioRoute = AuthenticatedPatrimonioRouteImport.update({
+  id: '/patrimonio',
+  path: '/patrimonio',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPecasRoute = AuthenticatedPecasRouteImport.update({
@@ -162,6 +189,16 @@ const AuthenticatedRedeCredenciadaRoute =
     path: '/rede-credenciada',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedSegurosRoute = AuthenticatedSegurosRouteImport.update({
+  id: '/seguros',
+  path: '/seguros',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSinistrosRoute = AuthenticatedSinistrosRouteImport.update({
+  id: '/sinistros',
+  path: '/sinistros',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedUnidadesRoute = AuthenticatedUnidadesRouteImport.update({
   id: '/unidades',
   path: '/unidades',
@@ -201,16 +238,22 @@ export interface FileRoutesByFullPath {
   '/cotacoes': typeof AuthenticatedCotacoesRoute
   '/cotas': typeof AuthenticatedCotasRoute
   '/empenhos': typeof AuthenticatedEmpenhosRoute
+  '/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/manutencoes': typeof AuthenticatedManutencoesRoute
+  '/multas': typeof AuthenticatedMultasRoute
+  '/obrigacoes': typeof AuthenticatedObrigacoesRoute
   '/ordens-servico': typeof AuthenticatedOrdensServicoRoute
   '/orgao': typeof AuthenticatedOrgaoRoute
   '/painel': typeof AuthenticatedPainelRoute
+  '/patrimonio': typeof AuthenticatedPatrimonioRoute
   '/pecas': typeof AuthenticatedPecasRoute
   '/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/pneus': typeof AuthenticatedPneusRoute
   '/rede-credenciada': typeof AuthenticatedRedeCredenciadaRoute
+  '/seguros': typeof AuthenticatedSegurosRoute
+  '/sinistros': typeof AuthenticatedSinistrosRoute
   '/unidades': typeof AuthenticatedUnidadesRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
   '/utilizacao': typeof AuthenticatedUtilizacaoRoute
@@ -230,16 +273,22 @@ export interface FileRoutesByTo {
   '/cotacoes': typeof AuthenticatedCotacoesRoute
   '/cotas': typeof AuthenticatedCotasRoute
   '/empenhos': typeof AuthenticatedEmpenhosRoute
+  '/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/manutencoes': typeof AuthenticatedManutencoesRoute
+  '/multas': typeof AuthenticatedMultasRoute
+  '/obrigacoes': typeof AuthenticatedObrigacoesRoute
   '/ordens-servico': typeof AuthenticatedOrdensServicoRoute
   '/orgao': typeof AuthenticatedOrgaoRoute
   '/painel': typeof AuthenticatedPainelRoute
+  '/patrimonio': typeof AuthenticatedPatrimonioRoute
   '/pecas': typeof AuthenticatedPecasRoute
   '/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/pneus': typeof AuthenticatedPneusRoute
   '/rede-credenciada': typeof AuthenticatedRedeCredenciadaRoute
+  '/seguros': typeof AuthenticatedSegurosRoute
+  '/sinistros': typeof AuthenticatedSinistrosRoute
   '/unidades': typeof AuthenticatedUnidadesRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
   '/utilizacao': typeof AuthenticatedUtilizacaoRoute
@@ -261,16 +310,22 @@ export interface FileRoutesById {
   '/_authenticated/cotacoes': typeof AuthenticatedCotacoesRoute
   '/_authenticated/cotas': typeof AuthenticatedCotasRoute
   '/_authenticated/empenhos': typeof AuthenticatedEmpenhosRoute
+  '/_authenticated/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/_authenticated/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/_authenticated/manutencoes': typeof AuthenticatedManutencoesRoute
+  '/_authenticated/multas': typeof AuthenticatedMultasRoute
+  '/_authenticated/obrigacoes': typeof AuthenticatedObrigacoesRoute
   '/_authenticated/ordens-servico': typeof AuthenticatedOrdensServicoRoute
   '/_authenticated/orgao': typeof AuthenticatedOrgaoRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
+  '/_authenticated/patrimonio': typeof AuthenticatedPatrimonioRoute
   '/_authenticated/pecas': typeof AuthenticatedPecasRoute
   '/_authenticated/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/_authenticated/pneus': typeof AuthenticatedPneusRoute
   '/_authenticated/rede-credenciada': typeof AuthenticatedRedeCredenciadaRoute
+  '/_authenticated/seguros': typeof AuthenticatedSegurosRoute
+  '/_authenticated/sinistros': typeof AuthenticatedSinistrosRoute
   '/_authenticated/unidades': typeof AuthenticatedUnidadesRoute
   '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
   '/_authenticated/utilizacao': typeof AuthenticatedUtilizacaoRoute
@@ -292,16 +347,22 @@ export interface FileRouteTypes {
     | '/cotacoes'
     | '/cotas'
     | '/empenhos'
+    | '/entidades-externas'
     | '/fornecedores'
     | '/historico-veiculo'
     | '/manutencoes'
+    | '/multas'
+    | '/obrigacoes'
     | '/ordens-servico'
     | '/orgao'
     | '/painel'
+    | '/patrimonio'
     | '/pecas'
     | '/planos-manutencao'
     | '/pneus'
     | '/rede-credenciada'
+    | '/seguros'
+    | '/sinistros'
     | '/unidades'
     | '/usuarios'
     | '/utilizacao'
@@ -321,16 +382,22 @@ export interface FileRouteTypes {
     | '/cotacoes'
     | '/cotas'
     | '/empenhos'
+    | '/entidades-externas'
     | '/fornecedores'
     | '/historico-veiculo'
     | '/manutencoes'
+    | '/multas'
+    | '/obrigacoes'
     | '/ordens-servico'
     | '/orgao'
     | '/painel'
+    | '/patrimonio'
     | '/pecas'
     | '/planos-manutencao'
     | '/pneus'
     | '/rede-credenciada'
+    | '/seguros'
+    | '/sinistros'
     | '/unidades'
     | '/usuarios'
     | '/utilizacao'
@@ -351,16 +418,22 @@ export interface FileRouteTypes {
     | '/_authenticated/cotacoes'
     | '/_authenticated/cotas'
     | '/_authenticated/empenhos'
+    | '/_authenticated/entidades-externas'
     | '/_authenticated/fornecedores'
     | '/_authenticated/historico-veiculo'
     | '/_authenticated/manutencoes'
+    | '/_authenticated/multas'
+    | '/_authenticated/obrigacoes'
     | '/_authenticated/ordens-servico'
     | '/_authenticated/orgao'
     | '/_authenticated/painel'
+    | '/_authenticated/patrimonio'
     | '/_authenticated/pecas'
     | '/_authenticated/planos-manutencao'
     | '/_authenticated/pneus'
     | '/_authenticated/rede-credenciada'
+    | '/_authenticated/seguros'
+    | '/_authenticated/sinistros'
     | '/_authenticated/unidades'
     | '/_authenticated/usuarios'
     | '/_authenticated/utilizacao'
@@ -467,6 +540,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEmpenhosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/entidades-externas': {
+      id: '/_authenticated/entidades-externas'
+      path: '/entidades-externas'
+      fullPath: '/entidades-externas'
+      preLoaderRoute: typeof AuthenticatedEntidadesExternasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/fornecedores': {
       id: '/_authenticated/fornecedores'
       path: '/fornecedores'
@@ -488,6 +568,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedManutencoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/multas': {
+      id: '/_authenticated/multas'
+      path: '/multas'
+      fullPath: '/multas'
+      preLoaderRoute: typeof AuthenticatedMultasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/obrigacoes': {
+      id: '/_authenticated/obrigacoes'
+      path: '/obrigacoes'
+      fullPath: '/obrigacoes'
+      preLoaderRoute: typeof AuthenticatedObrigacoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/ordens-servico': {
       id: '/_authenticated/ordens-servico'
       path: '/ordens-servico'
@@ -507,6 +601,13 @@ declare module '@tanstack/react-router' {
       path: '/painel'
       fullPath: '/painel'
       preLoaderRoute: typeof AuthenticatedPainelRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/patrimonio': {
+      id: '/_authenticated/patrimonio'
+      path: '/patrimonio'
+      fullPath: '/patrimonio'
+      preLoaderRoute: typeof AuthenticatedPatrimonioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/pecas': {
@@ -535,6 +636,20 @@ declare module '@tanstack/react-router' {
       path: '/rede-credenciada'
       fullPath: '/rede-credenciada'
       preLoaderRoute: typeof AuthenticatedRedeCredenciadaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/seguros': {
+      id: '/_authenticated/seguros'
+      path: '/seguros'
+      fullPath: '/seguros'
+      preLoaderRoute: typeof AuthenticatedSegurosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/sinistros': {
+      id: '/_authenticated/sinistros'
+      path: '/sinistros'
+      fullPath: '/sinistros'
+      preLoaderRoute: typeof AuthenticatedSinistrosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/unidades': {
@@ -586,16 +701,22 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCotacoesRoute: typeof AuthenticatedCotacoesRoute
   AuthenticatedCotasRoute: typeof AuthenticatedCotasRoute
   AuthenticatedEmpenhosRoute: typeof AuthenticatedEmpenhosRoute
+  AuthenticatedEntidadesExternasRoute: typeof AuthenticatedEntidadesExternasRoute
   AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
   AuthenticatedHistoricoVeiculoRoute: typeof AuthenticatedHistoricoVeiculoRoute
   AuthenticatedManutencoesRoute: typeof AuthenticatedManutencoesRoute
+  AuthenticatedMultasRoute: typeof AuthenticatedMultasRoute
+  AuthenticatedObrigacoesRoute: typeof AuthenticatedObrigacoesRoute
   AuthenticatedOrdensServicoRoute: typeof AuthenticatedOrdensServicoRoute
   AuthenticatedOrgaoRoute: typeof AuthenticatedOrgaoRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
+  AuthenticatedPatrimonioRoute: typeof AuthenticatedPatrimonioRoute
   AuthenticatedPecasRoute: typeof AuthenticatedPecasRoute
   AuthenticatedPlanosManutencaoRoute: typeof AuthenticatedPlanosManutencaoRoute
   AuthenticatedPneusRoute: typeof AuthenticatedPneusRoute
   AuthenticatedRedeCredenciadaRoute: typeof AuthenticatedRedeCredenciadaRoute
+  AuthenticatedSegurosRoute: typeof AuthenticatedSegurosRoute
+  AuthenticatedSinistrosRoute: typeof AuthenticatedSinistrosRoute
   AuthenticatedUnidadesRoute: typeof AuthenticatedUnidadesRoute
   AuthenticatedUsuariosRoute: typeof AuthenticatedUsuariosRoute
   AuthenticatedUtilizacaoRoute: typeof AuthenticatedUtilizacaoRoute
@@ -614,16 +735,22 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCotacoesRoute: AuthenticatedCotacoesRoute,
   AuthenticatedCotasRoute: AuthenticatedCotasRoute,
   AuthenticatedEmpenhosRoute: AuthenticatedEmpenhosRoute,
+  AuthenticatedEntidadesExternasRoute: AuthenticatedEntidadesExternasRoute,
   AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,
   AuthenticatedHistoricoVeiculoRoute: AuthenticatedHistoricoVeiculoRoute,
   AuthenticatedManutencoesRoute: AuthenticatedManutencoesRoute,
+  AuthenticatedMultasRoute: AuthenticatedMultasRoute,
+  AuthenticatedObrigacoesRoute: AuthenticatedObrigacoesRoute,
   AuthenticatedOrdensServicoRoute: AuthenticatedOrdensServicoRoute,
   AuthenticatedOrgaoRoute: AuthenticatedOrgaoRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
+  AuthenticatedPatrimonioRoute: AuthenticatedPatrimonioRoute,
   AuthenticatedPecasRoute: AuthenticatedPecasRoute,
   AuthenticatedPlanosManutencaoRoute: AuthenticatedPlanosManutencaoRoute,
   AuthenticatedPneusRoute: AuthenticatedPneusRoute,
   AuthenticatedRedeCredenciadaRoute: AuthenticatedRedeCredenciadaRoute,
+  AuthenticatedSegurosRoute: AuthenticatedSegurosRoute,
+  AuthenticatedSinistrosRoute: AuthenticatedSinistrosRoute,
   AuthenticatedUnidadesRoute: AuthenticatedUnidadesRoute,
   AuthenticatedUsuariosRoute: AuthenticatedUsuariosRoute,
   AuthenticatedUtilizacaoRoute: AuthenticatedUtilizacaoRoute,
