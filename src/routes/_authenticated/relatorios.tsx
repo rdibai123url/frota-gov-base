@@ -168,7 +168,7 @@ function Relatorios() {
         let q = supabase
           .from("fuelings")
           .select(
-            "id, fueled_at, quantity, unit_price, total_value, status, odometer, vehicle:vehicles(id, plate, asset_code), unit:units(name), driver:drivers(full_name), fuel_type:fuel_types(name), supplier:suppliers(trade_name, legal_name)",
+            "id, fueled_at, quantity, unit_price, total_value, status, odometer_km, vehicle:vehicles(id, plate, asset_code), unit:units(name), driver:drivers(full_name), fuel_type:fuel_types(name), supplier:suppliers(trade_name, legal_name)",
           )
           .gte("fueled_at", start)
           .lte("fueled_at", end)
@@ -187,7 +187,7 @@ function Relatorios() {
             condutor: f.driver?.full_name ?? "—",
             combustivel_tipo: f.fuel_type?.name ?? "—",
             fornecedor: f.supplier?.trade_name ?? f.supplier?.legal_name ?? "—",
-            hodometro: f.odometer ?? "—",
+            hodometro: f.odometer_km ?? "—",
             litros: formatLiters(f.quantity),
             preco_litro: formatMoney(f.unit_price),
             valor: formatMoney(f.total_value),
