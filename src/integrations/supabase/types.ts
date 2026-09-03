@@ -2098,6 +2098,53 @@ export type Database = {
           },
         ]
       }
+      equipment_types: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          default_meter_kind: string
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          default_meter_kind?: string
+          description?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          default_meter_kind?: string
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       external_entities: {
         Row: {
           active: boolean
@@ -6732,23 +6779,37 @@ export type Database = {
       }
       vehicles: {
         Row: {
+          acquisition_date: string | null
+          acquisition_value: number | null
+          asset_class: string
           asset_code: string | null
           brand: string | null
+          capacity_desc: string | null
           chassis: string | null
           color: string | null
+          cost_center_id: string | null
           created_at: string
           created_by: string | null
           current_km: number | null
+          document_path: string | null
+          engine_number: string | null
+          equipment_type: string | null
           fuel_type: string | null
           hour_meter: number | null
           id: string
           import_batch_id: string | null
           is_private_server_vehicle: boolean
+          manufacturer: string | null
+          meter_kind: string
           model: string | null
           notes: string | null
           organization_id: string
-          plate: string
+          ownership: string
+          photo_path: string | null
+          plate: string | null
+          power_hp: number | null
           renavam: string | null
+          serial_number: string | null
           status: Database["public"]["Enums"]["vehicle_status"]
           tank_capacity: number | null
           unit_id: string | null
@@ -6759,23 +6820,37 @@ export type Database = {
           year_model: number | null
         }
         Insert: {
+          acquisition_date?: string | null
+          acquisition_value?: number | null
+          asset_class?: string
           asset_code?: string | null
           brand?: string | null
+          capacity_desc?: string | null
           chassis?: string | null
           color?: string | null
+          cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
           current_km?: number | null
+          document_path?: string | null
+          engine_number?: string | null
+          equipment_type?: string | null
           fuel_type?: string | null
           hour_meter?: number | null
           id?: string
           import_batch_id?: string | null
           is_private_server_vehicle?: boolean
+          manufacturer?: string | null
+          meter_kind?: string
           model?: string | null
           notes?: string | null
           organization_id: string
-          plate: string
+          ownership?: string
+          photo_path?: string | null
+          plate?: string | null
+          power_hp?: number | null
           renavam?: string | null
+          serial_number?: string | null
           status?: Database["public"]["Enums"]["vehicle_status"]
           tank_capacity?: number | null
           unit_id?: string | null
@@ -6786,23 +6861,37 @@ export type Database = {
           year_model?: number | null
         }
         Update: {
+          acquisition_date?: string | null
+          acquisition_value?: number | null
+          asset_class?: string
           asset_code?: string | null
           brand?: string | null
+          capacity_desc?: string | null
           chassis?: string | null
           color?: string | null
+          cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
           current_km?: number | null
+          document_path?: string | null
+          engine_number?: string | null
+          equipment_type?: string | null
           fuel_type?: string | null
           hour_meter?: number | null
           id?: string
           import_batch_id?: string | null
           is_private_server_vehicle?: boolean
+          manufacturer?: string | null
+          meter_kind?: string
           model?: string | null
           notes?: string | null
           organization_id?: string
-          plate?: string
+          ownership?: string
+          photo_path?: string | null
+          plate?: string | null
+          power_hp?: number | null
           renavam?: string | null
+          serial_number?: string | null
           status?: Database["public"]["Enums"]["vehicle_status"]
           tank_capacity?: number | null
           unit_id?: string | null
@@ -6813,6 +6902,13 @@ export type Database = {
           year_model?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "vehicles_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vehicles_organization_id_fkey"
             columns: ["organization_id"]

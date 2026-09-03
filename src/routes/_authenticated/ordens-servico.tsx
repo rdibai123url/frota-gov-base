@@ -109,7 +109,7 @@ function OrdensServico() {
       (o) =>
         (fStatus === ALL || o.status === fStatus) &&
         (!q ||
-          `${o.code ?? ""} ${o.vehicle?.plate ?? ""} ${o.workshop?.legal_name ?? ""} ${o.services}`
+          `${o.code ?? ""} ${(o.vehicle?.plate ?? o.vehicle?.asset_code ?? "")} ${o.workshop?.legal_name ?? ""} ${o.services}`
             .toLowerCase()
             .includes(q)),
     );
@@ -243,7 +243,7 @@ function OrdensServico() {
                   {o.code || "—"}
                   <span className="block text-xs text-muted-foreground">{o.quotation?.code || "sem cotação"}</span>
                 </TableCell>
-                <TableCell>{o.vehicle?.plate ?? "—"}</TableCell>
+                <TableCell>{(o.vehicle?.plate ?? o.vehicle?.asset_code ?? "—")}</TableCell>
                 <TableCell>{o.workshop?.trade_name || o.workshop?.legal_name}</TableCell>
                 <TableCell className="text-sm">
                   {o.deadline_at ? dateBR(o.deadline_at) : "—"}
@@ -290,7 +290,7 @@ function OrdensServico() {
                   <SelectContent>
                     {approved.map((q) => (
                       <SelectItem key={q.id} value={q.id}>
-                        {q.code} — {q.vehicle?.plate} — {q.description.slice(0, 40)}
+                        {q.code} — {(q.vehicle?.plate ?? q.vehicle?.asset_code ?? "")} — {q.description.slice(0, 40)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -622,7 +622,7 @@ function ServiceOrderDetail({
       <p>${[org?.city, org?.state].filter(Boolean).join(" / ")} — CNPJ ${formatCNPJ(org?.cnpj)}</p></div></div>
       <h2 style="font-size:16px">Ordem de Serviço ${order.code ?? ""}</h2>
       <p><b>Emitida em:</b> ${dateTimeBR(order.issued_at)}</p>
-      <p><b>Veículo:</b> ${order.vehicle?.plate ?? ""} — ${order.vehicle?.brand ?? ""} ${order.vehicle?.model ?? ""}</p>
+      <p><b>Veículo:</b> ${(order.vehicle?.plate ?? order.vehicle?.asset_code ?? "")} — ${order.vehicle?.brand ?? ""} ${order.vehicle?.model ?? ""}</p>
       <p><b>Oficina:</b> ${order.workshop?.legal_name ?? ""} — CNPJ ${formatCNPJ(order.workshop?.cnpj)}</p>
       <p><b>Processo de cotação:</b> ${order.quotation?.code ?? "—"}</p>
       <p><b>Serviços:</b> ${order.services}</p>
@@ -650,7 +650,7 @@ function ServiceOrderDetail({
 
       <div className="grid gap-2 rounded-md border bg-muted/30 p-3 text-sm sm:grid-cols-3">
         <p>
-          <span className="text-muted-foreground">Veículo:</span> {order.vehicle?.plate ?? "—"}
+          <span className="text-muted-foreground">Veículo:</span> {(order.vehicle?.plate ?? order.vehicle?.asset_code ?? "—")}
         </p>
         <p>
           <span className="text-muted-foreground">Oficina:</span>{" "}

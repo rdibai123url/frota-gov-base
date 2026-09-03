@@ -222,7 +222,7 @@ function Obrigacoes() {
               <SelectItem value={ALL}>Todos</SelectItem>
               {vehicles.map((v) => (
                 <SelectItem key={v.id} value={v.id}>
-                  {v.plate}
+                  {(v.plate ?? v.asset_code)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -281,7 +281,7 @@ function Obrigacoes() {
               return (
                 <TableRow key={o.id}>
                   <TableCell className="font-medium">{o.obligation_type}</TableCell>
-                  <TableCell>{o.vehicle?.plate ?? "—"}</TableCell>
+                  <TableCell>{(o.vehicle?.plate ?? o.vehicle?.asset_code ?? "—")}</TableCell>
                   <TableCell>{o.exercise ?? "—"}</TableCell>
                   <TableCell className="text-sm">{o.document_number ?? "—"}</TableCell>
                   <TableCell className="whitespace-nowrap text-sm">
@@ -344,7 +344,7 @@ function Obrigacoes() {
                     <SelectItem value={NONE}>Selecione</SelectItem>
                     {vehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        {v.plate}
+                        {(v.plate ?? v.asset_code)}
                       </SelectItem>
                     ))}
                   </SelectContent>

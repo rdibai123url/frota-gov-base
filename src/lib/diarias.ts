@@ -11,7 +11,7 @@ export type DiaryProofStatus = Database["public"]["Enums"]["diary_proof_status"]
 
 export type DiaryRow = Diary & {
   unit: { id: string; name: string; acronym: string | null } | null;
-  vehicle: { id: string; plate: string; status: string } | null;
+  vehicle: { id: string; plate: string | null; asset_code: string | null; status: string } | null;
   driver: { id: string; full_name: string } | null;
   usage: { id: string; code: string | null; destination: string | null } | null;
   proofs: DiaryProof[];
@@ -142,7 +142,7 @@ export function useDiaries() {
       const { data, error } = await supabase
         .from("diaries")
         .select(
-          "*, unit:units(id, name, acronym), vehicle:vehicles(id, plate, status), driver:drivers(id, full_name), usage:vehicle_usages(id, code, destination), proofs:diary_proofs(*)",
+          "*, unit:units(id, name, acronym), vehicle:vehicles(id, plate,asset_code, status), driver:drivers(id, full_name), usage:vehicle_usages(id, code, destination), proofs:diary_proofs(*)",
         )
         .order("departure_at", { ascending: false })
         .limit(1000);

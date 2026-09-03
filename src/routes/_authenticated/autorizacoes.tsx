@@ -117,7 +117,7 @@ function Autorizacoes() {
     return auths.filter((a) => {
       if (fStatus !== ALL && a.status !== fStatus) return false;
       if (t) {
-        const hay = [a.code, a.vehicle?.plate, a.driver?.full_name, a.fuel?.name].filter(Boolean).join(" ").toLowerCase();
+        const hay = [a.code, (a.vehicle?.plate ?? a.vehicle?.asset_code ?? ""), a.driver?.full_name, a.fuel?.name].filter(Boolean).join(" ").toLowerCase();
         if (!hay.includes(t)) return false;
       }
       return true;
@@ -200,7 +200,7 @@ function Autorizacoes() {
             {rows.map((a) => (
               <TableRow key={a.id}>
                 <TableCell className="font-mono text-xs">{a.code}</TableCell>
-                <TableCell className="font-medium">{a.vehicle?.plate ?? "—"}</TableCell>
+                <TableCell className="font-medium">{(a.vehicle?.plate ?? a.vehicle?.asset_code ?? "—")}</TableCell>
                 <TableCell>{a.driver?.full_name ?? "—"}</TableCell>
                 <TableCell>{a.fuel?.name ?? "—"}</TableCell>
                 <TableCell className="text-right">{formatLiters(a.max_quantity)}</TableCell>
@@ -318,7 +318,7 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
   const issues: { level: "erro" | "alerta"; message: string }[] = [];
   if (!vehicle) issues.push({ level: "erro", message: "Selecione o veículo." });
   if (vehicle && ["inativo", "baixado"].includes(vehicle.status))
-    issues.push({ level: "erro", message: `Veículo ${vehicle.plate} está ${vehicle.status} e não pode ser autorizado.` });
+    issues.push({ level: "erro", message: `Veículo ${(vehicle.plate ?? vehicle.asset_code)} está ${vehicle.status} e não pode ser autorizado.` });
   if (vehicle?.status === "manutencao" && !perms.canManageFleet)
     issues.push({ level: "erro", message: "Somente Gestor de Frota ou Administrador pode autorizar veículo em manutenção." });
   if (vehicle?.status === "manutencao" && perms.canManageFleet)
@@ -412,7 +412,7 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
                 <SelectItem value={NONE}>Selecione</SelectItem>
                 {vehicles.map((v) => (
                   <SelectItem key={v.id} value={v.id} disabled={["inativo", "baixado"].includes(v.status)}>
-                    {v.plate} — {v.model ?? v.brand ?? "veículo"}
+                    {(v.plate ?? v.asset_code)} — {v.model ?? v.brand ?? "veículo"}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -636,7 +636,7 @@ function AuthorizationDetail({ auth, onClose }: { auth: AuthorizationRow; onClos
   const items: [string, string][] = [
     ["Código", auth.code ?? "—"],
     ["Situação", label(AUTH_STATUS, auth.status)],
-    ["Veículo", auth.vehicle?.plate ?? "—"],
+    ["Veículo", (auth.vehicle?.plate ?? auth.vehicle?.asset_code ?? "—")],
     ["Unidade", auth.unit?.name ?? "—"],
     ["Condutor", auth.driver?.full_name ?? "—"],
     ["Combustível", auth.fuel?.name ?? "—"],
@@ -832,7 +832,7 @@ function LimitsDialog({ onClose }: { onClose: () => void }) {
                 <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Selecione</SelectItem>
-                  {vehicles.map((v) => (<SelectItem key={v.id} value={v.id}>{v.plate}</SelectItem>))}
+                  {vehicles.map((v) => (<SelectItem key={v.id} value={v.id}>{(v.plate ?? v.asset_code)}</SelectItem>))}
                 </SelectContent>
               </Select>
             </div>

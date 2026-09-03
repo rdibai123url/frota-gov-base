@@ -288,7 +288,7 @@ function HistoricoVeiculo() {
   return (
     <>
       <PageHeader
-        title={vehicle ? `Veículo ${vehicle.plate}` : "Veículo"}
+        title={vehicle ? `Veículo ${(vehicle.plate ?? vehicle.asset_code)}` : "Veículo"}
         description={
           vehicle
             ? `${vehicle.brand ?? ""} ${vehicle.model ?? ""} · ${num(Number(vehicle.current_km ?? 0), 0)} km · ${label(

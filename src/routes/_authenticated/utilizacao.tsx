@@ -111,7 +111,7 @@ function Utilizacao() {
     return usages.filter((u) => {
       if (fStatus !== ALL && u.status !== fStatus) return false;
       if (t) {
-        const hay = [u.code, u.vehicle?.plate, u.driver?.full_name, u.destination, u.purpose]
+        const hay = [u.code, (u.vehicle?.plate ?? u.vehicle?.asset_code ?? ""), u.driver?.full_name, u.destination, u.purpose]
           .filter(Boolean)
           .join(" ")
           .toLowerCase();
@@ -132,7 +132,7 @@ function Utilizacao() {
       .eq("id", u.id);
     if (error) toast.error(error.message);
     else {
-      toast.success(`Saída registrada para ${u.vehicle?.plate}.`);
+      toast.success(`Saída registrada para ${(u.vehicle?.plate ?? u.vehicle?.asset_code ?? "")}.`);
       invalidate(["vehicle-usages"]);
     }
   }
@@ -183,7 +183,7 @@ function Utilizacao() {
             <SelectContent>
               <SelectItem value={NONE}>Selecione o veículo</SelectItem>
               {vehicles.map((v) => (
-                <SelectItem key={v.id} value={v.id}>{v.plate}</SelectItem>
+                <SelectItem key={v.id} value={v.id}>{(v.plate ?? v.asset_code)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -228,7 +228,7 @@ function Utilizacao() {
             {rows.map((u) => (
               <TableRow key={u.id}>
                 <TableCell className="font-mono text-xs">{u.code}</TableCell>
-                <TableCell className="font-medium">{u.vehicle?.plate ?? "—"}</TableCell>
+                <TableCell className="font-medium">{(u.vehicle?.plate ?? u.vehicle?.asset_code ?? "—")}</TableCell>
                 <TableCell>{u.driver?.full_name ?? "—"}</TableCell>
                 <TableCell>{dateTimeBR(u.planned_departure)}</TableCell>
                 <TableCell>{dateTimeBR(u.planned_return)}</TableCell>
@@ -315,7 +315,7 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
   const issues: { level: "erro" | "alerta" | "info"; message: string }[] = [];
   if (!vehicle) issues.push({ level: "erro", message: "Selecione o veículo." });
   if (vehicle && BLOCKED_VEHICLE.includes(vehicle.status))
-    issues.push({ level: "erro", message: `Veículo ${vehicle.plate} está ${vehicle.status} e não pode ser utilizado.` });
+    issues.push({ level: "erro", message: `Veículo ${(vehicle.plate ?? vehicle.asset_code)} está ${vehicle.status} e não pode ser utilizado.` });
   if (vehicle?.status === "manutencao")
     issues.push({ level: "alerta", message: "Veículo em manutenção: é obrigatório justificar a liberação." });
   if (!driver) issues.push({ level: "erro", message: "Selecione o condutor." });
@@ -426,7 +426,7 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
                 <SelectItem value={NONE}>Selecione</SelectItem>
                 {vehicles.map((v) => (
                   <SelectItem key={v.id} value={v.id} disabled={BLOCKED_VEHICLE.includes(v.status)}>
-                    {v.plate} — {v.model ?? v.brand ?? "veículo"}
+                    {(v.plate ?? v.asset_code)} — {v.model ?? v.brand ?? "veículo"}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -527,7 +527,7 @@ function UsageDetail({ usage, onClose }: { usage: UsageRow; onClose: () => void 
   const items: [string, string][] = [
     ["Número", usage.code ?? "—"],
     ["Situação", label(USAGE_STATUS, usage.status)],
-    ["Veículo", usage.vehicle?.plate ?? "—"],
+    ["Veículo", (usage.vehicle?.plate ?? usage.vehicle?.asset_code ?? "—")],
     ["Unidade", usage.unit?.name ?? "—"],
     ["Condutor", usage.driver?.full_name ?? "—"],
     ["Solicitante", usage.requester_name ?? "—"],

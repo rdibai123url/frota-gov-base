@@ -134,7 +134,7 @@ function Limpeza() {
         const q = search.trim().toLowerCase();
         return (
           !q ||
-          `${c.code ?? ""} ${c.vehicle?.plate ?? ""} ${(c.service_types ?? []).join(" ")} ${c.supplier?.legal_name ?? ""}`
+          `${c.code ?? ""} ${(c.vehicle?.plate ?? c.vehicle?.asset_code ?? "")} ${(c.service_types ?? []).join(" ")} ${c.supplier?.legal_name ?? ""}`
             .toLowerCase()
             .includes(q)
         );
@@ -360,7 +360,7 @@ function Limpeza() {
             <SelectItem value={ALL}>Todos os veículos</SelectItem>
             {vehicles.map((v) => (
               <SelectItem key={v.id} value={v.id}>
-                {v.plate} — {v.model}
+                {(v.plate ?? v.asset_code)} — {v.model}
               </SelectItem>
             ))}
           </SelectContent>
@@ -413,7 +413,7 @@ function Limpeza() {
                 <TableRow key={c.id}>
                   <TableCell className="font-medium">{c.code ?? "—"}</TableCell>
                   <TableCell>
-                    {c.vehicle?.plate ?? "—"}
+                    {(c.vehicle?.plate ?? c.vehicle?.asset_code ?? "—")}
                     <div className="text-xs text-muted-foreground">{c.vehicle?.model ?? ""}</div>
                   </TableCell>
                   <TableCell>{dateTimeBR(c.performed_at)}</TableCell>
@@ -491,7 +491,7 @@ function Limpeza() {
                   <SelectItem value={NONE}>Selecione</SelectItem>
                   {vehicles.map((v) => (
                     <SelectItem key={v.id} value={v.id}>
-                      {v.plate} — {v.model}
+                      {(v.plate ?? v.asset_code)} — {v.model}
                     </SelectItem>
                   ))}
                 </SelectContent>

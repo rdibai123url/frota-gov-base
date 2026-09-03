@@ -114,7 +114,7 @@ function Planos() {
       rows.filter((r) => {
         if (fState !== ALL && r.due.state !== fState) return false;
         const q = search.trim().toLowerCase();
-        return !q || `${r.plan.name} ${r.vehicle?.plate ?? ""} ${r.plan.service_type ?? ""}`.toLowerCase().includes(q);
+        return !q || `${r.plan.name} ${(r.vehicle?.plate ?? r.vehicle?.asset_code ?? "")} ${r.plan.service_type ?? ""}`.toLowerCase().includes(q);
       }),
     [rows, fState, search],
   );
@@ -386,7 +386,7 @@ function Planos() {
                     <SelectItem value={NONE}>Por tipo de veículo</SelectItem>
                     {vehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        {v.plate} — {v.model ?? ""}
+                        {(v.plate ?? v.asset_code)} — {v.model ?? ""}
                       </SelectItem>
                     ))}
                   </SelectContent>

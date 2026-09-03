@@ -27,6 +27,7 @@ import { Route as AuthenticatedCotasServidorRouteImport } from './routes/_authen
 import { Route as AuthenticatedDiariasRouteImport } from './routes/_authenticated/diarias'
 import { Route as AuthenticatedEmpenhosRouteImport } from './routes/_authenticated/empenhos'
 import { Route as AuthenticatedEntidadesExternasRouteImport } from './routes/_authenticated/entidades-externas'
+import { Route as AuthenticatedEquipamentosRouteImport } from './routes/_authenticated/equipamentos'
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
 import { Route as AuthenticatedHistoricoVeiculoRouteImport } from './routes/_authenticated/historico-veiculo'
 import { Route as AuthenticatedLimpezaRouteImport } from './routes/_authenticated/limpeza'
@@ -151,6 +152,12 @@ const AuthenticatedEntidadesExternasRoute =
   AuthenticatedEntidadesExternasRouteImport.update({
     id: '/entidades-externas',
     path: '/entidades-externas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEquipamentosRoute =
+  AuthenticatedEquipamentosRouteImport.update({
+    id: '/equipamentos',
+    path: '/equipamentos',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedFornecedoresRoute =
@@ -331,6 +338,7 @@ export interface FileRoutesByFullPath {
   '/diarias': typeof AuthenticatedDiariasRoute
   '/empenhos': typeof AuthenticatedEmpenhosRoute
   '/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
+  '/equipamentos': typeof AuthenticatedEquipamentosRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/limpeza': typeof AuthenticatedLimpezaRoute
@@ -380,6 +388,7 @@ export interface FileRoutesByTo {
   '/diarias': typeof AuthenticatedDiariasRoute
   '/empenhos': typeof AuthenticatedEmpenhosRoute
   '/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
+  '/equipamentos': typeof AuthenticatedEquipamentosRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/limpeza': typeof AuthenticatedLimpezaRoute
@@ -431,6 +440,7 @@ export interface FileRoutesById {
   '/_authenticated/diarias': typeof AuthenticatedDiariasRoute
   '/_authenticated/empenhos': typeof AuthenticatedEmpenhosRoute
   '/_authenticated/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
+  '/_authenticated/equipamentos': typeof AuthenticatedEquipamentosRoute
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/_authenticated/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/_authenticated/limpeza': typeof AuthenticatedLimpezaRoute
@@ -482,6 +492,7 @@ export interface FileRouteTypes {
     | '/diarias'
     | '/empenhos'
     | '/entidades-externas'
+    | '/equipamentos'
     | '/fornecedores'
     | '/historico-veiculo'
     | '/limpeza'
@@ -531,6 +542,7 @@ export interface FileRouteTypes {
     | '/diarias'
     | '/empenhos'
     | '/entidades-externas'
+    | '/equipamentos'
     | '/fornecedores'
     | '/historico-veiculo'
     | '/limpeza'
@@ -581,6 +593,7 @@ export interface FileRouteTypes {
     | '/_authenticated/diarias'
     | '/_authenticated/empenhos'
     | '/_authenticated/entidades-externas'
+    | '/_authenticated/equipamentos'
     | '/_authenticated/fornecedores'
     | '/_authenticated/historico-veiculo'
     | '/_authenticated/limpeza'
@@ -750,6 +763,13 @@ declare module '@tanstack/react-router' {
       path: '/entidades-externas'
       fullPath: '/entidades-externas'
       preLoaderRoute: typeof AuthenticatedEntidadesExternasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/equipamentos': {
+      id: '/_authenticated/equipamentos'
+      path: '/equipamentos'
+      fullPath: '/equipamentos'
+      preLoaderRoute: typeof AuthenticatedEquipamentosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/fornecedores': {
@@ -980,6 +1000,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDiariasRoute: typeof AuthenticatedDiariasRoute
   AuthenticatedEmpenhosRoute: typeof AuthenticatedEmpenhosRoute
   AuthenticatedEntidadesExternasRoute: typeof AuthenticatedEntidadesExternasRoute
+  AuthenticatedEquipamentosRoute: typeof AuthenticatedEquipamentosRoute
   AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
   AuthenticatedHistoricoVeiculoRoute: typeof AuthenticatedHistoricoVeiculoRoute
   AuthenticatedLimpezaRoute: typeof AuthenticatedLimpezaRoute
@@ -1023,6 +1044,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDiariasRoute: AuthenticatedDiariasRoute,
   AuthenticatedEmpenhosRoute: AuthenticatedEmpenhosRoute,
   AuthenticatedEntidadesExternasRoute: AuthenticatedEntidadesExternasRoute,
+  AuthenticatedEquipamentosRoute: AuthenticatedEquipamentosRoute,
   AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,
   AuthenticatedHistoricoVeiculoRoute: AuthenticatedHistoricoVeiculoRoute,
   AuthenticatedLimpezaRoute: AuthenticatedLimpezaRoute,

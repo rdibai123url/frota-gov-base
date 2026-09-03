@@ -433,7 +433,7 @@ function Seguros() {
                         setCovered((prev) => (c ? [...prev, v.id] : prev.filter((id) => id !== v.id)))
                       }
                     />
-                    {v.plate}
+                    {(v.plate ?? v.asset_code)}
                   </label>
                 ))}
               </div>

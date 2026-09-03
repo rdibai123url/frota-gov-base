@@ -168,7 +168,7 @@ function Manutencoes() {
         if (fStatus !== ALL && r.status !== fStatus) return false;
         if (fVehicle !== ALL && r.vehicle_id !== fVehicle) return false;
         const q = search.trim().toLowerCase();
-        return !q || `${r.code ?? ""} ${r.description} ${r.vehicle?.plate ?? ""}`.toLowerCase().includes(q);
+        return !q || `${r.code ?? ""} ${r.description} ${(r.vehicle?.plate ?? r.vehicle?.asset_code ?? "")}`.toLowerCase().includes(q);
       }),
     [requests, fStatus, fVehicle, search],
   );
@@ -178,7 +178,7 @@ function Manutencoes() {
       records.filter((r) => {
         if (fVehicle !== ALL && r.vehicle_id !== fVehicle) return false;
         const q = search.trim().toLowerCase();
-        return !q || `${r.code ?? ""} ${r.services} ${r.vehicle?.plate ?? ""}`.toLowerCase().includes(q);
+        return !q || `${r.code ?? ""} ${r.services} ${(r.vehicle?.plate ?? r.vehicle?.asset_code ?? "")}`.toLowerCase().includes(q);
       }),
     [records, fVehicle, search],
   );
@@ -541,7 +541,7 @@ function Manutencoes() {
               <SelectItem value={ALL}>Todos</SelectItem>
               {vehicles.map((v) => (
                 <SelectItem key={v.id} value={v.id}>
-                  {v.plate}
+                  {(v.plate ?? v.asset_code)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -592,7 +592,7 @@ function Manutencoes() {
                       <span className="block text-xs text-muted-foreground">{dateTimeBR(r.requested_at)}</span>
                     </TableCell>
                     <TableCell>
-                      {r.vehicle?.plate ?? "—"}
+                      {(r.vehicle?.plate ?? r.vehicle?.asset_code ?? "—")}
                       <span className="block text-xs text-muted-foreground">
                         {r.odometer_km ? `${num(Number(r.odometer_km), 0)} km` : ""}
                       </span>
@@ -683,7 +683,7 @@ function Manutencoes() {
                       <span className="block text-xs text-muted-foreground">{label(MAINTENANCE_KINDS, r.kind)}</span>
                     </TableCell>
                     <TableCell>
-                      {r.vehicle?.plate ?? "—"}
+                      {(r.vehicle?.plate ?? r.vehicle?.asset_code ?? "—")}
                       <span className="block text-xs text-muted-foreground">
                         {r.odometer_km ? `${num(Number(r.odometer_km), 0)} km` : ""}
                       </span>
@@ -784,7 +784,7 @@ function Manutencoes() {
                     <SelectItem value={NONE}>Selecione</SelectItem>
                     {vehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        {v.plate} — {v.model ?? ""}
+                        {(v.plate ?? v.asset_code)} — {v.model ?? ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -974,7 +974,7 @@ function Manutencoes() {
                     <SelectItem value={NONE}>Selecione</SelectItem>
                     {vehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        {v.plate} — {v.model ?? ""}
+                        {(v.plate ?? v.asset_code)} — {v.model ?? ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -990,7 +990,7 @@ function Manutencoes() {
                     <SelectItem value={NONE}>Sem solicitação</SelectItem>
                     {openRequests.map((r) => (
                       <SelectItem key={r.id} value={r.id}>
-                        {r.code} — {r.vehicle?.plate}
+                        {r.code} — {(r.vehicle?.plate ?? r.vehicle?.asset_code ?? "")}
                       </SelectItem>
                     ))}
                   </SelectContent>

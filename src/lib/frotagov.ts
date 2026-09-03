@@ -196,6 +196,60 @@ export function useVehicles() {
   });
 }
 
+/* ===== FASE 10 — Bloco 1: máquinas e equipamentos ===== */
+
+export type AssetClass = "veiculo" | "equipamento";
+export type EquipmentType = Database["public"]["Tables"]["equipment_types"]["Row"];
+
+export const ASSET_CLASSES = [
+  { value: "veiculo", label: "Veículo" },
+  { value: "equipamento", label: "Máquina / equipamento" },
+];
+
+export const METER_KINDS = [
+  { value: "hodometro", label: "Hodômetro (km)" },
+  { value: "horimetro", label: "Horímetro (h)" },
+  { value: "ambos", label: "Hodômetro e horímetro" },
+  { value: "nenhum", label: "Sem medidor" },
+];
+
+export const ASSET_OWNERSHIP = [
+  { value: "proprio", label: "Próprio" },
+  { value: "locado", label: "Locado" },
+  { value: "cedido", label: "Cedido" },
+  { value: "emprestado", label: "Emprestado" },
+  { value: "comodato", label: "Comodato" },
+  { value: "doado", label: "Doado" },
+  { value: "fiel_depositario", label: "Fiel depositário" },
+  { value: "baixado", label: "Baixado" },
+  { value: "alienado", label: "Alienado" },
+  { value: "leiloado", label: "Leiloado" },
+  { value: "perdido_furtado", label: "Perdido / furtado" },
+  { value: "outro", label: "Outro" },
+];
+
+/** Identificação de exibição: placa para veículos, patrimônio para equipamentos. */
+export function assetLabel(v?: Pick<Vehicle, "plate" | "asset_code"> | null) {
+  if (!v) return "—";
+  return v.plate || v.asset_code || "Sem identificação";
+}
+
+export function useEquipmentTypes() {
+  return useQuery({
+    queryKey: ["equipment-types"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("equipment_types")
+        .select("*")
+        .eq("active", true)
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+
 export function useOrgUsers() {
   return useQuery({
     queryKey: ["org-users"],
@@ -364,12 +418,12 @@ export function useFuelingAlerts() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("fueling_alerts")
-        .select("*, vehicle:vehicles(id, plate), fueling:fuelings(id, fueled_at, status)")
+        .select("*, vehicle:vehicles(id, plate,asset_code), fueling:fuelings(id, fueled_at, status)")
         .order("created_at", { ascending: false })
         .limit(500);
       if (error) throw error;
       return (data ?? []) as unknown as (FuelingAlert & {
-        vehicle: { id: string; plate: string } | null;
+        vehicle: { id: string; plate: string | null; asset_code: string | null } | null;
         fueling: { id: string; fueled_at: string; status: string } | null;
       })[];
     },
@@ -586,13 +640,13 @@ export type LimitScope = Database["public"]["Enums"]["limit_scope"];
 export type DriverRow = Driver & { unit: Pick<Unit, "id" | "name" | "acronym"> | null };
 
 export type UsageRow = VehicleUsage & {
-  vehicle: Pick<Vehicle, "id" | "plate" | "status"> | null;
+  vehicle: Pick<Vehicle, "id" | "plate" | "asset_code" | "status"> | null;
   unit: Pick<Unit, "id" | "name" | "acronym"> | null;
   driver: Pick<Driver, "id" | "full_name" | "license_expiry" | "active"> | null;
 };
 
 export type AuthorizationRow = FuelAuthorization & {
-  vehicle: Pick<Vehicle, "id" | "plate" | "fuel_type" | "status"> | null;
+  vehicle: Pick<Vehicle, "id" | "plate" | "asset_code" | "fuel_type" | "status"> | null;
   unit: Pick<Unit, "id" | "name" | "acronym"> | null;
   driver: Pick<Driver, "id" | "full_name" | "license_expiry" | "active"> | null;
   fuel: Pick<FuelType, "id" | "name" | "measure_unit"> | null;
@@ -711,7 +765,7 @@ export function useVehicleUsages() {
       const { data, error } = await supabase
         .from("vehicle_usages")
         .select(
-          "*, vehicle:vehicles(id, plate, status), unit:units(id, name, acronym), driver:drivers(id, full_name, license_expiry, active)",
+          "*, vehicle:vehicles(id, plate,asset_code, status), unit:units(id, name, acronym), driver:drivers(id, full_name, license_expiry, active)",
         )
         .order("planned_departure", { ascending: false })
         .limit(500);
@@ -729,7 +783,7 @@ export function useAuthorizations() {
       const { data, error } = await supabase
         .from("fuel_authorizations")
         .select(
-          "*, vehicle:vehicles(id, plate, fuel_type, status), unit:units(id, name, acronym), driver:drivers(id, full_name, license_expiry, active), fuel:fuel_types(id, name, measure_unit), supplier:suppliers(id, legal_name, trade_name)",
+          "*, vehicle:vehicles(id, plate,asset_code, fuel_type, status), unit:units(id, name, acronym), driver:drivers(id, full_name, license_expiry, active), fuel:fuel_types(id, name, measure_unit), supplier:suppliers(id, legal_name, trade_name)",
         )
         .order("created_at", { ascending: false })
         .limit(500);
@@ -1103,7 +1157,7 @@ export type ServerQuotaPeriod = Database["public"]["Enums"]["server_quota_period
 export type ServerQuotaStatus = Database["public"]["Enums"]["server_quota_status"];
 
 export type ServerFuelQuotaRow = ServerFuelQuota & {
-  vehicle: Pick<Vehicle, "id" | "plate" | "brand" | "model" | "status"> | null;
+  vehicle: Pick<Vehicle, "id" | "plate" | "asset_code" | "brand" | "model" | "status"> | null;
   unit: Pick<Unit, "id" | "name" | "acronym"> | null;
   fuel: Pick<FuelType, "id" | "name" | "measure_unit"> | null;
 };
@@ -1143,7 +1197,7 @@ export function useServerFuelQuotas() {
       const { data, error } = await supabase
         .from("server_fuel_quotas")
         .select(
-          "*, vehicle:vehicles(id, plate, brand, model, status), unit:units(id, name, acronym), fuel:fuel_types(id, name, measure_unit)",
+          "*, vehicle:vehicles(id, plate,asset_code, brand, model, status), unit:units(id, name, acronym), fuel:fuel_types(id, name, measure_unit)",
         )
         .order("beneficiary_name");
       if (error) throw error;
@@ -1274,7 +1328,7 @@ export type MaintenanceRequestStatus = Database["public"]["Enums"]["maintenance_
 export type MaintenanceRecordStatus = Database["public"]["Enums"]["maintenance_record_status"];
 export type TireStatus = Database["public"]["Enums"]["tire_status"];
 
-type VehicleRef = Pick<Vehicle, "id" | "plate" | "brand" | "model" | "current_km" | "hour_meter" | "status">;
+type VehicleRef = Pick<Vehicle, "id" | "plate" | "asset_code" | "brand" | "model" | "current_km" | "hour_meter" | "status">;
 type UnitRef = Pick<Unit, "id" | "name" | "acronym">;
 
 export type MaintenancePlanRow = MaintenancePlan & {
@@ -1447,7 +1501,7 @@ export function useMaintenancePlans() {
       const { data, error } = await supabase
         .from("maintenance_plans")
         .select(
-          "*, vehicle:vehicles(id, plate, brand, model, current_km, hour_meter, status), items:maintenance_plan_items(*)",
+          "*, vehicle:vehicles(id, plate,asset_code, brand, model, current_km, hour_meter, status), items:maintenance_plan_items(*)",
         )
         .order("name");
       if (error) throw error;
@@ -1463,7 +1517,7 @@ export function useMaintenanceRequests() {
       const { data, error } = await supabase
         .from("maintenance_requests")
         .select(
-          "*, vehicle:vehicles(id, plate, brand, model, current_km, hour_meter, status), unit:units(id, name, acronym), cost_center:cost_centers(id, code, name), plan:maintenance_plans(id, name)",
+          "*, vehicle:vehicles(id, plate,asset_code, brand, model, current_km, hour_meter, status), unit:units(id, name, acronym), cost_center:cost_centers(id, code, name), plan:maintenance_plans(id, name)",
         )
         .order("requested_at", { ascending: false });
       if (error) throw error;
@@ -1479,7 +1533,7 @@ export function useMaintenanceRecords() {
       const { data, error } = await supabase
         .from("maintenance_records")
         .select(
-          "*, vehicle:vehicles(id, plate, brand, model, current_km, hour_meter, status), supplier:suppliers(id, legal_name, trade_name), request:maintenance_requests(id, code, kind), parts:maintenance_parts(*), commitment:commitments(id, number), quota:quotas(id, name)",
+          "*, vehicle:vehicles(id, plate,asset_code, brand, model, current_km, hour_meter, status), supplier:suppliers(id, legal_name, trade_name), request:maintenance_requests(id, code, kind), parts:maintenance_parts(*), commitment:commitments(id, number), quota:quotas(id, name)",
         )
         .order("entry_at", { ascending: false });
       if (error) throw error;
@@ -1520,7 +1574,7 @@ export function useTires() {
       const { data, error } = await supabase
         .from("tires")
         .select(
-          "*, vehicle:vehicles(id, plate, brand, model, current_km, hour_meter, status), supplier:suppliers(id, legal_name, trade_name)",
+          "*, vehicle:vehicles(id, plate,asset_code, brand, model, current_km, hour_meter, status), supplier:suppliers(id, legal_name, trade_name)",
         )
         .order("code");
       if (error) throw error;
@@ -1583,7 +1637,7 @@ export type InvitationStatus = Database["public"]["Enums"]["invitation_status"];
 export type ServiceOrderStatus = Database["public"]["Enums"]["service_order_status"];
 
 export type QuotationRow = Quotation & {
-  vehicle: Pick<Vehicle, "id" | "plate" | "brand" | "model"> | null;
+  vehicle: Pick<Vehicle, "id" | "plate" | "asset_code" | "brand" | "model"> | null;
   request: Pick<MaintenanceRequest, "id" | "code" | "description"> | null;
   unit: Pick<Unit, "id" | "name" | "acronym"> | null;
 };
@@ -1594,7 +1648,7 @@ export type InvitationRow = QuotationInvitation & {
   workshop: Pick<Workshop, "id" | "legal_name" | "trade_name" | "specialties" | "status"> | null;
 };
 export type ServiceOrderRow = ServiceOrder & {
-  vehicle: Pick<Vehicle, "id" | "plate" | "brand" | "model"> | null;
+  vehicle: Pick<Vehicle, "id" | "plate" | "asset_code" | "brand" | "model"> | null;
   workshop: Pick<Workshop, "id" | "legal_name" | "trade_name" | "cnpj" | "phone"> | null;
   quotation: Pick<Quotation, "id" | "code"> | null;
   unit: Pick<Unit, "id" | "name" | "acronym"> | null;
@@ -1679,7 +1733,7 @@ export function useQuotations() {
       const { data, error } = await supabase
         .from("quotations")
         .select(
-          "*, vehicle:vehicles(id, plate, brand, model), request:maintenance_requests(id, code, description), unit:units(id, name, acronym)",
+          "*, vehicle:vehicles(id, plate,asset_code, brand, model), request:maintenance_requests(id, code, description), unit:units(id, name, acronym)",
         )
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -1758,7 +1812,7 @@ export function useServiceOrders() {
       const { data, error } = await supabase
         .from("service_orders")
         .select(
-          "*, vehicle:vehicles(id, plate, brand, model), workshop:workshops(id, legal_name, trade_name, cnpj, phone), quotation:quotations(id, code), unit:units(id, name, acronym)",
+          "*, vehicle:vehicles(id, plate,asset_code, brand, model), workshop:workshops(id, legal_name, trade_name, cnpj, phone), quotation:quotations(id, code), unit:units(id, name, acronym)",
         )
         .order("issued_at", { ascending: false });
       if (error) throw error;
@@ -1852,7 +1906,7 @@ export type InsuranceStatus = Database["public"]["Enums"]["insurance_status"];
 export type ObligationStatus = Database["public"]["Enums"]["obligation_status"];
 export type AssetMovementKind = Database["public"]["Enums"]["asset_movement_kind"];
 
-type PlateRef = Pick<Vehicle, "id" | "plate" | "brand" | "model" | "status" | "current_km" | "unit_id">;
+type PlateRef = Pick<Vehicle, "id" | "plate" | "asset_code" | "brand" | "model" | "status" | "current_km" | "unit_id">;
 
 export type TrafficFineRow = TrafficFine & {
   vehicle: PlateRef | null;
@@ -1994,7 +2048,7 @@ export function useExternalEntities() {
   });
 }
 
-const VEHICLE_REF = "vehicles(id, plate, brand, model, status, current_km, unit_id)";
+const VEHICLE_REF = "vehicles(id, plate,asset_code, brand, model, status, current_km, unit_id)";
 
 export function useTrafficFines() {
   return useQuery({
@@ -2358,7 +2412,7 @@ export const CLEANING_STATUS: { value: CleaningStatus; label: string }[] = [
 ];
 
 const CLEANING_SELECT =
-  "*, vehicle:vehicles(id, plate, brand, model, current_km, hour_meter, status), unit:units(id, name, acronym), supplier:suppliers(id, legal_name, trade_name), contract:contracts(id, number), commitment:commitments(id, number), quota:quotas(id, name), cost_center:cost_centers(id, code, name)";
+  "*, vehicle:vehicles(id, plate,asset_code, brand, model, current_km, hour_meter, status), unit:units(id, name, acronym), supplier:suppliers(id, legal_name, trade_name), contract:contracts(id, number), commitment:commitments(id, number), quota:quotas(id, name), cost_center:cost_centers(id, code, name)";
 
 export function useCleaningTypes(onlyActive = false) {
   return useQuery({

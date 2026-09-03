@@ -76,7 +76,7 @@ function Pecas() {
   const [search, setSearch] = useState("");
   const [fVehicle, setFVehicle] = useState(ALL);
 
-  const plateOf = useMemo(() => new Map(vehicles.map((v) => [v.id, v.plate])), [vehicles]);
+  const plateOf = useMemo(() => new Map(vehicles.map((v) => [v.id, (v.plate ?? v.asset_code)])), [vehicles]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -232,7 +232,7 @@ function Pecas() {
                 <SelectItem value={ALL}>Todos</SelectItem>
                 {vehicles.map((v) => (
                   <SelectItem key={v.id} value={v.id}>
-                    {v.plate}
+                    {(v.plate ?? v.asset_code)}
                   </SelectItem>
                 ))}
               </SelectContent>

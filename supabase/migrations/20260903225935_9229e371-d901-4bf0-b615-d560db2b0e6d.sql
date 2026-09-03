@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.guard_vehicle_identification() FROM PUBLIC, anon, authenticated;
