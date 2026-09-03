@@ -9,10 +9,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { supabase, useOrganization, useUnits, useVehicles } from "@/lib/frotagov";
+import {
+  supabase,
+  useBrasaoUrl,
+  useDrivers,
+  useOrganization,
+  useProfile,
+  useUnits,
+  useVehicles,
+} from "@/lib/frotagov";
 import { formatMoney, formatLiters } from "@/lib/format";
 import { logEvent } from "@/lib/platform";
-import { exportReportCsv, exportXlsx, printReport } from "@/lib/reports";
+import { exportReportCsv, exportXlsx, printReport, type ReportMeta } from "@/lib/reports";
+
 
 export const Route = createFileRoute("/_authenticated/relatorios")({
   head: () => ({
