@@ -23,6 +23,9 @@ import {
   ClipboardList,
   CircleDot,
   Cog,
+  Building2 as Building,
+  FileSearch,
+  FileCheck2,
 } from "lucide-react";
 
 import { PageHeader } from "@/components/app-shell";
@@ -52,6 +55,10 @@ import {
   useMaintenanceRecords,
   useMaintenanceRequests,
   useTires,
+  MIN_PROPOSALS,
+  useQuotations,
+  useServiceOrders,
+  useWorkshops,
 } from "@/lib/frotagov";
 
 
@@ -183,6 +190,9 @@ function Painel() {
   const { data: mRecords = [] } = useMaintenanceRecords();
   const { data: tires = [] } = useTires();
   const lead = useMaintenanceLead();
+  const { data: quotations = [] } = useQuotations();
+  const { data: orders = [] } = useServiceOrders();
+  const { data: workshops = [] } = useWorkshops();
 
   const manut = useMemo(() => {
     const dues = plans
@@ -211,6 +221,33 @@ function Painel() {
       pneusEstoque: tires.filter((t) => t.status === "estoque").length,
     };
   }, [plans, vehicles, lead, mRecords, mRequests, tires]);
+
+  const rede = useMemo(() => {
+    const now = new Date();
+    const emExecucao = orders.filter((o) => ["veiculo_recebido", "em_execucao", "aguardando_peca"].includes(o.status));
+    return {
+      cotacoesAbertas: quotations.filter((q) => ["aberta", "em_analise"].includes(q.status)).length,
+      aguardandoPropostas: quotations.filter((q) => q.status === "aberta" && q.proposals_count === 0).length,
+      poucasPropostas: quotations.filter(
+        (q) => ["aberta", "em_analise"].includes(q.status) && q.valid_proposals_count < MIN_PROPOSALS,
+      ).length,
+      osAbertas: orders.filter((o) => !["concluida", "cancelada"].includes(o.status)).length,
+      osEmExecucao: emExecucao.length,
+      osAtrasadas: orders.filter(
+        (o) =>
+          !["concluida", "cancelada"].includes(o.status) &&
+          o.deadline_at !== null &&
+          new Date(`${o.deadline_at}T12:00:00`) < now,
+      ).length,
+      valorMes: orders
+        .filter((o) => {
+          const d = new Date(o.finished_at ?? o.issued_at);
+          return o.status === "concluida" && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+        })
+        .reduce((s2, o) => s2 + Number(o.executed_value ?? 0), 0),
+      oficinasAtivas: workshops.filter((w) => w.status === "ativo").length,
+    };
+  }, [quotations, orders, workshops]);
 
   const ultimos6 = useMemo(() => {
     const base = new Date();
@@ -286,6 +323,28 @@ function Painel() {
         <StatCard label="Veículos em oficina" value={manut.emOficina} icon={Wrench} tone={manut.emOficina > 0 ? "warning" : "default"} />
         <StatCard label="Custo de manutenção no mês" value={brl(manut.custoMes)} icon={Cog} />
         <StatCard label="Pneus instalados / estoque" value={`${manut.pneusInstalados} / ${manut.pneusEstoque}`} icon={CircleDot} />
+      </div>
+
+      <h2 className="gov-title mt-10 mb-4 text-lg">Rede credenciada, cotações e ordens de serviço</h2>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard label="Cotações abertas" value={rede.cotacoesAbertas} icon={FileSearch} />
+        <StatCard label="Aguardando propostas" value={rede.aguardandoPropostas} icon={FileSearch} />
+        <StatCard
+          label={`Processos com menos de ${MIN_PROPOSALS} propostas`}
+          value={rede.poucasPropostas}
+          icon={FileSearch}
+          tone={rede.poucasPropostas > 0 ? "warning" : "default"}
+        />
+        <StatCard label="Oficinas credenciadas ativas" value={rede.oficinasAtivas} icon={Building} />
+        <StatCard label="OS em aberto" value={rede.osAbertas} icon={FileCheck2} />
+        <StatCard label="OS em execução" value={rede.osEmExecucao} icon={FileCheck2} />
+        <StatCard
+          label="OS atrasadas"
+          value={rede.osAtrasadas}
+          icon={FileCheck2}
+          tone={rede.osAtrasadas > 0 ? "warning" : "default"}
+        />
+        <StatCard label="Valor em manutenção no mês" value={brl(rede.valorMes)} icon={Banknote} />
       </div>
 
       <h2 className="gov-title mt-10 mb-4 text-lg">Execução orçamentária</h2>

@@ -55,7 +55,9 @@ function Alertas() {
   const [category, setCategory] = useState(ALL);
 
   useEffect(() => {
-    void Promise.all([supabase.rpc("refresh_financial_alerts"), supabase.rpc("refresh_maintenance_alerts")]).then(() =>
+    void Promise.all([supabase.rpc("refresh_financial_alerts"), supabase.rpc("refresh_maintenance_alerts"),
+      supabase.rpc("refresh_procurement_alerts"),
+    ]).then(() =>
       invalidate(["fueling-alerts"]),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps

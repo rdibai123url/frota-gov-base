@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ClipboardList, Pencil, Plus, Trash2 } from "lucide-react";
+import { ClipboardList, ListChecks, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -25,6 +25,7 @@ import {
   supabase,
   useInvalidate,
   useMaintenanceLead,
+  useMaintenancePlanItems,
   useMaintenancePlans,
   usePerms,
   useVehicles,
@@ -86,6 +87,7 @@ function Planos() {
   const lead = useMaintenanceLead();
 
   const [open, setOpen] = useState(false);
+  const [itemsPlan, setItemsPlan] = useState<{ id: string; name: string } | null>(null);
   const [editing, setEditing] = useState<MaintenancePlanRow | null>(null);
   const [serviceType, setServiceType] = useState(MAINTENANCE_SERVICE_TYPES[0]!);
   const [vehicleId, setVehicleId] = useState(NONE);
@@ -318,6 +320,14 @@ function Planos() {
                       <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => openEdit(r.plan)}>
                         <Pencil className="size-4" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Itens do plano"
+                        onClick={() => setItemsPlan(r.plan)}
+                      >
+                        <ListChecks className="size-4" />
+                      </Button>
                       {r.plan.active && (
                         <Button variant="ghost" size="icon" aria-label="Inativar" onClick={() => removePlan(r.plan)}>
                           <Trash2 className="size-4" />
@@ -331,6 +341,14 @@ function Planos() {
           </TableBody>
         </Table>
       </div>
+
+      <Dialog open={!!itemsPlan} onOpenChange={(v) => !v && setItemsPlan(null)}>
+        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+          {itemsPlan && (
+            <PlanItemsEditor plan={itemsPlan} canManage={canManageFleet} orgId={orgId} userId={userId} />
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
@@ -466,6 +484,120 @@ function Planos() {
           </form>
         </DialogContent>
       </Dialog>
+    </>
+  );
+}
+
+function PlanItemsEditor({
+  plan,
+  canManage,
+  orgId,
+  userId,
+}: {
+  plan: { id: string; name: string };
+  canManage: boolean;
+  orgId: string | null;
+  userId: string | null;
+}) {
+  const { data: items = [] } = useMaintenancePlanItems(plan.id);
+  const invalidate = useInvalidate();
+
+  async function add(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    const description = String(fd.get("description") ?? "").trim();
+    if (!description) {
+      toast.error("Informe a descrição do item.");
+      return;
+    }
+    const { error } = await supabase.from("maintenance_plan_items").insert({
+      organization_id: orgId!,
+      plan_id: plan.id,
+      description,
+      service_type: (fd.get("service_type") as string) || null,
+      sequence: items.length + 1,
+      created_by: userId,
+    });
+    if (error) {
+      toast.error(dbMessage(error));
+      return;
+    }
+    form.reset();
+    invalidate(["maintenance-plan-items"]);
+  }
+
+  async function remove(id: string) {
+    const { error } = await supabase.from("maintenance_plan_items").delete().eq("id", id);
+    if (error) {
+      toast.error(dbMessage(error));
+      return;
+    }
+    invalidate(["maintenance-plan-items"]);
+  }
+
+  return (
+    <>
+      <DialogHeader>
+        <DialogTitle>Itens do plano {plan.name}</DialogTitle>
+      </DialogHeader>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>#</TableHead>
+            <TableHead>Serviço / verificação</TableHead>
+            <TableHead>Tipo</TableHead>
+            <TableHead className="w-12" />
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {items.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={4} className="py-6 text-center text-muted-foreground">
+                Nenhum item cadastrado neste plano.
+              </TableCell>
+            </TableRow>
+          )}
+          {items.map((i) => (
+            <TableRow key={i.id}>
+              <TableCell>{i.sequence}</TableCell>
+              <TableCell>{i.description}</TableCell>
+              <TableCell>{i.service_type || "—"}</TableCell>
+              <TableCell>
+                {canManage && (
+                  <Button variant="ghost" size="icon" aria-label="Remover item" onClick={() => remove(i.id)}>
+                    <Trash2 className="size-4" />
+                  </Button>
+                )}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      {canManage && (
+        <form onSubmit={add} className="grid items-end gap-2 sm:grid-cols-4">
+          <div className="sm:col-span-2">
+            <Label htmlFor="item-description">Serviço / verificação</Label>
+            <Input id="item-description" name="description" />
+          </div>
+          <div>
+            <Label htmlFor="item-type">Tipo de serviço</Label>
+            <select
+              id="item-type"
+              name="service_type"
+              className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+            >
+              <option value="">—</option>
+              {MAINTENANCE_SERVICE_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </div>
+          <Button type="submit">Adicionar item</Button>
+        </form>
+      )}
     </>
   );
 }

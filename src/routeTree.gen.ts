@@ -19,15 +19,19 @@ import { Route as AuthenticatedCentrosCustoRouteImport } from './routes/_authent
 import { Route as AuthenticatedCombustiveisRouteImport } from './routes/_authenticated/combustiveis'
 import { Route as AuthenticatedCondutoresRouteImport } from './routes/_authenticated/condutores'
 import { Route as AuthenticatedContratosRouteImport } from './routes/_authenticated/contratos'
+import { Route as AuthenticatedCotacoesRouteImport } from './routes/_authenticated/cotacoes'
 import { Route as AuthenticatedCotasRouteImport } from './routes/_authenticated/cotas'
 import { Route as AuthenticatedEmpenhosRouteImport } from './routes/_authenticated/empenhos'
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
+import { Route as AuthenticatedHistoricoVeiculoRouteImport } from './routes/_authenticated/historico-veiculo'
 import { Route as AuthenticatedManutencoesRouteImport } from './routes/_authenticated/manutencoes'
+import { Route as AuthenticatedOrdensServicoRouteImport } from './routes/_authenticated/ordens-servico'
 import { Route as AuthenticatedOrgaoRouteImport } from './routes/_authenticated/orgao'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 import { Route as AuthenticatedPecasRouteImport } from './routes/_authenticated/pecas'
 import { Route as AuthenticatedPlanosManutencaoRouteImport } from './routes/_authenticated/planos-manutencao'
 import { Route as AuthenticatedPneusRouteImport } from './routes/_authenticated/pneus'
+import { Route as AuthenticatedRedeCredenciadaRouteImport } from './routes/_authenticated/rede-credenciada'
 import { Route as AuthenticatedUnidadesRouteImport } from './routes/_authenticated/unidades'
 import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
 import { Route as AuthenticatedUtilizacaoRouteImport } from './routes/_authenticated/utilizacao'
@@ -87,6 +91,11 @@ const AuthenticatedContratosRoute = AuthenticatedContratosRouteImport.update({
   path: '/contratos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCotacoesRoute = AuthenticatedCotacoesRouteImport.update({
+  id: '/cotacoes',
+  path: '/cotacoes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCotasRoute = AuthenticatedCotasRouteImport.update({
   id: '/cotas',
   path: '/cotas',
@@ -103,10 +112,22 @@ const AuthenticatedFornecedoresRoute =
     path: '/fornecedores',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedHistoricoVeiculoRoute =
+  AuthenticatedHistoricoVeiculoRouteImport.update({
+    id: '/historico-veiculo',
+    path: '/historico-veiculo',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedManutencoesRoute =
   AuthenticatedManutencoesRouteImport.update({
     id: '/manutencoes',
     path: '/manutencoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrdensServicoRoute =
+  AuthenticatedOrdensServicoRouteImport.update({
+    id: '/ordens-servico',
+    path: '/ordens-servico',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedOrgaoRoute = AuthenticatedOrgaoRouteImport.update({
@@ -135,6 +156,12 @@ const AuthenticatedPneusRoute = AuthenticatedPneusRouteImport.update({
   path: '/pneus',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRedeCredenciadaRoute =
+  AuthenticatedRedeCredenciadaRouteImport.update({
+    id: '/rede-credenciada',
+    path: '/rede-credenciada',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedUnidadesRoute = AuthenticatedUnidadesRouteImport.update({
   id: '/unidades',
   path: '/unidades',
@@ -171,15 +198,19 @@ export interface FileRoutesByFullPath {
   '/combustiveis': typeof AuthenticatedCombustiveisRoute
   '/condutores': typeof AuthenticatedCondutoresRoute
   '/contratos': typeof AuthenticatedContratosRoute
+  '/cotacoes': typeof AuthenticatedCotacoesRoute
   '/cotas': typeof AuthenticatedCotasRoute
   '/empenhos': typeof AuthenticatedEmpenhosRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
+  '/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/manutencoes': typeof AuthenticatedManutencoesRoute
+  '/ordens-servico': typeof AuthenticatedOrdensServicoRoute
   '/orgao': typeof AuthenticatedOrgaoRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/pecas': typeof AuthenticatedPecasRoute
   '/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/pneus': typeof AuthenticatedPneusRoute
+  '/rede-credenciada': typeof AuthenticatedRedeCredenciadaRoute
   '/unidades': typeof AuthenticatedUnidadesRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
   '/utilizacao': typeof AuthenticatedUtilizacaoRoute
@@ -196,15 +227,19 @@ export interface FileRoutesByTo {
   '/combustiveis': typeof AuthenticatedCombustiveisRoute
   '/condutores': typeof AuthenticatedCondutoresRoute
   '/contratos': typeof AuthenticatedContratosRoute
+  '/cotacoes': typeof AuthenticatedCotacoesRoute
   '/cotas': typeof AuthenticatedCotasRoute
   '/empenhos': typeof AuthenticatedEmpenhosRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
+  '/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/manutencoes': typeof AuthenticatedManutencoesRoute
+  '/ordens-servico': typeof AuthenticatedOrdensServicoRoute
   '/orgao': typeof AuthenticatedOrgaoRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/pecas': typeof AuthenticatedPecasRoute
   '/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/pneus': typeof AuthenticatedPneusRoute
+  '/rede-credenciada': typeof AuthenticatedRedeCredenciadaRoute
   '/unidades': typeof AuthenticatedUnidadesRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
   '/utilizacao': typeof AuthenticatedUtilizacaoRoute
@@ -223,15 +258,19 @@ export interface FileRoutesById {
   '/_authenticated/combustiveis': typeof AuthenticatedCombustiveisRoute
   '/_authenticated/condutores': typeof AuthenticatedCondutoresRoute
   '/_authenticated/contratos': typeof AuthenticatedContratosRoute
+  '/_authenticated/cotacoes': typeof AuthenticatedCotacoesRoute
   '/_authenticated/cotas': typeof AuthenticatedCotasRoute
   '/_authenticated/empenhos': typeof AuthenticatedEmpenhosRoute
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
+  '/_authenticated/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/_authenticated/manutencoes': typeof AuthenticatedManutencoesRoute
+  '/_authenticated/ordens-servico': typeof AuthenticatedOrdensServicoRoute
   '/_authenticated/orgao': typeof AuthenticatedOrgaoRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
   '/_authenticated/pecas': typeof AuthenticatedPecasRoute
   '/_authenticated/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/_authenticated/pneus': typeof AuthenticatedPneusRoute
+  '/_authenticated/rede-credenciada': typeof AuthenticatedRedeCredenciadaRoute
   '/_authenticated/unidades': typeof AuthenticatedUnidadesRoute
   '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
   '/_authenticated/utilizacao': typeof AuthenticatedUtilizacaoRoute
@@ -250,15 +289,19 @@ export interface FileRouteTypes {
     | '/combustiveis'
     | '/condutores'
     | '/contratos'
+    | '/cotacoes'
     | '/cotas'
     | '/empenhos'
     | '/fornecedores'
+    | '/historico-veiculo'
     | '/manutencoes'
+    | '/ordens-servico'
     | '/orgao'
     | '/painel'
     | '/pecas'
     | '/planos-manutencao'
     | '/pneus'
+    | '/rede-credenciada'
     | '/unidades'
     | '/usuarios'
     | '/utilizacao'
@@ -275,15 +318,19 @@ export interface FileRouteTypes {
     | '/combustiveis'
     | '/condutores'
     | '/contratos'
+    | '/cotacoes'
     | '/cotas'
     | '/empenhos'
     | '/fornecedores'
+    | '/historico-veiculo'
     | '/manutencoes'
+    | '/ordens-servico'
     | '/orgao'
     | '/painel'
     | '/pecas'
     | '/planos-manutencao'
     | '/pneus'
+    | '/rede-credenciada'
     | '/unidades'
     | '/usuarios'
     | '/utilizacao'
@@ -301,15 +348,19 @@ export interface FileRouteTypes {
     | '/_authenticated/combustiveis'
     | '/_authenticated/condutores'
     | '/_authenticated/contratos'
+    | '/_authenticated/cotacoes'
     | '/_authenticated/cotas'
     | '/_authenticated/empenhos'
     | '/_authenticated/fornecedores'
+    | '/_authenticated/historico-veiculo'
     | '/_authenticated/manutencoes'
+    | '/_authenticated/ordens-servico'
     | '/_authenticated/orgao'
     | '/_authenticated/painel'
     | '/_authenticated/pecas'
     | '/_authenticated/planos-manutencao'
     | '/_authenticated/pneus'
+    | '/_authenticated/rede-credenciada'
     | '/_authenticated/unidades'
     | '/_authenticated/usuarios'
     | '/_authenticated/utilizacao'
@@ -395,6 +446,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedContratosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/cotacoes': {
+      id: '/_authenticated/cotacoes'
+      path: '/cotacoes'
+      fullPath: '/cotacoes'
+      preLoaderRoute: typeof AuthenticatedCotacoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/cotas': {
       id: '/_authenticated/cotas'
       path: '/cotas'
@@ -416,11 +474,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFornecedoresRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/historico-veiculo': {
+      id: '/_authenticated/historico-veiculo'
+      path: '/historico-veiculo'
+      fullPath: '/historico-veiculo'
+      preLoaderRoute: typeof AuthenticatedHistoricoVeiculoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/manutencoes': {
       id: '/_authenticated/manutencoes'
       path: '/manutencoes'
       fullPath: '/manutencoes'
       preLoaderRoute: typeof AuthenticatedManutencoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ordens-servico': {
+      id: '/_authenticated/ordens-servico'
+      path: '/ordens-servico'
+      fullPath: '/ordens-servico'
+      preLoaderRoute: typeof AuthenticatedOrdensServicoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/orgao': {
@@ -456,6 +528,13 @@ declare module '@tanstack/react-router' {
       path: '/pneus'
       fullPath: '/pneus'
       preLoaderRoute: typeof AuthenticatedPneusRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/rede-credenciada': {
+      id: '/_authenticated/rede-credenciada'
+      path: '/rede-credenciada'
+      fullPath: '/rede-credenciada'
+      preLoaderRoute: typeof AuthenticatedRedeCredenciadaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/unidades': {
@@ -504,15 +583,19 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCombustiveisRoute: typeof AuthenticatedCombustiveisRoute
   AuthenticatedCondutoresRoute: typeof AuthenticatedCondutoresRoute
   AuthenticatedContratosRoute: typeof AuthenticatedContratosRoute
+  AuthenticatedCotacoesRoute: typeof AuthenticatedCotacoesRoute
   AuthenticatedCotasRoute: typeof AuthenticatedCotasRoute
   AuthenticatedEmpenhosRoute: typeof AuthenticatedEmpenhosRoute
   AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
+  AuthenticatedHistoricoVeiculoRoute: typeof AuthenticatedHistoricoVeiculoRoute
   AuthenticatedManutencoesRoute: typeof AuthenticatedManutencoesRoute
+  AuthenticatedOrdensServicoRoute: typeof AuthenticatedOrdensServicoRoute
   AuthenticatedOrgaoRoute: typeof AuthenticatedOrgaoRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
   AuthenticatedPecasRoute: typeof AuthenticatedPecasRoute
   AuthenticatedPlanosManutencaoRoute: typeof AuthenticatedPlanosManutencaoRoute
   AuthenticatedPneusRoute: typeof AuthenticatedPneusRoute
+  AuthenticatedRedeCredenciadaRoute: typeof AuthenticatedRedeCredenciadaRoute
   AuthenticatedUnidadesRoute: typeof AuthenticatedUnidadesRoute
   AuthenticatedUsuariosRoute: typeof AuthenticatedUsuariosRoute
   AuthenticatedUtilizacaoRoute: typeof AuthenticatedUtilizacaoRoute
@@ -528,15 +611,19 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCombustiveisRoute: AuthenticatedCombustiveisRoute,
   AuthenticatedCondutoresRoute: AuthenticatedCondutoresRoute,
   AuthenticatedContratosRoute: AuthenticatedContratosRoute,
+  AuthenticatedCotacoesRoute: AuthenticatedCotacoesRoute,
   AuthenticatedCotasRoute: AuthenticatedCotasRoute,
   AuthenticatedEmpenhosRoute: AuthenticatedEmpenhosRoute,
   AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,
+  AuthenticatedHistoricoVeiculoRoute: AuthenticatedHistoricoVeiculoRoute,
   AuthenticatedManutencoesRoute: AuthenticatedManutencoesRoute,
+  AuthenticatedOrdensServicoRoute: AuthenticatedOrdensServicoRoute,
   AuthenticatedOrgaoRoute: AuthenticatedOrgaoRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
   AuthenticatedPecasRoute: AuthenticatedPecasRoute,
   AuthenticatedPlanosManutencaoRoute: AuthenticatedPlanosManutencaoRoute,
   AuthenticatedPneusRoute: AuthenticatedPneusRoute,
+  AuthenticatedRedeCredenciadaRoute: AuthenticatedRedeCredenciadaRoute,
   AuthenticatedUnidadesRoute: AuthenticatedUnidadesRoute,
   AuthenticatedUsuariosRoute: AuthenticatedUsuariosRoute,
   AuthenticatedUtilizacaoRoute: AuthenticatedUtilizacaoRoute,

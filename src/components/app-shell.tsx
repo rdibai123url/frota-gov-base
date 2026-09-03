@@ -1,68 +1,122 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard,
   Truck,
   Building2,
-  Users,
   Landmark,
   Fuel,
-  Store,
-  Droplets,
   BellRing,
-  IdCard,
-  CalendarClock,
-  Ticket,
   FileText,
-  Wallet,
-  PiggyBank,
-  Coins,
   LogOut,
   Menu,
   X,
   ShieldCheck,
   Wrench,
   ClipboardList,
-  Cog,
-  CircleDot,
+  ChevronDown,
+  FolderCog,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase, useBrasaoUrl, useOrganization, useProfile, ROLE_LABELS } from "@/lib/frotagov";
 
-const NAV = [
-  { to: "/painel", label: "Painel", icon: LayoutDashboard },
-  { to: "/veiculos", label: "Veículos", icon: Truck },
-  { to: "/condutores", label: "Condutores", icon: IdCard },
-  { to: "/utilizacao", label: "Utilização e reservas", icon: CalendarClock },
-  { to: "/autorizacoes", label: "Autorizações", icon: Ticket },
-  { to: "/abastecimentos", label: "Abastecimentos", icon: Fuel },
-  { to: "/manutencoes", label: "Manutenções", icon: Wrench },
-  { to: "/planos-manutencao", label: "Planos preventivos", icon: ClipboardList },
-  { to: "/pecas", label: "Peças e acessórios", icon: Cog },
-  { to: "/pneus", label: "Pneus", icon: CircleDot },
-  { to: "/alertas", label: "Alertas e inconsistências", icon: BellRing },
-  { to: "/fornecedores", label: "Fornecedores / Postos", icon: Store },
-  { to: "/combustiveis", label: "Combustíveis", icon: Droplets },
-  { to: "/contratos", label: "Contratos", icon: FileText },
-  { to: "/empenhos", label: "Empenhos", icon: Wallet },
-  { to: "/cotas", label: "Cotas e saldos", icon: PiggyBank },
-  { to: "/centros-custo", label: "Centros de Custo", icon: Coins },
-  { to: "/unidades", label: "Secretarias / Unidades", icon: Building2 },
-  { to: "/usuarios", label: "Usuários e permissões", icon: Users },
-  { to: "/orgao", label: "Dados do Órgão", icon: Landmark },
-] as const;
+type NavLeaf = { to: string; label: string };
+type NavGroup = { id: string; label: string; icon: typeof Truck; to?: string; items?: NavLeaf[] };
+
+const NAV: NavGroup[] = [
+  { id: "painel", label: "Painel", icon: LayoutDashboard, to: "/painel" },
+  {
+    id: "frota",
+    label: "Frota",
+    icon: Truck,
+    items: [
+      { to: "/veiculos", label: "Veículos" },
+      { to: "/utilizacao", label: "Utilização e reservas" },
+      { to: "/historico-veiculo", label: "Histórico do veículo" },
+    ],
+  },
+  {
+    id: "abastecimento",
+    label: "Abastecimento",
+    icon: Fuel,
+    items: [
+      { to: "/autorizacoes", label: "Autorizações" },
+      { to: "/abastecimentos", label: "Abastecimentos" },
+      { to: "/combustiveis", label: "Combustíveis" },
+      { to: "/fornecedores", label: "Fornecedores / Postos" },
+    ],
+  },
+  {
+    id: "manutencao",
+    label: "Manutenção",
+    icon: Wrench,
+    items: [
+      { to: "/manutencoes", label: "Manutenções" },
+      { to: "/planos-manutencao", label: "Planos preventivos" },
+      { to: "/pecas", label: "Peças e acessórios" },
+      { to: "/pneus", label: "Pneus" },
+      { to: "/rede-credenciada", label: "Rede credenciada" },
+      { to: "/cotacoes", label: "Cotações" },
+      { to: "/ordens-servico", label: "Ordens de Serviço" },
+    ],
+  },
+  {
+    id: "orcamento",
+    label: "Contratos e Orçamento",
+    icon: FileText,
+    items: [
+      { to: "/contratos", label: "Contratos" },
+      { to: "/empenhos", label: "Empenhos" },
+      { to: "/cotas", label: "Cotas e saldos" },
+      { to: "/centros-custo", label: "Centros de Custo" },
+    ],
+  },
+  {
+    id: "cadastros",
+    label: "Cadastros",
+    icon: FolderCog,
+    items: [
+      { to: "/orgao", label: "Dados do Órgão" },
+      { to: "/unidades", label: "Secretarias / Unidades" },
+      { to: "/condutores", label: "Condutores / Motoristas" },
+      { to: "/usuarios", label: "Usuários e Permissões" },
+    ],
+  },
+  { id: "alertas", label: "Alertas e inconsistências", icon: BellRing, to: "/alertas" },
+];
+
+const EXTRA_MATCHES: Record<string, string[]> = {
+  frota: ["/veiculo/"],
+  manutencao: ["/cotacao/", "/ordem-servico/"],
+};
+
+function groupForPath(pathname: string) {
+  for (const g of NAV) {
+    if (g.to && pathname.startsWith(g.to)) return g.id;
+    if (g.items?.some((i) => pathname.startsWith(i.to))) return g.id;
+    if (EXTRA_MATCHES[g.id]?.some((p) => pathname.startsWith(p))) return g.id;
+  }
+  return null;
+}
+
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const currentGroup = groupForPath(pathname);
+  const [openGroup, setOpenGroup] = useState<string | null>(currentGroup);
+  useEffect(() => {
+    if (currentGroup) setOpenGroup(currentGroup);
+  }, [currentGroup]);
   const { data: org } = useOrganization();
   const { data: me } = useProfile();
   const { data: brasao } = useBrasaoUrl(org?.logo_url);
+
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -86,27 +140,77 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-4">
-        {NAV.map((item) => {
-          const active = pathname.startsWith(item.to);
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+        {NAV.map((group) => {
+          if (group.to) {
+            const active = pathname.startsWith(group.to);
+            return (
+              <Link
+                key={group.id}
+                to={group.to}
+                onClick={() => setOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors",
+                  active
+                    ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+                    : "opacity-80 hover:bg-sidebar-accent/60 hover:opacity-100",
+                )}
+              >
+                <group.icon className="size-4 shrink-0" />
+                <span className="truncate">{group.label}</span>
+              </Link>
+            );
+          }
+
+          const expanded = openGroup === group.id;
+          const inGroup = currentGroup === group.id;
           return (
-            <Link
-              key={item.to}
-              to={item.to}
-              onClick={() => setOpen(false)}
-              className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors",
-                active
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                  : "opacity-80 hover:bg-sidebar-accent/60 hover:opacity-100",
+            <div key={group.id}>
+              <button
+                type="button"
+                aria-expanded={expanded}
+                onClick={() => setOpenGroup(expanded ? null : group.id)}
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors",
+                  inGroup
+                    ? "font-medium text-sidebar-accent-foreground opacity-100"
+                    : "opacity-80 hover:opacity-100",
+                  "hover:bg-sidebar-accent/60",
+                )}
+              >
+                <group.icon className="size-4 shrink-0" />
+                <span className="flex-1 truncate text-left">{group.label}</span>
+                <ChevronDown
+                  className={cn("size-4 shrink-0 transition-transform", expanded && "rotate-180")}
+                />
+              </button>
+              {expanded && (
+                <div className="mt-0.5 mb-1 space-y-0.5 border-l border-sidebar-border/70 pl-3 ml-5">
+                  {group.items?.map((leaf) => {
+                    const active = pathname.startsWith(leaf.to);
+                    return (
+                      <Link
+                        key={leaf.to}
+                        to={leaf.to}
+                        onClick={() => setOpen(false)}
+                        className={cn(
+                          "block truncate rounded-md px-3 py-2 text-[13px] transition-colors",
+                          active
+                            ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+                            : "opacity-75 hover:bg-sidebar-accent/50 hover:opacity-100",
+                        )}
+                      >
+                        {leaf.label}
+                      </Link>
+                    );
+                  })}
+                </div>
               )}
-            >
-              <item.icon className="size-4 shrink-0" />
-              <span className="truncate">{item.label}</span>
-            </Link>
+            </div>
           );
         })}
       </nav>
+
 
       <div className="border-t border-sidebar-border px-4 py-4 text-xs">
         <p className="truncate font-medium">{me?.profile?.full_name || me?.email}</p>
