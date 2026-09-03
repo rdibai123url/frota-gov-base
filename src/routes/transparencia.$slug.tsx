@@ -31,9 +31,14 @@ type Payload = {
   apresentacao?: string | null;
   atualizado_em?: string;
   conjuntos_disponiveis?: string[];
+  competencias_publicadas?: { competencia: string; chave: string; versao: number; publicado_em: string }[];
   frota?: { total: number; por_situacao: Record<string, number>; por_categoria: Record<string, number> };
   abastecimento?: { registros: number; litros: number; valor_total: number };
   manutencao?: { registros: number; valor_total: number };
+  competencia?: string;
+  versao?: number;
+  publicado_em?: string;
+  dados?: Record<string, any>;
   contratos?: { number: string; object: string | null; valid_from: string | null; valid_to: string | null; status: string; current_value: number | null }[];
   error?: string;
 };
@@ -50,6 +55,7 @@ function PortalTransparencia() {
   const [from, setFrom] = useState(`${new Date().getFullYear()}-01-01`);
   const [to, setTo] = useState(new Date().toISOString().slice(0, 10));
   const [period, setPeriod] = useState({ from, to });
+  const [competencia, setCompetencia] = useState("");
 
   const { data, isLoading } = useQuery({
     queryKey: ["transparencia", slug, period.from, period.to],
@@ -61,6 +67,15 @@ function PortalTransparencia() {
     },
   });
 
+
+  const { data: fechamento } = useQuery({
+    queryKey: ["transparencia-competencia", slug, competencia],
+    enabled: !!competencia,
+    queryFn: async (): Promise<Payload> => {
+      const response = await fetch(`/api/public/v1/transparencia/${slug}?competencia=${competencia}`);
+      return (await response.json()) as Payload;
+    },
+  });
 
   if (isLoading) return <p className="p-10 text-center text-muted-foreground">Carregando dados abertos...</p>;
 
@@ -94,6 +109,71 @@ function PortalTransparencia() {
 
       <main className="mx-auto max-w-5xl space-y-6 px-5 py-10">
         {data.apresentacao && <p className="text-muted-foreground">{data.apresentacao}</p>}
+
+        <section className="rounded-lg border bg-card p-5 shadow-card">
+          <h2 className="gov-title text-lg">Fechamento mensal publicado</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Consulte os dados consolidados e conferidos pelo órgão em cada competência (mês/ano). Nenhum dado pessoal
+            é publicado.
+          </p>
+          {(data.competencias_publicadas ?? []).length === 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground">
+              Nenhuma competência foi fechada e publicada até o momento.
+            </p>
+          ) : (
+            <>
+              <div className="mt-4 flex flex-wrap items-end gap-3">
+                <label className="text-sm">
+                  <span className="mb-1 block text-muted-foreground">Competência</span>
+                  <select
+                    value={competencia}
+                    onChange={(e) => setCompetencia(e.target.value)}
+                    className="rounded-md border bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="">Selecione o mês/ano</option>
+                    {(data.competencias_publicadas ?? []).map((c) => (
+                      <option key={c.chave} value={c.chave}>
+                        Competência {c.competencia}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              {fechamento?.dados && (
+                <div className="mt-4 rounded-md border p-4 text-sm">
+                  <p className="font-medium">Competência {fechamento.competencia}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Versão {fechamento.versao} · Publicada em{" "}
+                    {fechamento.publicado_em ? new Date(fechamento.publicado_em).toLocaleString("pt-BR") : "—"}
+                  </p>
+                  <ul className="mt-3 space-y-1 text-muted-foreground">
+                    <li>Frota: {fechamento.dados['frota']?.total ?? 0} veículo(s)</li>
+                    <li>
+                      Abastecimentos: {fechamento.dados['abastecimento']?.registros ?? 0} registro(s) ·{" "}
+                      {formatLiters(fechamento.dados['abastecimento']?.litros)} L · R${" "}
+                      {formatMoney(fechamento.dados['abastecimento']?.valor_total)}
+                    </li>
+                    <li>
+                      Manutenções: {fechamento.dados['manutencao']?.registros ?? 0} registro(s) · R${" "}
+                      {formatMoney(fechamento.dados['manutencao']?.valor_total)}
+                    </li>
+                    <li>Utilizações: {fechamento.dados['utilizacao']?.registros ?? 0}</li>
+                    <li>
+                      Contratos vigentes: {fechamento.dados['contratos']?.vigentes ?? 0} · R${" "}
+                      {formatMoney(fechamento.dados['contratos']?.valor_total)}
+                    </li>
+                    <li>
+                      Multas: {fechamento.dados['multas']?.registros ?? 0} · Sinistros:{" "}
+                      {fechamento.dados['sinistros']?.registros ?? 0} · Obrigações:{" "}
+                      {fechamento.dados['obrigacoes']?.registros ?? 0}
+                    </li>
+                    <li>Movimentações patrimoniais: {fechamento.dados['patrimonio']?.movimentacoes ?? 0}</li>
+                  </ul>
+                </div>
+              )}
+            </>
+          )}
+        </section>
 
         <section className="rounded-lg border bg-card p-5 shadow-card">
           <h2 className="gov-title text-lg">Consulta por período e dados abertos</h2>
