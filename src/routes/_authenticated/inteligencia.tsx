@@ -144,7 +144,7 @@ function Inteligencia() {
   const invalidate = useInvalidate();
   const { data: org } = useOrganization();
   const { data: me } = useProfile();
-  const { data: logoUrl } = useBrasaoUrl(org?.brasao_path);
+  const { data: logoUrl } = useBrasaoUrl(org?.logo_url);
   const { data: units = [] } = useUnits();
   const { data: vehicles = [] } = useVehicles();
   const { data: drivers = [] } = useDrivers();
@@ -1098,7 +1098,7 @@ function ParametersTab({
     for (const key of numeric) payload[key] = parseBRNumber(String(cfgValue(key, 0))) ?? 0;
     payload["alerts_enabled"] = String(cfgValue("alerts_enabled", true)) !== "false";
     const { error } = settings
-      ? await supabase.from("intelligence_settings").update(payload).eq("id", settings.id)
+      ? await supabase.from("intelligence_settings").update(payload as never).eq("id", settings.id)
       : await supabase.from("intelligence_settings").insert(payload as never);
     if (error) {
       toast.error(error.message);
