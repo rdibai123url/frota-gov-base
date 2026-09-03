@@ -530,8 +530,8 @@ function Relatorios() {
           <Input type="date" value={to} disabled={!usesDate} onChange={(e) => setTo(e.target.value)} />
         </div>
         <div className="space-y-1.5">
-          <Label>Unidade</Label>
-          <Select value={unitId} onValueChange={setUnitId}>
+          <Label>Secretaria / unidade</Label>
+          <Select value={unitId} onValueChange={setUnitId} disabled={!caps.unit}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="todas">Todas</SelectItem>
@@ -541,9 +541,9 @@ function Relatorios() {
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-1.5 lg:col-span-2">
+        <div className="space-y-1.5">
           <Label>Veículo</Label>
-          <Select value={vehicleId} onValueChange={setVehicleId}>
+          <Select value={vehicleId} onValueChange={setVehicleId} disabled={!caps.vehicle}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Todos</SelectItem>
@@ -552,6 +552,48 @@ function Relatorios() {
               ))}
             </SelectContent>
           </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Condutor / motorista</Label>
+          <Select value={driverId} onValueChange={setDriverId} disabled={!caps.driver}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              {drivers.map((d) => (
+                <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <p className="text-xs text-muted-foreground sm:col-span-2 lg:col-span-5">
+          Filtros desabilitados não se aplicam ao relatório selecionado.
+        </p>
+      </div>
+
+      {/* Cabeçalho institucional — idêntico ao usado na impressão/PDF e nas exportações */}
+      <div className="mb-4 rounded-lg border bg-card p-4 shadow-card">
+        <div className="flex items-start gap-4">
+          {logoUrl ? (
+            <img src={logoUrl} alt={`Brasão de ${meta.organization}`} className="size-14 shrink-0 object-contain" />
+          ) : null}
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold uppercase tracking-wide">{meta.organization}</p>
+            {meta.subtitle ? <p className="text-xs text-muted-foreground">{meta.subtitle}</p> : null}
+            <h2 className="mt-1 text-base font-semibold text-foreground">{reportLabel}</h2>
+            <dl className="mt-2 grid gap-x-6 gap-y-1 text-xs text-muted-foreground sm:grid-cols-2 lg:grid-cols-3">
+              <div><dt className="inline font-medium">Secretaria/unidade: </dt><dd className="inline">{meta.unit}</dd></div>
+              <div><dt className="inline font-medium">Período: </dt><dd className="inline">{periodText}</dd></div>
+              {filters.map((f) => (
+                <div key={f.label}>
+                  <dt className="inline font-medium">{f.label}: </dt>
+                  <dd className="inline">{f.value}</dd>
+                </div>
+              ))}
+              <div><dt className="inline font-medium">Emitido em: </dt><dd className="inline">{new Date().toLocaleString("pt-BR")}</dd></div>
+              <div><dt className="inline font-medium">Emitido por: </dt><dd className="inline">{issuedBy}</dd></div>
+              <div><dt className="inline font-medium">Total de registros: </dt><dd className="inline">{rows.length}</dd></div>
+            </dl>
+          </div>
         </div>
       </div>
 
@@ -571,6 +613,7 @@ function Relatorios() {
           </Button>
         </div>
       </div>
+
 
       <div className="overflow-x-auto rounded-lg border bg-card shadow-card">
         <Table>
