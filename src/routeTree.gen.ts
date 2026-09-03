@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAbastecimentosRouteImport } from './routes/_authenticated/abastecimentos'
+import { Route as AuthenticatedAlertasRouteImport } from './routes/_authenticated/alertas'
 import { Route as AuthenticatedCombustiveisRouteImport } from './routes/_authenticated/combustiveis'
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
 import { Route as AuthenticatedOrgaoRouteImport } from './routes/_authenticated/orgao'
@@ -41,6 +42,11 @@ const AuthenticatedAbastecimentosRoute =
     path: '/abastecimentos',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAlertasRoute = AuthenticatedAlertasRouteImport.update({
+  id: '/alertas',
+  path: '/alertas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCombustiveisRoute =
   AuthenticatedCombustiveisRouteImport.update({
     id: '/combustiveis',
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/abastecimentos': typeof AuthenticatedAbastecimentosRoute
+  '/alertas': typeof AuthenticatedAlertasRoute
   '/combustiveis': typeof AuthenticatedCombustiveisRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/orgao': typeof AuthenticatedOrgaoRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/abastecimentos': typeof AuthenticatedAbastecimentosRoute
+  '/alertas': typeof AuthenticatedAlertasRoute
   '/combustiveis': typeof AuthenticatedCombustiveisRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/orgao': typeof AuthenticatedOrgaoRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/abastecimentos': typeof AuthenticatedAbastecimentosRoute
+  '/_authenticated/alertas': typeof AuthenticatedAlertasRoute
   '/_authenticated/combustiveis': typeof AuthenticatedCombustiveisRoute
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/_authenticated/orgao': typeof AuthenticatedOrgaoRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/abastecimentos'
+    | '/alertas'
     | '/combustiveis'
     | '/fornecedores'
     | '/orgao'
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/abastecimentos'
+    | '/alertas'
     | '/combustiveis'
     | '/fornecedores'
     | '/orgao'
@@ -148,6 +159,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/abastecimentos'
+    | '/_authenticated/alertas'
     | '/_authenticated/combustiveis'
     | '/_authenticated/fornecedores'
     | '/_authenticated/orgao'
@@ -191,6 +203,13 @@ declare module '@tanstack/react-router' {
       path: '/abastecimentos'
       fullPath: '/abastecimentos'
       preLoaderRoute: typeof AuthenticatedAbastecimentosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/alertas': {
+      id: '/_authenticated/alertas'
+      path: '/alertas'
+      fullPath: '/alertas'
+      preLoaderRoute: typeof AuthenticatedAlertasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/combustiveis': {
@@ -247,6 +266,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAbastecimentosRoute: typeof AuthenticatedAbastecimentosRoute
+  AuthenticatedAlertasRoute: typeof AuthenticatedAlertasRoute
   AuthenticatedCombustiveisRoute: typeof AuthenticatedCombustiveisRoute
   AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
   AuthenticatedOrgaoRoute: typeof AuthenticatedOrgaoRoute
@@ -258,6 +278,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAbastecimentosRoute: AuthenticatedAbastecimentosRoute,
+  AuthenticatedAlertasRoute: AuthenticatedAlertasRoute,
   AuthenticatedCombustiveisRoute: AuthenticatedCombustiveisRoute,
   AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,
   AuthenticatedOrgaoRoute: AuthenticatedOrgaoRoute,
