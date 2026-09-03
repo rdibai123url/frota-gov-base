@@ -321,6 +321,15 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
+        {isDemoOrg && (
+          <div className="border-b border-warning/40 bg-warning/20 px-4 py-2.5 text-sm font-medium text-foreground sm:px-6">
+            AMBIENTE DE DEMONSTRAÇÃO — os dados exibidos são fictícios e destinados a apresentação
+            comercial e treinamento. Não utilize para operação real.
+          </div>
+        )}
+
+
+
         {isSuperAdmin && platformSession?.organization_id && (
           <div className="flex flex-wrap items-center justify-between gap-3 border-b bg-accent/15 px-4 py-2.5 text-sm sm:px-6">
             <p className="font-medium">
