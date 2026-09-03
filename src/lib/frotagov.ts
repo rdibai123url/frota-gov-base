@@ -1057,10 +1057,177 @@ export function useContractFileUrl(path: string | null | undefined) {
   });
 }
 
+/* ============ OBJETO DO CONTRATO (classificação extensível) ============ */
+
+export type ContractObjectKind = Database["public"]["Tables"]["contract_object_kinds"]["Row"];
+
+/** Fallback usado enquanto a lista do banco não carrega (mesma ordem do cadastro). */
+export const CONTRACT_OBJECT_KIND_FALLBACK: { value: string; label: string }[] = [
+  { value: "seguros", label: "Seguros" },
+  { value: "combustivel_oleos", label: "Combustível e óleos" },
+  { value: "manutencao", label: "Manutenção preventiva e corretiva" },
+  { value: "pneus", label: "Pneus" },
+  { value: "pecas", label: "Peças automotivas" },
+  { value: "higienizacao", label: "Higienização" },
+];
+
+export function useContractObjectKinds() {
+  return useQuery({
+    queryKey: ["contract-object-kinds"],
+    staleTime: 1000 * 60 * 60,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("contract_object_kinds")
+        .select("*")
+        .eq("active", true)
+        .order("sort_order");
+      if (error) throw error;
+      return (data ?? []) as ContractObjectKind[];
+    },
+  });
+}
+
+export function objectKindLabel(code: string | null | undefined, kinds: ContractObjectKind[] = []) {
+  if (!code) return "—";
+  return (
+    kinds.find((k) => k.code === code)?.label ??
+    CONTRACT_OBJECT_KIND_FALLBACK.find((k) => k.value === code)?.label ??
+    code
+  );
+}
+
+/* ====== VEÍCULO PARTICULAR DE SERVIDOR COM COTA DE COMBUSTÍVEL ====== */
+
+export type ServerFuelQuota = Database["public"]["Tables"]["server_fuel_quotas"]["Row"];
+export type ServerQuotaPeriod = Database["public"]["Enums"]["server_quota_period"];
+export type ServerQuotaStatus = Database["public"]["Enums"]["server_quota_status"];
+
+export type ServerFuelQuotaRow = ServerFuelQuota & {
+  vehicle: Pick<Vehicle, "id" | "plate" | "brand" | "model" | "status"> | null;
+  unit: Pick<Unit, "id" | "name" | "acronym"> | null;
+  fuel: Pick<FuelType, "id" | "name" | "measure_unit"> | null;
+};
+
+export const SERVER_QUOTA_PERIODS: { value: ServerQuotaPeriod; label: string }[] = [
+  { value: "semanal", label: "Semanal" },
+  { value: "mensal", label: "Mensal" },
+];
+
+export const SERVER_QUOTA_STATUS: { value: ServerQuotaStatus; label: string }[] = [
+  { value: "ativa", label: "Ativa" },
+  { value: "inativa", label: "Inativa" },
+  { value: "suspensa", label: "Suspensa" },
+];
+
+/** Início (inclusivo) e fim (exclusivo) do ciclo da cota, na semana ou no mês. */
+export function serverQuotaCycle(period: ServerQuotaPeriod, at: Date = new Date()) {
+  const d = new Date(at);
+  d.setHours(0, 0, 0, 0);
+  if (period === "semanal") {
+    const dow = (d.getDay() + 6) % 7; // segunda-feira como início, igual ao banco
+    const start = new Date(d);
+    start.setDate(d.getDate() - dow);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 7);
+    return { start, end };
+  }
+  const start = new Date(d.getFullYear(), d.getMonth(), 1);
+  const end = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+  return { start, end };
+}
+
+export function useServerFuelQuotas() {
+  return useQuery({
+    queryKey: ["server-fuel-quotas"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("server_fuel_quotas")
+        .select(
+          "*, vehicle:vehicles(id, plate, brand, model, status), unit:units(id, name, acronym), fuel:fuel_types(id, name, measure_unit)",
+        )
+        .order("beneficiary_name");
+      if (error) throw error;
+      return (data ?? []) as unknown as ServerFuelQuotaRow[];
+    },
+  });
+}
+
+/** Abastecimentos válidos vinculados a cotas de servidor nos últimos ciclos. */
+export function useServerQuotaFuelings() {
+  return useQuery({
+    queryKey: ["server-quota-fuelings"],
+    queryFn: async () => {
+      const since = new Date();
+      since.setDate(1);
+      since.setMonth(since.getMonth() - 1);
+      since.setHours(0, 0, 0, 0);
+      const { data, error } = await supabase
+        .from("fuelings")
+        .select("id, server_quota_id, vehicle_id, quantity, total_value, fueled_at, status")
+        .not("server_quota_id", "is", null)
+        .eq("status", "valido")
+        .gte("fueled_at", since.toISOString());
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export type ServerQuotaFueling = {
+  server_quota_id: string | null;
+  quantity: number | null;
+  total_value: number | null;
+  fueled_at: string;
+};
+
+/** Consumo do ciclo corrente da cota e saldo restante (o saldo não acumula entre ciclos). */
+export function serverQuotaUsage(
+  quota: Pick<ServerFuelQuota, "id" | "period" | "quota_quantity" | "alert_threshold_percent">,
+  fuelings: ServerQuotaFueling[],
+  at: Date = new Date(),
+) {
+  const { start, end } = serverQuotaCycle(quota.period, at);
+  const inCycle = fuelings.filter((f) => {
+    if (f.server_quota_id !== quota.id) return false;
+    const t = new Date(f.fueled_at).getTime();
+    return t >= start.getTime() && t < end.getTime();
+  });
+  const used = inCycle.reduce((s, f) => s + Number(f.quantity ?? 0), 0);
+  const value = inCycle.reduce((s, f) => s + Number(f.total_value ?? 0), 0);
+  const total = Number(quota.quota_quantity ?? 0);
+  const percent = pct(used, total);
+  return {
+    cycleStart: start,
+    cycleEnd: end,
+    used,
+    value,
+    total,
+    balance: Math.max(total - used, 0),
+    percent,
+    exhausted: total > 0 && used >= total - 0.001,
+    nearLimit: total > 0 && percent >= Number(quota.alert_threshold_percent ?? 80) && used < total - 0.001,
+  };
+}
+
+/** Cota vigente do veículo na data indicada (ativa tem precedência). */
+export function activeServerQuota(
+  quotas: ServerFuelQuotaRow[],
+  vehicleId: string | null | undefined,
+  at: Date = new Date(),
+) {
+  if (!vehicleId) return null;
+  const day = at.toISOString().slice(0, 10);
+  const list = quotas.filter(
+    (q) => q.vehicle_id === vehicleId && q.start_date <= day && (!q.end_date || q.end_date >= day),
+  );
+  return list.find((q) => q.status === "ativa") ?? list[0] ?? null;
+}
+
 /* ------------------------------- cálculos ------------------------------- */
 
 export function contractTotals(c: ContractRow) {
-  const items = c.items ?? [];
+  // Itens inativados deixam de compor o valor do contrato, mas preservam o histórico.
+  const items = (c.items ?? []).filter((i) => i.active !== false);
   const total = items.reduce((s, i) => s + Number(i.total_value ?? 0), 0);
   const consumed = items.reduce((s, i) => s + Number(i.consumed_value ?? 0), 0);
   const reserved = items.reduce((s, i) => s + Number(i.reserved_value ?? 0), 0);

@@ -1272,10 +1272,12 @@ export type Database = {
           fuel_type_id: string | null
           id: string
           item_code: string | null
+          item_number: number | null
           material_kind: string
           measure_unit: string
           notes: string | null
           organization_id: string
+          origin_amendment_id: string | null
           quantity: number
           reserved_quantity: number
           reserved_value: number
@@ -1295,10 +1297,12 @@ export type Database = {
           fuel_type_id?: string | null
           id?: string
           item_code?: string | null
+          item_number?: number | null
           material_kind?: string
           measure_unit?: string
           notes?: string | null
           organization_id: string
+          origin_amendment_id?: string | null
           quantity?: number
           reserved_quantity?: number
           reserved_value?: number
@@ -1318,10 +1322,12 @@ export type Database = {
           fuel_type_id?: string | null
           id?: string
           item_code?: string | null
+          item_number?: number | null
           material_kind?: string
           measure_unit?: string
           notes?: string | null
           organization_id?: string
+          origin_amendment_id?: string | null
           quantity?: number
           reserved_quantity?: number
           reserved_value?: number
@@ -1352,7 +1358,41 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "contract_items_origin_amendment_id_fkey"
+            columns: ["origin_amendment_id"]
+            isOneToOne: false
+            referencedRelation: "contract_amendments"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      contract_object_kinds: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          label: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          label: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          label?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       contract_periods: {
         Row: {
@@ -1456,6 +1496,7 @@ export type Database = {
           notes: string | null
           number: string
           object: string
+          object_kind: string
           organization_id: string
           original_valid_from: string | null
           original_valid_to: string | null
@@ -1467,6 +1508,7 @@ export type Database = {
           updated_by: string | null
           valid_from: string | null
           valid_to: string | null
+          value_from_items: boolean
         }
         Insert: {
           allows_amendment?: boolean
@@ -1484,6 +1526,7 @@ export type Database = {
           notes?: string | null
           number: string
           object: string
+          object_kind?: string
           organization_id: string
           original_valid_from?: string | null
           original_valid_to?: string | null
@@ -1495,6 +1538,7 @@ export type Database = {
           updated_by?: string | null
           valid_from?: string | null
           valid_to?: string | null
+          value_from_items?: boolean
         }
         Update: {
           allows_amendment?: boolean
@@ -1512,6 +1556,7 @@ export type Database = {
           notes?: string | null
           number?: string
           object?: string
+          object_kind?: string
           organization_id?: string
           original_valid_from?: string | null
           original_valid_to?: string | null
@@ -1523,6 +1568,7 @@ export type Database = {
           updated_by?: string | null
           valid_from?: string | null
           valid_to?: string | null
+          value_from_items?: boolean
         }
         Relationships: [
           {
@@ -1531,6 +1577,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "contract_periods"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_object_kind_fkey"
+            columns: ["object_kind"]
+            isOneToOne: false
+            referencedRelation: "contract_object_kinds"
+            referencedColumns: ["code"]
           },
           {
             foreignKeyName: "contracts_organization_id_fkey"
@@ -2151,6 +2204,8 @@ export type Database = {
           reserved_quantity: number
           reserved_value: number
           security_code: string | null
+          server_quota_id: string | null
+          server_quota_override_reason: string | null
           status: Database["public"]["Enums"]["fuel_auth_status"]
           supplier_id: string | null
           unit_id: string | null
@@ -2194,6 +2249,8 @@ export type Database = {
           reserved_quantity?: number
           reserved_value?: number
           security_code?: string | null
+          server_quota_id?: string | null
+          server_quota_override_reason?: string | null
           status?: Database["public"]["Enums"]["fuel_auth_status"]
           supplier_id?: string | null
           unit_id?: string | null
@@ -2237,6 +2294,8 @@ export type Database = {
           reserved_quantity?: number
           reserved_value?: number
           security_code?: string | null
+          server_quota_id?: string | null
+          server_quota_override_reason?: string | null
           status?: Database["public"]["Enums"]["fuel_auth_status"]
           supplier_id?: string | null
           unit_id?: string | null
@@ -2301,6 +2360,13 @@ export type Database = {
             columns: ["quota_id"]
             isOneToOne: false
             referencedRelation: "quotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_authorizations_server_quota_id_fkey"
+            columns: ["server_quota_id"]
+            isOneToOne: false
+            referencedRelation: "server_fuel_quotas"
             referencedColumns: ["id"]
           },
           {
@@ -2602,6 +2668,7 @@ export type Database = {
           released_value: number
           reserved_quantity_before: number | null
           reserved_value_before: number | null
+          server_quota_id: string | null
           status: Database["public"]["Enums"]["fueling_status"]
           supplier_id: string | null
           total_value: number | null
@@ -2651,6 +2718,7 @@ export type Database = {
           released_value?: number
           reserved_quantity_before?: number | null
           reserved_value_before?: number | null
+          server_quota_id?: string | null
           status?: Database["public"]["Enums"]["fueling_status"]
           supplier_id?: string | null
           total_value?: number | null
@@ -2700,6 +2768,7 @@ export type Database = {
           released_value?: number
           reserved_quantity_before?: number | null
           reserved_value_before?: number | null
+          server_quota_id?: string | null
           status?: Database["public"]["Enums"]["fueling_status"]
           supplier_id?: string | null
           total_value?: number | null
@@ -2773,6 +2842,13 @@ export type Database = {
             columns: ["quota_id"]
             isOneToOne: false
             referencedRelation: "quotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuelings_server_quota_id_fkey"
+            columns: ["server_quota_id"]
+            isOneToOne: false
+            referencedRelation: "server_fuel_quotas"
             referencedColumns: ["id"]
           },
           {
@@ -4824,6 +4900,116 @@ export type Database = {
           },
         ]
       }
+      server_fuel_quotas: {
+        Row: {
+          alert_threshold_percent: number
+          attachment_path: string | null
+          beneficiary_cpf: string
+          beneficiary_name: string
+          created_at: string
+          created_by: string | null
+          end_date: string | null
+          fuel_type_id: string | null
+          id: string
+          import_batch_id: string | null
+          job_title: string | null
+          justification: string | null
+          notes: string | null
+          organization_id: string
+          period: Database["public"]["Enums"]["server_quota_period"]
+          quota_quantity: number
+          quota_value: number | null
+          registration_code: string | null
+          start_date: string
+          status: Database["public"]["Enums"]["server_quota_status"]
+          unit_id: string | null
+          updated_at: string
+          updated_by: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          alert_threshold_percent?: number
+          attachment_path?: string | null
+          beneficiary_cpf: string
+          beneficiary_name: string
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          fuel_type_id?: string | null
+          id?: string
+          import_batch_id?: string | null
+          job_title?: string | null
+          justification?: string | null
+          notes?: string | null
+          organization_id: string
+          period?: Database["public"]["Enums"]["server_quota_period"]
+          quota_quantity?: number
+          quota_value?: number | null
+          registration_code?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["server_quota_status"]
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          alert_threshold_percent?: number
+          attachment_path?: string | null
+          beneficiary_cpf?: string
+          beneficiary_name?: string
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          fuel_type_id?: string | null
+          id?: string
+          import_batch_id?: string | null
+          job_title?: string | null
+          justification?: string | null
+          notes?: string | null
+          organization_id?: string
+          period?: Database["public"]["Enums"]["server_quota_period"]
+          quota_quantity?: number
+          quota_value?: number | null
+          registration_code?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["server_quota_status"]
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "server_fuel_quotas_fuel_type_id_fkey"
+            columns: ["fuel_type_id"]
+            isOneToOne: false
+            referencedRelation: "fuel_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "server_fuel_quotas_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "server_fuel_quotas_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "server_fuel_quotas_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_order_items: {
         Row: {
           brand: string | null
@@ -6557,6 +6743,7 @@ export type Database = {
           hour_meter: number | null
           id: string
           import_batch_id: string | null
+          is_private_server_vehicle: boolean
           model: string | null
           notes: string | null
           organization_id: string
@@ -6583,6 +6770,7 @@ export type Database = {
           hour_meter?: number | null
           id?: string
           import_batch_id?: string | null
+          is_private_server_vehicle?: boolean
           model?: string | null
           notes?: string | null
           organization_id: string
@@ -6609,6 +6797,7 @@ export type Database = {
           hour_meter?: number | null
           id?: string
           import_batch_id?: string | null
+          is_private_server_vehicle?: boolean
           model?: string | null
           notes?: string | null
           organization_id?: string
@@ -6753,6 +6942,41 @@ export type Database = {
     }
     Functions: {
       active_org_id: { Args: never; Returns: string }
+      active_server_quota: {
+        Args: { _at: string; _vehicle: string }
+        Returns: {
+          alert_threshold_percent: number
+          attachment_path: string | null
+          beneficiary_cpf: string
+          beneficiary_name: string
+          created_at: string
+          created_by: string | null
+          end_date: string | null
+          fuel_type_id: string | null
+          id: string
+          import_batch_id: string | null
+          job_title: string | null
+          justification: string | null
+          notes: string | null
+          organization_id: string
+          period: Database["public"]["Enums"]["server_quota_period"]
+          quota_quantity: number
+          quota_value: number | null
+          registration_code: string | null
+          start_date: string
+          status: Database["public"]["Enums"]["server_quota_status"]
+          unit_id: string | null
+          updated_at: string
+          updated_by: string | null
+          vehicle_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "server_fuel_quotas"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       annul_import_batch: {
         Args: { _batch: string; _reason: string }
         Returns: Json
@@ -6959,6 +7183,20 @@ export type Database = {
         Returns: undefined
       }
       seed_cleaning_types: { Args: { _org: string }; Returns: undefined }
+      server_quota_cycle: {
+        Args: {
+          _at: string
+          _period: Database["public"]["Enums"]["server_quota_period"]
+        }
+        Returns: {
+          cycle_end: string
+          cycle_start: string
+        }[]
+      }
+      server_quota_usage: {
+        Args: { _at: string; _ignore_auth?: string; _quota: string }
+        Returns: number
+      }
       transparency_period_is_closed: {
         Args: { _at: string; _org: string }
         Returns: boolean
@@ -7137,6 +7375,8 @@ export type Database = {
         | "aprovado"
         | "rejeitado"
         | "executado"
+      server_quota_period: "semanal" | "mensal"
+      server_quota_status: "ativa" | "inativa" | "suspensa"
       service_order_status:
         | "emitida"
         | "veiculo_recebido"
@@ -7501,6 +7741,8 @@ export const Constants = {
         "rejeitado",
         "executado",
       ],
+      server_quota_period: ["semanal", "mensal"],
+      server_quota_status: ["ativa", "inativa", "suspensa"],
       service_order_status: [
         "emitida",
         "veiculo_recebido",

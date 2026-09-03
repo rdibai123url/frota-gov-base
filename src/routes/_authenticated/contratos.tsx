@@ -1,7 +1,7 @@
 import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Pencil, FileText, Package, Upload, ExternalLink, GitBranch } from "lucide-react";
+import { Plus, Pencil, FileText, Package, Upload, ExternalLink, GitBranch, Ban, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   CONTRACT_MODALITIES,
   CONTRACT_STATUS,
@@ -35,6 +36,9 @@ import {
   useInvalidate,
   usePerms,
   useSuppliers,
+  useContractObjectKinds,
+  objectKindLabel,
+  CONTRACT_OBJECT_KIND_FALLBACK,
   type ContractItem,
   type ContractRow,
   parseBRNumber,
@@ -104,6 +108,10 @@ function Contratos() {
   const { data: contracts = [], isLoading } = useContracts();
   const { data: suppliers = [] } = useSuppliers();
   const { data: fuels = [] } = useFuelTypes();
+  const { data: objectKinds = [] } = useContractObjectKinds();
+  const kindOptions = objectKinds.length
+    ? objectKinds.map((k) => ({ value: k.code, label: k.label }))
+    : CONTRACT_OBJECT_KIND_FALLBACK;
   const { canManageFinance, orgId, userId } = usePerms();
   const invalidate = useInvalidate();
 
@@ -112,6 +120,8 @@ function Contratos() {
   const [modality, setModality] = useState<string>("pregao");
   const [status, setStatus] = useState<string>("rascunho");
   const [supplierId, setSupplierId] = useState(NONE);
+  const [objectKind, setObjectKind] = useState("combustivel_oleos");
+  const [valueFromItems, setValueFromItems] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -128,6 +138,7 @@ function Contratos() {
 
   const [fStatus, setFStatus] = useState(ALL);
   const [fSupplier, setFSupplier] = useState(ALL);
+  const [fKind, setFKind] = useState(ALL);
   const [search, setSearch] = useState("");
 
   const filtered = useMemo(
@@ -135,10 +146,11 @@ function Contratos() {
       contracts.filter((c) => {
         if (fStatus !== ALL && c.status !== fStatus) return false;
         if (fSupplier !== ALL && (c.supplier_id ?? NONE) !== fSupplier) return false;
+        if (fKind !== ALL && c.object_kind !== fKind) return false;
         const q = search.trim().toLowerCase();
         return !q || `${c.number} ${c.process_number ?? ""} ${c.object}`.toLowerCase().includes(q);
       }),
-    [contracts, fStatus, fSupplier, search],
+    [contracts, fStatus, fSupplier, fKind, search],
   );
 
   const totals = useMemo(() => {
@@ -157,6 +169,8 @@ function Contratos() {
     setModality("pregao");
     setStatus("rascunho");
     setSupplierId(NONE);
+    setObjectKind("combustivel_oleos");
+    setValueFromItems(false);
     setFile(null);
     setOpen(true);
   }
@@ -166,6 +180,8 @@ function Contratos() {
     setModality(c.modality);
     setStatus(c.status);
     setSupplierId(c.supplier_id ?? NONE);
+    setObjectKind(c.object_kind ?? "combustivel_oleos");
+    setValueFromItems(Boolean(c.value_from_items));
     setFile(null);
     setOpen(true);
   }
@@ -205,6 +221,8 @@ function Contratos() {
       process_number: d.process_number || null,
       modality: modality as ContractRow["modality"],
       object: d.object,
+      object_kind: objectKind,
+      value_from_items: valueFromItems,
       supplier_id: supplierId === NONE ? null : supplierId,
       cnpj: onlyDigits(d.cnpj) || null,
       signed_at: d.signed_at || null,
@@ -300,6 +318,17 @@ function Contratos() {
     setItemOpen(false);
   }
 
+  async function toggleItem(i: ContractItem) {
+    const next = i.active === false;
+    const { error } = await supabase.from("contract_items").update({ active: next }).eq("id", i.id);
+    if (error) {
+      toast.error("Não foi possível alterar a situação do item.");
+      return;
+    }
+    toast.success(next ? "Item reativado." : "Item inativado. O histórico de execução foi preservado.");
+    invalidate(["contracts", "contract-items"]);
+  }
+
   async function openAttachment(path: string) {
     const { data } = await supabase.storage.from("contratos").createSignedUrl(path, 3600);
     if (data?.signedUrl) window.open(data.signedUrl, "_blank", "noopener");
@@ -358,6 +387,22 @@ function Contratos() {
           </Select>
         </div>
         <div>
+          <Label>Objeto do contrato</Label>
+          <Select value={fKind} onValueChange={setFKind}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>Todos os objetos</SelectItem>
+              {kindOptions.map((k) => (
+                <SelectItem key={k.value} value={k.value}>
+                  {k.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
           <Label>Fornecedor</Label>
           <Select value={fSupplier} onValueChange={setFSupplier}>
             <SelectTrigger>
@@ -394,6 +439,7 @@ function Contratos() {
                     <h3 className="gov-title text-lg">Contrato {c.number}</h3>
                     <StatusBadge status={c.status} />
                     <Badge variant="outline">{label(CONTRACT_MODALITIES, c.modality)}</Badge>
+                    <Badge variant="secondary">{objectKindLabel(c.object_kind, objectKinds)}</Badge>
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">{c.object}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
@@ -463,6 +509,7 @@ function Contratos() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-14">Nº</TableHead>
                       <TableHead>Item</TableHead>
                       <TableHead>Tipo</TableHead>
                       <TableHead className="text-right">Contratado</TableHead>
@@ -477,18 +524,27 @@ function Contratos() {
                   <TableBody>
                     {(c.items ?? []).length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={9} className="py-6 text-center text-sm text-muted-foreground">
+                        <TableCell colSpan={10} className="py-6 text-center text-sm text-muted-foreground">
                           Nenhum item cadastrado neste contrato.
                         </TableCell>
                       </TableRow>
                     )}
-                    {(c.items ?? []).map((i) => {
+                    {[...(c.items ?? [])]
+                      .sort((a, b2) => (a.item_number ?? 0) - (b2.item_number ?? 0))
+                      .map((i) => {
                       const b = itemBalance(i);
+                      const inactive = i.active === false;
                       return (
-                        <TableRow key={i.id}>
+                        <TableRow key={i.id} className={inactive ? "opacity-60" : undefined}>
+                          <TableCell className="text-sm text-muted-foreground">{i.item_number ?? "—"}</TableCell>
                           <TableCell className="font-medium">
                             {i.item_code ? `${i.item_code} — ` : ""}
                             {i.description}
+                            {inactive && (
+                              <Badge variant="outline" className="ml-2">
+                                Inativo
+                              </Badge>
+                            )}
                           </TableCell>
                           <TableCell>{MATERIAL_KIND_LABELS[i.material_kind] ?? i.material_kind}</TableCell>
                           <TableCell className="text-right">
@@ -507,14 +563,29 @@ function Contratos() {
                           <TableCell className="text-right font-medium">{brl(b.value)}</TableCell>
                           <TableCell>
                             {canManageFinance && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                aria-label="Editar item"
-                                onClick={() => openEditItem(c, i)}
-                              >
-                                <Pencil className="size-4" />
-                              </Button>
+                              <div className="flex justify-end gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  aria-label="Editar item"
+                                  onClick={() => openEditItem(c, i)}
+                                >
+                                  <Pencil className="size-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  aria-label={inactive ? "Reativar item" : "Inativar item"}
+                                  title={
+                                    inactive
+                                      ? "Reativar item"
+                                      : "Inativar item (itens com movimentação não podem ser excluídos)"
+                                  }
+                                  onClick={() => toggleItem(i)}
+                                >
+                                  {inactive ? <RotateCcw className="size-4" /> : <Ban className="size-4" />}
+                                </Button>
+                              </div>
                             )}
                           </TableCell>
                         </TableRow>
@@ -562,8 +633,26 @@ function Contratos() {
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <Label>Objeto do contrato *</Label>
+                <Select value={objectKind} onValueChange={setObjectKind}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {kindOptions.map((k) => (
+                      <SelectItem key={k.value} value={k.value}>
+                        {k.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Classificação usada em listagens, filtros e relatórios.
+                </p>
+              </div>
               <div className="sm:col-span-3">
-                <Label htmlFor="object">Objeto *</Label>
+                <Label htmlFor="object">Descrição do objeto *</Label>
                 <Textarea id="object" name="object" defaultValue={editing?.object ?? ""} rows={2} required />
               </div>
               <div>
@@ -632,6 +721,22 @@ function Contratos() {
                   name="current_value"
                   defaultValue={editing ? Number(editing.current_value) : ""}
                 />
+              </div>
+              <div className="sm:col-span-3 flex items-start gap-2 rounded-md border p-3">
+                <Checkbox
+                  id="value_from_items"
+                  checked={valueFromItems}
+                  onCheckedChange={(v) => setValueFromItems(v === true)}
+                />
+                <div>
+                  <Label htmlFor="value_from_items" className="cursor-pointer">
+                    Contrato itemizado — o valor atual é a soma dos itens
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Com a opção marcada, o valor atual do contrato passa a ser calculado automaticamente pela soma de
+                    quantidade × valor unitário dos itens ativos.
+                  </p>
+                </div>
               </div>
               <div>
                 <Label htmlFor="file">PDF do contrato</Label>
