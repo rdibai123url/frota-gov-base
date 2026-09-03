@@ -37,6 +37,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   ALERT_TYPE_LABELS,
+  EXPENSE_ORIGINS,
   authorizationBalance,
   authorizationUsable,
   brl,
