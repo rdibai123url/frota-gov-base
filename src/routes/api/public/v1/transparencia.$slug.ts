@@ -225,6 +225,7 @@ export const Route = createFileRoute("/api/public/v1/transparencia/$slug")({
           apresentacao: settings.headline ?? null,
           periodo,
           atualizado_em: new Date().toISOString(),
+          competencias_publicadas: competencias,
           conjuntos_disponiveis: Object.entries(datasets)
             .filter(([, v]) => v)
             .map(([k]) => k),
