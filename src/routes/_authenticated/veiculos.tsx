@@ -170,7 +170,8 @@ function Veiculos() {
       tank_capacity: num(d.tank_capacity),
       current_km: num(d.current_km),
       hour_meter: num(d.hour_meter),
-      unit_id: safeUnitId,
+      // A unidade só muda pelo fluxo de movimentação patrimonial (Frota → Movimentação patrimonial).
+      ...(editing ? {} : { unit_id: safeUnitId }),
       status,
       notes: d.notes || null,
     };
