@@ -26,6 +26,10 @@ import {
   Building2 as Building,
   FileSearch,
   FileCheck2,
+  FileWarning,
+  AlertTriangle,
+  ShieldCheck,
+  ArrowLeftRight,
 } from "lucide-react";
 
 import { PageHeader } from "@/components/app-shell";
@@ -59,6 +63,12 @@ import {
   useQuotations,
   useServiceOrders,
   useWorkshops,
+  DISPOSAL_KINDS,
+  useAccidents,
+  useAssetMovements,
+  useInsurancePolicies,
+  useTrafficFines,
+  useVehicleObligations,
 } from "@/lib/frotagov";
 
 
@@ -120,6 +130,11 @@ const SHORTCUTS = [
   { to: "/combustiveis", label: "Combustíveis", text: "Tipos de combustível do órgão", icon: Droplets },
   { to: "/unidades", label: "Secretarias / Unidades", text: "Estrutura administrativa do órgão", icon: Building2 },
   { to: "/usuarios", label: "Usuários", text: "Perfis e permissões de acesso", icon: Users },
+  { to: "/multas", label: "Multas e infrações", text: "Autos de infração, defesa e responsabilidade", icon: FileWarning },
+  { to: "/sinistros", label: "Acidentes e sinistros", text: "Ocorrências, seguradora e indisponibilidade", icon: AlertTriangle },
+  { to: "/seguros", label: "Seguros", text: "Apólices, vigências e veículos cobertos", icon: ShieldCheck },
+  { to: "/obrigacoes", label: "Obrigações legais", text: "Licenciamento, IPVA, inspeções e ANTT", icon: FileCheck2 },
+  { to: "/patrimonio", label: "Movimentação patrimonial", text: "Cessões, remanejamentos, baixas e leilões", icon: ArrowLeftRight },
   { to: "/orgao", label: "Dados do Órgão", text: "Identificação institucional e brasão", icon: Landmark },
 ] as const;
 
@@ -249,6 +264,36 @@ function Painel() {
     };
   }, [quotations, orders, workshops]);
 
+  const { data: fines = [] } = useTrafficFines();
+  const { data: accidents = [] } = useAccidents();
+  const { data: policies = [] } = useInsurancePolicies();
+  const { data: obligations = [] } = useVehicleObligations();
+  const { data: movements = [] } = useAssetMovements();
+
+  const admin = useMemo(() => {
+    const now = new Date();
+    const abertasStatus = ["recebida", "em_analise", "defesa_apresentada", "indeferida"];
+    const multasAbertas = fines.filter((f) => abertasStatus.includes(f.status));
+    const sinistrosAbertos = accidents.filter((a) => a.status !== "encerrado");
+    return {
+      multasAbertas: multasAbertas.length,
+      multasValor: multasAbertas.reduce((s2, f) => s2 + Number(f.amount ?? 0), 0),
+      obrigacoesVencidas: obligations.filter((o) => o.status === "vencida").length,
+      segurosAVencer: policies.filter((p) => {
+        if (p.status === "cancelada" || p.status === "vencida") return false;
+        const d = daysUntil(p.valid_to);
+        return d !== null && d >= 0 && d <= 60;
+      }).length,
+      sinistrosAbertos: sinistrosAbertos.length,
+      veiculosPorSinistro: new Set(sinistrosAbertos.filter((a) => a.blocks_use).map((a) => a.vehicle_id)).size,
+      movimentacoesMes: movements.filter((m) => {
+        const d = new Date(`${m.moved_on}T12:00:00`);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      }).length,
+      baixas: movements.filter((m) => DISPOSAL_KINDS.includes(m.kind)).length,
+    };
+  }, [fines, accidents, policies, obligations, movements]);
+
   const ultimos6 = useMemo(() => {
     const base = new Date();
     return Array.from({ length: 6 }, (_, i) => {
@@ -365,6 +410,43 @@ function Painel() {
           icon={Coins}
           tone={financeiro.contratosAVencer > 0 ? "warning" : "default"}
         />
+      </div>
+
+      <h2 className="gov-title mt-10 mb-4 text-lg">Gestão administrativa, legal e patrimonial</h2>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          label="Multas em aberto"
+          value={admin.multasAbertas}
+          icon={FileWarning}
+          tone={admin.multasAbertas > 0 ? "warning" : "default"}
+        />
+        <StatCard label="Valor de multas em aberto" value={brl(admin.multasValor)} icon={Banknote} />
+        <StatCard
+          label="Obrigações legais vencidas"
+          value={admin.obrigacoesVencidas}
+          icon={FileCheck2}
+          tone={admin.obrigacoesVencidas > 0 ? "warning" : "default"}
+        />
+        <StatCard
+          label="Seguros a vencer (60 dias)"
+          value={admin.segurosAVencer}
+          icon={ShieldCheck}
+          tone={admin.segurosAVencer > 0 ? "warning" : "default"}
+        />
+        <StatCard
+          label="Sinistros em aberto"
+          value={admin.sinistrosAbertos}
+          icon={AlertTriangle}
+          tone={admin.sinistrosAbertos > 0 ? "warning" : "default"}
+        />
+        <StatCard
+          label="Veículos indisponíveis por sinistro"
+          value={admin.veiculosPorSinistro}
+          icon={Truck}
+          tone={admin.veiculosPorSinistro > 0 ? "warning" : "default"}
+        />
+        <StatCard label="Movimentações patrimoniais no mês" value={admin.movimentacoesMes} icon={ArrowLeftRight} />
+        <StatCard label="Baixas e alienações acumuladas" value={admin.baixas} icon={Landmark} />
       </div>
 
       <h2 className="gov-title mt-10 mb-4 text-lg">Gasto dos últimos 6 meses</h2>
