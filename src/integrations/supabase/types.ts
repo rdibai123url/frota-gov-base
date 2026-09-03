@@ -4277,12 +4277,286 @@ export type Database = {
           },
         ]
       }
+      transparency_delivery_attempts: {
+        Row: {
+          attempted_at: string
+          attempted_by: string | null
+          created_at: string
+          endpoint: string | null
+          http_status: number | null
+          id: string
+          message: string | null
+          mode: Database["public"]["Enums"]["transparency_integration_mode"]
+          organization_id: string
+          publication_id: string | null
+          status: string
+        }
+        Insert: {
+          attempted_at?: string
+          attempted_by?: string | null
+          created_at?: string
+          endpoint?: string | null
+          http_status?: number | null
+          id?: string
+          message?: string | null
+          mode: Database["public"]["Enums"]["transparency_integration_mode"]
+          organization_id: string
+          publication_id?: string | null
+          status: string
+        }
+        Update: {
+          attempted_at?: string
+          attempted_by?: string | null
+          created_at?: string
+          endpoint?: string | null
+          http_status?: number | null
+          id?: string
+          message?: string | null
+          mode?: Database["public"]["Enums"]["transparency_integration_mode"]
+          organization_id?: string
+          publication_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transparency_delivery_attempts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transparency_delivery_attempts_publication_id_fkey"
+            columns: ["publication_id"]
+            isOneToOne: false
+            referencedRelation: "transparency_publications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transparency_periods: {
+        Row: {
+          checklist: Json
+          closed_at: string | null
+          closed_by: string | null
+          closing_notes: string | null
+          created_at: string
+          created_by: string | null
+          current_version: number
+          id: string
+          month: number
+          organization_id: string
+          reopened_at: string | null
+          reopened_by: string | null
+          status: Database["public"]["Enums"]["transparency_period_status"]
+          updated_at: string
+          updated_by: string | null
+          year: number
+        }
+        Insert: {
+          checklist?: Json
+          closed_at?: string | null
+          closed_by?: string | null
+          closing_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_version?: number
+          id?: string
+          month: number
+          organization_id: string
+          reopened_at?: string | null
+          reopened_by?: string | null
+          status?: Database["public"]["Enums"]["transparency_period_status"]
+          updated_at?: string
+          updated_by?: string | null
+          year: number
+        }
+        Update: {
+          checklist?: Json
+          closed_at?: string | null
+          closed_by?: string | null
+          closing_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_version?: number
+          id?: string
+          month?: number
+          organization_id?: string
+          reopened_at?: string | null
+          reopened_by?: string | null
+          status?: Database["public"]["Enums"]["transparency_period_status"]
+          updated_at?: string
+          updated_by?: string | null
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transparency_periods_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transparency_publications: {
+        Row: {
+          checklist: Json
+          created_at: string
+          external_error: string | null
+          external_mode: Database["public"]["Enums"]["transparency_integration_mode"]
+          external_sent_at: string | null
+          external_status: string
+          id: string
+          notes: string | null
+          organization_id: string
+          period_id: string
+          published_at: string
+          published_by: string | null
+          snapshot: Json
+          superseded_at: string | null
+          version: number
+        }
+        Insert: {
+          checklist?: Json
+          created_at?: string
+          external_error?: string | null
+          external_mode?: Database["public"]["Enums"]["transparency_integration_mode"]
+          external_sent_at?: string | null
+          external_status?: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          period_id: string
+          published_at?: string
+          published_by?: string | null
+          snapshot?: Json
+          superseded_at?: string | null
+          version: number
+        }
+        Update: {
+          checklist?: Json
+          created_at?: string
+          external_error?: string | null
+          external_mode?: Database["public"]["Enums"]["transparency_integration_mode"]
+          external_sent_at?: string | null
+          external_status?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          period_id?: string
+          published_at?: string
+          published_by?: string | null
+          snapshot?: Json
+          superseded_at?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transparency_publications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transparency_publications_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "transparency_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transparency_reopen_requests: {
+        Row: {
+          created_at: string
+          details: string
+          executed_at: string | null
+          executed_by: string | null
+          id: string
+          organization_id: string
+          period_id: string
+          protocol: string | null
+          reason: string
+          requested_at: string
+          requested_by: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["reopen_request_status"]
+          support_justification: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          details: string
+          executed_at?: string | null
+          executed_by?: string | null
+          id?: string
+          organization_id: string
+          period_id: string
+          protocol?: string | null
+          reason: string
+          requested_at?: string
+          requested_by?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["reopen_request_status"]
+          support_justification?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: string
+          executed_at?: string | null
+          executed_by?: string | null
+          id?: string
+          organization_id?: string
+          period_id?: string
+          protocol?: string | null
+          reason?: string
+          requested_at?: string
+          requested_by?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["reopen_request_status"]
+          support_justification?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transparency_reopen_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transparency_reopen_requests_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "transparency_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transparency_settings: {
         Row: {
           created_at: string
           datasets: Json
           enabled: boolean
           headline: string | null
+          integration_auth_header: string | null
+          integration_endpoint: string | null
+          integration_mode: Database["public"]["Enums"]["transparency_integration_mode"]
+          integration_notes: string | null
+          integration_secret_name: string | null
+          last_sync_at: string | null
+          last_sync_error: string | null
+          last_sync_status: string | null
           organization_id: string
           slug: string | null
           updated_at: string
@@ -4293,6 +4567,14 @@ export type Database = {
           datasets?: Json
           enabled?: boolean
           headline?: string | null
+          integration_auth_header?: string | null
+          integration_endpoint?: string | null
+          integration_mode?: Database["public"]["Enums"]["transparency_integration_mode"]
+          integration_notes?: string | null
+          integration_secret_name?: string | null
+          last_sync_at?: string | null
+          last_sync_error?: string | null
+          last_sync_status?: string | null
           organization_id: string
           slug?: string | null
           updated_at?: string
@@ -4303,6 +4585,14 @@ export type Database = {
           datasets?: Json
           enabled?: boolean
           headline?: string | null
+          integration_auth_header?: string | null
+          integration_endpoint?: string | null
+          integration_mode?: Database["public"]["Enums"]["transparency_integration_mode"]
+          integration_notes?: string | null
+          integration_secret_name?: string | null
+          last_sync_at?: string | null
+          last_sync_error?: string | null
+          last_sync_status?: string | null
           organization_id?: string
           slug?: string | null
           updated_at?: string
@@ -4966,7 +5256,24 @@ export type Database = {
       can_register_fueling: { Args: never; Returns: boolean }
       can_register_occurrence: { Args: never; Returns: boolean }
       can_write: { Args: never; Returns: boolean }
+      close_transparency_period: {
+        Args: {
+          _checklist: Json
+          _month: number
+          _notes: string
+          _year: number
+        }
+        Returns: Json
+      }
       current_org_id: { Args: never; Returns: string }
+      ensure_transparency_period: {
+        Args: { _month: number; _year: number }
+        Returns: string
+      }
+      execute_transparency_reopen: {
+        Args: { _justification: string; _request: string }
+        Returns: undefined
+      }
       expire_fuel_authorizations: { Args: never; Returns: undefined }
       expire_fuel_authorizations_all: { Args: never; Returns: number }
       fuel_limit_breach: {
@@ -5006,6 +5313,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      log_transparency_delivery: {
+        Args: {
+          _http: number
+          _message: string
+          _publication: string
+          _status: string
+        }
+        Returns: undefined
+      }
       my_unit_id: { Args: never; Returns: string }
       next_org_code: {
         Args: { _key: string; _org: string; _prefix: string }
@@ -5016,6 +5332,31 @@ export type Database = {
       refresh_fleet_alerts: { Args: never; Returns: undefined }
       refresh_maintenance_alerts: { Args: never; Returns: undefined }
       refresh_procurement_alerts: { Args: never; Returns: undefined }
+      request_transparency_reopen: {
+        Args: {
+          _details: string
+          _month: number
+          _reason: string
+          _year: number
+        }
+        Returns: string
+      }
+      review_transparency_reopen: {
+        Args: { _decision: string; _justification: string; _request: string }
+        Returns: undefined
+      }
+      save_transparency_checklist: {
+        Args: { _checklist: Json; _month: number; _year: number }
+        Returns: undefined
+      }
+      transparency_period_is_closed: {
+        Args: { _at: string; _org: string }
+        Returns: boolean
+      }
+      transparency_snapshot: {
+        Args: { _month: number; _org: string; _year: number }
+        Returns: Json
+      }
       unit_scope_ok: { Args: { _unit: string }; Returns: boolean }
     }
     Enums: {
@@ -5154,6 +5495,12 @@ export type Database = {
         | "em_analise"
         | "encerrada"
         | "cancelada"
+      reopen_request_status:
+        | "aberto"
+        | "em_analise"
+        | "aprovado"
+        | "rejeitado"
+        | "executado"
       service_order_status:
         | "emitida"
         | "veiculo_recebido"
@@ -5176,6 +5523,18 @@ export type Database = {
         | "recapagem"
         | "descartado"
         | "baixado"
+      transparency_integration_mode:
+        | "desativada"
+        | "api"
+        | "webhook"
+        | "arquivo"
+      transparency_period_status:
+        | "aberta"
+        | "em_conferencia"
+        | "fechada"
+        | "reabertura_solicitada"
+        | "reaberta"
+        | "erro_integracao"
       unit_type:
         | "secretaria"
         | "departamento"
@@ -5470,6 +5829,13 @@ export const Constants = {
         "encerrada",
         "cancelada",
       ],
+      reopen_request_status: [
+        "aberto",
+        "em_analise",
+        "aprovado",
+        "rejeitado",
+        "executado",
+      ],
       service_order_status: [
         "emitida",
         "veiculo_recebido",
@@ -5494,6 +5860,20 @@ export const Constants = {
         "recapagem",
         "descartado",
         "baixado",
+      ],
+      transparency_integration_mode: [
+        "desativada",
+        "api",
+        "webhook",
+        "arquivo",
+      ],
+      transparency_period_status: [
+        "aberta",
+        "em_conferencia",
+        "fechada",
+        "reabertura_solicitada",
+        "reaberta",
+        "erro_integracao",
       ],
       unit_type: [
         "secretaria",
