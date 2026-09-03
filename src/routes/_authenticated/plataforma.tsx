@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReopenReviewTab } from "@/components/reopen-review";
+import { ImportMigrationTab } from "@/components/import-migration";
+
 import { exportXlsx } from "@/lib/reports";
 import { DocsTab, MatrixTab } from "@/components/homologacao";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
