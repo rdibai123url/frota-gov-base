@@ -102,6 +102,7 @@ export type Database = {
           job_title: string | null
           organization_id: string | null
           phone: string | null
+          unit_id: string | null
           updated_at: string
         }
         Insert: {
@@ -113,6 +114,7 @@ export type Database = {
           job_title?: string | null
           organization_id?: string | null
           phone?: string | null
+          unit_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -124,6 +126,7 @@ export type Database = {
           job_title?: string | null
           organization_id?: string | null
           phone?: string | null
+          unit_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -132,6 +135,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
             referencedColumns: ["id"]
           },
         ]
@@ -325,6 +335,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_manage_users: { Args: never; Returns: boolean }
       can_write: { Args: never; Returns: boolean }
       current_org_id: { Args: never; Returns: string }
       has_role: {
