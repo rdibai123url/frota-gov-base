@@ -24,6 +24,9 @@ import { Route as AuthenticatedEmpenhosRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
 import { Route as AuthenticatedOrgaoRouteImport } from './routes/_authenticated/orgao'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
+import { Route as AuthenticatedPecasRouteImport } from './routes/_authenticated/pecas'
+import { Route as AuthenticatedPlanosManutencaoRouteImport } from './routes/_authenticated/planos-manutencao'
+import { Route as AuthenticatedPneusRouteImport } from './routes/_authenticated/pneus'
 import { Route as AuthenticatedUnidadesRouteImport } from './routes/_authenticated/unidades'
 import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
 import { Route as AuthenticatedUtilizacaoRouteImport } from './routes/_authenticated/utilizacao'
@@ -108,6 +111,22 @@ const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
   path: '/painel',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPecasRoute = AuthenticatedPecasRouteImport.update({
+  id: '/pecas',
+  path: '/pecas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPlanosManutencaoRoute =
+  AuthenticatedPlanosManutencaoRouteImport.update({
+    id: '/planos-manutencao',
+    path: '/planos-manutencao',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPneusRoute = AuthenticatedPneusRouteImport.update({
+  id: '/pneus',
+  path: '/pneus',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedUnidadesRoute = AuthenticatedUnidadesRouteImport.update({
   id: '/unidades',
   path: '/unidades',
@@ -144,6 +163,9 @@ export interface FileRoutesByFullPath {
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/orgao': typeof AuthenticatedOrgaoRoute
   '/painel': typeof AuthenticatedPainelRoute
+  '/pecas': typeof AuthenticatedPecasRoute
+  '/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
+  '/pneus': typeof AuthenticatedPneusRoute
   '/unidades': typeof AuthenticatedUnidadesRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
   '/utilizacao': typeof AuthenticatedUtilizacaoRoute
@@ -164,6 +186,9 @@ export interface FileRoutesByTo {
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/orgao': typeof AuthenticatedOrgaoRoute
   '/painel': typeof AuthenticatedPainelRoute
+  '/pecas': typeof AuthenticatedPecasRoute
+  '/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
+  '/pneus': typeof AuthenticatedPneusRoute
   '/unidades': typeof AuthenticatedUnidadesRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
   '/utilizacao': typeof AuthenticatedUtilizacaoRoute
@@ -186,6 +211,9 @@ export interface FileRoutesById {
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/_authenticated/orgao': typeof AuthenticatedOrgaoRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
+  '/_authenticated/pecas': typeof AuthenticatedPecasRoute
+  '/_authenticated/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
+  '/_authenticated/pneus': typeof AuthenticatedPneusRoute
   '/_authenticated/unidades': typeof AuthenticatedUnidadesRoute
   '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
   '/_authenticated/utilizacao': typeof AuthenticatedUtilizacaoRoute
@@ -208,6 +236,9 @@ export interface FileRouteTypes {
     | '/fornecedores'
     | '/orgao'
     | '/painel'
+    | '/pecas'
+    | '/planos-manutencao'
+    | '/pneus'
     | '/unidades'
     | '/usuarios'
     | '/utilizacao'
@@ -228,6 +259,9 @@ export interface FileRouteTypes {
     | '/fornecedores'
     | '/orgao'
     | '/painel'
+    | '/pecas'
+    | '/planos-manutencao'
+    | '/pneus'
     | '/unidades'
     | '/usuarios'
     | '/utilizacao'
@@ -249,6 +283,9 @@ export interface FileRouteTypes {
     | '/_authenticated/fornecedores'
     | '/_authenticated/orgao'
     | '/_authenticated/painel'
+    | '/_authenticated/pecas'
+    | '/_authenticated/planos-manutencao'
+    | '/_authenticated/pneus'
     | '/_authenticated/unidades'
     | '/_authenticated/usuarios'
     | '/_authenticated/utilizacao'
@@ -368,6 +405,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPainelRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/pecas': {
+      id: '/_authenticated/pecas'
+      path: '/pecas'
+      fullPath: '/pecas'
+      preLoaderRoute: typeof AuthenticatedPecasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/planos-manutencao': {
+      id: '/_authenticated/planos-manutencao'
+      path: '/planos-manutencao'
+      fullPath: '/planos-manutencao'
+      preLoaderRoute: typeof AuthenticatedPlanosManutencaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/pneus': {
+      id: '/_authenticated/pneus'
+      path: '/pneus'
+      fullPath: '/pneus'
+      preLoaderRoute: typeof AuthenticatedPneusRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/unidades': {
       id: '/_authenticated/unidades'
       path: '/unidades'
@@ -412,6 +470,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
   AuthenticatedOrgaoRoute: typeof AuthenticatedOrgaoRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
+  AuthenticatedPecasRoute: typeof AuthenticatedPecasRoute
+  AuthenticatedPlanosManutencaoRoute: typeof AuthenticatedPlanosManutencaoRoute
+  AuthenticatedPneusRoute: typeof AuthenticatedPneusRoute
   AuthenticatedUnidadesRoute: typeof AuthenticatedUnidadesRoute
   AuthenticatedUsuariosRoute: typeof AuthenticatedUsuariosRoute
   AuthenticatedUtilizacaoRoute: typeof AuthenticatedUtilizacaoRoute
@@ -431,6 +492,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,
   AuthenticatedOrgaoRoute: AuthenticatedOrgaoRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
+  AuthenticatedPecasRoute: AuthenticatedPecasRoute,
+  AuthenticatedPlanosManutencaoRoute: AuthenticatedPlanosManutencaoRoute,
+  AuthenticatedPneusRoute: AuthenticatedPneusRoute,
   AuthenticatedUnidadesRoute: AuthenticatedUnidadesRoute,
   AuthenticatedUsuariosRoute: AuthenticatedUsuariosRoute,
   AuthenticatedUtilizacaoRoute: AuthenticatedUtilizacaoRoute,

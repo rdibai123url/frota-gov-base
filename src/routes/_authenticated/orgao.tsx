@@ -4,6 +4,7 @@ import { Landmark, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { CnpjInput, CpfInput } from "@/components/form-fields";
 import { PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,9 @@ import {
   useProfile,
   WRITE_ROLES,
   type OrgType,
+  onlyDigits,
+  isValidCNPJ,
+  isValidCPF,
 } from "@/lib/frotagov";
 
 export const Route = createFileRoute("/_authenticated/orgao")({
@@ -126,13 +130,26 @@ function Orgao() {
       logoPath = path;
     }
 
+    const cnpjDigits = onlyDigits(d.cnpj);
+    if (cnpjDigits && !isValidCNPJ(cnpjDigits)) {
+      setSaving(false);
+      toast.error("CNPJ inválido.");
+      return;
+    }
+    const cpfDigits = onlyDigits(d.authority_cpf);
+    if (cpfDigits && !isValidCPF(cpfDigits)) {
+      setSaving(false);
+      toast.error("CPF da autoridade inválido.");
+      return;
+    }
+
     const { error } = await supabase
       .from("organizations")
       .update({
         legal_name: d.legal_name,
         short_name: d.short_name || null,
         org_type: type,
-        cnpj: d.cnpj || null,
+        cnpj: cnpjDigits || null,
         city: d.city || null,
         state: uf === NONE ? null : uf,
         address: d.address || null,
@@ -143,7 +160,7 @@ function Orgao() {
         logo_url: logoPath,
         authority_name: d.authority_name || null,
         authority_role: authRole === NONE ? null : authRole,
-        authority_cpf: d.authority_cpf || null,
+        authority_cpf: cpfDigits || null,
         term_start: d.term_start || null,
         term_end: d.term_end || null,
         notes: d.notes || null,
@@ -213,7 +230,7 @@ function Orgao() {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="cnpj">CNPJ</Label>
-              <Input id="cnpj" name="cnpj" defaultValue={org.cnpj ?? ""} />
+              <CnpjInput id="cnpj" name="cnpj" defaultValue={org.cnpj ?? ""} />
             </div>
           </div>
         </section>
@@ -333,12 +350,7 @@ function Orgao() {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="authority_cpf">CPF da autoridade (opcional)</Label>
-              <Input
-                id="authority_cpf"
-                name="authority_cpf"
-                defaultValue={org.authority_cpf ?? ""}
-                autoComplete="off"
-              />
+              <CpfInput id="authority_cpf" name="authority_cpf" defaultValue={org.authority_cpf ?? ""} />
               <p className="text-xs text-muted-foreground">
                 Dado restrito (LGPD): não é exibido em telas públicas nem em relatórios comuns.
               </p>

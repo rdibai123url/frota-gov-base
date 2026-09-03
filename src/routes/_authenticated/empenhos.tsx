@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { MoneyInput } from "@/components/form-fields";
 import {
   COMMITMENT_KINDS,
   COMMITMENT_STATUS,
@@ -21,6 +22,7 @@ import {
   label,
   num,
   pct,
+  parseBRNumber,
   supabase,
   useCommitments,
   useContracts,
@@ -52,7 +54,7 @@ export const Route = createFileRoute("/_authenticated/empenhos")({
 
 const ALL = "__all__";
 const NONE = "__none__";
-const money = (v: string | undefined) => Number(String(v ?? "0").replace(/\./g, "").replace(",", ".")) || 0;
+const money = (v: string | undefined) => parseBRNumber(v);
 
 const schema = z.object({
   number: z.string().trim().min(1, "Informe o número do empenho").max(40),
@@ -520,21 +522,19 @@ function Empenhos() {
               </div>
               <div>
                 <Label htmlFor="committed_value">Valor empenhado (R$) *</Label>
-                <Input
+                <MoneyInput
                   id="committed_value"
                   name="committed_value"
-                  inputMode="decimal"
-                  defaultValue={editing ? String(editing.committed_value) : ""}
+                  defaultValue={editing ? Number(editing.committed_value) : ""}
                   required
                 />
               </div>
               <div>
                 <Label htmlFor="cancelled_value">Valor anulado (R$)</Label>
-                <Input
+                <MoneyInput
                   id="cancelled_value"
                   name="cancelled_value"
-                  inputMode="decimal"
-                  defaultValue={editing ? String(editing.cancelled_value) : ""}
+                  defaultValue={editing ? Number(editing.cancelled_value) : ""}
                 />
               </div>
               {editing && (

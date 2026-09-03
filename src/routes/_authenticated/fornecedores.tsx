@@ -4,6 +4,7 @@ import { Plus, Pencil, Search } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { CnpjInput } from "@/components/form-fields";
 import { PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +37,8 @@ import {
   usePerms,
   useSuppliers,
   type Supplier,
+  formatCNPJ,
+  onlyDigits,
 } from "@/lib/frotagov";
 
 export const Route = createFileRoute("/_authenticated/fornecedores")({
@@ -105,7 +108,7 @@ function Fornecedores() {
     setEditing(s);
     setUf(s.state || NONE);
     setActive(s.active);
-    setCnpj(s.cnpj ?? "");
+    setCnpj(maskCNPJ(s.cnpj ?? ""));
     setCep(s.zip_code ?? "");
     setOpen(true);
   }
@@ -125,7 +128,7 @@ function Fornecedores() {
     const payload = {
       legal_name: parsed.data.legal_name,
       trade_name: parsed.data.trade_name || null,
-      cnpj: cnpj || null,
+      cnpj: onlyDigits(cnpj) || null,
       state_registration: parsed.data.state_registration || null,
       address: parsed.data.address || null,
       city: parsed.data.city || null,
@@ -208,7 +211,7 @@ function Fornecedores() {
               <TableRow key={s.id}>
                 <TableCell className="font-medium">{s.legal_name}</TableCell>
                 <TableCell>{s.trade_name || "—"}</TableCell>
-                <TableCell>{s.cnpj || "—"}</TableCell>
+                <TableCell>{formatCNPJ(s.cnpj)}</TableCell>
                 <TableCell>{[s.city, s.state].filter(Boolean).join(" / ") || "—"}</TableCell>
                 <TableCell>{s.contact_name || s.phone || "—"}</TableCell>
                 <TableCell>
@@ -246,13 +249,7 @@ function Fornecedores() {
               </div>
               <div>
                 <Label htmlFor="cnpj">CNPJ</Label>
-                <Input
-                  id="cnpj"
-                  value={cnpj}
-                  onChange={(e) => setCnpj(maskCNPJ(e.target.value))}
-                  placeholder="00.000.000/0000-00"
-                  inputMode="numeric"
-                />
+                <CnpjInput id="cnpj" value={cnpj} onValueChange={setCnpj} />
               </div>
               <div>
                 <Label htmlFor="state_registration">Inscrição estadual</Label>

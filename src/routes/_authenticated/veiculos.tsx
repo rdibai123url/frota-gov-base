@@ -4,6 +4,7 @@ import { Plus, Pencil, Search } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { LitersInput } from "@/components/form-fields";
 import { PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +39,7 @@ import {
   WRITE_ROLES,
   type Vehicle,
   type VehicleStatus,
+  parseBRNumber,
 } from "@/lib/frotagov";
 
 export const Route = createFileRoute("/_authenticated/veiculos")({
@@ -79,7 +81,7 @@ const schema = z.object({
 
 const num = (v?: string) => {
   if (!v) return null;
-  const n = Number(v.replace(",", "."));
+  const n = parseBRNumber(v);
   return Number.isFinite(n) ? n : null;
 };
 
@@ -453,10 +455,9 @@ function Veiculos() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="tank_capacity">Capacidade do tanque (L)</Label>
-                <Input
+                <LitersInput
                   id="tank_capacity"
                   name="tank_capacity"
-                  inputMode="decimal"
                   defaultValue={editing?.tank_capacity ?? ""}
                 />
               </div>

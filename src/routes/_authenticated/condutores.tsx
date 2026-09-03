@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { Plus, Search, Pencil, IdCard } from "lucide-react";
 import { toast } from "sonner";
 
+import { CpfInput } from "@/components/form-fields";
 import { PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -347,7 +348,7 @@ function DriverDialog({
           </div>
           <div>
             <Label htmlFor="cpf">CPF</Label>
-            <Input id="cpf" value={cpf} onChange={(e) => setCpf(maskCPF(e.target.value))} placeholder="000.000.000-00" />
+            <CpfInput id="cpf" value={cpf} onValueChange={setCpf} />
           </div>
           <div>
             <Label htmlFor="reg">Matrícula funcional</Label>
