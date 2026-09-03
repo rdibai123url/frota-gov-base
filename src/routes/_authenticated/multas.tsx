@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Ban, FileWarning, Paperclip, Pencil, Plus, Upload } from "lucide-react";
@@ -267,6 +268,7 @@ function Multas() {
     setCancelOpen(false);
   }
 
+  const paged = usePaged(filtered);
   return (
     <>
       <PageHeader
@@ -364,7 +366,7 @@ function Multas() {
                 </TableCell>
               </TableRow>
             )}
-            {filtered.map((f) => {
+            {paged.rows.map((f) => {
               const due = dueState(f.due_date, 15);
               const attachments = [
                 { path: f.notification_path, label: "Notificação" },
@@ -443,6 +445,7 @@ function Multas() {
             })}
           </TableBody>
         </Table>
+        <ListPagination state={paged} />
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>

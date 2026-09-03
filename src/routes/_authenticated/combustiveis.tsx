@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Plus, Pencil } from "lucide-react";
@@ -111,6 +112,7 @@ function Combustiveis() {
     setOpen(false);
   }
 
+  const paged = usePaged(fuels);
   return (
     <>
       <PageHeader
@@ -151,7 +153,7 @@ function Combustiveis() {
                 </TableCell>
               </TableRow>
             )}
-            {fuels.map((f) => (
+            {paged.rows.map((f) => (
               <TableRow key={f.id}>
                 <TableCell className="font-medium">{f.name}</TableCell>
                 <TableCell>{f.acronym || "—"}</TableCell>
@@ -172,6 +174,7 @@ function Combustiveis() {
             ))}
           </TableBody>
         </Table>
+        <ListPagination state={paged} />
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>

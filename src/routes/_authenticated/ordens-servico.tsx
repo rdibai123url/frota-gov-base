@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { FileCheck2, Plus, Printer, Upload } from "lucide-react";
@@ -155,6 +156,7 @@ function OrdensServico() {
     setOpen(false);
   }
 
+  const paged = usePaged(filtered);
   return (
     <>
       <PageHeader
@@ -235,7 +237,7 @@ function OrdensServico() {
                 </TableCell>
               </TableRow>
             )}
-            {filtered.map((o) => (
+            {paged.rows.map((o) => (
               <TableRow key={o.id}>
                 <TableCell className="font-medium">
                   {o.code || "—"}
@@ -269,6 +271,7 @@ function OrdensServico() {
             ))}
           </TableBody>
         </Table>
+        <ListPagination state={paged} />
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>

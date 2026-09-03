@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Plus, Pencil, Landmark, AlertTriangle } from "lucide-react";
@@ -200,6 +201,7 @@ function Empenhos() {
     setOpen(false);
   }
 
+  const paged = usePaged(filtered);
   return (
     <>
       <PageHeader
@@ -331,7 +333,7 @@ function Empenhos() {
                 </TableCell>
               </TableRow>
             )}
-            {filtered.map((c) => {
+            {paged.rows.map((c) => {
               const liquido = Number(c.committed_value) - Number(c.cancelled_value);
               const restante = pct(Number(c.available_value), liquido);
               const baixo = c.status === "ativo" && restante <= 20;
@@ -381,6 +383,7 @@ function Empenhos() {
             })}
           </TableBody>
         </Table>
+        <ListPagination state={paged} />
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>

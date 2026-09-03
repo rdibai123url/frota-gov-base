@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Plus, Pencil, Wallet } from "lucide-react";
@@ -120,6 +121,7 @@ function CentrosCusto() {
     setOpen(false);
   }
 
+  const paged = usePaged(filtered);
   return (
     <>
       <PageHeader
@@ -186,7 +188,7 @@ function CentrosCusto() {
                 </TableCell>
               </TableRow>
             )}
-            {filtered.map((c) => (
+            {paged.rows.map((c) => (
               <TableRow key={c.id}>
                 <TableCell className="font-medium">{c.code}</TableCell>
                 <TableCell>{c.name}</TableCell>
@@ -208,6 +210,7 @@ function CentrosCusto() {
             ))}
           </TableBody>
         </Table>
+        <ListPagination state={paged} />
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>

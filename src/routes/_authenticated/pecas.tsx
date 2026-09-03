@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Cog, Pencil, Plus } from "lucide-react";
@@ -137,6 +138,7 @@ function Pecas() {
     setOpen(false);
   }
 
+  const paged = usePaged(filtered);
   return (
     <>
       <PageHeader
@@ -191,7 +193,7 @@ function Pecas() {
                     </TableCell>
                   </TableRow>
                 )}
-                {filtered.map((p) => (
+                {paged.rows.map((p) => (
                   <TableRow key={p.id}>
                     <TableCell className="font-medium">{p.internal_code || "—"}</TableCell>
                     <TableCell>{p.description}</TableCell>
@@ -215,6 +217,7 @@ function Pecas() {
                 ))}
               </TableBody>
             </Table>
+            <ListPagination state={paged} />
           </div>
         </TabsContent>
 

@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Plus, Pencil, Search } from "lucide-react";
@@ -155,6 +156,7 @@ function Fornecedores() {
     setOpen(false);
   }
 
+  const paged = usePaged(filtered);
   return (
     <>
       <PageHeader
@@ -207,7 +209,7 @@ function Fornecedores() {
                 </TableCell>
               </TableRow>
             )}
-            {filtered.map((s) => (
+            {paged.rows.map((s) => (
               <TableRow key={s.id}>
                 <TableCell className="font-medium">{s.legal_name}</TableCell>
                 <TableCell>{s.trade_name || "—"}</TableCell>
@@ -230,6 +232,7 @@ function Fornecedores() {
             ))}
           </TableBody>
         </Table>
+        <ListPagination state={paged} />
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>

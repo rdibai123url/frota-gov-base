@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Plus, Pencil } from "lucide-react";
@@ -31,6 +32,7 @@ import {
   supabase,
   useInvalidate,
   useProfile,
+  usePerms,
   useUnits,
   WRITE_ROLES,
   type Unit,
@@ -63,6 +65,7 @@ const schema = z.object({
 function Unidades() {
   const { data: units = [], isLoading } = useUnits();
   const { data: me } = useProfile();
+  const perms = usePerms();
   const invalidate = useInvalidate();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Unit | null>(null);
@@ -70,7 +73,7 @@ function Unidades() {
   const [active, setActive] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const canWrite = (me?.roles ?? []).some((r) => WRITE_ROLES.includes(r));
+  const canWrite = Boolean(perms.orgId) && (me?.roles ?? []).some((r) => WRITE_ROLES.includes(r));
 
   function openNew() {
     setEditing(null);
@@ -114,10 +117,10 @@ function Unidades() {
         return;
       }
     } else {
-      const orgId = me?.profile?.organization_id;
+      const orgId = perms.orgId;
       if (!orgId) {
         setSaving(false);
-        toast.error("Seu usuário não está vinculado a um órgão.");
+        toast.error("Nenhum órgão em contexto. Acesse um órgão para cadastrar.");
         return;
       }
       const { error } = await supabase
@@ -134,6 +137,7 @@ function Unidades() {
     invalidate(["units"]);
   }
 
+  const paged = usePaged(units);
   return (
     <>
       <PageHeader
@@ -176,7 +180,7 @@ function Unidades() {
                 </TableCell>
               </TableRow>
             )}
-            {units.map((u) => (
+            {paged.rows.map((u) => (
               <TableRow key={u.id}>
                 <TableCell className="font-medium">{u.name}</TableCell>
                 <TableCell>{u.acronym || "—"}</TableCell>
@@ -207,6 +211,7 @@ function Unidades() {
             ))}
           </TableBody>
         </Table>
+        <ListPagination state={paged} />
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>

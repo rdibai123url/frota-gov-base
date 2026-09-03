@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Pencil, ShieldAlert, Plus, KeyRound } from "lucide-react";
@@ -31,6 +32,7 @@ import {
   useInvalidate,
   useOrgUsers,
   useProfile,
+  usePerms,
   useUnits,
   type AppRole,
 } from "@/lib/frotagov";
@@ -91,9 +93,11 @@ function Usuarios() {
   const [newUnit, setNewUnit] = useState<string>(NONE);
   const [newCpf, setNewCpf] = useState("");
   const [credential, setCredential] = useState<{ email: string; tempPassword: string } | null>(null);
+  const perms = usePerms();
 
   const myRoles = me?.roles ?? [];
-  const canManage = myRoles.includes("org_admin") || myRoles.includes("super_admin");
+  const canManage =
+    Boolean(perms.orgId) && (myRoles.includes("org_admin") || myRoles.includes("super_admin"));
   const isSuperAdmin = myRoles.includes("super_admin");
 
   const unitName = (id: string | null) => units.find((u) => u.id === id)?.name ?? "—";
@@ -134,6 +138,8 @@ function Usuarios() {
       });
       setCreating(false);
       setNewCpf("");
+      setNewRole("operator");
+      setNewUnit(NONE);
       setCredential({ email: result.email, tempPassword: result.tempPassword });
       invalidate(["org-users"]);
     } catch (error) {
@@ -216,6 +222,7 @@ function Usuarios() {
     invalidate(["org-users", "profile"]);
   }
 
+  const paged = usePaged(users);
   return (
     <>
       <PageHeader
@@ -267,7 +274,7 @@ function Usuarios() {
                 </TableCell>
               </TableRow>
             )}
-            {users.map((u) => (
+            {paged.rows.map((u) => (
               <TableRow key={u.id}>
                 <TableCell className="font-medium">
                   {u.full_name || "—"}
@@ -311,6 +318,7 @@ function Usuarios() {
             ))}
           </TableBody>
         </Table>
+        <ListPagination state={paged} />
       </div>
 
       <p className="mt-4 text-xs text-muted-foreground">

@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Building, Pencil, Plus } from "lucide-react";
@@ -143,6 +144,7 @@ function Entidades() {
     }
   }
 
+  const paged = usePaged(filtered);
   return (
     <>
       <PageHeader
@@ -191,7 +193,7 @@ function Entidades() {
                 </TableCell>
               </TableRow>
             )}
-            {filtered.map((e) => (
+            {paged.rows.map((e) => (
               <TableRow key={e.id}>
                 <TableCell className="font-medium">{e.name}</TableCell>
                 <TableCell>{label(ENTITY_KINDS, e.kind)}</TableCell>
@@ -212,6 +214,7 @@ function Entidades() {
             ))}
           </TableBody>
         </Table>
+        <ListPagination state={paged} />
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
