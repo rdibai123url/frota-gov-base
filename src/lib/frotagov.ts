@@ -213,6 +213,11 @@ export type FuelingRow = Fueling & {
   fuel: Pick<FuelType, "id" | "name" | "measure_unit"> | null;
   driver: { id: string; full_name: string } | null;
   authorization: { id: string; code: string | null; max_quantity: number; consumed_quantity: number } | null;
+  contract: { id: string; number: string } | null;
+  contract_item: { id: string; description: string; measure_unit: string } | null;
+  commitment: { id: string; number: string; exercise: number } | null;
+  cost_center: { id: string; code: string; name: string } | null;
+  quota: { id: string; name: string } | null;
 };
 
 
