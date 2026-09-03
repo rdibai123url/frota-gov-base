@@ -47,6 +47,7 @@ import {
   BATCH_STATUS_LABELS,
   DUPLICATE_STRATEGIES,
   IMPORT_MODULES,
+  IMPORT_GROUPS,
   OPENING_BALANCE_KINDS,
   downloadIssues,
   downloadTemplate,
@@ -500,13 +501,19 @@ function ImportWizard({ orgId }: { orgId: string }) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {[...IMPORT_MODULES]
-                  .sort((a, b) => a.order - b.order)
-                  .map((m) => (
-                    <SelectItem key={m.id} value={m.id}>
-                      {m.order}. {m.label}
-                    </SelectItem>
-                  ))}
+                {IMPORT_GROUPS.map((g) => (
+                  <SelectGroup key={g.id}>
+                    <SelectLabel>{g.label}</SelectLabel>
+                    {g.modules
+                      .map((id) => moduleById(id))
+                      .filter((m): m is NonNullable<typeof m> => Boolean(m))
+                      .map((m) => (
+                        <SelectItem key={m.id} value={m.id}>
+                          {m.order}. {m.label}
+                        </SelectItem>
+                      ))}
+                  </SelectGroup>
+                ))}
               </SelectContent>
             </Select>
             <p className="mt-2 text-xs text-muted-foreground">{mod.description}</p>
@@ -518,7 +525,7 @@ function ImportWizard({ orgId }: { orgId: string }) {
             <label className="inline-flex">
               <input
                 type="file"
-                accept=".csv,.xlsx,.xls"
+                accept=".csv,.xlsx,.xls,.json"
                 className="hidden"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
@@ -527,7 +534,7 @@ function ImportWizard({ orgId }: { orgId: string }) {
                 }}
               />
               <span className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90">
-                <Upload className="size-4" /> Enviar arquivo CSV ou XLSX
+                <Upload className="size-4" /> Enviar arquivo CSV, XLSX ou JSON
               </span>
             </label>
           </div>
