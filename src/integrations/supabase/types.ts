@@ -3802,6 +3802,7 @@ export type Database = {
           part_id: string
           system_quantity: number
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           adjusted?: boolean
@@ -3818,6 +3819,7 @@ export type Database = {
           part_id: string
           system_quantity?: number
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           adjusted?: boolean
@@ -3834,6 +3836,7 @@ export type Database = {
           part_id?: string
           system_quantity?: number
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
@@ -4892,6 +4895,7 @@ export type Database = {
           service_order_id: string | null
           status: Database["public"]["Enums"]["capture_status"]
           updated_at: string
+          updated_by: string | null
           user_agent: string | null
           vehicle_id: string | null
         }
@@ -4920,6 +4924,7 @@ export type Database = {
           service_order_id?: string | null
           status?: Database["public"]["Enums"]["capture_status"]
           updated_at?: string
+          updated_by?: string | null
           user_agent?: string | null
           vehicle_id?: string | null
         }
@@ -4948,6 +4953,7 @@ export type Database = {
           service_order_id?: string | null
           status?: Database["public"]["Enums"]["capture_status"]
           updated_at?: string
+          updated_by?: string | null
           user_agent?: string | null
           vehicle_id?: string | null
         }
@@ -6377,6 +6383,7 @@ export type Database = {
           quantity: number
           reserved_quantity: number
           updated_at: string
+          updated_by: string | null
           warehouse_id: string
         }
         Insert: {
@@ -6394,6 +6401,7 @@ export type Database = {
           quantity?: number
           reserved_quantity?: number
           updated_at?: string
+          updated_by?: string | null
           warehouse_id: string
         }
         Update: {
@@ -6411,6 +6419,7 @@ export type Database = {
           quantity?: number
           reserved_quantity?: number
           updated_at?: string
+          updated_by?: string | null
           warehouse_id?: string
         }
         Relationships: [
@@ -6605,6 +6614,7 @@ export type Database = {
           status: string
           supply_order_id: string | null
           updated_at: string
+          updated_by: string | null
           warehouse_id: string
         }
         Insert: {
@@ -6623,6 +6633,7 @@ export type Database = {
           status?: string
           supply_order_id?: string | null
           updated_at?: string
+          updated_by?: string | null
           warehouse_id: string
         }
         Update: {
@@ -6641,6 +6652,7 @@ export type Database = {
           status?: string
           supply_order_id?: string | null
           updated_at?: string
+          updated_by?: string | null
           warehouse_id?: string
         }
         Relationships: [
