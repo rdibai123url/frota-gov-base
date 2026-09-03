@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { CircleDot, History, Pencil, Plus, Replace } from "lucide-react";
@@ -229,6 +230,7 @@ function Pneus() {
     setMoveOpen(false);
   }
 
+  const paged = usePaged(filtered);
   return (
     <>
       <PageHeader
@@ -326,7 +328,7 @@ function Pneus() {
                 </TableCell>
               </TableRow>
             )}
-            {filtered.map((t) => {
+            {paged.rows.map((t) => {
               const life = Number(t.expected_life_km ?? 0);
               const used = Number(t.accumulated_km ?? 0) + (t.status === "instalado" && t.install_km && t.vehicle?.current_km
                 ? Math.max(0, Number(t.vehicle.current_km) - Number(t.install_km))
@@ -386,6 +388,7 @@ function Pneus() {
             })}
           </TableBody>
         </Table>
+        <ListPagination state={paged} />
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>

@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Plus, Pencil, PiggyBank, TrendingUp, History } from "lucide-react";
@@ -247,6 +248,7 @@ function Cotas() {
     e.currentTarget.reset();
   }
 
+  const paged = usePaged(filtered);
   return (
     <>
       <PageHeader
@@ -378,7 +380,7 @@ function Cotas() {
                 </TableCell>
               </TableRow>
             )}
-            {filtered.map((q) => {
+            {paged.rows.map((q) => {
               const usado = quotaPercent(q);
               const restante = 100 - usado;
               return (
@@ -438,6 +440,7 @@ function Cotas() {
             })}
           </TableBody>
         </Table>
+        <ListPagination state={paged} />
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>

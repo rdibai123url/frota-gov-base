@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Plus, Pencil, FileText, Package, Upload, ExternalLink } from "lucide-react";
@@ -293,6 +294,7 @@ function Contratos() {
     else toast.error("Não foi possível abrir o arquivo.");
   }
 
+  const paged = usePaged(filtered);
   return (
     <>
       <PageHeader
@@ -370,7 +372,7 @@ function Contratos() {
       )}
 
       <div className="space-y-4">
-        {filtered.map((c) => {
+        {paged.rows.map((c) => {
           const t = contractTotals(c);
           return (
             <div key={c.id} className="rounded-lg border bg-card shadow-card">
@@ -497,6 +499,7 @@ function Contratos() {
             </div>
           );
         })}
+        <ListPagination state={paged} />
       </div>
 
       {/* contrato */}

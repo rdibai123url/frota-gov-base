@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Landmark, Paperclip, Plus, Printer, Upload } from "lucide-react";
@@ -261,6 +262,7 @@ td:first-child{width:34%;font-weight:bold}
     w.print();
   }
 
+  const paged = usePaged(filtered);
   return (
     <>
       <PageHeader
@@ -353,7 +355,7 @@ td:first-child{width:34%;font-weight:bold}
                 </TableCell>
               </TableRow>
             )}
-            {filtered.map((m) => (
+            {paged.rows.map((m) => (
               <TableRow key={m.id}>
                 <TableCell className="font-medium">{m.code ?? "—"}</TableCell>
                 <TableCell>{m.vehicle?.plate ?? "—"}</TableCell>
@@ -390,6 +392,7 @@ td:first-child{width:34%;font-weight:bold}
             ))}
           </TableBody>
         </Table>
+        <ListPagination state={paged} />
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>

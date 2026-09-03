@@ -34,6 +34,7 @@ import {
   supabase,
   useInvalidate,
   useProfile,
+  usePerms,
   useUnits,
   useVehicles,
   WRITE_ROLES,
@@ -92,6 +93,7 @@ function Veiculos() {
   const { data: vehicles = [], isLoading } = useVehicles();
   const { data: units = [] } = useUnits();
   const { data: me } = useProfile();
+  const perms = usePerms();
   const invalidate = useInvalidate();
 
   const [search, setSearch] = useState("");
@@ -107,7 +109,7 @@ function Veiculos() {
   const [fuelType, setFuelType] = useState<string>(NONE);
   const [saving, setSaving] = useState(false);
 
-  const canWrite = (me?.roles ?? []).some((r) => WRITE_ROLES.includes(r));
+  const canWrite = Boolean(perms.orgId) && (me?.roles ?? []).some((r) => WRITE_ROLES.includes(r));
   const unitName = (id: string | null) => units.find((u) => u.id === id)?.name ?? "—";
 
   const filtered = useMemo(() => {
@@ -189,10 +191,10 @@ function Veiculos() {
         return;
       }
     } else {
-      const orgId = me?.profile?.organization_id;
+      const orgId = perms.orgId;
       if (!orgId) {
         setSaving(false);
-        toast.error("Seu usuário não está vinculado a um órgão.");
+        toast.error("Nenhum órgão em contexto. Acesse um órgão para cadastrar.");
         return;
       }
       const { error } = await supabase

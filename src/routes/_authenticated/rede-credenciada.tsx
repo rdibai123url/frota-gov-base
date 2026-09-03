@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Building2, Pencil, Plus, Upload } from "lucide-react";
@@ -195,6 +196,7 @@ function RedeCredenciada() {
     setOpen(false);
   }
 
+  const paged = usePaged(filtered);
   return (
     <>
       <PageHeader
@@ -281,7 +283,7 @@ function RedeCredenciada() {
                 </TableCell>
               </TableRow>
             )}
-            {filtered.map((w) => (
+            {paged.rows.map((w) => (
               <TableRow key={w.id}>
                 <TableCell>
                   <span className="font-medium">{w.trade_name || w.legal_name}</span>
@@ -326,6 +328,7 @@ function RedeCredenciada() {
             ))}
           </TableBody>
         </Table>
+        <ListPagination state={paged} />
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>

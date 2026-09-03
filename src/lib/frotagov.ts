@@ -254,18 +254,23 @@ export const CANCEL_ROLES: AppRole[] = ["super_admin", "org_admin", "fleet_manag
 
 export function usePerms() {
   const { data: me } = useProfile();
+  const { data: activeOrgId } = useActiveOrgId();
   const roles = me?.roles ?? [];
+  // Órgão em contexto: perfil do usuário ou órgão acessado pelo Super Admin.
+  const orgId = activeOrgId ?? me?.profile?.organization_id ?? null;
+  // Sem órgão em contexto não há operação possível (Super Admin fora de um órgão).
+  const inOrg = Boolean(orgId);
   return {
     roles,
-    orgId: me?.profile?.organization_id ?? null,
+    orgId,
     unitId: me?.profile?.unit_id ?? null,
     userId: me?.profile?.id ?? null,
     userName: me?.profile?.full_name ?? me?.email ?? "",
-    canWrite: roles.some((r) => WRITE_ROLES.includes(r)),
-    canRegister: roles.some((r) => REGISTER_ROLES.includes(r)),
-    canCancel: roles.some((r) => CANCEL_ROLES.includes(r)),
-    canManageFleet: roles.some((r) => (["super_admin", "org_admin", "fleet_manager"] as AppRole[]).includes(r)),
-    canManageFinance: roles.some((r) => (["super_admin", "org_admin", "fleet_manager"] as AppRole[]).includes(r)),
+    canWrite: inOrg && roles.some((r) => WRITE_ROLES.includes(r)),
+    canRegister: inOrg && roles.some((r) => REGISTER_ROLES.includes(r)),
+    canCancel: inOrg && roles.some((r) => CANCEL_ROLES.includes(r)),
+    canManageFleet: inOrg && roles.some((r) => (["super_admin", "org_admin", "fleet_manager"] as AppRole[]).includes(r)),
+    canManageFinance: inOrg && roles.some((r) => (["super_admin", "org_admin", "fleet_manager"] as AppRole[]).includes(r)),
     isAuditor: roles.length > 0 && roles.every((r) => r === "auditor"),
   };
 }

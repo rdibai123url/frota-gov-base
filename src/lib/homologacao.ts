@@ -59,6 +59,12 @@ export const TECH_CHECKLIST: ChecklistItem[] = [
   { item: "Padrão de dados pt-BR", status: "ok", detail: "Moeda 1.000,00, litros 1.000,0000, CPF e CNPJ mascarados com validação de dígitos e armazenamento apenas de dígitos." },
   { item: "Arquivos privados", status: "ok", detail: "Anexos ficam em armazenamento privado por órgão, acessados por link temporário." },
   { item: "TypeScript e build", status: "ok", detail: "Verificação de tipos e build de produção sem erros." },
+  { item: "Teste regressivo de telas", status: "ok", detail: "34 telas percorridas com Administrador do órgão e com Super Admin, sem erros de console, com botões de ação, filtros e estados vazios verificados." },
+  { item: "Ensaio de implantação ponta a ponta", status: "ok", detail: "Órgão criado pelo Super Admin, administrador com senha temporária, troca obrigatória no primeiro acesso, secretarias, usuários com perfis distintos, veículos, condutores e utilização registrados." },
+  { item: "Paginação de listas operacionais", status: "ok", detail: "Todas as listas operacionais exibem 25 registros por página com contagem total; relatórios usam 50." },
+  { item: "Responsividade", status: "ok", detail: "Telas verificadas em 1280 px e 390 px, sem rolagem horizontal indevida." },
+  { item: "Unicidade de cadastros", status: "ok", detail: "Unidades (nome e sigla), fornecedores, oficinas e entidades externas não aceitam duplicidade dentro do mesmo órgão." },
+  { item: "API v1 e Portal da Transparência", status: "ok", detail: "API exige chave válida com escopo de frota e devolve páginas; o portal publica apenas agregados e dados abertos em CSV." },
   { item: "Envio de e-mail com domínio próprio", status: "parcial", detail: "Os e-mails de autenticação usam o remetente padrão do provedor; o domínio institucional exige verificação pelo órgão." },
 ];
 
@@ -103,6 +109,8 @@ export const FEATURE_MATRIX: MatrixRow[] = [
   { module: "Relatórios", feature: "Impressão / PDF com cabeçalho institucional", status: "Sim", note: "Gerado pelo navegador, com filtros e data/hora.", evidence: "/relatorios → Imprimir" },
   { module: "Transparência", feature: "Portal público por órgão, desabilitado por padrão", status: "Sim", note: "Somente dados agregados; sem dados pessoais.", evidence: "/transparencia" },
   { module: "Transparência", feature: "Download público de dados abertos em CSV", status: "Sim", note: "Por período, configurável pelo órgão.", evidence: "/transparencia/{slug}" },
+  { module: "Usabilidade", feature: "Paginação e desempenho das listas operacionais", status: "Sim", note: "25 registros por página com contagem total; índices por órgão e data no banco.", evidence: "/veiculos, /multas, /manutencoes" },
+  { module: "Usabilidade", feature: "Uso em computador e celular", status: "Sim", note: "Layout responsivo com menu lateral em gaveta no celular.", evidence: "Todas as telas" },
   { module: "Integrações", feature: "API pública v1 de leitura com chave por órgão", status: "Sim", note: "Validade, revogação, escopos, paginação e isolamento por órgão.", evidence: "/chaves-api" },
   { module: "Integrações", feature: "API de escrita", status: "Não", note: "Não faz parte desta versão.", evidence: "—" },
   { module: "Operação", feature: "Rotinas automáticas de alertas e retenção de logs", status: "Sim", note: "Agendadas no banco de dados (horária e diária).", evidence: "/alertas" },
@@ -116,6 +124,7 @@ export const KNOWN_LIMITATIONS: string[] = [
   "A senha temporária do administrador é entregue na tela, para repasse por canal seguro do órgão.",
   "Os e-mails de autenticação usam o remetente padrão do provedor enquanto o domínio institucional não for verificado.",
   "A API pública v1 é somente de leitura, sem escopos de escrita.",
+  "Em navegação muito rápida entre telas o ambiente de desenvolvimento pode registrar um aviso do React sobre atualização de estado; não ocorre na versão publicada.",
   "Não há autenticação em dois fatores nem assinatura digital de documentos.",
   "O ambiente de demonstração é um órgão comum identificado como DEMONSTRAÇÃO; a limpeza é feita manualmente, sem rotina destrutiva automática.",
 ];

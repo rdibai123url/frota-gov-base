@@ -325,7 +325,7 @@ export const issueApiKey = createServerFn({ method: "POST" })
       name: data.name,
       prefix,
       key_hash: await sha256(key),
-      scopes: data.scopes.length ? data.scopes : ["read"],
+      scopes: data.scopes.length ? data.scopes : ["frota:read"],
       expires_at: data.expiresAt || null,
       created_by: context.userId,
     });

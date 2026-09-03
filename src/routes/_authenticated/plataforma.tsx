@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { exportXlsx } from "@/lib/reports";
 import { DocsTab, MatrixTab } from "@/components/homologacao";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -25,7 +26,6 @@ import {
   useActivityLogs,
   usePlatformSettings,
   exportCsv,
-  exportExcel,
   LOG_EVENT_TYPES,
 } from "@/lib/platform";
 import { createOrganizationWithAdmin, bootstrapSuperAdmin } from "@/lib/platform.functions";
@@ -573,7 +573,7 @@ function LogsTab() {
           <Button variant="outline" size="sm" onClick={() => exportCsv("logs-globais", LOG_COLUMNS, exportRows)}>
             <Download className="size-4" /> CSV
           </Button>
-          <Button variant="outline" size="sm" onClick={() => exportExcel("logs-globais", LOG_COLUMNS, exportRows)}>
+          <Button variant="outline" size="sm" onClick={() => exportXlsx("logs-globais", LOG_COLUMNS, exportRows, "Logs globais")}>
             <Download className="size-4" /> Excel
           </Button>
         </div>

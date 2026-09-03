@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Paperclip, Pencil, Plus, Upload } from "lucide-react";
@@ -251,6 +252,7 @@ function Sinistros() {
     }
   }
 
+  const paged = usePaged(filtered);
   return (
     <>
       <PageHeader
@@ -344,7 +346,7 @@ function Sinistros() {
                 </TableCell>
               </TableRow>
             )}
-            {filtered.map((a) => (
+            {paged.rows.map((a) => (
               <TableRow key={a.id}>
                 <TableCell className="font-medium">{a.code ?? "—"}</TableCell>
                 <TableCell>
@@ -392,6 +394,7 @@ function Sinistros() {
             ))}
           </TableBody>
         </Table>
+        <ListPagination state={paged} />
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>

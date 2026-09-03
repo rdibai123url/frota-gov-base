@@ -625,10 +625,12 @@ function AuthorizationDetail({ auth, onClose }: { auth: AuthorizationRow; onClos
   const [qr, setQr] = useState<string | null>(null);
 
   useEffect(() => {
+    let active = true;
     // O QR Code carrega apenas o token opaco da autorização — nenhum dado pessoal.
     QRCode.toDataURL(`frotagov:auth:${auth.qr_token}`, { width: 240, margin: 1 })
-      .then(setQr)
-      .catch(() => setQr(null));
+      .then((url) => { if (active) setQr(url); })
+      .catch(() => { if (active) setQr(null); });
+    return () => { active = false; };
   }, [auth.qr_token]);
 
   const items: [string, string][] = [

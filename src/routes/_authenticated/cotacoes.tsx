@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AlertTriangle, ClipboardList, FileSearch, Plus, Trash2 } from "lucide-react";
@@ -159,6 +160,7 @@ function Cotacoes() {
     invalidate(["quotations"]);
   }
 
+  const paged = usePaged(filtered);
   return (
     <>
       <PageHeader
@@ -234,7 +236,7 @@ function Cotacoes() {
                 </TableCell>
               </TableRow>
             )}
-            {filtered.map((q) => (
+            {paged.rows.map((q) => (
               <TableRow key={q.id}>
                 <TableCell className="font-medium">
                   {q.code || "—"}
@@ -263,6 +265,7 @@ function Cotacoes() {
             ))}
           </TableBody>
         </Table>
+        <ListPagination state={paged} />
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>

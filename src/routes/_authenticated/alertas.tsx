@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
@@ -90,6 +91,7 @@ function Alertas() {
     invalidate(["fueling-alerts"]);
   }
 
+  const paged = usePaged(filtered);
   return (
     <>
       <PageHeader
@@ -164,7 +166,7 @@ function Alertas() {
                 </TableCell>
               </TableRow>
             )}
-            {filtered.map((a) => (
+            {paged.rows.map((a) => (
               <TableRow key={a.id}>
                 <TableCell className="font-medium">
                   <span className="inline-flex items-center gap-2">
@@ -195,6 +197,7 @@ function Alertas() {
             ))}
           </TableBody>
         </Table>
+        <ListPagination state={paged} />
       </div>
     </>
   );

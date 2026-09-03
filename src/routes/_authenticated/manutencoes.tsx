@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Ban, CheckCircle2, Cog, Pencil, Plus, Wrench } from "lucide-react";
@@ -472,6 +473,8 @@ function Manutencoes() {
 
   const openRequests = requests.filter((r) => !["concluida", "cancelada"].includes(r.status));
 
+  const pagedReqs = usePaged(filteredReqs);
+  const pagedRecs = usePaged(filteredRecs);
   return (
     <>
       <PageHeader
@@ -582,7 +585,7 @@ function Manutencoes() {
                     </TableCell>
                   </TableRow>
                 )}
-                {filteredReqs.map((r) => (
+                {pagedReqs.rows.map((r) => (
                   <TableRow key={r.id}>
                     <TableCell className="font-medium">
                       {r.code}
@@ -644,6 +647,7 @@ function Manutencoes() {
                 ))}
               </TableBody>
             </Table>
+            <ListPagination state={pagedReqs} />
           </div>
         </TabsContent>
 
@@ -672,7 +676,7 @@ function Manutencoes() {
                     </TableCell>
                   </TableRow>
                 )}
-                {filteredRecs.map((r) => (
+                {pagedRecs.rows.map((r) => (
                   <TableRow key={r.id}>
                     <TableCell className="font-medium">
                       {r.code}
@@ -757,6 +761,7 @@ function Manutencoes() {
                 ))}
               </TableBody>
             </Table>
+            <ListPagination state={pagedRecs} />
           </div>
         </TabsContent>
       </Tabs>

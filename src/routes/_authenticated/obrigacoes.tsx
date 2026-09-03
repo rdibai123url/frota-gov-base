@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { FileCheck2, Paperclip, Pencil, Plus, Upload } from "lucide-react";
@@ -181,6 +182,7 @@ function Obrigacoes() {
     }
   }
 
+  const paged = usePaged(filtered);
   return (
     <>
       <PageHeader
@@ -274,7 +276,7 @@ function Obrigacoes() {
                 </TableCell>
               </TableRow>
             )}
-            {filtered.map((o) => {
+            {paged.rows.map((o) => {
               const d = daysUntil(o.due_date);
               return (
                 <TableRow key={o.id}>
@@ -322,6 +324,7 @@ function Obrigacoes() {
             })}
           </TableBody>
         </Table>
+        <ListPagination state={paged} />
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>

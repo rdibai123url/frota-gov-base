@@ -1,3 +1,4 @@
+import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Ban, KeyRound, Plus, Copy } from "lucide-react";
@@ -34,18 +35,19 @@ export const Route = createFileRoute("/_authenticated/chaves-api")({
 });
 
 const SCOPES = [
-  { value: "read", label: "Leitura de frota e indicadores" },
-  { value: "read:frota", label: "Leitura somente de veículos" },
+  { value: "frota:read", label: "Leitura de frota (veículos e indicadores)" },
+  { value: "*", label: "Leitura de todos os recursos publicados" },
 ];
 
 function ChavesApi() {
   const { data: keys = [], isLoading } = useApiKeys();
   const perms = usePerms();
   const invalidate = useInvalidate();
-  const canManage = perms.roles.includes("org_admin") || perms.roles.includes("super_admin");
+  const canManage =
+    Boolean(perms.orgId) && (perms.roles.includes("org_admin") || perms.roles.includes("super_admin"));
 
   const [open, setOpen] = useState(false);
-  const [scope, setScope] = useState("read");
+  const [scope, setScope] = useState("frota:read");
   const [saving, setSaving] = useState(false);
   const [issued, setIssued] = useState<string | null>(null);
 
@@ -85,6 +87,7 @@ function ChavesApi() {
     invalidate(["org-api-keys"]);
   }
 
+  const paged = usePaged(keys);
   return (
     <>
       <PageHeader
@@ -124,7 +127,7 @@ function ChavesApi() {
                 </TableCell>
               </TableRow>
             )}
-            {keys.map((k) => (
+            {paged.rows.map((k) => (
               <TableRow key={k.id}>
                 <TableCell className="font-medium">{k.name}</TableCell>
                 <TableCell className="font-mono text-xs">{k.prefix}</TableCell>
@@ -148,6 +151,7 @@ function ChavesApi() {
             ))}
           </TableBody>
         </Table>
+        <ListPagination state={paged} />
       </div>
 
       <p className="mt-4 text-xs text-muted-foreground">
