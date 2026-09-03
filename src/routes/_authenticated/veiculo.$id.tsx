@@ -1,5 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import {
+  DEVIATION_LABEL,
+  ECONOMICITY_LABEL,
+  aggregateConsumption,
+  classifyDeviation,
+  costsByAsset,
+  economicity,
+  matchParameter,
+  periodDays,
+  useConsumptionParameters,
+  useConsumptionSegments,
+  useCostRows,
+  useDowntime,
+  type DeviationClass,
+} from "@/lib/inteligencia";
 import { ArrowLeft, Truck } from "lucide-react";
 
 import { PageHeader } from "@/components/app-shell";
@@ -273,6 +288,53 @@ function HistoricoVeiculo() {
 
   const { data: fuelProducts = [] } = useFuelTypes();
 
+  /* ===== Fase 10 / Bloco 2 — indicadores de inteligência do ativo ===== */
+  const intelFrom = useMemo(() => {
+    if (from) return from;
+    const d = new Date();
+    d.setMonth(d.getMonth() - 11);
+    d.setDate(1);
+    return d.toISOString().slice(0, 10);
+  }, [from]);
+  const intelTo = to || new Date().toISOString().slice(0, 10);
+  const { data: intelSegments = [] } = useConsumptionSegments({ from: intelFrom, to: intelTo, vehicleId: id });
+  const { data: intelCosts = [] } = useCostRows({ from: intelFrom, to: intelTo, vehicleId: id });
+  const { data: intelDowntime = [] } = useDowntime(intelFrom, intelTo);
+  const { data: intelParams = [] } = useConsumptionParameters();
+
+  const intel = useMemo(() => {
+    const agg = aggregateConsumption(intelSegments, "ativo")[0] ?? null;
+    const costs = costsByAsset(intelCosts);
+    const metric = (agg?.km ?? 0) > 0 ? "km_l" : "l_h";
+    const param = agg
+      ? matchParameter(
+          intelParams,
+          {
+            vehicleId: agg.vehicleId,
+            assetClass: agg.assetClass,
+            category: agg.category,
+            brand: agg.brand,
+            model: agg.model,
+          },
+          metric,
+        )
+      : null;
+    const dev = classifyDeviation(metric === "km_l" ? (agg?.kmL ?? null) : (agg?.lH ?? null), param);
+    const devMap = new Map<string, DeviationClass>();
+    if (agg?.vehicleId) devMap.set(agg.key, dev.klass);
+    const econRow = costs.length
+      ? (economicity({
+          costs,
+          consumption: agg ? [agg] : [],
+          downtime: intelDowntime.filter((d) => d.vehicle_id === id),
+          vehicles,
+          deviations: devMap,
+          periodDays: periodDays(intelFrom, intelTo),
+        })[0] ?? null)
+      : null;
+    return { agg, cost: costs[0] ?? null, dev, param, econRow, metric };
+  }, [intelSegments, intelCosts, intelDowntime, intelParams, vehicles, id, intelFrom, intelTo]);
+
   const totals = useMemo(
     () => ({
       manutencao: vRecords.filter((r) => r.status === "concluida").reduce((s, r) => s + maintenanceTotal(r), 0),
@@ -327,6 +389,88 @@ function HistoricoVeiculo() {
                 <p className="gov-title mt-2 text-2xl">{c.value}</p>
               </div>
             ))}
+          </div>
+
+          {/* Fase 10 — Bloco 2: indicadores de consumo, custo e economicidade */}
+          <div className="mb-6 rounded-lg border bg-card p-5 shadow-card">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm font-semibold">Indicadores de consumo e custo</p>
+              <p className="text-xs text-muted-foreground">
+                Período analisado: {new Date(`${intelFrom}T00:00:00`).toLocaleDateString("pt-BR")} a{" "}
+                {new Date(`${intelTo}T00:00:00`).toLocaleDateString("pt-BR")}
+              </p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Média de consumo</p>
+                <p className="mt-1 text-lg font-semibold">
+                  {intel.agg?.kmL != null
+                    ? `${num(intel.agg.kmL, 2)} km/L`
+                    : intel.agg?.lH != null
+                      ? `${num(intel.agg.lH, 2)} L/h`
+                      : "—"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {intel.param ? `Esperado: ${num(Number(intel.param.expected_value), 2)}` : "Sem parâmetro definido"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Classificação do consumo</p>
+                <p className="mt-1">
+                  <Badge
+                    variant={
+                      intel.dev.klass === "critico"
+                        ? "destructive"
+                        : intel.dev.klass === "atencao"
+                          ? "secondary"
+                          : "outline"
+                    }
+                  >
+                    {DEVIATION_LABEL[intel.dev.klass]}
+                  </Badge>
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {intel.dev.deviationPct != null ? `Desvio de ${intel.dev.deviationPct.toFixed(1)}%` : "—"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Custo total (TCO) no período</p>
+                <p className="mt-1 text-lg font-semibold">{brl(intel.cost?.totals.total ?? 0)}</p>
+                <p className="text-xs text-muted-foreground">
+                  {intel.econRow?.costPerKm != null
+                    ? `${brl(intel.econRow.costPerKm)} por km`
+                    : intel.econRow?.costPerHour != null
+                      ? `${brl(intel.econRow.costPerHour)} por hora`
+                      : "Sem quilometragem/horas apuradas"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Economicidade</p>
+                <p className="mt-1">
+                  {intel.econRow ? (
+                    <Badge
+                      variant={
+                        intel.econRow.klass === "custo_elevado"
+                          ? "destructive"
+                          : intel.econRow.klass === "atencao"
+                            ? "secondary"
+                            : "outline"
+                      }
+                    >
+                      {ECONOMICITY_LABEL[intel.econRow.klass]}
+                    </Badge>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">Sem custos no período</span>
+                  )}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {intel.econRow ? `Pontuação ${num(intel.econRow.score, 0)} de 100` : "—"}
+                </p>
+              </div>
+            </div>
+            {intel.econRow?.reasons.length ? (
+              <p className="mt-3 text-xs text-muted-foreground">{intel.econRow.reasons.join(" ")}</p>
+            ) : null}
           </div>
 
           <Tabs defaultValue="linha">

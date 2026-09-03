@@ -1160,6 +1160,94 @@ export type Database = {
           },
         ]
       }
+      consumption_parameters: {
+        Row: {
+          active: boolean
+          asset_class: string | null
+          brand: string | null
+          category: string | null
+          created_at: string
+          created_by: string | null
+          critical_pct: number
+          expected_value: number
+          fuel_type_id: string | null
+          id: string
+          metric: string
+          model: string | null
+          notes: string | null
+          organization_id: string
+          scope: string
+          tolerance_pct: number
+          updated_at: string
+          updated_by: string | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          asset_class?: string | null
+          brand?: string | null
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          critical_pct?: number
+          expected_value: number
+          fuel_type_id?: string | null
+          id?: string
+          metric: string
+          model?: string | null
+          notes?: string | null
+          organization_id: string
+          scope?: string
+          tolerance_pct?: number
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          asset_class?: string | null
+          brand?: string | null
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          critical_pct?: number
+          expected_value?: number
+          fuel_type_id?: string | null
+          id?: string
+          metric?: string
+          model?: string | null
+          notes?: string | null
+          organization_id?: string
+          scope?: string
+          tolerance_pct?: number
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consumption_parameters_fuel_type_id_fkey"
+            columns: ["fuel_type_id"]
+            isOneToOne: false
+            referencedRelation: "fuel_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consumption_parameters_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consumption_parameters_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contract_amendments: {
         Row: {
           attachment_path: string | null
@@ -2586,6 +2674,7 @@ export type Database = {
           justification: string | null
           message: string
           organization_id: string
+          period_key: string | null
           resolved_at: string | null
           resolved_by: string | null
           severity: Database["public"]["Enums"]["alert_severity"]
@@ -2608,6 +2697,7 @@ export type Database = {
           justification?: string | null
           message: string
           organization_id: string
+          period_key?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
           severity?: Database["public"]["Enums"]["alert_severity"]
@@ -2630,6 +2720,7 @@ export type Database = {
           justification?: string | null
           message?: string
           organization_id?: string
+          period_key?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
           severity?: Database["public"]["Enums"]["alert_severity"]
@@ -3257,6 +3348,71 @@ export type Database = {
           },
         ]
       }
+      intelligence_settings: {
+        Row: {
+          alerts_enabled: boolean
+          cost_deviation_pct: number
+          created_at: string
+          created_by: string | null
+          critical_pct: number
+          default_tolerance_pct: number
+          efficiency_drop_pct: number
+          id: string
+          maintenance_cost_alert: number
+          max_hours_segment: number
+          max_km_segment: number
+          min_minutes_between_fuelings: number
+          min_segments_for_alert: number
+          organization_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          alerts_enabled?: boolean
+          cost_deviation_pct?: number
+          created_at?: string
+          created_by?: string | null
+          critical_pct?: number
+          default_tolerance_pct?: number
+          efficiency_drop_pct?: number
+          id?: string
+          maintenance_cost_alert?: number
+          max_hours_segment?: number
+          max_km_segment?: number
+          min_minutes_between_fuelings?: number
+          min_segments_for_alert?: number
+          organization_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          alerts_enabled?: boolean
+          cost_deviation_pct?: number
+          created_at?: string
+          created_by?: string | null
+          critical_pct?: number
+          default_tolerance_pct?: number
+          efficiency_drop_pct?: number
+          id?: string
+          maintenance_cost_alert?: number
+          max_hours_segment?: number
+          max_km_segment?: number
+          min_minutes_between_fuelings?: number
+          min_segments_for_alert?: number
+          organization_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "intelligence_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maintenance_parts: {
         Row: {
           created_at: string
@@ -3867,6 +4023,66 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: true
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meter_corrections: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          meter: string
+          new_value: number
+          occurred_at: string
+          organization_id: string
+          previous_value: number | null
+          reason: string
+          updated_at: string
+          updated_by: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          meter: string
+          new_value: number
+          occurred_at?: string
+          organization_id: string
+          previous_value?: number | null
+          reason: string
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          meter?: string
+          new_value?: number
+          occurred_at?: string
+          organization_id?: string
+          previous_value?: number | null
+          reason?: string
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meter_corrections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meter_corrections_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
         ]
@@ -7182,6 +7398,77 @@ export type Database = {
       expire_backups: { Args: never; Returns: number }
       expire_fuel_authorizations: { Args: never; Returns: undefined }
       expire_fuel_authorizations_all: { Args: never; Returns: number }
+      fleet_consumption_segments: {
+        Args: {
+          _asset_class?: string
+          _cost_center?: string
+          _driver?: string
+          _from: string
+          _fuel?: string
+          _to: string
+          _unit?: string
+          _vehicle?: string
+        }
+        Returns: {
+          asset_class: string
+          asset_label: string
+          brand: string
+          category: string
+          cost_center_id: string
+          cost_center_name: string
+          distance_km: number
+          driver_id: string
+          driver_name: string
+          fuel_name: string
+          fuel_type_id: string
+          fueled_at: string
+          fueling_id: string
+          hours: number
+          invalid_reason: string
+          liters: number
+          meter_kind: string
+          model: string
+          too_close: boolean
+          unit_id: string
+          unit_name: string
+          valid: boolean
+          value: number
+          vehicle_id: string
+        }[]
+      }
+      fleet_cost_rows: {
+        Args: {
+          _asset_class?: string
+          _cost_center?: string
+          _from: string
+          _to: string
+          _unit?: string
+          _vehicle?: string
+        }
+        Returns: {
+          asset_class: string
+          asset_label: string
+          brand: string
+          category: string
+          category_asset: string
+          competence: string
+          cost_center_id: string
+          cost_center_name: string
+          model: string
+          unit_id: string
+          unit_name: string
+          value: number
+          vehicle_id: string
+        }[]
+      }
+      fleet_downtime: {
+        Args: { _from: string; _to: string }
+        Returns: {
+          days: number
+          events: number
+          vehicle_id: string
+        }[]
+      }
       fuel_limit_breach: {
         Args: {
           _at: string
@@ -7259,6 +7546,7 @@ export type Database = {
       refresh_backup_alerts: { Args: never; Returns: undefined }
       refresh_financial_alerts: { Args: never; Returns: undefined }
       refresh_fleet_alerts: { Args: never; Returns: undefined }
+      refresh_intelligence_alerts: { Args: never; Returns: number }
       refresh_maintenance_alerts: { Args: never; Returns: undefined }
       refresh_procurement_alerts: { Args: never; Returns: undefined }
       request_transparency_reopen: {

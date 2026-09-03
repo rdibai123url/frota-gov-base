@@ -21,10 +21,29 @@ import {
   objectKindLabel,
   CONTRACT_OBJECT_KIND_FALLBACK,
 } from "@/lib/frotagov";
-import { formatMoney, formatLiters, formatNumberBR, formatCPF } from "@/lib/format";
+import { formatMoney, formatLiters, formatNumberBR, formatCPF, parseBRNumber } from "@/lib/format";
 import { DIARY_STATUS } from "@/lib/diarias";
 import { logEvent } from "@/lib/platform";
 import { exportReportCsv, exportXlsx, printReport, type ReportMeta } from "@/lib/reports";
+import {
+  COST_CATEGORIES,
+  DEVIATION_LABEL,
+  ECONOMICITY_LABEL,
+  aggregateConsumption,
+  catValue,
+  classifyDeviation,
+  costsByAsset,
+  costsByMonth,
+  detectAnomalies,
+  economicity,
+  matchParameter,
+  monthLabel,
+  periodDays,
+  type ConsumptionSegment,
+  type CostRow,
+  type DeviationClass,
+  type DowntimeRow,
+} from "@/lib/inteligencia";
 
 
 export const Route = createFileRoute("/_authenticated/relatorios")({
@@ -57,6 +76,12 @@ const REPORTS = [
   { value: "diarias", label: "Diárias — requisições e comprovações" },
   { value: "limpeza", label: "Limpeza da frota" },
   { value: "cotas_servidor", label: "Cotas de combustível de servidor" },
+  { value: "int_consumo", label: "Inteligência — consumo e eficiência por ativo" },
+  { value: "int_ranking", label: "Inteligência — ranking de consumo" },
+  { value: "int_desvios", label: "Inteligência — desvios e anomalias" },
+  { value: "int_despesas", label: "Inteligência — evolução de despesas" },
+  { value: "int_tco", label: "Inteligência — custo total por ativo (TCO)" },
+  { value: "int_economicidade", label: "Inteligência — economicidade do ativo" },
 ] as const;
 
 type ReportKey = (typeof REPORTS)[number]["value"];
@@ -77,6 +102,12 @@ const CAPS: Record<ReportKey, { date: boolean; unit: boolean; vehicle: boolean; 
   diarias: { date: true, unit: true, vehicle: false, driver: true },
   limpeza: { date: true, unit: true, vehicle: true, driver: false },
   cotas_servidor: { date: true, unit: true, vehicle: true, driver: false },
+  int_consumo: { date: true, unit: true, vehicle: true, driver: true },
+  int_ranking: { date: true, unit: true, vehicle: true, driver: true },
+  int_desvios: { date: true, unit: true, vehicle: true, driver: true },
+  int_despesas: { date: true, unit: true, vehicle: true, driver: false },
+  int_tco: { date: true, unit: true, vehicle: true, driver: false },
+  int_economicidade: { date: true, unit: true, vehicle: true, driver: false },
 };
 
 
@@ -183,6 +214,132 @@ function Relatorios() {
       const start = `${from}T00:00:00`;
 
       const end = `${to}T23:59:59`;
+
+      /* ===== Fase 10 / Bloco 2 — relatórios de inteligência ===== */
+      if (report.startsWith("int_")) {
+        const [{ data: segRaw }, { data: costRaw }, { data: downRaw }, { data: paramsRaw }, { data: cfg }] =
+          await Promise.all([
+            supabase.rpc("fleet_consumption_segments", {
+              _from: from,
+              _to: to,
+              ...(unit ? { _unit: unit } : {}),
+              ...(vehicle ? { _vehicle: vehicle } : {}),
+              ...(driver ? { _driver: driver } : {}),
+            }),
+            supabase.rpc("fleet_cost_rows", {
+              _from: from,
+              _to: to,
+              ...(unit ? { _unit: unit } : {}),
+              ...(vehicle ? { _vehicle: vehicle } : {}),
+            }),
+            supabase.rpc("fleet_downtime", { _from: from, _to: to }),
+            supabase.from("consumption_parameters").select("*"),
+            supabase.from("intelligence_settings").select("*").maybeSingle(),
+          ]);
+
+        const segments = (segRaw ?? []) as ConsumptionSegment[];
+        const costRows = (costRaw ?? []) as CostRow[];
+        const downtime = (downRaw ?? []) as DowntimeRow[];
+        const params = paramsRaw ?? [];
+        const byAsset = aggregateConsumption(segments, "ativo");
+        const assetCosts = costsByAsset(costRows);
+        const devMap = new Map<string, DeviationClass>();
+        const expectedMap = new Map<string, number | null>();
+        const pctMap = new Map<string, number | null>();
+        for (const a of byAsset) {
+          const metric = a.km > 0 ? "km_l" : "l_h";
+          const p = matchParameter(
+            params,
+            { vehicleId: a.vehicleId, assetClass: a.assetClass, category: a.category, brand: a.brand, model: a.model },
+            metric,
+          );
+          const { klass, deviationPct } = classifyDeviation(metric === "km_l" ? a.kmL : a.lH, p);
+          devMap.set(a.key, klass);
+          expectedMap.set(a.key, p ? Number(p.expected_value) : null);
+          pctMap.set(a.key, deviationPct);
+        }
+
+        if (report === "int_consumo" || report === "int_ranking") {
+          const rowsOut = byAsset.map((a) => ({
+            ativo: a.label,
+            tipo: a.assetClass === "equipamento" ? "Equipamento" : "Veículo",
+            litros: formatNumberBR(a.liters, 2),
+            km: formatNumberBR(a.km, 0),
+            horas: formatNumberBR(a.hours, 1),
+            km_l: a.kmL != null ? formatNumberBR(a.kmL, 2) : "—",
+            l_h: a.lH != null ? formatNumberBR(a.lH, 2) : "—",
+            esperado: expectedMap.get(a.key) != null ? formatNumberBR(expectedMap.get(a.key)!, 2) : "—",
+            desvio: pctMap.get(a.key) != null ? `${pctMap.get(a.key)!.toFixed(1)}%` : "—",
+            classificacao: DEVIATION_LABEL[devMap.get(a.key) ?? "sem_parametro"],
+            gasto: formatMoney(a.value),
+            trechos: a.segments,
+            descartados: a.invalidSegments,
+          }));
+          if (report === "int_ranking") {
+            return rowsOut
+              .filter((r) => r.km_l !== "—" || r.l_h !== "—")
+              .sort((a, b) => (parseBRNumber(b.km_l) ?? 0) - (parseBRNumber(a.km_l) ?? 0));
+          }
+          return rowsOut;
+        }
+
+        if (report === "int_desvios") {
+          return detectAnomalies(segments, cfg ?? null).map((a) => ({
+            data: dt(a.at),
+            ativo: a.asset,
+            ocorrencia: a.type,
+            detalhe: a.detail,
+            severidade: a.severity === "critico" ? "Crítico" : "Atenção",
+          }));
+        }
+
+        if (report === "int_despesas") {
+          return costsByMonth(costRows).map((m) => {
+            const row: Record<string, unknown> = { competencia: monthLabel(m.competencia) };
+            for (const c of COST_CATEGORIES) row[c.value] = formatMoney(catValue(m.totals, c.value));
+            row["total"] = formatMoney(m.totals.total);
+            return row;
+          });
+        }
+
+        if (report === "int_tco") {
+          const totalFrota = assetCosts.reduce((s2, a) => s2 + a.totals.total, 0);
+          return assetCosts.map((a) => {
+            const cons = byAsset.find((c) => c.vehicleId === a.vehicleId);
+            const row: Record<string, unknown> = { ativo: a.label, unidade: a.unitName ?? "—" };
+            for (const c of COST_CATEGORIES) row[c.value] = formatMoney(catValue(a.totals, c.value));
+            row["total"] = formatMoney(a.totals.total);
+            row["km"] = formatNumberBR(cons?.km ?? 0, 0);
+            row["horas"] = formatNumberBR(cons?.hours ?? 0, 1);
+            row["custo_km"] = cons?.km ? formatMoney(a.totals.total / cons.km) : "—";
+            row["custo_hora"] = cons?.hours ? formatMoney(a.totals.total / cons.hours) : "—";
+            row["participacao"] = totalFrota ? `${((a.totals.total / totalFrota) * 100).toFixed(1)}%` : "—";
+            return row;
+          });
+        }
+
+        return economicity({
+          costs: assetCosts,
+          consumption: byAsset,
+          downtime,
+          vehicles,
+          deviations: devMap,
+          periodDays: periodDays(from, to),
+        }).map((e) => ({
+          ativo: e.label,
+          idade: e.ageYears != null ? formatNumberBR(e.ageYears, 1) : "—",
+          aquisicao: e.acquisitionValue ? formatMoney(e.acquisitionValue) : "—",
+          custo_periodo: formatMoney(e.periodCost),
+          manutencao: formatMoney(e.maintenanceCost),
+          custo_km: e.costPerKm != null ? formatMoney(e.costPerKm) : "—",
+          custo_hora: e.costPerHour != null ? formatMoney(e.costPerHour) : "—",
+          indisponibilidade: formatNumberBR(e.downtimeDays, 1),
+          consumo: DEVIATION_LABEL[e.deviation],
+          pontuacao: formatNumberBR(e.score, 0),
+          classificacao: ECONOMICITY_LABEL[e.klass],
+          fatores: e.reasons.join(" ") || "Sem fatores relevantes.",
+        }));
+      }
 
       if (report === "frota") {
         let q = supabase

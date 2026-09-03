@@ -4,8 +4,8 @@ Execução em etapas. Cada bloco só é marcado como concluído após migração
 
 ## Blocos
 - [x] 1. Máquinas e equipamentos (cadastro próprio integrado à frota) — migração, página /equipamentos, menu, identificação por patrimônio em todas as telas e 5 bens demonstrativos
-- [ ] 2. Inteligência de consumo e custos (km/L, L/h, rankings, desvios)
-- [ ] 3. TCO e economicidade
+- [x] 2. Inteligência de consumo e custos (km/L, L/h, rankings, desvios, evolução de despesas, TCO, economicidade, relatórios e alertas) — área /inteligencia, 3 tabelas, 4 RPCs, 6 relatórios e carga demonstrativa
+- [ ] 3. TCO e economicidade — entregue no Bloco 2; revisar apenas ajustes finos (FIPE) no Bloco 4
 - [ ] 4. FIPE / valor de referência (conector não configurado)
 - [ ] 5. Compatibilidade peça × bem
 - [ ] 6. Ordem de Fornecimento de peças (OF)

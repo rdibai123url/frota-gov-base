@@ -106,6 +106,7 @@ const NAV: NavGroup[] = [
     label: "Relatórios e integrações",
     icon: FileBarChart,
     items: [
+      { to: "/inteligencia", label: "Inteligência da frota" },
       { to: "/relatorios", label: "Relatórios avançados" },
       { to: "/transparencia", label: "Portal da Transparência" },
       { to: "/chaves-api", label: "Chaves de API" },
