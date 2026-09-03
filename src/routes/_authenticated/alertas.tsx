@@ -5,6 +5,7 @@ import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/app-shell";
+import { useDiaries, diaryAlerts } from "@/lib/diarias";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -91,6 +92,9 @@ function Alertas() {
     invalidate(["fueling-alerts"]);
   }
 
+  const { data: diaries = [] } = useDiaries();
+  const diaryIssues = useMemo(() => diaryAlerts(diaries), [diaries]);
+
   const paged = usePaged(filtered);
   return (
     <>
@@ -140,6 +144,22 @@ function Alertas() {
           </Select>
         </div>
       </div>
+
+      {diaryIssues.length > 0 && (
+        <div className="mb-4 rounded-lg border bg-card p-4 shadow-card">
+          <h2 className="gov-title mb-3 text-base">Diárias — pendências</h2>
+          <ul className="space-y-2">
+            {diaryIssues.map((i, idx) => (
+              <li key={`${i.kind}-${idx}`} className="flex items-start gap-2 text-sm">
+                <AlertTriangle
+                  className={`mt-0.5 size-4 ${i.severity === "alta" ? "text-destructive" : "text-warning"}`}
+                />
+                <span>{i.message}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="overflow-x-auto rounded-lg border bg-card shadow-card">
         <Table>
