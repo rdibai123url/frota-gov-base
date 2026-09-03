@@ -139,6 +139,7 @@ function Alertas() {
           <TableHeader>
             <TableRow>
               <TableHead>Ocorrência</TableHead>
+              <TableHead>Categoria</TableHead>
               <TableHead>Veículo</TableHead>
               <TableHead>Detalhe</TableHead>
               <TableHead>Justificativa</TableHead>
@@ -149,11 +150,11 @@ function Alertas() {
           </TableHeader>
           <TableBody>
             {isLoading && (
-              <TableRow><TableCell colSpan={7} className="py-8 text-center text-muted-foreground">Carregando…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="py-8 text-center text-muted-foreground">Carregando…</TableCell></TableRow>
             )}
             {!isLoading && filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
                   Nenhuma inconsistência registrada.
                 </TableCell>
               </TableRow>
@@ -165,6 +166,9 @@ function Alertas() {
                     <AlertTriangle className="size-4 text-warning" />
                     {alertLabel(a.alert_type)}
                   </span>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline">{label(ALERT_CATEGORIES, a.category ?? "abastecimento")}</Badge>
                 </TableCell>
                 <TableCell>{a.vehicle?.plate ?? "—"}</TableCell>
                 <TableCell className="max-w-sm text-sm text-muted-foreground">{a.message}</TableCell>
