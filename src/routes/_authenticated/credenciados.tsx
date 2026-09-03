@@ -30,6 +30,7 @@ import {
   usePartnerUsers,
   usePartners,
   type Partner,
+  type PartnerUser,
 } from "@/lib/credenciados";
 import {
   brl,
@@ -173,8 +174,8 @@ function Credenciados() {
       legal_name: form.legal_name.trim(),
       trade_name: form.trade_name.trim() || null,
       cnpj: cnpj || null,
-      kinds: form.kinds,
-      status: form.status,
+      kinds: form.kinds as Partner["kinds"],
+      status: form.status as Partner["status"],
       supplier_id: form.supplier_id === NONE ? null : form.supplier_id,
       workshop_id: form.workshop_id === NONE ? null : form.workshop_id,
       address: form.address.trim() || null,
@@ -354,7 +355,7 @@ function Credenciados() {
                 {pagedCaptures.rows.map((c) => (
                   <TableRow key={c.id}>
                     <TableCell>{dateTimeBR(c.captured_at)}</TableCell>
-                    <TableCell>{partnerLabel.get(c.partner_id) ?? "—"}</TableCell>
+                    <TableCell>{(c.partner_id ? partnerLabel.get(c.partner_id) : null) ?? "—"}</TableCell>
                     <TableCell>{c.kind}</TableCell>
                     <TableCell>{c.vehicle_id ? (vehicleLabel.get(c.vehicle_id) ?? "—") : "—"}</TableCell>
                     <TableCell className="text-right">
@@ -557,7 +558,7 @@ function PartnerUsersPanel({
       full_name: form.full_name.trim(),
       email: form.email.trim().toLowerCase(),
       phone: form.phone.trim() || null,
-      role: form.role,
+      role: form.role as PartnerUser["role"],
     });
     if (error) {
       toast.error(dbMessage(error));
@@ -573,7 +574,7 @@ function PartnerUsersPanel({
     const { error } = await supabase
       .from("partner_users")
       .update({
-        status,
+        status: status as PartnerUser["status"],
         blocked_at: status === "bloqueado" ? new Date().toISOString() : null,
         blocked_reason: status === "bloqueado" ? (reason ?? "Bloqueio administrativo") : null,
       })
