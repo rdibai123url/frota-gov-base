@@ -59,6 +59,7 @@ function Alertas() {
   useEffect(() => {
     void Promise.all([supabase.rpc("refresh_financial_alerts"), supabase.rpc("refresh_maintenance_alerts"),
       supabase.rpc("refresh_procurement_alerts"), supabase.rpc("refresh_fleet_alerts"),
+      supabase.rpc("refresh_intelligence_alerts"),
 
     ]).then(() =>
       invalidate(["fueling-alerts"]),
