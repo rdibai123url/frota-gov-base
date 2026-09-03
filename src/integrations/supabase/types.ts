@@ -2573,6 +2573,7 @@ export type Database = {
           cancel_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
+          closes_authorization: boolean
           commitment_id: string | null
           contract_id: string | null
           contract_item_id: string | null
@@ -2597,6 +2598,10 @@ export type Database = {
           organization_id: string
           quantity: number
           quota_id: string | null
+          released_quantity: number
+          released_value: number
+          reserved_quantity_before: number | null
+          reserved_value_before: number | null
           status: Database["public"]["Enums"]["fueling_status"]
           supplier_id: string | null
           total_value: number | null
@@ -2617,6 +2622,7 @@ export type Database = {
           cancel_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
+          closes_authorization?: boolean
           commitment_id?: string | null
           contract_id?: string | null
           contract_item_id?: string | null
@@ -2641,6 +2647,10 @@ export type Database = {
           organization_id: string
           quantity: number
           quota_id?: string | null
+          released_quantity?: number
+          released_value?: number
+          reserved_quantity_before?: number | null
+          reserved_value_before?: number | null
           status?: Database["public"]["Enums"]["fueling_status"]
           supplier_id?: string | null
           total_value?: number | null
@@ -2661,6 +2671,7 @@ export type Database = {
           cancel_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
+          closes_authorization?: boolean
           commitment_id?: string | null
           contract_id?: string | null
           contract_item_id?: string | null
@@ -2685,6 +2696,10 @@ export type Database = {
           organization_id?: string
           quantity?: number
           quota_id?: string | null
+          released_quantity?: number
+          released_value?: number
+          reserved_quantity_before?: number | null
+          reserved_value_before?: number | null
           status?: Database["public"]["Enums"]["fueling_status"]
           supplier_id?: string | null
           total_value?: number | null

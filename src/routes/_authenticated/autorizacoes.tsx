@@ -644,6 +644,7 @@ function AuthorizationDetail({ auth, onClose }: { auth: AuthorizationRow; onClos
     ["Quantidade autorizada", formatLiters(auth.max_quantity)],
     ["Consumido", formatLiters(auth.consumed_quantity)],
     ["Saldo", formatLiters(authorizationBalance(auth))],
+    ["Reservado no orçamento", `${formatLiters(Number(auth.reserved_quantity ?? 0))}${auth.reserved_value != null ? ` · ${brl(Number(auth.reserved_value))}` : ""}`],
     ["Valor máximo", auth.max_value ? brl(auth.max_value) : "—"],
     ["Preço unitário máximo", auth.max_unit_price ? brl(auth.max_unit_price) : "—"],
     ["Válida de", dateTimeBR(auth.valid_from)],

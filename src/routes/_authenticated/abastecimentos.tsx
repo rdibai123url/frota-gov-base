@@ -35,6 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   ALERT_TYPE_LABELS,
@@ -424,6 +425,7 @@ function NewFuelingDialog({
   const [notes, setNotes] = useState("");
   const [justification, setJustification] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [closeAuth, setCloseAuth] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const usableAuths = useMemo(() => auths.filter((a) => authorizationUsable(a)), [auths]);
@@ -591,6 +593,7 @@ function NewFuelingDialog({
         notes: notes || null,
         alert_flags: alerts.map((a) => a.type),
         alert_justification: needsJustification ? justification.trim() : null,
+        closes_authorization: selectedAuth ? closeAuth : false,
         created_by: perms.userId,
       })
       .select("id")
@@ -730,6 +733,27 @@ function NewFuelingDialog({
                     <p className="text-sm">{v}</p>
                   </div>
                 ))}
+              </div>
+            )}
+            {selectedAuth && (
+              <div className="mt-3 rounded-md border bg-background p-3">
+                <div className="flex items-start gap-2">
+                  <Checkbox
+                    id="closeauth"
+                    checked={closeAuth}
+                    onCheckedChange={(v) => setCloseAuth(v === true)}
+                  />
+                  <div>
+                    <Label htmlFor="closeauth" className="cursor-pointer">
+                      Encerrar a autorização com este abastecimento
+                    </Label>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {closeAuth
+                        ? `A diferença entre o reservado e o abastecido volta automaticamente ao saldo do contrato, do empenho e da cota. Devolução prevista: ${formatLiters(Math.max(0, authorizationBalance(selectedAuth) - qty))} ${selectedAuth.fuel?.measure_unit ?? "L"}.`
+                        : "A autorização permanece aberta e o saldo reservado continua bloqueado para novos abastecimentos parciais."}
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
             {needsAuthReason && (
@@ -966,6 +990,30 @@ function DetailDialog({ fueling, onClose }: { fueling: FuelingRow | null; onClos
             label="Autorização"
             value={fueling.authorization?.code ?? (fueling.without_authorization_reason ? "Sem autorização prévia" : "—")}
           />
+          {fueling.authorization_id && (
+            <>
+              <Row
+                label="Reservado na autorização"
+                value={
+                  fueling.reserved_quantity_before != null
+                    ? `${formatLiters(Number(fueling.reserved_quantity_before))} ${fueling.fuel?.measure_unit ?? ""}${
+                        fueling.reserved_value_before != null ? ` · ${brl(Number(fueling.reserved_value_before))}` : ""
+                      }`
+                    : "—"
+                }
+              />
+              <Row
+                label="Devolvido ao saldo"
+                value={
+                  Number(fueling.released_quantity ?? 0) > 0 || Number(fueling.released_value ?? 0) > 0
+                    ? `${formatLiters(Number(fueling.released_quantity ?? 0))} ${fueling.fuel?.measure_unit ?? ""} · ${brl(Number(fueling.released_value ?? 0))}`
+                    : fueling.closes_authorization
+                      ? "Sem diferença a devolver"
+                      : "Autorização mantida aberta"
+                }
+              />
+            </>
+          )}
           <Row
             label="Documento fiscal"
             value={`${DOCUMENT_KIND_LABELS[fueling.document_kind ?? ""] ?? "—"}${fueling.invoice_number ? ` nº ${fueling.invoice_number}` : ""}`}

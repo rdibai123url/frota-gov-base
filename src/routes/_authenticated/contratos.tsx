@@ -495,8 +495,14 @@ function Contratos() {
                             {formatLiters(Number(i.quantity))} {i.measure_unit}
                           </TableCell>
                           <TableCell className="text-right">{brl(Number(i.unit_price))}</TableCell>
-                          <TableCell className="text-right">{formatLiters(Number(i.reserved_quantity))}</TableCell>
-                          <TableCell className="text-right">{formatLiters(Number(i.consumed_quantity))}</TableCell>
+                          <TableCell className="text-right">
+                            {formatLiters(Number(i.reserved_quantity))}
+                            <span className="block text-xs text-muted-foreground">{brl(Number(i.reserved_value))}</span>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {formatLiters(Number(i.consumed_quantity))}
+                            <span className="block text-xs text-muted-foreground">{brl(Number(i.consumed_value))}</span>
+                          </TableCell>
                           <TableCell className="text-right font-medium">{formatLiters(b.quantity)}</TableCell>
                           <TableCell className="text-right font-medium">{brl(b.value)}</TableCell>
                           <TableCell>
