@@ -9077,6 +9077,7 @@ export type Database = {
         Returns: string
       }
       partner_org_id: { Args: never; Returns: string }
+      partner_session_touch: { Args: never; Returns: string }
       purge_activity_logs: { Args: never; Returns: number }
       refresh_backup_alerts: { Args: never; Returns: undefined }
       refresh_financial_alerts: { Args: never; Returns: undefined }
