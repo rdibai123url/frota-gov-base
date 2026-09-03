@@ -167,12 +167,15 @@ function Relatorios() {
       if (report === "abastecimento" || report === "custo_veiculo") {
         let q = supabase
           .from("fuelings")
-          .select("id, fueled_at, quantity, total_value, status, vehicle:vehicles(id, plate, asset_code), unit:units(name)")
+          .select(
+            "id, fueled_at, quantity, unit_price, total_value, status, odometer, vehicle:vehicles(id, plate, asset_code), unit:units(name), driver:drivers(full_name), fuel_type:fuel_types(name), supplier:suppliers(trade_name, legal_name)",
+          )
           .gte("fueled_at", start)
           .lte("fueled_at", end)
           .order("fueled_at", { ascending: false });
         if (unit) q = q.eq("unit_id", unit);
         if (vehicle) q = q.eq("vehicle_id", vehicle);
+        if (driver) q = q.eq("driver_id", driver);
         const { data: fuelings, error } = await q;
         if (error) throw error;
 
@@ -181,7 +184,12 @@ function Relatorios() {
             data: new Date(f.fueled_at).toLocaleDateString("pt-BR"),
             veiculo: f.vehicle?.plate ?? f.vehicle?.asset_code ?? "—",
             unidade: f.unit?.name ?? "—",
+            condutor: f.driver?.full_name ?? "—",
+            combustivel_tipo: f.fuel_type?.name ?? "—",
+            fornecedor: f.supplier?.trade_name ?? f.supplier?.legal_name ?? "—",
+            hodometro: f.odometer ?? "—",
             litros: formatLiters(f.quantity),
+            preco_litro: formatMoney(f.unit_price),
             valor: formatMoney(f.total_value),
             situacao: f.status,
           }));
@@ -189,45 +197,50 @@ function Relatorios() {
 
         let mq = supabase
           .from("maintenance_records")
-          .select("id, total_value, vehicle:vehicles(id, plate, asset_code), entry_at")
+          .select("id, total_value, vehicle:vehicles(id, plate, asset_code), unit:units(name), entry_at")
           .gte("entry_at", start)
           .lte("entry_at", end);
+        if (unit) mq = mq.eq("unit_id", unit);
         if (vehicle) mq = mq.eq("vehicle_id", vehicle);
         const { data: maints } = await mq;
 
-        const acc = new Map<string, { veiculo: string; litros: number; combustivel: number; manutencao: number }>();
+        type Acc = { veiculo: string; unidade: string; litros: number; combustivel: number; manutencao: number };
+        const acc = new Map<string, Acc>();
+        const blank = (veiculo: string, unidade: string): Acc => ({
+          veiculo,
+          unidade,
+          litros: 0,
+          combustivel: 0,
+          manutencao: 0,
+        });
         for (const f of fuelings ?? []) {
           if (f.status === "cancelado") continue;
           const key = f.vehicle?.id ?? "—";
-          const row = acc.get(key) ?? {
-            veiculo: f.vehicle?.plate ?? f.vehicle?.asset_code ?? "—",
-            litros: 0,
-            combustivel: 0,
-            manutencao: 0,
-          };
+          const row =
+            acc.get(key) ?? blank(f.vehicle?.plate ?? f.vehicle?.asset_code ?? "—", f.unit?.name ?? "—");
           row.litros += Number(f.quantity ?? 0);
           row.combustivel += Number(f.total_value ?? 0);
           acc.set(key, row);
         }
         for (const m of maints ?? []) {
           const key = m.vehicle?.id ?? "—";
-          const row = acc.get(key) ?? {
-            veiculo: m.vehicle?.plate ?? m.vehicle?.asset_code ?? "—",
-            litros: 0,
-            combustivel: 0,
-            manutencao: 0,
-          };
+          const row =
+            acc.get(key) ?? blank(m.vehicle?.plate ?? m.vehicle?.asset_code ?? "—", m.unit?.name ?? "—");
           row.manutencao += Number(m.total_value ?? 0);
           acc.set(key, row);
         }
-        return Array.from(acc.values()).map((r) => ({
-          veiculo: r.veiculo,
-          litros: formatLiters(r.litros),
-          combustivel: formatMoney(r.combustivel),
-          manutencao: formatMoney(r.manutencao),
-          total: formatMoney(r.combustivel + r.manutencao),
-        }));
+        return Array.from(acc.values())
+          .sort((a, b) => b.combustivel + b.manutencao - (a.combustivel + a.manutencao))
+          .map((r) => ({
+            veiculo: r.veiculo,
+            unidade: r.unidade,
+            litros: formatLiters(r.litros),
+            combustivel: formatMoney(r.combustivel),
+            manutencao: formatMoney(r.manutencao),
+            total: formatMoney(r.combustivel + r.manutencao),
+          }));
       }
+
 
       if (report === "manutencao") {
         let q = supabase
