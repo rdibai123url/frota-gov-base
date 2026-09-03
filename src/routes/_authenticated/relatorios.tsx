@@ -52,6 +52,7 @@ const REPORTS = [
   { value: "legal", label: "Multas, sinistros e obrigações" },
   { value: "patrimonio", label: "Movimentação patrimonial" },
   { value: "diarias", label: "Diárias — requisições e comprovações" },
+  { value: "limpeza", label: "Limpeza da frota" },
 ] as const;
 
 type ReportKey = (typeof REPORTS)[number]["value"];
@@ -70,6 +71,7 @@ const CAPS: Record<ReportKey, { date: boolean; unit: boolean; vehicle: boolean; 
   legal: { date: true, unit: true, vehicle: true, driver: true },
   patrimonio: { date: true, unit: true, vehicle: true, driver: false },
   diarias: { date: true, unit: true, vehicle: false, driver: true },
+  limpeza: { date: true, unit: true, vehicle: true, driver: false },
 };
 
 
@@ -90,6 +92,8 @@ const LABELS: Record<string, string> = {
   km: "KM percorrido",
   combustivel: "Combustível (R$)",
   manutencao: "Manutenção (R$)",
+  servicos: "Serviços de limpeza",
+  nota: "Nota fiscal",
   total: "Total (R$)",
   placa: "Placa",
   patrimonio: "Patrimônio",
@@ -287,6 +291,33 @@ function Relatorios() {
           mao_obra: formatMoney(m.labor_value),
           valor: formatMoney(m.total_value),
           situacao: m.status,
+        }));
+      }
+
+      if (report === "limpeza") {
+        let q = supabase
+          .from("vehicle_cleanings")
+          .select(
+            "id, code, status, performed_at, odometer_km, total_value, invoice_number, service_types, vehicle:vehicles(plate, asset_code), unit:units(name), supplier:suppliers(trade_name, legal_name)",
+          )
+          .gte("performed_at", start)
+          .lte("performed_at", end)
+          .order("performed_at", { ascending: false });
+        if (unit) q = q.eq("unit_id", unit);
+        if (vehicle) q = q.eq("vehicle_id", vehicle);
+        const { data: rows, error } = await q;
+        if (error) throw error;
+        return (rows ?? []).map((c) => ({
+          codigo: c.code ?? "—",
+          veiculo: c.vehicle?.plate ?? c.vehicle?.asset_code ?? "—",
+          unidade: c.unit?.name ?? "—",
+          data: day(c.performed_at),
+          servicos: (c.service_types ?? []).join(", ") || "—",
+          fornecedor: c.supplier?.trade_name ?? c.supplier?.legal_name ?? "—",
+          hodometro: c.odometer_km ?? "—",
+          nota: c.invoice_number ?? "—",
+          valor: formatMoney(c.total_value),
+          situacao: c.status,
         }));
       }
 

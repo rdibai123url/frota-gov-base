@@ -930,6 +930,53 @@ export type Database = {
           },
         ]
       }
+      cleaning_types: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          sort_order: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          sort_order?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          sort_order?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cleaning_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       commitment_movements: {
         Row: {
           attachment_path: string | null
@@ -6026,6 +6073,163 @@ export type Database = {
           },
         ]
       }
+      vehicle_cleanings: {
+        Row: {
+          attachment_path: string | null
+          budget_consumed: boolean
+          cancel_reason: string | null
+          code: string | null
+          commitment_id: string | null
+          contract_id: string | null
+          contract_item_id: string | null
+          cost_center_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          import_batch_id: string | null
+          invoice_number: string | null
+          legacy_source: string | null
+          notes: string | null
+          odometer_km: number | null
+          organization_id: string
+          performed_at: string
+          quota_id: string | null
+          service_type_ids: string[]
+          service_types: string[]
+          status: Database["public"]["Enums"]["cleaning_status"]
+          supplier_id: string | null
+          total_value: number
+          unit_id: string | null
+          updated_at: string
+          updated_by: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          attachment_path?: string | null
+          budget_consumed?: boolean
+          cancel_reason?: string | null
+          code?: string | null
+          commitment_id?: string | null
+          contract_id?: string | null
+          contract_item_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          import_batch_id?: string | null
+          invoice_number?: string | null
+          legacy_source?: string | null
+          notes?: string | null
+          odometer_km?: number | null
+          organization_id: string
+          performed_at?: string
+          quota_id?: string | null
+          service_type_ids?: string[]
+          service_types?: string[]
+          status?: Database["public"]["Enums"]["cleaning_status"]
+          supplier_id?: string | null
+          total_value?: number
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          attachment_path?: string | null
+          budget_consumed?: boolean
+          cancel_reason?: string | null
+          code?: string | null
+          commitment_id?: string | null
+          contract_id?: string | null
+          contract_item_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          import_batch_id?: string | null
+          invoice_number?: string | null
+          legacy_source?: string | null
+          notes?: string | null
+          odometer_km?: number | null
+          organization_id?: string
+          performed_at?: string
+          quota_id?: string | null
+          service_type_ids?: string[]
+          service_types?: string[]
+          status?: Database["public"]["Enums"]["cleaning_status"]
+          supplier_id?: string | null
+          total_value?: number
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_cleanings_commitment_id_fkey"
+            columns: ["commitment_id"]
+            isOneToOne: false
+            referencedRelation: "commitments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_cleanings_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_cleanings_contract_item_id_fkey"
+            columns: ["contract_item_id"]
+            isOneToOne: false
+            referencedRelation: "contract_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_cleanings_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_cleanings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_cleanings_quota_id_fkey"
+            columns: ["quota_id"]
+            isOneToOne: false
+            referencedRelation: "quotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_cleanings_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_cleanings_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_cleanings_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicle_obligations: {
         Row: {
           amount: number | null
@@ -6626,6 +6830,7 @@ export type Database = {
       }
       commit_import_batch: { Args: { _batch: string }; Returns: Json }
       commit_import_batch_v2: { Args: { _batch: string }; Returns: Json }
+      commit_import_batch_v3: { Args: { _batch: string }; Returns: Json }
       contract_period_at: {
         Args: { _at: string; _contract: string }
         Returns: string
@@ -6738,6 +6943,7 @@ export type Database = {
         Args: { _checklist: Json; _month: number; _year: number }
         Returns: undefined
       }
+      seed_cleaning_types: { Args: { _org: string }; Returns: undefined }
       transparency_period_is_closed: {
         Args: { _at: string; _org: string }
         Returns: boolean
@@ -6794,6 +7000,7 @@ export type Database = {
         | "consumo"
         | "estorno"
         | "suplementacao"
+      cleaning_status: "agendada" | "realizada" | "cancelada"
       commitment_kind: "ordinario" | "estimativo" | "global"
       commitment_status: "ativo" | "esgotado" | "anulado" | "encerrado"
       contract_amendment_kind:
@@ -7141,6 +7348,7 @@ export const Constants = {
         "estorno",
         "suplementacao",
       ],
+      cleaning_status: ["agendada", "realizada", "cancelada"],
       commitment_kind: ["ordinario", "estimativo", "global"],
       commitment_status: ["ativo", "esgotado", "anulado", "encerrado"],
       contract_amendment_kind: [

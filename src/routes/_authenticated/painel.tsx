@@ -60,6 +60,7 @@ import {
   useMaintenanceLead,
   useMaintenancePlans,
   useMaintenanceRecords,
+  useVehicleCleanings,
   useMaintenanceRequests,
   useTires,
   MIN_PROPOSALS,
@@ -213,11 +214,24 @@ function Painel() {
   const { data: plans = [] } = useMaintenancePlans();
   const { data: mRequests = [] } = useMaintenanceRequests();
   const { data: mRecords = [] } = useMaintenanceRecords();
+  const { data: cleanings = [] } = useVehicleCleanings();
   const { data: tires = [] } = useTires();
   const lead = useMaintenanceLead();
   const { data: quotations = [] } = useQuotations();
   const { data: orders = [] } = useServiceOrders();
   const { data: workshops = [] } = useWorkshops();
+
+  const limpeza = useMemo(() => {
+    const month = new Date().toISOString().slice(0, 7);
+    const doneMonth = cleanings.filter(
+      (c) => c.status === "realizada" && (c.performed_at ?? "").slice(0, 7) === month,
+    );
+    return {
+      mes: doneMonth.length,
+      valorMes: doneMonth.reduce((s, c) => s + Number(c.total_value ?? 0), 0),
+      agendadas: cleanings.filter((c) => c.status === "agendada").length,
+    };
+  }, [cleanings]);
 
   const manut = useMemo(() => {
     const dues = plans
@@ -393,6 +407,13 @@ function Painel() {
         <StatCard label="Veículos em oficina" value={manut.emOficina} icon={Wrench} tone={manut.emOficina > 0 ? "warning" : "default"} />
         <StatCard label="Custo de manutenção no mês" value={brl(manut.custoMes)} icon={Cog} />
         <StatCard label="Pneus instalados / estoque" value={`${manut.pneusInstalados} / ${manut.pneusEstoque}`} icon={CircleDot} />
+      </div>
+
+      <h2 className="gov-title mt-10 mb-4 text-lg">Limpeza da frota</h2>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <StatCard label="Limpezas no mês" value={limpeza.mes} icon={Droplets} />
+        <StatCard label="Gasto com limpeza no mês" value={brl(limpeza.valorMes)} icon={Banknote} />
+        <StatCard label="Limpezas agendadas" value={limpeza.agendadas} icon={Droplets} tone={limpeza.agendadas > 0 ? "warning" : "default"} />
       </div>
 
       <h2 className="gov-title mt-10 mb-4 text-lg">Rede credenciada, cotações e ordens de serviço</h2>

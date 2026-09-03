@@ -2165,3 +2165,56 @@ export function periodAt(periods: ContractPeriod[], contractId: string, at: Date
 export function periodBalance(p: ContractPeriod) {
   return Number(p.period_value ?? 0) - Number(p.reserved_value ?? 0) - Number(p.consumed_value ?? 0);
 }
+
+/* ======================================================================== */
+/*   MANUTENÇÃO — LIMPEZA DE VEÍCULOS                                       */
+/* ======================================================================== */
+
+export type CleaningType = Database["public"]["Tables"]["cleaning_types"]["Row"];
+export type VehicleCleaning = Database["public"]["Tables"]["vehicle_cleanings"]["Row"];
+export type CleaningStatus = Database["public"]["Enums"]["cleaning_status"];
+
+export type VehicleCleaningRow = VehicleCleaning & {
+  vehicle: VehicleRef | null;
+  unit: Pick<Unit, "id" | "name" | "acronym"> | null;
+  supplier: Pick<Supplier, "id" | "legal_name" | "trade_name"> | null;
+  contract: Pick<Contract, "id" | "number"> | null;
+  commitment: Pick<Commitment, "id" | "number"> | null;
+  quota: Pick<Quota, "id" | "name"> | null;
+  cost_center: Pick<CostCenter, "id" | "code" | "name"> | null;
+};
+
+export const CLEANING_STATUS: { value: CleaningStatus; label: string }[] = [
+  { value: "agendada", label: "Agendada" },
+  { value: "realizada", label: "Realizada" },
+  { value: "cancelada", label: "Cancelada" },
+];
+
+const CLEANING_SELECT =
+  "*, vehicle:vehicles(id, plate, brand, model, current_km, hour_meter, status), unit:units(id, name, acronym), supplier:suppliers(id, legal_name, trade_name), contract:contracts(id, number), commitment:commitments(id, number), quota:quotas(id, name), cost_center:cost_centers(id, code, name)";
+
+export function useCleaningTypes(onlyActive = false) {
+  return useQuery({
+    queryKey: ["cleaning-types", onlyActive],
+    queryFn: async () => {
+      let q = supabase.from("cleaning_types").select("*").order("sort_order").order("name");
+      if (onlyActive) q = q.eq("active", true);
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []) as CleaningType[];
+    },
+  });
+}
+
+export function useVehicleCleanings(vehicleId?: string) {
+  return useQuery({
+    queryKey: ["vehicle-cleanings", vehicleId ?? "todas"],
+    queryFn: async () => {
+      let q = supabase.from("vehicle_cleanings").select(CLEANING_SELECT).order("performed_at", { ascending: false });
+      if (vehicleId) q = q.eq("vehicle_id", vehicleId);
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []) as unknown as VehicleCleaningRow[];
+    },
+  });
+}

@@ -63,6 +63,7 @@ const DATASETS = [
   { key: "frota", label: "Frota (quantidade de veículos por situação)" },
   { key: "abastecimento", label: "Abastecimento (litros e valores agregados)" },
   { key: "manutencao", label: "Manutenção (quantidade e valores agregados)" },
+  { key: "limpeza", label: "Limpeza da frota (quantidade e valores agregados)" },
   { key: "contratos", label: "Contratos (número, objeto e vigência)" },
 ];
 

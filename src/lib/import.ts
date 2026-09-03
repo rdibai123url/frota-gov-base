@@ -75,7 +75,8 @@ export type ImportModuleId =
   | "pecas"
   | "pneus"
   | "planos"
-  | "cotas";
+  | "cotas"
+  | "limpeza";
 
 export type ImportModule = {
   id: ImportModuleId;
@@ -92,6 +93,7 @@ export type ImportModule = {
   fields: ImportField[];
 };
 
+const CLEANING_STATUS_IMPORT = ["agendada", "realizada", "cancelada"];
 const UNIT_TYPES = ["secretaria", "departamento", "diretoria", "coordenacao", "unidade", "outro"];
 const VEHICLE_STATUS = ["ativo", "manutencao", "cedido", "inativo", "baixado"];
 const DRIVER_BONDS = ["efetivo", "comissionado", "contratado", "terceirizado", "outro"];
@@ -598,6 +600,29 @@ export const IMPORT_MODULES: ImportModule[] = [
     ],
   },
   {
+    id: "limpeza",
+    label: "Limpeza de veículos",
+    description: "Serviços de lavagem e higienização já executados no sistema anterior.",
+    order: 18.5,
+    depends: ["veiculos"],
+    legacy: true,
+    dedupe: ["_vehicle", "performed_at"],
+    fields: [
+      refVehicle(true),
+      refUnit(),
+      refSupplier(),
+      refContract(),
+      refCostCenter(),
+      { key: "performed_at", label: "Data/hora do serviço", type: "datetime", required: true, aliases: ["data", "data_servico", "data_limpeza"] },
+      { key: "service_types", label: "Tipos de serviço (separados por ponto e vírgula)", type: "text", aliases: ["servicos", "tipo", "tipos"] },
+      { key: "odometer_km", label: "Quilometragem", type: "number", aliases: ["km", "hodometro", "odometro"] },
+      { key: "total_value", label: "Valor total", type: "money", aliases: ["valor", "valor_total", "custo"] },
+      { key: "invoice_number", label: "Nota fiscal", type: "text", aliases: ["nf", "nota", "nota_fiscal"] },
+      { key: "status", label: "Situação", type: "enum", options: CLEANING_STATUS_IMPORT, aliases: ["situacao"] },
+      { key: "notes", label: "Observações", type: "text", aliases: ["observacao", "obs"] },
+    ],
+  },
+  {
     id: "rede_credenciada",
     label: "Rede credenciada (oficinas)",
     description: "Oficinas e prestadores credenciados para manutenção.",
@@ -725,7 +750,7 @@ export const IMPORT_GROUPS: { id: string; label: string; modules: ImportModuleId
   {
     id: "operacao",
     label: "Operação",
-    modules: ["abastecimentos", "utilizacoes", "diarias", "manutencoes", "planos", "pecas", "pneus", "rede_credenciada"],
+    modules: ["abastecimentos", "utilizacoes", "diarias", "manutencoes", "limpeza", "planos", "pecas", "pneus", "rede_credenciada"],
   },
   {
     id: "legal",

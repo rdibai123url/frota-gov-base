@@ -28,6 +28,7 @@ import { Route as AuthenticatedEmpenhosRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedEntidadesExternasRouteImport } from './routes/_authenticated/entidades-externas'
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
 import { Route as AuthenticatedHistoricoVeiculoRouteImport } from './routes/_authenticated/historico-veiculo'
+import { Route as AuthenticatedLimpezaRouteImport } from './routes/_authenticated/limpeza'
 import { Route as AuthenticatedManutencoesRouteImport } from './routes/_authenticated/manutencoes'
 import { Route as AuthenticatedMigracaoRouteImport } from './routes/_authenticated/migracao'
 import { Route as AuthenticatedMultasRouteImport } from './routes/_authenticated/multas'
@@ -157,6 +158,11 @@ const AuthenticatedHistoricoVeiculoRoute =
     path: '/historico-veiculo',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedLimpezaRoute = AuthenticatedLimpezaRouteImport.update({
+  id: '/limpeza',
+  path: '/limpeza',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedManutencoesRoute =
   AuthenticatedManutencoesRouteImport.update({
     id: '/manutencoes',
@@ -319,6 +325,7 @@ export interface FileRoutesByFullPath {
   '/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
+  '/limpeza': typeof AuthenticatedLimpezaRoute
   '/manutencoes': typeof AuthenticatedManutencoesRoute
   '/migracao': typeof AuthenticatedMigracaoRoute
   '/multas': typeof AuthenticatedMultasRoute
@@ -366,6 +373,7 @@ export interface FileRoutesByTo {
   '/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
+  '/limpeza': typeof AuthenticatedLimpezaRoute
   '/manutencoes': typeof AuthenticatedManutencoesRoute
   '/migracao': typeof AuthenticatedMigracaoRoute
   '/multas': typeof AuthenticatedMultasRoute
@@ -415,6 +423,7 @@ export interface FileRoutesById {
   '/_authenticated/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/_authenticated/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
+  '/_authenticated/limpeza': typeof AuthenticatedLimpezaRoute
   '/_authenticated/manutencoes': typeof AuthenticatedManutencoesRoute
   '/_authenticated/migracao': typeof AuthenticatedMigracaoRoute
   '/_authenticated/multas': typeof AuthenticatedMultasRoute
@@ -464,6 +473,7 @@ export interface FileRouteTypes {
     | '/entidades-externas'
     | '/fornecedores'
     | '/historico-veiculo'
+    | '/limpeza'
     | '/manutencoes'
     | '/migracao'
     | '/multas'
@@ -511,6 +521,7 @@ export interface FileRouteTypes {
     | '/entidades-externas'
     | '/fornecedores'
     | '/historico-veiculo'
+    | '/limpeza'
     | '/manutencoes'
     | '/migracao'
     | '/multas'
@@ -559,6 +570,7 @@ export interface FileRouteTypes {
     | '/_authenticated/entidades-externas'
     | '/_authenticated/fornecedores'
     | '/_authenticated/historico-veiculo'
+    | '/_authenticated/limpeza'
     | '/_authenticated/manutencoes'
     | '/_authenticated/migracao'
     | '/_authenticated/multas'
@@ -732,6 +744,13 @@ declare module '@tanstack/react-router' {
       path: '/historico-veiculo'
       fullPath: '/historico-veiculo'
       preLoaderRoute: typeof AuthenticatedHistoricoVeiculoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/limpeza': {
+      id: '/_authenticated/limpeza'
+      path: '/limpeza'
+      fullPath: '/limpeza'
+      preLoaderRoute: typeof AuthenticatedLimpezaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/manutencoes': {
@@ -942,6 +961,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEntidadesExternasRoute: typeof AuthenticatedEntidadesExternasRoute
   AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
   AuthenticatedHistoricoVeiculoRoute: typeof AuthenticatedHistoricoVeiculoRoute
+  AuthenticatedLimpezaRoute: typeof AuthenticatedLimpezaRoute
   AuthenticatedManutencoesRoute: typeof AuthenticatedManutencoesRoute
   AuthenticatedMigracaoRoute: typeof AuthenticatedMigracaoRoute
   AuthenticatedMultasRoute: typeof AuthenticatedMultasRoute
@@ -983,6 +1003,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEntidadesExternasRoute: AuthenticatedEntidadesExternasRoute,
   AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,
   AuthenticatedHistoricoVeiculoRoute: AuthenticatedHistoricoVeiculoRoute,
+  AuthenticatedLimpezaRoute: AuthenticatedLimpezaRoute,
   AuthenticatedManutencoesRoute: AuthenticatedManutencoesRoute,
   AuthenticatedMigracaoRoute: AuthenticatedMigracaoRoute,
   AuthenticatedMultasRoute: AuthenticatedMultasRoute,
