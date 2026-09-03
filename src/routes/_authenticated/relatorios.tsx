@@ -392,7 +392,7 @@ function Relatorios() {
         let q = supabase
           .from("asset_movements")
           .select(
-            "code, kind, moved_on, from_unit_id, unit_id, to_status, act_number, notes, vehicle:vehicles(plate, asset_code), entity:external_entities(name)",
+            "code, kind, moved_on, from_unit_id, unit_id, to_status, act_number, notes, vehicle:vehicles(plate, asset_code), entity:external_entities!asset_movements_entity_id_fkey(name)",
           )
           .gte("moved_on", from)
           .lte("moved_on", to)
