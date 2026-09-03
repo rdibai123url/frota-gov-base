@@ -252,6 +252,11 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
   const { data: fuels = [] } = useFuelTypes();
   const { data: suppliers = [] } = useSuppliers();
   const { data: units = [] } = useUnits();
+  const { data: centers = [] } = useCostCenters();
+  const { data: contracts = [] } = useContracts();
+  const { data: contractItems = [] } = useContractItems();
+  const { data: commitments = [] } = useCommitments();
+  const { data: quotas = [] } = useQuotas();
   const perms = usePerms();
 
   const now = new Date();
@@ -270,6 +275,12 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
   const [justification, setJustification] = useState("");
   const [exceptionReason, setExceptionReason] = useState("");
   const [limitMsg, setLimitMsg] = useState<string | null>(null);
+  const [origin, setOrigin] = useState<ExpenseOrigin>("contrato");
+  const [centerId, setCenterId] = useState(NONE);
+  const [contractId, setContractId] = useState(NONE);
+  const [itemId, setItemId] = useState(NONE);
+  const [commitmentId, setCommitmentId] = useState(NONE);
+  const [quotaId, setQuotaId] = useState(NONE);
   const [saving, setSaving] = useState(false);
 
   const vehicle = vehicles.find((v) => v.id === vehicleId) ?? null;
