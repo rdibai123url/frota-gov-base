@@ -30,11 +30,11 @@ export type HelpTopic = {
   /** Como usar, em passos curtos. */
   steps: string[];
   /** Campos relevantes do formulário (ou filtros/indicadores, quando não há formulário). */
-  fields?: HelpField[];
+  fields?: HelpField[] | undefined;
   /** Regras e bloqueios importantes da tela. */
-  rules?: string[];
+  rules?: string[] | undefined;
   /** Exemplos curtos. */
-  examples?: string[];
+  examples?: string[] | undefined;
 };
 
 const t = (
@@ -45,6 +45,7 @@ const t = (
   rules?: string[],
   examples?: string[],
 ): HelpTopic => ({ title, purpose, steps, fields, rules, examples });
+
 
 const REQ: FieldTag[] = ["Obrigatório"];
 const AUTO: FieldTag[] = ["Automático"];
