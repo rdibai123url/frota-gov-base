@@ -7,8 +7,11 @@ import { z } from "zod";
 
 import { PageHeader } from "@/components/app-shell";
 import { ConvitesCotacao } from "@/components/convites-cotacao";
+import { EntitySelect } from "@/components/entity-select";
 import { MoneyInput } from "@/components/form-fields";
 import { ItemHistoryInput } from "@/components/item-history-input";
+import { NovaEmpresaCotacaoDialog } from "@/components/nova-empresa-cotacao";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -417,6 +420,7 @@ function QuotationDetail({
   const [busy, setBusy] = useState(false);
   const [itemDescription, setItemDescription] = useState("");
   const [itemUnit, setItemUnit] = useState("UN");
+  const [newCompanyOpen, setNewCompanyOpen] = useState(false);
 
   const closed = quotation.status === "encerrada" || quotation.status === "cancelada";
   const valid = proposals.filter((p) => p.status !== "desclassificada");
@@ -428,6 +432,26 @@ function QuotationDetail({
       (!quotation.specialty || (w.specialties ?? []).includes(quotation.specialty)) &&
       !invites.some((i) => i.workshop_id === w.id),
   );
+
+  /** Empresas selecionáveis na proposta: convidadas + qualquer empresa ativa do órgão. */
+  const proposalCompanyOptions = useMemo(() => {
+    const used = new Set(proposals.map((p) => p.workshop_id).filter(Boolean) as string[]);
+    return workshops
+      .filter((w) => w.status === "ativo" && !used.has(w.id))
+      .map((w) => {
+        const invited = invites.some((i) => i.workshop_id === w.id);
+        return {
+          value: w.id,
+          label: w.trade_name || w.legal_name,
+          description: [w.legal_name, (w.specialties ?? []).join(", "), [w.city, w.state].filter(Boolean).join("/")]
+            .filter(Boolean)
+            .join(" · "),
+          keywords: [w.cnpj, w.email, w.phone],
+          hint: invited ? null : "sem convite",
+        };
+      });
+  }, [workshops, proposals, invites]);
+
 
   function refresh() {
     invalidate([
@@ -496,32 +520,76 @@ function QuotationDetail({
 
   async function addProposal(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!proposalWorkshop) { toast.error("Selecione a oficina da proposta."); return; }
+    if (!proposalWorkshop) { toast.error("Selecione a empresa da proposta."); return; }
     const form = e.currentTarget;
     const fd = new FormData(form);
     setBusy(true);
-    const { error } = await supabase.from("quotation_proposals").insert({
-      organization_id: orgId!,
-      quotation_id: quotation.id,
-      workshop_id: proposalWorkshop,
-      execution_days: fd.get("execution_days") ? Number(fd.get("execution_days")) : null,
-      valid_until: (fd.get("valid_until") as string) || null,
-      warranty_days: fd.get("warranty_days") ? Number(fd.get("warranty_days")) : null,
-      payment_terms: (fd.get("payment_terms") as string) || null,
-      labor_value: parseBRNumber(String(fd.get("labor_value") ?? "0")),
-      discount_value: parseBRNumber(String(fd.get("discount_value") ?? "0")),
-      notes: (fd.get("notes") as string) || null,
-      created_by: userId,
-    });
+
+    // Lançamento manual: empresa sem convite recebe convite interno (sem envio de e-mail).
+    let inviteId = invites.find((i) => i.workshop_id === proposalWorkshop)?.id ?? null;
+    let manual = false;
+    if (!inviteId) {
+      manual = true;
+      const { data: created, error: invError } = await supabase
+        .from("quotation_invitations")
+        .insert({
+          organization_id: orgId!,
+          quotation_id: quotation.id,
+          workshop_id: proposalWorkshop,
+          is_manual: true,
+          created_by: userId,
+        })
+        .select("id")
+        .maybeSingle();
+      if (invError) { setBusy(false); toast.error(dbMessage(invError)); return; }
+      inviteId = created?.id ?? null;
+    }
+
+
+    const { data: proposal, error } = await supabase
+      .from("quotation_proposals")
+      .insert({
+        organization_id: orgId!,
+        quotation_id: quotation.id,
+        workshop_id: proposalWorkshop,
+        execution_days: fd.get("execution_days") ? Number(fd.get("execution_days")) : null,
+        valid_until: (fd.get("valid_until") as string) || null,
+        warranty_days: fd.get("warranty_days") ? Number(fd.get("warranty_days")) : null,
+        payment_terms: (fd.get("payment_terms") as string) || null,
+        labor_value: parseBRNumber(String(fd.get("labor_value") ?? "0")),
+        discount_value: parseBRNumber(String(fd.get("discount_value") ?? "0")),
+        notes: (fd.get("notes") as string) || null,
+        created_by: userId,
+      })
+      .select("id")
+      .maybeSingle();
     setBusy(false);
     if (error) { toast.error(dbMessage(error)); return; }
-    const inv = invites.find((i) => i.workshop_id === proposalWorkshop);
-    if (inv) await setInviteStatus(inv.id, "respondida");
+    if (inviteId) await setInviteStatus(inviteId, "respondida");
+
+    await supabase.from("activity_logs").insert({
+      organization_id: orgId!,
+      actor_id: userId,
+      actor_name: userName,
+      event_type: "proposta_lancada_manualmente",
+      area: "Cotações",
+      screen: "Cotações › Propostas",
+      route: "/cotacoes",
+      entity: "quotation_proposals",
+      record_id: proposal?.id ?? null,
+      action: "insert",
+      summary: manual
+        ? "Proposta lançada manualmente; convite interno criado automaticamente, sem envio de e-mail."
+        : "Proposta lançada manualmente para empresa já convidada.",
+      new_data: { quotation_id: quotation.id, workshop_id: proposalWorkshop, invite_created: manual },
+    });
+
     form.reset();
     setProposalWorkshop("");
     toast.success("Proposta registrada.");
     refresh();
   }
+
 
   async function addProposalItem(proposalId: string, e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -860,24 +928,32 @@ function QuotationDetail({
             <form onSubmit={addProposal} className="grid items-end gap-3 rounded-md border p-3 sm:grid-cols-3">
               <div className="sm:col-span-3">
                 <p className="text-sm font-medium">Registrar proposta recebida</p>
+                <p className="text-xs text-muted-foreground">
+                  Use para lançar propostas recebidas por papel, e-mail ou WhatsApp. Empresas cadastradas no órgão podem
+                  ser selecionadas mesmo sem convite prévio — o convite interno é criado automaticamente, sem envio de
+                  e-mail.
+                </p>
               </div>
               <div>
-                <Label>Oficina</Label>
-                <Select value={proposalWorkshop} onValueChange={setProposalWorkshop}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {invites
-                      .filter((i) => !!i.workshop_id && !proposals.some((p) => p.workshop_id === i.workshop_id))
-                      .map((i) => (
-                        <SelectItem key={i.workshop_id!} value={i.workshop_id!}>
-                          {i.workshop?.trade_name || i.workshop?.legal_name || i.email}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+                <Label>Oficina / loja / fornecedor</Label>
+                <EntitySelect
+                  value={proposalWorkshop || null}
+                  onChange={(v) => setProposalWorkshop(v ?? "")}
+                  options={proposalCompanyOptions}
+                  placeholder="Selecione"
+                  searchPlaceholder="Buscar por nome ou CNPJ…"
+                  emptyLabel="Nenhuma empresa cadastrada neste órgão."
+                />
+                <Button
+                  type="button"
+                  variant="link"
+                  className="h-auto px-0 text-xs"
+                  onClick={() => setNewCompanyOpen(true)}
+                >
+                  <Plus className="mr-1 size-3" /> Cadastrar nova empresa
+                </Button>
               </div>
+
               <div>
                 <Label htmlFor="execution_days">Prazo de execução (dias)</Label>
                 <Input id="execution_days" name="execution_days" type="number" min={0} />
@@ -911,7 +987,20 @@ function QuotationDetail({
               </Button>
             </form>
           )}
+
+          <NovaEmpresaCotacaoDialog
+            open={newCompanyOpen}
+            onOpenChange={setNewCompanyOpen}
+            orgId={orgId}
+            userId={userId}
+            userName={userName}
+            defaultSpecialty={quotation.specialty}
+            existing={workshops}
+            quotationId={quotation.id}
+            onCreated={(id) => setProposalWorkshop(id)}
+          />
         </TabsContent>
+
 
         <TabsContent value="mapa" className="space-y-4">
           <div className="overflow-x-auto">
