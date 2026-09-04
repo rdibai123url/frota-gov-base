@@ -7,7 +7,7 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { CheckCircle2, Loader2, ShieldAlert } from "lucide-react";
+import { Building2, CheckCircle2, Loader2, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 
 import { PropostaFields } from "@/components/proposta-form";
@@ -15,15 +15,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getQuotationByToken, submitProposalByToken, type PublicQuotation } from "@/lib/cotacoes-convites.functions";
+import { formatCNPJ } from "@/lib/format";
 import {
   asQuotationKind,
   discountProblem,
   draftToPayload,
   emptyProposalDraft,
   hasParts,
-  quotationKindLabel,
   type ProposalDraft,
 } from "@/lib/cotacoes";
+
+const HEADER_TITLE: Record<string, string> = {
+  pecas: "Cotação de Peças",
+  servicos: "Cotação de Serviços",
+  servicos_pecas: "Cotação de Peças e Serviços",
+};
+
+const dateTime = (iso: string) =>
+  new Date(iso).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
 
 export const Route = createFileRoute("/cotacao/$token")({
   head: () => ({
@@ -55,7 +64,7 @@ function ResponderCotacao() {
         if (!alive) return;
         setState(res);
         const kind = asQuotationKind(res.quotation?.quotation_kind);
-        setDraft(emptyProposalDraft(hasParts(kind) ? (res.items ?? []) : []));
+        setDraft(emptyProposalDraft(hasParts(kind) ? (res.items ?? []) : [], true));
       })
       .catch(() => setState({ ok: false, message: "Não foi possível abrir a cotação." }))
       .finally(() => alive && setLoading(false));
@@ -65,10 +74,15 @@ function ResponderCotacao() {
   }, [token]);
 
   const kind = asQuotationKind(state?.quotation?.quotation_kind);
+  const expired = Boolean(state?.expired);
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    if (expired) {
+      toast.error("O prazo para envio da proposta está encerrado.");
+      return;
+    }
     const payload = draftToPayload(draft, kind);
     const problem = discountProblem(payload.discountMode, payload.discountInput, payload.totals.gross);
     if (problem) {
@@ -94,6 +108,7 @@ function ResponderCotacao() {
           phone: String(fd.get("phone") ?? ""),
           executionDays: payload.executionDays,
           warrantyDays: payload.warrantyDays,
+          partsWarrantyDays: payload.partsWarrantyDays,
           validDays: payload.validDays,
           paymentTerms: payload.paymentTerms,
           laborHours: payload.laborHours,
@@ -158,31 +173,52 @@ function ResponderCotacao() {
   }
 
   const q = state.quotation!;
+  const uf = [q.org_city, q.org_state].filter(Boolean).join(" / ");
   return (
     <main className="min-h-screen bg-muted/30 py-8">
       <div className="mx-auto w-full max-w-4xl px-4">
-        <header className="rounded-t-lg bg-foreground px-6 py-5 text-background">
-          <p className="text-xs uppercase tracking-widest opacity-80">{q.organization}</p>
-          <h1 className="gov-title text-xl">Cotação {q.code}</h1>
+        <header className="flex items-start gap-4 rounded-t-lg bg-foreground px-6 py-5 text-background">
+          <div className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-md bg-background/10">
+            {q.org_logo_url ? (
+              <img src={q.org_logo_url} alt={`Brasão de ${q.organization}`} className="size-16 object-contain" />
+            ) : (
+              <Building2 className="size-8 opacity-70" aria-hidden />
+            )}
+          </div>
+          <div className="min-w-0">
+            <h1 className="gov-title text-xl leading-tight">{q.organization}</h1>
+            <p className="text-xs opacity-80">
+              {q.org_cnpj ? `CNPJ ${formatCNPJ(q.org_cnpj)}` : "CNPJ não informado"}
+              {uf ? ` · ${uf}` : ""}
+            </p>
+            <p className="mt-2 text-sm font-medium uppercase tracking-wide">
+              {HEADER_TITLE[q.quotation_kind] ?? HEADER_TITLE["servicos_pecas"]} — nº {q.code}
+            </p>
+          </div>
         </header>
         <div className="space-y-6 rounded-b-lg border border-t-0 bg-card p-6 shadow-card">
-          <section className="grid gap-2 rounded-md border bg-muted/40 p-4 text-sm sm:grid-cols-2">
-            <p className="sm:col-span-2">
+          {expired && (
+            <p className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm font-medium text-destructive">
+              Prazo para envio da proposta encerrado em {q.deadline_at ? dateTime(q.deadline_at) : "—"}.
+            </p>
+          )}
+          <section className="grid gap-2 rounded-md border bg-muted/40 p-4 text-sm">
+            <p>
               <span className="text-muted-foreground">Objeto: </span>
               {q.description}
             </p>
             {q.vehicle && (
               <p>
-                <span className="text-muted-foreground">Veículo/bem: </span>
+                <span className="text-muted-foreground">Veículo/Bem: </span>
                 {q.vehicle}
               </p>
             )}
             <p>
-              <span className="text-muted-foreground">Prazo final: </span>
-              {q.deadline_at ? new Date(q.deadline_at).toLocaleString("pt-BR") : "sem prazo definido"}
+              <span className="text-muted-foreground">Prazo final para recebimento da proposta: </span>
+              {q.deadline_at ? dateTime(q.deadline_at) : "sem prazo definido"}
             </p>
             {q.notes && (
-              <p className="sm:col-span-2">
+              <p>
                 <span className="text-muted-foreground">Observações: </span>
                 {q.notes}
               </p>
@@ -193,38 +229,40 @@ function ResponderCotacao() {
             <section className="grid gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="companyName">Razão social *</Label>
-                <Input id="companyName" name="companyName" required defaultValue={state.invitation?.company ?? ""} maxLength={160} />
+                <Input id="companyName" name="companyName" required defaultValue={state.invitation?.company ?? ""} maxLength={160} disabled={expired} />
               </div>
               <div>
                 <Label htmlFor="cnpj">CNPJ</Label>
-                <Input id="cnpj" name="cnpj" maxLength={20} placeholder="00.000.000/0000-00" />
+                <Input id="cnpj" name="cnpj" maxLength={20} placeholder="00.000.000/0000-00" disabled={expired} />
               </div>
               <div>
                 <Label htmlFor="contactName">Responsável</Label>
-                <Input id="contactName" name="contactName" defaultValue={state.invitation?.contact_name ?? ""} maxLength={120} />
+                <Input id="contactName" name="contactName" defaultValue={state.invitation?.contact_name ?? ""} maxLength={120} disabled={expired} />
               </div>
               <div>
                 <Label htmlFor="phone">Telefone</Label>
-                <Input id="phone" name="phone" maxLength={30} />
+                <Input id="phone" name="phone" maxLength={30} disabled={expired} />
               </div>
             </section>
 
             <section>
               <h2 className="gov-title mb-2 text-sm uppercase tracking-wider text-muted-foreground">
-                Proposta — {quotationKindLabel(q.quotation_kind)}
+                Proposta da empresa
               </h2>
               <PropostaFields
                 kind={kind}
                 quotationItems={state.items ?? []}
                 draft={draft}
                 onChange={(patch) => setDraft((d) => ({ ...d, ...patch }))}
+                disabled={expired}
+                lockItems
               />
             </section>
 
 
             <div className="flex justify-end">
-              <Button type="submit" size="lg" disabled={sending}>
-                {sending ? "Enviando…" : "Enviar proposta"}
+              <Button type="submit" size="lg" disabled={sending || expired}>
+                {expired ? "Prazo encerrado" : sending ? "Enviando…" : "Enviar proposta"}
               </Button>
             </div>
           </form>
