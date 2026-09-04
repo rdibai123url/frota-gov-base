@@ -56,17 +56,15 @@ export async function geocodeRecord(
       },
     });
 
-    const patch: Record<string, unknown> = {
+    const patch = {
       geocode_status: res.status,
       geocode_source: res.provider,
       geocode_precision: res.precision,
       geocoded_at: new Date().toISOString(),
+      ...(res.ok
+        ? { latitude: res.latitude, longitude: res.longitude, geocoded_address: res.displayName }
+        : {}),
     };
-    if (res.ok) {
-      patch["latitude"] = res.latitude;
-      patch["longitude"] = res.longitude;
-      patch["geocoded_address"] = res.displayName;
-    }
     await supabase.from(table).update(patch).eq("id", id);
 
     return {
