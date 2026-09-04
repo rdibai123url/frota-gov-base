@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.search_item_history(text, integer) FROM anon;
