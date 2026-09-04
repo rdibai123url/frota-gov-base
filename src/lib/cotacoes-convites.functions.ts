@@ -37,11 +37,13 @@ export type PublicQuotation = {
     code: string;
     description: string;
     specialty: string | null;
+    quotation_kind: string;
     deadline_at: string | null;
     notes: string | null;
     organization: string;
     vehicle: string | null;
   };
+
   items?: { id: string; sequence: number; description: string; measure_unit: string; quantity: number }[];
   invitation?: { id: string; email: string; contact_name: string | null; company: string | null };
 };
@@ -334,6 +336,7 @@ export const sendInvites = createServerFn({ method: "POST" })
 
         description: quotation.description,
         specialty: quotation.specialty,
+        
         deadlineText: deadlineText(quotation.deadline_at),
         notes: quotation.notes,
         items: (items ?? []).map((i) => ({
@@ -448,7 +451,7 @@ export const getQuotationByToken = createServerFn({ method: "POST" })
 
     const { data: quotation } = await supabaseAdmin
       .from("quotations")
-      .select("code, description, specialty, deadline_at, notes, status, organization_id, vehicle:vehicles(plate, asset_code, brand, model)")
+      .select("code, description, specialty, quotation_kind, deadline_at, notes, status, organization_id, vehicle:vehicles(plate, asset_code, brand, model)")
       .eq("id", invite.quotation_id)
       .maybeSingle();
     if (!quotation) return { ok: false, reason: "invalido", message: "Cotação não encontrada." };
@@ -480,6 +483,8 @@ export const getQuotationByToken = createServerFn({ method: "POST" })
         code: quotation.code ?? "—",
         description: quotation.description,
         specialty: quotation.specialty,
+        quotation_kind: quotation.quotation_kind ?? "servicos_pecas",
+
         deadline_at: quotation.deadline_at,
         notes: quotation.notes,
         organization: org?.short_name || org?.legal_name || "Órgão público",
@@ -508,15 +513,27 @@ export const submitProposalByToken = createServerFn({ method: "POST" })
     phone: string;
     executionDays: number | null;
     warrantyDays: number | null;
-    validUntil: string | null;
+    validDays: number | null;
     paymentTerms: string;
-    laborValue: number;
-    discountValue: number;
+    laborHours: number;
+    laborHourValue: number;
+    servicesValue: number;
+    discountMode: "amount" | "percent";
+    discountInput: number;
     notes: string;
-    items: { quotationItemId: string | null; description: string; brand: string; quantity: number; unitValue: number }[];
+    items: {
+      quotationItemId: string | null;
+      description: string;
+      brand: string;
+      partNumber: string;
+      quantity: number;
+      warrantyDays: number | null;
+      unitValue: number;
+    }[];
   }) => input)
   .handler(async ({ data }) => {
     if (!/^[a-f0-9]{64}$/.test(data.token)) return { ok: false, message: "Link inválido." };
+
     const { supabaseAdmin, invite } = await findInvite(data.token);
     if (!invite) return { ok: false, message: "Link inválido." };
     if (invite.token_expires_at && new Date(invite.token_expires_at).getTime() < Date.now()) {
@@ -585,36 +602,68 @@ export const submitProposalByToken = createServerFn({ method: "POST" })
       return { ok: false, message: "Já existe proposta desta empresa nesta cotação." };
     }
 
+    // Conferência dos valores no servidor (o banco recalcula de novo ao gravar).
+    const round2 = (n: number) => Math.round((Number.isFinite(n) ? n : 0) * 100) / 100;
+    const laborHours = Math.max(0, data.laborHours || 0);
+    const laborHourValue = Math.max(0, data.laborHourValue || 0);
+    const laborValue = round2(laborHours * laborHourValue);
+    const servicesValue = round2(Math.max(0, data.servicesValue || 0));
+    const validItems = data.items.filter((i) => i.description.trim());
+    const partsValue = round2(
+      validItems.reduce((s, i) => s + Math.max(0, i.quantity || 1) * Math.max(0, i.unitValue || 0), 0),
+    );
+    const gross = round2(laborValue + servicesValue + partsValue);
+    if (gross <= 0) return { ok: false, message: "Informe ao menos um valor de serviço ou de peça." };
+    const discountInput = Math.max(0, data.discountInput || 0);
+    if (data.discountMode === "percent" && discountInput > 100) {
+      return { ok: false, message: "O desconto percentual não pode passar de 100%." };
+    }
+    if (data.discountMode === "amount" && discountInput > gross + 0.005) {
+      return { ok: false, message: "O desconto em reais não pode ser maior que o valor bruto da proposta." };
+    }
+
     const { data: proposal, error: pErr } = await supabaseAdmin
       .from("quotation_proposals")
       .insert({
         organization_id: orgId,
         quotation_id: quotation.id,
         workshop_id: workshopId!,
+        source: "link",
         execution_days: data.executionDays,
         warranty_days: data.warrantyDays,
-        valid_until: data.validUntil || null,
+        valid_days: data.validDays,
         payment_terms: data.paymentTerms || null,
-        labor_value: data.laborValue || 0,
-        discount_value: data.discountValue || 0,
+        labor_hours: laborHours,
+        labor_hour_value: laborHourValue,
+        labor_value: laborValue,
+        services_value: servicesValue,
         notes: data.notes || null,
       })
       .select("id")
       .maybeSingle();
     if (pErr || !proposal) return { ok: false, message: "Não foi possível registrar a proposta." };
 
-    const rows = data.items
-      .filter((i) => i.description.trim())
-      .map((i) => ({
-        organization_id: orgId,
-        proposal_id: proposal.id,
-        quotation_item_id: i.quotationItemId,
-        description: i.description.trim(),
-        brand: i.brand || null,
-        quantity: i.quantity || 1,
-        unit_value: i.unitValue || 0,
-      }));
+    const rows = validItems.map((i) => ({
+      organization_id: orgId,
+      proposal_id: proposal.id,
+      quotation_item_id: i.quotationItemId,
+      description: i.description.trim(),
+      brand: i.brand || null,
+      part_number: i.partNumber || null,
+      quantity: i.quantity || 1,
+      warranty_days: i.warrantyDays,
+      unit_value: i.unitValue || 0,
+    }));
     if (rows.length) await supabaseAdmin.from("quotation_proposal_items").insert(rows);
+
+    // O desconto entra depois dos itens, quando o valor bruto já está completo.
+    if (discountInput > 0) {
+      await supabaseAdmin
+        .from("quotation_proposals")
+        .update({ discount_mode: data.discountMode, discount_input: discountInput })
+        .eq("id", proposal.id);
+    }
+
 
     await supabaseAdmin
       .from("quotation_invitations")

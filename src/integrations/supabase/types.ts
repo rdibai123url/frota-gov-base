@@ -6518,6 +6518,7 @@ export type Database = {
           id: string
           notes: string | null
           organization_id: string
+          part_number: string | null
           proposal_id: string
           quantity: number
           quotation_item_id: string | null
@@ -6525,6 +6526,7 @@ export type Database = {
           unit_value: number
           updated_at: string
           updated_by: string | null
+          warranty_days: number | null
         }
         Insert: {
           brand?: string | null
@@ -6534,6 +6536,7 @@ export type Database = {
           id?: string
           notes?: string | null
           organization_id: string
+          part_number?: string | null
           proposal_id: string
           quantity?: number
           quotation_item_id?: string | null
@@ -6541,6 +6544,7 @@ export type Database = {
           unit_value?: number
           updated_at?: string
           updated_by?: string | null
+          warranty_days?: number | null
         }
         Update: {
           brand?: string | null
@@ -6550,6 +6554,7 @@ export type Database = {
           id?: string
           notes?: string | null
           organization_id?: string
+          part_number?: string | null
           proposal_id?: string
           quantity?: number
           quotation_item_id?: string | null
@@ -6557,6 +6562,7 @@ export type Database = {
           unit_value?: number
           updated_at?: string
           updated_by?: string | null
+          warranty_days?: number | null
         }
         Relationships: [
           {
@@ -6587,21 +6593,30 @@ export type Database = {
           attachment_path: string | null
           created_at: string
           created_by: string | null
+          discount_input: number
+          discount_mode: string
           discount_value: number
           disqualify_reason: string | null
           execution_days: number | null
+          gross_value: number
           id: string
+          labor_hour_value: number
+          labor_hours: number
           labor_value: number
+          net_value: number
           notes: string | null
           organization_id: string
           parts_value: number
           payment_terms: string | null
           quotation_id: string
           received_at: string
+          services_value: number
+          source: string
           status: Database["public"]["Enums"]["proposal_status"]
           total_value: number
           updated_at: string
           updated_by: string | null
+          valid_days: number | null
           valid_until: string | null
           warranty_days: number | null
           workshop_id: string
@@ -6610,21 +6625,30 @@ export type Database = {
           attachment_path?: string | null
           created_at?: string
           created_by?: string | null
+          discount_input?: number
+          discount_mode?: string
           discount_value?: number
           disqualify_reason?: string | null
           execution_days?: number | null
+          gross_value?: number
           id?: string
+          labor_hour_value?: number
+          labor_hours?: number
           labor_value?: number
+          net_value?: number
           notes?: string | null
           organization_id: string
           parts_value?: number
           payment_terms?: string | null
           quotation_id: string
           received_at?: string
+          services_value?: number
+          source?: string
           status?: Database["public"]["Enums"]["proposal_status"]
           total_value?: number
           updated_at?: string
           updated_by?: string | null
+          valid_days?: number | null
           valid_until?: string | null
           warranty_days?: number | null
           workshop_id: string
@@ -6633,21 +6657,30 @@ export type Database = {
           attachment_path?: string | null
           created_at?: string
           created_by?: string | null
+          discount_input?: number
+          discount_mode?: string
           discount_value?: number
           disqualify_reason?: string | null
           execution_days?: number | null
+          gross_value?: number
           id?: string
+          labor_hour_value?: number
+          labor_hours?: number
           labor_value?: number
+          net_value?: number
           notes?: string | null
           organization_id?: string
           parts_value?: number
           payment_terms?: string | null
           quotation_id?: string
           received_at?: string
+          services_value?: number
+          source?: string
           status?: Database["public"]["Enums"]["proposal_status"]
           total_value?: number
           updated_at?: string
           updated_by?: string | null
+          valid_days?: number | null
           valid_until?: string | null
           warranty_days?: number | null
           workshop_id?: string
@@ -6697,6 +6730,7 @@ export type Database = {
           notes: string | null
           organization_id: string
           proposals_count: number
+          quotation_kind: string
           refusals_count: number
           reject_reason: string | null
           request_id: string | null
@@ -6708,7 +6742,7 @@ export type Database = {
           updated_at: string
           updated_by: string | null
           valid_proposals_count: number
-          vehicle_id: string
+          vehicle_id: string | null
         }
         Insert: {
           approved_at?: string | null
@@ -6730,6 +6764,7 @@ export type Database = {
           notes?: string | null
           organization_id: string
           proposals_count?: number
+          quotation_kind?: string
           refusals_count?: number
           reject_reason?: string | null
           request_id?: string | null
@@ -6741,7 +6776,7 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           valid_proposals_count?: number
-          vehicle_id: string
+          vehicle_id?: string | null
         }
         Update: {
           approved_at?: string | null
@@ -6763,6 +6798,7 @@ export type Database = {
           notes?: string | null
           organization_id?: string
           proposals_count?: number
+          quotation_kind?: string
           refusals_count?: number
           reject_reason?: string | null
           request_id?: string | null
@@ -6774,7 +6810,7 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           valid_proposals_count?: number
-          vehicle_id?: string
+          vehicle_id?: string | null
         }
         Relationships: [
           {

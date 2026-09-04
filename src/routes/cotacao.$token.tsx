@@ -6,17 +6,24 @@
  * cria uma proposta normal, visível na tela de Cotações do órgão.
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckCircle2, Loader2, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 
+import { PropostaFields } from "@/components/proposta-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
 import { getQuotationByToken, submitProposalByToken, type PublicQuotation } from "@/lib/cotacoes-convites.functions";
-import { parseBRNumber } from "@/lib/format";
+import {
+  asQuotationKind,
+  discountProblem,
+  draftToPayload,
+  emptyProposalDraft,
+  hasParts,
+  quotationKindLabel,
+  type ProposalDraft,
+} from "@/lib/cotacoes";
 
 export const Route = createFileRoute("/cotacao/$token")({
   head: () => ({
@@ -33,15 +40,13 @@ export const Route = createFileRoute("/cotacao/$token")({
   component: ResponderCotacao,
 });
 
-type ItemForm = { quotationItemId: string | null; description: string; brand: string; quantity: string; unitValue: string };
-
 function ResponderCotacao() {
   const { token } = Route.useParams();
   const [state, setState] = useState<PublicQuotation | null>(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
-  const [itemForms, setItemForms] = useState<ItemForm[]>([]);
+  const [draft, setDraft] = useState<ProposalDraft>(() => emptyProposalDraft());
 
   useEffect(() => {
     let alive = true;
@@ -49,15 +54,8 @@ function ResponderCotacao() {
       .then((res) => {
         if (!alive) return;
         setState(res);
-        setItemForms(
-          (res.items ?? []).map((i) => ({
-            quotationItemId: i.id,
-            description: i.description,
-            brand: "",
-            quantity: String(i.quantity).replace(".", ","),
-            unitValue: "",
-          })),
-        );
+        const kind = asQuotationKind(res.quotation?.quotation_kind);
+        setDraft(emptyProposalDraft(hasParts(kind) ? (res.items ?? []) : []));
       })
       .catch(() => setState({ ok: false, message: "Não foi possível abrir a cotação." }))
       .finally(() => alive && setLoading(false));
@@ -66,18 +64,25 @@ function ResponderCotacao() {
     };
   }, [token]);
 
-  const total = useMemo(
-    () => itemForms.reduce((sum, i) => sum + parseBRNumber(i.quantity || "0") * parseBRNumber(i.unitValue || "0"), 0),
-    [itemForms],
-  );
-
-  function setItem(idx: number, patch: Partial<ItemForm>) {
-    setItemForms((prev) => prev.map((i, n) => (n === idx ? { ...i, ...patch } : i)));
-  }
+  const kind = asQuotationKind(state?.quotation?.quotation_kind);
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    const payload = draftToPayload(draft, kind);
+    const problem = discountProblem(payload.discountMode, payload.discountInput, payload.totals.gross);
+    if (problem) {
+      toast.error(problem);
+      return;
+    }
+    if (payload.totals.gross <= 0) {
+      toast.error("Informe ao menos um valor de serviço ou de peça.");
+      return;
+    }
+    if (hasParts(kind) && payload.items.length === 0) {
+      toast.error("Esta cotação exige ao menos um item de peça na proposta.");
+      return;
+    }
     setSending(true);
     try {
       const res = await submitProposalByToken({
@@ -87,20 +92,17 @@ function ResponderCotacao() {
           cnpj: String(fd.get("cnpj") ?? ""),
           contactName: String(fd.get("contactName") ?? ""),
           phone: String(fd.get("phone") ?? ""),
-          executionDays: fd.get("executionDays") ? Number(fd.get("executionDays")) : null,
-          warrantyDays: fd.get("warrantyDays") ? Number(fd.get("warrantyDays")) : null,
-          validUntil: (fd.get("validUntil") as string) || null,
-          paymentTerms: String(fd.get("paymentTerms") ?? ""),
-          laborValue: parseBRNumber(String(fd.get("laborValue") ?? "0")),
-          discountValue: parseBRNumber(String(fd.get("discountValue") ?? "0")),
-          notes: String(fd.get("notes") ?? ""),
-          items: itemForms.map((i) => ({
-            quotationItemId: i.quotationItemId,
-            description: i.description,
-            brand: i.brand,
-            quantity: parseBRNumber(i.quantity || "1") || 1,
-            unitValue: parseBRNumber(i.unitValue || "0"),
-          })),
+          executionDays: payload.executionDays,
+          warrantyDays: payload.warrantyDays,
+          validDays: payload.validDays,
+          paymentTerms: payload.paymentTerms,
+          laborHours: payload.laborHours,
+          laborHourValue: payload.laborHourValue,
+          servicesValue: payload.servicesValue,
+          discountMode: payload.discountMode,
+          discountInput: payload.discountInput,
+          notes: payload.notes,
+          items: payload.items,
         },
       });
       if (!res.ok) {
@@ -114,6 +116,7 @@ function ResponderCotacao() {
       setSending(false);
     }
   }
+
 
   if (loading) {
     return (
@@ -207,80 +210,17 @@ function ResponderCotacao() {
             </section>
 
             <section>
-              <h2 className="gov-title mb-2 text-sm uppercase tracking-wider text-muted-foreground">Itens / serviços</h2>
-              <div className="overflow-x-auto rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Descrição</TableHead>
-                      <TableHead className="w-28">Marca</TableHead>
-                      <TableHead className="w-24">Qtd.</TableHead>
-                      <TableHead className="w-32">Valor unit. (R$)</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {itemForms.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={4} className="py-6 text-center text-muted-foreground">
-                          Sem itens detalhados — informe os valores no resumo abaixo.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                    {itemForms.map((i, idx) => (
-                      <TableRow key={i.quotationItemId ?? idx}>
-                        <TableCell className="text-sm">{i.description}</TableCell>
-                        <TableCell>
-                          <Input value={i.brand} onChange={(e) => setItem(idx, { brand: e.target.value })} />
-                        </TableCell>
-                        <TableCell>
-                          <Input value={i.quantity} inputMode="decimal" onChange={(e) => setItem(idx, { quantity: e.target.value })} />
-                        </TableCell>
-                        <TableCell>
-                          <Input value={i.unitValue} inputMode="decimal" onChange={(e) => setItem(idx, { unitValue: e.target.value })} />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-              <p className="mt-2 text-right text-sm text-muted-foreground">
-                Soma dos itens:{" "}
-                <strong className="text-foreground">
-                  {total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                </strong>
-              </p>
+              <h2 className="gov-title mb-2 text-sm uppercase tracking-wider text-muted-foreground">
+                Proposta — {quotationKindLabel(q.quotation_kind)}
+              </h2>
+              <PropostaFields
+                kind={kind}
+                quotationItems={state.items ?? []}
+                draft={draft}
+                onChange={(patch) => setDraft((d) => ({ ...d, ...patch }))}
+              />
             </section>
 
-            <section className="grid gap-4 sm:grid-cols-3">
-              <div>
-                <Label htmlFor="laborValue">Mão de obra (R$)</Label>
-                <Input id="laborValue" name="laborValue" inputMode="decimal" defaultValue="0" />
-              </div>
-              <div>
-                <Label htmlFor="discountValue">Desconto (R$)</Label>
-                <Input id="discountValue" name="discountValue" inputMode="decimal" defaultValue="0" />
-              </div>
-              <div>
-                <Label htmlFor="executionDays">Prazo de execução (dias)</Label>
-                <Input id="executionDays" name="executionDays" type="number" min={0} />
-              </div>
-              <div>
-                <Label htmlFor="warrantyDays">Garantia (dias)</Label>
-                <Input id="warrantyDays" name="warrantyDays" type="number" min={0} />
-              </div>
-              <div>
-                <Label htmlFor="validUntil">Validade da proposta</Label>
-                <Input id="validUntil" name="validUntil" type="date" />
-              </div>
-              <div>
-                <Label htmlFor="paymentTerms">Condição de pagamento</Label>
-                <Input id="paymentTerms" name="paymentTerms" maxLength={120} />
-              </div>
-              <div className="sm:col-span-3">
-                <Label htmlFor="notes">Observações</Label>
-                <Textarea id="notes" name="notes" rows={3} maxLength={800} />
-              </div>
-            </section>
 
             <div className="flex justify-end">
               <Button type="submit" size="lg" disabled={sending}>

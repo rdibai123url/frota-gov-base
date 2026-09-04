@@ -1,6 +1,6 @@
 import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, ClipboardList, FileSearch, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -8,9 +8,9 @@ import { z } from "zod";
 import { PageHeader } from "@/components/app-shell";
 import { ConvitesCotacao } from "@/components/convites-cotacao";
 import { EntitySelect } from "@/components/entity-select";
-import { MoneyInput } from "@/components/form-fields";
 import { ItemHistoryInput } from "@/components/item-history-input";
 import { NovaEmpresaCotacaoDialog } from "@/components/nova-empresa-cotacao";
+import { PropostaFields } from "@/components/proposta-form";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { parseBRNumber } from "@/lib/format";
+import {
+  QUOTATION_KINDS,
+  asQuotationKind,
+  discountProblem,
+  draftToPayload,
+  emptyProposalDraft,
+  hasParts,
+  proposalSourceLabel,
+  quotationKindLabel,
+  type ProposalDraft,
+  type QuotationKind,
+} from "@/lib/cotacoes";
+
 import {
   MIN_PROPOSALS,
   PROPOSAL_STATUS,
@@ -86,7 +99,8 @@ function Cotacoes() {
   const invalidate = useInvalidate();
 
   const [open, setOpen] = useState(false);
-  const [vehicleId, setVehicleId] = useState("");
+  const [vehicleId, setVehicleId] = useState(NONE);
+  const [kind, setKind] = useState<QuotationKind>("servicos_pecas");
   const [requestId, setRequestId] = useState(NONE);
   const [unitId, setUnitId] = useState(NONE);
   const [specialty, setSpecialty] = useState(WORKSHOP_SPECIALTIES[0]!);
@@ -117,14 +131,11 @@ function Cotacoes() {
       toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos");
       return;
     }
-    if (!vehicleId) {
-      toast.error("Selecione o veículo.");
-      return;
-    }
     setSaving(true);
     const { error } = await supabase.from("quotations").insert({
       organization_id: orgId!,
-      vehicle_id: vehicleId,
+      vehicle_id: vehicleId === NONE ? null : vehicleId,
+      quotation_kind: kind,
       request_id: requestId === NONE ? null : requestId,
       unit_id: unitId === NONE ? null : unitId,
       description: parsed.data.description,
@@ -133,6 +144,7 @@ function Cotacoes() {
       notes: parsed.data.notes || null,
       created_by: userId,
     });
+
     setSaving(false);
     if (error) {
       toast.error(dbMessage(error));
@@ -174,7 +186,8 @@ function Cotacoes() {
           canManageFleet && orgId ? (
             <Button
               onClick={() => {
-                setVehicleId("");
+                setVehicleId(NONE);
+                setKind("servicos_pecas");
                 setRequestId(NONE);
                 setUnitId(NONE);
                 setSpecialty(WORKSHOP_SPECIALTIES[0]!);
@@ -280,15 +293,34 @@ function Cotacoes() {
           <form onSubmit={createQuotation} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <Label>Veículo *</Label>
+                <Label>Veículo / equipamento</Label>
                 <Select value={vehicleId} onValueChange={setVehicleId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value={NONE}>Sem veículo (compra para estoque)</SelectItem>
                     {vehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
                         {(v.plate ?? v.asset_code)} — {v.brand} {v.model}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Deixe sem veículo quando a cotação for de peças para o almoxarifado.
+                </p>
+              </div>
+              <div>
+                <Label>Tipo da cotação *</Label>
+                <Select value={kind} onValueChange={(v) => setKind(v as QuotationKind)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {QUOTATION_KINDS.map((k) => (
+                      <SelectItem key={k.value} value={k.value}>
+                        {k.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -303,7 +335,7 @@ function Cotacoes() {
                   <SelectContent>
                     <SelectItem value={NONE}>Sem vínculo</SelectItem>
                     {requests
-                      .filter((r) => !vehicleId || r.vehicle_id === vehicleId)
+                      .filter((r) => vehicleId === NONE || r.vehicle_id === vehicleId)
                       .map((r) => (
                         <SelectItem key={r.id} value={r.id}>
                           {r.code} — {r.description.slice(0, 40)}
@@ -312,6 +344,8 @@ function Cotacoes() {
                   </SelectContent>
                 </Select>
               </div>
+
+
               <div>
                 <Label>Unidade</Label>
                 <Select value={unitId} onValueChange={setUnitId}>
@@ -421,10 +455,29 @@ function QuotationDetail({
   const [itemDescription, setItemDescription] = useState("");
   const [itemUnit, setItemUnit] = useState("UN");
   const [newCompanyOpen, setNewCompanyOpen] = useState(false);
+  const [sourceFilter, setSourceFilter] = useState<"todas" | "manual" | "link">("todas");
+
+  const kind = asQuotationKind(quotation.quotation_kind);
+  const [draft, setDraft] = useState<ProposalDraft>(() => emptyProposalDraft());
+
+  /** Ao trocar de processo, o rascunho parte dos itens solicitados. */
+  const seededFor = useRef<string>("");
+  useEffect(() => {
+    const signature = `${quotation.id}:${items.map((i) => i.id).join(",")}`;
+    if (seededFor.current === signature) return;
+    seededFor.current = signature;
+    setDraft(emptyProposalDraft(hasParts(kind) ? items : []));
+  }, [quotation.id, items, kind]);
+
+  const netOf = (p: ProposalRow) => Number(p.net_value ?? p.total_value);
+  const countBySource = (s: string) => proposals.filter((p) => (p.source ?? "manual") === s).length;
+  const shownProposals = proposals.filter(
+    (p) => sourceFilter === "todas" || (p.source ?? "manual") === sourceFilter,
+  );
 
   const closed = quotation.status === "encerrada" || quotation.status === "cancelada";
   const valid = proposals.filter((p) => p.status !== "desclassificada");
-  const lowest = valid.length ? Math.min(...valid.map((p) => Number(p.total_value))) : 0;
+  const lowest = valid.length ? Math.min(...valid.map((p) => netOf(p))) : 0;
 
   const eligible = workshops.filter(
     (w) =>
@@ -432,6 +485,7 @@ function QuotationDetail({
       (!quotation.specialty || (w.specialties ?? []).includes(quotation.specialty)) &&
       !invites.some((i) => i.workshop_id === w.id),
   );
+
 
   /** Empresas selecionáveis na proposta: convidadas + qualquer empresa ativa do órgão. */
   const proposalCompanyOptions = useMemo(() => {
@@ -521,8 +575,17 @@ function QuotationDetail({
   async function addProposal(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!proposalWorkshop) { toast.error("Selecione a empresa da proposta."); return; }
-    const form = e.currentTarget;
-    const fd = new FormData(form);
+    const payload = draftToPayload(draft, kind);
+    const problem = discountProblem(payload.discountMode, payload.discountInput, payload.totals.gross);
+    if (problem) { toast.error(problem); return; }
+    if (payload.totals.gross <= 0) {
+      toast.error("Informe ao menos um valor de serviço ou de peça na proposta.");
+      return;
+    }
+    if (hasParts(kind) && payload.items.length === 0) {
+      toast.error("Cotação de peças exige ao menos um item na proposta.");
+      return;
+    }
     setBusy(true);
 
     // Lançamento manual: empresa sem convite recebe convite interno (sem envio de e-mail).
@@ -545,26 +608,59 @@ function QuotationDetail({
       inviteId = created?.id ?? null;
     }
 
-
     const { data: proposal, error } = await supabase
       .from("quotation_proposals")
       .insert({
         organization_id: orgId!,
         quotation_id: quotation.id,
         workshop_id: proposalWorkshop,
-        execution_days: fd.get("execution_days") ? Number(fd.get("execution_days")) : null,
-        valid_until: (fd.get("valid_until") as string) || null,
-        warranty_days: fd.get("warranty_days") ? Number(fd.get("warranty_days")) : null,
-        payment_terms: (fd.get("payment_terms") as string) || null,
-        labor_value: parseBRNumber(String(fd.get("labor_value") ?? "0")),
-        discount_value: parseBRNumber(String(fd.get("discount_value") ?? "0")),
-        notes: (fd.get("notes") as string) || null,
+        source: "manual",
+        execution_days: payload.executionDays,
+        valid_days: payload.validDays,
+        warranty_days: payload.warrantyDays,
+        payment_terms: payload.paymentTerms || null,
+        labor_hours: payload.laborHours,
+        labor_hour_value: payload.laborHourValue,
+        labor_value: payload.totals.laborValue,
+        services_value: payload.servicesValue,
+        discount_mode: payload.discountMode,
+
+        notes: payload.notes || null,
         created_by: userId,
       })
       .select("id")
       .maybeSingle();
+    if (error) { setBusy(false); toast.error(dbMessage(error)); return; }
+
+    if (proposal?.id && payload.items.length) {
+      const { error: itemsError } = await supabase.from("quotation_proposal_items").insert(
+        payload.items.map((i) => ({
+          organization_id: orgId!,
+          proposal_id: proposal.id,
+          quotation_item_id: i.quotationItemId,
+          description: i.description,
+          brand: i.brand || null,
+          part_number: i.partNumber || null,
+          quantity: i.quantity,
+          warranty_days: i.warrantyDays,
+          unit_value: i.unitValue,
+          created_by: userId,
+        })),
+      );
+      if (itemsError) { setBusy(false); toast.error(dbMessage(itemsError)); refresh(); return; }
+    }
+
+    // O desconto é gravado depois dos itens, quando o valor bruto já está completo.
+    if (proposal?.id && payload.discountInput > 0) {
+      const { error: discError } = await supabase
+        .from("quotation_proposals")
+        .update({ discount_mode: payload.discountMode, discount_input: payload.discountInput })
+        .eq("id", proposal.id);
+      if (discError) { setBusy(false); toast.error(dbMessage(discError)); refresh(); return; }
+    }
+
+
     setBusy(false);
-    if (error) { toast.error(dbMessage(error)); return; }
     if (inviteId) await setInviteStatus(inviteId, "respondida");
 
     await supabase.from("activity_logs").insert({
@@ -573,7 +669,7 @@ function QuotationDetail({
       actor_name: userName,
       event_type: "proposta_lancada_manualmente",
       area: "Cotações",
-      screen: "Cotações › Propostas",
+      screen: "Cotações › Lançar proposta",
       route: "/cotacoes",
       entity: "quotation_proposals",
       record_id: proposal?.id ?? null,
@@ -581,36 +677,22 @@ function QuotationDetail({
       summary: manual
         ? "Proposta lançada manualmente; convite interno criado automaticamente, sem envio de e-mail."
         : "Proposta lançada manualmente para empresa já convidada.",
-      new_data: { quotation_id: quotation.id, workshop_id: proposalWorkshop, invite_created: manual },
+      new_data: {
+        quotation_id: quotation.id,
+        workshop_id: proposalWorkshop,
+        invite_created: manual,
+        gross_value: payload.totals.gross,
+        discount_value: payload.totals.discount,
+        net_value: payload.totals.net,
+      },
     });
 
-    form.reset();
     setProposalWorkshop("");
+    setDraft(emptyProposalDraft(hasParts(kind) ? items : []));
     toast.success("Proposta registrada.");
     refresh();
   }
 
-
-  async function addProposalItem(proposalId: string, e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const fd = new FormData(form);
-    const description = String(fd.get("description") ?? "").trim();
-    if (!description) { toast.error("Informe a descrição do item."); return; }
-    const { error } = await supabase.from("quotation_proposal_items").insert({
-      organization_id: orgId!,
-      proposal_id: proposalId,
-      quotation_item_id: (fd.get("quotation_item_id") as string) || null,
-      description,
-      brand: (fd.get("brand") as string) || null,
-      quantity: parseBRNumber(String(fd.get("quantity") ?? "1")) || 1,
-      unit_value: parseBRNumber(String(fd.get("unit_value") ?? "0")),
-      created_by: userId,
-    });
-    if (error) { toast.error(dbMessage(error)); return; }
-    form.reset();
-    refresh();
-  }
 
   async function disqualify(p: ProposalRow) {
     const reason = window.prompt("Motivo da desclassificação:") ?? "";
@@ -718,12 +800,14 @@ function QuotationDetail({
       )}
 
       <Tabs defaultValue="itens" className="mt-2">
-        <TabsList>
+        <TabsList className="flex-wrap">
           <TabsTrigger value="itens">Itens solicitados</TabsTrigger>
           <TabsTrigger value="oficinas">Convites</TabsTrigger>
-          <TabsTrigger value="propostas">Propostas</TabsTrigger>
+          <TabsTrigger value="propostas">Propostas recebidas</TabsTrigger>
+          <TabsTrigger value="lancar">Lançar proposta</TabsTrigger>
           <TabsTrigger value="mapa">Mapa comparativo</TabsTrigger>
         </TabsList>
+
 
         <TabsContent value="itens" className="space-y-3">
           <Table>
@@ -833,21 +917,52 @@ function QuotationDetail({
         </TabsContent>
 
         <TabsContent value="propostas" className="space-y-4">
-          {proposals.map((p) => (
+          <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/30 p-2 text-sm">
+            <span className="text-muted-foreground">Mostrar:</span>
+            {(
+              [
+                { value: "todas", label: `Todas (${proposals.length})` },
+                { value: "manual", label: `Lançadas manualmente (${countBySource("manual")})` },
+                { value: "link", label: `Recebidas por link (${countBySource("link")})` },
+              ] as const
+            ).map((f) => (
+              <Button
+                key={f.value}
+                type="button"
+                size="sm"
+                variant={sourceFilter === f.value ? "default" : "outline"}
+                onClick={() => setSourceFilter(f.value)}
+              >
+                {f.label}
+              </Button>
+            ))}
+          </div>
+
+          {shownProposals.length === 0 && (
+            <p className="rounded-md border p-6 text-center text-sm text-muted-foreground">
+              Nenhuma proposta neste filtro.
+            </p>
+          )}
+
+          {shownProposals.map((p) => (
             <div key={p.id} className="rounded-md border p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <p className="font-medium">{p.workshop?.trade_name || p.workshop?.legal_name}</p>
+                  <p className="flex items-center gap-2 font-medium">
+                    {p.workshop?.trade_name || p.workshop?.legal_name}
+                    <Badge variant="outline">{proposalSourceLabel(p.source)}</Badge>
+                  </p>
                   <p className="text-xs text-muted-foreground">
-                    Recebida em {dateTimeBR(p.received_at)} · Prazo {p.execution_days ?? "—"} dia(s) · Garantia{" "}
-                    {p.warranty_days ?? "—"} dia(s) · {p.payment_terms || "condição não informada"}
+                    Recebida em {dateTimeBR(p.received_at)} · Execução {p.execution_days ?? "—"} dia(s) · Garantia{" "}
+                    {p.warranty_days ?? "—"} dia(s) · Validade {p.valid_days ?? "—"} dia(s) ·{" "}
+                    {p.payment_terms || "condição não informada"}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant={p.status === "selecionada" ? "default" : "secondary"}>
                     {labelOf(PROPOSAL_STATUS, p.status)}
                   </Badge>
-                  <span className="font-semibold">{brl(Number(p.total_value))}</span>
+                  <span className="font-semibold">{brl(netOf(p))}</span>
                   {canManage && !closed && p.status === "recebida" && (
                     <Button variant="outline" size="sm" onClick={() => disqualify(p)}>
                       Desclassificar
@@ -856,86 +971,66 @@ function QuotationDetail({
                 </div>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
-                Peças {brl(Number(p.parts_value))} · Mão de obra {brl(Number(p.labor_value))} · Desconto{" "}
+                Peças {brl(Number(p.parts_value))} · Mão de obra {brl(Number(p.labor_value))}
+                {Number(p.labor_hours) > 0
+                  ? ` (${num(Number(p.labor_hours), 2)} h × ${brl(Number(p.labor_hour_value))})`
+                  : ""}{" "}
+                · Outros serviços {brl(Number(p.services_value))} · Bruto {brl(Number(p.total_value))} · Desconto{" "}
                 {brl(Number(p.discount_value))}
+                {p.discount_mode === "percent" ? ` (${num(Number(p.discount_input), 2)}%)` : ""} · Líquido{" "}
+                <strong>{brl(netOf(p))}</strong>
                 {p.disqualify_reason ? ` · Desclassificada: ${p.disqualify_reason}` : ""}
               </p>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Item</TableHead>
-                    <TableHead>Marca</TableHead>
-                    <TableHead className="text-right">Qtd.</TableHead>
-                    <TableHead className="text-right">Unitário</TableHead>
-                    <TableHead className="text-right">Total</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {itemsByProposal(p.id).map((i) => (
-                    <TableRow key={i.id}>
-                      <TableCell>{i.description}</TableCell>
-                      <TableCell>{i.brand || "—"}</TableCell>
-                      <TableCell className="text-right">{num(Number(i.quantity), 2)}</TableCell>
-                      <TableCell className="text-right">{brl(Number(i.unit_value))}</TableCell>
-                      <TableCell className="text-right">{brl(Number(i.total_value))}</TableCell>
+              {itemsByProposal(p.id).length > 0 && (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Item</TableHead>
+                      <TableHead>Marca</TableHead>
+                      <TableHead>Nº / código</TableHead>
+                      <TableHead className="text-right">Qtd.</TableHead>
+                      <TableHead className="text-right">Garantia</TableHead>
+                      <TableHead className="text-right">Unitário</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              {canManage && !closed && (
-                <form onSubmit={(e) => addProposalItem(p.id, e)} className="mt-2 grid items-end gap-2 sm:grid-cols-6">
-                  <div className="sm:col-span-2">
-                    <Label>Item cotado</Label>
-                    <Input name="description" placeholder="Descrição" />
-                  </div>
-                  <div>
-                    <Label>Vincular a</Label>
-                    <select
-                      name="quotation_item_id"
-                      className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
-                    >
-                      <option value="">—</option>
-                      {items.map((it) => (
-                        <option key={it.id} value={it.id}>
-                          {it.sequence}. {it.description.slice(0, 24)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <Label>Marca</Label>
-                    <Input name="brand" />
-                  </div>
-                  <div>
-                    <Label>Qtd.</Label>
-                    <Input name="quantity" defaultValue="1" inputMode="decimal" />
-                  </div>
-                  <div className="flex gap-2">
-                    <div className="flex-1">
-                      <Label>Unitário</Label>
-                      <MoneyInput name="unit_value" />
-                    </div>
-                    <Button type="submit" className="mt-6">
-                      +
-                    </Button>
-                  </div>
-                </form>
+                  </TableHeader>
+                  <TableBody>
+                    {itemsByProposal(p.id).map((i) => (
+                      <TableRow key={i.id}>
+                        <TableCell>{i.description}</TableCell>
+                        <TableCell>{i.brand || "—"}</TableCell>
+                        <TableCell>{i.part_number || "—"}</TableCell>
+                        <TableCell className="text-right">{num(Number(i.quantity), 2)}</TableCell>
+                        <TableCell className="text-right">{i.warranty_days ? `${i.warranty_days} d` : "—"}</TableCell>
+                        <TableCell className="text-right">{brl(Number(i.unit_value))}</TableCell>
+                        <TableCell className="text-right">{brl(Number(i.total_value))}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
+              {p.notes && <p className="mt-2 text-xs text-muted-foreground">Observações: {p.notes}</p>}
             </div>
           ))}
+        </TabsContent>
 
-          {canManage && !closed && (
-            <form onSubmit={addProposal} className="grid items-end gap-3 rounded-md border p-3 sm:grid-cols-3">
-              <div className="sm:col-span-3">
-                <p className="text-sm font-medium">Registrar proposta recebida</p>
+        <TabsContent value="lancar" className="space-y-4">
+          {!canManage || closed ? (
+            <p className="rounded-md border p-6 text-center text-sm text-muted-foreground">
+              O processo está encerrado ou você não tem permissão para lançar propostas.
+            </p>
+          ) : (
+            <form onSubmit={addProposal} className="space-y-4 rounded-md border p-3">
+              <div>
+                <p className="text-sm font-medium">Registrar proposta recebida fora do sistema</p>
                 <p className="text-xs text-muted-foreground">
-                  Use para lançar propostas recebidas por papel, e-mail ou WhatsApp. Empresas cadastradas no órgão podem
-                  ser selecionadas mesmo sem convite prévio — o convite interno é criado automaticamente, sem envio de
-                  e-mail.
+                  Use para propostas entregues em papel, e-mail ou WhatsApp. Empresas cadastradas no órgão podem ser
+                  selecionadas mesmo sem convite prévio — o convite interno é criado automaticamente, sem envio de
+                  e-mail. Cotação de <strong>{quotationKindLabel(quotation.quotation_kind)}</strong>.
                 </p>
               </div>
-              <div>
-                <Label>Oficina / loja / fornecedor</Label>
+              <div className="max-w-md">
+                <Label>Oficina / loja / fornecedor *</Label>
                 <EntitySelect
                   value={proposalWorkshop || null}
                   onChange={(v) => setProposalWorkshop(v ?? "")}
@@ -954,36 +1049,15 @@ function QuotationDetail({
                 </Button>
               </div>
 
-              <div>
-                <Label htmlFor="execution_days">Prazo de execução (dias)</Label>
-                <Input id="execution_days" name="execution_days" type="number" min={0} />
-              </div>
-              <div>
-                <Label htmlFor="valid_until">Validade da proposta</Label>
-                <Input id="valid_until" name="valid_until" type="date" />
-              </div>
-              <div>
-                <Label htmlFor="warranty_days">Garantia (dias)</Label>
-                <Input id="warranty_days" name="warranty_days" type="number" min={0} />
-              </div>
-              <div>
-                <Label htmlFor="payment_terms">Condição de pagamento</Label>
-                <Input id="payment_terms" name="payment_terms" />
-              </div>
-              <div>
-                <Label htmlFor="labor_value">Mão de obra</Label>
-                <MoneyInput id="labor_value" name="labor_value" />
-              </div>
-              <div>
-                <Label htmlFor="discount_value">Desconto</Label>
-                <MoneyInput id="discount_value" name="discount_value" />
-              </div>
-              <div className="sm:col-span-2">
-                <Label htmlFor="notes">Observações</Label>
-                <Input id="notes" name="notes" />
-              </div>
+              <PropostaFields
+                kind={kind}
+                quotationItems={items}
+                draft={draft}
+                onChange={(patch) => setDraft((d) => ({ ...d, ...patch }))}
+              />
+
               <Button type="submit" disabled={busy}>
-                Registrar proposta
+                {busy ? "Registrando…" : "Registrar proposta"}
               </Button>
             </form>
           )}
@@ -1000,6 +1074,8 @@ function QuotationDetail({
             onCreated={(id) => setProposalWorkshop(id)}
           />
         </TabsContent>
+
+
 
 
         <TabsContent value="mapa" className="space-y-4">
@@ -1047,25 +1123,34 @@ function QuotationDetail({
                   ))}
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium">Prazo / garantia</TableCell>
+                  <TableCell className="font-medium">Prazo / garantia / validade</TableCell>
                   {valid.map((p) => (
                     <TableCell key={p.id} className="text-right text-sm">
-                      {p.execution_days ?? "—"} d / {p.warranty_days ?? "—"} d
+                      {p.execution_days ?? "—"} d / {p.warranty_days ?? "—"} d / {p.valid_days ?? "—"} d
                     </TableCell>
                   ))}
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-semibold">Valor global</TableCell>
+                  <TableCell className="font-medium">Desconto</TableCell>
                   {valid.map((p) => (
-                    <TableCell
-                      key={p.id}
-                      className={`text-right font-semibold ${Number(p.total_value) <= lowest ? "text-primary" : ""}`}
-                    >
-                      {brl(Number(p.total_value))}
-                      {Number(p.total_value) <= lowest && <span className="block text-xs">menor valor</span>}
+                    <TableCell key={p.id} className="text-right">
+                      − {brl(Number(p.discount_value))}
                     </TableCell>
                   ))}
                 </TableRow>
+                <TableRow>
+                  <TableCell className="font-semibold">Valor líquido final</TableCell>
+                  {valid.map((p) => (
+                    <TableCell
+                      key={p.id}
+                      className={`text-right font-semibold ${netOf(p) <= lowest ? "text-primary" : ""}`}
+                    >
+                      {brl(netOf(p))}
+                      {netOf(p) <= lowest && <span className="block text-xs">menor valor</span>}
+                    </TableCell>
+                  ))}
+                </TableRow>
+
               </TableBody>
             </Table>
           </div>
