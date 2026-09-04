@@ -86,14 +86,18 @@ export type ProposalItemDraft = {
   brand: string;
   partNumber: string;
   quantity: string;
-  warrantyDays: string;
   unitValue: string;
+  /** Quantidade solicitada pelo órgão — bloqueada para o fornecedor no link público. */
+  lockedQuantity?: boolean;
 };
 
 export type ProposalDraft = {
   executionDays: string;
   validDays: string;
+  /** Garantia dos serviços (dias). */
   warrantyDays: string;
+  /** Garantia das peças (dias). */
+  partsWarrantyDays: string;
   laborHours: string;
   laborHourValue: string;
   servicesValue: string;
@@ -113,18 +117,20 @@ export const newItemDraft = (
   brand: "",
   partNumber: "",
   quantity: "1",
-  warrantyDays: "",
   unitValue: "",
   ...seed,
 });
 
 export function emptyProposalDraft(
   quotationItems: { id: string; description: string; quantity: number | string }[] = [],
+  /** Trava as quantidades no que o órgão solicitou (resposta pública do fornecedor). */
+  lockQuantities = false,
 ): ProposalDraft {
   return {
     executionDays: "",
     validDays: "",
     warrantyDays: "",
+    partsWarrantyDays: "",
     laborHours: "",
     laborHourValue: "",
     servicesValue: "",
@@ -137,6 +143,7 @@ export function emptyProposalDraft(
         quotationItemId: i.id,
         description: i.description,
         quantity: String(i.quantity).replace(".", ","),
+        lockedQuantity: lockQuantities,
       }),
     ),
   };
@@ -167,6 +174,7 @@ export function draftToPayload(draft: ProposalDraft, kind: QuotationKind) {
     executionDays: int(draft.executionDays),
     validDays: int(draft.validDays),
     warrantyDays: int(draft.warrantyDays),
+    partsWarrantyDays: int(draft.partsWarrantyDays),
     laborHours: hasServices(kind) ? parseBRNumber(draft.laborHours || "0") : 0,
     laborHourValue: hasServices(kind) ? parseBRNumber(draft.laborHourValue || "0") : 0,
     servicesValue: hasServices(kind) ? parseBRNumber(draft.servicesValue || "0") : 0,
@@ -183,7 +191,6 @@ export function draftToPayload(draft: ProposalDraft, kind: QuotationKind) {
             brand: i.brand.trim(),
             partNumber: i.partNumber.trim(),
             quantity: parseBRNumber(i.quantity || "1") || 1,
-            warrantyDays: i.warrantyDays.trim() ? Math.max(0, Math.round(parseBRNumber(i.warrantyDays))) : null,
             unitValue: parseBRNumber(i.unitValue || "0"),
           }))
       : [],

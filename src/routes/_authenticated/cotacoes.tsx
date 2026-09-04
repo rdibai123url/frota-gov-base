@@ -618,6 +618,7 @@ function QuotationDetail({
         execution_days: payload.executionDays,
         valid_days: payload.validDays,
         warranty_days: payload.warrantyDays,
+        parts_warranty_days: payload.partsWarrantyDays,
         payment_terms: payload.paymentTerms || null,
         labor_hours: payload.laborHours,
         labor_hour_value: payload.laborHourValue,
@@ -642,7 +643,6 @@ function QuotationDetail({
           brand: i.brand || null,
           part_number: i.partNumber || null,
           quantity: i.quantity,
-          warranty_days: i.warrantyDays,
           unit_value: i.unitValue,
           created_by: userId,
         })),
@@ -953,8 +953,9 @@ function QuotationDetail({
                     <Badge variant="outline">{proposalSourceLabel(p.source)}</Badge>
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Recebida em {dateTimeBR(p.received_at)} · Execução {p.execution_days ?? "—"} dia(s) · Garantia{" "}
-                    {p.warranty_days ?? "—"} dia(s) · Validade {p.valid_days ?? "—"} dia(s) ·{" "}
+                    Recebida em {dateTimeBR(p.received_at)} · Execução {p.execution_days ?? "—"} dia(s) · Garantia
+                    dos serviços {p.warranty_days ?? "—"} dia(s) · Garantia das peças {p.parts_warranty_days ?? "—"}{" "}
+                    dia(s) · Validade {p.valid_days ?? "—"} dia(s) ·{" "}
                     {p.payment_terms || "condição não informada"}
                   </p>
                 </div>
@@ -989,7 +990,6 @@ function QuotationDetail({
                       <TableHead>Marca</TableHead>
                       <TableHead>Nº / código</TableHead>
                       <TableHead className="text-right">Qtd.</TableHead>
-                      <TableHead className="text-right">Garantia</TableHead>
                       <TableHead className="text-right">Unitário</TableHead>
                       <TableHead className="text-right">Total</TableHead>
                     </TableRow>
@@ -1001,7 +1001,6 @@ function QuotationDetail({
                         <TableCell>{i.brand || "—"}</TableCell>
                         <TableCell>{i.part_number || "—"}</TableCell>
                         <TableCell className="text-right">{num(Number(i.quantity), 2)}</TableCell>
-                        <TableCell className="text-right">{i.warranty_days ? `${i.warranty_days} d` : "—"}</TableCell>
                         <TableCell className="text-right">{brl(Number(i.unit_value))}</TableCell>
                         <TableCell className="text-right">{brl(Number(i.total_value))}</TableCell>
                       </TableRow>
@@ -1123,10 +1122,11 @@ function QuotationDetail({
                   ))}
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium">Prazo / garantia / validade</TableCell>
+                  <TableCell className="font-medium">Prazo / gar. serviços / gar. peças / validade</TableCell>
                   {valid.map((p) => (
                     <TableCell key={p.id} className="text-right text-sm">
-                      {p.execution_days ?? "—"} d / {p.warranty_days ?? "—"} d / {p.valid_days ?? "—"} d
+                      {p.execution_days ?? "—"} d / {p.warranty_days ?? "—"} d / {p.parts_warranty_days ?? "—"} d /{" "}
+                      {p.valid_days ?? "—"} d
                     </TableCell>
                   ))}
                 </TableRow>

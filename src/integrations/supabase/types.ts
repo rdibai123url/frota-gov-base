@@ -6607,6 +6607,7 @@ export type Database = {
           notes: string | null
           organization_id: string
           parts_value: number
+          parts_warranty_days: number | null
           payment_terms: string | null
           quotation_id: string
           received_at: string
@@ -6639,6 +6640,7 @@ export type Database = {
           notes?: string | null
           organization_id: string
           parts_value?: number
+          parts_warranty_days?: number | null
           payment_terms?: string | null
           quotation_id: string
           received_at?: string
@@ -6671,6 +6673,7 @@ export type Database = {
           notes?: string | null
           organization_id?: string
           parts_value?: number
+          parts_warranty_days?: number | null
           payment_terms?: string | null
           quotation_id?: string
           received_at?: string

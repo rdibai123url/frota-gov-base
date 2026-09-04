@@ -33,6 +33,8 @@ export type PublicQuotation = {
   ok: boolean;
   reason?: "invalido" | "expirado" | "encerrado" | "respondido";
   message?: string;
+  /** Prazo encerrado: o fornecedor vê a solicitação, mas não pode enviar proposta. */
+  expired?: boolean;
   quotation?: {
     code: string;
     description: string;
@@ -41,6 +43,10 @@ export type PublicQuotation = {
     deadline_at: string | null;
     notes: string | null;
     organization: string;
+    org_cnpj: string | null;
+    org_city: string | null;
+    org_state: string | null;
+    org_logo_url: string | null;
     vehicle: string | null;
   };
 
@@ -444,9 +450,10 @@ export const getQuotationByToken = createServerFn({ method: "POST" })
     if (!/^[a-f0-9]{64}$/.test(data.token)) return { ok: false, reason: "invalido", message: "Link inválido." };
     const { supabaseAdmin, invite } = await findInvite(data.token);
     if (!invite) return { ok: false, reason: "invalido", message: "Link inválido ou já substituído por um reenvio." };
-    if (invite.token_expires_at && new Date(invite.token_expires_at).getTime() < Date.now()) {
+    // O link continua abrindo depois do prazo, apenas em leitura.
+    const tokenExpired = Boolean(invite.token_expires_at && new Date(invite.token_expires_at).getTime() < Date.now());
+    if (tokenExpired) {
       await supabaseAdmin.from("quotation_invitations").update({ send_status: "expirado" }).eq("id", invite.id);
-      return { ok: false, reason: "expirado", message: "O prazo desta cotação está encerrado." };
     }
 
     const { data: quotation } = await supabaseAdmin
@@ -461,9 +468,18 @@ export const getQuotationByToken = createServerFn({ method: "POST" })
 
     const { data: org } = await supabaseAdmin
       .from("organizations")
-      .select("legal_name, short_name")
+      .select("legal_name, short_name, cnpj, city, state, logo_url")
       .eq("id", quotation.organization_id)
       .maybeSingle();
+    let logoUrl: string | null = null;
+    const rawLogo = (org as { logo_url?: string | null } | null)?.logo_url ?? null;
+    if (rawLogo) {
+      if (rawLogo.startsWith("http")) logoUrl = rawLogo;
+      else {
+        const { data: signed } = await supabaseAdmin.storage.from("brasoes").createSignedUrl(rawLogo, 60 * 60);
+        logoUrl = signed?.signedUrl ?? null;
+      }
+    }
     const { data: items } = await supabaseAdmin
       .from("quotation_items")
       .select("id, sequence, description, measure_unit, quantity")
@@ -476,8 +492,11 @@ export const getQuotationByToken = createServerFn({ method: "POST" })
         : { data: null };
 
     const v = quotation.vehicle as { plate: string | null; asset_code: string | null; brand: string | null; model: string | null } | null;
+    const deadlinePassed =
+      tokenExpired || Boolean(quotation.deadline_at && new Date(quotation.deadline_at).getTime() < Date.now());
     return {
       ok: true,
+      expired: deadlinePassed,
       ...(invite.send_status === "respondido" ? { reason: "respondido" as const } : {}),
       quotation: {
         code: quotation.code ?? "—",
@@ -487,7 +506,11 @@ export const getQuotationByToken = createServerFn({ method: "POST" })
 
         deadline_at: quotation.deadline_at,
         notes: quotation.notes,
-        organization: org?.short_name || org?.legal_name || "Órgão público",
+        organization: org?.legal_name || org?.short_name || "Órgão público",
+        org_cnpj: (org as { cnpj?: string | null } | null)?.cnpj ?? null,
+        org_city: (org as { city?: string | null } | null)?.city ?? null,
+        org_state: (org as { state?: string | null } | null)?.state ?? null,
+        org_logo_url: logoUrl,
         vehicle: v ? `${v.plate ?? v.asset_code ?? ""} ${v.brand ?? ""} ${v.model ?? ""}`.trim() : null,
       },
       items: (items ?? []).map((i) => ({ ...i, quantity: Number(i.quantity) })),
@@ -513,6 +536,7 @@ export const submitProposalByToken = createServerFn({ method: "POST" })
     phone: string;
     executionDays: number | null;
     warrantyDays: number | null;
+    partsWarrantyDays: number | null;
     validDays: number | null;
     paymentTerms: string;
     laborHours: number;
@@ -526,8 +550,6 @@ export const submitProposalByToken = createServerFn({ method: "POST" })
       description: string;
       brand: string;
       partNumber: string;
-      quantity: number;
-      warrantyDays: number | null;
       unitValue: number;
     }[];
   }) => input)
@@ -538,18 +560,33 @@ export const submitProposalByToken = createServerFn({ method: "POST" })
     if (!invite) return { ok: false, message: "Link inválido." };
     if (invite.token_expires_at && new Date(invite.token_expires_at).getTime() < Date.now()) {
       await supabaseAdmin.from("quotation_invitations").update({ send_status: "expirado" }).eq("id", invite.id);
-      return { ok: false, message: "O prazo desta cotação está encerrado." };
+      return { ok: false, message: "O prazo para envio da proposta está encerrado." };
     }
     if (invite.proposal_id) return { ok: false, message: "Já existe proposta registrada para este convite." };
 
     const { data: quotation } = await supabaseAdmin
       .from("quotations")
-      .select("id, status, organization_id")
+      .select("id, status, organization_id, deadline_at, quotation_kind")
       .eq("id", invite.quotation_id)
       .maybeSingle();
     if (!quotation || !["rascunho", "aberta"].includes(quotation.status)) {
       return { ok: false, message: "Esta cotação não está mais recebendo propostas." };
     }
+    // Conferência de prazo no servidor: nada é aceito depois do prazo final.
+    if (quotation.deadline_at && new Date(quotation.deadline_at).getTime() < Date.now()) {
+      return { ok: false, message: "O prazo para envio da proposta está encerrado." };
+    }
+    const kind = quotation.quotation_kind ?? "servicos_pecas";
+    const kindHasParts = kind !== "servicos";
+    const kindHasServices = kind !== "pecas";
+
+    // Itens e quantidades vêm sempre do que o órgão solicitou — nunca do cliente.
+    const { data: requested } = await supabaseAdmin
+      .from("quotation_items")
+      .select("id, description, quantity")
+      .eq("quotation_id", quotation.id)
+      .order("sequence");
+    const requestedById = new Map((requested ?? []).map((i) => [i.id, i]));
 
     const orgId = invite.organization_id;
     const digits = (data.cnpj || "").replace(/\D/g, "");
@@ -604,14 +641,26 @@ export const submitProposalByToken = createServerFn({ method: "POST" })
 
     // Conferência dos valores no servidor (o banco recalcula de novo ao gravar).
     const round2 = (n: number) => Math.round((Number.isFinite(n) ? n : 0) * 100) / 100;
-    const laborHours = Math.max(0, data.laborHours || 0);
-    const laborHourValue = Math.max(0, data.laborHourValue || 0);
+    const laborHours = kindHasServices ? Math.max(0, data.laborHours || 0) : 0;
+    const laborHourValue = kindHasServices ? Math.max(0, data.laborHourValue || 0) : 0;
     const laborValue = round2(laborHours * laborHourValue);
-    const servicesValue = round2(Math.max(0, data.servicesValue || 0));
-    const validItems = data.items.filter((i) => i.description.trim());
-    const partsValue = round2(
-      validItems.reduce((s, i) => s + Math.max(0, i.quantity || 1) * Math.max(0, i.unitValue || 0), 0),
-    );
+    const servicesValue = kindHasServices ? round2(Math.max(0, data.servicesValue || 0)) : 0;
+    const validItems = kindHasParts
+      ? data.items
+          .filter((i) => i.quotationItemId && requestedById.has(i.quotationItemId))
+          .map((i) => {
+            const req = requestedById.get(i.quotationItemId!)!;
+            return {
+              quotationItemId: req.id,
+              description: req.description,
+              brand: i.brand,
+              partNumber: i.partNumber,
+              quantity: Math.max(0, Number(req.quantity) || 1),
+              unitValue: Math.max(0, i.unitValue || 0),
+            };
+          })
+      : [];
+    const partsValue = round2(validItems.reduce((s, i) => s + i.quantity * i.unitValue, 0));
     const gross = round2(laborValue + servicesValue + partsValue);
     if (gross <= 0) return { ok: false, message: "Informe ao menos um valor de serviço ou de peça." };
     const discountInput = Math.max(0, data.discountInput || 0);
@@ -630,7 +679,8 @@ export const submitProposalByToken = createServerFn({ method: "POST" })
         workshop_id: workshopId!,
         source: "link",
         execution_days: data.executionDays,
-        warranty_days: data.warrantyDays,
+        warranty_days: kindHasServices ? data.warrantyDays : null,
+        parts_warranty_days: kindHasParts ? data.partsWarrantyDays : null,
         valid_days: data.validDays,
         payment_terms: data.paymentTerms || null,
         labor_hours: laborHours,
@@ -651,7 +701,6 @@ export const submitProposalByToken = createServerFn({ method: "POST" })
       brand: i.brand || null,
       part_number: i.partNumber || null,
       quantity: i.quantity || 1,
-      warranty_days: i.warrantyDays,
       unit_value: i.unitValue || 0,
     }));
     if (rows.length) await supabaseAdmin.from("quotation_proposal_items").insert(rows);
