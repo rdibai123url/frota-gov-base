@@ -182,6 +182,19 @@ const LABELS: Record<string, string> = {
   cota: "Cota por ciclo",
   consumido: "Consumido no período",
   propriedade: "Propriedade",
+  credenciado: "Credenciado",
+  autorizado: "Autorizado",
+  realizado: "Realizado",
+  diferenca: "Diferença devolvida",
+  tempo_resposta: "Tempo de resposta",
+  usos: "Usos do cartão",
+  emissao: "Emissão",
+  revogacao: "Revogação",
+  almoxarifado: "Almoxarifado",
+  lote: "Lote",
+  reservado: "Reservado",
+  itens: "Itens",
+  atendido: "Quantidade atendida",
 };
 
 const label = (k: string) => LABELS[k] ?? k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, " ");
