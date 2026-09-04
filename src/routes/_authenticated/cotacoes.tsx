@@ -289,7 +289,10 @@ function Cotacoes() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Novo processo de cotação</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              Novo processo de cotação
+              <HelpInlineButton topicKey="/cotacoes" />
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={createQuotation} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
