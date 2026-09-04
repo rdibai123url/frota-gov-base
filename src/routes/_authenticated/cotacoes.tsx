@@ -860,24 +860,32 @@ function QuotationDetail({
             <form onSubmit={addProposal} className="grid items-end gap-3 rounded-md border p-3 sm:grid-cols-3">
               <div className="sm:col-span-3">
                 <p className="text-sm font-medium">Registrar proposta recebida</p>
+                <p className="text-xs text-muted-foreground">
+                  Use para lançar propostas recebidas por papel, e-mail ou WhatsApp. Empresas cadastradas no órgão podem
+                  ser selecionadas mesmo sem convite prévio — o convite interno é criado automaticamente, sem envio de
+                  e-mail.
+                </p>
               </div>
               <div>
-                <Label>Oficina</Label>
-                <Select value={proposalWorkshop} onValueChange={setProposalWorkshop}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {invites
-                      .filter((i) => !!i.workshop_id && !proposals.some((p) => p.workshop_id === i.workshop_id))
-                      .map((i) => (
-                        <SelectItem key={i.workshop_id!} value={i.workshop_id!}>
-                          {i.workshop?.trade_name || i.workshop?.legal_name || i.email}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+                <Label>Oficina / loja / fornecedor</Label>
+                <EntitySelect
+                  value={proposalWorkshop || null}
+                  onChange={(v) => setProposalWorkshop(v ?? "")}
+                  options={proposalCompanyOptions}
+                  placeholder="Selecione"
+                  searchPlaceholder="Buscar por nome ou CNPJ…"
+                  emptyLabel="Nenhuma empresa cadastrada neste órgão."
+                />
+                <Button
+                  type="button"
+                  variant="link"
+                  className="h-auto px-0 text-xs"
+                  onClick={() => setNewCompanyOpen(true)}
+                >
+                  <Plus className="mr-1 size-3" /> Cadastrar nova empresa
+                </Button>
               </div>
+
               <div>
                 <Label htmlFor="execution_days">Prazo de execução (dias)</Label>
                 <Input id="execution_days" name="execution_days" type="number" min={0} />
