@@ -521,8 +521,17 @@ function QuotationDetail({
   async function addProposal(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!proposalWorkshop) { toast.error("Selecione a empresa da proposta."); return; }
-    const form = e.currentTarget;
-    const fd = new FormData(form);
+    const payload = draftToPayload(draft, kind);
+    const problem = discountProblem(payload.discountMode, payload.discountInput, payload.totals.gross);
+    if (problem) { toast.error(problem); return; }
+    if (payload.totals.gross <= 0) {
+      toast.error("Informe ao menos um valor de serviço ou de peça na proposta.");
+      return;
+    }
+    if (hasParts(kind) && payload.items.length === 0) {
+      toast.error("Cotação de peças exige ao menos um item na proposta.");
+      return;
+    }
     setBusy(true);
 
     // Lançamento manual: empresa sem convite recebe convite interno (sem envio de e-mail).
@@ -545,26 +554,49 @@ function QuotationDetail({
       inviteId = created?.id ?? null;
     }
 
-
     const { data: proposal, error } = await supabase
       .from("quotation_proposals")
       .insert({
         organization_id: orgId!,
         quotation_id: quotation.id,
         workshop_id: proposalWorkshop,
-        execution_days: fd.get("execution_days") ? Number(fd.get("execution_days")) : null,
-        valid_until: (fd.get("valid_until") as string) || null,
-        warranty_days: fd.get("warranty_days") ? Number(fd.get("warranty_days")) : null,
-        payment_terms: (fd.get("payment_terms") as string) || null,
-        labor_value: parseBRNumber(String(fd.get("labor_value") ?? "0")),
-        discount_value: parseBRNumber(String(fd.get("discount_value") ?? "0")),
-        notes: (fd.get("notes") as string) || null,
+        source: "manual",
+        execution_days: payload.executionDays,
+        valid_days: payload.validDays,
+        warranty_days: payload.warrantyDays,
+        payment_terms: payload.paymentTerms || null,
+        labor_hours: payload.laborHours,
+        labor_hour_value: payload.laborHourValue,
+        labor_value: payload.totals.laborValue,
+        services_value: payload.servicesValue,
+        discount_mode: payload.discountMode,
+        discount_input: payload.discountInput,
+        notes: payload.notes || null,
         created_by: userId,
       })
       .select("id")
       .maybeSingle();
+    if (error) { setBusy(false); toast.error(dbMessage(error)); return; }
+
+    if (proposal?.id && payload.items.length) {
+      const { error: itemsError } = await supabase.from("quotation_proposal_items").insert(
+        payload.items.map((i) => ({
+          organization_id: orgId!,
+          proposal_id: proposal.id,
+          quotation_item_id: i.quotationItemId,
+          description: i.description,
+          brand: i.brand || null,
+          part_number: i.partNumber || null,
+          quantity: i.quantity,
+          warranty_days: i.warrantyDays,
+          unit_value: i.unitValue,
+          created_by: userId,
+        })),
+      );
+      if (itemsError) { setBusy(false); toast.error(dbMessage(itemsError)); refresh(); return; }
+    }
+
     setBusy(false);
-    if (error) { toast.error(dbMessage(error)); return; }
     if (inviteId) await setInviteStatus(inviteId, "respondida");
 
     await supabase.from("activity_logs").insert({
@@ -573,7 +605,7 @@ function QuotationDetail({
       actor_name: userName,
       event_type: "proposta_lancada_manualmente",
       area: "Cotações",
-      screen: "Cotações › Propostas",
+      screen: "Cotações › Lançar proposta",
       route: "/cotacoes",
       entity: "quotation_proposals",
       record_id: proposal?.id ?? null,
@@ -581,36 +613,22 @@ function QuotationDetail({
       summary: manual
         ? "Proposta lançada manualmente; convite interno criado automaticamente, sem envio de e-mail."
         : "Proposta lançada manualmente para empresa já convidada.",
-      new_data: { quotation_id: quotation.id, workshop_id: proposalWorkshop, invite_created: manual },
+      new_data: {
+        quotation_id: quotation.id,
+        workshop_id: proposalWorkshop,
+        invite_created: manual,
+        gross_value: payload.totals.gross,
+        discount_value: payload.totals.discount,
+        net_value: payload.totals.net,
+      },
     });
 
-    form.reset();
     setProposalWorkshop("");
+    setDraft(emptyProposalDraft(hasParts(kind) ? items : []));
     toast.success("Proposta registrada.");
     refresh();
   }
 
-
-  async function addProposalItem(proposalId: string, e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const fd = new FormData(form);
-    const description = String(fd.get("description") ?? "").trim();
-    if (!description) { toast.error("Informe a descrição do item."); return; }
-    const { error } = await supabase.from("quotation_proposal_items").insert({
-      organization_id: orgId!,
-      proposal_id: proposalId,
-      quotation_item_id: (fd.get("quotation_item_id") as string) || null,
-      description,
-      brand: (fd.get("brand") as string) || null,
-      quantity: parseBRNumber(String(fd.get("quantity") ?? "1")) || 1,
-      unit_value: parseBRNumber(String(fd.get("unit_value") ?? "0")),
-      created_by: userId,
-    });
-    if (error) { toast.error(dbMessage(error)); return; }
-    form.reset();
-    refresh();
-  }
 
   async function disqualify(p: ProposalRow) {
     const reason = window.prompt("Motivo da desclassificação:") ?? "";
