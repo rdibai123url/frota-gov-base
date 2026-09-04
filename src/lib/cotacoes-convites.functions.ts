@@ -483,6 +483,8 @@ export const getQuotationByToken = createServerFn({ method: "POST" })
         code: quotation.code ?? "—",
         description: quotation.description,
         specialty: quotation.specialty,
+        quotation_kind: quotation.quotation_kind ?? "servicos_pecas",
+
         deadline_at: quotation.deadline_at,
         notes: quotation.notes,
         organization: org?.short_name || org?.legal_name || "Órgão público",
