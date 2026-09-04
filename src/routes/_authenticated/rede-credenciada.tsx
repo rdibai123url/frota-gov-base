@@ -72,6 +72,8 @@ const schema = z.object({
   accredited_at: z.string().optional(),
   accredited_until: z.string().optional(),
   notes: z.string().trim().max(800).optional(),
+  latitude: z.string().trim().max(24).optional(),
+  longitude: z.string().trim().max(24).optional(),
 });
 
 function RedeCredenciada() {
@@ -178,6 +180,8 @@ function RedeCredenciada() {
         .filter(Boolean),
       service_radius_km: radius ? parseBRNumber(radius) : null,
       coverage_area: d.coverage_area || null,
+      latitude: d.latitude ? Number(d.latitude.replace(",", ".")) : null,
+      longitude: d.longitude ? Number(d.longitude.replace(",", ".")) : null,
       urgency_24h: urgency,
       weekend_service: weekend,
       attachment_path: attachment,
@@ -357,6 +361,14 @@ function RedeCredenciada() {
               <div className="sm:col-span-2">
                 <Label htmlFor="address">Endereço</Label>
                 <Input id="address" name="address" defaultValue={editing?.address ?? ""} />
+              </div>
+              <div>
+                <Label htmlFor="latitude">Latitude</Label>
+                <Input id="latitude" name="latitude" placeholder="-23,5505" defaultValue={editing?.latitude ?? ""} />
+              </div>
+              <div>
+                <Label htmlFor="longitude">Longitude</Label>
+                <Input id="longitude" name="longitude" placeholder="-46,6333" defaultValue={editing?.longitude ?? ""} />
               </div>
               <div>
                 <Label htmlFor="district">Bairro</Label>
