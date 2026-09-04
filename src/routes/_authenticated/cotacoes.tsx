@@ -414,6 +414,8 @@ function QuotationDetail({
   const [choiceJust, setChoiceJust] = useState(quotation.choice_justification ?? "");
   const [fewJust, setFewJust] = useState(quotation.few_proposals_justification ?? "");
   const [busy, setBusy] = useState(false);
+  const [itemDescription, setItemDescription] = useState("");
+  const [itemUnit, setItemUnit] = useState("UN");
 
   const closed = quotation.status === "encerrada" || quotation.status === "cancelada";
   const valid = proposals.filter((p) => p.status !== "desclassificada");
