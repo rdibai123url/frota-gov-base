@@ -650,6 +650,16 @@ function QuotationDetail({
       if (itemsError) { setBusy(false); toast.error(dbMessage(itemsError)); refresh(); return; }
     }
 
+    // O desconto é gravado depois dos itens, quando o valor bruto já está completo.
+    if (proposal?.id && payload.discountInput > 0) {
+      const { error: discError } = await supabase
+        .from("quotation_proposals")
+        .update({ discount_mode: payload.discountMode, discount_input: payload.discountInput })
+        .eq("id", proposal.id);
+      if (discError) { setBusy(false); toast.error(dbMessage(discError)); refresh(); return; }
+    }
+
+
     setBusy(false);
     if (inviteId) await setInviteStatus(inviteId, "respondida");
 
