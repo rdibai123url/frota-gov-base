@@ -5468,6 +5468,109 @@ export type Database = {
         }
         Relationships: []
       }
+      org_email_secrets: {
+        Row: {
+          created_at: string
+          organization_id: string
+          secret: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          organization_id: string
+          secret: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          organization_id?: string
+          secret?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_email_secrets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_email_settings: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          enabled: boolean
+          from_email: string | null
+          from_name: string | null
+          has_secret: boolean
+          id: string
+          last_test_at: string | null
+          last_test_error: string | null
+          last_test_ok: boolean | null
+          organization_id: string
+          provider: string
+          reply_to: string | null
+          smtp_host: string | null
+          smtp_port: number | null
+          smtp_secure: boolean
+          smtp_user: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          from_email?: string | null
+          from_name?: string | null
+          has_secret?: boolean
+          id?: string
+          last_test_at?: string | null
+          last_test_error?: string | null
+          last_test_ok?: boolean | null
+          organization_id: string
+          provider?: string
+          reply_to?: string | null
+          smtp_host?: string | null
+          smtp_port?: number | null
+          smtp_secure?: boolean
+          smtp_user?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          from_email?: string | null
+          from_name?: string | null
+          has_secret?: boolean
+          id?: string
+          last_test_at?: string | null
+          last_test_error?: string | null
+          last_test_ok?: boolean | null
+          organization_id?: string
+          provider?: string
+          reply_to?: string | null
+          smtp_host?: string | null
+          smtp_port?: number | null
+          smtp_secure?: boolean
+          smtp_user?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_email_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           address: string | null
@@ -6215,46 +6318,85 @@ export type Database = {
       }
       quotation_invitations: {
         Row: {
+          attempts: number
+          contact_name: string | null
           created_at: string
           created_by: string | null
+          email: string | null
           id: string
           invited_at: string
+          is_manual: boolean
+          last_attempt_at: string | null
+          last_error: string | null
           organization_id: string
+          proposal_id: string | null
+          provider: string | null
           quotation_id: string
           reason: string | null
           responded_at: string | null
+          send_status: string
+          sent_at: string | null
           status: Database["public"]["Enums"]["invitation_status"]
+          supplier_id: string | null
+          token_expires_at: string | null
+          token_hash: string | null
           updated_at: string
           updated_by: string | null
-          workshop_id: string
+          workshop_id: string | null
         }
         Insert: {
+          attempts?: number
+          contact_name?: string | null
           created_at?: string
           created_by?: string | null
+          email?: string | null
           id?: string
           invited_at?: string
+          is_manual?: boolean
+          last_attempt_at?: string | null
+          last_error?: string | null
           organization_id: string
+          proposal_id?: string | null
+          provider?: string | null
           quotation_id: string
           reason?: string | null
           responded_at?: string | null
+          send_status?: string
+          sent_at?: string | null
           status?: Database["public"]["Enums"]["invitation_status"]
+          supplier_id?: string | null
+          token_expires_at?: string | null
+          token_hash?: string | null
           updated_at?: string
           updated_by?: string | null
-          workshop_id: string
+          workshop_id?: string | null
         }
         Update: {
+          attempts?: number
+          contact_name?: string | null
           created_at?: string
           created_by?: string | null
+          email?: string | null
           id?: string
           invited_at?: string
+          is_manual?: boolean
+          last_attempt_at?: string | null
+          last_error?: string | null
           organization_id?: string
+          proposal_id?: string | null
+          provider?: string | null
           quotation_id?: string
           reason?: string | null
           responded_at?: string | null
+          send_status?: string
+          sent_at?: string | null
           status?: Database["public"]["Enums"]["invitation_status"]
+          supplier_id?: string | null
+          token_expires_at?: string | null
+          token_hash?: string | null
           updated_at?: string
           updated_by?: string | null
-          workshop_id?: string
+          workshop_id?: string | null
         }
         Relationships: [
           {
@@ -6265,10 +6407,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "quotation_invitations_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "quotation_proposals"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "quotation_invitations_quotation_id_fkey"
             columns: ["quotation_id"]
             isOneToOne: false
             referencedRelation: "quotations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotation_invitations_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
             referencedColumns: ["id"]
           },
           {

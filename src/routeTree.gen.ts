@@ -62,6 +62,7 @@ import { Route as AuthenticatedUnidadesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
 import { Route as AuthenticatedUtilizacaoRouteImport } from './routes/_authenticated/utilizacao'
 import { Route as AuthenticatedVeiculosRouteImport } from './routes/_authenticated/veiculos'
+import { Route as CotacaoTokenRouteImport } from './routes/cotacao.$token'
 import { Route as TransparenciaSlugRouteImport } from './routes/transparencia.$slug'
 import { Route as AuthenticatedVeiculoIdRouteImport } from './routes/_authenticated/veiculo.$id'
 import { Route as ApiPublicHooksBackupDiarioRouteImport } from './routes/api/public/hooks/backup-diario'
@@ -354,6 +355,11 @@ const AuthenticatedVeiculosRoute = AuthenticatedVeiculosRouteImport.update({
   path: '/veiculos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const CotacaoTokenRoute = CotacaoTokenRouteImport.update({
+  id: '/cotacao/$token',
+  path: '/cotacao/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TransparenciaSlugRoute = TransparenciaSlugRouteImport.update({
   id: '/transparencia/$slug',
   path: '/transparencia/$slug',
@@ -447,6 +453,7 @@ export interface FileRoutesByFullPath {
   '/usuarios': typeof AuthenticatedUsuariosRoute
   '/utilizacao': typeof AuthenticatedUtilizacaoRoute
   '/veiculos': typeof AuthenticatedVeiculosRoute
+  '/cotacao/$token': typeof CotacaoTokenRoute
   '/transparencia/$slug': typeof TransparenciaSlugRoute
   '/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
   '/api/public/hooks/backup-diario': typeof ApiPublicHooksBackupDiarioRoute
@@ -508,6 +515,7 @@ export interface FileRoutesByTo {
   '/usuarios': typeof AuthenticatedUsuariosRoute
   '/utilizacao': typeof AuthenticatedUtilizacaoRoute
   '/veiculos': typeof AuthenticatedVeiculosRoute
+  '/cotacao/$token': typeof CotacaoTokenRoute
   '/transparencia/$slug': typeof TransparenciaSlugRoute
   '/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
   '/api/public/hooks/backup-diario': typeof ApiPublicHooksBackupDiarioRoute
@@ -571,6 +579,7 @@ export interface FileRoutesById {
   '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
   '/_authenticated/utilizacao': typeof AuthenticatedUtilizacaoRoute
   '/_authenticated/veiculos': typeof AuthenticatedVeiculosRoute
+  '/cotacao/$token': typeof CotacaoTokenRoute
   '/transparencia/$slug': typeof TransparenciaSlugRoute
   '/_authenticated/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
   '/api/public/hooks/backup-diario': typeof ApiPublicHooksBackupDiarioRoute
@@ -634,6 +643,7 @@ export interface FileRouteTypes {
     | '/usuarios'
     | '/utilizacao'
     | '/veiculos'
+    | '/cotacao/$token'
     | '/transparencia/$slug'
     | '/veiculo/$id'
     | '/api/public/hooks/backup-diario'
@@ -695,6 +705,7 @@ export interface FileRouteTypes {
     | '/usuarios'
     | '/utilizacao'
     | '/veiculos'
+    | '/cotacao/$token'
     | '/transparencia/$slug'
     | '/veiculo/$id'
     | '/api/public/hooks/backup-diario'
@@ -757,6 +768,7 @@ export interface FileRouteTypes {
     | '/_authenticated/usuarios'
     | '/_authenticated/utilizacao'
     | '/_authenticated/veiculos'
+    | '/cotacao/$token'
     | '/transparencia/$slug'
     | '/_authenticated/veiculo/$id'
     | '/api/public/hooks/backup-diario'
@@ -771,6 +783,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
+  CotacaoTokenRoute: typeof CotacaoTokenRoute
   TransparenciaSlugRoute: typeof TransparenciaSlugRoute
   ApiPublicHooksBackupDiarioRoute: typeof ApiPublicHooksBackupDiarioRoute
   ApiPublicHooksWebhooksRetryRoute: typeof ApiPublicHooksWebhooksRetryRoute
@@ -1152,6 +1165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVeiculosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/cotacao/$token': {
+      id: '/cotacao/$token'
+      path: '/cotacao/$token'
+      fullPath: '/cotacao/$token'
+      preLoaderRoute: typeof CotacaoTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/transparencia/$slug': {
       id: '/transparencia/$slug'
       path: '/transparencia/$slug'
@@ -1318,6 +1338,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
+  CotacaoTokenRoute: CotacaoTokenRoute,
   TransparenciaSlugRoute: TransparenciaSlugRoute,
   ApiPublicHooksBackupDiarioRoute: ApiPublicHooksBackupDiarioRoute,
   ApiPublicHooksWebhooksRetryRoute: ApiPublicHooksWebhooksRetryRoute,
