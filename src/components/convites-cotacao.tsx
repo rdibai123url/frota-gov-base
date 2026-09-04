@@ -6,7 +6,7 @@
  * e acompanhar o histórico de cada convite. Todo o disparo acontece no
  * servidor; nenhuma credencial de e-mail trafega para o navegador.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, Link2, Mail, Plus, RefreshCw, Send, Settings2, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
@@ -43,6 +43,7 @@ type InviteRow = {
   last_attempt_at: string | null;
   last_error: string | null;
   responded_at: string | null;
+  token_expires_at: string | null;
   invited_at: string;
   provider: string | null;
   workshop?: { legal_name: string; trade_name: string | null } | null;
@@ -191,7 +192,13 @@ export function ConvitesCotacao({
               </TableRow>
             )}
             {invites.map((i) => {
-              const st = SEND_STATUS[i.send_status] ?? SEND_STATUS["pendente"]!;
+              // O prazo vencido é mostrado mesmo antes de o convidado abrir o link.
+              const expired =
+                i.send_status !== "respondido" &&
+                Boolean(i.token_expires_at) &&
+                new Date(i.token_expires_at!).getTime() < Date.now();
+              const key = expired ? "expirado" : i.send_status;
+              const st = SEND_STATUS[key] ?? SEND_STATUS["pendente"]!;
               return (
                 <TableRow key={i.id}>
                   <TableCell>
@@ -305,8 +312,12 @@ function EnviarConvitesDialog({
         label: s.trade_name || s.legal_name,
         detail: [s.cnpj, s.email].filter(Boolean).join(" · "),
       }));
+    const seen = new Set<string>();
     return [...fromWorkshops, ...fromSuppliers].filter((c) => {
-      if (invitedEmails.has(c.email.toLowerCase())) return false;
+      const key = c.email.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      if (invitedEmails.has(key)) return false;
       if (list.some((r) => r.email.toLowerCase() === c.email.toLowerCase())) return false;
       if (!term) return true;
       return `${c.label} ${c.detail ?? ""}`.toLowerCase().includes(term);
@@ -503,14 +514,38 @@ function ConfiguracaoEmailDialog({
   onDone: () => void;
 }) {
   const { data: settings } = useEmailSettings();
-  const [provider, setProvider] = useState<string>(settings?.provider ?? "smtp");
-  const [enabled, setEnabled] = useState<boolean>(settings?.enabled ?? true);
+  const [provider, setProvider] = useState<string>("smtp");
+  const [enabled, setEnabled] = useState(true);
   const [secret, setSecret] = useState("");
   const [busy, setBusy] = useState(false);
+
+  // A configuração chega depois da primeira renderização: refletir o que está salvo.
+  useEffect(() => {
+    if (!open) return;
+    setProvider(settings?.provider ?? "smtp");
+    setEnabled(settings?.enabled ?? true);
+    setSecret("");
+  }, [open, settings?.provider, settings?.enabled]);
 
   async function save(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    const fromEmail = String(fd.get("fromEmail") ?? "").trim();
+    const port = fd.get("smtpPort") ? Number(fd.get("smtpPort")) : null;
+    if (provider !== "nenhum") {
+      if (!fromEmail) {
+        toast.error("Informe o e-mail remetente.");
+        return;
+      }
+      if (!settings?.has_secret && !secret.trim()) {
+        toast.error(provider === "smtp" ? "Informe a senha do usuário SMTP." : "Informe a chave de API do provedor.");
+        return;
+      }
+      if (provider === "smtp" && !String(fd.get("smtpHost") ?? "").trim()) {
+        toast.error("Informe o servidor SMTP.");
+        return;
+      }
+    }
     setBusy(true);
     try {
       await saveEmailSettings({
@@ -518,11 +553,12 @@ function ConfiguracaoEmailDialog({
           provider: provider as "nenhum" | "smtp" | "resend" | "sendgrid",
           enabled,
           fromName: String(fd.get("fromName") ?? ""),
-          fromEmail: String(fd.get("fromEmail") ?? ""),
+          fromEmail,
           replyTo: String(fd.get("replyTo") ?? ""),
           smtpHost: String(fd.get("smtpHost") ?? ""),
-          smtpPort: fd.get("smtpPort") ? Number(fd.get("smtpPort")) : null,
-          smtpSecure: true,
+          smtpPort: port,
+          // 465 usa TLS direto; 587/25 abrem em texto e sobem para TLS (STARTTLS).
+          smtpSecure: port === 465,
           smtpUser: String(fd.get("smtpUser") ?? ""),
           secret: secret.trim() || null,
         },
