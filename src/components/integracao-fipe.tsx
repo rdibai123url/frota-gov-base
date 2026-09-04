@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-import { formatCurrency, formatPercent } from "@/lib/format";
+import { formatBRL, formatPercent } from "@/lib/format";
 import { exportReportCsv } from "@/lib/reports";
 import { useInvalidate, usePerms } from "@/lib/frotagov";
 import { FIPE_DISCLAIMER, FIPE_KINDS, FIPE_STATUS_LABEL, depreciation, useFipeFleet } from "@/lib/fipe";
@@ -119,7 +119,7 @@ export function FipePanel() {
         <CardContent className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-3">
             <Stat label="Bens vinculados" value={`${linked} de ${fleet.length}`} />
-            <Stat label="Valor de mercado somado" value={formatCurrency(totalValue)} />
+            <Stat label="Valor de mercado somado" value={formatBRL(totalValue)} />
             <Stat
               label="Sem vínculo"
               value={String(fleet.length - linked)}
@@ -184,8 +184,8 @@ export function FipePanel() {
                           <span className="text-muted-foreground">Sem vínculo</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-right">{v.fipe_value ? formatCurrency(v.fipe_value) : "—"}</TableCell>
-                      <TableCell className="text-right">{dep === null ? "—" : formatPercent(dep)}</TableCell>
+                      <TableCell className="text-right">{v.fipe_value ? formatBRL(v.fipe_value) : "—"}</TableCell>
+                      <TableCell className="text-right">{dep === null ? "—" : formatPercent(dep * 100)}</TableCell>
                       <TableCell>
                         <Badge variant={v.fipe_last_status === "ok" ? "default" : "secondary"}>
                           {FIPE_STATUS_LABEL[v.fipe_last_status ?? ""] ?? "Nunca consultado"}
@@ -298,7 +298,7 @@ function LinkDialog({ vehicle, onClose }: { vehicle: Vehicle; onClose: () => voi
         setError(r.message);
         toast.error(r.message);
       } else {
-        toast.success(`Valor registrado: ${formatCurrency(r.value ?? 0)} (${r.referenceLabel ?? "referência atual"}).`);
+        toast.success(`Valor registrado: ${formatBRL(r.value ?? 0)} (${r.referenceLabel ?? "referência atual"}).`);
         invalidate(["vehicles", "asset_market_values"]);
         onClose();
       }
