@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { CreditCard, Plus, QrCode, ShieldOff, Store, Users } from "lucide-react";
 import { toast } from "sonner";
+
+import { autoGeocode } from "@/lib/geocode";
 import { z } from "zod";
 
 import { PageHeader } from "@/components/app-shell";
@@ -189,17 +191,25 @@ function Credenciados() {
       contact_name: form.contact_name.trim() || null,
       updated_by: userId,
     };
-    const { error } = form.id
-      ? await supabase.from("accredited_partners").update(payload).eq("id", form.id)
-      : await supabase.from("accredited_partners").insert({ ...payload, created_by: userId });
+    const { data: saved, error } = form.id
+      ? await supabase.from("accredited_partners").update(payload).eq("id", form.id).select("id").maybeSingle()
+      : await supabase
+          .from("accredited_partners")
+          .insert({ ...payload, created_by: userId })
+          .select("id")
+          .maybeSingle();
     setSaving(false);
     if (error) {
       toast.error(dbMessage(error));
       return;
     }
     toast.success(form.id ? "Credenciado atualizado" : "Credenciado cadastrado");
+    const savedId = saved?.id ?? form.id;
     setForm(null);
     invalidate(["accredited-partners"]);
+    if (!payload.latitude || !payload.longitude) {
+      void autoGeocode("accredited_partners", savedId, payload).then(() => invalidate(["accredited-partners"]));
+    }
   }
 
   function edit(p: Partner) {

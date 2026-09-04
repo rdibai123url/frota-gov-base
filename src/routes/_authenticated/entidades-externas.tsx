@@ -3,6 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Building, Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
+
+import { autoGeocode } from "@/lib/geocode";
 import { z } from "zod";
 
 import { PageHeader } from "@/components/app-shell";
@@ -128,15 +130,28 @@ function Entidades() {
         notes: d.notes || null,
         active,
       };
-      const { error } = editing
-        ? await supabase.from("external_entities").update({ ...payload, updated_by: userId }).eq("id", editing.id)
+      const before = editing
+        ? { address: editing.address, city: editing.city, state: editing.state, zip_code: editing.zip_code }
+        : null;
+      const { data: saved, error } = editing
+        ? await supabase
+            .from("external_entities")
+            .update({ ...payload, updated_by: userId })
+            .eq("id", editing.id)
+            .select("id")
+            .maybeSingle()
         : await supabase
             .from("external_entities")
-            .insert({ ...payload, organization_id: orgId!, created_by: userId });
+            .insert({ ...payload, organization_id: orgId!, created_by: userId })
+            .select("id")
+            .maybeSingle();
       if (error) throw error;
       toast.success(editing ? "Entidade atualizada." : "Entidade cadastrada.");
       invalidate(["external-entities"]);
       setOpen(false);
+      void autoGeocode("external_entities", saved?.id ?? editing?.id, payload, before).then(() =>
+        invalidate(["external-entities"]),
+      );
     } catch (err) {
       toast.error(dbMessage(err));
     } finally {

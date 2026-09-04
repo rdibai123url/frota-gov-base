@@ -3,6 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Building2, Pencil, Plus, Upload } from "lucide-react";
 import { toast } from "sonner";
+
+import { autoGeocode } from "@/lib/geocode";
 import { z } from "zod";
 
 import { PageHeader } from "@/components/app-shell";
@@ -187,9 +189,16 @@ function RedeCredenciada() {
       attachment_path: attachment,
       notes: d.notes || null,
     };
-    const { error } = editing
-      ? await supabase.from("workshops").update({ ...payload, updated_by: userId }).eq("id", editing.id)
-      : await supabase.from("workshops").insert({ ...payload, organization_id: orgId!, created_by: userId });
+    const before = editing
+      ? { address: editing.address, district: editing.district, city: editing.city, state: editing.state, zip_code: editing.zip_code }
+      : null;
+    const { data: saved, error } = editing
+      ? await supabase.from("workshops").update({ ...payload, updated_by: userId }).eq("id", editing.id).select("id").maybeSingle()
+      : await supabase
+          .from("workshops")
+          .insert({ ...payload, organization_id: orgId!, created_by: userId })
+          .select("id")
+          .maybeSingle();
     setSaving(false);
     if (error) {
       toast.error(dbMessage(error));
@@ -198,6 +207,9 @@ function RedeCredenciada() {
     toast.success(editing ? "Oficina atualizada." : "Oficina credenciada cadastrada.");
     invalidate(["workshops"]);
     setOpen(false);
+    if (!payload.latitude || !payload.longitude) {
+      void autoGeocode("workshops", saved?.id ?? editing?.id, payload, before).then(() => invalidate(["workshops"]));
+    }
   }
 
   const paged = usePaged(filtered);

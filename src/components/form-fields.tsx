@@ -5,8 +5,13 @@
 import * as React from "react";
 import { Input } from "@/components/ui/input";
 import {
+  HOUR_METER_DECIMALS,
   LITER_DECIMALS,
   MONEY_DECIMALS,
+  PERCENT_DECIMALS,
+  QUANTITY_DECIMALS,
+  maskInteger,
+  maskKm,
   maskCNPJ,
   maskCPF,
   maskDecimalBR,
@@ -100,6 +105,59 @@ export function CnpjInput({ defaultValue, value, onValueChange, ...props }: Base
       value={text}
       onChange={(e) => {
         const masked = maskCNPJ(e.target.value);
+        setText(masked);
+        onValueChange?.(masked);
+      }}
+    />
+  );
+}
+
+/** Percentual — sempre 2 casas decimais. */
+export function PercentInput(props: BaseProps) {
+  return <DecimalInput decimals={PERCENT_DECIMALS} placeholder="0,00" {...props} />;
+}
+
+/** Quantidade genérica — sempre 2 casas decimais. */
+export function QuantityInput(props: BaseProps) {
+  return <DecimalInput decimals={QUANTITY_DECIMALS} placeholder="0,00" {...props} />;
+}
+
+/** Horímetro — uma casa decimal. */
+export function HourMeterInput(props: BaseProps) {
+  return <DecimalInput decimals={HOUR_METER_DECIMALS} placeholder="0,0" {...props} />;
+}
+
+/** Hodômetro — inteiro com separador de milhar (sem decimais artificiais). */
+export function KmInput({ defaultValue, value, onValueChange, ...props }: BaseProps) {
+  const [text, setText] = useMasked(defaultValue, maskKm, value);
+  return (
+    <Input
+      inputMode="numeric"
+      autoComplete="off"
+      placeholder="0"
+      {...props}
+      value={text}
+      onChange={(e) => {
+        const masked = maskKm(e.target.value);
+        setText(masked);
+        onValueChange?.(masked);
+      }}
+    />
+  );
+}
+
+/** Inteiro técnico (ano, processo, sequencial, eixos) — sem casas decimais. */
+export function IntegerInput({ defaultValue, value, onValueChange, maxDigits = 12, ...props }: BaseProps & { maxDigits?: number }) {
+  const mask = (v: string) => maskInteger(v, maxDigits);
+  const [text, setText] = useMasked(defaultValue, mask, value);
+  return (
+    <Input
+      inputMode="numeric"
+      autoComplete="off"
+      {...props}
+      value={text}
+      onChange={(e) => {
+        const masked = mask(e.target.value);
         setText(masked);
         onValueChange?.(masked);
       }}
