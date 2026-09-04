@@ -336,7 +336,7 @@ export const sendInvites = createServerFn({ method: "POST" })
 
         description: quotation.description,
         specialty: quotation.specialty,
-        quotation_kind: quotation.quotation_kind ?? "servicos_pecas",
+        
         deadlineText: deadlineText(quotation.deadline_at),
         notes: quotation.notes,
         items: (items ?? []).map((i) => ({
