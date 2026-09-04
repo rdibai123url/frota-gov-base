@@ -624,7 +624,7 @@ function QuotationDetail({
         labor_value: payload.totals.laborValue,
         services_value: payload.servicesValue,
         discount_mode: payload.discountMode,
-        discount_input: payload.discountInput,
+
         notes: payload.notes || null,
         created_by: userId,
       })
