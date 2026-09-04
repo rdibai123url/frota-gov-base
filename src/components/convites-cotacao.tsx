@@ -660,9 +660,11 @@ function ConfiguracaoEmailDialog({
                 placeholder="https://frota.seuorgao.gov.br"
               />
               <p className="mt-1 text-xs text-muted-foreground">
-                É o endereço usado no link enviado ao fornecedor. O endereço de pré-visualização do editor exige login e
-                não funciona para quem está fora do órgão.
+                É o endereço usado no link enviado ao fornecedor. Precisa ser um endereço público (ex.:
+                https://frota.seuorgao.gov.br). Endereços locais, de rede interna ou de pré-visualização do editor não
+                são aceitos, porque exigem login e não abrem para quem está fora do órgão.
               </p>
+
             </div>
             <div className="sm:col-span-2">
               <Label htmlFor="secret">{provider === "smtp" ? "Senha do usuário SMTP" : "Chave de API do provedor"}</Label>
