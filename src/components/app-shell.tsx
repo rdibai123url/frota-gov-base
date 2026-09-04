@@ -307,7 +307,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 
   return (
+    <TooltipProvider delayDuration={200}>
     <div className="flex min-h-screen bg-background">
+
       <aside className="hidden w-72 shrink-0 lg:block">
         <div className="fixed inset-y-0 w-72">{sidebar}</div>
       </aside>
