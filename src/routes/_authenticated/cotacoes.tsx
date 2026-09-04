@@ -696,11 +696,25 @@ function QuotationDetail({
             <form onSubmit={addItem} className="grid items-end gap-2 sm:grid-cols-4">
               <div className="sm:col-span-2">
                 <Label htmlFor="description">Item / serviço</Label>
-                <Input id="description" name="description" />
+                <ItemHistoryInput
+                  id="description"
+                  name="description"
+                  value={itemDescription}
+                  onChange={setItemDescription}
+                  onPick={(s) => { if (s.measure_unit) setItemUnit(s.measure_unit); }}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Sugestões vêm do histórico do próprio órgão; itens novos podem ser digitados livremente.
+                </p>
               </div>
               <div>
                 <Label htmlFor="measure_unit">Unidade</Label>
-                <Input id="measure_unit" name="measure_unit" defaultValue="UN" />
+                <Input
+                  id="measure_unit"
+                  name="measure_unit"
+                  value={itemUnit}
+                  onChange={(e) => setItemUnit(e.target.value)}
+                />
               </div>
               <div className="flex gap-2">
                 <div className="flex-1">
