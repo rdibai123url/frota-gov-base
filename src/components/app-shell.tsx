@@ -22,9 +22,12 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { HelpButton } from "@/components/help-button";
 import { cn } from "@/lib/utils";
 import { supabase, useBrasaoUrl, useOrganization, useProfile, ROLE_LABELS } from "@/lib/frotagov";
 import { useIsSuperAdmin, usePlatformSession, usePlatformContextActions } from "@/lib/platform";
+
 
 type NavLeaf = { to: string; label: string };
 type NavGroup = { id: string; label: string; icon: typeof Truck; to?: string; items?: NavLeaf[] };
@@ -204,7 +207,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+      <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-3">
         {navGroups.map((group) => {
           if (group.to) {
             const active = pathname.startsWith(group.to);
@@ -214,10 +217,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                 to={group.to}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors",
+                  "relative flex items-center gap-3 rounded-md px-3 py-2 text-[13.5px] transition-colors",
                   active
-                    ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-                    : "opacity-80 hover:bg-sidebar-accent/60 hover:opacity-100",
+                    ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-sidebar-primary"
+                    : "opacity-75 hover:bg-sidebar-accent/60 hover:opacity-100",
                 )}
               >
                 <group.icon className="size-4 shrink-0" />
@@ -235,10 +238,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                 aria-expanded={expanded}
                 onClick={() => setOpenGroup(expanded ? null : group.id)}
                 className={cn(
-                  "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors",
+                  "flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-[13.5px] transition-colors",
                   inGroup
-                    ? "font-medium text-sidebar-accent-foreground opacity-100"
-                    : "opacity-80 hover:opacity-100",
+                    ? "font-semibold text-sidebar-accent-foreground opacity-100"
+                    : "opacity-75 hover:opacity-100",
                   "hover:bg-sidebar-accent/60",
                 )}
               >
@@ -258,10 +261,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                         to={leaf.to}
                         onClick={() => setOpen(false)}
                         className={cn(
-                          "block truncate rounded-md px-3 py-2 text-[13px] transition-colors",
+                          "relative block truncate rounded-md px-3 py-1.5 text-[13px] transition-colors",
                           active
-                            ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-                            : "opacity-75 hover:bg-sidebar-accent/50 hover:opacity-100",
+                            ? "bg-sidebar-primary/18 font-semibold text-sidebar-accent-foreground before:absolute before:inset-y-1 before:-left-[13px] before:w-[3px] before:rounded-full before:bg-sidebar-primary"
+                            : "opacity-70 hover:bg-sidebar-accent/50 hover:opacity-100",
                         )}
                       >
                         {leaf.label}
@@ -304,7 +307,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 
   return (
+    <TooltipProvider delayDuration={200}>
     <div className="flex min-h-screen bg-background">
+
       <aside className="hidden w-72 shrink-0 lg:block">
         <div className="fixed inset-y-0 w-72">{sidebar}</div>
       </aside>
@@ -395,25 +400,62 @@ export function AppShell({ children }: { children: ReactNode }) {
         </main>
       </div>
     </div>
+    </TooltipProvider>
   );
+}
+
+/** Trilha de navegação (grupo do menu → página atual) derivada da rota. */
+function useBreadcrumb(pathname: string) {
+  const groupId = groupForPath(pathname);
+  const group = [PLATFORM_NAV, ...NAV].find((g) => g.id === groupId);
+  if (!group) return null;
+  const leaf = group.items?.find((i) => pathname.startsWith(i.to));
+  return { group: group.label, leaf: leaf?.label ?? null };
 }
 
 export function PageHeader({
   title,
   description,
   action,
+  helpKey,
 }: {
   title: string;
   description?: string;
   action?: ReactNode;
+  /** Chave alternativa de ajuda (ex.: aba interna). Por padrão usa a rota atual. */
+  helpKey?: string;
 }) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const trail = useBreadcrumb(pathname);
+
   return (
-    <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-      <div>
-        <h1 className="gov-title text-2xl">{title}</h1>
-        {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
+    <div className="mb-6 border-b pb-4">
+      {trail && (
+        <nav aria-label="Trilha de navegação" className="mb-1.5 text-xs text-muted-foreground">
+          <span>{trail.group}</span>
+          {trail.leaf && (
+            <>
+              <span aria-hidden className="mx-1.5 opacity-60">
+                /
+              </span>
+              <span className="font-medium text-foreground">{trail.leaf}</span>
+            </>
+          )}
+        </nav>
+      )}
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:justify-between">
+        <div className="min-w-0">
+          <div className="flex min-w-0 items-center gap-2">
+            <h1 className="gov-title min-w-0 truncate text-2xl">{title}</h1>
+            <HelpButton pathname={pathname} {...(helpKey ? { topicKey: helpKey } : {})} />
+          </div>
+          {description && (
+            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{description}</p>
+          )}
+        </div>
+        {action && <div className="flex flex-wrap items-center gap-2">{action}</div>}
       </div>
-      {action}
     </div>
   );
 }
+
