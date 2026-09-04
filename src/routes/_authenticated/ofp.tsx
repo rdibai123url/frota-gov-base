@@ -541,16 +541,23 @@ function OFP() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Input
+                <ItemHistoryInput
                   className="sm:col-span-3"
                   placeholder="Descrição"
                   value={d.description}
-                  onChange={(e) => {
+                  onChange={(v) => {
                     const next = [...drafts];
-                    next[idx] = { ...d, description: e.target.value };
+                    next[idx] = { ...d, description: v };
+                    setDrafts(next);
+                  }}
+                  onPick={(s) => {
+                    if (!s.measure_unit) return;
+                    const next = [...drafts];
+                    next[idx] = { ...d, description: s.description, measure_unit: s.measure_unit };
                     setDrafts(next);
                   }}
                 />
+
                 <Input
                   className="sm:col-span-2"
                   placeholder="Qtd."
