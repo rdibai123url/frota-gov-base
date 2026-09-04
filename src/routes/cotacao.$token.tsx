@@ -210,80 +210,17 @@ function ResponderCotacao() {
             </section>
 
             <section>
-              <h2 className="gov-title mb-2 text-sm uppercase tracking-wider text-muted-foreground">Itens / serviços</h2>
-              <div className="overflow-x-auto rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Descrição</TableHead>
-                      <TableHead className="w-28">Marca</TableHead>
-                      <TableHead className="w-24">Qtd.</TableHead>
-                      <TableHead className="w-32">Valor unit. (R$)</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {itemForms.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={4} className="py-6 text-center text-muted-foreground">
-                          Sem itens detalhados — informe os valores no resumo abaixo.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                    {itemForms.map((i, idx) => (
-                      <TableRow key={i.quotationItemId ?? idx}>
-                        <TableCell className="text-sm">{i.description}</TableCell>
-                        <TableCell>
-                          <Input value={i.brand} onChange={(e) => setItem(idx, { brand: e.target.value })} />
-                        </TableCell>
-                        <TableCell>
-                          <Input value={i.quantity} inputMode="decimal" onChange={(e) => setItem(idx, { quantity: e.target.value })} />
-                        </TableCell>
-                        <TableCell>
-                          <Input value={i.unitValue} inputMode="decimal" onChange={(e) => setItem(idx, { unitValue: e.target.value })} />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-              <p className="mt-2 text-right text-sm text-muted-foreground">
-                Soma dos itens:{" "}
-                <strong className="text-foreground">
-                  {total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                </strong>
-              </p>
+              <h2 className="gov-title mb-2 text-sm uppercase tracking-wider text-muted-foreground">
+                Proposta — {quotationKindLabel(q.quotation_kind)}
+              </h2>
+              <PropostaFields
+                kind={kind}
+                quotationItems={state.items ?? []}
+                draft={draft}
+                onChange={(patch) => setDraft((d) => ({ ...d, ...patch }))}
+              />
             </section>
 
-            <section className="grid gap-4 sm:grid-cols-3">
-              <div>
-                <Label htmlFor="laborValue">Mão de obra (R$)</Label>
-                <Input id="laborValue" name="laborValue" inputMode="decimal" defaultValue="0" />
-              </div>
-              <div>
-                <Label htmlFor="discountValue">Desconto (R$)</Label>
-                <Input id="discountValue" name="discountValue" inputMode="decimal" defaultValue="0" />
-              </div>
-              <div>
-                <Label htmlFor="executionDays">Prazo de execução (dias)</Label>
-                <Input id="executionDays" name="executionDays" type="number" min={0} />
-              </div>
-              <div>
-                <Label htmlFor="warrantyDays">Garantia (dias)</Label>
-                <Input id="warrantyDays" name="warrantyDays" type="number" min={0} />
-              </div>
-              <div>
-                <Label htmlFor="validUntil">Validade da proposta</Label>
-                <Input id="validUntil" name="validUntil" type="date" />
-              </div>
-              <div>
-                <Label htmlFor="paymentTerms">Condição de pagamento</Label>
-                <Input id="paymentTerms" name="paymentTerms" maxLength={120} />
-              </div>
-              <div className="sm:col-span-3">
-                <Label htmlFor="notes">Observações</Label>
-                <Textarea id="notes" name="notes" rows={3} maxLength={800} />
-              </div>
-            </section>
 
             <div className="flex justify-end">
               <Button type="submit" size="lg" disabled={sending}>
