@@ -156,6 +156,8 @@ export const saveEmailSettings = createServerFn({ method: "POST" })
     smtpPort: number | null;
     smtpSecure: boolean;
     smtpUser: string;
+    /** Endereço público do sistema usado nos links enviados aos fornecedores. */
+    publicBaseUrl?: string | null;
     /** Enviado apenas quando o usuário digita uma nova credencial. */
     secret?: string | null;
   }) => input)
@@ -192,6 +194,7 @@ export const saveEmailSettings = createServerFn({ method: "POST" })
       smtp_port: data.smtpPort,
       smtp_secure: data.smtpSecure,
       smtp_user: data.smtpUser || null,
+      public_base_url: (data.publicBaseUrl ?? "").trim() || null,
       has_secret: hasNewSecret ? true : Boolean(existing?.has_secret),
       updated_by: userId,
     };
@@ -311,6 +314,10 @@ export const sendInvites = createServerFn({ method: "POST" })
     const { settings, secret, publicBaseUrl } = await loadSettings(quotation.organization_id);
     const problem = checkSettings(settings);
     if (problem || !settings) return { ok: false, configured: false, message: problem ?? "Envio de e-mail não configurado.", results: [] };
+    // Nunca enviar um link que o fornecedor não consegue abrir (endereço interno).
+    if (!resolveBase(publicBaseUrl).isPublic) {
+      return { ok: false, configured: true, message: NO_PUBLIC_BASE_MESSAGE, results: [] };
+    }
 
     const { data: org } = await supabase
       .from("organizations")
