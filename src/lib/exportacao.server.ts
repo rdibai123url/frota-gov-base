@@ -176,12 +176,26 @@ function csvCell(value: unknown): string {
   return /[";\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
-/** Remove colunas proibidas de uma linha. */
+/** Remove chaves proibidas, inclusive dentro de colunas JSON (logs e payloads). */
+function scrub(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(scrub);
+  if (value && typeof value === "object") {
+    const out: Row = {};
+    for (const [k, v] of Object.entries(value as Row)) {
+      if (FORBIDDEN_COLUMNS.has(k)) continue;
+      out[k] = scrub(v);
+    }
+    return out;
+  }
+  return value;
+}
+
+/** Remove colunas proibidas de uma linha (e de qualquer conteúdo JSON aninhado). */
 function sanitize(row: Row): Row {
   const out: Row = {};
   for (const [k, v] of Object.entries(row)) {
     if (FORBIDDEN_COLUMNS.has(k)) continue;
-    out[k] = v;
+    out[k] = v && typeof v === "object" ? scrub(v) : v;
   }
   return out;
 }
