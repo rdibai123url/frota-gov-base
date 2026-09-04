@@ -163,7 +163,7 @@ export const saveEmailSettings = createServerFn({ method: "POST" })
       smtp_port: data.smtpPort,
       smtp_secure: data.smtpSecure,
       smtp_user: data.smtpUser || null,
-      public_base_url: (data.publicBaseUrl ?? "").trim() || null,
+      public_base_url: requestedBase,
       has_secret: hasNewSecret ? true : Boolean(existing?.has_secret),
       updated_by: userId,
     };
