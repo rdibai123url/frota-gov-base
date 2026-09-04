@@ -835,7 +835,7 @@ function Relatorios() {
         let q = supabase
           .from("stock_movements")
           .select(
-            "occurred_at, kind, quantity, unit_value, total_value, lot, document_number, expense_origin, reason, warehouse:warehouses!stock_movements_warehouse_id_fkey(name), part:parts_catalog(code, name, measure_unit), vehicle:vehicles(plate, asset_code)",
+            "occurred_at, kind, quantity, unit_value, total_value, lot, document_number, expense_origin, reason, warehouse:warehouses!stock_movements_warehouse_id_fkey(name), part:parts_catalog(internal_code, reference, description, measure_unit), vehicle:vehicles(plate, asset_code)",
           )
           .gte("occurred_at", start)
           .lte("occurred_at", end)
@@ -847,8 +847,8 @@ function Relatorios() {
           data: dt(m.occurred_at),
           almoxarifado: m.warehouse?.name ?? "—",
           movimento: m.kind,
-          codigo: m.part?.code ?? "—",
-          descricao: m.part?.name ?? "—",
+          codigo: m.part?.internal_code ?? m.part?.reference ?? "—",
+          descricao: m.part?.description ?? "—",
           lote: m.lot ?? "—",
           quantidade: formatNumberBR(m.quantity, 4),
           valor_unitario: formatMoney(m.unit_value),
@@ -863,7 +863,7 @@ function Relatorios() {
         const { data: rows, error } = await supabase
           .from("stock_balances")
           .select(
-            "quantity, reserved_quantity, average_cost, min_quantity, lot, location, last_movement_at, warehouse:warehouses(name), part:parts_catalog(code, name, measure_unit)",
+            "quantity, reserved_quantity, average_cost, min_quantity, lot, location, last_movement_at, warehouse:warehouses(name), part:parts_catalog(internal_code, reference, description, measure_unit)",
           )
           .order("quantity", { ascending: false });
         if (error) throw error;
@@ -873,8 +873,8 @@ function Relatorios() {
           const min = b.min_quantity == null ? null : Number(b.min_quantity);
           return {
             almoxarifado: b.warehouse?.name ?? "—",
-            codigo: b.part?.code ?? "—",
-            descricao: b.part?.name ?? "—",
+            codigo: b.part?.internal_code ?? b.part?.reference ?? "—",
+            descricao: b.part?.description ?? "—",
             lote: b.lot ?? "—",
             quantidade: formatNumberBR(qt, 4),
             reservado: formatNumberBR(rv, 4),
