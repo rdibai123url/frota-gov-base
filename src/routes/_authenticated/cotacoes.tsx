@@ -718,12 +718,14 @@ function QuotationDetail({
       )}
 
       <Tabs defaultValue="itens" className="mt-2">
-        <TabsList>
+        <TabsList className="flex-wrap">
           <TabsTrigger value="itens">Itens solicitados</TabsTrigger>
           <TabsTrigger value="oficinas">Convites</TabsTrigger>
-          <TabsTrigger value="propostas">Propostas</TabsTrigger>
+          <TabsTrigger value="propostas">Propostas recebidas</TabsTrigger>
+          <TabsTrigger value="lancar">Lançar proposta</TabsTrigger>
           <TabsTrigger value="mapa">Mapa comparativo</TabsTrigger>
         </TabsList>
+
 
         <TabsContent value="itens" className="space-y-3">
           <Table>
