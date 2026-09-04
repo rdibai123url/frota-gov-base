@@ -9896,6 +9896,7 @@ export type Database = {
           brands: string[]
           city: string | null
           cnpj: string | null
+          company_kind: string
           contact_name: string | null
           coverage_area: string | null
           created_at: string
@@ -9935,6 +9936,7 @@ export type Database = {
           brands?: string[]
           city?: string | null
           cnpj?: string | null
+          company_kind?: string
           contact_name?: string | null
           coverage_area?: string | null
           created_at?: string
@@ -9974,6 +9976,7 @@ export type Database = {
           brands?: string[]
           city?: string | null
           cnpj?: string | null
+          company_kind?: string
           contact_name?: string | null
           coverage_area?: string | null
           created_at?: string
