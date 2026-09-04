@@ -76,6 +76,11 @@ const REPORTS = [
   { value: "diarias", label: "Diárias — requisições e comprovações" },
   { value: "limpeza", label: "Limpeza da frota" },
   { value: "cotas_servidor", label: "Cotas de combustível de servidor" },
+  { value: "cred_capturas", label: "Credenciados — capturas operacionais" },
+  { value: "cred_cartoes", label: "Credenciados — cartões virtuais e usos" },
+  { value: "ofp", label: "Ordens de fornecimento de peças (OFP)" },
+  { value: "estoque_mov", label: "Almoxarifado — movimentações de estoque" },
+  { value: "estoque_saldo", label: "Almoxarifado — saldos por peça" },
   { value: "int_consumo", label: "Inteligência — consumo e eficiência por ativo" },
   { value: "int_ranking", label: "Inteligência — ranking de consumo" },
   { value: "int_desvios", label: "Inteligência — desvios e anomalias" },
@@ -102,6 +107,11 @@ const CAPS: Record<ReportKey, { date: boolean; unit: boolean; vehicle: boolean; 
   diarias: { date: true, unit: true, vehicle: false, driver: true },
   limpeza: { date: true, unit: true, vehicle: true, driver: false },
   cotas_servidor: { date: true, unit: true, vehicle: true, driver: false },
+  cred_capturas: { date: true, unit: false, vehicle: true, driver: false },
+  cred_cartoes: { date: false, unit: true, vehicle: true, driver: false },
+  ofp: { date: true, unit: true, vehicle: true, driver: false },
+  estoque_mov: { date: true, unit: false, vehicle: true, driver: false },
+  estoque_saldo: { date: false, unit: false, vehicle: false, driver: false },
   int_consumo: { date: true, unit: true, vehicle: true, driver: true },
   int_ranking: { date: true, unit: true, vehicle: true, driver: true },
   int_desvios: { date: true, unit: true, vehicle: true, driver: true },
@@ -172,6 +182,19 @@ const LABELS: Record<string, string> = {
   cota: "Cota por ciclo",
   consumido: "Consumido no período",
   propriedade: "Propriedade",
+  credenciado: "Credenciado",
+  autorizado: "Autorizado",
+  realizado: "Realizado",
+  diferenca: "Diferença devolvida",
+  tempo_resposta: "Tempo de resposta",
+  usos: "Usos do cartão",
+  emissao: "Emissão",
+  revogacao: "Revogação",
+  almoxarifado: "Almoxarifado",
+  lote: "Lote",
+  reservado: "Reservado",
+  itens: "Itens",
+  atendido: "Quantidade atendida",
 };
 
 const label = (k: string) => LABELS[k] ?? k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, " ");
@@ -727,6 +750,155 @@ function Relatorios() {
         }));
       }
 
+      /* ===== Fase 10 / Bloco 3 — portal do credenciado ===== */
+      if (report === "cred_capturas") {
+        let q = supabase
+          .from("partner_captures")
+          .select(
+            "captured_at, kind, status, authorized_quantity, captured_quantity, authorized_value, captured_value, document_number, response_minutes, ip, partner:accredited_partners(trade_name, legal_name, cnpj), vehicle:vehicles(plate, asset_code)",
+          )
+          .gte("captured_at", start)
+          .lte("captured_at", end)
+          .order("captured_at", { ascending: false });
+        if (vehicle) q = q.eq("vehicle_id", vehicle);
+        const { data: rows, error } = await q;
+        if (error) throw error;
+        return (rows ?? []).map((c) => {
+          const aq = c.authorized_quantity == null ? null : Number(c.authorized_quantity);
+          const cq = c.captured_quantity == null ? null : Number(c.captured_quantity);
+          return {
+            data: dt(c.captured_at),
+            credenciado: c.partner?.trade_name ?? c.partner?.legal_name ?? "—",
+            cnpj: c.partner?.cnpj ?? "—",
+            tipo: c.kind,
+            veiculo: c.vehicle?.plate ?? c.vehicle?.asset_code ?? "—",
+            documento: c.document_number ?? "—",
+            autorizado: aq != null ? formatNumberBR(aq, 4) : "—",
+            realizado: cq != null ? formatNumberBR(cq, 4) : "—",
+            diferenca: aq != null && cq != null ? formatNumberBR(aq - cq, 4) : "—",
+            valor: formatMoney(c.captured_value),
+            tempo_resposta: c.response_minutes != null ? `${c.response_minutes} min` : "—",
+            situacao: c.status,
+          };
+        });
+      }
+
+      if (report === "cred_cartoes") {
+        let q = supabase
+          .from("asset_cards")
+          .select(
+            "code, status, issued_at, revoked_at, revoke_reason, uses_count, vehicle:vehicles(plate, asset_code, unit_id, unit:units(name))",
+          )
+          .order("issued_at", { ascending: false });
+        if (vehicle) q = q.eq("vehicle_id", vehicle);
+        const { data: rows, error } = await q;
+        if (error) throw error;
+        return (rows ?? [])
+          .filter((c) => !unit || c.vehicle?.unit_id === unit)
+          .map((c) => ({
+            codigo: c.code,
+            veiculo: c.vehicle?.plate ?? c.vehicle?.asset_code ?? "—",
+            unidade: c.vehicle?.unit?.name ?? "—",
+            emissao: dt(c.issued_at),
+            situacao: c.status,
+            usos: c.uses_count ?? 0,
+            revogacao: c.revoked_at ? dt(c.revoked_at) : "—",
+            descricao: c.revoke_reason ?? "—",
+          }));
+      }
+
+      /* ===== Fase 10 / Bloco 4 — OFP e almoxarifado ===== */
+      if (report === "ofp") {
+        let q = supabase
+          .from("supply_orders")
+          .select(
+            "code, status, issued_at, deadline_at, delivered_at, max_value, reserved_value, consumed_value, expense_origin, requester_name, unit:units(name), vehicle:vehicles(plate, asset_code), supplier:suppliers(trade_name, legal_name), items:supply_order_items(quantity, delivered_quantity)",
+          )
+          .gte("created_at", start)
+          .lte("created_at", end)
+          .order("created_at", { ascending: false });
+        if (unit) q = q.eq("unit_id", unit);
+        if (vehicle) q = q.eq("vehicle_id", vehicle);
+        const { data: rows, error } = await q;
+        if (error) throw error;
+        return (rows ?? []).map((o) => {
+          const items = (o.items ?? []) as { quantity: number; delivered_quantity: number | null }[];
+          const qt = items.reduce((s, i) => s + Number(i.quantity ?? 0), 0);
+          const dl = items.reduce((s, i) => s + Number(i.delivered_quantity ?? 0), 0);
+          return {
+            codigo: o.code,
+            unidade: o.unit?.name ?? "—",
+            veiculo: o.vehicle?.plate ?? o.vehicle?.asset_code ?? "—",
+            fornecedor: o.supplier?.trade_name ?? o.supplier?.legal_name ?? "—",
+            responsavel: o.requester_name ?? "—",
+            origem: o.expense_origin ?? "—",
+            emissao: o.issued_at ? dt(o.issued_at) : "—",
+            vencimento: o.deadline_at ? dt(o.deadline_at) : "—",
+            itens: items.length,
+            quantidade: formatNumberBR(qt, 2),
+            atendido: formatNumberBR(dl, 2),
+            valor: formatMoney(o.max_value),
+            total: formatMoney(o.consumed_value),
+            situacao: o.status,
+          };
+        });
+      }
+
+      if (report === "estoque_mov") {
+        let q = supabase
+          .from("stock_movements")
+          .select(
+            "occurred_at, kind, quantity, unit_value, total_value, lot, document_number, expense_origin, reason, warehouse:warehouses!stock_movements_warehouse_id_fkey(name), part:parts_catalog(internal_code, reference, description, measure_unit), vehicle:vehicles(plate, asset_code)",
+          )
+          .gte("occurred_at", start)
+          .lte("occurred_at", end)
+          .order("occurred_at", { ascending: false });
+        if (vehicle) q = q.eq("vehicle_id", vehicle);
+        const { data: rows, error } = await q;
+        if (error) throw error;
+        return (rows ?? []).map((m) => ({
+          data: dt(m.occurred_at),
+          almoxarifado: m.warehouse?.name ?? "—",
+          movimento: m.kind,
+          codigo: m.part?.internal_code ?? m.part?.reference ?? "—",
+          descricao: m.part?.description ?? "—",
+          lote: m.lot ?? "—",
+          quantidade: formatNumberBR(m.quantity, 4),
+          valor_unitario: formatMoney(m.unit_value),
+          total: formatMoney(m.total_value),
+          veiculo: m.vehicle?.plate ?? m.vehicle?.asset_code ?? "—",
+          origem: m.expense_origin ?? "—",
+          documento: m.document_number ?? m.reason ?? "—",
+        }));
+      }
+
+      if (report === "estoque_saldo") {
+        const { data: rows, error } = await supabase
+          .from("stock_balances")
+          .select(
+            "quantity, reserved_quantity, average_cost, min_quantity, lot, location, last_movement_at, warehouse:warehouses(name), part:parts_catalog(internal_code, reference, description, measure_unit)",
+          )
+          .order("quantity", { ascending: false });
+        if (error) throw error;
+        return (rows ?? []).map((b) => {
+          const qt = Number(b.quantity ?? 0);
+          const rv = Number(b.reserved_quantity ?? 0);
+          const min = b.min_quantity == null ? null : Number(b.min_quantity);
+          return {
+            almoxarifado: b.warehouse?.name ?? "—",
+            codigo: b.part?.internal_code ?? b.part?.reference ?? "—",
+            descricao: b.part?.description ?? "—",
+            lote: b.lot ?? "—",
+            quantidade: formatNumberBR(qt, 4),
+            reservado: formatNumberBR(rv, 4),
+            saldo: formatNumberBR(qt - rv, 4),
+            valor_unitario: formatMoney(b.average_cost),
+            total: formatMoney(qt * Number(b.average_cost ?? 0)),
+            situacao: min != null && qt - rv <= min ? "Abaixo do mínimo" : "Regular",
+            data: b.last_movement_at ? dt(b.last_movement_at) : "—",
+          };
+        });
+      }
 
 
       let q = supabase
