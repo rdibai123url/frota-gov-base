@@ -10,6 +10,7 @@ import { ConvitesCotacao } from "@/components/convites-cotacao";
 import { EntitySelect } from "@/components/entity-select";
 import { ItemHistoryInput } from "@/components/item-history-input";
 import { NovaEmpresaCotacaoDialog } from "@/components/nova-empresa-cotacao";
+import { HelpInlineButton } from "@/components/help-button";
 import { PropostaFields } from "@/components/proposta-form";
 
 import { Badge } from "@/components/ui/badge";
@@ -288,7 +289,10 @@ function Cotacoes() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Novo processo de cotação</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              Novo processo de cotação
+              <HelpInlineButton topicKey="/cotacoes" />
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={createQuotation} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
@@ -810,6 +814,7 @@ function QuotationDetail({
 
 
         <TabsContent value="itens" className="space-y-3">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground"><HelpInlineButton topicKey="/cotacoes/itens" /><span>Ajuda desta aba</span></div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -883,6 +888,7 @@ function QuotationDetail({
         </TabsContent>
 
         <TabsContent value="oficinas" className="space-y-4">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground"><HelpInlineButton topicKey="/cotacoes/convites" /><span>Ajuda desta aba</span></div>
           <ConvitesCotacao
             quotationId={quotation.id}
             invites={invites as never}
@@ -917,6 +923,7 @@ function QuotationDetail({
         </TabsContent>
 
         <TabsContent value="propostas" className="space-y-4">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground"><HelpInlineButton topicKey="/cotacoes/propostas" /><span>Ajuda desta aba</span></div>
           <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/30 p-2 text-sm">
             <span className="text-muted-foreground">Mostrar:</span>
             {(
@@ -1014,6 +1021,7 @@ function QuotationDetail({
         </TabsContent>
 
         <TabsContent value="lancar" className="space-y-4">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground"><HelpInlineButton topicKey="/cotacoes/lancar" /><HelpInlineButton topicKey="/cotacoes/servicos" /><HelpInlineButton topicKey="/cotacoes/pecas" /><HelpInlineButton topicKey="/cotacoes/servicos-pecas" /><span>Ajuda desta aba</span></div>
           {!canManage || closed ? (
             <p className="rounded-md border p-6 text-center text-sm text-muted-foreground">
               O processo está encerrado ou você não tem permissão para lançar propostas.
@@ -1078,6 +1086,7 @@ function QuotationDetail({
 
 
         <TabsContent value="mapa" className="space-y-4">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground"><HelpInlineButton topicKey="/cotacoes/mapa" /><span>Ajuda desta aba</span></div>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
