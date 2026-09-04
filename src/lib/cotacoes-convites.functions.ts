@@ -513,15 +513,27 @@ export const submitProposalByToken = createServerFn({ method: "POST" })
     phone: string;
     executionDays: number | null;
     warrantyDays: number | null;
-    validUntil: string | null;
+    validDays: number | null;
     paymentTerms: string;
-    laborValue: number;
-    discountValue: number;
+    laborHours: number;
+    laborHourValue: number;
+    servicesValue: number;
+    discountMode: "amount" | "percent";
+    discountInput: number;
     notes: string;
-    items: { quotationItemId: string | null; description: string; brand: string; quantity: number; unitValue: number }[];
+    items: {
+      quotationItemId: string | null;
+      description: string;
+      brand: string;
+      partNumber: string;
+      quantity: number;
+      warrantyDays: number | null;
+      unitValue: number;
+    }[];
   }) => input)
   .handler(async ({ data }) => {
     if (!/^[a-f0-9]{64}$/.test(data.token)) return { ok: false, message: "Link inválido." };
+
     const { supabaseAdmin, invite } = await findInvite(data.token);
     if (!invite) return { ok: false, message: "Link inválido." };
     if (invite.token_expires_at && new Date(invite.token_expires_at).getTime() < Date.now()) {
