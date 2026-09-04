@@ -33,6 +33,7 @@ import { Route as AuthenticatedEquipamentosRouteImport } from './routes/_authent
 import { Route as AuthenticatedExportacaoRouteImport } from './routes/_authenticated/exportacao'
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
 import { Route as AuthenticatedHistoricoVeiculoRouteImport } from './routes/_authenticated/historico-veiculo'
+import { Route as AuthenticatedIntegracoesRouteImport } from './routes/_authenticated/integracoes'
 import { Route as AuthenticatedInteligenciaRouteImport } from './routes/_authenticated/inteligencia'
 import { Route as AuthenticatedLimpezaRouteImport } from './routes/_authenticated/limpeza'
 import { Route as AuthenticatedManutencoesRouteImport } from './routes/_authenticated/manutencoes'
@@ -193,6 +194,12 @@ const AuthenticatedHistoricoVeiculoRoute =
   AuthenticatedHistoricoVeiculoRouteImport.update({
     id: '/historico-veiculo',
     path: '/historico-veiculo',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedIntegracoesRoute =
+  AuthenticatedIntegracoesRouteImport.update({
+    id: '/integracoes',
+    path: '/integracoes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedInteligenciaRoute =
@@ -384,6 +391,7 @@ export interface FileRoutesByFullPath {
   '/exportacao': typeof AuthenticatedExportacaoRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
+  '/integracoes': typeof AuthenticatedIntegracoesRoute
   '/inteligencia': typeof AuthenticatedInteligenciaRoute
   '/limpeza': typeof AuthenticatedLimpezaRoute
   '/manutencoes': typeof AuthenticatedManutencoesRoute
@@ -440,6 +448,7 @@ export interface FileRoutesByTo {
   '/exportacao': typeof AuthenticatedExportacaoRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
+  '/integracoes': typeof AuthenticatedIntegracoesRoute
   '/inteligencia': typeof AuthenticatedInteligenciaRoute
   '/limpeza': typeof AuthenticatedLimpezaRoute
   '/manutencoes': typeof AuthenticatedManutencoesRoute
@@ -498,6 +507,7 @@ export interface FileRoutesById {
   '/_authenticated/exportacao': typeof AuthenticatedExportacaoRoute
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/_authenticated/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
+  '/_authenticated/integracoes': typeof AuthenticatedIntegracoesRoute
   '/_authenticated/inteligencia': typeof AuthenticatedInteligenciaRoute
   '/_authenticated/limpeza': typeof AuthenticatedLimpezaRoute
   '/_authenticated/manutencoes': typeof AuthenticatedManutencoesRoute
@@ -556,6 +566,7 @@ export interface FileRouteTypes {
     | '/exportacao'
     | '/fornecedores'
     | '/historico-veiculo'
+    | '/integracoes'
     | '/inteligencia'
     | '/limpeza'
     | '/manutencoes'
@@ -612,6 +623,7 @@ export interface FileRouteTypes {
     | '/exportacao'
     | '/fornecedores'
     | '/historico-veiculo'
+    | '/integracoes'
     | '/inteligencia'
     | '/limpeza'
     | '/manutencoes'
@@ -669,6 +681,7 @@ export interface FileRouteTypes {
     | '/_authenticated/exportacao'
     | '/_authenticated/fornecedores'
     | '/_authenticated/historico-veiculo'
+    | '/_authenticated/integracoes'
     | '/_authenticated/inteligencia'
     | '/_authenticated/limpeza'
     | '/_authenticated/manutencoes'
@@ -881,6 +894,13 @@ declare module '@tanstack/react-router' {
       path: '/historico-veiculo'
       fullPath: '/historico-veiculo'
       preLoaderRoute: typeof AuthenticatedHistoricoVeiculoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/integracoes': {
+      id: '/_authenticated/integracoes'
+      path: '/integracoes'
+      fullPath: '/integracoes'
+      preLoaderRoute: typeof AuthenticatedIntegracoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/inteligencia': {
@@ -1124,6 +1144,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedExportacaoRoute: typeof AuthenticatedExportacaoRoute
   AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
   AuthenticatedHistoricoVeiculoRoute: typeof AuthenticatedHistoricoVeiculoRoute
+  AuthenticatedIntegracoesRoute: typeof AuthenticatedIntegracoesRoute
   AuthenticatedInteligenciaRoute: typeof AuthenticatedInteligenciaRoute
   AuthenticatedLimpezaRoute: typeof AuthenticatedLimpezaRoute
   AuthenticatedManutencoesRoute: typeof AuthenticatedManutencoesRoute
@@ -1174,6 +1195,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedExportacaoRoute: AuthenticatedExportacaoRoute,
   AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,
   AuthenticatedHistoricoVeiculoRoute: AuthenticatedHistoricoVeiculoRoute,
+  AuthenticatedIntegracoesRoute: AuthenticatedIntegracoesRoute,
   AuthenticatedInteligenciaRoute: AuthenticatedInteligenciaRoute,
   AuthenticatedLimpezaRoute: AuthenticatedLimpezaRoute,
   AuthenticatedManutencoesRoute: AuthenticatedManutencoesRoute,

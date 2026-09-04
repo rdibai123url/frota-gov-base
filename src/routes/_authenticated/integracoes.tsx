@@ -401,7 +401,7 @@ function Integracoes() {
 
 /* ------------------------------- DETRAN --------------------------------- */
 
-function DetranPanel({ connector }: { connector?: Connector }) {
+function DetranPanel({ connector }: { connector?: Connector | undefined }) {
   const configured = connector && connector.status !== "nao_configurado";
   return (
     <Card>
@@ -455,7 +455,7 @@ function SiaficPanel({
   orgName,
   userName,
 }: {
-  connector?: Connector;
+  connector?: Connector | undefined;
   readOnly: boolean;
   orgId: string | null;
   userId: string | null;
