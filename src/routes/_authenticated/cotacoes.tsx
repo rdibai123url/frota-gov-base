@@ -520,32 +520,75 @@ function QuotationDetail({
 
   async function addProposal(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!proposalWorkshop) { toast.error("Selecione a oficina da proposta."); return; }
+    if (!proposalWorkshop) { toast.error("Selecione a empresa da proposta."); return; }
     const form = e.currentTarget;
     const fd = new FormData(form);
     setBusy(true);
-    const { error } = await supabase.from("quotation_proposals").insert({
-      organization_id: orgId!,
-      quotation_id: quotation.id,
-      workshop_id: proposalWorkshop,
-      execution_days: fd.get("execution_days") ? Number(fd.get("execution_days")) : null,
-      valid_until: (fd.get("valid_until") as string) || null,
-      warranty_days: fd.get("warranty_days") ? Number(fd.get("warranty_days")) : null,
-      payment_terms: (fd.get("payment_terms") as string) || null,
-      labor_value: parseBRNumber(String(fd.get("labor_value") ?? "0")),
-      discount_value: parseBRNumber(String(fd.get("discount_value") ?? "0")),
-      notes: (fd.get("notes") as string) || null,
-      created_by: userId,
-    });
+
+    // Lançamento manual: empresa sem convite recebe convite interno (sem envio de e-mail).
+    let inv = invites.find((i) => i.workshop_id === proposalWorkshop) ?? null;
+    let manual = false;
+    if (!inv) {
+      manual = true;
+      const { data: created, error: invError } = await supabase
+        .from("quotation_invitations")
+        .insert({
+          organization_id: orgId!,
+          quotation_id: quotation.id,
+          workshop_id: proposalWorkshop,
+          is_manual: true,
+          created_by: userId,
+        })
+        .select("id")
+        .maybeSingle();
+      if (invError) { setBusy(false); toast.error(dbMessage(invError)); return; }
+      inv = created ? ({ id: created.id } as typeof inv) : null;
+    }
+
+    const { data: proposal, error } = await supabase
+      .from("quotation_proposals")
+      .insert({
+        organization_id: orgId!,
+        quotation_id: quotation.id,
+        workshop_id: proposalWorkshop,
+        execution_days: fd.get("execution_days") ? Number(fd.get("execution_days")) : null,
+        valid_until: (fd.get("valid_until") as string) || null,
+        warranty_days: fd.get("warranty_days") ? Number(fd.get("warranty_days")) : null,
+        payment_terms: (fd.get("payment_terms") as string) || null,
+        labor_value: parseBRNumber(String(fd.get("labor_value") ?? "0")),
+        discount_value: parseBRNumber(String(fd.get("discount_value") ?? "0")),
+        notes: (fd.get("notes") as string) || null,
+        created_by: userId,
+      })
+      .select("id")
+      .maybeSingle();
     setBusy(false);
     if (error) { toast.error(dbMessage(error)); return; }
-    const inv = invites.find((i) => i.workshop_id === proposalWorkshop);
     if (inv) await setInviteStatus(inv.id, "respondida");
+
+    await supabase.from("activity_logs").insert({
+      organization_id: orgId!,
+      actor_id: userId,
+      actor_name: userName,
+      event_type: "proposta_lancada_manualmente",
+      area: "Cotações",
+      screen: "Cotações › Propostas",
+      route: "/cotacoes",
+      entity: "quotation_proposals",
+      record_id: proposal?.id ?? null,
+      action: "insert",
+      summary: manual
+        ? "Proposta lançada manualmente; convite interno criado automaticamente, sem envio de e-mail."
+        : "Proposta lançada manualmente para empresa já convidada.",
+      new_data: { quotation_id: quotation.id, workshop_id: proposalWorkshop, invite_created: manual },
+    });
+
     form.reset();
     setProposalWorkshop("");
     toast.success("Proposta registrada.");
     refresh();
   }
+
 
   async function addProposalItem(proposalId: string, e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
