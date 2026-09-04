@@ -121,6 +121,10 @@ function OrdensServico() {
       toast.error("Selecione um processo com proposta aprovada.");
       return;
     }
+    if (!chosenQuotation.vehicle_id) {
+      toast.error("A cotação não tem veículo vinculado (compra para estoque). Use o módulo de Almoxarifado / OFP.");
+      return;
+    }
     const fd = new FormData(e.currentTarget);
     setSaving(true);
     const { error } = await supabase.from("service_orders").insert({
@@ -128,6 +132,7 @@ function OrdensServico() {
       quotation_id: chosenQuotation.id,
       request_id: chosenQuotation.request_id,
       vehicle_id: chosenQuotation.vehicle_id,
+
       unit_id: unitId === NONE ? chosenQuotation.unit_id : unitId,
       workshop_id: chosenProposal.workshop_id,
       services: String(fd.get("services") ?? chosenQuotation.description),
