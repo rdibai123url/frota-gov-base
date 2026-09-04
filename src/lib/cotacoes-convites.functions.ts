@@ -158,6 +158,11 @@ export const createInvites = createServerFn({ method: "POST" })
       .eq("id", data.quotationId)
       .maybeSingle();
     if (qErr || !quotation) throw new Error("Cotação não encontrada neste órgão.");
+    if (!["rascunho", "aberta"].includes(quotation.status)) {
+      throw new Error("Esta cotação não está mais aberta para novos convites.");
+    }
+    const { data: mayInvite } = await supabase.rpc("can_manage_maintenance");
+    if (!mayInvite) throw new Error("Sem permissão para convidar empresas nesta cotação.");
 
     const created: { id: string; email: string }[] = [];
     const skipped: { email: string; reason: string }[] = [];
@@ -321,6 +326,8 @@ export const issueInviteLink = createServerFn({ method: "POST" })
       .eq("id", data.invitationId)
       .maybeSingle();
     if (!invite) throw new Error("Convite não encontrado neste órgão.");
+    const { data: mayLink } = await supabase.rpc("can_manage_maintenance");
+    if (!mayLink) throw new Error("Sem permissão para gerar o link deste convite.");
     const token = randomToken();
     const deadline = (invite.quotation as { deadline_at: string | null } | null)?.deadline_at ?? null;
     const { error } = await supabase
