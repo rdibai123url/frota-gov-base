@@ -336,6 +336,7 @@ export const sendInvites = createServerFn({ method: "POST" })
 
         description: quotation.description,
         specialty: quotation.specialty,
+        quotation_kind: quotation.quotation_kind ?? "servicos_pecas",
         deadlineText: deadlineText(quotation.deadline_at),
         notes: quotation.notes,
         items: (items ?? []).map((i) => ({
@@ -450,7 +451,7 @@ export const getQuotationByToken = createServerFn({ method: "POST" })
 
     const { data: quotation } = await supabaseAdmin
       .from("quotations")
-      .select("code, description, specialty, deadline_at, notes, status, organization_id, vehicle:vehicles(plate, asset_code, brand, model)")
+      .select("code, description, specialty, quotation_kind, deadline_at, notes, status, organization_id, vehicle:vehicles(plate, asset_code, brand, model)")
       .eq("id", invite.quotation_id)
       .maybeSingle();
     if (!quotation) return { ok: false, reason: "invalido", message: "Cotação não encontrada." };
