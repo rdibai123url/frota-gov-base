@@ -65,6 +65,7 @@ import { Route as AuthenticatedVeiculosRouteImport } from './routes/_authenticat
 import { Route as TransparenciaSlugRouteImport } from './routes/transparencia.$slug'
 import { Route as AuthenticatedVeiculoIdRouteImport } from './routes/_authenticated/veiculo.$id'
 import { Route as ApiPublicHooksBackupDiarioRouteImport } from './routes/api/public/hooks/backup-diario'
+import { Route as ApiPublicHooksWebhooksRetryRouteImport } from './routes/api/public/hooks/webhooks-retry'
 import { Route as ApiPublicV1FrotaRouteImport } from './routes/api/public/v1/frota'
 import { Route as ApiPublicV1RecursosRecursoRouteImport } from './routes/api/public/v1/recursos.$recurso'
 import { Route as ApiPublicV1TransparenciaSlugRouteImport } from './routes/api/public/v1/transparencia.$slug'
@@ -369,6 +370,12 @@ const ApiPublicHooksBackupDiarioRoute =
     path: '/api/public/hooks/backup-diario',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksWebhooksRetryRoute =
+  ApiPublicHooksWebhooksRetryRouteImport.update({
+    id: '/api/public/hooks/webhooks-retry',
+    path: '/api/public/hooks/webhooks-retry',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicV1FrotaRoute = ApiPublicV1FrotaRouteImport.update({
   id: '/api/public/v1/frota',
   path: '/api/public/v1/frota',
@@ -443,6 +450,7 @@ export interface FileRoutesByFullPath {
   '/transparencia/$slug': typeof TransparenciaSlugRoute
   '/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
   '/api/public/hooks/backup-diario': typeof ApiPublicHooksBackupDiarioRoute
+  '/api/public/hooks/webhooks-retry': typeof ApiPublicHooksWebhooksRetryRoute
   '/api/public/v1/frota': typeof ApiPublicV1FrotaRoute
   '/api/public/v1/recursos/$recurso': typeof ApiPublicV1RecursosRecursoRoute
   '/api/public/v1/transparencia/$slug': typeof ApiPublicV1TransparenciaSlugRoute
@@ -503,6 +511,7 @@ export interface FileRoutesByTo {
   '/transparencia/$slug': typeof TransparenciaSlugRoute
   '/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
   '/api/public/hooks/backup-diario': typeof ApiPublicHooksBackupDiarioRoute
+  '/api/public/hooks/webhooks-retry': typeof ApiPublicHooksWebhooksRetryRoute
   '/api/public/v1/frota': typeof ApiPublicV1FrotaRoute
   '/api/public/v1/recursos/$recurso': typeof ApiPublicV1RecursosRecursoRoute
   '/api/public/v1/transparencia/$slug': typeof ApiPublicV1TransparenciaSlugRoute
@@ -565,6 +574,7 @@ export interface FileRoutesById {
   '/transparencia/$slug': typeof TransparenciaSlugRoute
   '/_authenticated/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
   '/api/public/hooks/backup-diario': typeof ApiPublicHooksBackupDiarioRoute
+  '/api/public/hooks/webhooks-retry': typeof ApiPublicHooksWebhooksRetryRoute
   '/api/public/v1/frota': typeof ApiPublicV1FrotaRoute
   '/api/public/v1/recursos/$recurso': typeof ApiPublicV1RecursosRecursoRoute
   '/api/public/v1/transparencia/$slug': typeof ApiPublicV1TransparenciaSlugRoute
@@ -627,6 +637,7 @@ export interface FileRouteTypes {
     | '/transparencia/$slug'
     | '/veiculo/$id'
     | '/api/public/hooks/backup-diario'
+    | '/api/public/hooks/webhooks-retry'
     | '/api/public/v1/frota'
     | '/api/public/v1/recursos/$recurso'
     | '/api/public/v1/transparencia/$slug'
@@ -687,6 +698,7 @@ export interface FileRouteTypes {
     | '/transparencia/$slug'
     | '/veiculo/$id'
     | '/api/public/hooks/backup-diario'
+    | '/api/public/hooks/webhooks-retry'
     | '/api/public/v1/frota'
     | '/api/public/v1/recursos/$recurso'
     | '/api/public/v1/transparencia/$slug'
@@ -748,6 +760,7 @@ export interface FileRouteTypes {
     | '/transparencia/$slug'
     | '/_authenticated/veiculo/$id'
     | '/api/public/hooks/backup-diario'
+    | '/api/public/hooks/webhooks-retry'
     | '/api/public/v1/frota'
     | '/api/public/v1/recursos/$recurso'
     | '/api/public/v1/transparencia/$slug'
@@ -760,6 +773,7 @@ export interface RootRouteChildren {
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   TransparenciaSlugRoute: typeof TransparenciaSlugRoute
   ApiPublicHooksBackupDiarioRoute: typeof ApiPublicHooksBackupDiarioRoute
+  ApiPublicHooksWebhooksRetryRoute: typeof ApiPublicHooksWebhooksRetryRoute
   ApiPublicV1FrotaRoute: typeof ApiPublicV1FrotaRoute
   ApiPublicV1RecursosRecursoRoute: typeof ApiPublicV1RecursosRecursoRoute
   ApiPublicV1TransparenciaSlugRoute: typeof ApiPublicV1TransparenciaSlugRoute
@@ -1159,6 +1173,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksBackupDiarioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/webhooks-retry': {
+      id: '/api/public/hooks/webhooks-retry'
+      path: '/api/public/hooks/webhooks-retry'
+      fullPath: '/api/public/hooks/webhooks-retry'
+      preLoaderRoute: typeof ApiPublicHooksWebhooksRetryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/v1/frota': {
       id: '/api/public/v1/frota'
       path: '/api/public/v1/frota'
@@ -1299,6 +1320,7 @@ const rootRouteChildren: RootRouteChildren = {
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   TransparenciaSlugRoute: TransparenciaSlugRoute,
   ApiPublicHooksBackupDiarioRoute: ApiPublicHooksBackupDiarioRoute,
+  ApiPublicHooksWebhooksRetryRoute: ApiPublicHooksWebhooksRetryRoute,
   ApiPublicV1FrotaRoute: ApiPublicV1FrotaRoute,
   ApiPublicV1RecursosRecursoRoute: ApiPublicV1RecursosRecursoRoute,
   ApiPublicV1TransparenciaSlugRoute: ApiPublicV1TransparenciaSlugRoute,

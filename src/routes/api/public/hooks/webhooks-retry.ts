@@ -38,7 +38,7 @@ export const Route = createFileRoute("/api/public/hooks/webhooks-retry")({
         const { data: pending, error } = await supabaseAdmin
           .from("webhook_deliveries")
           .select("id, organization_id, endpoint_id, event, payload, attempt")
-          .in("status", ["pendente", "reagendada"])
+          .eq("status", "pendente")
           .lte("next_retry_at", now.toISOString())
           .order("next_retry_at", { ascending: true })
           .limit(MAX_PER_RUN);
@@ -61,9 +61,9 @@ export const Route = createFileRoute("/api/public/hooks/webhooks-retry")({
           if (!endpoint || !endpoint.active) {
             await supabaseAdmin
               .from("webhook_deliveries")
-              .update({ status: "cancelada", error_message: "Endpoint inativo ou removido.", next_retry_at: null })
+              .update({ status: "descartada", error_message: "Endpoint inativo ou removido.", next_retry_at: null })
               .eq("id", delivery.id);
-            results.push({ id: delivery.id, status: "cancelada" });
+            results.push({ id: delivery.id, status: "descartada" });
             continue;
           }
 
@@ -108,7 +108,7 @@ export const Route = createFileRoute("/api/public/hooks/webhooks-retry")({
 
           const maxRetries = endpoint.max_retries ?? 5;
           const exhausted = attempt >= maxRetries;
-          const status = failure ? (exhausted ? "falha" : "reagendada") : "entregue";
+          const status: "pendente" | "entregue" | "falha" = failure ? (exhausted ? "falha" : "pendente") : "entregue";
           const backoff = BACKOFF_MINUTES[Math.min(attempt - 1, BACKOFF_MINUTES.length - 1)] ?? 180;
 
           await supabaseAdmin
@@ -121,7 +121,7 @@ export const Route = createFileRoute("/api/public/hooks/webhooks-retry")({
               error_message: failure,
               delivered_at: failure ? null : new Date().toISOString(),
               next_retry_at:
-                status === "reagendada" ? new Date(Date.now() + backoff * 60_000).toISOString() : null,
+                status === "pendente" ? new Date(Date.now() + backoff * 60_000).toISOString() : null,
             })
             .eq("id", delivery.id);
 
