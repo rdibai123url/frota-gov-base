@@ -137,6 +137,16 @@ export const saveEmailSettings = createServerFn({ method: "POST" })
     const { data: allowed } = await supabase.rpc("can_manage_users");
     if (!allowed) throw new Error("Sem permissão para configurar o envio de e-mail.");
 
+    // O endereço público precisa ser mesmo público: nada de localhost, rede
+    // interna, ambiente de desenvolvimento ou pré-visualização do editor.
+    const typedBase = (data.publicBaseUrl ?? "").trim();
+    const requestedBase = typedBase ? publicBase(typedBase) : null;
+    if (typedBase && !requestedBase) {
+      throw new Error(
+        "Endereço público inválido. Informe um endereço https acessível de fora do órgão (endereços locais, de rede interna ou de pré-visualização não são aceitos).",
+      );
+    }
+
     const hasNewSecret = typeof data.secret === "string" && data.secret.trim().length > 0;
     if (hasNewSecret) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
