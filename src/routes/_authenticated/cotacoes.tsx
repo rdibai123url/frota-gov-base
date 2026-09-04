@@ -421,10 +421,29 @@ function QuotationDetail({
   const [itemDescription, setItemDescription] = useState("");
   const [itemUnit, setItemUnit] = useState("UN");
   const [newCompanyOpen, setNewCompanyOpen] = useState(false);
+  const [sourceFilter, setSourceFilter] = useState<"todas" | "manual" | "link">("todas");
+
+  const kind = asQuotationKind(quotation.quotation_kind);
+  const [draft, setDraft] = useState<ProposalDraft>(() => emptyProposalDraft());
+
+  /** Ao trocar de processo, o rascunho parte dos itens solicitados. */
+  const seededFor = useRef<string>("");
+  useEffect(() => {
+    const signature = `${quotation.id}:${items.map((i) => i.id).join(",")}`;
+    if (seededFor.current === signature) return;
+    seededFor.current = signature;
+    setDraft(emptyProposalDraft(hasParts(kind) ? items : []));
+  }, [quotation.id, items, kind]);
+
+  const netOf = (p: ProposalRow) => Number(p.net_value ?? p.total_value);
+  const countBySource = (s: string) => proposals.filter((p) => (p.source ?? "manual") === s).length;
+  const shownProposals = proposals.filter(
+    (p) => sourceFilter === "todas" || (p.source ?? "manual") === sourceFilter,
+  );
 
   const closed = quotation.status === "encerrada" || quotation.status === "cancelada";
   const valid = proposals.filter((p) => p.status !== "desclassificada");
-  const lowest = valid.length ? Math.min(...valid.map((p) => Number(p.total_value))) : 0;
+  const lowest = valid.length ? Math.min(...valid.map((p) => netOf(p))) : 0;
 
   const eligible = workshops.filter(
     (w) =>
@@ -432,6 +451,7 @@ function QuotationDetail({
       (!quotation.specialty || (w.specialties ?? []).includes(quotation.specialty)) &&
       !invites.some((i) => i.workshop_id === w.id),
   );
+
 
   /** Empresas selecionáveis na proposta: convidadas + qualquer empresa ativa do órgão. */
   const proposalCompanyOptions = useMemo(() => {
