@@ -12,7 +12,7 @@ type Admin = SupabaseClient<any, any, any>;
 type Row = Record<string, unknown>;
 
 export const EXPORT_SCHEMA_VERSION = "1.0.0";
-export const EXPORT_APP_VERSION = "10.7.0";
+export const EXPORT_APP_VERSION = "11.0.0";
 export const CSV_DELIMITER = ";";
 export const CSV_ENCODING = "UTF-8 (com BOM)";
 
@@ -33,7 +33,13 @@ const FORBIDDEN_COLUMNS = new Set([
   "client_secret",
   "bind_password",
   "certificate",
+  "certificate_pem",
+  "certificate_fingerprint",
   "private_key",
+  "secret_name",
+  "bind_dn_password",
+  "api_key",
+  "signing_key",
 ]);
 
 /** Tabelas técnicas/efêmeras ou de segredos que não entram no pacote. */
