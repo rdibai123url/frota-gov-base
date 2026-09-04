@@ -214,7 +214,18 @@ async function loadSettings(orgId: string) {
     .select("secret")
     .eq("organization_id", orgId)
     .maybeSingle();
-  return { settings: data as EmailSettings, secret: secretRow?.secret ?? "" };
+  const settings = data as EmailSettings;
+  let secret = secretRow?.secret ?? "";
+  // Chave da plataforma (painel de Integrações): usada apenas quando o órgão
+  // escolheu Resend e ainda não cadastrou uma chave própria.
+  if (!secret && settings.provider === "resend") {
+    const platform = process.env["RESEND_API_KEY"] ?? "";
+    if (platform) {
+      secret = platform;
+      settings.has_secret = true;
+    }
+  }
+  return { settings, secret };
 }
 
 /** Dispara (ou reenvia) convites — sempre um e-mail individual por destinatário. */
@@ -254,7 +265,7 @@ export const sendInvites = createServerFn({ method: "POST" })
       .eq("quotation_id", quotation.id)
       .in("id", data.invitationIds);
 
-    const results: { id: string; email: string; ok: boolean; error?: string }[] = [];
+    const results: { id: string; email: string; ok: boolean; error?: string; providerId?: string | null }[] = [];
 
     for (const invite of invites ?? []) {
       if (!invite.email) continue;
@@ -279,7 +290,7 @@ export const sendInvites = createServerFn({ method: "POST" })
       });
 
       try {
-        await sendEmail(settings, secret, { to: invite.email, ...message });
+        const providerId = await sendEmail(settings, secret, { to: invite.email, ...message });
         await supabase
           .from("quotation_invitations")
           .update({
@@ -294,7 +305,7 @@ export const sendInvites = createServerFn({ method: "POST" })
             updated_by: userId,
           })
           .eq("id", invite.id);
-        results.push({ id: invite.id, email: invite.email, ok: true });
+        results.push({ id: invite.id, email: invite.email, ok: true, providerId });
       } catch (err) {
         const detail = err instanceof Error ? err.message.slice(0, 400) : "Falha desconhecida no envio";
         await supabase

@@ -191,12 +191,20 @@ async function sendSmtp(s: EmailSettings, secret: string, msg: EmailMessage) {
 }
 
 /** Dispara uma mensagem individual (um destinatário por envio). */
-export async function sendEmail(settings: EmailSettings, secret: string, msg: EmailMessage) {
+export async function sendEmail(
+  settings: EmailSettings,
+  secret: string,
+  msg: EmailMessage,
+): Promise<string | null> {
   const problem = checkSettings(settings);
   if (problem) throw new EmailNotConfiguredError(problem);
   if (settings.provider === "resend") return sendResend(settings, secret, msg);
-  if (settings.provider === "sendgrid") return sendSendgrid(settings, secret, msg);
-  return sendSmtp(settings, secret, msg);
+  if (settings.provider === "sendgrid") {
+    await sendSendgrid(settings, secret, msg);
+    return null;
+  }
+  await sendSmtp(settings, secret, msg);
+  return null;
 }
 
 /* ------------------------------- Template ------------------------------- */
