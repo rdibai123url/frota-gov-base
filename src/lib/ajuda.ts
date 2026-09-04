@@ -508,6 +508,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
     [
       { label: "Objeto da cotação", description: "Descrição do serviço ou peça solicitada.", tags: REQ },
+      { label: "Item / serviço", description: "Descrição do item cotado; sugere automaticamente itens já usados no órgão (com unidade usual, número de usos e último uso), sem impedir o cadastro de itens inéditos.", tags: REQ },
       { label: "Prazo limite", description: "Data final para resposta; também define a validade do link do convite.", tags: REQ },
       { label: "Convites", description: "Empresas cadastradas e e-mails avulsos convidados a propor.", tags: COND },
       { label: "Situação do convite", description: "Pendente (criado, ainda sem envio), Enviado, Erro no envio, Respondido e Prazo expirado.", tags: AUTO },
