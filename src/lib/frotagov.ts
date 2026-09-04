@@ -326,7 +326,11 @@ export function usePerms() {
     canManageFleet: inOrg && roles.some((r) => (["super_admin", "org_admin", "fleet_manager"] as AppRole[]).includes(r)),
     canManageFinance: inOrg && roles.some((r) => (["super_admin", "org_admin", "fleet_manager"] as AppRole[]).includes(r)),
     isAuditor: roles.length > 0 && roles.every((r) => r === "auditor"),
+    // Exportação integral de dados: gestão máxima do órgão e controladoria.
+    canExportData:
+      inOrg && roles.some((r) => (["super_admin", "org_admin", "auditor"] as AppRole[]).includes(r)),
   };
+
 }
 
 
