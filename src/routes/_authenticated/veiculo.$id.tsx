@@ -19,6 +19,7 @@ import { ArrowLeft, Truck } from "lucide-react";
 
 import { PageHeader } from "@/components/app-shell";
 import { ValorDeMercado } from "@/components/valor-mercado";
+import { VeiculoDadosOficiais, VeiculoFipe } from "@/components/veiculo-oficial";
 import { useDiaries, DIARY_STATUS } from "@/lib/diarias";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -630,7 +631,9 @@ function HistoricoVeiculo() {
               />
             </TabsContent>
 
-            <TabsContent value="valor">
+            <TabsContent value="valor" className="space-y-4">
+              <VeiculoFipe vehicleId={id} />
+              <VeiculoDadosOficiais vehicleId={id} />
               <ValorDeMercado
                 vehicleId={id}
                 assetClass={vehicle?.asset_class ?? "veiculo"}

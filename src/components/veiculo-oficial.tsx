@@ -159,7 +159,7 @@ export function VeiculoFipe({ vehicleId }: { vehicleId: string }) {
   );
 }
 
-function Info({ label, value, hint }: { label: string; value: string; hint?: string }) {
+function Info({ label, value, hint }: { label: string; value: string; hint?: string | undefined }) {
   return (
     <div className="rounded-lg border p-3">
       <div className="text-xs uppercase text-muted-foreground">{label}</div>
