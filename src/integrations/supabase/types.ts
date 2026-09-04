@@ -222,6 +222,9 @@ export type Database = {
           created_by: string | null
           district: string | null
           email: string | null
+          geocode_precision: string | null
+          geocode_source: string | null
+          geocode_status: string
           geocoded_address: string | null
           geocoded_at: string | null
           id: string
@@ -253,6 +256,9 @@ export type Database = {
           created_by?: string | null
           district?: string | null
           email?: string | null
+          geocode_precision?: string | null
+          geocode_source?: string | null
+          geocode_status?: string
           geocoded_address?: string | null
           geocoded_at?: string | null
           id?: string
@@ -284,6 +290,9 @@ export type Database = {
           created_by?: string | null
           district?: string | null
           email?: string | null
+          geocode_precision?: string | null
+          geocode_source?: string | null
+          geocode_status?: string
           geocoded_address?: string | null
           geocoded_at?: string | null
           id?: string
@@ -2791,9 +2800,16 @@ export type Database = {
           created_by: string | null
           document: string | null
           email: string | null
+          geocode_precision: string | null
+          geocode_source: string | null
+          geocode_status: string
+          geocoded_address: string | null
+          geocoded_at: string | null
           id: string
           import_batch_id: string | null
           kind: Database["public"]["Enums"]["entity_kind"]
+          latitude: number | null
+          longitude: number | null
           name: string
           notes: string | null
           organization_id: string
@@ -2811,9 +2827,16 @@ export type Database = {
           created_by?: string | null
           document?: string | null
           email?: string | null
+          geocode_precision?: string | null
+          geocode_source?: string | null
+          geocode_status?: string
+          geocoded_address?: string | null
+          geocoded_at?: string | null
           id?: string
           import_batch_id?: string | null
           kind?: Database["public"]["Enums"]["entity_kind"]
+          latitude?: number | null
+          longitude?: number | null
           name: string
           notes?: string | null
           organization_id: string
@@ -2831,9 +2854,16 @@ export type Database = {
           created_by?: string | null
           document?: string | null
           email?: string | null
+          geocode_precision?: string | null
+          geocode_source?: string | null
+          geocode_status?: string
+          geocoded_address?: string | null
+          geocoded_at?: string | null
           id?: string
           import_batch_id?: string | null
           kind?: Database["public"]["Enums"]["entity_kind"]
+          latitude?: number | null
+          longitude?: number | null
           name?: string
           notes?: string | null
           organization_id?: string
@@ -3560,6 +3590,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      geocode_cache: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          found: boolean
+          id: string
+          latitude: number | null
+          longitude: number | null
+          precision: string | null
+          provider: string
+          query: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          found?: boolean
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          precision?: string | null
+          provider?: string
+          query: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          found?: boolean
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          precision?: string | null
+          provider?: string
+          query?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       import_batches: {
         Row: {
@@ -7240,6 +7309,9 @@ export type Database = {
           created_at: string
           created_by: string | null
           email: string | null
+          geocode_precision: string | null
+          geocode_source: string | null
+          geocode_status: string
           geocoded_address: string | null
           geocoded_at: string | null
           id: string
@@ -7266,6 +7338,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           email?: string | null
+          geocode_precision?: string | null
+          geocode_source?: string | null
+          geocode_status?: string
           geocoded_address?: string | null
           geocoded_at?: string | null
           id?: string
@@ -7292,6 +7367,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           email?: string | null
+          geocode_precision?: string | null
+          geocode_source?: string | null
+          geocode_status?: string
           geocoded_address?: string | null
           geocoded_at?: string | null
           id?: string
@@ -9216,6 +9294,9 @@ export type Database = {
           created_by: string | null
           district: string | null
           email: string | null
+          geocode_precision: string | null
+          geocode_source: string | null
+          geocode_status: string
           geocoded_address: string | null
           geocoded_at: string | null
           id: string
@@ -9252,6 +9333,9 @@ export type Database = {
           created_by?: string | null
           district?: string | null
           email?: string | null
+          geocode_precision?: string | null
+          geocode_source?: string | null
+          geocode_status?: string
           geocoded_address?: string | null
           geocoded_at?: string | null
           id?: string
@@ -9288,6 +9372,9 @@ export type Database = {
           created_by?: string | null
           district?: string | null
           email?: string | null
+          geocode_precision?: string | null
+          geocode_source?: string | null
+          geocode_status?: string
           geocoded_address?: string | null
           geocoded_at?: string | null
           id?: string
