@@ -30,6 +30,7 @@ import { Route as AuthenticatedDiariasRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedEmpenhosRouteImport } from './routes/_authenticated/empenhos'
 import { Route as AuthenticatedEntidadesExternasRouteImport } from './routes/_authenticated/entidades-externas'
 import { Route as AuthenticatedEquipamentosRouteImport } from './routes/_authenticated/equipamentos'
+import { Route as AuthenticatedExportacaoRouteImport } from './routes/_authenticated/exportacao'
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
 import { Route as AuthenticatedHistoricoVeiculoRouteImport } from './routes/_authenticated/historico-veiculo'
 import { Route as AuthenticatedInteligenciaRouteImport } from './routes/_authenticated/inteligencia'
@@ -177,6 +178,11 @@ const AuthenticatedEquipamentosRoute =
     path: '/equipamentos',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedExportacaoRoute = AuthenticatedExportacaoRouteImport.update({
+  id: '/exportacao',
+  path: '/exportacao',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedFornecedoresRoute =
   AuthenticatedFornecedoresRouteImport.update({
     id: '/fornecedores',
@@ -375,6 +381,7 @@ export interface FileRoutesByFullPath {
   '/empenhos': typeof AuthenticatedEmpenhosRoute
   '/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
   '/equipamentos': typeof AuthenticatedEquipamentosRoute
+  '/exportacao': typeof AuthenticatedExportacaoRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/inteligencia': typeof AuthenticatedInteligenciaRoute
@@ -430,6 +437,7 @@ export interface FileRoutesByTo {
   '/empenhos': typeof AuthenticatedEmpenhosRoute
   '/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
   '/equipamentos': typeof AuthenticatedEquipamentosRoute
+  '/exportacao': typeof AuthenticatedExportacaoRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/inteligencia': typeof AuthenticatedInteligenciaRoute
@@ -487,6 +495,7 @@ export interface FileRoutesById {
   '/_authenticated/empenhos': typeof AuthenticatedEmpenhosRoute
   '/_authenticated/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
   '/_authenticated/equipamentos': typeof AuthenticatedEquipamentosRoute
+  '/_authenticated/exportacao': typeof AuthenticatedExportacaoRoute
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/_authenticated/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/_authenticated/inteligencia': typeof AuthenticatedInteligenciaRoute
@@ -544,6 +553,7 @@ export interface FileRouteTypes {
     | '/empenhos'
     | '/entidades-externas'
     | '/equipamentos'
+    | '/exportacao'
     | '/fornecedores'
     | '/historico-veiculo'
     | '/inteligencia'
@@ -599,6 +609,7 @@ export interface FileRouteTypes {
     | '/empenhos'
     | '/entidades-externas'
     | '/equipamentos'
+    | '/exportacao'
     | '/fornecedores'
     | '/historico-veiculo'
     | '/inteligencia'
@@ -655,6 +666,7 @@ export interface FileRouteTypes {
     | '/_authenticated/empenhos'
     | '/_authenticated/entidades-externas'
     | '/_authenticated/equipamentos'
+    | '/_authenticated/exportacao'
     | '/_authenticated/fornecedores'
     | '/_authenticated/historico-veiculo'
     | '/_authenticated/inteligencia'
@@ -848,6 +860,13 @@ declare module '@tanstack/react-router' {
       path: '/equipamentos'
       fullPath: '/equipamentos'
       preLoaderRoute: typeof AuthenticatedEquipamentosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/exportacao': {
+      id: '/_authenticated/exportacao'
+      path: '/exportacao'
+      fullPath: '/exportacao'
+      preLoaderRoute: typeof AuthenticatedExportacaoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/fornecedores': {
@@ -1102,6 +1121,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEmpenhosRoute: typeof AuthenticatedEmpenhosRoute
   AuthenticatedEntidadesExternasRoute: typeof AuthenticatedEntidadesExternasRoute
   AuthenticatedEquipamentosRoute: typeof AuthenticatedEquipamentosRoute
+  AuthenticatedExportacaoRoute: typeof AuthenticatedExportacaoRoute
   AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
   AuthenticatedHistoricoVeiculoRoute: typeof AuthenticatedHistoricoVeiculoRoute
   AuthenticatedInteligenciaRoute: typeof AuthenticatedInteligenciaRoute
@@ -1151,6 +1171,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEmpenhosRoute: AuthenticatedEmpenhosRoute,
   AuthenticatedEntidadesExternasRoute: AuthenticatedEntidadesExternasRoute,
   AuthenticatedEquipamentosRoute: AuthenticatedEquipamentosRoute,
+  AuthenticatedExportacaoRoute: AuthenticatedExportacaoRoute,
   AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,
   AuthenticatedHistoricoVeiculoRoute: AuthenticatedHistoricoVeiculoRoute,
   AuthenticatedInteligenciaRoute: AuthenticatedInteligenciaRoute,

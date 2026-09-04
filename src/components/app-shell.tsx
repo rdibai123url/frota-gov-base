@@ -102,6 +102,7 @@ const NAV: NavGroup[] = [
       { to: "/entidades-externas", label: "Entidades externas" },
       { to: "/usuarios", label: "Usuários e Permissões" },
       { to: "/migracao", label: "Migração de dados" },
+      { to: "/exportacao", label: "Exportar dados" },
     ],
   },
 
