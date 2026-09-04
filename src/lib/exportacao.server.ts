@@ -381,12 +381,12 @@ export async function buildFullExport(
   };
 }
 
-/** Cabeçalho de tabela vazia: usa o catálogo do banco para não gerar CSV sem colunas. */
+/** Cabeçalho de tabela vazia: usa o catálogo do banco, sem ler nenhum registro. */
 async function columnsOf(admin: Admin, table: string): Promise<string[]> {
-  const { data } = await admin.from(table).select("*").limit(1);
-  const first = (data ?? [])[0] as Row | undefined;
-  if (first) return Object.keys(sanitize(first));
-  return ["id", "organization_id", "created_at"];
+  const { data } = await admin.rpc("export_table_columns", { _table: table });
+  const cols = (data ?? []) as string[];
+  const visible = cols.filter((c) => !FORBIDDEN_COLUMNS.has(c));
+  return visible.length ? visible : ["id", "organization_id", "created_at"];
 }
 
 function toBase64(bytes: Uint8Array): string {
