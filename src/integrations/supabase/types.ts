@@ -10212,6 +10212,7 @@ export type Database = {
       expire_fuel_authorizations: { Args: never; Returns: undefined }
       expire_fuel_authorizations_all: { Args: never; Returns: number }
       export_table_columns: { Args: { _table: string }; Returns: string[] }
+      fg_norm: { Args: { _t: string }; Returns: string }
       fleet_consumption_segments: {
         Args: {
           _asset_class?: string
@@ -10442,6 +10443,16 @@ export type Database = {
       save_transparency_checklist: {
         Args: { _checklist: Json; _month: number; _year: number }
         Returns: undefined
+      }
+      search_item_history: {
+        Args: { _limit?: number; _q: string }
+        Returns: {
+          description: string
+          last_used: string
+          measure_unit: string
+          sources: string[]
+          uses: number
+        }[]
       }
       seed_cleaning_types: { Args: { _org: string }; Returns: undefined }
       server_quota_cycle: {

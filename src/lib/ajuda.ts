@@ -500,7 +500,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     "Cotações",
     "Coleta e compara propostas de serviços e peças junto à rede credenciada antes da contratação, inclusive com convite por e-mail para empresas cadastradas ou não.",
     [
-      "Abra a cotação descrevendo o serviço ou item e cadastre os itens solicitados.",
+      "Abra a cotação descrevendo o serviço ou item e cadastre os itens solicitados: ao digitar a descrição, o sistema sugere itens já usados pelo próprio órgão — clique numa sugestão para preencher descrição e unidade, ou continue digitando para cadastrar um item novo.",
       "Na aba Convites, clique em “Enviar convites”, busque empresas por nome, CNPJ ou e-mail e acrescente e-mails avulsos.",
       "Revise a lista final, remova quem não deve receber e confirme o envio: cada empresa recebe uma mensagem individual, sem ver as demais.",
       "Acompanhe a situação de cada convite, reenvie quando necessário ou copie o link para mandar por outro meio.",
@@ -508,6 +508,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
     [
       { label: "Objeto da cotação", description: "Descrição do serviço ou peça solicitada.", tags: REQ },
+      { label: "Item / serviço", description: "Descrição do item cotado; sugere automaticamente itens já usados no órgão (com unidade usual, número de usos e último uso), sem impedir o cadastro de itens inéditos.", tags: REQ },
       { label: "Prazo limite", description: "Data final para resposta; também define a validade do link do convite.", tags: REQ },
       { label: "Convites", description: "Empresas cadastradas e e-mails avulsos convidados a propor.", tags: COND },
       { label: "Situação do convite", description: "Pendente (criado, ainda sem envio), Enviado, Erro no envio, Respondido e Prazo expirado.", tags: AUTO },
@@ -517,6 +518,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       { label: "Menor valor", description: "Destacado automaticamente na comparação.", tags: CALC },
     ],
     [
+      "As sugestões de itens vêm apenas do histórico do próprio órgão (cotações, propostas, catálogo de peças, ordens de serviço, manutenções, contratos e fornecimentos) e nunca reaproveitam preço, marca, fornecedor ou quantidade anterior.",
       "A escolha de proposta que não seja a de menor valor exige justificativa.",
       "Cada convite tem link próprio, que expira no prazo da cotação e não exige login do fornecedor.",
       "Reenviar ou copiar o link gera um endereço novo: o anterior deixa de funcionar.",
