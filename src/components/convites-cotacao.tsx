@@ -29,6 +29,8 @@ import {
   type InviteTarget,
 } from "@/lib/cotacoes-convites.functions";
 import { dateTimeBR, dbMessage, supabase, useInvalidate, useSuppliers, useWorkshops } from "@/lib/frotagov";
+import { NO_PUBLIC_BASE_MESSAGE, isPublicInviteLink } from "@/lib/link-publico";
+
 
 type InviteRow = {
   id: string;
