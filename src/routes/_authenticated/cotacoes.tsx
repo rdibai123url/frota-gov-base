@@ -292,12 +292,13 @@ function Cotacoes() {
           <form onSubmit={createQuotation} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <Label>Veículo *</Label>
+                <Label>Veículo / equipamento</Label>
                 <Select value={vehicleId} onValueChange={setVehicleId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value={NONE}>Sem veículo (compra para estoque)</SelectItem>
                     {vehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
                         {(v.plate ?? v.asset_code)} — {v.brand} {v.model}
@@ -305,7 +306,44 @@ function Cotacoes() {
                     ))}
                   </SelectContent>
                 </Select>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Deixe sem veículo quando a cotação for de peças para o almoxarifado.
+                </p>
               </div>
+              <div>
+                <Label>Tipo da cotação *</Label>
+                <Select value={kind} onValueChange={(v) => setKind(v as QuotationKind)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {QUOTATION_KINDS.map((k) => (
+                      <SelectItem key={k.value} value={k.value}>
+                        {k.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Solicitação de manutenção</Label>
+                <Select value={requestId} onValueChange={setRequestId}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NONE}>Sem vínculo</SelectItem>
+                    {requests
+                      .filter((r) => vehicleId === NONE || r.vehicle_id === vehicleId)
+                      .map((r) => (
+                        <SelectItem key={r.id} value={r.id}>
+                          {r.code} — {r.description.slice(0, 40)}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div>
                 <Label>Solicitação de manutenção</Label>
                 <Select value={requestId} onValueChange={setRequestId}>
