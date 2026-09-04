@@ -313,8 +313,13 @@ export const sendInvites = createServerFn({ method: "POST" })
       const token = randomToken();
       const tokenHash = await hashToken(token);
       const { link: inviteLink } = linkFor(token, publicBaseUrl);
+      // Redundância proposital: nada é enviado sem endereço público válido.
+      if (!inviteLink) {
+        results.push({ id: invite.id, email: invite.email, ok: false, error: NO_PUBLIC_BASE_MESSAGE });
+        continue;
+      }
       const message = renderInviteEmail({
-        orgName: org?.short_name || org?.legal_name || "Órgão público",
+
         quotationCode: quotation.code ?? "—",
         description: quotation.description,
         specialty: quotation.specialty,
