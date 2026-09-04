@@ -132,9 +132,13 @@ export function ConvitesCotacao({
 
   async function copyLink(id: string) {
     try {
-      const { link } = await issueInviteLink({ data: { invitationId: id } });
+      const { link, isPublic, warning } = await issueInviteLink({ data: { invitationId: id } });
       await navigator.clipboard.writeText(link);
-      toast.success("Link copiado. Um novo link foi gerado e o anterior deixou de valer.");
+      if (isPublic) {
+        toast.success("Link copiado. Um novo link foi gerado e o anterior deixou de valer.");
+      } else {
+        toast.warning(warning ?? "Endereço público não configurado.", { duration: 12000 });
+      }
       refresh();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Não foi possível gerar o link.");
@@ -573,6 +577,7 @@ function ConfiguracaoEmailDialog({
           // 465 usa TLS direto; 587/25 abrem em texto e sobem para TLS (STARTTLS).
           smtpSecure: port === 465,
           smtpUser: String(fd.get("smtpUser") ?? ""),
+          publicBaseUrl: String(fd.get("publicBaseUrl") ?? ""),
           secret: secret.trim() || null,
         },
       });
@@ -641,6 +646,19 @@ function ConfiguracaoEmailDialog({
                 </div>
               </>
             )}
+            <div className="sm:col-span-2">
+              <Label htmlFor="publicBaseUrl">Endereço público do sistema</Label>
+              <Input
+                id="publicBaseUrl"
+                name="publicBaseUrl"
+                defaultValue={settings?.public_base_url ?? ""}
+                placeholder="https://frota.seuorgao.gov.br"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                É o endereço usado no link enviado ao fornecedor. O endereço de pré-visualização do editor exige login e
+                não funciona para quem está fora do órgão.
+              </p>
+            </div>
             <div className="sm:col-span-2">
               <Label htmlFor="secret">{provider === "smtp" ? "Senha do usuário SMTP" : "Chave de API do provedor"}</Label>
               <Input

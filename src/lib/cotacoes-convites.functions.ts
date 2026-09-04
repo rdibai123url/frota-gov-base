@@ -57,17 +57,75 @@ async function hashToken(token: string) {
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-function baseUrl() {
+/**
+ * Endereços internos (pré-visualização do editor e desenvolvimento) exigem login
+ * da plataforma e NÃO servem para o fornecedor externo. Só um endereço público
+ * (site publicado ou domínio próprio) pode ir no convite.
+ */
+function isInternalHost(host: string) {
+  const h = host.toLowerCase();
+  return (
+    h.startsWith("localhost") ||
+    h.startsWith("127.0.0.1") ||
+    h.endsWith(".lovableproject.com") ||
+    h.endsWith(".lovableproject-dev.com") ||
+    h.endsWith(".gpt-eng.com") ||
+    h.endsWith(".gptengineer.run") ||
+    /^id-preview(-[a-z0-9]+)?--/i.test(h) ||
+    /-dev\.lovable\.app$/i.test(h)
+  );
+}
+
+function requestOrigin() {
   const origin = getRequestHeader("origin");
   if (origin) return origin.replace(/\/+$/, "");
   const host = getRequestHeader("host");
-  const proto = getRequestHeader("x-forwarded-proto") || (host?.includes("localhost") ? "http" : "https");
-  return host ? `${proto}://${host}` : "";
+  if (!host) return "";
+  const proto = getRequestHeader("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
+  return `${proto}://${host}`;
 }
 
-function linkFor(token: string) {
-  return `${baseUrl()}/cotacao/${token}`;
+function normalizeBase(value: string | null | undefined) {
+  const raw = (value ?? "").trim().replace(/\/+$/, "");
+  if (!raw) return "";
+  const withProto = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+  try {
+    const url = new URL(withProto);
+    return `${url.protocol}//${url.host}`;
+  } catch {
+    return "";
+  }
 }
+
+/**
+ * Base do link do fornecedor, em ordem de prioridade:
+ *  1. endereço público configurado pelo órgão;
+ *  2. endereço público do ambiente (PUBLIC_APP_URL / VITE_PUBLIC_APP_URL);
+ *  3. endereço da requisição, apenas quando já for público.
+ * `isPublic=false` significa que o link só funciona para quem tem acesso interno.
+ */
+function resolveBase(orgBase?: string | null) {
+  const configured = normalizeBase(orgBase) || normalizeBase(process.env["PUBLIC_APP_URL"]) || normalizeBase(process.env["VITE_PUBLIC_APP_URL"]);
+  if (configured) return { base: configured, isPublic: true };
+  const origin = requestOrigin();
+  if (!origin) return { base: "", isPublic: false };
+  let host = "";
+  try {
+    host = new URL(origin).host;
+  } catch {
+    host = "";
+  }
+  return { base: origin, isPublic: Boolean(host) && !isInternalHost(host) };
+}
+
+const NO_PUBLIC_BASE_MESSAGE =
+  "Ainda não há um endereço público configurado para os links de cotação. O endereço de pré-visualização exige login da plataforma e não funciona para fornecedores. Publique o sistema (ou informe o endereço público em “Configurar envio”) antes de enviar convites.";
+
+function linkFor(token: string, orgBase?: string | null) {
+  const { base, isPublic } = resolveBase(orgBase);
+  return { link: `${base}/cotacao/${token}`, isPublic };
+}
+
 
 function isEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim());
@@ -98,6 +156,8 @@ export const saveEmailSettings = createServerFn({ method: "POST" })
     smtpPort: number | null;
     smtpSecure: boolean;
     smtpUser: string;
+    /** Endereço público do sistema usado nos links enviados aos fornecedores. */
+    publicBaseUrl?: string | null;
     /** Enviado apenas quando o usuário digita uma nova credencial. */
     secret?: string | null;
   }) => input)
@@ -134,6 +194,7 @@ export const saveEmailSettings = createServerFn({ method: "POST" })
       smtp_port: data.smtpPort,
       smtp_secure: data.smtpSecure,
       smtp_user: data.smtpUser || null,
+      public_base_url: (data.publicBaseUrl ?? "").trim() || null,
       has_secret: hasNewSecret ? true : Boolean(existing?.has_secret),
       updated_by: userId,
     };
@@ -210,15 +271,16 @@ async function loadSettings(orgId: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data } = await supabaseAdmin
     .from("org_email_settings")
-    .select("provider, enabled, from_name, from_email, reply_to, smtp_host, smtp_port, smtp_secure, smtp_user, has_secret")
+    .select("provider, enabled, from_name, from_email, reply_to, smtp_host, smtp_port, smtp_secure, smtp_user, has_secret, public_base_url")
     .eq("organization_id", orgId)
     .maybeSingle();
-  if (!data) return { settings: null as EmailSettings | null, secret: "" };
+  if (!data) return { settings: null as EmailSettings | null, secret: "", publicBaseUrl: null as string | null };
   const { data: secretRow } = await supabaseAdmin
     .from("org_email_secrets")
     .select("secret")
     .eq("organization_id", orgId)
     .maybeSingle();
+  const publicBaseUrl = (data as { public_base_url?: string | null }).public_base_url ?? null;
   const settings = data as EmailSettings;
   let secret = secretRow?.secret ?? "";
   // Chave da plataforma (painel de Integrações): usada apenas quando o órgão
@@ -230,7 +292,7 @@ async function loadSettings(orgId: string) {
       settings.has_secret = true;
     }
   }
-  return { settings, secret };
+  return { settings, secret, publicBaseUrl };
 }
 
 /** Dispara (ou reenvia) convites — sempre um e-mail individual por destinatário. */
@@ -249,9 +311,13 @@ export const sendInvites = createServerFn({ method: "POST" })
     const { data: allowed } = await supabase.rpc("can_manage_maintenance");
     if (!allowed) throw new Error("Sem permissão para enviar convites desta cotação.");
 
-    const { settings, secret } = await loadSettings(quotation.organization_id);
+    const { settings, secret, publicBaseUrl } = await loadSettings(quotation.organization_id);
     const problem = checkSettings(settings);
     if (problem || !settings) return { ok: false, configured: false, message: problem ?? "Envio de e-mail não configurado.", results: [] };
+    // Nunca enviar um link que o fornecedor não consegue abrir (endereço interno).
+    if (!resolveBase(publicBaseUrl).isPublic) {
+      return { ok: false, configured: true, message: NO_PUBLIC_BASE_MESSAGE, results: [] };
+    }
 
     const { data: org } = await supabase
       .from("organizations")
@@ -277,6 +343,7 @@ export const sendInvites = createServerFn({ method: "POST" })
       // Cada envio gera um token novo: o link antigo deixa de valer.
       const token = randomToken();
       const tokenHash = await hashToken(token);
+      const { link: inviteLink } = linkFor(token, publicBaseUrl);
       const message = renderInviteEmail({
         orgName: org?.short_name || org?.legal_name || "Órgão público",
         quotationCode: quotation.code ?? "—",
@@ -290,7 +357,7 @@ export const sendInvites = createServerFn({ method: "POST" })
           measure_unit: i.measure_unit,
           quantity: Number(i.quantity),
         })),
-        link: linkFor(token),
+        link: inviteLink,
         contactName: invite.contact_name,
       });
 
@@ -338,7 +405,7 @@ export const issueInviteLink = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: invite } = await supabase
       .from("quotation_invitations")
-      .select("id, quotation_id, send_status, quotation:quotations(deadline_at)")
+      .select("id, organization_id, quotation_id, send_status, quotation:quotations(deadline_at)")
       .eq("id", data.invitationId)
       .maybeSingle();
     if (!invite) throw new Error("Convite não encontrado neste órgão.");
@@ -355,7 +422,9 @@ export const issueInviteLink = createServerFn({ method: "POST" })
       })
       .eq("id", invite.id);
     if (error) throw new Error("Sem permissão para gerar o link deste convite.");
-    return { link: linkFor(token), expiresAt: expiryFor(deadline) };
+    const { publicBaseUrl } = await loadSettings(invite.organization_id);
+    const { link, isPublic } = linkFor(token, publicBaseUrl);
+    return { link, isPublic, warning: isPublic ? null : NO_PUBLIC_BASE_MESSAGE, expiresAt: expiryFor(deadline) };
   });
 
 /* ------------------------- resposta pública (token) --------------------- */
