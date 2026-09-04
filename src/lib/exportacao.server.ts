@@ -12,7 +12,7 @@ type Admin = SupabaseClient<any, any, any>;
 type Row = Record<string, unknown>;
 
 export const EXPORT_SCHEMA_VERSION = "1.0.0";
-export const EXPORT_APP_VERSION = "10.5.0";
+export const EXPORT_APP_VERSION = "10.6.0";
 export const CSV_DELIMITER = ";";
 export const CSV_ENCODING = "UTF-8 (com BOM)";
 
@@ -138,6 +138,8 @@ export const EXPORT_MODULES: ModuleDef[] = [
   { folder: "11_inteligencia", file: "inteligencia_parametros_consumo", table: "consumption_parameters" },
   { folder: "11_inteligencia", file: "inteligencia_configuracoes", table: "intelligence_settings" },
   { folder: "11_inteligencia", file: "alertas", table: "fueling_alerts" },
+  { folder: "11_inteligencia", file: "valor_de_mercado_fipe", table: "asset_market_values", json: true },
+  { folder: "11_inteligencia", file: "fatores_de_emissao", table: "emission_factors" },
 
   { folder: "12_transparencia", file: "transparencia_configuracoes", table: "transparency_settings" },
   { folder: "12_transparencia", file: "transparencia_periodos", table: "transparency_periods" },
@@ -153,6 +155,13 @@ export const EXPORT_MODULES: ModuleDef[] = [
   { folder: "13_administracao", file: "relatorios_preferencias", table: "report_presets" },
   { folder: "13_administracao", file: "logs_atividade", table: "activity_logs" },
   { folder: "13_administracao", file: "logs_auditoria", table: "audit_logs" },
+
+  { folder: "14_integracoes", file: "conectores", table: "integration_connectors", json: true },
+  { folder: "14_integracoes", file: "integracoes_mapeamentos", table: "integration_mappings", json: true },
+  { folder: "14_integracoes", file: "integracoes_historico", table: "integration_logs" },
+  { folder: "14_integracoes", file: "detran_consultas", table: "detran_snapshots", json: true },
+  { folder: "14_integracoes", file: "webhooks_endpoints", table: "webhook_endpoints" },
+  { folder: "14_integracoes", file: "webhooks_entregas", table: "webhook_deliveries", json: true },
 ];
 
 /* ------------------------------ utilitários ------------------------------ */
