@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   ACTIVE_MODULES,
+  MATRIX_STATUSES,
   APP_STAGE,
   APP_VERSION,
   FEATURE_MATRIX,
@@ -163,11 +164,8 @@ export function MatrixTab({ organization }: { organization?: string | null }) {
   );
 
   const counts = useMemo(
-    () => ({
-      sim: FEATURE_MATRIX.filter((r) => r.status === "Sim").length,
-      parcial: FEATURE_MATRIX.filter((r) => r.status === "Parcial").length,
-      nao: FEATURE_MATRIX.filter((r) => r.status === "Não").length,
-    }),
+    () =>
+      MATRIX_STATUSES.map((s) => ({ status: s, total: FEATURE_MATRIX.filter((r) => r.status === s).length })),
     [],
   );
 
@@ -207,9 +205,9 @@ export function MatrixTab({ organization }: { organization?: string | null }) {
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Todos</SelectItem>
-              <SelectItem value="Sim">Sim</SelectItem>
-              <SelectItem value="Parcial">Parcial</SelectItem>
-              <SelectItem value="Não">Não</SelectItem>
+              {MATRIX_STATUSES.map((s) => (
+                <SelectItem key={s} value={s}>{s}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -217,7 +215,7 @@ export function MatrixTab({ organization }: { organization?: string | null }) {
 
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
-          {rows.length} de {FEATURE_MATRIX.length} — Sim: {counts.sim} · Parcial: {counts.parcial} · Não: {counts.nao}
+          {rows.length} de {FEATURE_MATRIX.length} — {counts.map((c) => `${c.status}: ${c.total}`).join(" · ")}
         </p>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={() => { exportReportCsv("matriz-funcionalidades-frotagov", MATRIX_COLUMNS, rows); void log("CSV"); }}>
@@ -275,9 +273,7 @@ export function MatrixTab({ organization }: { organization?: string | null }) {
                 <TableCell className="text-sm text-muted-foreground">{r.module}</TableCell>
                 <TableCell className="text-sm font-medium">{r.feature}</TableCell>
                 <TableCell>
-                  <Badge
-                    variant={r.status === "Sim" ? "default" : r.status === "Parcial" ? "secondary" : "outline"}
-                  >
+                  <Badge variant={r.status === "Sim" ? "default" : r.status === "Não" || r.status === "Fora do núcleo" ? "outline" : "secondary"}>
                     {r.status}
                   </Badge>
                 </TableCell>
@@ -290,6 +286,12 @@ export function MatrixTab({ organization }: { organization?: string | null }) {
       </div>
 
       <p className="mt-3 text-xs text-muted-foreground">
+        Situações: <strong>Sim</strong> atende integralmente; <strong>Parcial</strong> atende com limitação
+        descrita; <strong>Depende de credencial</strong> está pronto, mas exige convênio, credencial ou
+        parceiro externo do órgão; <strong>Fora do núcleo</strong> não faz parte do produto; <strong>Não</strong>
+        não está implementado.
+      </p>
+      <p className="mt-2 text-xs text-muted-foreground">
         Este documento descreve as funcionalidades efetivamente entregues. A aderência a um edital
         específico depende da análise daquele edital.
       </p>

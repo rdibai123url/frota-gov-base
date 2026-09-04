@@ -17,6 +17,7 @@ import { BackupTab } from "@/components/backup-admin";
 
 import { exportXlsx } from "@/lib/reports";
 import { DocsTab, MatrixTab } from "@/components/homologacao";
+import { AuditTab } from "@/components/auditoria-produto";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -106,6 +107,7 @@ function Plataforma() {
           <TabsTrigger value="config">Configurações</TabsTrigger>
           <TabsTrigger value="documentacao">Documentação / Homologação</TabsTrigger>
           <TabsTrigger value="matriz">Matriz de funcionalidades</TabsTrigger>
+          <TabsTrigger value="auditoria">Auditoria e lançamento</TabsTrigger>
         </TabsList>
         <TabsContent value="orgaos" className="pt-5">
           <OrgsTab />
@@ -139,6 +141,9 @@ function Plataforma() {
         </TabsContent>
         <TabsContent value="matriz" className="pt-5">
           <MatrixTab organization="FrotaGov" />
+        </TabsContent>
+        <TabsContent value="auditoria" className="pt-5">
+          <AuditTab organization="FrotaGov" />
         </TabsContent>
       </Tabs>
 
