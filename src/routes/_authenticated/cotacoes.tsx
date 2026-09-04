@@ -1,6 +1,6 @@
 import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, ClipboardList, FileSearch, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -8,9 +8,9 @@ import { z } from "zod";
 import { PageHeader } from "@/components/app-shell";
 import { ConvitesCotacao } from "@/components/convites-cotacao";
 import { EntitySelect } from "@/components/entity-select";
-import { MoneyInput } from "@/components/form-fields";
 import { ItemHistoryInput } from "@/components/item-history-input";
 import { NovaEmpresaCotacaoDialog } from "@/components/nova-empresa-cotacao";
+import { PropostaFields } from "@/components/proposta-form";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { parseBRNumber } from "@/lib/format";
+import {
+  QUOTATION_KINDS,
+  asQuotationKind,
+  discountProblem,
+  draftToPayload,
+  emptyProposalDraft,
+  hasParts,
+  proposalSourceLabel,
+  quotationKindLabel,
+  type ProposalDraft,
+  type QuotationKind,
+} from "@/lib/cotacoes";
+
 import {
   MIN_PROPOSALS,
   PROPOSAL_STATUS,
