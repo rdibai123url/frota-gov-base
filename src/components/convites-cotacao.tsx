@@ -22,6 +22,7 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   createInvites,
+  getEmailProviderStatus,
   issueInviteLink,
   saveEmailSettings,
   sendInvites,
@@ -73,6 +74,14 @@ function useEmailSettings() {
   });
 }
 
+/** Indica se a plataforma já tem chave Resend (painel de Integrações). */
+function usePlatformProvider() {
+  return useQuery({
+    queryKey: ["email-provider-status"],
+    queryFn: () => getEmailProviderStatus(),
+  });
+}
+
 export function ConvitesCotacao({
   quotationId,
   invites,
@@ -90,11 +99,13 @@ export function ConvitesCotacao({
 }) {
   const invalidate = useInvalidate();
   const { data: settings } = useEmailSettings();
+  const { data: platform } = usePlatformProvider();
   const [openInvite, setOpenInvite] = useState(false);
   const [openConfig, setOpenConfig] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const configured = Boolean(settings?.enabled && settings.provider !== "nenhum" && settings.from_email && settings.has_secret);
+  const hasCredential = Boolean(settings?.has_secret) || (settings?.provider === "resend" && Boolean(platform?.platformResend));
+  const configured = Boolean(settings?.enabled && settings.provider !== "nenhum" && settings.from_email && hasCredential);
 
   function refresh() {
     invalidate(["quotations", "quotation-invitations", "quotation-proposals", "proposal-items", "org-email-settings"]);
@@ -514,7 +525,8 @@ function ConfiguracaoEmailDialog({
   onDone: () => void;
 }) {
   const { data: settings } = useEmailSettings();
-  const [provider, setProvider] = useState<string>("smtp");
+  const { data: platform } = usePlatformProvider();
+  const [provider, setProvider] = useState<string>("resend");
   const [enabled, setEnabled] = useState(true);
   const [secret, setSecret] = useState("");
   const [busy, setBusy] = useState(false);
@@ -522,7 +534,7 @@ function ConfiguracaoEmailDialog({
   // A configuração chega depois da primeira renderização: refletir o que está salvo.
   useEffect(() => {
     if (!open) return;
-    setProvider(settings?.provider ?? "smtp");
+    setProvider(settings?.provider ?? "resend");
     setEnabled(settings?.enabled ?? true);
     setSecret("");
   }, [open, settings?.provider, settings?.enabled]);
@@ -537,7 +549,8 @@ function ConfiguracaoEmailDialog({
         toast.error("Informe o e-mail remetente.");
         return;
       }
-      if (!settings?.has_secret && !secret.trim()) {
+      const platformKey = provider === "resend" && Boolean(platform?.platformResend);
+      if (!settings?.has_secret && !platformKey && !secret.trim()) {
         toast.error(provider === "smtp" ? "Informe a senha do usuário SMTP." : "Informe a chave de API do provedor.");
         return;
       }
@@ -589,8 +602,8 @@ function ConfiguracaoEmailDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="resend">Resend (recomendado)</SelectItem>
                   <SelectItem value="smtp">Servidor SMTP do órgão</SelectItem>
-                  <SelectItem value="resend">Resend</SelectItem>
                   <SelectItem value="sendgrid">SendGrid</SelectItem>
                   <SelectItem value="nenhum">Não utilizar envio automático</SelectItem>
                 </SelectContent>
@@ -636,7 +649,13 @@ function ConfiguracaoEmailDialog({
                 autoComplete="new-password"
                 value={secret}
                 onChange={(e) => setSecret(e.target.value)}
-                placeholder={settings?.has_secret ? "Credencial já cadastrada — preencha só para trocar" : "Obrigatório"}
+                placeholder={
+                  settings?.has_secret
+                    ? "Credencial já cadastrada — preencha só para trocar"
+                    : provider === "resend" && platform?.platformResend
+                      ? "Chave da plataforma em uso — preencha só para usar uma chave própria"
+                      : "Obrigatório"
+                }
               />
               <p className="mt-1 text-xs text-muted-foreground">
                 A credencial fica guardada em área restrita do servidor. Ela nunca é exibida, exportada ou devolvida ao

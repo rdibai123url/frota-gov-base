@@ -52,7 +52,7 @@ function fromHeader(s: EmailSettings) {
   return `"${name}" <${s.from_email}>`;
 }
 
-async function sendResend(s: EmailSettings, secret: string, msg: EmailMessage) {
+async function sendResend(s: EmailSettings, secret: string, msg: EmailMessage): Promise<string | null> {
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/json" },
@@ -66,6 +66,9 @@ async function sendResend(s: EmailSettings, secret: string, msg: EmailMessage) {
     }),
   });
   if (!res.ok) throw new Error(`Resend ${res.status}: ${(await res.text()).slice(0, 300)}`);
+  // O Resend confirma o aceite devolvendo o identificador do envio.
+  const body = (await res.json().catch(() => null)) as { id?: string } | null;
+  return body?.id ?? null;
 }
 
 async function sendSendgrid(s: EmailSettings, secret: string, msg: EmailMessage) {
@@ -188,12 +191,20 @@ async function sendSmtp(s: EmailSettings, secret: string, msg: EmailMessage) {
 }
 
 /** Dispara uma mensagem individual (um destinatário por envio). */
-export async function sendEmail(settings: EmailSettings, secret: string, msg: EmailMessage) {
+export async function sendEmail(
+  settings: EmailSettings,
+  secret: string,
+  msg: EmailMessage,
+): Promise<string | null> {
   const problem = checkSettings(settings);
   if (problem) throw new EmailNotConfiguredError(problem);
   if (settings.provider === "resend") return sendResend(settings, secret, msg);
-  if (settings.provider === "sendgrid") return sendSendgrid(settings, secret, msg);
-  return sendSmtp(settings, secret, msg);
+  if (settings.provider === "sendgrid") {
+    await sendSendgrid(settings, secret, msg);
+    return null;
+  }
+  await sendSmtp(settings, secret, msg);
+  return null;
 }
 
 /* ------------------------------- Template ------------------------------- */
