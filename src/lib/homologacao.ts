@@ -4,8 +4,8 @@
  * "Matriz de Funcionalidades", exclusivas do Super Admin.
  */
 
-export const APP_VERSION = "9.7.0";
-export const APP_STAGE = "Homologação geral (Fase 9)";
+export const APP_VERSION = "10.6.0";
+export const APP_STAGE = "Homologação geral (Fase 10 — Blocos 1 a 6)";
 
 export type VersionEntry = { version: string; date: string; title: string; summary: string };
 
@@ -24,6 +24,11 @@ export const VERSION_HISTORY: VersionEntry[] = [
   { version: "9.5.0", date: "Pós-Fase 9 — Bloco D", title: "Backup externo diário", summary: "Backup automático diário por órgão com horário e fuso configuráveis, destino em armazenamento compatível com S3, servidor próprio do órgão ou armazenamento privado da plataforma, credenciais apenas em segredos, checksum SHA-256, verificação de integridade, retenção com proteção contra expurgo, alertas de falha e restauração assistida com backup de segurança prévio." },
   { version: "9.6.0", date: "Pós-Fase 9 — Limpeza da frota", title: "Limpeza de veículos", summary: "Novo módulo de limpeza dentro de Manutenção: tipos de serviço configuráveis por órgão, registro de lavagem e higienização com fornecedor, contrato, empenho, cota e centro de custo, consumo e estorno orçamentário automáticos, anexo de comprovante, cancelamento com motivo, indicadores no painel, histórico do veículo, relatório próprio, importação de dados legados e divulgação agregada na transparência." },
   { version: "9.7.0", date: "Pós-Fase 9 — Bloco D funcional", title: "Objeto do contrato, itens e cota de servidor", summary: "Classificação obrigatória do objeto do contrato com tipos configuráveis, itens numerados com total calculado, valor do contrato pela soma dos itens, inativação de item com movimentação, veículo particular de servidor com cota de combustível por ciclo semanal ou mensal, bloqueio ao esgotar a cota com exceção justificada e auditada, alertas de cota próxima e esgotada, e filtros de objeto e cotas nos relatórios." },
+  { version: "10.0.0", date: "Fase 10 — Bloco 1", title: "Máquinas e equipamentos", summary: "Bens sem placa integrados à frota com classe de bem, tipos configuráveis, identificação patrimonial, horímetro e proteção da identificação." },
+  { version: "10.2.0", date: "Fase 10 — Bloco 2", title: "Inteligência de consumo e custos", summary: "Parâmetros de consumo por veículo e tipo, correção de medidor, segmentos de consumo, custo por quilômetro/hora, indisponibilidade da frota e alertas de desvio." },
+  { version: "10.4.0", date: "Fase 10 — Blocos 3 e 4", title: "Rede credenciada digital e almoxarifado", summary: "Credenciados com portal próprio, cartão virtual do bem com QR, captura operacional de abastecimento e manutenção, catálogo de peças com compatibilidade, ordens de fornecimento, almoxarifado com saldos, movimentações, reservas e inventário." },
+  { version: "10.5.0", date: "Fase 10 — Exportação integral", title: "Exportação integral de dados por órgão", summary: "Pacote .zip com todos os módulos em CSV e JSON, manifesto, checksum SHA-256 e restrição de acesso, para migração, auditoria e alimentação de outros sistemas." },
+  { version: "10.6.0", date: "Fase 10 — Blocos 5 e 6", title: "Valor de mercado, integrações preparadas, ESG e geolocalização", summary: "Histórico de valor de mercado/avaliação por bem integrado ao custo total, Central de Integrações (DETRAN, SIAFIC, LDAP/SSO, FIPE, Webhooks e API), API v1 ampliada com escopos, filtros, paginação, limite de requisições e auditoria, webhooks com HMAC e reenvio com backoff, painel de sustentabilidade com fatores de emissão parametrizáveis e mapa da rede credenciada com busca por proximidade." },
   { version: "9.4.0", date: "Pós-Fase 9 — Diárias e migração por tipo", title: "Diárias e migração individual", summary: "Módulo de diárias (RD e CD) com fluxo de aprovação, impressão institucional, indicadores, alertas e relatório próprio; migração de dados visível em Cadastros, por tipo individual, agrupada em cadastros básicos, contratos e orçamento, operação e legal/patrimonial, com suporte a CSV, XLSX e JSON." },
 ];
 
@@ -55,6 +60,14 @@ export const ACTIVE_MODULES: ModuleInfo[] = [
   { module: "Administração da Plataforma", route: "/plataforma", status: "ativo", note: "Exclusivo do Super Admin." },
   { module: "Backup externo diário", route: "/plataforma", status: "ativo", note: "Configuração, histórico, integridade e restauração por órgão; exclusivo do Super Admin." },
   { module: "Importação e migração de dados", route: "/plataforma", status: "ativo", note: "Assistente por módulo, lotes rastreáveis e posição de abertura." },
+  { module: "Máquinas e equipamentos", route: "/equipamentos", status: "ativo", note: "Bens sem placa, com horímetro e identificação patrimonial." },
+  { module: "Inteligência de consumo e custos", route: "/inteligencia", status: "ativo" },
+  { module: "Rede credenciada digital", route: "/credenciados", status: "ativo", note: "Portal do credenciado, cartão virtual do bem e captura operacional." },
+  { module: "Peças, almoxarifado e OFP", route: "/almoxarifado", status: "ativo" },
+  { module: "Exportação integral de dados", route: "/exportacao", status: "ativo", note: "Restrita a Super Admin, Administrador do órgão e Auditoria." },
+  { module: "Central de Integrações", route: "/integracoes", status: "parcial", note: "Estrutura, mapeamentos e histórico prontos; cada conector depende das credenciais do órgão." },
+  { module: "Sustentabilidade da frota (ESG)", route: "/sustentabilidade", status: "ativo", note: "Estimativas a partir de fatores de emissão parametrizáveis." },
+  { module: "Mapa da rede credenciada", route: "/mapa-rede", status: "ativo", note: "Distância aproximada em linha reta." },
 
 ];
 
@@ -110,17 +123,18 @@ export const FEATURE_MATRIX: MatrixRow[] = [
   { module: "Abastecimento", feature: "Autorização prévia com código e QR Code", status: "Sim", note: "Reserva de saldo no momento da autorização.", evidence: "/autorizacoes" },
   { module: "Abastecimento", feature: "Registro de abastecimento total e parcial", status: "Sim", note: "Baixa pelo valor efetivamente abastecido.", evidence: "/abastecimentos" },
   { module: "Abastecimento", feature: "Limites por órgão, unidade e veículo", status: "Sim", note: "Bloqueio e alerta automáticos.", evidence: "/autorizacoes" },
-  { module: "Abastecimento", feature: "Cartão magnético / integração com rede de postos", status: "Não", note: "Fora do escopo das fases entregues.", evidence: "—" },
+  { module: "Abastecimento", feature: "Cartão magnético físico, POS e adquirência", status: "Não", note: "Não faz parte do núcleo do FrotaGov: o sistema não é adquirente nem meio de pagamento e não processa transações bancárias.", evidence: "—" },
+  { module: "Abastecimento", feature: "Cartão virtual do bem com QR e captura pela rede credenciada", status: "Sim", note: "Substitui o cartão físico sem processamento bancário: o credenciado valida o QR e registra a captura.", evidence: "/credenciados, /portal-credenciado" },
   { module: "Manutenção", feature: "Planos preventivos por tempo e quilometragem", status: "Sim", note: "Com alertas de vencimento.", evidence: "/planos-manutencao" },
   { module: "Manutenção", feature: "Solicitação, execução e conclusão de manutenção", status: "Sim", note: "Registro imutável após conclusão e indisponibilidade do veículo.", evidence: "/manutencoes" },
   { module: "Manutenção", feature: "Limpeza de veículos (lavagem e higienização)", status: "Sim", note: "Tipos de serviço por órgão, custo com contrato/empenho/cota, estorno automático no cancelamento e comprovante anexado.", evidence: "/limpeza" },
   { module: "Manutenção", feature: "Peças, pneus e garantias", status: "Sim", note: "Controle documental de peças; sem gestão de estoque de almoxarifado.", evidence: "/pecas, /pneus" },
   { module: "Manutenção", feature: "Rede credenciada, cotações e ordem de serviço eletrônica", status: "Sim", note: "Mínimo de propostas com justificativa obrigatória.", evidence: "/rede-credenciada, /cotacoes, /ordens-servico" },
   { module: "Orçamento", feature: "Contratos, itens, empenhos e cotas", status: "Sim", note: "Motor de saldos com reserva, consumo, liberação e estorno.", evidence: "/contratos, /empenhos, /cotas" },
-  { module: "Orçamento", feature: "Integração com sistema contábil do órgão", status: "Não", note: "Depende de integração específica por município.", evidence: "—" },
+  { module: "Orçamento", feature: "Integração com sistema contábil (SIAFIC)", status: "Parcial", note: "Camada genérica com mapeamento de layout, exportação incremental por \"alterados desde\" e histórico reprocessável; a conexão final depende das credenciais e do layout do município.", evidence: "/integracoes → SIAFIC" },
   { module: "Legal", feature: "Multas, defesa e responsabilização do condutor", status: "Sim", note: "Cancelamento exige motivo registrado.", evidence: "/multas" },
   { module: "Legal", feature: "Sinistros, seguros e obrigações legais", status: "Sim", note: "Alertas automáticos de vencimento.", evidence: "/sinistros, /seguros, /obrigacoes" },
-  { module: "Legal", feature: "Importação automática de multas do DETRAN", status: "Não", note: "Requer convênio e integração específica.", evidence: "—" },
+  { module: "Legal", feature: "Consulta e importação de dados do DETRAN", status: "Parcial", note: "Adapter, mapeamento de campos, histórico de consultas e confirmação em caso de divergência prontos; sem convênio a ação fica desabilitada e o conector aparece como não configurado.", evidence: "/integracoes → DETRAN" },
   { module: "Patrimônio", feature: "Cessões, remanejamentos, baixas e alienações", status: "Sim", note: "Atualiza unidade, situação e quilometragem do veículo.", evidence: "/patrimonio" },
   { module: "Relatórios", feature: "Relatórios gerenciais com filtros e período", status: "Sim", note: "Nove relatórios: frota, abastecimento, manutenção, utilização, custo por veículo, contratos, legal, patrimônio e diárias.", evidence: "/relatorios" },
   { module: "Diárias", feature: "Requisição de diária (RD) com fluxo de autorização", status: "Sim", note: "Numeração por exercício, tramitação auditada e impressão institucional com valor por extenso.", evidence: "/diarias" },
@@ -138,7 +152,17 @@ export const FEATURE_MATRIX: MatrixRow[] = [
   { module: "Usabilidade", feature: "Paginação e desempenho das listas operacionais", status: "Sim", note: "25 registros por página com contagem total; índices por órgão e data no banco.", evidence: "/veiculos, /multas, /manutencoes" },
   { module: "Usabilidade", feature: "Uso em computador e celular", status: "Sim", note: "Layout responsivo com menu lateral em gaveta no celular.", evidence: "Todas as telas" },
   { module: "Integrações", feature: "API pública v1 de leitura com chave por órgão", status: "Sim", note: "Validade, revogação, escopos, paginação e isolamento por órgão.", evidence: "/chaves-api" },
-  { module: "Integrações", feature: "API de escrita", status: "Não", note: "Não faz parte desta versão.", evidence: "—" },
+  { module: "Integrações", feature: "API de escrita", status: "Não", note: "A API pública permanece somente de leitura.", evidence: "—" },
+  { module: "Integrações", feature: "API v1 ampliada com escopos, filtros e limite de requisições", status: "Sim", note: "Dezoito recursos de leitura, organização derivada da chave, paginação, filtro por período e por \"alterados desde\", 401/403/429 e auditoria de cada consulta.", evidence: "/api/public/v1/recursos/{recurso}" },
+  { module: "Integrações", feature: "Webhooks por órgão com HMAC, tentativa e histórico", status: "Sim", note: "Assinatura SHA-256, reenvio automático com backoff progressivo e histórico de entregas; o segredo nunca é exibido após salvo.", evidence: "/integracoes → Webhooks" },
+  { module: "Integrações", feature: "Autenticação corporativa LDAP/SSO", status: "Parcial", note: "Conector configurável por órgão; a autenticação padrão do FrotaGov continua como fallback enquanto não houver provedor ativo.", evidence: "/integracoes → Conectores" },
+  { module: "Integrações", feature: "Valor de mercado FIPE por API oficial", status: "Parcial", note: "Histórico de valor por bem com origem manual, importada ou de API e auditoria; sem credencial, o conector permanece não configurado.", evidence: "/veiculo/{id} → Valor de mercado" },
+  { module: "Frota", feature: "Máquinas e equipamentos sem placa", status: "Sim", note: "Classe de bem, tipos configuráveis, horímetro e identificação patrimonial.", evidence: "/equipamentos" },
+  { module: "Inteligência", feature: "Consumo, custo por km/hora e indisponibilidade", status: "Sim", note: "Parâmetros por veículo e tipo, correção de medidor e alertas de desvio.", evidence: "/inteligencia" },
+  { module: "Almoxarifado", feature: "Estoque, ordens de fornecimento e inventário", status: "Sim", note: "Saldos, movimentações, reservas, compatibilidade de peças e inventário rotativo.", evidence: "/almoxarifado, /ofp" },
+  { module: "Sustentabilidade", feature: "Indicadores ESG da frota", status: "Sim", note: "Estimativa de emissões a partir de fatores parametrizáveis por órgão, sempre identificada como estimativa e não como medição.", evidence: "/sustentabilidade" },
+  { module: "Rede credenciada", feature: "Geolocalização e busca por proximidade", status: "Sim", note: "Coordenadas em postos, oficinas, credenciados e unidades, com distância aproximada em linha reta e mapa aberto, sem depender de API paga.", evidence: "/mapa-rede" },
+  { module: "Implantação", feature: "Exportação integral dos dados do órgão", status: "Sim", note: "Pacote .zip com CSV e JSON de todos os módulos, manifesto e checksum, sem senhas, tokens ou segredos.", evidence: "/exportacao" },
   { module: "Operação", feature: "Rotinas automáticas de alertas e retenção de logs", status: "Sim", note: "Agendadas no banco de dados (horária e diária).", evidence: "/alertas" },
   { module: "Operação", feature: "Notificações por e-mail ou WhatsApp", status: "Não", note: "Os alertas são exibidos no sistema.", evidence: "—" },
   { module: "Operação", feature: "Aplicativo móvel nativo", status: "Parcial", note: "Interface responsiva em navegador; não há aplicativo publicado em lojas.", evidence: "Qualquer tela" },
@@ -160,5 +184,10 @@ export const KNOWN_LIMITATIONS: string[] = [
   "Com destino SFTP o envio final é feito pelo agente instalado no servidor do órgão; o servidor da aplicação não abre conexões SSH.",
   "O pacote de backup inclui todos os dados do órgão e o inventário dos anexos (caminho, tamanho e data); os arquivos binários permanecem no armazenamento privado da plataforma.",
   "Não há autenticação em dois fatores nem assinatura digital de documentos.",
+  "O FrotaGov não é adquirente nem meio de pagamento: cartão físico, terminal POS, adquirência e processamento bancário não fazem parte do núcleo; o cartão virtual do bem apenas identifica e autoriza o atendimento na rede credenciada.",
+  "Os conectores de DETRAN, SIAFIC, LDAP/SSO e FIPE estão estruturados e testáveis, mas dependem de convênio e credenciais do órgão; enquanto não houver credencial válida o conector permanece como não configurado e a ação fica desabilitada.",
+  "Os indicadores de sustentabilidade são estimativas calculadas a partir dos fatores de emissão cadastrados; não são medições diretas de emissão.",
+  "A distância no mapa da rede credenciada é aproximada, calculada em linha reta entre coordenadas, e não considera rotas nem trânsito.",
+  "A exportação integral é síncrona e montada em memória, adequada ao porte típico de um órgão municipal.",
   "O ambiente de demonstração é um órgão comum identificado como DEMONSTRAÇÃO; a limpeza é feita manualmente, sem rotina destrutiva automática.",
 ];
