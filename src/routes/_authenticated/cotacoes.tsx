@@ -99,7 +99,8 @@ function Cotacoes() {
   const invalidate = useInvalidate();
 
   const [open, setOpen] = useState(false);
-  const [vehicleId, setVehicleId] = useState("");
+  const [vehicleId, setVehicleId] = useState(NONE);
+  const [kind, setKind] = useState<QuotationKind>("servicos_pecas");
   const [requestId, setRequestId] = useState(NONE);
   const [unitId, setUnitId] = useState(NONE);
   const [specialty, setSpecialty] = useState(WORKSHOP_SPECIALTIES[0]!);
@@ -130,14 +131,11 @@ function Cotacoes() {
       toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos");
       return;
     }
-    if (!vehicleId) {
-      toast.error("Selecione o veículo.");
-      return;
-    }
     setSaving(true);
     const { error } = await supabase.from("quotations").insert({
       organization_id: orgId!,
-      vehicle_id: vehicleId,
+      vehicle_id: vehicleId === NONE ? null : vehicleId,
+      quotation_kind: kind,
       request_id: requestId === NONE ? null : requestId,
       unit_id: unitId === NONE ? null : unitId,
       description: parsed.data.description,
@@ -146,6 +144,7 @@ function Cotacoes() {
       notes: parsed.data.notes || null,
       created_by: userId,
     });
+
     setSaving(false);
     if (error) {
       toast.error(dbMessage(error));
