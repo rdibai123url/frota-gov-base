@@ -319,8 +319,9 @@ export const sendInvites = createServerFn({ method: "POST" })
         continue;
       }
       const message = renderInviteEmail({
-
+        orgName: org?.short_name || org?.legal_name || "Órgão público",
         quotationCode: quotation.code ?? "—",
+
         description: quotation.description,
         specialty: quotation.specialty,
         deadlineText: deadlineText(quotation.deadline_at),
