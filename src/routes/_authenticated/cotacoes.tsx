@@ -344,24 +344,7 @@ function Cotacoes() {
                 </Select>
               </div>
 
-              <div>
-                <Label>Solicitação de manutenção</Label>
-                <Select value={requestId} onValueChange={setRequestId}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NONE}>Sem vínculo</SelectItem>
-                    {requests
-                      .filter((r) => !vehicleId || r.vehicle_id === vehicleId)
-                      .map((r) => (
-                        <SelectItem key={r.id} value={r.id}>
-                          {r.code} — {r.description.slice(0, 40)}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
+
               <div>
                 <Label>Unidade</Label>
                 <Select value={unitId} onValueChange={setUnitId}>
