@@ -57,17 +57,75 @@ async function hashToken(token: string) {
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-function baseUrl() {
+/**
+ * Endereços internos (pré-visualização do editor e desenvolvimento) exigem login
+ * da plataforma e NÃO servem para o fornecedor externo. Só um endereço público
+ * (site publicado ou domínio próprio) pode ir no convite.
+ */
+function isInternalHost(host: string) {
+  const h = host.toLowerCase();
+  return (
+    h.startsWith("localhost") ||
+    h.startsWith("127.0.0.1") ||
+    h.endsWith(".lovableproject.com") ||
+    h.endsWith(".lovableproject-dev.com") ||
+    h.endsWith(".gpt-eng.com") ||
+    h.endsWith(".gptengineer.run") ||
+    /^id-preview(-[a-z0-9]+)?--/i.test(h) ||
+    /-dev\.lovable\.app$/i.test(h)
+  );
+}
+
+function requestOrigin() {
   const origin = getRequestHeader("origin");
   if (origin) return origin.replace(/\/+$/, "");
   const host = getRequestHeader("host");
-  const proto = getRequestHeader("x-forwarded-proto") || (host?.includes("localhost") ? "http" : "https");
-  return host ? `${proto}://${host}` : "";
+  if (!host) return "";
+  const proto = getRequestHeader("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
+  return `${proto}://${host}`;
 }
 
-function linkFor(token: string) {
-  return `${baseUrl()}/cotacao/${token}`;
+function normalizeBase(value: string | null | undefined) {
+  const raw = (value ?? "").trim().replace(/\/+$/, "");
+  if (!raw) return "";
+  const withProto = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+  try {
+    const url = new URL(withProto);
+    return `${url.protocol}//${url.host}`;
+  } catch {
+    return "";
+  }
 }
+
+/**
+ * Base do link do fornecedor, em ordem de prioridade:
+ *  1. endereço público configurado pelo órgão;
+ *  2. endereço público do ambiente (PUBLIC_APP_URL / VITE_PUBLIC_APP_URL);
+ *  3. endereço da requisição, apenas quando já for público.
+ * `isPublic=false` significa que o link só funciona para quem tem acesso interno.
+ */
+function resolveBase(orgBase?: string | null) {
+  const configured = normalizeBase(orgBase) || normalizeBase(process.env["PUBLIC_APP_URL"]) || normalizeBase(process.env["VITE_PUBLIC_APP_URL"]);
+  if (configured) return { base: configured, isPublic: true };
+  const origin = requestOrigin();
+  if (!origin) return { base: "", isPublic: false };
+  let host = "";
+  try {
+    host = new URL(origin).host;
+  } catch {
+    host = "";
+  }
+  return { base: origin, isPublic: Boolean(host) && !isInternalHost(host) };
+}
+
+const NO_PUBLIC_BASE_MESSAGE =
+  "Ainda não há um endereço público configurado para os links de cotação. O endereço de pré-visualização exige login da plataforma e não funciona para fornecedores. Publique o sistema (ou informe o endereço público em “Configurar envio”) antes de enviar convites.";
+
+function linkFor(token: string, orgBase?: string | null) {
+  const { base, isPublic } = resolveBase(orgBase);
+  return { link: `${base}/cotacao/${token}`, isPublic };
+}
+
 
 function isEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim());
