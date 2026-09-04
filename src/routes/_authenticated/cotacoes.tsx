@@ -186,7 +186,8 @@ function Cotacoes() {
           canManageFleet && orgId ? (
             <Button
               onClick={() => {
-                setVehicleId("");
+                setVehicleId(NONE);
+                setKind("servicos_pecas");
                 setRequestId(NONE);
                 setUnitId(NONE);
                 setSpecialty(WORKSHOP_SPECIALTIES[0]!);
