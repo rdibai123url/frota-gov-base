@@ -222,6 +222,8 @@ export type Database = {
           created_by: string | null
           district: string | null
           email: string | null
+          geocoded_address: string | null
+          geocoded_at: string | null
           id: string
           import_batch_id: string | null
           kinds: Database["public"]["Enums"]["partner_kind"][]
@@ -251,6 +253,8 @@ export type Database = {
           created_by?: string | null
           district?: string | null
           email?: string | null
+          geocoded_address?: string | null
+          geocoded_at?: string | null
           id?: string
           import_batch_id?: string | null
           kinds?: Database["public"]["Enums"]["partner_kind"][]
@@ -280,6 +284,8 @@ export type Database = {
           created_by?: string | null
           district?: string | null
           email?: string | null
+          geocoded_address?: string | null
+          geocoded_at?: string | null
           id?: string
           import_batch_id?: string | null
           kinds?: Database["public"]["Enums"]["partner_kind"][]
@@ -530,6 +536,82 @@ export type Database = {
           },
           {
             foreignKeyName: "asset_cards_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asset_market_values: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          fipe_code: string | null
+          id: string
+          import_batch_id: string | null
+          notes: string | null
+          organization_id: string
+          origin: Database["public"]["Enums"]["market_value_origin"]
+          reference_date: string
+          source: string
+          source_reference: string | null
+          updated_at: string
+          updated_by: string | null
+          value: number
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          fipe_code?: string | null
+          id?: string
+          import_batch_id?: string | null
+          notes?: string | null
+          organization_id: string
+          origin?: Database["public"]["Enums"]["market_value_origin"]
+          reference_date?: string
+          source?: string
+          source_reference?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          value: number
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          fipe_code?: string | null
+          id?: string
+          import_batch_id?: string | null
+          notes?: string | null
+          organization_id?: string
+          origin?: Database["public"]["Enums"]["market_value_origin"]
+          reference_date?: string
+          source?: string
+          source_reference?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          value?: number
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_market_values_import_batch_id_fkey"
+            columns: ["import_batch_id"]
+            isOneToOne: false
+            referencedRelation: "import_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_market_values_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_market_values_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
@@ -2083,6 +2165,82 @@ export type Database = {
         }
         Relationships: []
       }
+      detran_snapshots: {
+        Row: {
+          applied: boolean
+          applied_at: string | null
+          applied_by: string | null
+          applied_fields: string[]
+          connector_id: string | null
+          created_at: string
+          created_by: string | null
+          divergences: Json
+          fetched_at: string
+          id: string
+          notes: string | null
+          organization_id: string
+          payload: Json
+          source: string
+          vehicle_id: string
+        }
+        Insert: {
+          applied?: boolean
+          applied_at?: string | null
+          applied_by?: string | null
+          applied_fields?: string[]
+          connector_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          divergences?: Json
+          fetched_at?: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          payload?: Json
+          source?: string
+          vehicle_id: string
+        }
+        Update: {
+          applied?: boolean
+          applied_at?: string | null
+          applied_by?: string | null
+          applied_fields?: string[]
+          connector_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          divergences?: Json
+          fetched_at?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          payload?: Json
+          source?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "detran_snapshots_connector_id_fkey"
+            columns: ["connector_id"]
+            isOneToOne: false
+            referencedRelation: "integration_connectors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "detran_snapshots_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "detran_snapshots_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       diaries: {
         Row: {
           application_period: string | null
@@ -2492,6 +2650,87 @@ export type Database = {
             columns: ["unit_id"]
             isOneToOne: false
             referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      emission_factors: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          factor_kg_co2e_per_unit: number
+          fuel_key: string
+          fuel_type_id: string | null
+          id: string
+          label: string
+          notes: string | null
+          organization_id: string
+          reference: string | null
+          renewable_share_pct: number
+          source: string
+          unit: string
+          updated_at: string
+          updated_by: string | null
+          valid_from: string
+          valid_to: string | null
+          version: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          factor_kg_co2e_per_unit: number
+          fuel_key: string
+          fuel_type_id?: string | null
+          id?: string
+          label: string
+          notes?: string | null
+          organization_id: string
+          reference?: string | null
+          renewable_share_pct?: number
+          source: string
+          unit?: string
+          updated_at?: string
+          updated_by?: string | null
+          valid_from?: string
+          valid_to?: string | null
+          version?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          factor_kg_co2e_per_unit?: number
+          fuel_key?: string
+          fuel_type_id?: string | null
+          id?: string
+          label?: string
+          notes?: string | null
+          organization_id?: string
+          reference?: string | null
+          renewable_share_pct?: number
+          source?: string
+          unit?: string
+          updated_at?: string
+          updated_by?: string | null
+          valid_from?: string
+          valid_to?: string | null
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emission_factors_fuel_type_id_fkey"
+            columns: ["fuel_type_id"]
+            isOneToOne: false
+            referencedRelation: "fuel_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emission_factors_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -3654,6 +3893,230 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_connectors: {
+        Row: {
+          base_url: string | null
+          config: Json
+          created_at: string
+          created_by: string | null
+          documentation_url: string | null
+          environment: Database["public"]["Enums"]["integration_environment"]
+          has_secret: boolean
+          id: string
+          kind: Database["public"]["Enums"]["integration_kind"]
+          last_attempt_at: string | null
+          last_result: string | null
+          last_sync_at: string | null
+          notes: string | null
+          organization_id: string
+          provider: string | null
+          secret_name: string | null
+          status: Database["public"]["Enums"]["integration_status"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          base_url?: string | null
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          documentation_url?: string | null
+          environment?: Database["public"]["Enums"]["integration_environment"]
+          has_secret?: boolean
+          id?: string
+          kind: Database["public"]["Enums"]["integration_kind"]
+          last_attempt_at?: string | null
+          last_result?: string | null
+          last_sync_at?: string | null
+          notes?: string | null
+          organization_id: string
+          provider?: string | null
+          secret_name?: string | null
+          status?: Database["public"]["Enums"]["integration_status"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          base_url?: string | null
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          documentation_url?: string | null
+          environment?: Database["public"]["Enums"]["integration_environment"]
+          has_secret?: boolean
+          id?: string
+          kind?: Database["public"]["Enums"]["integration_kind"]
+          last_attempt_at?: string | null
+          last_result?: string | null
+          last_sync_at?: string | null
+          notes?: string | null
+          organization_id?: string
+          provider?: string | null
+          secret_name?: string | null
+          status?: Database["public"]["Enums"]["integration_status"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_connectors_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_logs: {
+        Row: {
+          connector_id: string | null
+          created_at: string
+          created_by: string | null
+          details: Json
+          direction: string
+          duration_ms: number | null
+          id: string
+          kind: Database["public"]["Enums"]["integration_kind"]
+          message: string | null
+          operation: string
+          organization_id: string
+          records_error: number
+          records_ok: number
+          records_total: number
+          ref_id: string | null
+          ref_table: string | null
+          status: Database["public"]["Enums"]["integration_log_status"]
+        }
+        Insert: {
+          connector_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          details?: Json
+          direction?: string
+          duration_ms?: number | null
+          id?: string
+          kind: Database["public"]["Enums"]["integration_kind"]
+          message?: string | null
+          operation: string
+          organization_id: string
+          records_error?: number
+          records_ok?: number
+          records_total?: number
+          ref_id?: string | null
+          ref_table?: string | null
+          status: Database["public"]["Enums"]["integration_log_status"]
+        }
+        Update: {
+          connector_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          details?: Json
+          direction?: string
+          duration_ms?: number | null
+          id?: string
+          kind?: Database["public"]["Enums"]["integration_kind"]
+          message?: string | null
+          operation?: string
+          organization_id?: string
+          records_error?: number
+          records_ok?: number
+          records_total?: number
+          ref_id?: string | null
+          ref_table?: string | null
+          status?: Database["public"]["Enums"]["integration_log_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_logs_connector_id_fkey"
+            columns: ["connector_id"]
+            isOneToOne: false
+            referencedRelation: "integration_connectors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "integration_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_mappings: {
+        Row: {
+          active: boolean
+          connector_id: string | null
+          created_at: string
+          created_by: string | null
+          delimiter: string
+          direction: string
+          entity: string
+          field_map: Json
+          format: string
+          id: string
+          incremental: boolean
+          last_exported_at: string | null
+          name: string
+          notes: string | null
+          organization_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          active?: boolean
+          connector_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          delimiter?: string
+          direction?: string
+          entity: string
+          field_map?: Json
+          format?: string
+          id?: string
+          incremental?: boolean
+          last_exported_at?: string | null
+          name: string
+          notes?: string | null
+          organization_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          active?: boolean
+          connector_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          delimiter?: string
+          direction?: string
+          entity?: string
+          field_map?: Json
+          format?: string
+          id?: string
+          incremental?: boolean
+          last_exported_at?: string | null
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_mappings_connector_id_fkey"
+            columns: ["connector_id"]
+            isOneToOne: false
+            referencedRelation: "integration_connectors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "integration_mappings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -6777,9 +7240,13 @@ export type Database = {
           created_at: string
           created_by: string | null
           email: string | null
+          geocoded_address: string | null
+          geocoded_at: string | null
           id: string
           import_batch_id: string | null
+          latitude: number | null
           legal_name: string
+          longitude: number | null
           notes: string | null
           organization_id: string
           phone: string | null
@@ -6799,9 +7266,13 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           email?: string | null
+          geocoded_address?: string | null
+          geocoded_at?: string | null
           id?: string
           import_batch_id?: string | null
+          latitude?: number | null
           legal_name: string
+          longitude?: number | null
           notes?: string | null
           organization_id: string
           phone?: string | null
@@ -6821,9 +7292,13 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           email?: string | null
+          geocoded_address?: string | null
+          geocoded_at?: string | null
           id?: string
           import_batch_id?: string | null
+          latitude?: number | null
           legal_name?: string
+          longitude?: number | null
           notes?: string | null
           organization_id?: string
           phone?: string | null
@@ -7828,6 +8303,8 @@ export type Database = {
           email: string | null
           id: string
           import_batch_id: string | null
+          latitude: number | null
+          longitude: number | null
           manager_name: string | null
           manager_role: string | null
           name: string
@@ -7845,6 +8322,8 @@ export type Database = {
           email?: string | null
           id?: string
           import_batch_id?: string | null
+          latitude?: number | null
+          longitude?: number | null
           manager_name?: string | null
           manager_role?: string | null
           name: string
@@ -7862,6 +8341,8 @@ export type Database = {
           email?: string | null
           id?: string
           import_batch_id?: string | null
+          latitude?: number | null
+          longitude?: number | null
           manager_name?: string | null
           manager_role?: string | null
           name?: string
@@ -8580,6 +9061,146 @@ export type Database = {
           },
         ]
       }
+      webhook_deliveries: {
+        Row: {
+          attempt: number
+          created_at: string
+          delivered_at: string | null
+          endpoint_id: string
+          error_message: string | null
+          event: string
+          id: string
+          next_retry_at: string | null
+          organization_id: string
+          payload: Json
+          response_body: string | null
+          response_status: number | null
+          status: Database["public"]["Enums"]["webhook_delivery_status"]
+          updated_at: string
+        }
+        Insert: {
+          attempt?: number
+          created_at?: string
+          delivered_at?: string | null
+          endpoint_id: string
+          error_message?: string | null
+          event: string
+          id?: string
+          next_retry_at?: string | null
+          organization_id: string
+          payload?: Json
+          response_body?: string | null
+          response_status?: number | null
+          status?: Database["public"]["Enums"]["webhook_delivery_status"]
+          updated_at?: string
+        }
+        Update: {
+          attempt?: number
+          created_at?: string
+          delivered_at?: string | null
+          endpoint_id?: string
+          error_message?: string | null
+          event?: string
+          id?: string
+          next_retry_at?: string | null
+          organization_id?: string
+          payload?: Json
+          response_body?: string | null
+          response_status?: number | null
+          status?: Database["public"]["Enums"]["webhook_delivery_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_deliveries_endpoint_id_fkey"
+            columns: ["endpoint_id"]
+            isOneToOne: false
+            referencedRelation: "webhook_endpoints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webhook_deliveries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webhook_endpoints: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          description: string | null
+          events: string[]
+          has_secret: boolean
+          id: string
+          last_delivery_at: string | null
+          last_status:
+            | Database["public"]["Enums"]["webhook_delivery_status"]
+            | null
+          max_retries: number
+          name: string
+          organization_id: string
+          secret_name: string | null
+          timeout_ms: number
+          updated_at: string
+          updated_by: string | null
+          url: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          events?: string[]
+          has_secret?: boolean
+          id?: string
+          last_delivery_at?: string | null
+          last_status?:
+            | Database["public"]["Enums"]["webhook_delivery_status"]
+            | null
+          max_retries?: number
+          name: string
+          organization_id: string
+          secret_name?: string | null
+          timeout_ms?: number
+          updated_at?: string
+          updated_by?: string | null
+          url: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          events?: string[]
+          has_secret?: boolean
+          id?: string
+          last_delivery_at?: string | null
+          last_status?:
+            | Database["public"]["Enums"]["webhook_delivery_status"]
+            | null
+          max_retries?: number
+          name?: string
+          organization_id?: string
+          secret_name?: string | null
+          timeout_ms?: number
+          updated_at?: string
+          updated_by?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_endpoints_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workshops: {
         Row: {
           accredited_at: string | null
@@ -8595,10 +9216,14 @@ export type Database = {
           created_by: string | null
           district: string | null
           email: string | null
+          geocoded_address: string | null
+          geocoded_at: string | null
           id: string
           import_batch_id: string | null
+          latitude: number | null
           legacy_source: string | null
           legal_name: string
+          longitude: number | null
           notes: string | null
           organization_id: string
           phone: string | null
@@ -8627,10 +9252,14 @@ export type Database = {
           created_by?: string | null
           district?: string | null
           email?: string | null
+          geocoded_address?: string | null
+          geocoded_at?: string | null
           id?: string
           import_batch_id?: string | null
+          latitude?: number | null
           legacy_source?: string | null
           legal_name: string
+          longitude?: number | null
           notes?: string | null
           organization_id: string
           phone?: string | null
@@ -8659,10 +9288,14 @@ export type Database = {
           created_by?: string | null
           district?: string | null
           email?: string | null
+          geocoded_address?: string | null
+          geocoded_at?: string | null
           id?: string
           import_batch_id?: string | null
+          latitude?: number | null
           legacy_source?: string | null
           legal_name?: string
+          longitude?: number | null
           notes?: string | null
           organization_id?: string
           phone?: string | null
@@ -9338,6 +9971,21 @@ export type Database = {
         | "cancelada"
       fueling_status: "valido" | "cancelado"
       insurance_status: "ativa" | "a_vencer" | "vencida" | "cancelada"
+      integration_environment: "homologacao" | "producao"
+      integration_kind:
+        | "detran"
+        | "siafic"
+        | "ldap_sso"
+        | "fipe"
+        | "webhook"
+        | "api"
+      integration_log_status: "sucesso" | "parcial" | "erro"
+      integration_status:
+        | "nao_configurado"
+        | "configurado"
+        | "ativo"
+        | "erro"
+        | "desativado"
       invitation_status:
         | "convidada"
         | "respondida"
@@ -9354,6 +10002,7 @@ export type Database = {
         | "em_manutencao"
         | "concluida"
         | "cancelada"
+      market_value_origin: "manual" | "importada" | "api"
       obligation_status:
         | "pendente"
         | "quitada"
@@ -9469,6 +10118,7 @@ export type Database = {
         | "concluida"
         | "cancelada"
       vehicle_status: "ativo" | "manutencao" | "cedido" | "inativo" | "baixado"
+      webhook_delivery_status: "pendente" | "entregue" | "falha" | "descartada"
       workshop_status: "em_analise" | "ativo" | "suspenso" | "inativo"
     }
     CompositeTypes: {
@@ -9735,6 +10385,23 @@ export const Constants = {
       ],
       fueling_status: ["valido", "cancelado"],
       insurance_status: ["ativa", "a_vencer", "vencida", "cancelada"],
+      integration_environment: ["homologacao", "producao"],
+      integration_kind: [
+        "detran",
+        "siafic",
+        "ldap_sso",
+        "fipe",
+        "webhook",
+        "api",
+      ],
+      integration_log_status: ["sucesso", "parcial", "erro"],
+      integration_status: [
+        "nao_configurado",
+        "configurado",
+        "ativo",
+        "erro",
+        "desativado",
+      ],
       invitation_status: [
         "convidada",
         "respondida",
@@ -9753,6 +10420,7 @@ export const Constants = {
         "concluida",
         "cancelada",
       ],
+      market_value_origin: ["manual", "importada", "api"],
       obligation_status: [
         "pendente",
         "quitada",
@@ -9883,6 +10551,7 @@ export const Constants = {
         "cancelada",
       ],
       vehicle_status: ["ativo", "manutencao", "cedido", "inativo", "baixado"],
+      webhook_delivery_status: ["pendente", "entregue", "falha", "descartada"],
       workshop_status: ["em_analise", "ativo", "suspenso", "inativo"],
     },
   },
