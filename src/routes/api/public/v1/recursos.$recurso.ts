@@ -227,7 +227,10 @@ export const Route = createFileRoute("/api/public/v1/recursos/$recurso")({
         const ate = url.searchParams.get("ate");
         const alteradosDesde = url.searchParams.get("alterados_desde");
 
-        let q = supabaseAdmin
+        // A tabela é escolhida dinamicamente pelo mapa de recursos acima.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const db = supabaseAdmin as any;
+        let q = db
           .from(def.table)
           .select(def.columns, { count: "exact" })
           .eq("organization_id", key.organization_id)
@@ -243,7 +246,7 @@ export const Route = createFileRoute("/api/public/v1/recursos/$recurso")({
         const { data, count, error } = await q;
         if (error) return json({ error: "Não foi possível consultar o recurso." }, 500);
 
-        const rows = (data ?? []) as Record<string, unknown>[];
+        const rows = (data ?? []) as unknown as Record<string, unknown>[];
         for (const row of rows) {
           for (const col of def.maskCpf ?? []) if (col in row) row[col] = maskCpf(row[col]);
         }

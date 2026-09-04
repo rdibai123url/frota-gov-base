@@ -66,6 +66,7 @@ import { Route as TransparenciaSlugRouteImport } from './routes/transparencia.$s
 import { Route as AuthenticatedVeiculoIdRouteImport } from './routes/_authenticated/veiculo.$id'
 import { Route as ApiPublicHooksBackupDiarioRouteImport } from './routes/api/public/hooks/backup-diario'
 import { Route as ApiPublicV1FrotaRouteImport } from './routes/api/public/v1/frota'
+import { Route as ApiPublicV1RecursosRecursoRouteImport } from './routes/api/public/v1/recursos.$recurso'
 import { Route as ApiPublicV1TransparenciaSlugRouteImport } from './routes/api/public/v1/transparencia.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -373,6 +374,12 @@ const ApiPublicV1FrotaRoute = ApiPublicV1FrotaRouteImport.update({
   path: '/api/public/v1/frota',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicV1RecursosRecursoRoute =
+  ApiPublicV1RecursosRecursoRouteImport.update({
+    id: '/api/public/v1/recursos/$recurso',
+    path: '/api/public/v1/recursos/$recurso',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicV1TransparenciaSlugRoute =
   ApiPublicV1TransparenciaSlugRouteImport.update({
     id: '/api/public/v1/transparencia/$slug',
@@ -437,6 +444,7 @@ export interface FileRoutesByFullPath {
   '/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
   '/api/public/hooks/backup-diario': typeof ApiPublicHooksBackupDiarioRoute
   '/api/public/v1/frota': typeof ApiPublicV1FrotaRoute
+  '/api/public/v1/recursos/$recurso': typeof ApiPublicV1RecursosRecursoRoute
   '/api/public/v1/transparencia/$slug': typeof ApiPublicV1TransparenciaSlugRoute
 }
 export interface FileRoutesByTo {
@@ -496,6 +504,7 @@ export interface FileRoutesByTo {
   '/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
   '/api/public/hooks/backup-diario': typeof ApiPublicHooksBackupDiarioRoute
   '/api/public/v1/frota': typeof ApiPublicV1FrotaRoute
+  '/api/public/v1/recursos/$recurso': typeof ApiPublicV1RecursosRecursoRoute
   '/api/public/v1/transparencia/$slug': typeof ApiPublicV1TransparenciaSlugRoute
 }
 export interface FileRoutesById {
@@ -557,6 +566,7 @@ export interface FileRoutesById {
   '/_authenticated/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
   '/api/public/hooks/backup-diario': typeof ApiPublicHooksBackupDiarioRoute
   '/api/public/v1/frota': typeof ApiPublicV1FrotaRoute
+  '/api/public/v1/recursos/$recurso': typeof ApiPublicV1RecursosRecursoRoute
   '/api/public/v1/transparencia/$slug': typeof ApiPublicV1TransparenciaSlugRoute
 }
 export interface FileRouteTypes {
@@ -618,6 +628,7 @@ export interface FileRouteTypes {
     | '/veiculo/$id'
     | '/api/public/hooks/backup-diario'
     | '/api/public/v1/frota'
+    | '/api/public/v1/recursos/$recurso'
     | '/api/public/v1/transparencia/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -677,6 +688,7 @@ export interface FileRouteTypes {
     | '/veiculo/$id'
     | '/api/public/hooks/backup-diario'
     | '/api/public/v1/frota'
+    | '/api/public/v1/recursos/$recurso'
     | '/api/public/v1/transparencia/$slug'
   id:
     | '__root__'
@@ -737,6 +749,7 @@ export interface FileRouteTypes {
     | '/_authenticated/veiculo/$id'
     | '/api/public/hooks/backup-diario'
     | '/api/public/v1/frota'
+    | '/api/public/v1/recursos/$recurso'
     | '/api/public/v1/transparencia/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -748,6 +761,7 @@ export interface RootRouteChildren {
   TransparenciaSlugRoute: typeof TransparenciaSlugRoute
   ApiPublicHooksBackupDiarioRoute: typeof ApiPublicHooksBackupDiarioRoute
   ApiPublicV1FrotaRoute: typeof ApiPublicV1FrotaRoute
+  ApiPublicV1RecursosRecursoRoute: typeof ApiPublicV1RecursosRecursoRoute
   ApiPublicV1TransparenciaSlugRoute: typeof ApiPublicV1TransparenciaSlugRoute
 }
 
@@ -1152,6 +1166,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicV1FrotaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/v1/recursos/$recurso': {
+      id: '/api/public/v1/recursos/$recurso'
+      path: '/api/public/v1/recursos/$recurso'
+      fullPath: '/api/public/v1/recursos/$recurso'
+      preLoaderRoute: typeof ApiPublicV1RecursosRecursoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/v1/transparencia/$slug': {
       id: '/api/public/v1/transparencia/$slug'
       path: '/api/public/v1/transparencia/$slug'
@@ -1279,6 +1300,7 @@ const rootRouteChildren: RootRouteChildren = {
   TransparenciaSlugRoute: TransparenciaSlugRoute,
   ApiPublicHooksBackupDiarioRoute: ApiPublicHooksBackupDiarioRoute,
   ApiPublicV1FrotaRoute: ApiPublicV1FrotaRoute,
+  ApiPublicV1RecursosRecursoRoute: ApiPublicV1RecursosRecursoRoute,
   ApiPublicV1TransparenciaSlugRoute: ApiPublicV1TransparenciaSlugRoute,
 }
 export const routeTree = rootRouteImport
