@@ -17,6 +17,8 @@ import {
   sendEmail,
   type EmailSettings,
 } from "@/lib/email.server";
+import { NO_PUBLIC_BASE_MESSAGE, isPublicInviteLink, publicBase } from "@/lib/link-publico";
+
 
 const TOKEN_TTL_DAYS = 30;
 
@@ -57,44 +59,13 @@ async function hashToken(token: string) {
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-/**
- * Endereços internos (pré-visualização do editor e desenvolvimento) exigem login
- * da plataforma e NÃO servem para o fornecedor externo. Só um endereço público
- * (site publicado ou domínio próprio) pode ir no convite.
- */
-function isInternalHost(host: string) {
-  const h = host.toLowerCase();
-  return (
-    h.startsWith("localhost") ||
-    h.startsWith("127.0.0.1") ||
-    h.endsWith(".lovableproject.com") ||
-    h.endsWith(".lovableproject-dev.com") ||
-    h.endsWith(".gpt-eng.com") ||
-    h.endsWith(".gptengineer.run") ||
-    /^id-preview(-[a-z0-9]+)?--/i.test(h) ||
-    /-dev\.lovable\.app$/i.test(h)
-  );
-}
-
 function requestOrigin() {
   const origin = getRequestHeader("origin");
   if (origin) return origin.replace(/\/+$/, "");
   const host = getRequestHeader("host");
   if (!host) return "";
-  const proto = getRequestHeader("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
+  const proto = getRequestHeader("x-forwarded-proto") || "https";
   return `${proto}://${host}`;
-}
-
-function normalizeBase(value: string | null | undefined) {
-  const raw = (value ?? "").trim().replace(/\/+$/, "");
-  if (!raw) return "";
-  const withProto = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
-  try {
-    const url = new URL(withProto);
-    return `${url.protocol}//${url.host}`;
-  } catch {
-    return "";
-  }
 }
 
 /**
@@ -102,29 +73,27 @@ function normalizeBase(value: string | null | undefined) {
  *  1. endereço público configurado pelo órgão;
  *  2. endereço público do ambiente (PUBLIC_APP_URL / VITE_PUBLIC_APP_URL);
  *  3. endereço da requisição, apenas quando já for público.
- * `isPublic=false` significa que o link só funciona para quem tem acesso interno.
+ * Qualquer endereço interno (localhost, rede interna, pré-visualização do
+ * editor, ambiente de desenvolvimento) é descartado: nesse caso `base` é ""
+ * e nenhum link pode ser copiado ou enviado.
  */
 function resolveBase(orgBase?: string | null) {
-  const configured = normalizeBase(orgBase) || normalizeBase(process.env["PUBLIC_APP_URL"]) || normalizeBase(process.env["VITE_PUBLIC_APP_URL"]);
-  if (configured) return { base: configured, isPublic: true };
-  const origin = requestOrigin();
-  if (!origin) return { base: "", isPublic: false };
-  let host = "";
-  try {
-    host = new URL(origin).host;
-  } catch {
-    host = "";
-  }
-  return { base: origin, isPublic: Boolean(host) && !isInternalHost(host) };
+  const base =
+    publicBase(orgBase) ||
+    publicBase(process.env["PUBLIC_APP_URL"]) ||
+    publicBase(process.env["VITE_PUBLIC_APP_URL"]) ||
+    publicBase(requestOrigin());
+  return { base, isPublic: Boolean(base) };
 }
-
-const NO_PUBLIC_BASE_MESSAGE =
-  "Ainda não há um endereço público configurado para os links de cotação. O endereço de pré-visualização exige login da plataforma e não funciona para fornecedores. Publique o sistema (ou informe o endereço público em “Configurar envio”) antes de enviar convites.";
 
 function linkFor(token: string, orgBase?: string | null) {
   const { base, isPublic } = resolveBase(orgBase);
-  return { link: `${base}/cotacao/${token}`, isPublic };
+  if (!isPublic) return { link: null as string | null, isPublic: false };
+  const link = `${base}/cotacao/${token}`;
+  // Confere o endereço final montado (mesma regra do navegador).
+  return isPublicInviteLink(link) ? { link, isPublic: true } : { link: null as string | null, isPublic: false };
 }
+
 
 
 function isEmail(value: string) {
@@ -168,6 +137,16 @@ export const saveEmailSettings = createServerFn({ method: "POST" })
     const { data: allowed } = await supabase.rpc("can_manage_users");
     if (!allowed) throw new Error("Sem permissão para configurar o envio de e-mail.");
 
+    // O endereço público precisa ser mesmo público: nada de localhost, rede
+    // interna, ambiente de desenvolvimento ou pré-visualização do editor.
+    const typedBase = (data.publicBaseUrl ?? "").trim();
+    const requestedBase = typedBase ? publicBase(typedBase) : null;
+    if (typedBase && !requestedBase) {
+      throw new Error(
+        "Endereço público inválido. Informe um endereço https acessível de fora do órgão (endereços locais, de rede interna ou de pré-visualização não são aceitos).",
+      );
+    }
+
     const hasNewSecret = typeof data.secret === "string" && data.secret.trim().length > 0;
     if (hasNewSecret) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -194,7 +173,7 @@ export const saveEmailSettings = createServerFn({ method: "POST" })
       smtp_port: data.smtpPort,
       smtp_secure: data.smtpSecure,
       smtp_user: data.smtpUser || null,
-      public_base_url: (data.publicBaseUrl ?? "").trim() || null,
+      public_base_url: requestedBase,
       has_secret: hasNewSecret ? true : Boolean(existing?.has_secret),
       updated_by: userId,
     };
@@ -344,9 +323,15 @@ export const sendInvites = createServerFn({ method: "POST" })
       const token = randomToken();
       const tokenHash = await hashToken(token);
       const { link: inviteLink } = linkFor(token, publicBaseUrl);
+      // Redundância proposital: nada é enviado sem endereço público válido.
+      if (!inviteLink) {
+        results.push({ id: invite.id, email: invite.email, ok: false, error: NO_PUBLIC_BASE_MESSAGE });
+        continue;
+      }
       const message = renderInviteEmail({
         orgName: org?.short_name || org?.legal_name || "Órgão público",
         quotationCode: quotation.code ?? "—",
+
         description: quotation.description,
         specialty: quotation.specialty,
         deadlineText: deadlineText(quotation.deadline_at),
@@ -411,8 +396,17 @@ export const issueInviteLink = createServerFn({ method: "POST" })
     if (!invite) throw new Error("Convite não encontrado neste órgão.");
     const { data: mayLink } = await supabase.rpc("can_manage_maintenance");
     if (!mayLink) throw new Error("Sem permissão para gerar o link deste convite.");
-    const token = randomToken();
     const deadline = (invite.quotation as { deadline_at: string | null } | null)?.deadline_at ?? null;
+    const { publicBaseUrl } = await loadSettings(invite.organization_id);
+    // Sem endereço público não há link possível: não gira o token nem devolve link.
+    if (!resolveBase(publicBaseUrl).isPublic) {
+      return { link: null as string | null, isPublic: false, warning: NO_PUBLIC_BASE_MESSAGE, expiresAt: null as string | null };
+    }
+    const token = randomToken();
+    const { link, isPublic } = linkFor(token, publicBaseUrl);
+    if (!isPublic || !link) {
+      return { link: null as string | null, isPublic: false, warning: NO_PUBLIC_BASE_MESSAGE, expiresAt: null as string | null };
+    }
     const { error } = await supabase
       .from("quotation_invitations")
       .update({
@@ -422,10 +416,9 @@ export const issueInviteLink = createServerFn({ method: "POST" })
       })
       .eq("id", invite.id);
     if (error) throw new Error("Sem permissão para gerar o link deste convite.");
-    const { publicBaseUrl } = await loadSettings(invite.organization_id);
-    const { link, isPublic } = linkFor(token, publicBaseUrl);
-    return { link, isPublic, warning: isPublic ? null : NO_PUBLIC_BASE_MESSAGE, expiresAt: expiryFor(deadline) };
+    return { link, isPublic: true, warning: null as string | null, expiresAt: expiryFor(deadline) };
   });
+
 
 /* ------------------------- resposta pública (token) --------------------- */
 

@@ -29,6 +29,8 @@ import {
   type InviteTarget,
 } from "@/lib/cotacoes-convites.functions";
 import { dateTimeBR, dbMessage, supabase, useInvalidate, useSuppliers, useWorkshops } from "@/lib/frotagov";
+import { NO_PUBLIC_BASE_MESSAGE, isPublicInviteLink } from "@/lib/link-publico";
+
 
 type InviteRow = {
   id: string;
@@ -133,17 +135,20 @@ export function ConvitesCotacao({
   async function copyLink(id: string) {
     try {
       const { link, isPublic, warning } = await issueInviteLink({ data: { invitationId: id } });
-      await navigator.clipboard.writeText(link);
-      if (isPublic) {
-        toast.success("Link copiado. Um novo link foi gerado e o anterior deixou de valer.");
-      } else {
-        toast.warning(warning ?? "Endereço público não configurado.", { duration: 12000 });
+      // Segunda checagem, agora no navegador: link interno nunca vai para a
+      // área de transferência.
+      if (!isPublic || !link || !isPublicInviteLink(link)) {
+        toast.error(warning ?? NO_PUBLIC_BASE_MESSAGE, { duration: 12000 });
+        return;
       }
+      await navigator.clipboard.writeText(link);
+      toast.success("Link copiado. Um novo link foi gerado e o anterior deixou de valer.");
       refresh();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Não foi possível gerar o link.");
     }
   }
+
 
   async function removeInvite(id: string) {
     const { error } = await supabase.from("quotation_invitations").delete().eq("id", id);
@@ -655,9 +660,11 @@ function ConfiguracaoEmailDialog({
                 placeholder="https://frota.seuorgao.gov.br"
               />
               <p className="mt-1 text-xs text-muted-foreground">
-                É o endereço usado no link enviado ao fornecedor. O endereço de pré-visualização do editor exige login e
-                não funciona para quem está fora do órgão.
+                É o endereço usado no link enviado ao fornecedor. Precisa ser um endereço público (ex.:
+                https://frota.seuorgao.gov.br). Endereços locais, de rede interna ou de pré-visualização do editor não
+                são aceitos, porque exigem login e não abrem para quem está fora do órgão.
               </p>
+
             </div>
             <div className="sm:col-span-2">
               <Label htmlFor="secret">{provider === "smtp" ? "Senha do usuário SMTP" : "Chave de API do provedor"}</Label>
