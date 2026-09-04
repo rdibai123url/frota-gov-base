@@ -8883,6 +8883,7 @@ export type Database = {
       expire_backups: { Args: never; Returns: number }
       expire_fuel_authorizations: { Args: never; Returns: undefined }
       expire_fuel_authorizations_all: { Args: never; Returns: number }
+      export_table_columns: { Args: { _table: string }; Returns: string[] }
       fleet_consumption_segments: {
         Args: {
           _asset_class?: string
