@@ -498,39 +498,230 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
 
   "/cotacoes": t(
     "Cotações",
-    "Coleta e compara propostas de serviços e peças junto à rede credenciada antes da contratação, inclusive com convite por e-mail para empresas cadastradas ou não.",
+    "Coleta e compara propostas de serviços e de peças antes da contratação, com convite por e-mail ou link, lançamento manual de propostas e mapa comparativo.",
     [
-      "Abra a cotação descrevendo o serviço ou item e cadastre os itens solicitados: ao digitar a descrição, o sistema sugere itens já usados pelo próprio órgão — clique numa sugestão para preencher descrição e unidade, ou continue digitando para cadastrar um item novo.",
-      "Na aba Convites, clique em “Enviar convites”, busque empresas por nome, CNPJ ou e-mail e acrescente e-mails avulsos.",
-      "Revise a lista final, remova quem não deve receber e confirme o envio: cada empresa recebe uma mensagem individual, sem ver as demais.",
-      "Acompanhe a situação de cada convite, reenvie quando necessário ou copie o link para mandar por outro meio.",
-      "Compare as propostas recebidas e escolha a vencedora.",
-      "Para lançar proposta recebida por papel, e-mail ou WhatsApp, selecione a empresa no bloco “Registrar proposta recebida” — mesmo sem convite prévio — ou use “+ Cadastrar nova empresa” para incluir a empresa na hora, sem sair da cotação.",
-    ],
-
-    [
-      { label: "Objeto da cotação", description: "Descrição do serviço ou peça solicitada.", tags: REQ },
-      { label: "Item / serviço", description: "Descrição do item cotado; sugere automaticamente itens já usados no órgão (com unidade usual, número de usos e último uso), sem impedir o cadastro de itens inéditos.", tags: REQ },
-      { label: "Prazo limite", description: "Data final para resposta; também define a validade do link do convite.", tags: REQ },
-      { label: "Convites", description: "Empresas cadastradas e e-mails avulsos convidados a propor.", tags: COND },
-      { label: "Situação do convite", description: "Pendente (criado, ainda sem envio), Enviado, Erro no envio, Respondido e Prazo expirado.", tags: AUTO },
-      { label: "Histórico do convite", description: "Criação, envio, reenvios, número de tentativas, último erro e data da resposta.", tags: AUTO },
-      { label: "Envio de e-mail", description: "Servidor SMTP do órgão ou provedor de envio; sem configuração o sistema avisa e oferece o link para envio manual.", tags: EXT },
-      { label: "Propostas", description: "Valores informados por cada prestador convidado ou lançados manualmente pelo órgão.", tags: COND },
-      { label: "Cadastrar nova empresa", description: "Atalho no bloco de propostas que inclui a empresa na Rede credenciada do órgão (tipo, razão social, CNPJ/CPF, contato, endereço e especialidade) e já a seleciona na proposta." },
-
-      { label: "Menor valor", description: "Destacado automaticamente na comparação.", tags: CALC },
+      "Clique em Nova cotação, escolha o tipo (Serviços, Peças, ou Serviços e peças), descreva o objeto e informe o prazo final para recebimento da proposta.",
+      "Vincule o veículo ou bem quando a cotação for para um item da frota; deixe em branco para compras de estoque.",
+      "Na aba Itens solicitados, cadastre o que será cotado; nas peças, informe a quantidade que o órgão precisa.",
+      "Na aba Convites, envie e-mails às empresas ou copie o link público para outros meios.",
+      "Use Lançar proposta para registrar propostas recebidas fora do sistema.",
+      "Compare tudo no Mapa comparativo e aprove a proposta vencedora.",
     ],
     [
-      "As sugestões de itens vêm apenas do histórico do próprio órgão (cotações, propostas, catálogo de peças, ordens de serviço, manutenções, contratos e fornecimentos) e nunca reaproveitam preço, marca, fornecedor ou quantidade anterior.",
-      "A escolha de proposta que não seja a de menor valor exige justificativa.",
-      "Cada convite tem link próprio, que expira no prazo da cotação e não exige login do fornecedor.",
-      "Reenviar ou copiar o link gera um endereço novo: o anterior deixa de funcionar.",
-      "Quando o fornecedor responde, o convite passa a “Respondido” e a proposta fica vinculada à empresa; e-mail avulso que coincidir com empresa cadastrada é vinculado sem perder o histórico.",
-      "Sem provedor de e-mail configurado, o envio é bloqueado e o sistema não registra falso envio — use “Copiar link”.",
-      "Somente quem administra a frota pode convidar ou reenviar; a configuração do provedor é restrita à administração do órgão.",
+      { label: "Tipo da cotação", description: "Serviços, Peças, ou Serviços e peças. Define quais campos a empresa preenche na proposta.", tags: REQ },
+      { label: "Objeto da cotação", description: "Descrição do que está sendo cotado.", tags: REQ },
+      { label: "Prazo final para recebimento da proposta", description: "Data limite de resposta; também encerra o link enviado ao fornecedor.", tags: REQ },
+      { label: "Veículo ou bem", description: "Vincule quando a cotação for para um item da frota; pode ficar em branco em compras de estoque.", tags: COND },
+      { label: "Observações", description: "Informações complementares exibidas também na página do fornecedor." },
+      { label: "Situação da cotação", description: "Rascunho, Aberta, Em análise, Encerrada ou Cancelada.", tags: AUTO },
+      { label: "Valor das propostas", description: "Sempre o valor líquido, já descontado.", tags: CALC },
+    ],
+    [
+      "Rascunho permite montar itens e convites, mas o fornecedor ainda não responde; Aberta libera as respostas; Em análise interrompe novas propostas e libera a comparação; Encerrada e Cancelada bloqueiam alterações.",
+      "Valores aparecem no padrão 0,00 e R$ 0,00; totais, descontos e valor líquido são calculados pelo sistema.",
+      "Todos os dados, sugestões e históricos são do próprio órgão; nada é compartilhado entre órgãos.",
+      "O link do fornecedor é protegido por token e só funciona em endereço público do sistema — endereços de teste ou de pré-visualização não servem.",
     ],
   ),
+
+  "/cotacoes/itens": t(
+    "Itens solicitados",
+    "Lista o que o órgão quer cotar. É essa lista que o fornecedor recebe e preenche.",
+    [
+      "Digite a descrição: o sistema sugere itens já usados pelo próprio órgão; clique numa sugestão ou continue digitando para cadastrar um item novo.",
+      "Confira a unidade (peça, litro, hora, serviço).",
+      "Informe a quantidade quando o item for peça ou material.",
+    ],
+    [
+      { label: "Descrição do item", description: "O que está sendo pedido. Com autocomplete pelo histórico do órgão.", tags: REQ },
+      { label: "Sugestão do histórico", description: "Traz descrição e unidade usual de itens já cotados no órgão; nunca reaproveita preço, marca ou fornecedor.", tags: AUTO },
+      { label: "Unidade", description: "Unidade de medida usada na cotação e na proposta." },
+      { label: "Quantidade", description: "Definida pelo órgão nas peças e materiais; o fornecedor não pode alterá-la.", tags: COND },
+    ],
+    [
+      "Peça é item físico com quantidade e valor unitário; serviço é mão de obra ou execução, cotada por horas e valores globais.",
+      "O fornecedor não pode incluir itens no link público: responde exatamente ao que foi solicitado.",
+      "Itens inéditos podem ser cadastrados livremente, mesmo sem histórico.",
+    ],
+  ),
+
+  "/cotacoes/convites": t(
+    "Convites",
+    "Convida empresas a apresentar proposta, por e-mail ou por link, e acompanha a resposta de cada uma.",
+    [
+      "Clique em Enviar convites e busque empresas por nome, CNPJ ou e-mail.",
+      "Acrescente e-mails avulsos de empresas ainda não cadastradas, ou cadastre a empresa na hora.",
+      "Confirme o envio: cada empresa recebe uma mensagem individual, sem ver as demais.",
+      "Quando não houver envio por e-mail, use Copiar link e mande pelo canal que preferir.",
+      "Acompanhe a situação, reenvie, edite o destinatário ou exclua o convite enquanto o processo estiver aberto.",
+    ],
+    [
+      { label: "Empresas cadastradas", description: "Selecionadas da rede do órgão, com e-mail já preenchido." },
+      { label: "E-mails avulsos", description: "Para empresas ainda não cadastradas; a vinculação ocorre quando a empresa for cadastrada.", tags: COND },
+      { label: "Situação do convite", description: "Pendente (criado, sem envio), Enviado, Respondido, Prazo expirado, Erro no envio e Recusado.", tags: AUTO },
+      { label: "Histórico do convite", description: "Criação, envios, tentativas, último erro e data da resposta.", tags: AUTO },
+      { label: "Envio de e-mail", description: "Depende do provedor de envio configurado pelo órgão; sem configuração o sistema avisa e oferece o link.", tags: EXT },
+      { label: "Copiar link", description: "Endereço público e exclusivo daquele convite, protegido por token.", tags: AUTO },
+    ],
+    [
+      "Copiar link só funciona com o endereço público do sistema configurado; endereços de teste, de rede interna ou de pré-visualização nunca são enviados ao fornecedor.",
+      "Cada convite tem link próprio, protegido por token, sem login, válido até o prazo final da cotação.",
+      "Reenviar ou copiar o link gera um endereço novo: o anterior deixa de funcionar.",
+      "Depois do prazo, o link ainda abre para leitura, mas o envio de proposta fica bloqueado.",
+      "Sem provedor de e-mail configurado o envio é bloqueado e nada é registrado como enviado — use Copiar link.",
+      "Somente quem administra a frota pode convidar, reenviar ou excluir convites.",
+    ],
+  ),
+
+  "/cotacoes/lancar": t(
+    "Lançar proposta",
+    "Registra no sistema uma proposta recebida fora dele — em papel, e-mail, WhatsApp ou balcão.",
+    [
+      "Selecione a empresa; se ela ainda não existir, use “+ Cadastrar nova empresa” sem sair da cotação.",
+      "Preencha os campos conforme o tipo da cotação: serviços, peças, ou os dois grupos.",
+      "Informe validade, prazos, garantias e desconto, e confirme o lançamento.",
+    ],
+    [
+      { label: "Empresa / oficina / loja", description: "Pode ser escolhida mesmo sem convite prévio; o convite interno é criado sem envio de e-mail.", tags: REQ },
+      { label: "Cadastrar nova empresa", description: "Inclui a empresa na rede do órgão (tipo, razão social, CNPJ/CPF, contato, endereço e especialidade) e já a seleciona." },
+      { label: "Campos da proposta", description: "Exibidos conforme o tipo da cotação escolhido na abertura.", tags: COND },
+      { label: "Origem", description: "Propostas lançadas aqui aparecem como Manual em Propostas recebidas.", tags: AUTO },
+    ],
+    [
+      "A proposta manual segue exatamente as mesmas regras de cálculo da recebida por link.",
+      "Cada empresa tem uma proposta por cotação; um novo lançamento para a mesma empresa substitui os valores anteriores.",
+    ],
+  ),
+
+  "/cotacoes/propostas": t(
+    "Propostas recebidas",
+    "Reúne todas as propostas da cotação, lançadas pelo órgão ou enviadas pelo fornecedor no link público.",
+    [
+      "Use o filtro para ver todas, só as lançadas manualmente ou só as recebidas por link.",
+      "Abra a proposta para conferir serviços, peças, prazos, garantias e desconto.",
+      "Desclassifique, com o motivo, a proposta que não atender às condições.",
+    ],
+    [
+      { label: "Origem", description: "Manual (lançada pelo órgão) ou Link (enviada pelo fornecedor).", tags: AUTO },
+      { label: "Situação da proposta", description: "Recebida, aprovada ou desclassificada.", tags: AUTO },
+      { label: "Validade da proposta (dias)", description: "Prazo em que o fornecedor mantém os valores." },
+      { label: "Prazo de execução", description: "Dias para executar o serviço.", tags: COND },
+      { label: "Garantia dos serviços / Garantia das peças", description: "Informadas separadamente, em dias, no cabeçalho da proposta.", tags: COND },
+      { label: "Desconto", description: "Informado em R$ ou em %; o sistema converte e aplica sobre o total bruto.", tags: CALC },
+      { label: "Subtotais, desconto e valor líquido", description: "Calculados pelo sistema a partir dos valores informados.", tags: CALC },
+      { label: "Valor exibido", description: "Sempre o valor líquido final, já com o desconto.", tags: CALC },
+      { label: "Motivo da desclassificação", description: "Exigido ao desclassificar uma proposta.", tags: COND },
+    ],
+    [
+      "A garantia é da proposta inteira (serviços e peças), não item a item.",
+      "Desconto em percentual não pode passar de 100%; desconto em valor não pode superar o total bruto.",
+      "Proposta desclassificada continua registrada e sai da comparação.",
+    ],
+  ),
+
+  "/cotacoes/servicos": t(
+    "Proposta de serviços",
+    "Campos usados quando a cotação é de serviços ou da parte de serviços de uma cotação mista.",
+    [
+      "Informe validade, prazo de execução e garantia dos serviços.",
+      "Lance as horas-homem e o valor da hora; o total da mão de obra é calculado.",
+      "Use o valor global dos demais serviços para o que não é cobrado por hora.",
+    ],
+    [
+      { label: "Validade da proposta (dias)", description: "Tempo em que a empresa mantém os valores." },
+      { label: "Prazo de execução (dias)", description: "Tempo para concluir o serviço." },
+      { label: "Garantia dos serviços (dias)", description: "Garantia da execução." },
+      { label: "Quantidade de horas", description: "Horas-homem previstas." },
+      { label: "Valor da hora/homem (R$)", description: "Valor unitário da hora." },
+      { label: "Total da mão de obra", description: "Horas multiplicadas pelo valor da hora.", tags: CALC },
+      { label: "Valor global dos demais serviços (R$)", description: "Serviços não cobrados por hora." },
+      { label: "Desconto", description: "Em R$ ou %, aplicado ao total bruto.", tags: CALC },
+      { label: "Observações", description: "Condições e esclarecimentos da empresa." },
+    ],
+  ),
+
+  "/cotacoes/pecas": t(
+    "Proposta de peças",
+    "Campos usados quando a cotação é de peças ou da parte de peças de uma cotação mista.",
+    [
+      "Para cada item solicitado, informe marca, nº/código e valor unitário.",
+      "Confira o total de cada item e o total geral, calculados automaticamente.",
+      "Informe validade, garantia das peças e desconto.",
+    ],
+    [
+      { label: "Marca", description: "Marca oferecida para o item." },
+      { label: "Nº / código da peça", description: "Referência do fabricante ou do catálogo." },
+      { label: "Quantidade", description: "Definida pelo órgão; fica bloqueada para o fornecedor.", tags: AUTO },
+      { label: "Valor unitário (R$)", description: "Preço por unidade do item." },
+      { label: "Total do item", description: "Quantidade multiplicada pelo valor unitário.", tags: CALC },
+      { label: "Total geral das peças", description: "Soma dos itens.", tags: CALC },
+      { label: "Garantia das peças (dias)", description: "Informada uma vez, no cabeçalho da proposta, valendo para todos os itens." },
+      { label: "Desconto", description: "Em R$ ou %, aplicado ao total bruto.", tags: CALC },
+      { label: "Observações", description: "Condições e esclarecimentos da empresa." },
+    ],
+    ["A garantia é geral da proposta: não existe garantia por item."],
+  ),
+
+  "/cotacoes/servicos-pecas": t(
+    "Proposta de serviços e peças",
+    "Reúne, na mesma proposta, o bloco de serviços e o bloco de peças.",
+    [
+      "Preencha o bloco de serviços (horas, valor da hora e serviços globais).",
+      "Preencha o bloco de peças (marca, código e valor unitário de cada item solicitado).",
+      "Informe as duas garantias, o desconto e confira o valor líquido.",
+    ],
+    [
+      { label: "Garantia dos serviços (dias)", description: "Garantia da execução." },
+      { label: "Garantia das peças (dias)", description: "Garantia dos materiais fornecidos." },
+      { label: "Subtotal de serviços e Subtotal de peças", description: "Calculados separadamente e somados no total bruto.", tags: CALC },
+      { label: "Valor líquido final", description: "Total bruto menos o desconto.", tags: CALC },
+    ],
+    ["As duas garantias são independentes e ambas ficam registradas na proposta."],
+  ),
+
+  "/cotacoes/publica": t(
+    "Página do fornecedor",
+    "Tela aberta pelo link do convite, onde a empresa consulta o pedido do órgão e envia sua proposta, sem login.",
+    [
+      "Confira o cabeçalho com o órgão, o tipo da cotação, o objeto e o prazo final.",
+      "Preencha os campos solicitados conforme o tipo da cotação.",
+      "Envie a proposta antes do prazo final.",
+    ],
+    [
+      { label: "Cabeçalho institucional", description: "Brasão, nome do órgão, CNPJ e cidade/UF.", tags: AUTO },
+      { label: "Tipo da cotação, objeto e observações", description: "Definidos pelo órgão.", tags: AUTO },
+      { label: "Veículo ou bem", description: "Exibido apenas quando a cotação estiver vinculada a um item da frota.", tags: COND },
+      { label: "Prazo final para recebimento da proposta", description: "Data limite para envio.", tags: AUTO },
+      { label: "Quantidade das peças", description: "Definida pelo órgão e bloqueada para o fornecedor.", tags: AUTO },
+      { label: "Horas-homem", description: "Editáveis pelo fornecedor nas cotações de serviços.", tags: COND },
+    ],
+    [
+      "A empresa preenche apenas o que foi solicitado e não pode acrescentar itens.",
+      "Depois do prazo a página continua abrindo para leitura, mas não é possível editar nem enviar.",
+      "O link é individual e protegido por token; endereços de teste ou pré-visualização não valem para fornecedor externo.",
+    ],
+  ),
+
+  "/cotacoes/mapa": t(
+    "Mapa comparativo",
+    "Compara lado a lado as propostas válidas e apoia a decisão do órgão.",
+    [
+      "Confira, por item e no total, os valores de cada empresa.",
+      "Verifique o menor valor destacado, sempre sobre a base líquida.",
+      "Registre a análise técnica e aprove a proposta vencedora.",
+    ],
+    [
+      { label: "Propostas comparadas", description: "Somente as válidas; desclassificadas ficam de fora.", tags: AUTO },
+      { label: "Desconto e valor líquido", description: "Exibidos por proposta.", tags: CALC },
+      { label: "Menor valor", description: "Destacado automaticamente pelo valor líquido.", tags: CALC },
+      { label: "Justificativa de escolha", description: "Exigida quando a proposta aprovada não for a de menor valor.", tags: COND },
+      { label: "Justificativa de quantidade", description: "Exigida quando houver menos de três propostas válidas.", tags: COND },
+      { label: "Análise técnica", description: "Registro do parecer do órgão sobre as propostas." },
+      { label: "Proposta aprovada", description: "Passa a ser a base para a ordem de serviço ou compra.", tags: AUTO },
+    ],
+    ["A comparação usa sempre o valor líquido, nunca o bruto."],
+  ),
+
 
 
   "/ordens-servico": t(
