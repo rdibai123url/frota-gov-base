@@ -987,7 +987,20 @@ function QuotationDetail({
               </Button>
             </form>
           )}
+
+          <NovaEmpresaCotacaoDialog
+            open={newCompanyOpen}
+            onOpenChange={setNewCompanyOpen}
+            orgId={orgId}
+            userId={userId}
+            userName={userName}
+            defaultSpecialty={quotation.specialty}
+            existing={workshops}
+            quotationId={quotation.id}
+            onCreated={(id) => setProposalWorkshop(id)}
+          />
         </TabsContent>
+
 
         <TabsContent value="mapa" className="space-y-4">
           <div className="overflow-x-auto">
