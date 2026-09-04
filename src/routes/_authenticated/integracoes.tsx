@@ -67,6 +67,8 @@ import {
   type WebhookEndpoint,
 } from "@/lib/integracoes";
 import { sendWebhookTest, testConnector } from "@/lib/integracoes.functions";
+import { FipePanel } from "@/components/integracao-fipe";
+import { LdapPanel, LoginEventsPanel, SsoPanel } from "@/components/integracao-identidade";
 
 export const Route = createFileRoute("/_authenticated/integracoes")({
   head: () => ({
@@ -93,6 +95,10 @@ const ICONS: Record<IntegrationKind, typeof Car> = {
   detran: Car,
   siafic: Landmark,
   ldap_sso: KeyRound,
+  oidc: KeyRound,
+  saml: KeyRound,
+  ldap: KeyRound,
+  serpro: Car,
   fipe: Coins,
   webhook: WebhookIcon,
   api: Plug,
@@ -199,11 +205,31 @@ function Integracoes() {
       <Tabs defaultValue="conectores" className="space-y-4">
         <TabsList className="flex-wrap">
           <TabsTrigger value="conectores">Conectores</TabsTrigger>
+          <TabsTrigger value="fipe">FIPE / valor de mercado</TabsTrigger>
           <TabsTrigger value="detran">DETRAN</TabsTrigger>
           <TabsTrigger value="siafic">SIAFIC / Contabilidade</TabsTrigger>
+          <TabsTrigger value="identidade">Login institucional</TabsTrigger>
+          <TabsTrigger value="acessos">Acessos</TabsTrigger>
           <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
           <TabsTrigger value="logs">Histórico técnico</TabsTrigger>
         </TabsList>
+
+        {/* ------------------------------ FIPE ------------------------------ */}
+        <TabsContent value="fipe">
+          <FipePanel />
+        </TabsContent>
+
+        {/* -------------------------- identidade ---------------------------- */}
+        <TabsContent value="identidade" className="space-y-4">
+          <SsoPanel />
+          <LdapPanel />
+        </TabsContent>
+
+        {/* ---------------------------- acessos ----------------------------- */}
+        <TabsContent value="acessos">
+          <LoginEventsPanel />
+        </TabsContent>
+
 
         {/* --------------------------- conectores --------------------------- */}
         <TabsContent value="conectores">

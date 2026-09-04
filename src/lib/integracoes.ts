@@ -86,6 +86,54 @@ export const CONNECTOR_META: Record<
     secretLabel: "FIPE_API_KEY",
     testable: true,
   },
+  serpro: {
+    label: "SERPRO / SENATRAN (RENAVAM)",
+    description:
+      "Consulta oficial de dados de veículo e condutor na base nacional. Disponível mediante contratação e credenciais do órgão junto ao SERPRO/SENATRAN. Sem credencial, nenhuma consulta é feita.",
+    fields: [
+      { key: "produto", label: "Produto contratado", placeholder: "Consulta Veicular" },
+      { key: "cnpj_orgao", label: "CNPJ do órgão contratante" },
+      { key: "consumer_key", label: "Consumer Key" },
+    ],
+    secretLabel: "SERPRO_API_TOKEN",
+    testable: true,
+  },
+  oidc: {
+    label: "SSO — OIDC",
+    description:
+      "Login institucional por OpenID Connect. Segredos ficam somente no servidor; o login padrão do FrotaGov permanece disponível.",
+    fields: [
+      { key: "issuer", label: "Issuer / Discovery URL" },
+      { key: "client_id", label: "Client ID" },
+      { key: "dominio", label: "Domínio de e-mail" },
+    ],
+    secretLabel: "OIDC_CLIENT_SECRET",
+    testable: true,
+  },
+  saml: {
+    label: "SSO — SAML 2.0",
+    description:
+      "Login institucional por SAML 2.0 com metadados do provedor de identidade do órgão.",
+    fields: [
+      { key: "metadata_url", label: "URL de metadados do IdP" },
+      { key: "entity_id", label: "Entity ID" },
+      { key: "dominio", label: "Domínio de e-mail" },
+    ],
+    secretLabel: "SAML_SIGNING_CERT",
+    testable: true,
+  },
+  ldap: {
+    label: "Diretório LDAP / Active Directory",
+    description:
+      "Sincronização de usuários e grupos do diretório corporativo por gateway seguro. Credenciais ficam somente no servidor.",
+    fields: [
+      { key: "host", label: "Endereço do gateway", placeholder: "https://gateway.orgao.gov.br" },
+      { key: "base_dn", label: "Base DN", placeholder: "dc=orgao,dc=gov,dc=br" },
+      { key: "bind_dn", label: "Usuário de leitura (bind DN)" },
+    ],
+    secretLabel: "LDAP_BIND_PASSWORD",
+    testable: true,
+  },
   webhook: {
     label: "Webhooks",
     description:
