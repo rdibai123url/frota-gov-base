@@ -43,7 +43,13 @@ const FORBIDDEN_COLUMNS = new Set([
 ]);
 
 /** Tabelas técnicas/efêmeras ou de segredos que não entram no pacote. */
-const EXCLUDED_TABLES = new Set(["org_api_keys", "cron_secrets", "platform_sessions", "platform_settings"]);
+const EXCLUDED_TABLES = new Set([
+  "org_api_keys",
+  "cron_secrets",
+  "platform_sessions",
+  "platform_settings",
+  "org_email_secrets",
+]);
 
 type ModuleDef = {
   /** Nome do arquivo (sem extensão) dentro da pasta. */
@@ -69,6 +75,7 @@ export const EXPORT_MODULES: ModuleDef[] = [
   { folder: "01_orgao", file: "usuarios_papeis", table: "user_roles" },
   { folder: "01_orgao", file: "centros_de_custo", table: "cost_centers" },
   { folder: "01_orgao", file: "contadores_numeracao", table: "org_counters" },
+  { folder: "01_orgao", file: "envio_de_email_configuracao", table: "org_email_settings" },
 
   { folder: "02_frota", file: "veiculos", table: "vehicles", json: true },
   { folder: "02_frota", file: "maquinas_e_equipamentos_tipos", table: "equipment_types" },

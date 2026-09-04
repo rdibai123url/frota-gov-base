@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { PageHeader } from "@/components/app-shell";
+import { ConvitesCotacao } from "@/components/convites-cotacao";
 import { MoneyInput } from "@/components/form-fields";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { parseBRNumber } from "@/lib/format";
 import {
-  INVITATION_STATUS,
   MIN_PROPOSALS,
   PROPOSAL_STATUS,
   QUOTATION_STATUS,
@@ -78,7 +78,7 @@ function Cotacoes() {
   const { data: vehicles = [] } = useVehicles();
   const { data: units = [] } = useUnits();
   const { data: requests = [] } = useMaintenanceRequests();
-  const { canManageFleet, orgId, userId, userName } = usePerms();
+  const { canManageFleet, canManageUsers, orgId, userId, userName } = usePerms();
   const invalidate = useInvalidate();
 
   const [open, setOpen] = useState(false);
@@ -370,6 +370,7 @@ function Cotacoes() {
             <QuotationDetail
               quotation={current}
               canManage={canManageFleet}
+              canManageUsers={canManageUsers}
               userId={userId}
               userName={userName}
               orgId={orgId}
@@ -385,6 +386,7 @@ function Cotacoes() {
 function QuotationDetail({
   quotation,
   canManage,
+  canManageUsers,
   userId,
   userName,
   orgId,
@@ -392,6 +394,7 @@ function QuotationDetail({
 }: {
   quotation: QuotationRow;
   canManage: boolean;
+  canManageUsers: boolean;
   userId: string | null;
   userName: string;
   orgId: string | null;
@@ -644,7 +647,7 @@ function QuotationDetail({
       <Tabs defaultValue="itens" className="mt-2">
         <TabsList>
           <TabsTrigger value="itens">Itens solicitados</TabsTrigger>
-          <TabsTrigger value="oficinas">Oficinas convidadas</TabsTrigger>
+          <TabsTrigger value="oficinas">Convites</TabsTrigger>
           <TabsTrigger value="propostas">Propostas</TabsTrigger>
           <TabsTrigger value="mapa">Mapa comparativo</TabsTrigger>
         </TabsList>
@@ -708,51 +711,20 @@ function QuotationDetail({
           )}
         </TabsContent>
 
-        <TabsContent value="oficinas" className="space-y-3">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Oficina</TableHead>
-                <TableHead>Convite</TableHead>
-                <TableHead>Situação</TableHead>
-                <TableHead className="w-52" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {invites.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={4} className="py-6 text-center text-muted-foreground">
-                    Nenhuma oficina convidada.
-                  </TableCell>
-                </TableRow>
-              )}
-              {invites.map((i) => (
-                <TableRow key={i.id}>
-                  <TableCell>{i.workshop?.trade_name || i.workshop?.legal_name}</TableCell>
-                  <TableCell className="text-sm">{dateTimeBR(i.invited_at)}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{labelOf(INVITATION_STATUS, i.status)}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {canManage && !closed && i.status === "convidada" && (
-                      <div className="flex justify-end gap-1">
-                        <Button variant="outline" size="sm" onClick={() => setInviteStatus(i.id, "recusada")}>
-                          Recusou
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => setInviteStatus(i.id, "sem_resposta")}>
-                          Sem resposta
-                        </Button>
-                      </div>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <TabsContent value="oficinas" className="space-y-4">
+          <ConvitesCotacao
+            quotationId={quotation.id}
+            invites={invites as never}
+            canManage={canManage}
+            canConfigure={canManageUsers}
+            closed={closed}
+            specialty={quotation.specialty}
+          />
+
           {canManage && !closed && (
-            <div className="flex flex-wrap items-end gap-2">
+            <div className="flex flex-wrap items-end gap-2 rounded-md border bg-muted/30 p-3">
               <div className="min-w-64 flex-1">
-                <Label>Oficina credenciada apta ({quotation.specialty || "qualquer especialidade"})</Label>
+                <Label>Convidar oficina credenciada apta ({quotation.specialty || "qualquer especialidade"})</Label>
                 <Select value={inviteWorkshop} onValueChange={setInviteWorkshop}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
@@ -766,8 +738,8 @@ function QuotationDetail({
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={invite} disabled={busy}>
-                Convidar
+              <Button variant="outline" onClick={invite} disabled={busy}>
+                Registrar convite sem e-mail
               </Button>
             </div>
           )}
@@ -878,10 +850,10 @@ function QuotationDetail({
                   </SelectTrigger>
                   <SelectContent>
                     {invites
-                      .filter((i) => !proposals.some((p) => p.workshop_id === i.workshop_id))
+                      .filter((i) => !!i.workshop_id && !proposals.some((p) => p.workshop_id === i.workshop_id))
                       .map((i) => (
-                        <SelectItem key={i.workshop_id} value={i.workshop_id}>
-                          {i.workshop?.trade_name || i.workshop?.legal_name}
+                        <SelectItem key={i.workshop_id!} value={i.workshop_id!}>
+                          {i.workshop?.trade_name || i.workshop?.legal_name || i.email}
                         </SelectItem>
                       ))}
                   </SelectContent>

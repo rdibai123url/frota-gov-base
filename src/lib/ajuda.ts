@@ -498,19 +498,34 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
 
   "/cotacoes": t(
     "Cotações",
-    "Coleta e compara propostas de serviços e peças junto à rede credenciada antes da contratação.",
+    "Coleta e compara propostas de serviços e peças junto à rede credenciada antes da contratação, inclusive com convite por e-mail para empresas cadastradas ou não.",
     [
-      "Abra a cotação descrevendo o serviço ou item.",
-      "Convide os prestadores e registre as propostas.",
-      "Compare os valores e escolha a vencedora.",
+      "Abra a cotação descrevendo o serviço ou item e cadastre os itens solicitados.",
+      "Na aba Convites, clique em “Enviar convites”, busque empresas por nome, CNPJ ou e-mail e acrescente e-mails avulsos.",
+      "Revise a lista final, remova quem não deve receber e confirme o envio: cada empresa recebe uma mensagem individual, sem ver as demais.",
+      "Acompanhe a situação de cada convite, reenvie quando necessário ou copie o link para mandar por outro meio.",
+      "Compare as propostas recebidas e escolha a vencedora.",
     ],
     [
       { label: "Objeto da cotação", description: "Descrição do serviço ou peça solicitada.", tags: REQ },
+      { label: "Prazo limite", description: "Data final para resposta; também define a validade do link do convite.", tags: REQ },
+      { label: "Convites", description: "Empresas cadastradas e e-mails avulsos convidados a propor.", tags: COND },
+      { label: "Situação do convite", description: "Pendente (criado, ainda sem envio), Enviado, Erro no envio, Respondido e Prazo expirado.", tags: AUTO },
+      { label: "Histórico do convite", description: "Criação, envio, reenvios, número de tentativas, último erro e data da resposta.", tags: AUTO },
+      { label: "Envio de e-mail", description: "Servidor SMTP do órgão ou provedor de envio; sem configuração o sistema avisa e oferece o link para envio manual.", tags: EXT },
       { label: "Propostas", description: "Valores informados por cada prestador convidado." },
       { label: "Menor valor", description: "Destacado automaticamente na comparação.", tags: CALC },
     ],
-    ["A escolha de proposta que não seja a de menor valor exige justificativa."],
+    [
+      "A escolha de proposta que não seja a de menor valor exige justificativa.",
+      "Cada convite tem link próprio, que expira no prazo da cotação e não exige login do fornecedor.",
+      "Reenviar ou copiar o link gera um endereço novo: o anterior deixa de funcionar.",
+      "Quando o fornecedor responde, o convite passa a “Respondido” e a proposta fica vinculada à empresa; e-mail avulso que coincidir com empresa cadastrada é vinculado sem perder o histórico.",
+      "Sem provedor de e-mail configurado, o envio é bloqueado e o sistema não registra falso envio — use “Copiar link”.",
+      "Somente quem administra a frota pode convidar ou reenviar; a configuração do provedor é restrita à administração do órgão.",
+    ],
   ),
+
 
   "/ordens-servico": t(
     "Ordens de Serviço",
