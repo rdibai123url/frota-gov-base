@@ -145,6 +145,11 @@ export const saveEmailSettings = createServerFn({ method: "POST" })
     return { ok: true, hasSecret: payload.has_secret };
   });
 
+/** Informa se a plataforma já tem uma chave Resend disponível (sem revelá-la). */
+export const getEmailProviderStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => ({ platformResend: Boolean(process.env["RESEND_API_KEY"]) }));
+
 /* ------------------------------- convites ------------------------------- */
 
 export const createInvites = createServerFn({ method: "POST" })
