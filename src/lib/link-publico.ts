@@ -53,18 +53,16 @@ export function publicBase(value: string | null | undefined): string {
   const base = normalizeBase(value);
   if (!base) return "";
   let host = "";
-  let protocol = "";
   try {
-    const url = new URL(base);
-    host = url.host;
-    protocol = url.protocol;
+    host = new URL(base).host;
   } catch {
     return "";
   }
-  if (protocol !== "https:") return "";
   if (isInternalHost(host)) return "";
-  return base;
+  // Endereço externo sempre em https (link de fornecedor nunca sai em http).
+  return `https://${host}`;
 }
+
 
 /** Confere o link final (usado antes de escrever na área de transferência). */
 export function isPublicInviteLink(link: string | null | undefined): boolean {
