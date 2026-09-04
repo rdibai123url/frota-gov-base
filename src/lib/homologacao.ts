@@ -4,8 +4,8 @@
  * "Matriz de Funcionalidades", exclusivas do Super Admin.
  */
 
-export const APP_VERSION = "10.6.0";
-export const APP_STAGE = "Homologação geral (Fase 10 — Blocos 1 a 6)";
+export const APP_VERSION = "11.0.0";
+export const APP_STAGE = "Versão de Lançamento (Fase 10 concluída — Blocos 1 a 6 fechados e auditados)";
 
 export type VersionEntry = { version: string; date: string; title: string; summary: string };
 
@@ -29,6 +29,9 @@ export const VERSION_HISTORY: VersionEntry[] = [
   { version: "10.4.0", date: "Fase 10 — Blocos 3 e 4", title: "Rede credenciada digital e almoxarifado", summary: "Credenciados com portal próprio, cartão virtual do bem com QR, captura operacional de abastecimento e manutenção, catálogo de peças com compatibilidade, ordens de fornecimento, almoxarifado com saldos, movimentações, reservas e inventário." },
   { version: "10.5.0", date: "Fase 10 — Exportação integral", title: "Exportação integral de dados por órgão", summary: "Pacote .zip com todos os módulos em CSV e JSON, manifesto, checksum SHA-256 e restrição de acesso, para migração, auditoria e alimentação de outros sistemas." },
   { version: "10.6.0", date: "Fase 10 — Blocos 5 e 6", title: "Valor de mercado, integrações preparadas, ESG e geolocalização", summary: "Histórico de valor de mercado/avaliação por bem integrado ao custo total, Central de Integrações (DETRAN, SIAFIC, LDAP/SSO, FIPE, Webhooks e API), API v1 ampliada com escopos, filtros, paginação, limite de requisições e auditoria, webhooks com HMAC e reenvio com backoff, painel de sustentabilidade com fatores de emissão parametrizáveis e mapa da rede credenciada com busca por proximidade." },
+  { version: "10.7.0", date: "Rodada 1 — Etapas 1 e 2", title: "Padrão numérico global, autopreenchimento e geocodificação", summary: "Formatação pt-BR unificada de percentual, quantidade, quilometragem e horímetro; seletor pesquisável reaproveitando cadastros; geocodificação automática de postos, oficinas, credenciados e entidades externas com cache e coordenadas manuais; mapa interativo real da rede." },
+  { version: "10.8.0", date: "Rodada 2 — Etapas 3 e 4", title: "FIPE, dados oficiais e identidade institucional", summary: "Consulta FIPE por marca/modelo/ano com vínculo do bem, histórico mensal de valor e depreciação; consulta de dados oficiais do veículo com aplicação assistida e histórico; login institucional OIDC/SAML e diretório corporativo (LDAP) com mapeamento de perfis, teste de conexão e histórico de acessos." },
+  { version: "11.0.0", date: "Rodada 3 — Etapas 5 e 6", title: "Versão de Lançamento", summary: "Relatório de aderência a licitações por requisito (atende, parcial, depende de credencial, fora do núcleo), matriz de homologação atualizada, exportação integral ampliada com FIPE, geocodificação, integrações, identidade e acessos, auditoria funcional do produto com classificação essencial/avançada/redundante e menu reorganizado em áreas administrativas." },
   { version: "9.4.0", date: "Pós-Fase 9 — Diárias e migração por tipo", title: "Diárias e migração individual", summary: "Módulo de diárias (RD e CD) com fluxo de aprovação, impressão institucional, indicadores, alertas e relatório próprio; migração de dados visível em Cadastros, por tipo individual, agrupada em cadastros básicos, contratos e orçamento, operação e legal/patrimonial, com suporte a CSV, XLSX e JSON." },
 ];
 
@@ -67,7 +70,10 @@ export const ACTIVE_MODULES: ModuleInfo[] = [
   { module: "Exportação integral de dados", route: "/exportacao", status: "ativo", note: "Restrita a Super Admin, Administrador do órgão e Auditoria." },
   { module: "Central de Integrações", route: "/integracoes", status: "parcial", note: "Estrutura, mapeamentos e histórico prontos; cada conector depende das credenciais do órgão." },
   { module: "Sustentabilidade da frota (ESG)", route: "/sustentabilidade", status: "ativo", note: "Estimativas a partir de fatores de emissão parametrizáveis." },
-  { module: "Mapa da rede credenciada", route: "/mapa-rede", status: "ativo", note: "Distância aproximada em linha reta." },
+  { module: "Mapa da rede credenciada", route: "/mapa-rede", status: "ativo", note: "Mapa interativo com geocodificação automática; distância aproximada em linha reta." },
+  { module: "Valor de mercado e FIPE", route: "/integracoes", status: "ativo", note: "Base pública da FIPE; base contratada depende de credencial do órgão." },
+  { module: "Consulta de dados oficiais do veículo", route: "/integracoes", status: "parcial", note: "Depende de convênio e credenciais (SERPRO/SENATRAN/DETRAN)." },
+  { module: "Login institucional (OIDC/SAML) e diretório corporativo", route: "/integracoes", status: "parcial", note: "Configuração e teste prontos; ativação depende do provedor do órgão." },
 
 ];
 
@@ -95,13 +101,25 @@ export const TECH_CHECKLIST: ChecklistItem[] = [
   { item: "Responsividade", status: "ok", detail: "Telas verificadas em 1280 px e 390 px, sem rolagem horizontal indevida." },
   { item: "Unicidade de cadastros", status: "ok", detail: "Unidades (nome e sigla), fornecedores, oficinas e entidades externas não aceitam duplicidade dentro do mesmo órgão." },
   { item: "API v1 e Portal da Transparência", status: "ok", detail: "API exige chave válida com escopo de frota e devolve páginas; o portal publica apenas agregados e dados abertos em CSV." },
+  { item: "Nenhum segredo em tela, log, API ou exportação", status: "ok", detail: "Senhas, hashes, tokens, certificados, chaves de API, segredos de webhook e senhas de diretório são removidos de qualquer saída, inclusive de colunas JSON." },
+  { item: "Conectores externos sem credencial", status: "ok", detail: "Nenhum conector que dependa de credencial não fornecida aparece como ativo; a ação correspondente fica desabilitada com aviso." },
+  { item: "Menu e rotas sem duplicidade", status: "ok", detail: "Menu reorganizado em áreas administrativas; cada rota aparece uma única vez e todas as rotas referenciadas existem." },
+  { item: "Regressão da Rodada 3", status: "parcial", detail: "Verificação de tipos, build de produção, rotas, importações, regras de acesso e conferências de banco executadas; as telas internas não foram revalidadas visualmente com sessão autenticada nesta rodada." },
   { item: "Envio de e-mail com domínio próprio", status: "parcial", detail: "Os e-mails de autenticação usam o remetente padrão do provedor; o domínio institucional exige verificação pelo órgão." },
 ];
+
+/**
+ * Classificação de aderência usada nos relatórios para licitações:
+ * atendimento total, parcial, dependente de credencial/parceiro externo ou
+ * item que não faz parte do núcleo do produto.
+ */
+export const MATRIX_STATUSES = ["Sim", "Parcial", "Depende de credencial", "Fora do núcleo", "Não"] as const;
+export type MatrixStatus = (typeof MATRIX_STATUSES)[number];
 
 export type MatrixRow = {
   module: string;
   feature: string;
-  status: "Sim" | "Parcial" | "Não";
+  status: MatrixStatus;
   note: string;
   evidence: string;
 };
@@ -123,7 +141,7 @@ export const FEATURE_MATRIX: MatrixRow[] = [
   { module: "Abastecimento", feature: "Autorização prévia com código e QR Code", status: "Sim", note: "Reserva de saldo no momento da autorização.", evidence: "/autorizacoes" },
   { module: "Abastecimento", feature: "Registro de abastecimento total e parcial", status: "Sim", note: "Baixa pelo valor efetivamente abastecido.", evidence: "/abastecimentos" },
   { module: "Abastecimento", feature: "Limites por órgão, unidade e veículo", status: "Sim", note: "Bloqueio e alerta automáticos.", evidence: "/autorizacoes" },
-  { module: "Abastecimento", feature: "Cartão magnético físico, POS e adquirência", status: "Não", note: "Não faz parte do núcleo do FrotaGov: o sistema não é adquirente nem meio de pagamento e não processa transações bancárias.", evidence: "—" },
+  { module: "Abastecimento", feature: "Cartão magnético físico, POS e adquirência", status: "Fora do núcleo", note: "Não faz parte do núcleo do FrotaGov: o sistema não é adquirente nem meio de pagamento e não processa transações bancárias.", evidence: "—" },
   { module: "Abastecimento", feature: "Cartão virtual do bem com QR e captura pela rede credenciada", status: "Sim", note: "Substitui o cartão físico sem processamento bancário: o credenciado valida o QR e registra a captura.", evidence: "/credenciados, /portal-credenciado" },
   { module: "Manutenção", feature: "Planos preventivos por tempo e quilometragem", status: "Sim", note: "Com alertas de vencimento.", evidence: "/planos-manutencao" },
   { module: "Manutenção", feature: "Solicitação, execução e conclusão de manutenção", status: "Sim", note: "Registro imutável após conclusão e indisponibilidade do veículo.", evidence: "/manutencoes" },
@@ -131,10 +149,10 @@ export const FEATURE_MATRIX: MatrixRow[] = [
   { module: "Manutenção", feature: "Peças, pneus e garantias", status: "Sim", note: "Controle documental de peças; sem gestão de estoque de almoxarifado.", evidence: "/pecas, /pneus" },
   { module: "Manutenção", feature: "Rede credenciada, cotações e ordem de serviço eletrônica", status: "Sim", note: "Mínimo de propostas com justificativa obrigatória.", evidence: "/rede-credenciada, /cotacoes, /ordens-servico" },
   { module: "Orçamento", feature: "Contratos, itens, empenhos e cotas", status: "Sim", note: "Motor de saldos com reserva, consumo, liberação e estorno.", evidence: "/contratos, /empenhos, /cotas" },
-  { module: "Orçamento", feature: "Integração com sistema contábil (SIAFIC)", status: "Parcial", note: "Camada genérica com mapeamento de layout, exportação incremental por \"alterados desde\" e histórico reprocessável; a conexão final depende das credenciais e do layout do município.", evidence: "/integracoes → SIAFIC" },
+  { module: "Orçamento", feature: "Integração com sistema contábil (SIAFIC)", status: "Depende de credencial", note: "Camada genérica com mapeamento de layout, exportação incremental por \"alterados desde\" e histórico reprocessável; a conexão final depende das credenciais e do layout do município.", evidence: "/integracoes → SIAFIC" },
   { module: "Legal", feature: "Multas, defesa e responsabilização do condutor", status: "Sim", note: "Cancelamento exige motivo registrado.", evidence: "/multas" },
   { module: "Legal", feature: "Sinistros, seguros e obrigações legais", status: "Sim", note: "Alertas automáticos de vencimento.", evidence: "/sinistros, /seguros, /obrigacoes" },
-  { module: "Legal", feature: "Consulta e importação de dados do DETRAN", status: "Parcial", note: "Adapter, mapeamento de campos, histórico de consultas e confirmação em caso de divergência prontos; sem convênio a ação fica desabilitada e o conector aparece como não configurado.", evidence: "/integracoes → DETRAN" },
+  { module: "Legal", feature: "Consulta e importação de dados do DETRAN", status: "Depende de credencial", note: "Adapter, mapeamento de campos, histórico de consultas e confirmação em caso de divergência prontos; sem convênio a ação fica desabilitada e o conector aparece como não configurado.", evidence: "/integracoes → DETRAN" },
   { module: "Patrimônio", feature: "Cessões, remanejamentos, baixas e alienações", status: "Sim", note: "Atualiza unidade, situação e quilometragem do veículo.", evidence: "/patrimonio" },
   { module: "Relatórios", feature: "Relatórios gerenciais com filtros e período", status: "Sim", note: "Nove relatórios: frota, abastecimento, manutenção, utilização, custo por veículo, contratos, legal, patrimônio e diárias.", evidence: "/relatorios" },
   { module: "Diárias", feature: "Requisição de diária (RD) com fluxo de autorização", status: "Sim", note: "Numeração por exercício, tramitação auditada e impressão institucional com valor por extenso.", evidence: "/diarias" },
@@ -155,8 +173,8 @@ export const FEATURE_MATRIX: MatrixRow[] = [
   { module: "Integrações", feature: "API de escrita", status: "Não", note: "A API pública permanece somente de leitura.", evidence: "—" },
   { module: "Integrações", feature: "API v1 ampliada com escopos, filtros e limite de requisições", status: "Sim", note: "Dezoito recursos de leitura, organização derivada da chave, paginação, filtro por período e por \"alterados desde\", 401/403/429 e auditoria de cada consulta.", evidence: "/api/public/v1/recursos/{recurso}" },
   { module: "Integrações", feature: "Webhooks por órgão com HMAC, tentativa e histórico", status: "Sim", note: "Assinatura SHA-256, reenvio automático com backoff progressivo e histórico de entregas; o segredo nunca é exibido após salvo.", evidence: "/integracoes → Webhooks" },
-  { module: "Integrações", feature: "Autenticação corporativa LDAP/SSO", status: "Parcial", note: "Conector configurável por órgão; a autenticação padrão do FrotaGov continua como fallback enquanto não houver provedor ativo.", evidence: "/integracoes → Conectores" },
-  { module: "Integrações", feature: "Valor de mercado FIPE por API oficial", status: "Parcial", note: "Histórico de valor por bem com origem manual, importada ou de API e auditoria; sem credencial, o conector permanece não configurado.", evidence: "/veiculo/{id} → Valor de mercado" },
+  { module: "Integrações", feature: "Autenticação corporativa LDAP/SSO", status: "Depende de credencial", note: "Conector configurável por órgão; a autenticação padrão do FrotaGov continua como fallback enquanto não houver provedor ativo.", evidence: "/integracoes → Conectores" },
+  { module: "Integrações", feature: "Valor de mercado FIPE por API oficial", status: "Sim", note: "Histórico de valor por bem com origem manual, importada ou de API e auditoria; sem credencial, o conector permanece não configurado.", evidence: "/veiculo/{id} → Valor de mercado" },
   { module: "Frota", feature: "Máquinas e equipamentos sem placa", status: "Sim", note: "Classe de bem, tipos configuráveis, horímetro e identificação patrimonial.", evidence: "/equipamentos" },
   { module: "Inteligência", feature: "Consumo, custo por km/hora e indisponibilidade", status: "Sim", note: "Parâmetros por veículo e tipo, correção de medidor e alertas de desvio.", evidence: "/inteligencia" },
   { module: "Almoxarifado", feature: "Estoque, ordens de fornecimento e inventário", status: "Sim", note: "Saldos, movimentações, reservas, compatibilidade de peças e inventário rotativo.", evidence: "/almoxarifado, /ofp" },
@@ -170,12 +188,27 @@ export const FEATURE_MATRIX: MatrixRow[] = [
   { module: "Implantação", feature: "Simulação sem gravar dados, com relatório de erros", status: "Sim", note: "Planilha de ocorrências com linha, campo, valor recebido e motivo.", evidence: "/plataforma → Importação e migração" },
   { module: "Implantação", feature: "Importação transacional com lote rastreável e anulação", status: "Sim", note: "Tudo ou nada por lote; anulação apenas pelo Super Admin, sem exclusão física.", evidence: "/plataforma → Lotes do órgão" },
   { module: "Implantação", feature: "Migração de histórico sem consumir saldo de contrato, empenho ou cota", status: "Sim", note: "Registros marcados como legado com o sistema de origem.", evidence: "Abastecimentos, manutenções e utilizações legados" },
+  { module: "Frota", feature: "Valor de mercado FIPE com histórico e depreciação", status: "Sim", note: "Consulta por marca, modelo e ano na base pública da FIPE, vínculo do bem, histórico mensal, depreciação e atualização em lote da frota; base contratada exige credencial do órgão.", evidence: "/integracoes → FIPE, /veiculo/{id} → Valor de mercado" },
+  { module: "Frota", feature: "Consulta de dados oficiais do veículo (base nacional)", status: "Depende de credencial", note: "Consulta, comparação campo a campo, aplicação assistida e histórico prontos; sem convênio e credencial a ação fica desabilitada.", evidence: "/veiculo/{id} → Dados oficiais" },
+  { module: "Segurança", feature: "Login institucional OIDC e SAML", status: "Depende de credencial", note: "Cadastro do provedor por órgão, mapeamento de perfis por atributo, teste de conexão e histórico de acessos; sem provedor ativo permanece a autenticação própria.", evidence: "/integracoes → Identidade" },
+  { module: "Segurança", feature: "Diretório corporativo (LDAP / Active Directory)", status: "Depende de credencial", note: "Cadastro do diretório, mapeamento de grupos para perfis e teste de disponibilidade; a conexão final depende do gateway e das credenciais do órgão.", evidence: "/integracoes → Identidade" },
+  { module: "Segurança", feature: "Histórico de acessos por método de autenticação", status: "Sim", note: "Registro de entradas por senha, login institucional ou diretório, com resultado e origem; nunca grava senha ou token.", evidence: "/integracoes → Acessos" },
+  { module: "Cadastros", feature: "Geocodificação automática de endereços", status: "Sim", note: "Postos, oficinas, credenciados, unidades e entidades externas geocodificados ao salvar, com cache, situação da consulta e coordenadas manuais.", evidence: "/fornecedores, /rede-credenciada, /mapa-rede" },
+  { module: "Rede credenciada", feature: "Mapa interativo da rede", status: "Sim", note: "Mapa aberto sem dependência de API paga, com marcadores, filtro por tipo e busca por proximidade.", evidence: "/mapa-rede" },
+  { module: "Usabilidade", feature: "Padrão numérico único em todo o sistema", status: "Sim", note: "Moeda, litros, percentual, quantidade, quilometragem e horímetro no padrão pt-BR, com máscara na digitação e mesmo formato em tela, relatórios e exportações.", evidence: "Todas as telas" },
+  { module: "Usabilidade", feature: "Seleção com busca e autopreenchimento a partir do cadastro", status: "Sim", note: "Veículo, condutor, fornecedor, contrato, combustível, unidade e centro de custo são pesquisáveis e preenchem automaticamente os dados já cadastrados.", evidence: "/autorizacoes, /abastecimentos, /manutencoes" },
+  { module: "Integrações", feature: "Reenvio automático de webhooks com histórico", status: "Sim", note: "Fila de reprocessamento com espera progressiva, limite de tentativas e reenvio manual.", evidence: "/integracoes → Webhooks" },
+  { module: "Abastecimento", feature: "Portal do credenciado com captura pelo estabelecimento", status: "Sim", note: "Acesso restrito do credenciado, validação do cartão virtual do bem e registro da captura para conferência do órgão.", evidence: "/portal-credenciado" },
+  { module: "Almoxarifado", feature: "Ordem de fornecimento e compatibilidade de peças", status: "Sim", note: "Emissão, atendimento parcial, reserva de estoque, compatibilidade por veículo e exceções justificadas.", evidence: "/ofp, /pecas" },
+  { module: "Inteligência", feature: "Custo total de propriedade (TCO) e economicidade", status: "Sim", note: "Custo por quilômetro e por hora, custo acumulado com valor de mercado e depreciação, ranking de bens antieconômicos e indisponibilidade.", evidence: "/inteligencia" },
+  { module: "Relatórios", feature: "Relatório de aderência a requisitos de licitação", status: "Sim", note: "Por requisito: atende, atende parcialmente, depende de credencial externa ou fora do núcleo, com observação e evidência, exportável em CSV, Excel e PDF.", evidence: "/plataforma → Matriz de funcionalidades" },
+  { module: "Plataforma", feature: "Auditoria funcional do produto (essencial / avançada)", status: "Sim", note: "Classificação de cada funcionalidade e registro antes/depois da simplificação, sem exclusão de dados ou histórico.", evidence: "/plataforma → Auditoria e lançamento" },
   { module: "Implantação", feature: "Posição de abertura de saldos com data-base e justificativa", status: "Sim", note: "Rotina exclusiva de implantação, fora do fluxo operacional.", evidence: "/plataforma → Saldos iniciais" },
 ];
 
 
 export const KNOWN_LIMITATIONS: string[] = [
-  "Não há integração com DETRAN, importação automática de multas nem portal de seguradoras.",
+  "A consulta de dados oficiais do veículo, a importação automática de multas e o portal de seguradoras dependem de convênio e credenciais do órgão.",
   "Não há envio de notificações por e-mail ou WhatsApp; os alertas são apresentados dentro do sistema.",
   "A senha temporária do administrador é entregue na tela, para repasse por canal seguro do órgão.",
   "Os e-mails de autenticação usam o remetente padrão do provedor enquanto o domínio institucional não for verificado.",
@@ -189,5 +222,9 @@ export const KNOWN_LIMITATIONS: string[] = [
   "Os indicadores de sustentabilidade são estimativas calculadas a partir dos fatores de emissão cadastrados; não são medições diretas de emissão.",
   "A distância no mapa da rede credenciada é aproximada, calculada em linha reta entre coordenadas, e não considera rotas nem trânsito.",
   "A exportação integral é síncrona e montada em memória, adequada ao porte típico de um órgão municipal.",
+  "A consulta da FIPE usa a base pública; a base contratada, com histórico estendido, exige credencial do órgão.",
+  "A geocodificação usa serviço público aberto, com limite de consultas por minuto e cache; endereços incompletos ficam pendentes para ajuste manual de coordenadas.",
+  "O login institucional e o diretório corporativo ficam desabilitados até que o órgão cadastre provedor, certificado e gateway próprios.",
+  "As telas internas não foram revalidadas visualmente com sessão autenticada na Rodada 3; a verificação foi por tipos, build, rotas, importações, banco e regras de acesso.",
   "O ambiente de demonstração é um órgão comum identificado como DEMONSTRAÇÃO; a limpeza é feita manualmente, sem rotina destrutiva automática.",
 ];
