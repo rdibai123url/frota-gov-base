@@ -160,7 +160,7 @@ export function EntitySelect({
                     <CommandItem
                       key={o.value}
                       value={o.value}
-                      disabled={o.disabled}
+                      disabled={o.disabled ?? false}
                       onSelect={() => {
                         onChange(o.value);
                         setOpen(false);
