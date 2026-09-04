@@ -73,10 +73,17 @@ const NAV: NavGroup[] = [
       { to: "/ofp", label: "Ordens de Fornecimento (OFP)" },
       { to: "/almoxarifado", label: "Almoxarifado" },
       { to: "/pneus", label: "Pneus" },
-      { to: "/rede-credenciada", label: "Rede credenciada" },
-      { to: "/mapa-rede", label: "Mapa da rede credenciada" },
+    ],
+  },
+  {
+    id: "rede",
+    label: "Rede credenciada e compras",
+    icon: ClipboardList,
+    items: [
+      { to: "/rede-credenciada", label: "Oficinas e rede credenciada" },
       { to: "/credenciados", label: "Credenciados e cartão virtual" },
       { to: "/portal-credenciado", label: "Portal do credenciado" },
+      { to: "/mapa-rede", label: "Mapa da rede" },
       { to: "/cotacoes", label: "Cotações" },
       { to: "/ordens-servico", label: "Ordens de Serviço" },
     ],
@@ -109,12 +116,19 @@ const NAV: NavGroup[] = [
 
   {
     id: "relatorios",
-    label: "Relatórios e integrações",
+    label: "Relatórios e análises",
     icon: FileBarChart,
     items: [
       { to: "/inteligencia", label: "Inteligência da frota" },
       { to: "/relatorios", label: "Relatórios avançados" },
       { to: "/sustentabilidade", label: "Sustentabilidade da frota" },
+    ],
+  },
+  {
+    id: "integracoes",
+    label: "Integrações e dados abertos",
+    icon: Landmark,
+    items: [
       { to: "/transparencia", label: "Portal da Transparência" },
       { to: "/integracoes", label: "Central de Integrações" },
       { to: "/chaves-api", label: "Chaves de API" },
@@ -134,7 +148,7 @@ const PLATFORM_NAV: NavGroup = {
 
 const EXTRA_MATCHES: Record<string, string[]> = {
   frota: ["/veiculo/"],
-  manutencao: ["/cotacao/", "/ordem-servico/"],
+  rede: ["/cotacao/", "/ordem-servico/"],
 };
 
 function groupForPath(pathname: string) {
