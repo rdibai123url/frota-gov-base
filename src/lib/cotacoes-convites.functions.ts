@@ -378,8 +378,17 @@ export const issueInviteLink = createServerFn({ method: "POST" })
     if (!invite) throw new Error("Convite não encontrado neste órgão.");
     const { data: mayLink } = await supabase.rpc("can_manage_maintenance");
     if (!mayLink) throw new Error("Sem permissão para gerar o link deste convite.");
-    const token = randomToken();
     const deadline = (invite.quotation as { deadline_at: string | null } | null)?.deadline_at ?? null;
+    const { publicBaseUrl } = await loadSettings(invite.organization_id);
+    // Sem endereço público não há link possível: não gira o token nem devolve link.
+    if (!resolveBase(publicBaseUrl).isPublic) {
+      return { link: null as string | null, isPublic: false, warning: NO_PUBLIC_BASE_MESSAGE, expiresAt: null as string | null };
+    }
+    const token = randomToken();
+    const { link, isPublic } = linkFor(token, publicBaseUrl);
+    if (!isPublic || !link) {
+      return { link: null as string | null, isPublic: false, warning: NO_PUBLIC_BASE_MESSAGE, expiresAt: null as string | null };
+    }
     const { error } = await supabase
       .from("quotation_invitations")
       .update({
@@ -389,10 +398,9 @@ export const issueInviteLink = createServerFn({ method: "POST" })
       })
       .eq("id", invite.id);
     if (error) throw new Error("Sem permissão para gerar o link deste convite.");
-    const { publicBaseUrl } = await loadSettings(invite.organization_id);
-    const { link, isPublic } = linkFor(token, publicBaseUrl);
-    return { link, isPublic, warning: isPublic ? null : NO_PUBLIC_BASE_MESSAGE, expiresAt: expiryFor(deadline) };
+    return { link, isPublic: true, warning: null as string | null, expiresAt: expiryFor(deadline) };
   });
+
 
 /* ------------------------- resposta pública (token) --------------------- */
 
