@@ -268,15 +268,16 @@ async function loadSettings(orgId: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data } = await supabaseAdmin
     .from("org_email_settings")
-    .select("provider, enabled, from_name, from_email, reply_to, smtp_host, smtp_port, smtp_secure, smtp_user, has_secret")
+    .select("provider, enabled, from_name, from_email, reply_to, smtp_host, smtp_port, smtp_secure, smtp_user, has_secret, public_base_url")
     .eq("organization_id", orgId)
     .maybeSingle();
-  if (!data) return { settings: null as EmailSettings | null, secret: "" };
+  if (!data) return { settings: null as EmailSettings | null, secret: "", publicBaseUrl: null as string | null };
   const { data: secretRow } = await supabaseAdmin
     .from("org_email_secrets")
     .select("secret")
     .eq("organization_id", orgId)
     .maybeSingle();
+  const publicBaseUrl = (data as { public_base_url?: string | null }).public_base_url ?? null;
   const settings = data as EmailSettings;
   let secret = secretRow?.secret ?? "";
   // Chave da plataforma (painel de Integrações): usada apenas quando o órgão
@@ -288,7 +289,7 @@ async function loadSettings(orgId: string) {
       settings.has_secret = true;
     }
   }
-  return { settings, secret };
+  return { settings, secret, publicBaseUrl };
 }
 
 /** Dispara (ou reenvia) convites — sempre um e-mail individual por destinatário. */
@@ -307,7 +308,7 @@ export const sendInvites = createServerFn({ method: "POST" })
     const { data: allowed } = await supabase.rpc("can_manage_maintenance");
     if (!allowed) throw new Error("Sem permissão para enviar convites desta cotação.");
 
-    const { settings, secret } = await loadSettings(quotation.organization_id);
+    const { settings, secret, publicBaseUrl } = await loadSettings(quotation.organization_id);
     const problem = checkSettings(settings);
     if (problem || !settings) return { ok: false, configured: false, message: problem ?? "Envio de e-mail não configurado.", results: [] };
 
@@ -335,6 +336,7 @@ export const sendInvites = createServerFn({ method: "POST" })
       // Cada envio gera um token novo: o link antigo deixa de valer.
       const token = randomToken();
       const tokenHash = await hashToken(token);
+      const { link: inviteLink } = linkFor(token, publicBaseUrl);
       const message = renderInviteEmail({
         orgName: org?.short_name || org?.legal_name || "Órgão público",
         quotationCode: quotation.code ?? "—",
@@ -348,7 +350,7 @@ export const sendInvites = createServerFn({ method: "POST" })
           measure_unit: i.measure_unit,
           quantity: Number(i.quantity),
         })),
-        link: linkFor(token),
+        link: inviteLink,
         contactName: invite.contact_name,
       });
 
@@ -413,7 +415,10 @@ export const issueInviteLink = createServerFn({ method: "POST" })
       })
       .eq("id", invite.id);
     if (error) throw new Error("Sem permissão para gerar o link deste convite.");
-    return { link: linkFor(token), expiresAt: expiryFor(deadline) };
+    const { settings: orgSettings } = await loadSettings(invite.organization_id as string);
+    void orgSettings;
+    const { link, isPublic } = linkFor(token, publicBase);
+    return { link, isPublic, warning: isPublic ? null : NO_PUBLIC_BASE_MESSAGE, expiresAt: expiryFor(deadline) };
   });
 
 /* ------------------------- resposta pública (token) --------------------- */
