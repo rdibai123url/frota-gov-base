@@ -67,6 +67,8 @@ import {
   type WebhookEndpoint,
 } from "@/lib/integracoes";
 import { sendWebhookTest, testConnector } from "@/lib/integracoes.functions";
+import { FipePanel } from "@/components/integracao-fipe";
+import { LdapPanel, LoginEventsPanel, SsoPanel } from "@/components/integracao-identidade";
 
 export const Route = createFileRoute("/_authenticated/integracoes")({
   head: () => ({
