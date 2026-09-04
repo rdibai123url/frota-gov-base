@@ -194,5 +194,10 @@ export const listInstitutionalLogins = createServerFn({ method: "POST" })
       if (!domain) return true;
       return domains.some((d) => d.toLowerCase().replace(/^@/, "") === domain);
     });
-    return list.map((p) => ({ id: p.id, name: p.display_name, protocol: p.protocol }));
+    return list.map((p) => ({
+      id: p.id,
+      name: p.display_name,
+      protocol: p.protocol,
+      domains: (p.allowed_domains ?? []) as string[],
+    }));
   });

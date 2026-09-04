@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { useServerFn } from "@tanstack/react-start";
+import { listInstitutionalLogins, recordLoginEvent } from "@/lib/identidade.functions";
 
 export const Route = createFileRoute("/auth")({
   // Renderização apenas no cliente: evita divergência de hidratação causada pelo
@@ -40,6 +42,36 @@ function AuthPage() {
   const [mode, setMode] = useState<"login" | "recuperar">("login");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [institucionais, setInstitucionais] = useState<
+    { id: string; name: string; protocol: string; domains: string[] }[]
+  >([]);
+  const listLogins = useServerFn(listInstitutionalLogins);
+  const logLogin = useServerFn(recordLoginEvent);
+
+  // Logins institucionais ativos do órgão (quando houver). Sem provedor
+  // configurado, apenas o acesso padrão é exibido.
+  useEffect(() => {
+    listLogins({ data: {} })
+      .then(setInstitucionais)
+      .catch(() => setInstitucionais([]));
+  }, [listLogins]);
+
+  async function entrarInstitucional(p: { name: string; protocol: string; domains: string[] }) {
+    const domain = p.domains[0];
+    if (p.protocol !== "saml" || !domain) {
+      toast.info(
+        `${p.name}: a entrada institucional é concluída pelo provedor do órgão. Enquanto a habilitação não estiver ativa, use e-mail e senha.`,
+      );
+      return;
+    }
+    const { data, error } = await supabase.auth.signInWithSSO({ domain });
+    if (error || !data?.url) {
+      await logLogin({ data: { method: "saml", success: false, reason: error?.message ?? "Provedor não habilitado" } });
+      toast.error("O login institucional ainda não está habilitado para este domínio.");
+      return;
+    }
+    window.location.href = data.url;
+  }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -95,9 +127,11 @@ function AuthPage() {
     const { error } = await supabase.auth.signInWithPassword(parsed.data);
     setLoading(false);
     if (error) {
+      await logLogin({ data: { email: parsed.data.email, method: "senha", success: false, reason: "Credenciais inválidas" } });
       toast.error("Não foi possível entrar: verifique e-mail e senha.");
       return;
     }
+    await logLogin({ data: { email: parsed.data.email, method: "senha", success: true } });
     navigate({ to: "/painel", replace: true });
   }
 
@@ -161,6 +195,24 @@ function AuthPage() {
                 <Button variant="outline" className="w-full" onClick={handleGoogle}>
                   Continuar com Google
                 </Button>
+
+                {institucionais.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    {institucionais.map((p) => (
+                      <Button
+                        key={p.id}
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => void entrarInstitucional(p)}
+                      >
+                        Entrar com {p.name}
+                      </Button>
+                    ))}
+                    <p className="text-center text-xs text-muted-foreground">
+                      Login institucional configurado pelo seu órgão. O acesso por e-mail e senha continua disponível.
+                    </p>
+                  </div>
+                )}
               </>
             ) : (
               <div className="space-y-4">
