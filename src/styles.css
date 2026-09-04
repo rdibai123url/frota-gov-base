@@ -6,9 +6,10 @@
 
 /*
  * FrotaGov — design system institucional.
- * Paleta: azul-marinho institucional, verde-oliva de apoio, superfícies neutras quentes.
+ * Paleta: vermelho institucional (ação), grafite/preto (base), branco e cinzas neutros (leitura).
  * Tipografia: Barlow (títulos) + Source Sans 3 (texto).
  */
+
 
 @theme inline {
   --font-sans: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
