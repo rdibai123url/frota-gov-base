@@ -518,6 +518,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       { label: "Menor valor", description: "Destacado automaticamente na comparação.", tags: CALC },
     ],
     [
+      "As sugestões de itens vêm apenas do histórico do próprio órgão (cotações, propostas, catálogo de peças, ordens de serviço, manutenções, contratos e fornecimentos) e nunca reaproveitam preço, marca, fornecedor ou quantidade anterior.",
       "A escolha de proposta que não seja a de menor valor exige justificativa.",
       "Cada convite tem link próprio, que expira no prazo da cotação e não exige login do fornecedor.",
       "Reenviar ou copiar o link gera um endereço novo: o anterior deixa de funcionar.",
