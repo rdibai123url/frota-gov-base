@@ -3,6 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Plus, Pencil, Search, FileText } from "lucide-react";
 import { toast } from "sonner";
+
+import { autoGeocode } from "@/lib/geocode";
 import { z } from "zod";
 
 import { CnpjInput } from "@/components/form-fields";
@@ -149,11 +151,16 @@ function Fornecedores() {
       notes: parsed.data.notes || null,
       active,
     };
-    const { error } = editing
-      ? await supabase.from("suppliers").update(payload).eq("id", editing.id)
+    const before = editing
+      ? { address: editing.address, city: editing.city, state: editing.state, zip_code: editing.zip_code }
+      : null;
+    const { data: saved, error } = editing
+      ? await supabase.from("suppliers").update(payload).eq("id", editing.id).select("id").maybeSingle()
       : await supabase
           .from("suppliers")
-          .insert({ ...payload, organization_id: orgId!, created_by: userId });
+          .insert({ ...payload, organization_id: orgId!, created_by: userId })
+          .select("id")
+          .maybeSingle();
     setSaving(false);
     if (error) {
       toast.error("Não foi possível salvar o fornecedor.");
@@ -162,6 +169,7 @@ function Fornecedores() {
     toast.success(editing ? "Fornecedor atualizado." : "Fornecedor cadastrado.");
     invalidate(["suppliers"]);
     setOpen(false);
+    void autoGeocode("suppliers", saved?.id ?? editing?.id, payload, before).then(() => invalidate(["suppliers"]));
   }
 
   const paged = usePaged(filtered);

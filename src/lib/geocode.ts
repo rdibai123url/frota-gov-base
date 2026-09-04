@@ -5,6 +5,8 @@
  * cadastro correspondente. Todas as gravações passam pelas políticas de
  * organização já existentes (RLS) — o cliente nunca escolhe a organização.
  */
+import { toast } from "sonner";
+
 import { supabase } from "@/lib/frotagov";
 import { geocodeAddress } from "@/lib/geocode.functions";
 
@@ -105,4 +107,27 @@ export async function saveManualCoordinates(
       geocoded_at: new Date().toISOString(),
     })
     .eq("id", id);
+}
+
+/**
+ * Geocodificação automática após salvar um cadastro com endereço.
+ * Não bloqueia o fluxo: apenas informa o resultado.
+ */
+export async function autoGeocode(
+  table: GeoTable,
+  id: string | null | undefined,
+  parts: AddressParts,
+  before?: AddressParts | null,
+) {
+  if (!id) return;
+  if (!parts.address?.trim() || !parts.city?.trim()) return;
+  if (before && !addressChanged(before, parts)) return;
+  const r = await geocodeRecord(table, id, parts);
+  if (r.status === "geocodificado") {
+    toast.success("Endereço localizado automaticamente no mapa da rede.");
+  } else if (r.status === "nao_encontrado") {
+    toast.warning("Endereço não localizado pelo mapa. Você pode informar as coordenadas manualmente.");
+  } else if (r.status === "falhou") {
+    toast.message("Cadastro salvo. O mapa está indisponível agora — coordenadas ficaram pendentes.");
+  }
 }
