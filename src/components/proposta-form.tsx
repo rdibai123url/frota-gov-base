@@ -38,12 +38,15 @@ export function PropostaFields({
   draft,
   onChange,
   disabled,
+  lockItems,
 }: {
   kind: QuotationKind;
   quotationItems: QItem[];
   draft: ProposalDraft;
   onChange: (patch: Partial<ProposalDraft>) => void;
   disabled?: boolean;
+  /** Resposta pública: os itens são exatamente os solicitados pelo órgão. */
+  lockItems?: boolean;
 }) {
   const totals = draftTotals(draft, kind);
 
@@ -75,19 +78,33 @@ export function PropostaFields({
                 disabled={disabled}
               />
             </div>
-            <div>
-              <Label htmlFor="warrantyDays">Garantia do serviço (dias)</Label>
-              <IntegerInput
-                id="warrantyDays"
-                maxDigits={4}
-                value={draft.warrantyDays}
-                onValueChange={(v) => onChange({ warrantyDays: v })}
-                disabled={disabled}
-              />
-            </div>
           </>
         )}
-        <div className={hasServices(kind) ? "sm:col-span-3" : "sm:col-span-2"}>
+        {hasParts(kind) && (
+          <div>
+            <Label htmlFor="partsWarrantyDays">Garantia das peças (dias)</Label>
+            <IntegerInput
+              id="partsWarrantyDays"
+              maxDigits={4}
+              value={draft.partsWarrantyDays}
+              onValueChange={(v) => onChange({ partsWarrantyDays: v })}
+              disabled={disabled}
+            />
+          </div>
+        )}
+        {hasServices(kind) && (
+          <div>
+            <Label htmlFor="warrantyDays">Garantia dos serviços (dias)</Label>
+            <IntegerInput
+              id="warrantyDays"
+              maxDigits={4}
+              value={draft.warrantyDays}
+              onValueChange={(v) => onChange({ warrantyDays: v })}
+              disabled={disabled}
+            />
+          </div>
+        )}
+        <div className="sm:col-span-3">
           <Label htmlFor="paymentTerms">Condição de pagamento</Label>
           <Input
             id="paymentTerms"
@@ -147,20 +164,19 @@ export function PropostaFields({
               <TableHeader>
                 <TableRow>
                   <TableHead className="min-w-48">Item cotado</TableHead>
-                  <TableHead className="w-40">Vínculo com o solicitado</TableHead>
+                  {!lockItems && <TableHead className="w-40">Vínculo com o solicitado</TableHead>}
                   <TableHead className="w-28">Marca</TableHead>
                   <TableHead className="w-28">Nº / código</TableHead>
                   <TableHead className="w-24">Qtd.</TableHead>
-                  <TableHead className="w-24">Garantia (dias)</TableHead>
                   <TableHead className="w-32">Unitário</TableHead>
                   <TableHead className="w-28 text-right">Total</TableHead>
-                  <TableHead className="w-10" />
+                  {!lockItems && <TableHead className="w-10" />}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {draft.items.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={9} className="py-6 text-center text-muted-foreground">
+                    <TableCell colSpan={lockItems ? 6 : 8} className="py-6 text-center text-muted-foreground">
                       Nenhum item na proposta.
                     </TableCell>
                   </TableRow>
@@ -168,31 +184,37 @@ export function PropostaFields({
                 {draft.items.map((i) => (
                   <TableRow key={i.key}>
                     <TableCell>
-                      <Input
-                        value={i.description}
-                        onChange={(e) => setItem(i.key, { description: e.target.value })}
-                        disabled={disabled}
-                      />
+                      {lockItems ? (
+                        <span className="text-sm">{i.description}</span>
+                      ) : (
+                        <Input
+                          value={i.description}
+                          onChange={(e) => setItem(i.key, { description: e.target.value })}
+                          disabled={disabled}
+                        />
+                      )}
                     </TableCell>
-                    <TableCell>
-                      <Select
-                        value={i.quotationItemId ?? NO_LINK}
-                        onValueChange={(v) => setItem(i.key, { quotationItemId: v === NO_LINK ? null : v })}
-                        disabled={!!disabled}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={NO_LINK}>Sem vínculo</SelectItem>
-                          {quotationItems.map((q) => (
-                            <SelectItem key={q.id} value={q.id}>
-                              {q.sequence}. {q.description.slice(0, 30)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
+                    {!lockItems && (
+                      <TableCell>
+                        <Select
+                          value={i.quotationItemId ?? NO_LINK}
+                          onValueChange={(v) => setItem(i.key, { quotationItemId: v === NO_LINK ? null : v })}
+                          disabled={!!disabled}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value={NO_LINK}>Sem vínculo</SelectItem>
+                            {quotationItems.map((q) => (
+                              <SelectItem key={q.id} value={q.id}>
+                                {q.sequence}. {q.description.slice(0, 30)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                    )}
                     <TableCell>
                       <Input value={i.brand} onChange={(e) => setItem(i.key, { brand: e.target.value })} disabled={disabled} />
                     </TableCell>
@@ -204,53 +226,58 @@ export function PropostaFields({
                       />
                     </TableCell>
                     <TableCell>
-                      <DecimalInput
-                        decimals={2}
-                        value={i.quantity}
-                        onValueChange={(v) => setItem(i.key, { quantity: v })}
-                        disabled={disabled}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <IntegerInput
-                        maxDigits={4}
-                        value={i.warrantyDays}
-                        onValueChange={(v) => setItem(i.key, { warrantyDays: v })}
-                        disabled={disabled}
-                      />
+                      {i.lockedQuantity ? (
+                        <Input readOnly tabIndex={-1} value={i.quantity} className="bg-muted/50" aria-label="Quantidade solicitada" />
+                      ) : (
+                        <DecimalInput
+                          decimals={2}
+                          value={i.quantity}
+                          onValueChange={(v) => setItem(i.key, { quantity: v })}
+                          disabled={disabled}
+                        />
+                      )}
                     </TableCell>
                     <TableCell>
                       <MoneyInput value={i.unitValue} onValueChange={(v) => setItem(i.key, { unitValue: v })} disabled={disabled} />
                     </TableCell>
                     <TableCell className="text-right text-sm font-medium">{formatBRL(itemTotal(i))}</TableCell>
-                    <TableCell>
-                      {!disabled && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          aria-label="Remover item"
-                          onClick={() => onChange({ items: draft.items.filter((x) => x.key !== i.key) })}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      )}
-                    </TableCell>
+                    {!lockItems && (
+                      <TableCell>
+                        {!disabled && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Remover item"
+                            onClick={() => onChange({ items: draft.items.filter((x) => x.key !== i.key) })}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        )}
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </div>
-          {!disabled && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="gap-1"
-              onClick={() => onChange({ items: [...draft.items, newItemDraft()] })}
-            >
-              <Plus className="size-3" /> Adicionar item
-            </Button>
+          {lockItems ? (
+            <p className="text-xs text-muted-foreground">
+              Os itens e as quantidades foram definidos pelo órgão e não podem ser alterados. Informe marca, nº/código e
+              valor unitário de cada item.
+            </p>
+          ) : (
+            !disabled && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1"
+                onClick={() => onChange({ items: [...draft.items, newItemDraft()] })}
+              >
+                <Plus className="size-3" /> Adicionar item
+              </Button>
+            )
           )}
         </section>
       )}
