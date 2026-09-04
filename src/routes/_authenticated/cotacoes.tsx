@@ -442,7 +442,7 @@ function QuotationDetail({
     e.preventDefault();
     const form = e.currentTarget;
     const fd = new FormData(form);
-    const description = String(fd.get("description") ?? "").trim();
+    const description = itemDescription.trim();
     if (!description) { toast.error("Informe a descrição do item."); return; }
     setBusy(true);
     const { error } = await supabase.from("quotation_items").insert({
@@ -450,13 +450,15 @@ function QuotationDetail({
       quotation_id: quotation.id,
       sequence: items.length + 1,
       description,
-      measure_unit: String(fd.get("measure_unit") ?? "UN") || "UN",
+      measure_unit: itemUnit.trim() || "UN",
       quantity: parseBRNumber(String(fd.get("quantity") ?? "1")) || 1,
       created_by: userId,
     });
     setBusy(false);
     if (error) { toast.error(dbMessage(error)); return; }
     form.reset();
+    setItemDescription("");
+    setItemUnit("UN");
     refresh();
   }
 
