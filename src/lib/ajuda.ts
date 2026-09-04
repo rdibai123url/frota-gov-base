@@ -516,7 +516,9 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       { label: "Situação do convite", description: "Pendente (criado, ainda sem envio), Enviado, Erro no envio, Respondido e Prazo expirado.", tags: AUTO },
       { label: "Histórico do convite", description: "Criação, envio, reenvios, número de tentativas, último erro e data da resposta.", tags: AUTO },
       { label: "Envio de e-mail", description: "Servidor SMTP do órgão ou provedor de envio; sem configuração o sistema avisa e oferece o link para envio manual.", tags: EXT },
-      { label: "Propostas", description: "Valores informados por cada prestador convidado." },
+      { label: "Propostas", description: "Valores informados por cada prestador convidado ou lançados manualmente pelo órgão.", tags: COND },
+      { label: "Cadastrar nova empresa", description: "Atalho no bloco de propostas que inclui a empresa na Rede credenciada do órgão (tipo, razão social, CNPJ/CPF, contato, endereço e especialidade) e já a seleciona na proposta." },
+
       { label: "Menor valor", description: "Destacado automaticamente na comparação.", tags: CALC },
     ],
     [
