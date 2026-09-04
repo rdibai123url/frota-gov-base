@@ -526,9 +526,9 @@ function QuotationDetail({
     setBusy(true);
 
     // Lançamento manual: empresa sem convite recebe convite interno (sem envio de e-mail).
-    let inv = invites.find((i) => i.workshop_id === proposalWorkshop) ?? null;
+    let inviteId = invites.find((i) => i.workshop_id === proposalWorkshop)?.id ?? null;
     let manual = false;
-    if (!inv) {
+    if (!inviteId) {
       manual = true;
       const { data: created, error: invError } = await supabase
         .from("quotation_invitations")
@@ -542,8 +542,9 @@ function QuotationDetail({
         .select("id")
         .maybeSingle();
       if (invError) { setBusy(false); toast.error(dbMessage(invError)); return; }
-      inv = created ? ({ id: created.id } as typeof inv) : null;
+      inviteId = created?.id ?? null;
     }
+
 
     const { data: proposal, error } = await supabase
       .from("quotation_proposals")
