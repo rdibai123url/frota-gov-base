@@ -5511,6 +5511,7 @@ export type Database = {
           last_test_ok: boolean | null
           organization_id: string
           provider: string
+          public_base_url: string | null
           reply_to: string | null
           smtp_host: string | null
           smtp_port: number | null
@@ -5532,6 +5533,7 @@ export type Database = {
           last_test_ok?: boolean | null
           organization_id: string
           provider?: string
+          public_base_url?: string | null
           reply_to?: string | null
           smtp_host?: string | null
           smtp_port?: number | null
@@ -5553,6 +5555,7 @@ export type Database = {
           last_test_ok?: boolean | null
           organization_id?: string
           provider?: string
+          public_base_url?: string | null
           reply_to?: string | null
           smtp_host?: string | null
           smtp_port?: number | null
