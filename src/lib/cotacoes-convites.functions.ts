@@ -398,7 +398,7 @@ export const issueInviteLink = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: invite } = await supabase
       .from("quotation_invitations")
-      .select("id, quotation_id, send_status, quotation:quotations(deadline_at)")
+      .select("id, organization_id, quotation_id, send_status, quotation:quotations(deadline_at)")
       .eq("id", data.invitationId)
       .maybeSingle();
     if (!invite) throw new Error("Convite não encontrado neste órgão.");
@@ -415,9 +415,8 @@ export const issueInviteLink = createServerFn({ method: "POST" })
       })
       .eq("id", invite.id);
     if (error) throw new Error("Sem permissão para gerar o link deste convite.");
-    const { settings: orgSettings } = await loadSettings(invite.organization_id as string);
-    void orgSettings;
-    const { link, isPublic } = linkFor(token, publicBase);
+    const { publicBaseUrl } = await loadSettings(invite.organization_id);
+    const { link, isPublic } = linkFor(token, publicBaseUrl);
     return { link, isPublic, warning: isPublic ? null : NO_PUBLIC_BASE_MESSAGE, expiresAt: expiryFor(deadline) };
   });
 
