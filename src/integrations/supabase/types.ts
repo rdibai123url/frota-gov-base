@@ -562,7 +562,9 @@ export type Database = {
           notes: string | null
           organization_id: string
           origin: Database["public"]["Enums"]["market_value_origin"]
+          provider: string | null
           reference_date: string
+          reference_label: string | null
           source: string
           source_reference: string | null
           updated_at: string
@@ -579,7 +581,9 @@ export type Database = {
           notes?: string | null
           organization_id: string
           origin?: Database["public"]["Enums"]["market_value_origin"]
+          provider?: string | null
           reference_date?: string
+          reference_label?: string | null
           source?: string
           source_reference?: string | null
           updated_at?: string
@@ -596,7 +600,9 @@ export type Database = {
           notes?: string | null
           organization_id?: string
           origin?: Database["public"]["Enums"]["market_value_origin"]
+          provider?: string | null
           reference_date?: string
+          reference_label?: string | null
           source?: string
           source_reference?: string | null
           updated_at?: string
@@ -827,6 +833,56 @@ export type Database = {
           table_name?: string
         }
         Relationships: []
+      }
+      auth_login_events: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          ip_address: string | null
+          method: string
+          organization_id: string | null
+          provider_id: string | null
+          reason: string | null
+          success: boolean
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          ip_address?: string | null
+          method?: string
+          organization_id?: string | null
+          provider_id?: string | null
+          reason?: string | null
+          success: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          ip_address?: string | null
+          method?: string
+          organization_id?: string | null
+          provider_id?: string | null
+          reason?: string | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auth_login_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       backup_restores: {
         Row: {
@@ -2181,6 +2237,7 @@ export type Database = {
           applied_by: string | null
           applied_fields: string[]
           connector_id: string | null
+          content_hash: string | null
           created_at: string
           created_by: string | null
           divergences: Json
@@ -2190,6 +2247,7 @@ export type Database = {
           organization_id: string
           payload: Json
           source: string
+          source_timestamp: string | null
           vehicle_id: string
         }
         Insert: {
@@ -2198,6 +2256,7 @@ export type Database = {
           applied_by?: string | null
           applied_fields?: string[]
           connector_id?: string | null
+          content_hash?: string | null
           created_at?: string
           created_by?: string | null
           divergences?: Json
@@ -2207,6 +2266,7 @@ export type Database = {
           organization_id: string
           payload?: Json
           source?: string
+          source_timestamp?: string | null
           vehicle_id: string
         }
         Update: {
@@ -2215,6 +2275,7 @@ export type Database = {
           applied_by?: string | null
           applied_fields?: string[]
           connector_id?: string | null
+          content_hash?: string | null
           created_at?: string
           created_by?: string | null
           divergences?: Json
@@ -2224,6 +2285,7 @@ export type Database = {
           organization_id?: string
           payload?: Json
           source?: string
+          source_timestamp?: string | null
           vehicle_id?: string
         }
         Relationships: [
@@ -3968,65 +4030,83 @@ export type Database = {
       }
       integration_connectors: {
         Row: {
+          auto_sync: boolean
           base_url: string | null
           config: Json
           created_at: string
           created_by: string | null
           documentation_url: string | null
           environment: Database["public"]["Enums"]["integration_environment"]
+          failure_count: number
           has_secret: boolean
           id: string
           kind: Database["public"]["Enums"]["integration_kind"]
           last_attempt_at: string | null
+          last_error_at: string | null
           last_result: string | null
           last_sync_at: string | null
+          next_sync_at: string | null
           notes: string | null
           organization_id: string
           provider: string | null
+          rate_limit_per_minute: number
           secret_name: string | null
           status: Database["public"]["Enums"]["integration_status"]
+          sync_interval_days: number
           updated_at: string
           updated_by: string | null
         }
         Insert: {
+          auto_sync?: boolean
           base_url?: string | null
           config?: Json
           created_at?: string
           created_by?: string | null
           documentation_url?: string | null
           environment?: Database["public"]["Enums"]["integration_environment"]
+          failure_count?: number
           has_secret?: boolean
           id?: string
           kind: Database["public"]["Enums"]["integration_kind"]
           last_attempt_at?: string | null
+          last_error_at?: string | null
           last_result?: string | null
           last_sync_at?: string | null
+          next_sync_at?: string | null
           notes?: string | null
           organization_id: string
           provider?: string | null
+          rate_limit_per_minute?: number
           secret_name?: string | null
           status?: Database["public"]["Enums"]["integration_status"]
+          sync_interval_days?: number
           updated_at?: string
           updated_by?: string | null
         }
         Update: {
+          auto_sync?: boolean
           base_url?: string | null
           config?: Json
           created_at?: string
           created_by?: string | null
           documentation_url?: string | null
           environment?: Database["public"]["Enums"]["integration_environment"]
+          failure_count?: number
           has_secret?: boolean
           id?: string
           kind?: Database["public"]["Enums"]["integration_kind"]
           last_attempt_at?: string | null
+          last_error_at?: string | null
           last_result?: string | null
           last_sync_at?: string | null
+          next_sync_at?: string | null
           notes?: string | null
           organization_id?: string
           provider?: string | null
+          rate_limit_per_minute?: number
           secret_name?: string | null
           status?: Database["public"]["Enums"]["integration_status"]
+          sync_interval_days?: number
           updated_at?: string
           updated_by?: string | null
         }
@@ -4390,6 +4470,168 @@ export type Database = {
             columns: ["part_id"]
             isOneToOne: false
             referencedRelation: "parts_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ldap_directories: {
+        Row: {
+          active: boolean
+          base_dn: string | null
+          bind_dn: string | null
+          connectivity_mode: string
+          created_at: string
+          created_by: string | null
+          display_name: string
+          email_attribute: string
+          gateway_url: string | null
+          group_attribute: string
+          has_secret: boolean
+          host: string | null
+          id: string
+          last_result: string | null
+          last_test_at: string | null
+          login_attribute: string
+          name_attribute: string
+          notes: string | null
+          organization_id: string
+          port: number
+          secret_name: string | null
+          status: Database["public"]["Enums"]["integration_status"]
+          sync_enabled: boolean
+          updated_at: string
+          updated_by: string | null
+          use_tls: boolean
+          user_filter: string
+        }
+        Insert: {
+          active?: boolean
+          base_dn?: string | null
+          bind_dn?: string | null
+          connectivity_mode?: string
+          created_at?: string
+          created_by?: string | null
+          display_name: string
+          email_attribute?: string
+          gateway_url?: string | null
+          group_attribute?: string
+          has_secret?: boolean
+          host?: string | null
+          id?: string
+          last_result?: string | null
+          last_test_at?: string | null
+          login_attribute?: string
+          name_attribute?: string
+          notes?: string | null
+          organization_id: string
+          port?: number
+          secret_name?: string | null
+          status?: Database["public"]["Enums"]["integration_status"]
+          sync_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          use_tls?: boolean
+          user_filter?: string
+        }
+        Update: {
+          active?: boolean
+          base_dn?: string | null
+          bind_dn?: string | null
+          connectivity_mode?: string
+          created_at?: string
+          created_by?: string | null
+          display_name?: string
+          email_attribute?: string
+          gateway_url?: string | null
+          group_attribute?: string
+          has_secret?: boolean
+          host?: string | null
+          id?: string
+          last_result?: string | null
+          last_test_at?: string | null
+          login_attribute?: string
+          name_attribute?: string
+          notes?: string | null
+          organization_id?: string
+          port?: number
+          secret_name?: string | null
+          status?: Database["public"]["Enums"]["integration_status"]
+          sync_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          use_tls?: boolean
+          user_filter?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ldap_directories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ldap_group_mappings: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          directory_id: string
+          group_dn: string
+          id: string
+          organization_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          unit_id: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          directory_id: string
+          group_dn: string
+          id?: string
+          organization_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          directory_id?: string
+          group_dn?: string
+          id?: string
+          organization_id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ldap_group_mappings_directory_id_fkey"
+            columns: ["directory_id"]
+            isOneToOne: false
+            referencedRelation: "ldap_directories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ldap_group_mappings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ldap_group_mappings_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
             referencedColumns: ["id"]
           },
         ]
@@ -6899,6 +7141,165 @@ export type Database = {
           },
         ]
       }
+      sso_claim_mappings: {
+        Row: {
+          active: boolean
+          claim: string
+          claim_value: string
+          created_at: string
+          created_by: string | null
+          id: string
+          organization_id: string
+          priority: number
+          provider_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          unit_id: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          active?: boolean
+          claim: string
+          claim_value: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id: string
+          priority?: number
+          provider_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          active?: boolean
+          claim?: string
+          claim_value?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id?: string
+          priority?: number
+          provider_id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sso_claim_mappings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sso_claim_mappings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "sso_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sso_claim_mappings_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sso_providers: {
+        Row: {
+          active: boolean
+          allowed_domains: string[]
+          certificate_fingerprint: string | null
+          client_id: string | null
+          created_at: string
+          created_by: string | null
+          default_role: Database["public"]["Enums"]["app_role"]
+          display_name: string
+          has_secret: boolean
+          id: string
+          issuer: string | null
+          jit_provisioning: boolean
+          last_result: string | null
+          last_test_at: string | null
+          metadata_url: string | null
+          notes: string | null
+          organization_id: string
+          protocol: string
+          redirect_uri: string | null
+          scopes: string[]
+          secret_name: string | null
+          status: Database["public"]["Enums"]["integration_status"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          active?: boolean
+          allowed_domains?: string[]
+          certificate_fingerprint?: string | null
+          client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          default_role?: Database["public"]["Enums"]["app_role"]
+          display_name: string
+          has_secret?: boolean
+          id?: string
+          issuer?: string | null
+          jit_provisioning?: boolean
+          last_result?: string | null
+          last_test_at?: string | null
+          metadata_url?: string | null
+          notes?: string | null
+          organization_id: string
+          protocol: string
+          redirect_uri?: string | null
+          scopes?: string[]
+          secret_name?: string | null
+          status?: Database["public"]["Enums"]["integration_status"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          active?: boolean
+          allowed_domains?: string[]
+          certificate_fingerprint?: string | null
+          client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          default_role?: Database["public"]["Enums"]["app_role"]
+          display_name?: string
+          has_secret?: boolean
+          id?: string
+          issuer?: string | null
+          jit_provisioning?: boolean
+          last_result?: string | null
+          last_test_at?: string | null
+          metadata_url?: string | null
+          notes?: string | null
+          organization_id?: string
+          protocol?: string
+          redirect_uri?: string | null
+          scopes?: string[]
+          secret_name?: string | null
+          status?: Database["public"]["Enums"]["integration_status"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sso_providers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_balances: {
         Row: {
           average_cost: number
@@ -8945,6 +9346,19 @@ export type Database = {
           document_path: string | null
           engine_number: string | null
           equipment_type: string | null
+          fipe_brand_code: string | null
+          fipe_brand_name: string | null
+          fipe_code: string | null
+          fipe_kind: string | null
+          fipe_last_query_at: string | null
+          fipe_last_status: string | null
+          fipe_linked_at: string | null
+          fipe_model_code: string | null
+          fipe_model_name: string | null
+          fipe_reference_date: string | null
+          fipe_reference_label: string | null
+          fipe_value: number | null
+          fipe_year_code: string | null
           fuel_type: string | null
           hour_meter: number | null
           id: string
@@ -8954,6 +9368,9 @@ export type Database = {
           meter_kind: string
           model: string | null
           notes: string | null
+          official_source: string | null
+          official_source_timestamp: string | null
+          official_synced_at: string | null
           organization_id: string
           ownership: string
           photo_path: string | null
@@ -8986,6 +9403,19 @@ export type Database = {
           document_path?: string | null
           engine_number?: string | null
           equipment_type?: string | null
+          fipe_brand_code?: string | null
+          fipe_brand_name?: string | null
+          fipe_code?: string | null
+          fipe_kind?: string | null
+          fipe_last_query_at?: string | null
+          fipe_last_status?: string | null
+          fipe_linked_at?: string | null
+          fipe_model_code?: string | null
+          fipe_model_name?: string | null
+          fipe_reference_date?: string | null
+          fipe_reference_label?: string | null
+          fipe_value?: number | null
+          fipe_year_code?: string | null
           fuel_type?: string | null
           hour_meter?: number | null
           id?: string
@@ -8995,6 +9425,9 @@ export type Database = {
           meter_kind?: string
           model?: string | null
           notes?: string | null
+          official_source?: string | null
+          official_source_timestamp?: string | null
+          official_synced_at?: string | null
           organization_id: string
           ownership?: string
           photo_path?: string | null
@@ -9027,6 +9460,19 @@ export type Database = {
           document_path?: string | null
           engine_number?: string | null
           equipment_type?: string | null
+          fipe_brand_code?: string | null
+          fipe_brand_name?: string | null
+          fipe_code?: string | null
+          fipe_kind?: string | null
+          fipe_last_query_at?: string | null
+          fipe_last_status?: string | null
+          fipe_linked_at?: string | null
+          fipe_model_code?: string | null
+          fipe_model_name?: string | null
+          fipe_reference_date?: string | null
+          fipe_reference_label?: string | null
+          fipe_value?: number | null
+          fipe_year_code?: string | null
           fuel_type?: string | null
           hour_meter?: number | null
           id?: string
@@ -9036,6 +9482,9 @@ export type Database = {
           meter_kind?: string
           model?: string | null
           notes?: string | null
+          official_source?: string | null
+          official_source_timestamp?: string | null
+          official_synced_at?: string | null
           organization_id?: string
           ownership?: string
           photo_path?: string | null
@@ -10066,6 +10515,10 @@ export type Database = {
         | "fipe"
         | "webhook"
         | "api"
+        | "serpro"
+        | "oidc"
+        | "saml"
+        | "ldap"
       integration_log_status: "sucesso" | "parcial" | "erro"
       integration_status:
         | "nao_configurado"
@@ -10480,6 +10933,10 @@ export const Constants = {
         "fipe",
         "webhook",
         "api",
+        "serpro",
+        "oidc",
+        "saml",
+        "ldap",
       ],
       integration_log_status: ["sucesso", "parcial", "erro"],
       integration_status: [
