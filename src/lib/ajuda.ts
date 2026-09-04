@@ -505,7 +505,9 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Revise a lista final, remova quem não deve receber e confirme o envio: cada empresa recebe uma mensagem individual, sem ver as demais.",
       "Acompanhe a situação de cada convite, reenvie quando necessário ou copie o link para mandar por outro meio.",
       "Compare as propostas recebidas e escolha a vencedora.",
+      "Para lançar proposta recebida por papel, e-mail ou WhatsApp, selecione a empresa no bloco “Registrar proposta recebida” — mesmo sem convite prévio — ou use “+ Cadastrar nova empresa” para incluir a empresa na hora, sem sair da cotação.",
     ],
+
     [
       { label: "Objeto da cotação", description: "Descrição do serviço ou peça solicitada.", tags: REQ },
       { label: "Item / serviço", description: "Descrição do item cotado; sugere automaticamente itens já usados no órgão (com unidade usual, número de usos e último uso), sem impedir o cadastro de itens inéditos.", tags: REQ },
