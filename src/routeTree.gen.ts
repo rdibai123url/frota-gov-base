@@ -37,6 +37,7 @@ import { Route as AuthenticatedIntegracoesRouteImport } from './routes/_authenti
 import { Route as AuthenticatedInteligenciaRouteImport } from './routes/_authenticated/inteligencia'
 import { Route as AuthenticatedLimpezaRouteImport } from './routes/_authenticated/limpeza'
 import { Route as AuthenticatedManutencoesRouteImport } from './routes/_authenticated/manutencoes'
+import { Route as AuthenticatedMapaRedeRouteImport } from './routes/_authenticated/mapa-rede'
 import { Route as AuthenticatedMigracaoRouteImport } from './routes/_authenticated/migracao'
 import { Route as AuthenticatedMultasRouteImport } from './routes/_authenticated/multas'
 import { Route as AuthenticatedObrigacoesRouteImport } from './routes/_authenticated/obrigacoes'
@@ -220,6 +221,11 @@ const AuthenticatedManutencoesRoute =
     path: '/manutencoes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMapaRedeRoute = AuthenticatedMapaRedeRouteImport.update({
+  id: '/mapa-rede',
+  path: '/mapa-rede',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMigracaoRoute = AuthenticatedMigracaoRouteImport.update({
   id: '/migracao',
   path: '/migracao',
@@ -402,6 +408,7 @@ export interface FileRoutesByFullPath {
   '/inteligencia': typeof AuthenticatedInteligenciaRoute
   '/limpeza': typeof AuthenticatedLimpezaRoute
   '/manutencoes': typeof AuthenticatedManutencoesRoute
+  '/mapa-rede': typeof AuthenticatedMapaRedeRoute
   '/migracao': typeof AuthenticatedMigracaoRoute
   '/multas': typeof AuthenticatedMultasRoute
   '/obrigacoes': typeof AuthenticatedObrigacoesRoute
@@ -460,6 +467,7 @@ export interface FileRoutesByTo {
   '/inteligencia': typeof AuthenticatedInteligenciaRoute
   '/limpeza': typeof AuthenticatedLimpezaRoute
   '/manutencoes': typeof AuthenticatedManutencoesRoute
+  '/mapa-rede': typeof AuthenticatedMapaRedeRoute
   '/migracao': typeof AuthenticatedMigracaoRoute
   '/multas': typeof AuthenticatedMultasRoute
   '/obrigacoes': typeof AuthenticatedObrigacoesRoute
@@ -520,6 +528,7 @@ export interface FileRoutesById {
   '/_authenticated/inteligencia': typeof AuthenticatedInteligenciaRoute
   '/_authenticated/limpeza': typeof AuthenticatedLimpezaRoute
   '/_authenticated/manutencoes': typeof AuthenticatedManutencoesRoute
+  '/_authenticated/mapa-rede': typeof AuthenticatedMapaRedeRoute
   '/_authenticated/migracao': typeof AuthenticatedMigracaoRoute
   '/_authenticated/multas': typeof AuthenticatedMultasRoute
   '/_authenticated/obrigacoes': typeof AuthenticatedObrigacoesRoute
@@ -580,6 +589,7 @@ export interface FileRouteTypes {
     | '/inteligencia'
     | '/limpeza'
     | '/manutencoes'
+    | '/mapa-rede'
     | '/migracao'
     | '/multas'
     | '/obrigacoes'
@@ -638,6 +648,7 @@ export interface FileRouteTypes {
     | '/inteligencia'
     | '/limpeza'
     | '/manutencoes'
+    | '/mapa-rede'
     | '/migracao'
     | '/multas'
     | '/obrigacoes'
@@ -697,6 +708,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inteligencia'
     | '/_authenticated/limpeza'
     | '/_authenticated/manutencoes'
+    | '/_authenticated/mapa-rede'
     | '/_authenticated/migracao'
     | '/_authenticated/multas'
     | '/_authenticated/obrigacoes'
@@ -937,6 +949,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedManutencoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/mapa-rede': {
+      id: '/_authenticated/mapa-rede'
+      path: '/mapa-rede'
+      fullPath: '/mapa-rede'
+      preLoaderRoute: typeof AuthenticatedMapaRedeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/migracao': {
       id: '/_authenticated/migracao'
       path: '/migracao'
@@ -1168,6 +1187,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInteligenciaRoute: typeof AuthenticatedInteligenciaRoute
   AuthenticatedLimpezaRoute: typeof AuthenticatedLimpezaRoute
   AuthenticatedManutencoesRoute: typeof AuthenticatedManutencoesRoute
+  AuthenticatedMapaRedeRoute: typeof AuthenticatedMapaRedeRoute
   AuthenticatedMigracaoRoute: typeof AuthenticatedMigracaoRoute
   AuthenticatedMultasRoute: typeof AuthenticatedMultasRoute
   AuthenticatedObrigacoesRoute: typeof AuthenticatedObrigacoesRoute
@@ -1220,6 +1240,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInteligenciaRoute: AuthenticatedInteligenciaRoute,
   AuthenticatedLimpezaRoute: AuthenticatedLimpezaRoute,
   AuthenticatedManutencoesRoute: AuthenticatedManutencoesRoute,
+  AuthenticatedMapaRedeRoute: AuthenticatedMapaRedeRoute,
   AuthenticatedMigracaoRoute: AuthenticatedMigracaoRoute,
   AuthenticatedMultasRoute: AuthenticatedMultasRoute,
   AuthenticatedObrigacoesRoute: AuthenticatedObrigacoesRoute,

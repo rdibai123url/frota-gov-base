@@ -74,6 +74,7 @@ const NAV: NavGroup[] = [
       { to: "/almoxarifado", label: "Almoxarifado" },
       { to: "/pneus", label: "Pneus" },
       { to: "/rede-credenciada", label: "Rede credenciada" },
+      { to: "/mapa-rede", label: "Mapa da rede credenciada" },
       { to: "/credenciados", label: "Credenciados e cartão virtual" },
       { to: "/portal-credenciado", label: "Portal do credenciado" },
       { to: "/cotacoes", label: "Cotações" },
