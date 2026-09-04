@@ -276,7 +276,7 @@ export function ValorDeMercado({
   );
 }
 
-function Info({ label, value, icon }: { label: string; value: string; icon?: "up" | "down" }) {
+function Info({ label, value, icon }: { label: string; value: string; icon?: "up" | "down" | undefined }) {
   return (
     <div className="rounded-lg border p-3">
       <p className="text-xs text-muted-foreground">{label}</p>
