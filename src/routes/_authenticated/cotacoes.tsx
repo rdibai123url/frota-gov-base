@@ -420,6 +420,7 @@ function QuotationDetail({
   const [busy, setBusy] = useState(false);
   const [itemDescription, setItemDescription] = useState("");
   const [itemUnit, setItemUnit] = useState("UN");
+  const [newCompanyOpen, setNewCompanyOpen] = useState(false);
 
   const closed = quotation.status === "encerrada" || quotation.status === "cancelada";
   const valid = proposals.filter((p) => p.status !== "desclassificada");
@@ -431,6 +432,26 @@ function QuotationDetail({
       (!quotation.specialty || (w.specialties ?? []).includes(quotation.specialty)) &&
       !invites.some((i) => i.workshop_id === w.id),
   );
+
+  /** Empresas selecionáveis na proposta: convidadas + qualquer empresa ativa do órgão. */
+  const proposalCompanyOptions = useMemo(() => {
+    const used = new Set(proposals.map((p) => p.workshop_id).filter(Boolean) as string[]);
+    return workshops
+      .filter((w) => w.status === "ativo" && !used.has(w.id))
+      .map((w) => {
+        const invited = invites.some((i) => i.workshop_id === w.id);
+        return {
+          value: w.id,
+          label: w.trade_name || w.legal_name,
+          description: [w.legal_name, (w.specialties ?? []).join(", "), [w.city, w.state].filter(Boolean).join("/")]
+            .filter(Boolean)
+            .join(" · "),
+          keywords: [w.cnpj, w.email, w.phone],
+          hint: invited ? null : "sem convite",
+        };
+      });
+  }, [workshops, proposals, invites]);
+
 
   function refresh() {
     invalidate([
