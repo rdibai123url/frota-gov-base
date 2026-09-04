@@ -203,11 +203,31 @@ function Integracoes() {
       <Tabs defaultValue="conectores" className="space-y-4">
         <TabsList className="flex-wrap">
           <TabsTrigger value="conectores">Conectores</TabsTrigger>
+          <TabsTrigger value="fipe">FIPE / valor de mercado</TabsTrigger>
           <TabsTrigger value="detran">DETRAN</TabsTrigger>
           <TabsTrigger value="siafic">SIAFIC / Contabilidade</TabsTrigger>
+          <TabsTrigger value="identidade">Login institucional</TabsTrigger>
+          <TabsTrigger value="acessos">Acessos</TabsTrigger>
           <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
           <TabsTrigger value="logs">Histórico técnico</TabsTrigger>
         </TabsList>
+
+        {/* ------------------------------ FIPE ------------------------------ */}
+        <TabsContent value="fipe">
+          <FipePanel />
+        </TabsContent>
+
+        {/* -------------------------- identidade ---------------------------- */}
+        <TabsContent value="identidade" className="space-y-4">
+          <SsoPanel />
+          <LdapPanel />
+        </TabsContent>
+
+        {/* ---------------------------- acessos ----------------------------- */}
+        <TabsContent value="acessos">
+          <LoginEventsPanel />
+        </TabsContent>
+
 
         {/* --------------------------- conectores --------------------------- */}
         <TabsContent value="conectores">
