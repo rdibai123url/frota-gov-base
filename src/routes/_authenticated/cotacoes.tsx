@@ -565,7 +565,7 @@ function QuotationDetail({
       .maybeSingle();
     setBusy(false);
     if (error) { toast.error(dbMessage(error)); return; }
-    if (inv) await setInviteStatus(inv.id, "respondida");
+    if (inviteId) await setInviteStatus(inviteId, "respondida");
 
     await supabase.from("activity_logs").insert({
       organization_id: orgId!,
