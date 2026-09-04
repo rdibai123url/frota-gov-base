@@ -37,11 +37,13 @@ export type PublicQuotation = {
     code: string;
     description: string;
     specialty: string | null;
+    quotation_kind: string;
     deadline_at: string | null;
     notes: string | null;
     organization: string;
     vehicle: string | null;
   };
+
   items?: { id: string; sequence: number; description: string; measure_unit: string; quantity: number }[];
   invitation?: { id: string; email: string; contact_name: string | null; company: string | null };
 };
