@@ -12,7 +12,7 @@ type Admin = SupabaseClient<any, any, any>;
 type Row = Record<string, unknown>;
 
 export const EXPORT_SCHEMA_VERSION = "1.0.0";
-export const EXPORT_APP_VERSION = "10.6.0";
+export const EXPORT_APP_VERSION = "10.7.0";
 export const CSV_DELIMITER = ";";
 export const CSV_ENCODING = "UTF-8 (com BOM)";
 
@@ -30,6 +30,10 @@ const FORBIDDEN_COLUMNS = new Set([
   "refresh_token",
   "webhook_secret",
   "secret",
+  "client_secret",
+  "bind_password",
+  "certificate",
+  "private_key",
 ]);
 
 /** Tabelas técnicas/efêmeras ou de segredos que não entram no pacote. */
@@ -162,6 +166,12 @@ export const EXPORT_MODULES: ModuleDef[] = [
   { folder: "14_integracoes", file: "detran_consultas", table: "detran_snapshots", json: true },
   { folder: "14_integracoes", file: "webhooks_endpoints", table: "webhook_endpoints" },
   { folder: "14_integracoes", file: "webhooks_entregas", table: "webhook_deliveries", json: true },
+
+  { folder: "15_identidade", file: "login_institucional_provedores", table: "sso_providers" },
+  { folder: "15_identidade", file: "login_institucional_perfis", table: "sso_claim_mappings" },
+  { folder: "15_identidade", file: "diretorios_corporativos", table: "ldap_directories" },
+  { folder: "15_identidade", file: "diretorios_grupos_perfis", table: "ldap_group_mappings" },
+  { folder: "15_identidade", file: "historico_de_acessos", table: "auth_login_events" },
 ];
 
 /* ------------------------------ utilitários ------------------------------ */
