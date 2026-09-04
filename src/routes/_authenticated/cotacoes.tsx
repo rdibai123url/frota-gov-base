@@ -1122,7 +1122,7 @@ function QuotationDetail({
                   ))}
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium">Prazo / garantia / validade</TableCell>
+                  <TableCell className="font-medium">Prazo / gar. serviços / gar. peças / validade</TableCell>
                   {valid.map((p) => (
                     <TableCell key={p.id} className="text-right text-sm">
                       {p.execution_days ?? "—"} d / {p.warranty_days ?? "—"} d / {p.parts_warranty_days ?? "—"} d /{" "}
