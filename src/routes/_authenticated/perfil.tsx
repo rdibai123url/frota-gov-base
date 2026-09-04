@@ -72,12 +72,11 @@ function PerfilPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="gov-title text-2xl">Perfil e segurança</h1>
-        <p className="text-sm text-muted-foreground">
-          Consulte seus dados de acesso e mantenha sua senha atualizada.
-        </p>
-      </header>
+      <PageHeader
+        title="Perfil e segurança"
+        description="Consulte seus dados de acesso e mantenha sua senha atualizada."
+      />
+
 
       <section className="rounded-lg border bg-card p-6 shadow-panel">
         <div className="mb-4 flex items-center gap-3">
