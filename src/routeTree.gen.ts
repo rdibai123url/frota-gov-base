@@ -33,9 +33,11 @@ import { Route as AuthenticatedEquipamentosRouteImport } from './routes/_authent
 import { Route as AuthenticatedExportacaoRouteImport } from './routes/_authenticated/exportacao'
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
 import { Route as AuthenticatedHistoricoVeiculoRouteImport } from './routes/_authenticated/historico-veiculo'
+import { Route as AuthenticatedIntegracoesRouteImport } from './routes/_authenticated/integracoes'
 import { Route as AuthenticatedInteligenciaRouteImport } from './routes/_authenticated/inteligencia'
 import { Route as AuthenticatedLimpezaRouteImport } from './routes/_authenticated/limpeza'
 import { Route as AuthenticatedManutencoesRouteImport } from './routes/_authenticated/manutencoes'
+import { Route as AuthenticatedMapaRedeRouteImport } from './routes/_authenticated/mapa-rede'
 import { Route as AuthenticatedMigracaoRouteImport } from './routes/_authenticated/migracao'
 import { Route as AuthenticatedMultasRouteImport } from './routes/_authenticated/multas'
 import { Route as AuthenticatedObrigacoesRouteImport } from './routes/_authenticated/obrigacoes'
@@ -54,6 +56,7 @@ import { Route as AuthenticatedRedeCredenciadaRouteImport } from './routes/_auth
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as AuthenticatedSegurosRouteImport } from './routes/_authenticated/seguros'
 import { Route as AuthenticatedSinistrosRouteImport } from './routes/_authenticated/sinistros'
+import { Route as AuthenticatedSustentabilidadeRouteImport } from './routes/_authenticated/sustentabilidade'
 import { Route as AuthenticatedTransparenciaRouteImport } from './routes/_authenticated/transparencia'
 import { Route as AuthenticatedUnidadesRouteImport } from './routes/_authenticated/unidades'
 import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
@@ -62,7 +65,9 @@ import { Route as AuthenticatedVeiculosRouteImport } from './routes/_authenticat
 import { Route as TransparenciaSlugRouteImport } from './routes/transparencia.$slug'
 import { Route as AuthenticatedVeiculoIdRouteImport } from './routes/_authenticated/veiculo.$id'
 import { Route as ApiPublicHooksBackupDiarioRouteImport } from './routes/api/public/hooks/backup-diario'
+import { Route as ApiPublicHooksWebhooksRetryRouteImport } from './routes/api/public/hooks/webhooks-retry'
 import { Route as ApiPublicV1FrotaRouteImport } from './routes/api/public/v1/frota'
+import { Route as ApiPublicV1RecursosRecursoRouteImport } from './routes/api/public/v1/recursos.$recurso'
 import { Route as ApiPublicV1TransparenciaSlugRouteImport } from './routes/api/public/v1/transparencia.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -195,6 +200,12 @@ const AuthenticatedHistoricoVeiculoRoute =
     path: '/historico-veiculo',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedIntegracoesRoute =
+  AuthenticatedIntegracoesRouteImport.update({
+    id: '/integracoes',
+    path: '/integracoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedInteligenciaRoute =
   AuthenticatedInteligenciaRouteImport.update({
     id: '/inteligencia',
@@ -212,6 +223,11 @@ const AuthenticatedManutencoesRoute =
     path: '/manutencoes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMapaRedeRoute = AuthenticatedMapaRedeRouteImport.update({
+  id: '/mapa-rede',
+  path: '/mapa-rede',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMigracaoRoute = AuthenticatedMigracaoRouteImport.update({
   id: '/migracao',
   path: '/migracao',
@@ -306,6 +322,12 @@ const AuthenticatedSinistrosRoute = AuthenticatedSinistrosRouteImport.update({
   path: '/sinistros',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSustentabilidadeRoute =
+  AuthenticatedSustentabilidadeRouteImport.update({
+    id: '/sustentabilidade',
+    path: '/sustentabilidade',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedTransparenciaRoute =
   AuthenticatedTransparenciaRouteImport.update({
     id: '/transparencia',
@@ -348,11 +370,23 @@ const ApiPublicHooksBackupDiarioRoute =
     path: '/api/public/hooks/backup-diario',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksWebhooksRetryRoute =
+  ApiPublicHooksWebhooksRetryRouteImport.update({
+    id: '/api/public/hooks/webhooks-retry',
+    path: '/api/public/hooks/webhooks-retry',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicV1FrotaRoute = ApiPublicV1FrotaRouteImport.update({
   id: '/api/public/v1/frota',
   path: '/api/public/v1/frota',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicV1RecursosRecursoRoute =
+  ApiPublicV1RecursosRecursoRouteImport.update({
+    id: '/api/public/v1/recursos/$recurso',
+    path: '/api/public/v1/recursos/$recurso',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicV1TransparenciaSlugRoute =
   ApiPublicV1TransparenciaSlugRouteImport.update({
     id: '/api/public/v1/transparencia/$slug',
@@ -384,9 +418,11 @@ export interface FileRoutesByFullPath {
   '/exportacao': typeof AuthenticatedExportacaoRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
+  '/integracoes': typeof AuthenticatedIntegracoesRoute
   '/inteligencia': typeof AuthenticatedInteligenciaRoute
   '/limpeza': typeof AuthenticatedLimpezaRoute
   '/manutencoes': typeof AuthenticatedManutencoesRoute
+  '/mapa-rede': typeof AuthenticatedMapaRedeRoute
   '/migracao': typeof AuthenticatedMigracaoRoute
   '/multas': typeof AuthenticatedMultasRoute
   '/obrigacoes': typeof AuthenticatedObrigacoesRoute
@@ -405,6 +441,7 @@ export interface FileRoutesByFullPath {
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/seguros': typeof AuthenticatedSegurosRoute
   '/sinistros': typeof AuthenticatedSinistrosRoute
+  '/sustentabilidade': typeof AuthenticatedSustentabilidadeRoute
   '/transparencia': typeof AuthenticatedTransparenciaRoute
   '/unidades': typeof AuthenticatedUnidadesRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
@@ -413,7 +450,9 @@ export interface FileRoutesByFullPath {
   '/transparencia/$slug': typeof TransparenciaSlugRoute
   '/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
   '/api/public/hooks/backup-diario': typeof ApiPublicHooksBackupDiarioRoute
+  '/api/public/hooks/webhooks-retry': typeof ApiPublicHooksWebhooksRetryRoute
   '/api/public/v1/frota': typeof ApiPublicV1FrotaRoute
+  '/api/public/v1/recursos/$recurso': typeof ApiPublicV1RecursosRecursoRoute
   '/api/public/v1/transparencia/$slug': typeof ApiPublicV1TransparenciaSlugRoute
 }
 export interface FileRoutesByTo {
@@ -440,9 +479,11 @@ export interface FileRoutesByTo {
   '/exportacao': typeof AuthenticatedExportacaoRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
+  '/integracoes': typeof AuthenticatedIntegracoesRoute
   '/inteligencia': typeof AuthenticatedInteligenciaRoute
   '/limpeza': typeof AuthenticatedLimpezaRoute
   '/manutencoes': typeof AuthenticatedManutencoesRoute
+  '/mapa-rede': typeof AuthenticatedMapaRedeRoute
   '/migracao': typeof AuthenticatedMigracaoRoute
   '/multas': typeof AuthenticatedMultasRoute
   '/obrigacoes': typeof AuthenticatedObrigacoesRoute
@@ -461,6 +502,7 @@ export interface FileRoutesByTo {
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/seguros': typeof AuthenticatedSegurosRoute
   '/sinistros': typeof AuthenticatedSinistrosRoute
+  '/sustentabilidade': typeof AuthenticatedSustentabilidadeRoute
   '/transparencia': typeof AuthenticatedTransparenciaRoute
   '/unidades': typeof AuthenticatedUnidadesRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
@@ -469,7 +511,9 @@ export interface FileRoutesByTo {
   '/transparencia/$slug': typeof TransparenciaSlugRoute
   '/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
   '/api/public/hooks/backup-diario': typeof ApiPublicHooksBackupDiarioRoute
+  '/api/public/hooks/webhooks-retry': typeof ApiPublicHooksWebhooksRetryRoute
   '/api/public/v1/frota': typeof ApiPublicV1FrotaRoute
+  '/api/public/v1/recursos/$recurso': typeof ApiPublicV1RecursosRecursoRoute
   '/api/public/v1/transparencia/$slug': typeof ApiPublicV1TransparenciaSlugRoute
 }
 export interface FileRoutesById {
@@ -498,9 +542,11 @@ export interface FileRoutesById {
   '/_authenticated/exportacao': typeof AuthenticatedExportacaoRoute
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/_authenticated/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
+  '/_authenticated/integracoes': typeof AuthenticatedIntegracoesRoute
   '/_authenticated/inteligencia': typeof AuthenticatedInteligenciaRoute
   '/_authenticated/limpeza': typeof AuthenticatedLimpezaRoute
   '/_authenticated/manutencoes': typeof AuthenticatedManutencoesRoute
+  '/_authenticated/mapa-rede': typeof AuthenticatedMapaRedeRoute
   '/_authenticated/migracao': typeof AuthenticatedMigracaoRoute
   '/_authenticated/multas': typeof AuthenticatedMultasRoute
   '/_authenticated/obrigacoes': typeof AuthenticatedObrigacoesRoute
@@ -519,6 +565,7 @@ export interface FileRoutesById {
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
   '/_authenticated/seguros': typeof AuthenticatedSegurosRoute
   '/_authenticated/sinistros': typeof AuthenticatedSinistrosRoute
+  '/_authenticated/sustentabilidade': typeof AuthenticatedSustentabilidadeRoute
   '/_authenticated/transparencia': typeof AuthenticatedTransparenciaRoute
   '/_authenticated/unidades': typeof AuthenticatedUnidadesRoute
   '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
@@ -527,7 +574,9 @@ export interface FileRoutesById {
   '/transparencia/$slug': typeof TransparenciaSlugRoute
   '/_authenticated/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
   '/api/public/hooks/backup-diario': typeof ApiPublicHooksBackupDiarioRoute
+  '/api/public/hooks/webhooks-retry': typeof ApiPublicHooksWebhooksRetryRoute
   '/api/public/v1/frota': typeof ApiPublicV1FrotaRoute
+  '/api/public/v1/recursos/$recurso': typeof ApiPublicV1RecursosRecursoRoute
   '/api/public/v1/transparencia/$slug': typeof ApiPublicV1TransparenciaSlugRoute
 }
 export interface FileRouteTypes {
@@ -556,9 +605,11 @@ export interface FileRouteTypes {
     | '/exportacao'
     | '/fornecedores'
     | '/historico-veiculo'
+    | '/integracoes'
     | '/inteligencia'
     | '/limpeza'
     | '/manutencoes'
+    | '/mapa-rede'
     | '/migracao'
     | '/multas'
     | '/obrigacoes'
@@ -577,6 +628,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/seguros'
     | '/sinistros'
+    | '/sustentabilidade'
     | '/transparencia'
     | '/unidades'
     | '/usuarios'
@@ -585,7 +637,9 @@ export interface FileRouteTypes {
     | '/transparencia/$slug'
     | '/veiculo/$id'
     | '/api/public/hooks/backup-diario'
+    | '/api/public/hooks/webhooks-retry'
     | '/api/public/v1/frota'
+    | '/api/public/v1/recursos/$recurso'
     | '/api/public/v1/transparencia/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -612,9 +666,11 @@ export interface FileRouteTypes {
     | '/exportacao'
     | '/fornecedores'
     | '/historico-veiculo'
+    | '/integracoes'
     | '/inteligencia'
     | '/limpeza'
     | '/manutencoes'
+    | '/mapa-rede'
     | '/migracao'
     | '/multas'
     | '/obrigacoes'
@@ -633,6 +689,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/seguros'
     | '/sinistros'
+    | '/sustentabilidade'
     | '/transparencia'
     | '/unidades'
     | '/usuarios'
@@ -641,7 +698,9 @@ export interface FileRouteTypes {
     | '/transparencia/$slug'
     | '/veiculo/$id'
     | '/api/public/hooks/backup-diario'
+    | '/api/public/hooks/webhooks-retry'
     | '/api/public/v1/frota'
+    | '/api/public/v1/recursos/$recurso'
     | '/api/public/v1/transparencia/$slug'
   id:
     | '__root__'
@@ -669,9 +728,11 @@ export interface FileRouteTypes {
     | '/_authenticated/exportacao'
     | '/_authenticated/fornecedores'
     | '/_authenticated/historico-veiculo'
+    | '/_authenticated/integracoes'
     | '/_authenticated/inteligencia'
     | '/_authenticated/limpeza'
     | '/_authenticated/manutencoes'
+    | '/_authenticated/mapa-rede'
     | '/_authenticated/migracao'
     | '/_authenticated/multas'
     | '/_authenticated/obrigacoes'
@@ -690,6 +751,7 @@ export interface FileRouteTypes {
     | '/_authenticated/relatorios'
     | '/_authenticated/seguros'
     | '/_authenticated/sinistros'
+    | '/_authenticated/sustentabilidade'
     | '/_authenticated/transparencia'
     | '/_authenticated/unidades'
     | '/_authenticated/usuarios'
@@ -698,7 +760,9 @@ export interface FileRouteTypes {
     | '/transparencia/$slug'
     | '/_authenticated/veiculo/$id'
     | '/api/public/hooks/backup-diario'
+    | '/api/public/hooks/webhooks-retry'
     | '/api/public/v1/frota'
+    | '/api/public/v1/recursos/$recurso'
     | '/api/public/v1/transparencia/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -709,7 +773,9 @@ export interface RootRouteChildren {
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   TransparenciaSlugRoute: typeof TransparenciaSlugRoute
   ApiPublicHooksBackupDiarioRoute: typeof ApiPublicHooksBackupDiarioRoute
+  ApiPublicHooksWebhooksRetryRoute: typeof ApiPublicHooksWebhooksRetryRoute
   ApiPublicV1FrotaRoute: typeof ApiPublicV1FrotaRoute
+  ApiPublicV1RecursosRecursoRoute: typeof ApiPublicV1RecursosRecursoRoute
   ApiPublicV1TransparenciaSlugRoute: typeof ApiPublicV1TransparenciaSlugRoute
 }
 
@@ -883,6 +949,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHistoricoVeiculoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/integracoes': {
+      id: '/_authenticated/integracoes'
+      path: '/integracoes'
+      fullPath: '/integracoes'
+      preLoaderRoute: typeof AuthenticatedIntegracoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/inteligencia': {
       id: '/_authenticated/inteligencia'
       path: '/inteligencia'
@@ -902,6 +975,13 @@ declare module '@tanstack/react-router' {
       path: '/manutencoes'
       fullPath: '/manutencoes'
       preLoaderRoute: typeof AuthenticatedManutencoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/mapa-rede': {
+      id: '/_authenticated/mapa-rede'
+      path: '/mapa-rede'
+      fullPath: '/mapa-rede'
+      preLoaderRoute: typeof AuthenticatedMapaRedeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/migracao': {
@@ -1030,6 +1110,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSinistrosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/sustentabilidade': {
+      id: '/_authenticated/sustentabilidade'
+      path: '/sustentabilidade'
+      fullPath: '/sustentabilidade'
+      preLoaderRoute: typeof AuthenticatedSustentabilidadeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/transparencia': {
       id: '/_authenticated/transparencia'
       path: '/transparencia'
@@ -1086,11 +1173,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksBackupDiarioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/webhooks-retry': {
+      id: '/api/public/hooks/webhooks-retry'
+      path: '/api/public/hooks/webhooks-retry'
+      fullPath: '/api/public/hooks/webhooks-retry'
+      preLoaderRoute: typeof ApiPublicHooksWebhooksRetryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/v1/frota': {
       id: '/api/public/v1/frota'
       path: '/api/public/v1/frota'
       fullPath: '/api/public/v1/frota'
       preLoaderRoute: typeof ApiPublicV1FrotaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/recursos/$recurso': {
+      id: '/api/public/v1/recursos/$recurso'
+      path: '/api/public/v1/recursos/$recurso'
+      fullPath: '/api/public/v1/recursos/$recurso'
+      preLoaderRoute: typeof ApiPublicV1RecursosRecursoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/v1/transparencia/$slug': {
@@ -1124,9 +1225,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedExportacaoRoute: typeof AuthenticatedExportacaoRoute
   AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
   AuthenticatedHistoricoVeiculoRoute: typeof AuthenticatedHistoricoVeiculoRoute
+  AuthenticatedIntegracoesRoute: typeof AuthenticatedIntegracoesRoute
   AuthenticatedInteligenciaRoute: typeof AuthenticatedInteligenciaRoute
   AuthenticatedLimpezaRoute: typeof AuthenticatedLimpezaRoute
   AuthenticatedManutencoesRoute: typeof AuthenticatedManutencoesRoute
+  AuthenticatedMapaRedeRoute: typeof AuthenticatedMapaRedeRoute
   AuthenticatedMigracaoRoute: typeof AuthenticatedMigracaoRoute
   AuthenticatedMultasRoute: typeof AuthenticatedMultasRoute
   AuthenticatedObrigacoesRoute: typeof AuthenticatedObrigacoesRoute
@@ -1145,6 +1248,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
   AuthenticatedSegurosRoute: typeof AuthenticatedSegurosRoute
   AuthenticatedSinistrosRoute: typeof AuthenticatedSinistrosRoute
+  AuthenticatedSustentabilidadeRoute: typeof AuthenticatedSustentabilidadeRoute
   AuthenticatedTransparenciaRoute: typeof AuthenticatedTransparenciaRoute
   AuthenticatedUnidadesRoute: typeof AuthenticatedUnidadesRoute
   AuthenticatedUsuariosRoute: typeof AuthenticatedUsuariosRoute
@@ -1174,9 +1278,11 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedExportacaoRoute: AuthenticatedExportacaoRoute,
   AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,
   AuthenticatedHistoricoVeiculoRoute: AuthenticatedHistoricoVeiculoRoute,
+  AuthenticatedIntegracoesRoute: AuthenticatedIntegracoesRoute,
   AuthenticatedInteligenciaRoute: AuthenticatedInteligenciaRoute,
   AuthenticatedLimpezaRoute: AuthenticatedLimpezaRoute,
   AuthenticatedManutencoesRoute: AuthenticatedManutencoesRoute,
+  AuthenticatedMapaRedeRoute: AuthenticatedMapaRedeRoute,
   AuthenticatedMigracaoRoute: AuthenticatedMigracaoRoute,
   AuthenticatedMultasRoute: AuthenticatedMultasRoute,
   AuthenticatedObrigacoesRoute: AuthenticatedObrigacoesRoute,
@@ -1195,6 +1301,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
   AuthenticatedSegurosRoute: AuthenticatedSegurosRoute,
   AuthenticatedSinistrosRoute: AuthenticatedSinistrosRoute,
+  AuthenticatedSustentabilidadeRoute: AuthenticatedSustentabilidadeRoute,
   AuthenticatedTransparenciaRoute: AuthenticatedTransparenciaRoute,
   AuthenticatedUnidadesRoute: AuthenticatedUnidadesRoute,
   AuthenticatedUsuariosRoute: AuthenticatedUsuariosRoute,
@@ -1213,7 +1320,9 @@ const rootRouteChildren: RootRouteChildren = {
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   TransparenciaSlugRoute: TransparenciaSlugRoute,
   ApiPublicHooksBackupDiarioRoute: ApiPublicHooksBackupDiarioRoute,
+  ApiPublicHooksWebhooksRetryRoute: ApiPublicHooksWebhooksRetryRoute,
   ApiPublicV1FrotaRoute: ApiPublicV1FrotaRoute,
+  ApiPublicV1RecursosRecursoRoute: ApiPublicV1RecursosRecursoRoute,
   ApiPublicV1TransparenciaSlugRoute: ApiPublicV1TransparenciaSlugRoute,
 }
 export const routeTree = rootRouteImport

@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.guard_market_value() FROM PUBLIC, anon, authenticated;

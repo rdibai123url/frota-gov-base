@@ -74,6 +74,7 @@ const NAV: NavGroup[] = [
       { to: "/almoxarifado", label: "Almoxarifado" },
       { to: "/pneus", label: "Pneus" },
       { to: "/rede-credenciada", label: "Rede credenciada" },
+      { to: "/mapa-rede", label: "Mapa da rede credenciada" },
       { to: "/credenciados", label: "Credenciados e cartão virtual" },
       { to: "/portal-credenciado", label: "Portal do credenciado" },
       { to: "/cotacoes", label: "Cotações" },
@@ -113,7 +114,9 @@ const NAV: NavGroup[] = [
     items: [
       { to: "/inteligencia", label: "Inteligência da frota" },
       { to: "/relatorios", label: "Relatórios avançados" },
+      { to: "/sustentabilidade", label: "Sustentabilidade da frota" },
       { to: "/transparencia", label: "Portal da Transparência" },
+      { to: "/integracoes", label: "Central de Integrações" },
       { to: "/chaves-api", label: "Chaves de API" },
     ],
   },

@@ -18,6 +18,7 @@ import {
 import { ArrowLeft, Truck } from "lucide-react";
 
 import { PageHeader } from "@/components/app-shell";
+import { ValorDeMercado } from "@/components/valor-mercado";
 import { useDiaries, DIARY_STATUS } from "@/lib/diarias";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -102,6 +103,19 @@ function HistoricoVeiculo() {
   const vAuths = useMemo(() => auths.filter((a) => a.vehicle_id === id), [auths, id]);
   const vRecords = useMemo(() => records.filter((r) => r.vehicle_id === id), [records, id]);
   const vParts = useMemo(() => vRecords.flatMap((r) => (r.parts ?? []).map((p) => ({ ...p, code: r.code }))), [vRecords]);
+  /** Custo de manutenção acumulado (12 e 24 meses) para comparar com o valor de mercado. */
+  const maintCost12m = useMemo(() => {
+    const limit = Date.now() - 365 * 86400000;
+    return vRecords
+      .filter((r) => new Date(r.entry_at).getTime() >= limit)
+      .reduce((sum, r) => sum + maintenanceTotal(r), 0);
+  }, [vRecords]);
+  const maintCost24m = useMemo(() => {
+    const limit = Date.now() - 730 * 86400000;
+    return vRecords
+      .filter((r) => new Date(r.entry_at).getTime() >= limit)
+      .reduce((sum, r) => sum + maintenanceTotal(r), 0);
+  }, [vRecords]);
   const vTires = useMemo(() => tires.filter((t) => t.vehicle_id === id), [tires, id]);
   const vFines = useMemo(() => fines.filter((f) => f.vehicle_id === id), [fines, id]);
   const vAccidents = useMemo(() => accidents.filter((a) => a.vehicle_id === id), [accidents, id]);
@@ -480,6 +494,7 @@ function HistoricoVeiculo() {
               <TabsTrigger value="limpeza">Limpeza</TabsTrigger>
               <TabsTrigger value="pecas">Peças</TabsTrigger>
               <TabsTrigger value="pneus">Pneus</TabsTrigger>
+              <TabsTrigger value="valor">Valor de mercado</TabsTrigger>
               <TabsTrigger value="abastecimentos">Abastecimentos</TabsTrigger>
               <TabsTrigger value="autorizacoes">Autorizações</TabsTrigger>
               <TabsTrigger value="utilizacoes">Utilizações</TabsTrigger>
@@ -612,6 +627,15 @@ function HistoricoVeiculo() {
                   brl(Number(o.amount ?? 0)),
                   label(OBLIGATION_STATUS, o.status),
                 ])}
+              />
+            </TabsContent>
+
+            <TabsContent value="valor">
+              <ValorDeMercado
+                vehicleId={id}
+                assetClass={vehicle?.asset_class ?? "veiculo"}
+                maintenanceCost12m={maintCost12m}
+                maintenanceCost24m={maintCost24m}
               />
             </TabsContent>
 
