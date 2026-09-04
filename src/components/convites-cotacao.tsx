@@ -133,17 +133,20 @@ export function ConvitesCotacao({
   async function copyLink(id: string) {
     try {
       const { link, isPublic, warning } = await issueInviteLink({ data: { invitationId: id } });
-      await navigator.clipboard.writeText(link);
-      if (isPublic) {
-        toast.success("Link copiado. Um novo link foi gerado e o anterior deixou de valer.");
-      } else {
-        toast.warning(warning ?? "Endereço público não configurado.", { duration: 12000 });
+      // Segunda checagem, agora no navegador: link interno nunca vai para a
+      // área de transferência.
+      if (!isPublic || !link || !isPublicInviteLink(link)) {
+        toast.error(warning ?? NO_PUBLIC_BASE_MESSAGE, { duration: 12000 });
+        return;
       }
+      await navigator.clipboard.writeText(link);
+      toast.success("Link copiado. Um novo link foi gerado e o anterior deixou de valer.");
       refresh();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Não foi possível gerar o link.");
     }
   }
+
 
   async function removeInvite(id: string) {
     const { error } = await supabase.from("quotation_invitations").delete().eq("id", id);
