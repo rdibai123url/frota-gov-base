@@ -234,7 +234,7 @@ type Vehicle = {
   fipe_year_code: string | null;
 };
 
-function LinkDialog({ vehicle, onClose }: { vehicle: Vehicle; onClose: () => void }) {
+export function LinkDialog({ vehicle, onClose }: { vehicle: Vehicle; onClose: () => void }) {
   const invalidate = useInvalidate();
   const getBrands = useServerFn(fipeBrands);
   const getModels = useServerFn(fipeModels);
