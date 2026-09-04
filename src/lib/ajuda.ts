@@ -500,7 +500,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     "Cotações",
     "Coleta e compara propostas de serviços e peças junto à rede credenciada antes da contratação, inclusive com convite por e-mail para empresas cadastradas ou não.",
     [
-      "Abra a cotação descrevendo o serviço ou item e cadastre os itens solicitados.",
+      "Abra a cotação descrevendo o serviço ou item e cadastre os itens solicitados: ao digitar a descrição, o sistema sugere itens já usados pelo próprio órgão — clique numa sugestão para preencher descrição e unidade, ou continue digitando para cadastrar um item novo.",
       "Na aba Convites, clique em “Enviar convites”, busque empresas por nome, CNPJ ou e-mail e acrescente e-mails avulsos.",
       "Revise a lista final, remova quem não deve receber e confirme o envio: cada empresa recebe uma mensagem individual, sem ver as demais.",
       "Acompanhe a situação de cada convite, reenvie quando necessário ou copie o link para mandar por outro meio.",
