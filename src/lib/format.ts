@@ -135,3 +135,53 @@ export function isValidCPF(v: string | null | undefined) {
 }
 
 export const maskCEP = (v: string) => onlyDigits(v).slice(0, 8).replace(/^(\d{5})(\d)/, "$1-$2");
+
+/* --------------------- padrões numéricos complementares ------------------ */
+
+export const PERCENT_DECIMALS = 2;
+export const QUANTITY_DECIMALS = 2;
+/** Hodômetro: quilometragem inteira (precisão funcional do produto). */
+export const KM_DECIMALS = 0;
+/** Horímetro: uma casa decimal, como registrado nos equipamentos. */
+export const HOUR_METER_DECIMALS = 1;
+
+/** Percentual no padrão brasileiro: 12.5 -> "12,50". */
+export const formatPercent = (value: number | string | null | undefined, withSign = true) =>
+  `${formatNumberBR(value, PERCENT_DECIMALS)}${withSign ? "%" : ""}`;
+
+/** Quantidade genérica (peças, serviços, itens): sempre 2 casas. */
+export const formatQuantity = (value: number | string | null | undefined) =>
+  formatNumberBR(value, QUANTITY_DECIMALS);
+
+/** Quantidade com unidade de medida: "3,00 UN". */
+export const formatQuantityUnit = (value: number | string | null | undefined, unit?: string | null) =>
+  `${formatQuantity(value)}${unit ? ` ${unit}` : ""}`;
+
+/** Quilometragem: milhar brasileiro, sem casas decimais artificiais. */
+export const formatKm = (value: number | string | null | undefined) =>
+  formatNumberBR(value, KM_DECIMALS);
+
+export const formatKmUnit = (value: number | string | null | undefined) => `${formatKm(value)} km`;
+
+/** Horímetro: uma casa decimal. */
+export const formatHourMeter = (value: number | string | null | undefined) =>
+  formatNumberBR(value, HOUR_METER_DECIMALS);
+
+/**
+ * Inteiro técnico (ano, processo, sequencial, eixos): sem casas decimais
+ * e sem separador de milhar, para não descaracterizar o número.
+ */
+export const formatInteger = (value: number | string | null | undefined) => {
+  const n = typeof value === "number" ? value : Number(value ?? 0);
+  return Number.isFinite(n) ? String(Math.round(n)) : "";
+};
+
+/** Máscara de digitação apenas com dígitos (inteiros técnicos). */
+export const maskInteger = (v: string, max = 12) => onlyDigits(v).slice(0, max);
+
+/** Máscara de quilometragem com separador de milhar, sem decimais. */
+export function maskKm(v: string) {
+  const d = onlyDigits(v).replace(/^0+(?=\d)/, "");
+  if (!d) return "";
+  return d.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
