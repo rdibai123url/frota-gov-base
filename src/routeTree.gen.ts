@@ -55,6 +55,7 @@ import { Route as AuthenticatedRedeCredenciadaRouteImport } from './routes/_auth
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as AuthenticatedSegurosRouteImport } from './routes/_authenticated/seguros'
 import { Route as AuthenticatedSinistrosRouteImport } from './routes/_authenticated/sinistros'
+import { Route as AuthenticatedSustentabilidadeRouteImport } from './routes/_authenticated/sustentabilidade'
 import { Route as AuthenticatedTransparenciaRouteImport } from './routes/_authenticated/transparencia'
 import { Route as AuthenticatedUnidadesRouteImport } from './routes/_authenticated/unidades'
 import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
@@ -313,6 +314,12 @@ const AuthenticatedSinistrosRoute = AuthenticatedSinistrosRouteImport.update({
   path: '/sinistros',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSustentabilidadeRoute =
+  AuthenticatedSustentabilidadeRouteImport.update({
+    id: '/sustentabilidade',
+    path: '/sustentabilidade',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedTransparenciaRoute =
   AuthenticatedTransparenciaRouteImport.update({
     id: '/transparencia',
@@ -413,6 +420,7 @@ export interface FileRoutesByFullPath {
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/seguros': typeof AuthenticatedSegurosRoute
   '/sinistros': typeof AuthenticatedSinistrosRoute
+  '/sustentabilidade': typeof AuthenticatedSustentabilidadeRoute
   '/transparencia': typeof AuthenticatedTransparenciaRoute
   '/unidades': typeof AuthenticatedUnidadesRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
@@ -470,6 +478,7 @@ export interface FileRoutesByTo {
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/seguros': typeof AuthenticatedSegurosRoute
   '/sinistros': typeof AuthenticatedSinistrosRoute
+  '/sustentabilidade': typeof AuthenticatedSustentabilidadeRoute
   '/transparencia': typeof AuthenticatedTransparenciaRoute
   '/unidades': typeof AuthenticatedUnidadesRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
@@ -529,6 +538,7 @@ export interface FileRoutesById {
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
   '/_authenticated/seguros': typeof AuthenticatedSegurosRoute
   '/_authenticated/sinistros': typeof AuthenticatedSinistrosRoute
+  '/_authenticated/sustentabilidade': typeof AuthenticatedSustentabilidadeRoute
   '/_authenticated/transparencia': typeof AuthenticatedTransparenciaRoute
   '/_authenticated/unidades': typeof AuthenticatedUnidadesRoute
   '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
@@ -588,6 +598,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/seguros'
     | '/sinistros'
+    | '/sustentabilidade'
     | '/transparencia'
     | '/unidades'
     | '/usuarios'
@@ -645,6 +656,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/seguros'
     | '/sinistros'
+    | '/sustentabilidade'
     | '/transparencia'
     | '/unidades'
     | '/usuarios'
@@ -703,6 +715,7 @@ export interface FileRouteTypes {
     | '/_authenticated/relatorios'
     | '/_authenticated/seguros'
     | '/_authenticated/sinistros'
+    | '/_authenticated/sustentabilidade'
     | '/_authenticated/transparencia'
     | '/_authenticated/unidades'
     | '/_authenticated/usuarios'
@@ -1050,6 +1063,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSinistrosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/sustentabilidade': {
+      id: '/_authenticated/sustentabilidade'
+      path: '/sustentabilidade'
+      fullPath: '/sustentabilidade'
+      preLoaderRoute: typeof AuthenticatedSustentabilidadeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/transparencia': {
       id: '/_authenticated/transparencia'
       path: '/transparencia'
@@ -1166,6 +1186,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
   AuthenticatedSegurosRoute: typeof AuthenticatedSegurosRoute
   AuthenticatedSinistrosRoute: typeof AuthenticatedSinistrosRoute
+  AuthenticatedSustentabilidadeRoute: typeof AuthenticatedSustentabilidadeRoute
   AuthenticatedTransparenciaRoute: typeof AuthenticatedTransparenciaRoute
   AuthenticatedUnidadesRoute: typeof AuthenticatedUnidadesRoute
   AuthenticatedUsuariosRoute: typeof AuthenticatedUsuariosRoute
@@ -1217,6 +1238,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
   AuthenticatedSegurosRoute: AuthenticatedSegurosRoute,
   AuthenticatedSinistrosRoute: AuthenticatedSinistrosRoute,
+  AuthenticatedSustentabilidadeRoute: AuthenticatedSustentabilidadeRoute,
   AuthenticatedTransparenciaRoute: AuthenticatedTransparenciaRoute,
   AuthenticatedUnidadesRoute: AuthenticatedUnidadesRoute,
   AuthenticatedUsuariosRoute: AuthenticatedUsuariosRoute,
