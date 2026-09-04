@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.export_table_columns(text) FROM authenticated;
