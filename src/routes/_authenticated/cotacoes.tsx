@@ -991,7 +991,7 @@ function QuotationDetail({
           />
         </TabsContent>
 
-        </TabsContent>
+
 
 
         <TabsContent value="mapa" className="space-y-4">
