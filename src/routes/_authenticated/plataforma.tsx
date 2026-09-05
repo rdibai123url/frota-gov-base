@@ -14,6 +14,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReopenReviewTab } from "@/components/reopen-review";
 import { ImportMigrationTab } from "@/components/import-migration";
 import { BackupTab } from "@/components/backup-admin";
+import { ModulesTab } from "@/components/modulos-orgao";
+
 
 import { exportXlsx } from "@/lib/reports";
 import { DocsTab, MatrixTab } from "@/components/homologacao";
