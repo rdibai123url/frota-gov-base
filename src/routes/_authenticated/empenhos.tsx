@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { BudgetReferenceSelect } from "@/components/cadastro-rapido";
 import { MoneyInput } from "@/components/form-fields";
 import {
   COMMITMENT_KINDS,
@@ -89,6 +90,9 @@ function Empenhos() {
   const [centerId, setCenterId] = useState(NONE);
   const [unitId, setUnitId] = useState(NONE);
   const [saving, setSaving] = useState(false);
+  const [allocation, setAllocation] = useState("");
+  const [resourceSource, setResourceSource] = useState("");
+  const [expenseElement, setExpenseElement] = useState("");
 
   const [fExercise, setFExercise] = useState(ALL);
   const [detailOf, setDetailOf] = useState<CommitmentRow | null>(null);
@@ -129,6 +133,9 @@ function Empenhos() {
 
   function openNew() {
     setEditing(null);
+    setAllocation("");
+    setResourceSource("");
+    setExpenseElement("");
     setKind("estimativo");
     setStatus("ativo");
     setContractId(NONE);
@@ -140,6 +147,9 @@ function Empenhos() {
 
   function openEdit(c: CommitmentRow) {
     setEditing(c);
+    setAllocation(c.budget_allocation ?? "");
+    setResourceSource(c.resource_source ?? "");
+    setExpenseElement(c.expense_element ?? "");
     setKind(c.kind);
     setStatus(c.status);
     setContractId(c.contract_id ?? NONE);
@@ -181,9 +191,9 @@ function Empenhos() {
       supplier_id: supplierId === NONE ? null : supplierId,
       cost_center_id: centerId === NONE ? null : centerId,
       unit_id: unitId === NONE ? null : unitId,
-      budget_allocation: d.budget_allocation || null,
-      resource_source: d.resource_source || null,
-      expense_element: d.expense_element || null,
+      budget_allocation: allocation || null,
+      resource_source: resourceSource || null,
+      expense_element: expenseElement || null,
       committed_value: committed,
       cancelled_value: cancelled,
       notes: d.notes || null,
@@ -527,17 +537,18 @@ function Empenhos() {
                   </SelectContent>
                 </Select>
               </div>
+              {/* Bloco 6.3 — seleção a partir dos cadastros do órgão, com botão + para incluir novos */}
               <div>
-                <Label htmlFor="budget_allocation">Dotação orçamentária</Label>
-                <Input id="budget_allocation" name="budget_allocation" defaultValue={editing?.budget_allocation ?? ""} />
+                <Label>Dotação orçamentária</Label>
+                <BudgetReferenceSelect kind="dotacao" value={allocation} onChange={setAllocation} />
               </div>
               <div>
-                <Label htmlFor="resource_source">Fonte de recurso</Label>
-                <Input id="resource_source" name="resource_source" defaultValue={editing?.resource_source ?? ""} />
+                <Label>Fonte de recurso</Label>
+                <BudgetReferenceSelect kind="fonte" value={resourceSource} onChange={setResourceSource} />
               </div>
               <div>
-                <Label htmlFor="expense_element">Elemento de despesa</Label>
-                <Input id="expense_element" name="expense_element" defaultValue={editing?.expense_element ?? ""} />
+                <Label>Elemento de despesa</Label>
+                <BudgetReferenceSelect kind="elemento" value={expenseElement} onChange={setExpenseElement} />
               </div>
               <div>
                 <Label htmlFor="committed_value">Valor empenhado (R$) *</Label>
