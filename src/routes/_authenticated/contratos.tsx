@@ -78,9 +78,22 @@ export const Route = createFileRoute("/_authenticated/contratos")({
 const ALL = "__all__";
 const NONE = "__none__";
 
+/** Rótulo do número do procedimento conforme a modalidade escolhida. */
+const PROCEDURE_LABELS: Record<string, string> = {
+  pregao: "Número do pregão",
+  concorrencia: "Número da concorrência",
+  dispensa: "Número da dispensa",
+  inexigibilidade: "Número da inexigibilidade",
+  adesao_ata: "Número da ata / adesão",
+  contratacao_direta: "Número da contratação direta",
+  credenciamento: "Número do edital de credenciamento",
+  outro: "Número do procedimento",
+};
+
 const contractSchema = z.object({
   number: z.string().trim().min(1, "Informe o número do contrato").max(40),
   process_number: z.string().trim().max(40).optional(),
+  procedure_number: z.string().trim().max(40).optional(),
   object: z.string().trim().min(3, "Descreva o objeto do contrato").max(400),
   cnpj: z.string().trim().optional(),
   signed_at: z.string().optional(),
