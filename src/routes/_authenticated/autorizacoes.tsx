@@ -268,6 +268,7 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
   const [fuelId, setFuelId] = useState(NONE);
   const [supplierId, setSupplierId] = useState(NONE);
   const [maxQty, setMaxQty] = useState("");
+  const [fillTank, setFillTank] = useState(false);
   const [maxValue, setMaxValue] = useState("");
   const [maxUnitPrice, setMaxUnitPrice] = useState("");
   const [odometer, setOdometer] = useState("");
@@ -359,6 +360,7 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
       driver_id: driver.id,
       fuel_type_id: fuel.id,
       supplier_id: supplierId === NONE ? null : supplierId,
+      fill_tank: fillTank,
       max_quantity: qty,
       max_value: maxValue ? parseBRNumber(maxValue) : null,
       max_unit_price: maxUnitPrice ? parseBRNumber(maxUnitPrice) : null,
@@ -463,6 +465,24 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
           <div>
             <Label htmlFor="mq">Quantidade máxima ({fuel?.measure_unit ?? "litros"}) *</Label>
             <LitersInput id="mq" value={maxQty} onValueChange={setMaxQty} />
+            <label className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                className="h-4 w-4 accent-primary"
+                checked={fillTank}
+                onChange={(e) => {
+                  const on = e.target.checked;
+                  setFillTank(on);
+                  if (on && vehicle?.tank_capacity) setMaxQty(String(vehicle.tank_capacity));
+                }}
+              />
+              Completar tanque (usa a capacidade cadastrada do veículo como teto)
+            </label>
+            {fillTank && !vehicle?.tank_capacity ? (
+              <p className="mt-1 text-xs text-destructive">
+                Veículo sem capacidade de tanque cadastrada: informe a quantidade máxima manualmente.
+              </p>
+            ) : null}
           </div>
           <div>
             <Label htmlFor="mv">Valor máximo (R$)</Label>
