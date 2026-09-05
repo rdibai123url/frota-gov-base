@@ -31,6 +31,7 @@ import {
   PRODUCT_CATEGORY_LABELS,
   PRODUCT_UNITS,
   supabase,
+  useContracts,
   useFuelTypes,
   useInvalidate,
   usePerms,
@@ -63,6 +64,7 @@ const schema = z.object({
 function Combustiveis() {
   const { data: fuels = [], isLoading } = useFuelTypes();
   const { canWrite, orgId, userId } = usePerms();
+  const { data: contracts = [] } = useContracts();
   const invalidate = useInvalidate();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<FuelType | null>(null);
@@ -70,12 +72,18 @@ function Combustiveis() {
   const [category, setCategory] = useState("combustivel");
   const [active, setActive] = useState(true);
   const [saving, setSaving] = useState(false);
+  // Vínculo opcional com o contrato de fornecimento (preço vem do item do contrato).
+  const [contractId, setContractId] = useState(NONE);
+  const [itemId, setItemId] = useState(NONE);
+  const contractItems = contracts.find((c) => c.id === contractId)?.items ?? [];
 
   function openNew() {
     setEditing(null);
     setUnit("litro");
     setCategory("combustivel");
     setActive(true);
+    setContractId(NONE);
+    setItemId(NONE);
     setOpen(true);
   }
 
@@ -84,6 +92,8 @@ function Combustiveis() {
     setUnit(f.measure_unit);
     setCategory(f.category ?? "combustivel");
     setActive(f.active);
+    setContractId(f.contract_id ?? NONE);
+    setItemId(f.contract_item_id ?? NONE);
     setOpen(true);
   }
 
@@ -243,6 +253,49 @@ function Combustiveis() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label>Contrato de fornecimento</Label>
+                <Select
+                  value={contractId}
+                  onValueChange={(v) => {
+                    setContractId(v);
+                    setItemId(NONE);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sem vínculo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NONE}>Sem vínculo</SelectItem>
+                    {contracts.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.number}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Item do contrato</Label>
+                <Select value={itemId} onValueChange={setItemId} disabled={contractId === NONE}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o item" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NONE}>Sem vínculo</SelectItem>
+                    {contractItems.map((i) => (
+                      <SelectItem key={i.id} value={i.id}>
+                        {i.description}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Quando vinculado, o preço unitário do abastecimento vem do item do contrato.
+                </p>
               </div>
             </div>
             {category !== "combustivel" && (
