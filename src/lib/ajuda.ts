@@ -560,16 +560,16 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
   ),
 
   "/rede-credenciada": t(
-    "Rede credenciada",
-    "Cadastro de oficinas e prestadores credenciados, com serviços atendidos, endereço e posição no mapa.",
+    "Oficinas e prestadores do órgão",
+    "Para que serve: reúne as oficinas e prestadores cadastrados pelo próprio órgão, com serviços atendidos, endereço e posição no mapa. O FrotaGov não disponibiliza prestadores; nada aqui é compartilhado com outros órgãos.",
     [
-      "Cadastre a oficina com CNPJ e endereço.",
+      "Cadastre a oficina do seu órgão com CNPJ e endereço.",
       "Indique os serviços atendidos.",
       "Salve: a posição no mapa é obtida automaticamente pelo endereço.",
     ],
     [
       { label: "CNPJ e razão social", description: "Identificação oficial do prestador; evita duplicidade no cadastro.", tags: REQ },
-      { label: "Serviços atendidos", description: "Especialidades da oficina; filtram onde ela aparece em cotações, ordens de serviço e manutenções." },
+      { label: "Serviços atendidos", description: "Especialidades da oficina; filtram onde ela aparece em cotações, ordens de serviço e manutenções do próprio órgão." },
       { label: "Endereço e localização", description: "A posição no mapa vem do endereço; pode ser corrigida manualmente quando não localizada.", tags: ["Automático", "Depende de integração"] },
       { label: "Situação", description: "Em análise, ativo, suspenso ou inativo. Somente oficinas ativas podem receber ordem de serviço." },
     ],
@@ -577,15 +577,15 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
   ),
 
   "/credenciados": t(
-    "Credenciados e cartão virtual",
-    "Gestão dos parceiros credenciados e do cartão virtual do bem, usado para identificar veículo e autorização no atendimento.",
+    "Credenciados do órgão e cartão virtual",
+    "Para que serve: gerencia as empresas cadastradas ou convidadas pelo próprio órgão e o cartão virtual do bem, usado para identificar veículo e autorização no atendimento.",
     [
       "Cadastre o parceiro e os usuários que acessarão o portal.",
       "Gere o cartão virtual do bem.",
       "Acompanhe os atendimentos capturados pelo parceiro.",
     ],
     [
-      { label: "Parceiro", description: "Empresa credenciada responsável pelo atendimento.", tags: REQ },
+      { label: "Parceiro", description: "Empresa cadastrada ou convidada pelo próprio órgão, responsável pelo atendimento. Não existe catálogo público de empresas.", tags: REQ },
       { label: "Cartão virtual", description: "Código de identificação do bem, apresentado no atendimento.", tags: AUTO },
       { label: "Usuários do parceiro", description: "Acessam apenas os dados do próprio credenciamento.", tags: COND },
     ],
@@ -597,7 +597,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
 
   "/portal-credenciado": t(
     "Portal do credenciado",
-    "Área usada pelo parceiro credenciado para validar o cartão do bem e registrar o atendimento de abastecimento ou manutenção.",
+    "Para que serve: área usada pela empresa cadastrada ou convidada pelo órgão para validar o cartão do bem e registrar o atendimento de abastecimento ou manutenção. O acesso é apenas por convite do órgão, sem descoberta pública.",
     [
       "Informe ou leia o código do cartão virtual.",
       "Confira os dados do bem e da autorização.",
@@ -611,8 +611,8 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
   ),
 
   "/mapa-rede": t(
-    "Mapa da rede credenciada",
-    "Visualiza no mapa postos, oficinas e credenciados, apoiando o planejamento de rotas e a distribuição da rede.",
+    "Mapa dos prestadores do órgão",
+    "Para que serve: visualiza no mapa somente os postos, oficinas e prestadores cadastrados pelo próprio órgão, apoiando o planejamento de rotas e a cobertura por região.",
     [
       "Use os filtros por tipo de estabelecimento e situação.",
       "Clique em um ponto para ver os dados do estabelecimento.",
@@ -621,7 +621,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
     [
       { label: "Filtro por tipo", description: "Postos de combustível, oficinas, credenciados e higienização/lava-jatos." },
-      { label: "Pontos no mapa", description: "Alimentados automaticamente pelo cadastro mestre e pelos contratos e credenciamentos ativos do próprio órgão.", tags: ["Automático", "Depende de integração"] },
+      { label: "Pontos no mapa", description: "Alimentados automaticamente pelos cadastros, contratos e credenciamentos do próprio órgão. O sistema não traz prestadores prontos nem dados de outros órgãos.", tags: ["Automático", "Depende de integração"] },
       { label: "Localização pendente", description: "Cadastros sem coordenada ficam listados à parte para busca automática ou correção manual.", tags: COND },
     ],
     [
@@ -862,7 +862,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
 
   "/ordens-servico": t(
     "Ordens de Serviço",
-    "Autoriza e acompanha a execução de serviços na rede credenciada, do orçamento aprovado até a entrega e o pagamento.",
+    "Autoriza e acompanha a execução de serviços pelos prestadores cadastrados pelo próprio órgão, do orçamento aprovado até a entrega e o pagamento.",
     [
       "Gere a ordem a partir da cotação aprovada ou diretamente.",
       "Escolha a origem da despesa: contrato ou compra direta/pronto pagamento.",
