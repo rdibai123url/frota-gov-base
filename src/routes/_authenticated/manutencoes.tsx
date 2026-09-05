@@ -27,11 +27,13 @@ import {
   dateTimeBR,
   dbMessage,
   label,
+  contractItemBalance,
   maintenanceTotal,
   num,
   parseBRNumber,
   supabase,
   useCommitments,
+  useContracts,
   useCostCenters,
   useInvalidate,
   useMaintenancePlans,
@@ -118,6 +120,7 @@ function Manutencoes() {
   const { data: suppliers = [] } = useSuppliers();
   const { data: plans = [] } = useMaintenancePlans();
   const { data: employees = [] } = useEmployees();
+  const { data: contracts = [] } = useContracts();
   const { data: commitments = [] } = useCommitments();
   const { data: quotas = [] } = useQuotas();
   const { data: catalog = [] } = usePartsCatalog();
