@@ -90,6 +90,8 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     [
       "Após haver movimentação registrada, os campos de identificação ficam protegidos contra alteração.",
       "Veículos baixados ou indisponíveis não podem receber novas autorizações de abastecimento.",
+      "A unidade informada define quais veículos aparecem nos filtros dependentes dos relatórios.",
+      "Planos de manutenção preventiva ficam vinculados ao bem: na manutenção só aparecem os planos daquele veículo ou equipamento.",
     ],
     ["Uma retroescavadeira deve ser cadastrada em Máquinas e equipamentos, não aqui."],
   ),
@@ -114,7 +116,8 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     "Utilização e reservas",
     "Registra a saída e o retorno dos bens, com condutor, finalidade, destino e quilometragem, além das reservas programadas.",
     [
-      "Clique em Nova utilização e informe o bem e o condutor.",
+      "Clique em Nova utilização (ou reserva) e informe o bem e o condutor.",
+      "A unidade é sugerida pela lotação do bem e do condutor; ajuste se tiver permissão.",
       "Registre a marcação de saída.",
       "Ao retornar, informe a marcação de chegada para encerrar o uso.",
     ],
@@ -127,6 +130,8 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     [
       "A marcação de retorno não pode ser menor que a de saída.",
       "Um bem não pode ter duas utilizações abertas ao mesmo tempo.",
+      "Só aparecem bens e condutores do próprio órgão; bens em manutenção, cedidos ou baixados não podem ser reservados.",
+      "O histórico de utilização alimenta o filtro de veículos por condutor nos relatórios.",
     ],
   ),
 
@@ -134,14 +139,20 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     "Diárias",
     "Controle de diárias de viagem vinculadas a deslocamentos da frota, com valores, período e prestação de contas.",
     [
-      "Cadastre a diária informando servidor, destino e período.",
+      "Cadastre a diária informando solicitante, beneficiário e autorizador a partir do cadastro de funcionários e pessoas externas.",
+      "Informe destino, período e o dispositivo legal que fundamenta a concessão.",
       "Vincule ao uso do veículo quando houver.",
       "Acompanhe a situação até a prestação de contas.",
     ],
     [
-      { label: "Servidor", description: "Beneficiário da diária.", tags: REQ },
+      { label: "Solicitante, beneficiário e autorizador", description: "Selecionados no cadastro de pessoas do órgão (funcionários e pessoas externas), evitando digitação livre de nomes.", tags: REQ },
+      { label: "Dispositivo legal / norma", description: "Escolhido no cadastro de dispositivos legais do órgão; há também campo de texto livre para normas não cadastradas.", tags: COND },
       { label: "Período", description: "Datas de saída e retorno; base para o número de diárias.", tags: REQ },
       { label: "Valor total", description: "Quantidade de diárias multiplicada pelo valor unitário.", tags: CALC },
+    ],
+    [
+      "Somente pessoas e dispositivos legais do próprio órgão aparecem nas listas.",
+      "O documento impresso reproduz o dispositivo legal informado.",
     ],
   ),
 
@@ -250,7 +261,8 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       { label: "Combustível/produto", description: "Deve estar previsto no contrato vigente.", tags: REQ },
       { label: "Quantidade ou valor autorizado", description: "Reservado imediatamente no contrato, no empenho e na cota.", tags: REQ },
       { label: "Saldo disponível", description: "Mostra o quanto ainda pode ser reservado.", tags: CALC },
-      { label: "Posto/fornecedor", description: "Limita onde a autorização pode ser utilizada.", tags: COND },
+      { label: "Posto/fornecedor", description: "Limita onde a autorização pode ser utilizada; deve pertencer ao contrato do próprio órgão.", tags: COND },
+      { label: "Contrato e item", description: "A autorização nasce vinculada ao item do contrato; o preço utilizado é sempre o do item contratual.", tags: ["Automático", "Obrigatório"] },
     ],
     [
       "A autorização não é emitida se não houver saldo suficiente de contrato, empenho ou cota.",
@@ -269,7 +281,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Salve para consumir a reserva e devolver a diferença ao saldo.",
     ],
     [
-      { label: "Autorização", description: "Ao selecionar, os dados do bem e do combustível são preenchidos.", tags: ["Automático", "Condicional"] },
+      { label: "Autorização", description: "Ao selecionar, os dados do bem, do combustível, do contrato e do item são preenchidos automaticamente.", tags: ["Automático", "Condicional"] },
       { label: "Quantidade abastecida", description: "Consumo real; não pode ultrapassar o autorizado.", tags: REQ },
       { label: "Valor total", description: "Quantidade multiplicada pelo valor unitário.", tags: CALC },
       { label: "Marcação do medidor", description: "Base do cálculo de consumo médio.", tags: REQ },
@@ -292,6 +304,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     [
       { label: "Unidade de medida", description: "Litro, quilo, hora ou unidade, conforme o produto.", tags: REQ },
       { label: "Entra no consumo", description: "Define se o produto é considerado nos indicadores de km/l." },
+      { label: "Uso em contrato", description: "O produto só pode ser autorizado quando houver item de contrato vigente do próprio órgão que o contemple.", tags: COND },
     ],
   ),
 
@@ -330,17 +343,27 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     "Manutenções",
     "Registro de manutenções corretivas e preventivas, com serviços, peças, custos, oficina e tempo de indisponibilidade.",
     [
-      "Abra uma manutenção informando o bem e o tipo.",
-      "Lance serviços, peças e valores.",
-      "Encerre a manutenção com a data de conclusão.",
+      "Na solicitação, informe o funcionário solicitante (a unidade solicitante é sugerida automaticamente) e o bem, quando a solicitação for para um bem específico.",
+      "Ao registrar, escolha entre \"Usar solicitação existente\" (que preenche automaticamente os dados já informados) e \"Registrar manutenção sem solicitação prévia\".",
+      "Escolha a origem: por contrato (com oficina contratada, contrato e item de mão de obra) ou fora de contrato.",
+      "Lance as peças substituídas/utilizadas e encerre a manutenção com a data de conclusão.",
     ],
     [
-      { label: "Tipo", description: "Corretiva, preventiva ou preditiva.", tags: REQ },
-      { label: "Oficina", description: "Rede credenciada ou fornecedor cadastrado.", tags: COND },
+      { label: "Unidade solicitante", description: "Sugerida a partir da unidade do funcionário solicitante; pode ser ajustada por quem tem permissão.", tags: ["Automático", "Obrigatório"] },
+      { label: "Tipo", description: "Corretiva ou preventiva.", tags: REQ },
+      { label: "Plano preventivo", description: "Lista apenas os planos cadastrados para o bem selecionado.", tags: COND },
+      { label: "Oficina e contrato", description: "Na origem por contrato, a oficina contratada e o contrato vigente definem os itens disponíveis.", tags: COND },
+      { label: "Valor unitário", description: "Vem do item contratual e fica bloqueado para edição; o total é quantidade × valor unitário.", tags: ["Automático", "Calculado"] },
+      { label: "Peças substituídas/utilizadas", description: "Selecionadas entre os itens do contrato, com nº do item, descrição, referência, unidade, saldo disponível e valor unitário.", tags: COND },
       { label: "Custo total", description: "Soma de serviços e peças lançados.", tags: CALC },
       { label: "Período de indisponibilidade", description: "Diferença entre entrada e saída; alimenta o indicador de disponibilidade da frota.", tags: CALC },
     ],
-    ["Enquanto a manutenção estiver aberta, o bem é contabilizado como indisponível."],
+    [
+      "Centro de custo, empenho e cota não aparecem na tela operacional: são derivados da origem/contrato e permanecem registrados para auditoria e relatórios.",
+      "Não é permitido consumir peça ou serviço acima do saldo do item contratual.",
+      "Ao concluir manutenção vinculada a plano preventivo, o histórico do plano é atualizado e a próxima manutenção é calculada pela periodicidade cadastrada, sem duplicar evento em caso de reedição.",
+      "Enquanto a manutenção estiver aberta, o bem é contabilizado como indisponível.",
+    ],
   ),
 
   "/planos-manutencao": t(
@@ -349,11 +372,13 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     [
       "Crie o plano e escolha os bens ou o tipo de bem.",
       "Defina o intervalo (km, horas ou meses).",
+      "No campo Tipo de serviço, use o botão + para cadastrar um novo tipo sem sair da tela.",
       "Acompanhe os avisos gerados na tela de Alertas.",
     ],
     [
+      { label: "Tipo de serviço", description: "Escolhido da lista do órgão; o botão + cria o tipo e já o deixa selecionado.", tags: REQ },
       { label: "Intervalo", description: "Base do próximo vencimento do plano.", tags: REQ },
-      { label: "Próxima revisão", description: "Calculada a partir da última execução e do intervalo.", tags: CALC },
+      { label: "Próxima revisão", description: "Calculada a partir da última execução e do intervalo, atualizada quando uma manutenção do plano é concluída.", tags: CALC },
     ],
   ),
 
@@ -363,10 +388,12 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     [
       "Registre a limpeza informando bem e data.",
       "Informe o tipo de serviço e o custo, quando houver.",
+      "Use \"Imprimir / Gerar PDF\" para emitir a solicitação institucional a ser apresentada no estabelecimento.",
       "Use os filtros para conferir a periodicidade por bem.",
     ],
     [
       { label: "Tipo de serviço", description: "Lavagem simples, completa, higienização ou outro.", tags: REQ },
+      { label: "Imprimir / Gerar PDF", description: "Documento com brasão e dados do órgão, código, bem, tipo de limpeza, prestador quando definido, solicitante, data e observações.", tags: AUTO },
     ],
   ),
 
@@ -406,15 +433,20 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     "Controle de estoque de peças e insumos: entradas, saídas, reservas, saldos por depósito e inventário.",
     [
       "Cadastre depósitos e saldos iniciais.",
-      "Registre entradas e saídas de material.",
+      "Registre entradas e saídas de material; a entrada por compra nasce do recebimento da ordem de fornecimento.",
+      "Use a transferência entre depósitos para mover um ou vários itens em uma única operação.",
       "Use o inventário para conferência periódica.",
     ],
     [
-      { label: "Depósito", description: "Local físico do estoque.", tags: REQ },
+      { label: "Depósito", description: "Local físico do estoque; a transferência exige depósito de origem e de destino diferentes.", tags: REQ },
       { label: "Saldo disponível", description: "Saldo em estoque menos as reservas ativas.", tags: CALC },
       { label: "Movimentação", description: "Entrada, saída, ajuste ou transferência; sempre com justificativa.", tags: REQ },
+      { label: "Transferência multi-item", description: "Permite incluir várias linhas de item e quantidade; cada linha é validada e registrada individualmente na auditoria.", tags: COND },
     ],
-    ["Saídas acima do saldo disponível são bloqueadas."],
+    [
+      "Saídas e transferências acima do saldo disponível são bloqueadas.",
+      "Entradas excepcionais (saldo inicial, devolução, doação, ajuste e correção) exigem justificativa e ficam registradas na auditoria.",
+    ],
   ),
 
   "/pneus": t(
@@ -487,13 +519,20 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     [
       "Use os filtros por tipo de estabelecimento e situação.",
       "Clique em um ponto para ver os dados do estabelecimento.",
+      "Para cadastros sem localização, use a busca de coordenadas ou informe latitude e longitude manualmente.",
       "Ajuste o zoom para comparar a cobertura por região.",
     ],
     [
-      { label: "Filtro por tipo", description: "Postos, oficinas ou credenciados." },
-      { label: "Pontos no mapa", description: "Exibidos apenas para cadastros com localização obtida ou informada.", tags: ["Automático", "Depende de integração"] },
+      { label: "Filtro por tipo", description: "Postos de combustível, oficinas, credenciados e higienização/lava-jatos." },
+      { label: "Pontos no mapa", description: "Alimentados automaticamente pelo cadastro mestre e pelos contratos e credenciamentos ativos do próprio órgão.", tags: ["Automático", "Depende de integração"] },
+      { label: "Localização pendente", description: "Cadastros sem coordenada ficam listados à parte para busca automática ou correção manual.", tags: COND },
     ],
-    ["Cadastros sem endereço válido não aparecem no mapa."],
+    [
+      "O mapa mostra somente estabelecimentos do órgão em que você está conectado.",
+      "Cadastros sem endereço válido não aparecem no mapa até receberem coordenada.",
+      "A busca automática de coordenadas usa serviço público gratuito, com limite de consultas; quando falha, informe a coordenada manualmente. O sistema nunca estima coordenadas.",
+      "Não é necessário recadastrar o estabelecimento apenas para que ele apareça no mapa.",
+    ],
   ),
 
   "/cotacoes": t(
@@ -729,31 +768,45 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     "Autoriza e acompanha a execução de serviços na rede credenciada, do orçamento aprovado até a entrega e o pagamento.",
     [
       "Gere a ordem a partir da cotação aprovada ou diretamente.",
-      "Acompanhe a execução pelo prestador.",
-      "Registre a conclusão e o valor final.",
+      "Escolha a origem da despesa: contrato ou compra direta/pronto pagamento.",
+      "Na origem por contrato, selecione o contrato e o item contratual correspondente.",
+      "Acompanhe a execução e registre a conclusão e o valor final.",
     ],
     [
-      { label: "Prestador", description: "Oficina ou credenciado responsável.", tags: REQ },
-      { label: "Itens e serviços", description: "Base do valor da ordem.", tags: REQ },
-      { label: "Valor total", description: "Soma dos itens autorizados.", tags: CALC },
+      { label: "Origem da despesa", description: "Define o restante da tela: por contrato exige contrato e item; compra direta/pronto pagamento dispensa contrato.", tags: REQ },
+      { label: "Prestador", description: "Na compra direta pode ser qualquer empresa do cadastro mestre, mesmo sem contrato ou credenciamento.", tags: REQ },
+      { label: "Contrato e item contratual", description: "Aparecem apenas na origem por contrato; o valor unitário vem do item e não é editável.", tags: ["Obrigatório", "Condicional"] },
+      { label: "Valor total", description: "Quantidade multiplicada pelo valor unitário do item; soma dos itens autorizados.", tags: CALC },
     ],
-    ["Ordens concluídas ficam bloqueadas para edição e geram lançamento de custo no bem."],
+    [
+      "Centro de custo, empenho e cota não aparecem na tela operacional: são derivados da origem e do contrato e permanecem registrados para auditoria e relatórios.",
+      "Ordens nascidas de cotação só prosseguem com proposta aprovada.",
+      "Ordens concluídas ficam bloqueadas para edição e geram lançamento de custo no bem.",
+      "Só é possível selecionar contratos, itens e empresas do próprio órgão.",
+    ],
   ),
 
   "/contratos": t(
     "Contratos",
     "Cadastro dos contratos de fornecimento e serviços, com itens, quantidades, preços e saldos consumidos.",
     [
-      "Cadastre o contrato com fornecedor, vigência e valor.",
+      "Cadastre o contrato com fornecedor, tipo de objeto, vigência e valor.",
       "Inclua os itens contratados com quantidade e preço unitário.",
-      "Acompanhe o saldo conforme as autorizações e ordens forem emitidas.",
+      "Registre aditivos de prazo, valor, acréscimo, supressão ou reajuste quando houver.",
+      "Acompanhe nos cards de resumo o contratado, o consumido, o reservado e o saldo.",
     ],
     [
+      { label: "Tipo de objeto", description: "Classifica o contrato (combustível, peças, manutenção, higienização, locação, seguro e outros) e orienta onde ele pode ser usado.", tags: REQ },
       { label: "Vigência", description: "Fora da vigência o contrato não pode ser utilizado.", tags: REQ },
       { label: "Itens", description: "Cada item tem quantidade e preço unitário; o total é calculado.", tags: CALC },
       { label: "Saldo do item", description: "Quantidade contratada menos consumida e reservada.", tags: CALC },
+      { label: "Cards de resumo", description: "Contratos vigentes, valor contratado, consumido, reservado e saldo disponível, calculados a partir dos itens e das execuções.", tags: CALC },
     ],
-    ["Contratos vencidos ou sem saldo bloqueiam a emissão de novas autorizações."],
+    [
+      "Contratos vencidos ou sem saldo bloqueiam a emissão de novas autorizações.",
+      "Somente contratos do próprio órgão podem ser selecionados nas demais telas.",
+      "Preços usados em manutenções e ordens de serviço vêm sempre do item contratual, não de valor digitado livremente.",
+    ],
   ),
 
   "/empenhos": t(
@@ -761,12 +814,15 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     "Controle dos empenhos orçamentários vinculados aos contratos, com valores empenhados, reservados e liquidados.",
     [
       "Cadastre o empenho com número, data e valor.",
+      "Informe dotação orçamentária, fonte de recurso e elemento de despesa; use o botão + ao lado de cada campo para criar um novo registro sem sair da tela.",
       "Vincule ao contrato correspondente.",
-      "Acompanhe o consumo do saldo empenhado.",
+      "Acompanhe o consumo do saldo empenhado nos cards de resumo.",
     ],
     [
       { label: "Número do empenho", description: "Identificação orçamentária oficial.", tags: REQ },
+      { label: "Dotação, fonte e elemento", description: "Escolhidos de cadastros reutilizáveis do próprio órgão; o botão + cria o registro e já o deixa selecionado.", tags: REQ },
       { label: "Saldo disponível", description: "Valor empenhado menos reservado e liquidado.", tags: CALC },
+      { label: "Cards de resumo", description: "Empenhos ativos, valor empenhado, consumido, reservado e saldo disponível.", tags: CALC },
     ],
     ["Sem saldo de empenho a autorização de abastecimento não é emitida."],
   ),
@@ -926,14 +982,23 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     "Conjunto de relatórios gerenciais e operacionais com filtros por período, unidade, bem e tipo de despesa.",
     [
       "Escolha o relatório desejado.",
-      "Aplique os filtros de período e abrangência.",
+      "Selecione Ano e Mês para montar o período automaticamente, ou ajuste as datas De/Até manualmente.",
+      "Refine por Secretaria/unidade, Veículo, Condutor, Tipo de contrato e Contrato.",
       "Gere e exporte em planilha ou documento.",
     ],
     [
-      { label: "Período", description: "Recorta os lançamentos considerados.", tags: REQ },
-      { label: "Filtros de abrangência", description: "Unidade, centro de custo, bem ou fornecedor." },
+      { label: "Ano e Mês", description: "Preenchem as datas do período; escolha \"Ano inteiro\" para o exercício completo.", tags: AUTO },
+      { label: "Período (De/Até)", description: "Recorta os lançamentos considerados; pode ser ajustado após escolher ano e mês.", tags: REQ },
+      { label: "Secretaria / unidade", description: "Ao escolher a unidade, a lista de veículos passa a mostrar apenas os bens lotados nela." },
+      { label: "Condutor", description: "Ao escolher o condutor, a lista de veículos passa a mostrar apenas os bens que ele efetivamente utilizou no histórico." },
+      { label: "Tipo de contrato", description: "Categoria do objeto contratual (combustível, peças, manutenção, higienização, locação, seguro e outros); define quais contratos aparecem no filtro Contrato." },
+      { label: "Contrato", description: "Seleciona um contrato específico; os relatórios passam a considerar apenas os consumos e execuções vinculados a ele." },
     ],
-    ["Relatórios sem resultado indicam ausência de lançamentos no filtro escolhido, não erro do sistema."],
+    [
+      "Quando um filtro superior muda e invalida o filtro já escolhido, o filtro dependente é limpo automaticamente.",
+      "Filtros desabilitados não se aplicam ao relatório selecionado.",
+      "Relatórios sem resultado indicam ausência de lançamentos no filtro escolhido, não erro do sistema.",
+    ],
   ),
 
   "/sustentabilidade": t(

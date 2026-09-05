@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-import { supabase, useOrganization, usePerms, useUnits, useInvalidate } from "@/lib/frotagov";
+import { supabase, useActiveOrgId, useOrganization, usePerms, useUnits, useInvalidate } from "@/lib/frotagov";
 import { formatNumberBR, parseBRNumber } from "@/lib/format";
 import { exportReportCsv } from "@/lib/reports";
 import { haversineKm } from "@/lib/integracoes";
@@ -103,6 +103,7 @@ function enderecoDe(p: {
 
 type NetworkEntity = {
   id: string;
+  organization_id: string;
   name: string;
   trade_name: string | null;
   address: string | null;
@@ -125,40 +126,54 @@ function contractPointKind(objectKind: string | null, categories: string[]) {
   return "Credenciado";
 }
 
-function useNetworkPoints() {
+/**
+ * Pontos do mapa restritos ao órgão do contexto autenticado.
+ *
+ * Além do isolamento garantido pelas políticas de acesso do banco, todas as
+ * consultas filtram explicitamente pelo organization_id ativo, de modo que o
+ * mapa nunca misture estabelecimentos de órgãos diferentes.
+ */
+function useNetworkPoints(orgId: string | null | undefined) {
   return useQuery({
-    queryKey: ["rede-geolocalizada"],
+    queryKey: ["rede-geolocalizada", orgId],
+    enabled: !!orgId,
     queryFn: async () => {
+      if (!orgId) return [] as Point[];
       const [partners, suppliers, workshops, entities] = await Promise.all([
         supabase
           .from("accredited_partners")
           .select(
             "id, legal_name, trade_name, address, district, city, state, phone, status, kinds, latitude, longitude, geocode_status",
-          ),
+          )
+          .eq("organization_id", orgId),
         supabase
           .from("suppliers")
           .select(
             "id, legal_name, trade_name, address, city, state, zip_code, phone, active, latitude, longitude, geocode_status",
-          ),
+          )
+          .eq("organization_id", orgId),
         supabase
           .from("workshops")
           .select(
             "id, legal_name, trade_name, address, district, city, state, zip_code, phone, status, specialties, latitude, longitude, geocode_status",
-          ),
+          )
+          .eq("organization_id", orgId),
         // Empresas do cadastro mestre habilitadas por contrato: oficinas,
         // postos e lava-jatos entram no mapa automaticamente.
         supabase
           .from("contracts")
           .select(
-            "id, status, object_kind, entity:external_entities(id, name, trade_name, address, district, city, state, zip_code, phone, categories, latitude, longitude, geocode_status)",
+            "id, status, object_kind, entity:external_entities(id, organization_id, name, trade_name, address, district, city, state, zip_code, phone, categories, latitude, longitude, geocode_status)",
           )
+          .eq("organization_id", orgId)
           .in("status", ["vigente", "suspenso"]),
       ]);
       const points: Point[] = [];
       const seen = new Set<string>();
       for (const c of entities.data ?? []) {
         const e = (c as { entity: NetworkEntity | null }).entity;
-        if (!e || seen.has(e.id)) continue;
+        // Defesa adicional: nunca aceitar empresa vinculada a outro órgão.
+        if (!e || e.organization_id !== orgId || seen.has(e.id)) continue;
         seen.add(e.id);
         points.push({
           id: `empresa-${e.id}`,
@@ -267,7 +282,8 @@ const LEGEND = [
 ];
 
 function MapaRede() {
-  const { data: points = [], isLoading } = useNetworkPoints();
+  const { data: orgId } = useActiveOrgId();
+  const { data: points = [], isLoading } = useNetworkPoints(orgId);
   const { data: units = [] } = useUnits();
   const { data: org } = useOrganization();
   const { userName, canManageFleet } = usePerms();
@@ -286,20 +302,24 @@ function MapaRede() {
   const [fixing, setFixing] = useState<Point | null>(null);
   const [running, setRunning] = useState(false);
 
-  const unitsWithCoords = units.filter(
+  // A unidade de referência também vem do órgão do contexto autenticado.
+  const orgUnits = units.filter(
+    (u) => (u as { organization_id?: string | null }).organization_id === orgId,
+  );
+  const unitsWithCoords = orgUnits.filter(
     (u) => (u as { latitude?: number | null }).latitude != null && (u as { longitude?: number | null }).longitude != null,
   );
 
   const origin = useMemo(() => {
     if (unitId !== ALL) {
-      const u = units.find((x) => x.id === unitId) as { latitude?: number | null; longitude?: number | null } | undefined;
+      const u = orgUnits.find((x) => x.id === unitId) as { latitude?: number | null; longitude?: number | null } | undefined;
       if (u?.latitude != null && u.longitude != null) return { lat: Number(u.latitude), lon: Number(u.longitude) };
     }
     const la = Number(lat.replace(",", "."));
     const lo = Number(lon.replace(",", "."));
     if (Number.isFinite(la) && Number.isFinite(lo) && lat && lon) return { lat: la, lon: lo };
     return null;
-  }, [unitId, units, lat, lon]);
+  }, [unitId, orgUnits, lat, lon]);
 
   const raioKm = raio ? parseBRNumber(raio) : null;
 
@@ -345,13 +365,22 @@ function MapaRede() {
   const pendentes = points.filter((p) => (p.latitude == null || p.longitude == null) && p.address && p.city);
   const semEndereco = points.filter((p) => p.latitude == null || p.longitude == null).length - pendentes.length;
 
+  /**
+   * Localiza os pendentes usando o serviço público e gratuito de
+   * geocodificação: uma consulta por vez, com pausa de 1,1s e lote máximo de
+   * 25 endereços por execução, conforme a política de uso do serviço.
+   * Nenhuma coordenada é estimada: endereços não encontrados permanecem
+   * pendentes para correção manual.
+   */
   async function geocodificarPendentes() {
-    if (pendentes.length === 0) return;
+    if (pendentes.length === 0 || running) return;
     setRunning(true);
     let ok = 0;
     let falhou = 0;
-    // Uma consulta por vez, com pausa: política de uso do OpenStreetMap.
-    for (const p of pendentes.slice(0, 25)) {
+    let interrompido = false;
+    let errosSeguidos = 0;
+    const lote = pendentes.slice(0, 25);
+    for (const p of lote) {
       const r = await geocodeRecord(p.table, p.recordId, {
         address: p.address,
         district: p.district,
@@ -359,13 +388,36 @@ function MapaRede() {
         state: p.state,
         zip_code: p.zip_code,
       });
-      if (r.status === "geocodificado") ok += 1;
-      else falhou += 1;
+      if (r.status === "geocodificado") {
+        ok += 1;
+        errosSeguidos = 0;
+      } else {
+        falhou += 1;
+        // "falhou" indica indisponibilidade/limite do serviço; três seguidas
+        // interrompem o lote para não insistir contra o serviço gratuito.
+        errosSeguidos = r.status === "falhou" ? errosSeguidos + 1 : 0;
+        if (errosSeguidos >= 3) {
+          interrompido = true;
+          break;
+        }
+      }
       await new Promise((res) => setTimeout(res, 1100));
     }
     setRunning(false);
     invalidate(["rede-geolocalizada"]);
-    toast.success(`Geocodificação concluída: ${ok} localizado(s), ${falhou} sem coordenadas.`);
+    if (interrompido) {
+      toast.warning(
+        `Consulta interrompida pelo serviço de localização. ${ok} localizado(s); tente novamente em alguns minutos ou informe as coordenadas manualmente.`,
+      );
+      return;
+    }
+    if (falhou > 0) {
+      toast.warning(
+        `Geocodificação concluída: ${ok} localizado(s) e ${falhou} sem coordenadas. Use "Corrigir" para informar a localização manualmente.`,
+      );
+      return;
+    }
+    toast.success(`Geocodificação concluída: ${ok} localizado(s).`);
   }
 
   const columns = [
@@ -509,8 +561,10 @@ function MapaRede() {
       {(pendentes.length > 0 || semEndereco > 0) && (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
           <span>
-            {pendentes.length} estabelecimento(s) com endereço aguardando geocodificação
-            {semEndereco > 0 ? ` e ${semEndereco} sem endereço suficiente` : ""}.
+            {pendentes.length} estabelecimento(s) com endereço aguardando localização
+            {semEndereco > 0 ? ` e ${semEndereco} sem endereço suficiente para localizar` : ""}. A busca
+            automática usa serviço público gratuito e processa até 25 endereços por vez; o que não for
+            encontrado deve receber a coordenada manualmente.
           </span>
           {canManageFleet && pendentes.length > 0 && (
             <Button size="sm" variant="outline" onClick={geocodificarPendentes} disabled={running}>
@@ -611,7 +665,8 @@ function ManualCoordinatesDialog({
 
   async function tentarNovamente() {
     setSaving(true);
-    const r = await geocodeRecord(
+    try {
+      const r = await geocodeRecord(
       point.table,
       point.recordId,
       {
@@ -621,16 +676,22 @@ function ManualCoordinatesDialog({
         state: point.state,
         zip_code: point.zip_code,
       },
-      { force: true },
-    );
-    setSaving(false);
-    if (r.status === "geocodificado") {
-      setLat(String(r.latitude));
-      setLon(String(r.longitude));
-      toast.success("Endereço localizado.");
-      onSaved();
-    } else {
-      toast.warning(r.message);
+        { force: true },
+      );
+      if (r.status === "geocodificado") {
+        setLat(String(r.latitude));
+        setLon(String(r.longitude));
+        toast.success("Endereço localizado.");
+        onSaved();
+      } else {
+        toast.warning(r.message);
+      }
+    } catch {
+      toast.error(
+        "Serviço de localização indisponível no momento. Tente novamente mais tarde ou informe latitude e longitude manualmente.",
+      );
+    } finally {
+      setSaving(false);
     }
   }
 
