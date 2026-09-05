@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Ban, Droplets, Paperclip, Pencil, Plus, Settings2 } from "lucide-react";
+import { Ban, Droplets, Paperclip, Pencil, Plus, Printer, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -96,7 +96,8 @@ function Limpeza() {
   const { data: commitments = [] } = useCommitments();
   const { data: quotas = [] } = useQuotas();
   const { data: centers = [] } = useCostCenters();
-  const { canManageFleet, orgId } = usePerms();
+  const { canManageFleet, orgId, userName } = usePerms();
+  const { data: org } = useOrganization();
   const invalidate = useInvalidate();
 
   const [open, setOpen] = useState(false);
