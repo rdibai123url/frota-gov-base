@@ -181,7 +181,27 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { isSuperAdmin } = useIsSuperAdmin();
   const { data: platformSession } = usePlatformSession();
   const { exitOrg } = usePlatformContextActions();
-  const navGroups = isSuperAdmin ? [PLATFORM_NAV, ...NAV] : NAV;
+  const { map: modules, isLoading: modulesLoading } = useModuleMap();
+
+  /** Bloco 6.1 — o menu mostra apenas os módulos habilitados para o órgão. */
+  const visibleNav = NAV.map((group) => {
+    if (group.to) {
+      const mod = moduleForPath(group.to);
+      return mod && modules[mod.key] === false ? null : group;
+    }
+    const items = (group.items ?? []).filter((leaf) => {
+      const mod = moduleForPath(leaf.to);
+      return !mod || modules[mod.key] !== false;
+    });
+    return items.length ? { ...group, items } : null;
+  }).filter((g): g is NavGroup => g !== null);
+
+  const navGroups = isSuperAdmin ? [PLATFORM_NAV, ...visibleNav] : visibleNav;
+
+  const currentModule = moduleForPath(pathname);
+  const blocked = !modulesLoading && !!currentModule && modules[currentModule.key] === false;
+
+
 
 
   async function handleSignOut() {
