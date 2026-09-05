@@ -108,18 +108,6 @@ function RedeCredenciada() {
     );
   }, [workshops, search, fStatus, fSpecialty]);
 
-  function openNew() {
-    setEditing(null);
-    setStatus("em_analise");
-    setUf("");
-    setCnpj("");
-    setRadius("");
-    setSpecialties([]);
-    setUrgency(false);
-    setWeekend(false);
-    setFile(null);
-    setOpen(true);
-  }
 
   function openEdit(w: Workshop) {
     setEditing(w);
