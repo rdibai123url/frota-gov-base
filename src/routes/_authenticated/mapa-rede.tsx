@@ -247,7 +247,12 @@ function useNetworkPoints() {
           zip_code: w.zip_code,
         });
       }
-      return points;
+      // Nunca duplicar a mesma empresa no mapa: registros antigos de
+      // fornecedor/oficina com mesmo nome e município cedem lugar ao ponto
+      // derivado do contrato.
+      const chave = (p: Point) => `${p.nome.trim().toLowerCase()}|${p.cidade.trim().toLowerCase()}`;
+      const derivados = new Set(points.filter((p) => p.table === "external_entities").map(chave));
+      return points.filter((p) => p.table === "external_entities" || !derivados.has(chave(p)));
     },
   });
 }
