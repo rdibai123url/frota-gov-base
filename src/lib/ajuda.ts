@@ -404,6 +404,29 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   ),
 
+  "/manutencoes/solicitacoes": t(
+    "Solicitações de manutenção",
+    "Registra o pedido de manutenção antes da execução: quem pediu, para qual bem e o que está ocorrendo. É a origem preferencial do registro da manutenção.",
+    [
+      "Clique em nova solicitação e informe o funcionário solicitante: a unidade solicitante é preenchida pela lotação dele.",
+      "Selecione o bem e descreva o problema ou o serviço necessário.",
+      "Escolha o tipo (corretiva ou preventiva) e a prioridade.",
+      "Acompanhe a situação até a manutenção ser executada.",
+    ],
+    [
+      { label: "Funcionário solicitante", description: "Escolhido no cadastro de funcionários; não digite o nome.", tags: ["Obrigatório", "Automático"] },
+      { label: "Unidade solicitante", description: "Sugerida pela lotação do solicitante; só quem tem permissão pode trocar.", tags: ["Automático", "Obrigatório"] },
+      { label: "Bem", description: "Veículo ou equipamento do próprio órgão que precisa do serviço.", tags: REQ },
+      { label: "Descrição", description: "Relato objetivo do defeito ou do serviço pedido; orienta a oficina e a cotação.", tags: REQ },
+      { label: "Prioridade", description: "Baixa, normal, alta ou urgente; organiza a fila de atendimento." },
+      { label: "Situação", description: "Aberta, em análise, aprovada, em manutenção, concluída ou cancelada.", tags: AUTO },
+    ],
+    [
+      "Ao registrar a manutenção usando a solicitação, bem, unidade, tipo e descrição já vêm preenchidos.",
+      "Uma solicitação concluída não volta a ficar aberta: registre nova solicitação se o problema retornar.",
+    ],
+  ),
+
   "/planos-manutencao": t(
     "Planos de manutenção preventiva",
     "Define os intervalos de revisão por quilometragem, horas ou tempo, gerando avisos automáticos de manutenção vencida ou próxima.",
@@ -495,6 +518,27 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     [
       "Saídas e transferências acima do saldo disponível são bloqueadas.",
       "Entradas excepcionais (saldo inicial, devolução, doação, ajuste e correção) exigem justificativa e ficam registradas na auditoria.",
+    ],
+  ),
+
+  "/almoxarifado/transferencias": t(
+    "Transferência entre depósitos",
+    "Move itens de um depósito para outro sem alterar o patrimônio total do estoque. Uma única operação pode transferir vários itens.",
+    [
+      "Selecione o depósito de origem e o de destino (precisam ser diferentes).",
+      "Acrescente uma linha por item, informando a peça e a quantidade.",
+      "Confira o saldo disponível mostrado em cada linha e confirme a transferência.",
+    ],
+    [
+      { label: "Depósito de origem", description: "De onde o material sai; o saldo disponível é mostrado por item.", tags: REQ },
+      { label: "Depósito de destino", description: "Para onde o material vai; deve ser diferente da origem.", tags: REQ },
+      { label: "Itens e quantidades", description: "Várias linhas na mesma operação; cada linha é validada e registrada individualmente.", tags: REQ },
+      { label: "Justificativa", description: "Motivo da movimentação; fica no histórico para auditoria.", tags: REQ },
+      { label: "Saldo após a operação", description: "Baixado na origem e acrescido no destino no momento da confirmação.", tags: AUTO },
+    ],
+    [
+      "Transferência acima do saldo disponível (saldo em estoque menos reservas) é bloqueada.",
+      "A operação não altera custo médio total: apenas muda a localização do material.",
     ],
   ),
 
@@ -859,6 +903,52 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Contratos vencidos ou sem saldo bloqueiam a emissão de novas autorizações.",
       "Somente contratos do próprio órgão podem ser selecionados nas demais telas.",
       "Preços usados em manutenções e ordens de serviço vêm sempre do item contratual, não de valor digitado livremente.",
+    ],
+  ),
+
+  "/contratos/itens": t(
+    "Itens do contrato",
+    "Detalha o que foi contratado: cada produto ou serviço com quantidade, preço unitário e saldo. É o item que controla preço e limite de consumo em abastecimentos, manutenções e ordens de serviço.",
+    [
+      "Clique em incluir item e descreva o objeto exatamente como consta no contrato.",
+      "Informe a unidade de medida, a quantidade contratada e o valor unitário adjudicado.",
+      "Confira o total calculado e salve; repita para cada item do contrato.",
+    ],
+    [
+      { label: "Número e descrição do item", description: "Identificação do item no instrumento contratual; use a mesma redação do contrato para facilitar a conferência.", tags: REQ },
+      { label: "Produto vinculado", description: "Combustível, peça ou tipo de serviço já cadastrado. É esse vínculo que faz o item aparecer nas telas de abastecimento e manutenção.", tags: REQ },
+      { label: "Unidade de medida", description: "Litro, hora, peça, serviço; deve ser a mesma usada no consumo.", tags: REQ },
+      { label: "Quantidade contratada", description: "Limite total previsto para o item; alterações só por aditivo.", tags: REQ },
+      { label: "Valor unitário", description: "Preço contratado por unidade. É esse preço que as demais telas usam, bloqueado para edição.", tags: ["Obrigatório", "Calculado no total"] as unknown as FieldTag[] },
+      { label: "Valor total do item", description: "Quantidade multiplicada pelo valor unitário.", tags: CALC },
+      { label: "Consumido / reservado / saldo", description: "Atualizados automaticamente pelas autorizações, abastecimentos, manutenções e ordens de serviço.", tags: ["Automático", "Calculado"] },
+    ],
+    [
+      "Não é possível consumir acima do saldo do item: o lançamento é bloqueado.",
+      "Itens com consumo registrado não podem ter quantidade ou preço reduzidos livremente — use aditivo de supressão ou reajuste.",
+    ],
+  ),
+
+  "/contratos/aditivos": t(
+    "Aditivos contratuais",
+    "Registra as alterações formais do contrato: prorrogação de prazo, acréscimo, supressão, reajuste ou reequilíbrio. O aditivo atualiza automaticamente vigência, valores e itens.",
+    [
+      "Clique em novo aditivo e escolha o tipo de alteração.",
+      "Informe o número, a data de assinatura e o fundamento legal.",
+      "Conforme o tipo, informe a nova vigência e/ou as alterações de quantidade e preço por item.",
+      "Salve: o contrato passa a valer com a nova vigência e os novos saldos.",
+    ],
+    [
+      { label: "Tipo de aditivo", description: "Prorrogação, acréscimo, supressão, reajuste, reequilíbrio ou combinado. Define quais campos ficam disponíveis.", tags: REQ },
+      { label: "Número e data de assinatura", description: "Identificação do termo aditivo; a data define a partir de quando a alteração vale.", tags: REQ },
+      { label: "Fundamento legal", description: "Dispositivo que autoriza a alteração; aparece no histórico e nos documentos." },
+      { label: "Nova vigência", description: "Exigida nas prorrogações; cria uma nova vigência com saldo próprio.", tags: COND },
+      { label: "Itens alterados", description: "Nos aditivos de valor, informe a nova quantidade e/ou preço por item; o sistema recalcula os saldos.", tags: COND },
+      { label: "Valor anterior e posterior", description: "Calculados a partir dos itens antes e depois do aditivo.", tags: CALC },
+    ],
+    [
+      "Não é possível suprimir quantidade já consumida.",
+      "O histórico mostra todas as vigências e aditivos, com valor, reservado, consumido e saldo de cada período.",
     ],
   ),
 
