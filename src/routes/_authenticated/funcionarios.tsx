@@ -187,17 +187,10 @@ function Funcionarios() {
         },
       });
       // Vincula o acesso criado à pessoa já cadastrada, sem duplicar o funcionário.
-      const { data: created } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("email", email.toLowerCase())
-        .maybeSingle();
-      if (created?.id) {
-        await supabase
-          .from("employees")
-          .update({ user_id: created.id, email, updated_by: userId })
-          .eq("id", accessFor.id);
-      }
+      await supabase
+        .from("employees")
+        .update({ user_id: result.userId, email, updated_by: userId })
+        .eq("id", accessFor.id);
       setAccessFor(null);
       setAccessRole("operator");
       setCredential({ email: result.email, tempPassword: result.tempPassword });
