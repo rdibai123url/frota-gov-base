@@ -214,6 +214,8 @@ function Relatorios() {
   const [driverId, setDriverId] = useState("todos");
   const [objectKind, setObjectKind] = useState("todos");
   const [contractId, setContractId] = useState("todos");
+  const [year, setYear] = useState(String(new Date().getFullYear()));
+  const [month, setMonth] = useState("todos");
   const [page, setPage] = useState(1);
 
   const { data: units = [] } = useUnits();
@@ -228,6 +230,78 @@ function Relatorios() {
     : CONTRACT_OBJECT_KIND_FALLBACK;
 
   const caps = CAPS[report];
+
+  /* ===== Bloco 6.5/6.6 — filtros dependentes ===== */
+  // Veículos que o condutor selecionado efetivamente utilizou no histórico (uso, abastecimento e diárias).
+  const { data: driverVehicleIds } = useQuery({
+    queryKey: ["report-driver-vehicles", driverId],
+    enabled: driverId !== "todos",
+    queryFn: async (): Promise<string[]> => {
+      const [usages, fuels] = await Promise.all([
+        supabase.from("vehicle_usages").select("vehicle_id").eq("driver_id", driverId),
+        supabase.from("fuelings").select("vehicle_id").eq("driver_id", driverId),
+      ]);
+      const ids = new Set<string>();
+      for (const r of usages.data ?? []) if (r.vehicle_id) ids.add(r.vehicle_id);
+      for (const r of fuels.data ?? []) if (r.vehicle_id) ids.add(r.vehicle_id);
+      return [...ids];
+    },
+  });
+
+  // Contratos disponíveis para o filtro "Contrato", restritos ao tipo selecionado.
+  const { data: contractOptions = [] } = useQuery({
+    queryKey: ["report-contracts", objectKind],
+    queryFn: async () => {
+      let q = supabase
+        .from("contracts")
+        .select("id, number, object, object_kind")
+        .order("number", { ascending: false });
+      if (objectKind !== "todos") q = q.eq("object_kind", objectKind);
+      const { data, error } = await q;
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const availableVehicles = useMemo(() => {
+    let list = vehicles;
+    if (unitId !== "todas") list = list.filter((v) => v.unit_id === unitId);
+    if (driverId !== "todos" && driverVehicleIds) {
+      const set = new Set(driverVehicleIds);
+      list = list.filter((v) => set.has(v.id));
+    }
+    return list;
+  }, [vehicles, unitId, driverId, driverVehicleIds]);
+
+  // Se o filtro pai invalidar o filho selecionado, o filho é limpo automaticamente.
+  useEffect(() => {
+    if (vehicleId !== "todos" && !availableVehicles.some((v) => v.id === vehicleId)) setVehicleId("todos");
+  }, [availableVehicles, vehicleId]);
+  useEffect(() => {
+    if (contractId !== "todos" && contractOptions.length && !contractOptions.some((c) => c.id === contractId)) {
+      setContractId("todos");
+    }
+  }, [contractOptions, contractId]);
+
+  const yearOptions = useMemo(() => {
+    const y = new Date().getFullYear();
+    return Array.from({ length: 6 }, (_, i) => String(y - i));
+  }, []);
+  const MONTHS = [
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+  ];
+  const applyPeriod = (year: string, month: string) => {
+    if (month === "todos") {
+      setFrom(`${year}-01-01`);
+      setTo(`${year}-12-31`);
+      return;
+    }
+    const m = Number(month);
+    const last = new Date(Number(year), m, 0).getDate();
+    setFrom(`${year}-${String(m).padStart(2, "0")}-01`);
+    setTo(`${year}-${String(m).padStart(2, "0")}-${String(last).padStart(2, "0")}`);
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ["report", report, from, to, unitId, vehicleId, driverId, objectKind, contractId],
@@ -1024,6 +1098,37 @@ function Relatorios() {
           </Select>
         </div>
         <div className="space-y-1.5">
+          <Label>Ano</Label>
+          <Select
+            value={year}
+            onValueChange={(v) => { setYear(v); applyPeriod(v, month); }}
+            disabled={!usesDate}
+          >
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {yearOptions.map((y) => (
+                <SelectItem key={y} value={y}>{y}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Mês</Label>
+          <Select
+            value={month}
+            onValueChange={(v) => { setMonth(v); applyPeriod(year, v); }}
+            disabled={!usesDate}
+          >
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Ano inteiro</SelectItem>
+              {MONTHS.map((m, i) => (
+                <SelectItem key={m} value={String(i + 1)}>{m}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
           <Label>De</Label>
           <Input type="date" value={from} disabled={!usesDate} onChange={(e) => setFrom(e.target.value)} />
         </div>
@@ -1049,7 +1154,7 @@ function Relatorios() {
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Todos</SelectItem>
-              {vehicles.map((v) => (
+              {availableVehicles.map((v) => (
                 <SelectItem key={v.id} value={v.id}>{v.plate ?? v.asset_code ?? v.id}</SelectItem>
               ))}
             </SelectContent>
@@ -1068,13 +1173,27 @@ function Relatorios() {
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label>Objeto do contrato</Label>
-          <Select value={objectKind} onValueChange={setObjectKind} disabled={report !== "contratos"}>
+          <Label>Tipo de contrato</Label>
+          <Select value={objectKind} onValueChange={setObjectKind}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Todos</SelectItem>
               {kindOptions.map((k) => (
                 <SelectItem key={k.value} value={k.value}>{k.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Contrato</Label>
+          <Select value={contractId} onValueChange={setContractId}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              {contractOptions.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.number} — {(c.object ?? "").slice(0, 40)}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
