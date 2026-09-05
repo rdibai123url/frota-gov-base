@@ -142,6 +142,28 @@ function Limpeza() {
     [cleanings, fStatus, fVehicle, fType, search],
   );
 
+  function printCleaning(c: VehicleCleaningRow) {
+    const ok = printDocument({
+      organization: org?.name ?? "FrotaGov",
+      logoUrl: org?.logo_url ?? null,
+      title: "Autorização de limpeza / higienização de veículo",
+      subtitle: "Apresentar no estabelecimento prestador",
+      code: c.code,
+      fields: [
+        { label: "Veículo / bem", value: `${c.vehicle?.plate ?? c.vehicle?.asset_code ?? "—"} ${c.vehicle?.model ?? ""}`.trim() },
+        { label: "Unidade solicitante", value: units.find((u) => u.id === c.unit_id)?.name ?? "—" },
+        { label: "Tipo de limpeza", value: (c.service_types ?? []).join(", ") || "—" },
+        { label: "Prestador", value: c.supplier?.trade_name ?? c.supplier?.legal_name ?? "A definir" },
+        { label: "Data prevista / realizada", value: dateTimeBR(c.performed_at) },
+        { label: "Situação", value: label(CLEANING_STATUS, c.status) },
+      ],
+      notes: c.notes ?? null,
+      issuedBy: userName ?? null,
+      signatureLabels: ["Autorizado por (órgão)", "Executado / recebido por (estabelecimento)"],
+    });
+    if (!ok) toast.error("Permita janelas pop-up para gerar o documento.");
+  }
+
   const paged = usePaged(filtered);
 
   const totals = useMemo(() => {
