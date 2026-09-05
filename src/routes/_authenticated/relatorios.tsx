@@ -1043,11 +1043,16 @@ function Relatorios() {
     {
       label: "Tipo de contrato",
       value:
-        report !== "contratos"
-          ? "Não se aplica"
-          : objectKind === "todos"
+        objectKind === "todos"
             ? "Todos"
             : objectKindLabel(objectKind, objectKinds),
+    },
+    {
+      label: "Contrato",
+      value:
+        contractId === "todos"
+          ? "Todos"
+          : (contractOptions.find((c) => c.id === contractId)?.number ?? "—"),
     },
   ];
 
