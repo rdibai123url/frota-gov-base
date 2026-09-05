@@ -1136,6 +1136,17 @@ function ContractPeriodsPanel({
   );
 }
 
+/** Linha da planilha de itens do aditivo (acréscimo, supressão ou item novo). */
+type AmendmentItemRow = {
+  key: string;
+  operation: "acrescimo" | "supressao";
+  contract_item_id: string | null;
+  description: string;
+  measure_unit: string;
+  quantity: string;
+  unit_price: string;
+};
+
 function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; onClose: () => void }) {
   const { orgId, userId } = usePerms();
   const invalidate = useInvalidate();
