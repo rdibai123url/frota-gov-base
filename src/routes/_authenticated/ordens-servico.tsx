@@ -372,7 +372,7 @@ function OrdensServico() {
               <div>
                 <Label>
                   Contrato{" "}
-                  {origin === "compra_direta" || origin === "suprimentos" ? (
+                  {origin !== "contrato" ? (
                     <span className="text-xs font-normal text-muted-foreground">
                       (opcional — compra direta/pronto pagamento pode usar oficina não contratada)
                     </span>
