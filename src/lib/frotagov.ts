@@ -871,6 +871,7 @@ export const CONTRACT_MODALITIES: { value: ContractModality; label: string }[] =
   { value: "inexigibilidade", label: "Inexigibilidade" },
   { value: "adesao_ata", label: "Adesão à Ata" },
   { value: "contratacao_direta", label: "Contratação Direta" },
+  { value: "credenciamento", label: "Credenciamento" },
   { value: "outro", label: "Outro" },
 ];
 
