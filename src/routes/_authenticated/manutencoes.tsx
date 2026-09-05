@@ -165,6 +165,8 @@ function Manutencoes() {
   const [partsOpen, setPartsOpen] = useState(false);
   const [partsTarget, setPartsTarget] = useState<MaintenanceRecordRow | null>(null);
   const [partId, setPartId] = useState(NONE);
+  const [partItem, setPartItem] = useState(NONE);
+  const [partQty, setPartQty] = useState("1");
 
   const [recCancelOpen, setRecCancelOpen] = useState(false);
   const [recCancelTarget, setRecCancelTarget] = useState<MaintenanceRecordRow | null>(null);
@@ -348,6 +350,8 @@ function Manutencoes() {
       ? []
       : (contracts.find((c) => c.id === contractId)?.items ?? []).filter((i) => i.active !== false);
   const selectedItem = itemsOfContract(recContract).find((i) => i.id === recItem) ?? null;
+  const selectedPartItem =
+    partsTarget?.contract_id ? itemsOfContract(partsTarget.contract_id).find((i) => i.id === partItem) ?? null : null;
   const laborUnitPrice = Number(selectedItem?.unit_price ?? 0);
   const laborQty = parseBRNumber(recLaborQty || "0") || 0;
   const laborTotal = laborUnitPrice * laborQty;
@@ -516,12 +520,22 @@ function Manutencoes() {
     e.preventDefault();
     if (!partsTarget) return;
     const form = new FormData(e.currentTarget);
-    const description =
-      partId === NONE
+    const byContract = !!partsTarget.contract_id;
+    if (byContract && !selectedPartItem) {
+      toast.error("Selecione a peça entre os itens do contrato.");
+      return;
+    }
+    const description = byContract
+      ? selectedPartItem!.description
+      : partId === NONE
         ? String(form.get("description") ?? "").trim()
         : catalog.find((c) => c.id === partId)?.description ?? "";
-    const quantity = numOrNull(form.get("quantity")) ?? 0;
-    const unitValue = numOrNull(form.get("unit_value")) ?? 0;
+    const quantity = byContract ? parseBRNumber(partQty || "0") || 0 : numOrNull(form.get("quantity")) ?? 0;
+    const unitValue = byContract ? Number(selectedPartItem!.unit_price) : numOrNull(form.get("unit_value")) ?? 0;
+    if (byContract && quantity > contractItemBalance(selectedPartItem!)) {
+      toast.error("Quantidade acima do saldo disponível no item do contrato.");
+      return;
+    }
     if (!description) {
       toast.error("Informe a peça.");
       return;
@@ -534,7 +548,8 @@ function Manutencoes() {
       organization_id: orgId!,
       maintenance_record_id: partsTarget.id,
       vehicle_id: partsTarget.vehicle_id,
-      part_id: partId === NONE ? null : partId,
+      part_id: !partsTarget.contract_id && partId !== NONE ? partId : null,
+      contract_item_id: partsTarget.contract_id ? partItem : null,
       description,
       quantity,
       unit_value: unitValue,
@@ -548,8 +563,10 @@ function Manutencoes() {
       return;
     }
     toast.success("Peça registrada.");
-    invalidate(["maintenance-records", "maintenance-parts"]);
+    invalidate(["maintenance-records", "maintenance-parts", "contracts", "contract-items"]);
     setPartId(NONE);
+    setPartItem(NONE);
+    setPartQty("1");
     e.currentTarget.reset();
   }
 
@@ -1408,8 +1425,7 @@ function Manutencoes() {
                           <SelectItem key={i.id} value={i.id}>
                             {i.item_number ? `Item ${i.item_number} — ` : ""}
                             {i.description}
-                            {i.brand ? ` · ${i.brand}` : ""}
-                            {i.item_code ? ` · ${i.item_code}` : ""} — saldo {num(contractItemBalance(i), 2)}{" "}
+                            {i.item_code ? ` · ref. ${i.item_code}` : ""} — saldo {num(contractItemBalance(i), 2)}{" "}
                             {i.measure_unit ?? "un"} — {brl(Number(i.unit_price))}
                           </SelectItem>
                         ))}
