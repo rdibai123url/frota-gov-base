@@ -491,7 +491,26 @@ function Manutencoes() {
     if (r.request_id) {
       await supabase.from("maintenance_requests").update({ status: "concluida" }).eq("id", r.request_id);
     }
-    toast.success("Manutenção concluída.");
+    const plan = r.plan_id ? plans.find((p) => p.id === r.plan_id) : null;
+    if (plan) {
+      /* Bloco 5.6 — o histórico do plano é atualizado pelo próprio banco na transição para concluída
+         (sem duplicar em reabertura/edição). Aqui apenas informamos a próxima ocorrência calculada. */
+      const parts: string[] = [];
+      if (plan.interval_km && r.odometer_km) parts.push(`${num(Number(r.odometer_km) + Number(plan.interval_km), 0)} km`);
+      if (plan.interval_hours && r.hour_meter) parts.push(`${num(Number(r.hour_meter) + Number(plan.interval_hours), 1)} h`);
+      if (plan.interval_months) {
+        const d = new Date();
+        d.setMonth(d.getMonth() + Number(plan.interval_months));
+        parts.push(dateBR(d.toISOString()));
+      }
+      toast.success(
+        parts.length
+          ? `Manutenção concluída. Plano "${plan.name}" atualizado — próxima prevista em ${parts.join(" · ")}.`
+          : `Manutenção concluída. Plano "${plan.name}" atualizado.`,
+      );
+    } else {
+      toast.success("Manutenção concluída.");
+    }
     invalidate(["maintenance-records", "maintenance-requests", "vehicles", "commitments", "quotas", "maintenance-plans"]);
   }
 
