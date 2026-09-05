@@ -842,8 +842,29 @@ export type QuotaType = Database["public"]["Enums"]["quota_type"];
 export type ExpenseOrigin = Database["public"]["Enums"]["expense_origin"];
 
 export type CostCenterRow = CostCenter & { unit: Pick<Unit, "id" | "name" | "acronym"> | null };
+export type ContractEntity = Pick<
+  ExternalEntity,
+  | "id"
+  | "name"
+  | "trade_name"
+  | "document"
+  | "kind"
+  | "address"
+  | "district"
+  | "city"
+  | "state"
+  | "zip_code"
+  | "phone"
+  | "email"
+  | "contact_name"
+  | "categories"
+  | "latitude"
+  | "longitude"
+>;
+
 export type ContractRow = Contract & {
   supplier: Pick<Supplier, "id" | "legal_name" | "trade_name"> | null;
+  entity: ContractEntity | null;
   items: ContractItem[];
 };
 export type ContractItemRow = ContractItem & {
