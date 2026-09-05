@@ -90,6 +90,8 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     [
       "Após haver movimentação registrada, os campos de identificação ficam protegidos contra alteração.",
       "Veículos baixados ou indisponíveis não podem receber novas autorizações de abastecimento.",
+      "A unidade informada define quais veículos aparecem nos filtros dependentes dos relatórios.",
+      "Planos de manutenção preventiva ficam vinculados ao bem: na manutenção só aparecem os planos daquele veículo ou equipamento.",
     ],
     ["Uma retroescavadeira deve ser cadastrada em Máquinas e equipamentos, não aqui."],
   ),
@@ -114,7 +116,8 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     "Utilização e reservas",
     "Registra a saída e o retorno dos bens, com condutor, finalidade, destino e quilometragem, além das reservas programadas.",
     [
-      "Clique em Nova utilização e informe o bem e o condutor.",
+      "Clique em Nova utilização (ou reserva) e informe o bem e o condutor.",
+      "A unidade é sugerida pela lotação do bem e do condutor; ajuste se tiver permissão.",
       "Registre a marcação de saída.",
       "Ao retornar, informe a marcação de chegada para encerrar o uso.",
     ],
@@ -127,6 +130,8 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     [
       "A marcação de retorno não pode ser menor que a de saída.",
       "Um bem não pode ter duas utilizações abertas ao mesmo tempo.",
+      "Só aparecem bens e condutores do próprio órgão; bens em manutenção, cedidos ou baixados não podem ser reservados.",
+      "O histórico de utilização alimenta o filtro de veículos por condutor nos relatórios.",
     ],
   ),
 
@@ -134,14 +139,20 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     "Diárias",
     "Controle de diárias de viagem vinculadas a deslocamentos da frota, com valores, período e prestação de contas.",
     [
-      "Cadastre a diária informando servidor, destino e período.",
+      "Cadastre a diária informando solicitante, beneficiário e autorizador a partir do cadastro de funcionários e pessoas externas.",
+      "Informe destino, período e o dispositivo legal que fundamenta a concessão.",
       "Vincule ao uso do veículo quando houver.",
       "Acompanhe a situação até a prestação de contas.",
     ],
     [
-      { label: "Servidor", description: "Beneficiário da diária.", tags: REQ },
+      { label: "Solicitante, beneficiário e autorizador", description: "Selecionados no cadastro de pessoas do órgão (funcionários e pessoas externas), evitando digitação livre de nomes.", tags: REQ },
+      { label: "Dispositivo legal / norma", description: "Escolhido no cadastro de dispositivos legais do órgão; há também campo de texto livre para normas não cadastradas.", tags: COND },
       { label: "Período", description: "Datas de saída e retorno; base para o número de diárias.", tags: REQ },
       { label: "Valor total", description: "Quantidade de diárias multiplicada pelo valor unitário.", tags: CALC },
+    ],
+    [
+      "Somente pessoas e dispositivos legais do próprio órgão aparecem nas listas.",
+      "O documento impresso reproduz o dispositivo legal informado.",
     ],
   ),
 
@@ -250,7 +261,8 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       { label: "Combustível/produto", description: "Deve estar previsto no contrato vigente.", tags: REQ },
       { label: "Quantidade ou valor autorizado", description: "Reservado imediatamente no contrato, no empenho e na cota.", tags: REQ },
       { label: "Saldo disponível", description: "Mostra o quanto ainda pode ser reservado.", tags: CALC },
-      { label: "Posto/fornecedor", description: "Limita onde a autorização pode ser utilizada.", tags: COND },
+      { label: "Posto/fornecedor", description: "Limita onde a autorização pode ser utilizada; deve pertencer ao contrato do próprio órgão.", tags: COND },
+      { label: "Contrato e item", description: "A autorização nasce vinculada ao item do contrato; o preço utilizado é sempre o do item contratual.", tags: ["Automático", "Obrigatório"] },
     ],
     [
       "A autorização não é emitida se não houver saldo suficiente de contrato, empenho ou cota.",
@@ -269,7 +281,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Salve para consumir a reserva e devolver a diferença ao saldo.",
     ],
     [
-      { label: "Autorização", description: "Ao selecionar, os dados do bem e do combustível são preenchidos.", tags: ["Automático", "Condicional"] },
+      { label: "Autorização", description: "Ao selecionar, os dados do bem, do combustível, do contrato e do item são preenchidos automaticamente.", tags: ["Automático", "Condicional"] },
       { label: "Quantidade abastecida", description: "Consumo real; não pode ultrapassar o autorizado.", tags: REQ },
       { label: "Valor total", description: "Quantidade multiplicada pelo valor unitário.", tags: CALC },
       { label: "Marcação do medidor", description: "Base do cálculo de consumo médio.", tags: REQ },
@@ -292,6 +304,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     [
       { label: "Unidade de medida", description: "Litro, quilo, hora ou unidade, conforme o produto.", tags: REQ },
       { label: "Entra no consumo", description: "Define se o produto é considerado nos indicadores de km/l." },
+      { label: "Uso em contrato", description: "O produto só pode ser autorizado quando houver item de contrato vigente do próprio órgão que o contemple.", tags: COND },
     ],
   ),
 
