@@ -106,8 +106,10 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
     [
       { label: "Número de patrimônio", description: "Identificação principal quando não existe placa.", tags: REQ },
-      { label: "Tipo de equipamento", description: "Classificação usada em relatórios e planos de manutenção.", tags: REQ },
-      { label: "Horímetro", description: "Marcação de horas trabalhadas; base do consumo por hora.", tags: COND },
+      { label: "Tipo de equipamento", description: "Classificação usada em relatórios, cotações e planos de manutenção.", tags: REQ },
+      { label: "Unidade de lotação", description: "Selecionada em Secretarias/Unidades; define responsabilidade e rateio de custo.", tags: REQ },
+      { label: "Tipo de medidor", description: "Normalmente horímetro; define se o consumo é apurado por hora trabalhada.", tags: REQ },
+      { label: "Horímetro atual", description: "Atualizado automaticamente pelos abastecimentos e utilizações lançados.", tags: AUTO },
     ],
     ["Bens sem placa exigem patrimônio; bens com placa devem ser cadastrados em Veículos."],
   ),
@@ -182,10 +184,15 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Acompanhe o andamento até a conclusão.",
     ],
     [
-      { label: "Data e local", description: "Identificação básica da ocorrência.", tags: REQ },
-      { label: "Apólice acionada", description: "Aparece quando o veículo possui seguro vigente.", tags: COND },
-      { label: "Custo estimado / franquia", description: "Compõe o custo total do bem." },
+      { label: "Bem envolvido", description: "Veículo ou equipamento da frota do órgão.", tags: REQ },
+      { label: "Data, hora e local", description: "Usados para identificar o condutor pelo registro de utilização e para instruir o processo.", tags: REQ },
+      { label: "Tipo de ocorrência", description: "Colisão, tombamento, atropelamento, furto/roubo, incêndio, perda total e outros.", tags: REQ },
+      { label: "Condutor", description: "Sugerido pela utilização aberta do bem no momento da ocorrência; confirme antes de salvar.", tags: ["Automático", "Condicional"] },
+      { label: "Apólice acionada", description: "Só aparece quando o bem tem seguro vigente na data da ocorrência.", tags: COND },
+      { label: "Custo estimado e franquia", description: "Entram no custo acumulado do bem e nos relatórios de sinistralidade." },
+      { label: "Situação", description: "Registrado, em apuração, seguradora acionada, reparo autorizado ou encerrado.", tags: REQ },
     ],
+    ["Enquanto o bem estiver indisponível por sinistro, ele não aparece para reserva ou utilização."],
   ),
 
   "/seguros": t(
@@ -197,9 +204,14 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Acompanhe os avisos de vencimento.",
     ],
     [
-      { label: "Vigência", description: "Início e fim da cobertura; gera alerta antes do vencimento.", tags: REQ },
-      { label: "Franquia", description: "Valor de participação usado no cálculo de custos de sinistro." },
+      { label: "Seguradora", description: "Empresa selecionada no cadastro de pessoas e empresas externas; não digite o nome.", tags: ["Obrigatório", "Automático"] },
+      { label: "Número da apólice", description: "Identificação do contrato de seguro junto à seguradora.", tags: REQ },
+      { label: "Vigência", description: "Início e fim da cobertura; o sistema avisa antes do vencimento.", tags: REQ },
+      { label: "Veículos cobertos", description: "Selecionados na frota do órgão; um mesmo bem não deve ficar em duas apólices vigentes.", tags: REQ },
+      { label: "Prêmio e franquia", description: "O prêmio entra no custo do bem; a franquia é usada no cálculo do custo do sinistro." },
+      { label: "Situação", description: "Ativa, a vencer, vencida ou cancelada, conforme a vigência.", tags: AUTO },
     ],
+    ["Ao registrar um sinistro, apenas apólices vigentes do veículo aparecem para acionamento."],
   ),
 
   "/obrigacoes": t(
@@ -211,8 +223,12 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Registre a quitação ou renovação quando concluída.",
     ],
     [
-      { label: "Tipo de obrigação", description: "Licenciamento, IPVA, vistoria, certificado, entre outros.", tags: REQ },
-      { label: "Vencimento", description: "Base dos alertas de documento vencido ou a vencer.", tags: REQ },
+      { label: "Bem", description: "Veículo ou equipamento a que o documento se refere.", tags: REQ },
+      { label: "Tipo de obrigação", description: "Licenciamento, IPVA, seguro obrigatório, vistoria, certificado e outros.", tags: REQ },
+      { label: "Exercício / competência", description: "Ano a que o documento se refere; evita confundir renovações de anos diferentes.", tags: REQ },
+      { label: "Vencimento", description: "Base dos avisos de documento vencido ou a vencer.", tags: REQ },
+      { label: "Valor e comprovante", description: "Preencha ao registrar a quitação; ficam disponíveis para conferência.", tags: COND },
+      { label: "Situação", description: "Pendente, quitada, vencida, cancelada ou não aplicável, conforme o registro da baixa.", tags: AUTO },
     ],
     ["Documentos vencidos aparecem em Alertas e podem restringir o uso do bem conforme a política do órgão."],
   ),
@@ -226,11 +242,17 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Justifique a movimentação para fins de auditoria.",
     ],
     [
-      { label: "Tipo de movimentação", description: "Transferência, cessão, incorporação ou baixa.", tags: REQ },
-      { label: "Unidade de destino", description: "Passa a responder pelo bem a partir da data informada.", tags: COND },
+      { label: "Bem", description: "Veículo ou equipamento movimentado; a situação atual dele é mostrada ao selecionar.", tags: REQ },
+      { label: "Tipo de movimentação", description: "Remanejamento entre unidades, cessão, locação, fiel depositário, alienação, doação, leilão, furto/roubo, perda total ou baixa.", tags: REQ },
+      { label: "Unidade de origem", description: "Preenchida com a lotação atual do bem.", tags: AUTO },
+      { label: "Unidade ou entidade de destino", description: "Unidade do próprio órgão ou entidade externa já cadastrada, conforme o tipo escolhido.", tags: ["Obrigatório", "Condicional"] },
+      { label: "Data e documento", description: "Data de efeito e número do ato, termo ou processo que autoriza a movimentação.", tags: REQ },
       { label: "Justificativa", description: "Texto exigido para rastreabilidade e auditoria.", tags: REQ },
     ],
-    ["A baixa patrimonial altera a situação do bem e impede novas operações."],
+    [
+      "A movimentação atualiza automaticamente a lotação e a situação do bem a partir da data informada.",
+      "Bens baixados, alienados ou cedidos deixam de aparecer para reserva, abastecimento e manutenção.",
+    ],
   ),
 
   "/historico-veiculo": t(
@@ -242,8 +264,14 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Exporte quando precisar instruir processo ou auditoria.",
     ],
     [
-      { label: "Bem", description: "Veículo ou equipamento analisado.", tags: REQ },
-      { label: "Indicadores de consumo e custo", description: "Calculados com base nos lançamentos do período.", tags: CALC },
+      { label: "Bem", description: "Veículo ou equipamento analisado; a lista traz apenas bens do próprio órgão.", tags: REQ },
+      { label: "Período", description: "Recorta a linha do tempo e os totais apresentados.", tags: REQ },
+      { label: "Linha do tempo", description: "Reúne o que já foi lançado nas outras telas (utilizações, abastecimentos, manutenções, limpezas, multas, sinistros e movimentações). Nada é digitado aqui.", tags: AUTO },
+      { label: "Indicadores de consumo e custo", description: "Calculados a partir dos lançamentos do período e das marcações de medidor.", tags: CALC },
+    ],
+    [
+      "Esta tela é apenas de consulta: correções devem ser feitas na tela onde o lançamento foi originado.",
+      "Períodos sem marcação de medidor confiável ficam sem consumo médio.",
     ],
   ),
 
@@ -317,10 +345,16 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Acompanhe o consumo e o saldo restante.",
     ],
     [
+      { label: "Servidor", description: "Escolhido no cadastro de funcionários do órgão; não digite o nome.", tags: ["Obrigatório", "Automático"] },
       { label: "Tipo de cota", description: "Quantitativa (litros) ou financeira (R$).", tags: REQ },
-      { label: "Saldo utilizado", description: "Atualizado a cada autorização e abastecimento.", tags: AUTO },
+      { label: "Periodicidade", description: "Semanal ou mensal; define quando o limite é renovado.", tags: REQ },
+      { label: "Saldo utilizado", description: "Atualizado a cada autorização emitida e abastecimento lançado.", tags: AUTO },
+      { label: "Situação", description: "Somente cotas ativas são consideradas na emissão de autorizações." },
     ],
-    ["Autorizações acima do saldo da cota são bloqueadas."],
+    [
+      "Autorização acima do saldo da cota do servidor é bloqueada.",
+      "A cota de servidor é somada às demais travas: contrato, empenho e cota da unidade continuam valendo.",
+    ]
   ),
 
   "/fornecedores": t(
@@ -332,11 +366,15 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Salve: a localização no mapa é buscada automaticamente pelo endereço.",
     ],
     [
-      { label: "CNPJ", description: "Identificação do fornecedor; validado no formato oficial.", tags: REQ },
-      { label: "Endereço", description: "Quanto mais completo, melhor a precisão do mapa.", tags: REQ },
-      { label: "Latitude / longitude", description: "Obtidas automaticamente a partir do endereço; podem ser ajustadas manualmente.", tags: ["Automático", "Depende de integração"] },
+      { label: "CNPJ e razão social", description: "Identificação oficial do posto ou fornecedor; o CNPJ evita cadastro duplicado.", tags: REQ },
+      { label: "Endereço completo", description: "Logradouro, bairro, município e UF. Quanto mais completo, maior a chance de o mapa localizar o ponto.", tags: REQ },
+      { label: "Latitude / longitude", description: "Buscadas automaticamente pelo endereço; corrija manualmente quando o endereço não for localizado. O sistema nunca estima coordenadas.", tags: ["Automático", "Depende de integração"] },
+      { label: "Situação", description: "Fornecedores inativos deixam de aparecer nas autorizações e nos contratos novos." },
     ],
-    ["Endereços incompletos podem ficar sem posição no mapa até o ajuste manual."],
+    [
+      "O posto só pode receber autorização de abastecimento se estiver vinculado a contrato vigente do próprio órgão.",
+      "Endereço incompleto deixa o cadastro na lista de localização pendente do Mapa da rede.",
+    ],
   ),
 
   "/manutencoes": t(
@@ -406,10 +444,15 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Consulte antes de emitir ordens de fornecimento.",
     ],
     [
-      { label: "Código / descrição", description: "Identificação usada nas ordens de fornecimento e no estoque.", tags: REQ },
-      { label: "Compatibilidade", description: "Indica quais bens aceitam a peça; pode ser ajustada manualmente." },
+      { label: "Código e descrição", description: "Identificação usada no estoque, nas ordens de fornecimento e nas cotações.", tags: REQ },
+      { label: "Unidade de medida", description: "Peça, jogo, litro, metro; deve ser a mesma usada nas compras e no estoque.", tags: REQ },
+      { label: "Valor de referência", description: "Preço estimado para conferência; não substitui o preço do item contratual, que sempre prevalece na execução." },
+      { label: "Compatibilidade", description: "Relaciona marcas e modelos atendidos; pode ser ajustada manualmente quando o catálogo não cobrir o caso.", tags: COND },
     ],
-    ["Peças marcadas como incompatíveis geram aviso ao serem incluídas em uma ordem."],
+    [
+      "Peça incompatível com o bem gera aviso ao ser incluída em ordem ou manutenção.",
+      "Na execução de manutenção por contrato, a peça só pode ser consumida se existir item de contrato com saldo.",
+    ],
   ),
 
   "/ofp": t(
@@ -421,11 +464,17 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Emita, acompanhe a entrega e finalize ou cancele.",
     ],
     [
-      { label: "Itens", description: "Cada item traz quantidade e valor unitário.", tags: REQ },
-      { label: "Valor total", description: "Soma de quantidade × valor unitário dos itens.", tags: CALC },
-      { label: "Situação", description: "Rascunho, emitida, entregue ou cancelada.", tags: AUTO },
+      { label: "Fornecedor", description: "Empresa do cadastro de pessoas e empresas externas; com contrato, apenas fornecedores do contrato aparecem.", tags: ["Obrigatório", "Condicional"] },
+      { label: "Contrato e item", description: "Quando a compra é por contrato, o item define a peça e o valor unitário, que não é editável.", tags: ["Condicional", "Automático"] },
+      { label: "Itens da ordem", description: "Cada linha traz peça, quantidade e valor unitário.", tags: REQ },
+      { label: "Valor total", description: "Soma de quantidade × valor unitário de todos os itens.", tags: CALC },
+      { label: "Recebimento", description: "Ao registrar a entrega, a quantidade recebida entra automaticamente no estoque do depósito indicado.", tags: AUTO },
+      { label: "Situação", description: "Rascunho, aguardando aprovação, aprovada, parcialmente atendida, atendida, rejeitada ou cancelada.", tags: AUTO },
     ],
-    ["Ordens entregues não podem mais ser editadas; use cancelamento com justificativa."],
+    [
+      "Não é possível pedir acima do saldo do item contratual.",
+      "Ordens já atendidas ficam bloqueadas para edição; use cancelamento com justificativa.",
+    ]
   ),
 
   "/almoxarifado": t(
@@ -458,9 +507,11 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Registre rodízios, recapagens e o descarte final.",
     ],
     [
-      { label: "Número de série / fogo", description: "Identificação única do pneu.", tags: REQ },
-      { label: "Posição", description: "Local de instalação no bem.", tags: COND },
-      { label: "Vida útil percorrida", description: "Calculada pela quilometragem do bem enquanto o pneu esteve instalado.", tags: CALC },
+      { label: "Número de série / fogo", description: "Identificação única do pneu; não se repete no órgão.", tags: REQ },
+      { label: "Medida e marca", description: "Usadas na conferência de compatibilidade com o bem.", tags: REQ },
+      { label: "Bem e posição", description: "Informados na instalação; a posição indica o eixo/lado ocupado.", tags: COND },
+      { label: "Situação", description: "Estoque, instalado, em reparo, recapagem, descartado ou baixado.", tags: AUTO },
+      { label: "Vida útil percorrida", description: "Quilometragem acumulada do bem durante o período em que o pneu esteve instalado.", tags: CALC },
     ],
   ),
 
@@ -473,10 +524,12 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Salve: a posição no mapa é obtida automaticamente pelo endereço.",
     ],
     [
-      { label: "CNPJ e razão social", description: "Identificação do prestador.", tags: REQ },
-      { label: "Serviços atendidos", description: "Usados para filtrar a oficina em cotações e ordens de serviço." },
-      { label: "Localização", description: "Obtida do endereço; ajustável manualmente.", tags: ["Automático", "Depende de integração"] },
+      { label: "CNPJ e razão social", description: "Identificação oficial do prestador; evita duplicidade no cadastro.", tags: REQ },
+      { label: "Serviços atendidos", description: "Especialidades da oficina; filtram onde ela aparece em cotações, ordens de serviço e manutenções." },
+      { label: "Endereço e localização", description: "A posição no mapa vem do endereço; pode ser corrigida manualmente quando não localizada.", tags: ["Automático", "Depende de integração"] },
+      { label: "Situação", description: "Em análise, ativo, suspenso ou inativo. Somente oficinas ativas podem receber ordem de serviço." },
     ],
+    ["Para execução por contrato, a oficina também precisa constar como contratada no contrato vigente."],
   ),
 
   "/credenciados": t(
@@ -836,49 +889,77 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Acompanhe o consumo e o saldo restante.",
     ],
     [
-      { label: "Tipo de cota", description: "Quantitativa (litros) ou financeira (R$).", tags: REQ },
-      { label: "Saldo restante", description: "Limite menos consumo e reservas em aberto.", tags: CALC },
+      { label: "Abrangência", description: "Define a quem a cota se aplica: órgão, unidade ou bem específico.", tags: REQ },
+      { label: "Tipo de cota", description: "Quantitativa (litros/horas) ou financeira (R$).", tags: REQ },
+      { label: "Período", description: "Intervalo em que o limite vale; ao terminar, a cota deixa de reservar saldo.", tags: REQ },
+      { label: "Limite", description: "Valor ou quantidade máxima permitida no período.", tags: REQ },
+      { label: "Reservado / consumido", description: "Atualizados automaticamente pelas autorizações emitidas e pelos abastecimentos lançados.", tags: AUTO },
+      { label: "Saldo restante", description: "Limite menos o consumido e o reservado em aberto.", tags: CALC },
+    ],
+    [
+      "Autorização acima do saldo da cota é bloqueada na emissão.",
+      "Suplementação de cota é registrada como lançamento próprio e fica no histórico.",
     ],
   ),
 
   "/centros-custo": t(
     "Centros de custo",
-    "Estrutura de rateio das despesas da frota, permitindo apurar custos por área, programa ou projeto.",
+    "Define para onde a despesa da frota é apropriada, permitindo apurar custo por área, programa ou projeto.",
     [
       "Cadastre o centro de custo com código e nome.",
-      "Vincule unidades e bens.",
-      "Use nos relatórios para apurar custos por área.",
+      "Vincule a unidade responsável, quando o centro pertencer a uma secretaria específica.",
+      "Use o centro nos relatórios para apurar o custo por área.",
     ],
     [
-      { label: "Código", description: "Identificação usada nos relatórios e exportações.", tags: REQ },
+      { label: "Código", description: "Identificação usada em relatórios, exportações e integração contábil.", tags: REQ },
+      { label: "Nome", description: "Descrição reconhecível pela área responsável.", tags: REQ },
+      { label: "Unidade vinculada", description: "Selecionada em Secretarias/Unidades; usada para sugerir o centro nas despesas daquela unidade.", tags: COND },
+    ],
+    [
+      "Nas telas de manutenção e ordem de serviço o centro de custo não é digitado: ele é derivado da origem da despesa e do contrato, e fica registrado para relatórios e auditoria.",
     ],
   ),
 
   "/orgao": t(
     "Dados do Órgão",
-    "Identificação institucional usada em documentos, relatórios, portal da transparência e cabeçalho do sistema.",
+    "Guarda a identificação institucional do órgão. É daqui que saem o cabeçalho do sistema, os documentos impressos, os relatórios e o portal da transparência.",
     [
-      "Preencha razão social, CNPJ e endereço.",
-      "Envie o brasão do órgão.",
-      "Salve: os dados passam a aparecer nos documentos emitidos.",
+      "Preencha razão social, CNPJ, endereço e contatos.",
+      "Envie o brasão em imagem de boa qualidade.",
+      "Informe o período de gestão, quando aplicável, e salve.",
     ],
     [
-      { label: "Razão social e CNPJ", description: "Identificação oficial do órgão.", tags: REQ },
-      { label: "Brasão", description: "Imagem exibida no cabeçalho e nos relatórios." },
+      { label: "Razão social", description: "Nome oficial do órgão, exatamente como consta nos atos administrativos. Aparece nos documentos emitidos.", tags: REQ },
+      { label: "Nome curto", description: "Versão reduzida usada no menu e nos cabeçalhos quando o nome oficial é longo." },
+      { label: "CNPJ", description: "Informe apenas números; o sistema aplica a formatação.", tags: REQ },
+      { label: "Endereço, município e UF", description: "Usados nos documentos impressos e como referência de localização nos mapas.", tags: REQ },
+      { label: "Brasão", description: "Imagem exibida no topo do sistema e em todo documento impresso ou PDF gerado." },
+      { label: "Período de gestão", description: "Datas de início e fim do mandato; usado apenas como informação institucional.", tags: COND },
+    ],
+    [
+      "A alteração vale para todo o órgão e passa a valer imediatamente nos próximos documentos emitidos.",
+      "Cada órgão vê e edita somente os próprios dados.",
     ],
   ),
 
   "/unidades": t(
     "Secretarias / Unidades",
-    "Estrutura administrativa do órgão: secretarias, departamentos e unidades responsáveis pelos bens.",
+    "Monta a estrutura administrativa do órgão. A unidade define quem responde por cada bem e organiza custos, filtros e relatórios.",
     [
-      "Cadastre a unidade com nome e responsável.",
-      "Informe o endereço quando houver atendimento presencial.",
-      "Vincule bens e condutores à unidade.",
+      "Cadastre a unidade com nome, sigla e tipo (secretaria, departamento, setor).",
+      "Se a unidade estiver subordinada a outra, indique a unidade superior.",
+      "Informe o endereço quando a unidade tiver sede própria: ele é usado como ponto de referência no mapa.",
     ],
     [
-      { label: "Nome da unidade", description: "Aparece nos relatórios e no rateio de custos.", tags: REQ },
-      { label: "Unidade superior", description: "Permite montar a hierarquia administrativa.", tags: COND },
+      { label: "Nome e sigla", description: "Identificação usada em telas, filtros e relatórios.", tags: REQ },
+      { label: "Tipo de unidade", description: "Classificação administrativa (secretaria, departamento, diretoria, coordenação e outros).", tags: REQ },
+      { label: "Unidade superior", description: "Monta a hierarquia. Deixe em branco apenas nas unidades de primeiro nível.", tags: COND },
+      { label: "Responsável", description: "Servidor indicado como responsável pela unidade; escolhido no cadastro de funcionários, não digitado." },
+      { label: "Endereço e coordenadas", description: "A localização é buscada pelo endereço; pode ser corrigida manualmente quando não for encontrada.", tags: ["Automático", "Depende de integração"] },
+    ],
+    [
+      "A unidade lotada no bem é que determina quais veículos aparecem nos filtros dependentes dos relatórios.",
+      "Unidades com bens, pessoas ou lançamentos vinculados não devem ser excluídas: ajuste os vínculos antes.",
     ],
   ),
 
@@ -891,23 +972,60 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Mantenha a situação atualizada.",
     ],
     [
-      { label: "Habilitação e validade", description: "Habilitação vencida gera alerta e pode bloquear o uso do veículo.", tags: REQ },
-      { label: "Categoria", description: "Deve ser compatível com o veículo dirigido.", tags: REQ },
-      { label: "Situação", description: "Somente condutores ativos aparecem nas telas de utilização.", tags: REQ },
+      { label: "Pessoa", description: "Selecione o servidor já cadastrado em Funcionários; nome, matrícula e unidade vêm desse cadastro e não são digitados aqui.", tags: ["Obrigatório", "Automático"] },
+      { label: "Número e categoria da habilitação", description: "Informe conforme o documento. A categoria precisa ser compatível com o bem que o condutor vai conduzir.", tags: REQ },
+      { label: "Validade da habilitação", description: "Gera aviso antes do vencimento; habilitação vencida bloqueia novas utilizações.", tags: REQ },
+      { label: "Vínculo", description: "Efetivo, comissionado, contratado, terceirizado ou outro; usado em relatórios e na conferência de responsabilidade.", tags: REQ },
+      { label: "Situação", description: "Somente condutores ativos aparecem nas listas de utilização, diárias e indicação de multa.", tags: REQ },
+    ],
+    [
+      "O condutor precisa existir antes no cadastro de pessoas: esta tela apenas acrescenta os dados de habilitação.",
+      "O histórico de utilização do condutor alimenta a sugestão de condutor nas multas e o filtro Condutor → Veículo nos relatórios.",
     ],
   ),
 
   "/entidades-externas": t(
-    "Entidades externas",
-    "Cadastro de órgãos, consórcios e entidades parceiras envolvidas em cessões, convênios e compartilhamento de frota.",
+    "Pessoas e empresas externas",
+    "Cadastro único de quem não é servidor do órgão: empresas fornecedoras, oficinas, postos, órgãos parceiros, consórcios e pessoas físicas externas. Todas as demais telas selecionam a partir daqui.",
     [
-      "Cadastre a entidade com CNPJ e endereço.",
-      "Indique o tipo de vínculo.",
-      "Use nas movimentações patrimoniais e cessões.",
+      "Escolha se é pessoa física ou jurídica e informe CPF/CNPJ, nome ou razão social.",
+      "Marque as categorias de atuação (combustível, manutenção, peças, higienização, locação e outras): elas definem onde a empresa poderá ser selecionada.",
+      "Preencha o endereço completo e salve.",
     ],
     [
-      { label: "Tipo de vínculo", description: "Convênio, cessão, consórcio ou outro.", tags: REQ },
-      { label: "Localização", description: "Obtida do endereço informado.", tags: AUTO },
+      { label: "Tipo de pessoa", description: "Física ou jurídica; define se o documento é CPF ou CNPJ.", tags: REQ },
+      { label: "CPF / CNPJ", description: "Identificação única no órgão; impede cadastro duplicado.", tags: REQ },
+      { label: "Nome / razão social e nome fantasia", description: "Nome oficial usado em contratos e documentos; o fantasia é opcional e ajuda na busca.", tags: REQ },
+      { label: "Categorias de atuação", description: "Determinam em quais telas a empresa aparece (contratos, cotações, ordens de serviço, abastecimento, limpeza).", tags: REQ },
+      { label: "Endereço e coordenadas", description: "A posição no mapa é buscada pelo endereço; se não for encontrada, informe latitude e longitude manualmente.", tags: ["Automático", "Depende de integração"] },
+      { label: "Situação", description: "Empresas inativas deixam de aparecer nas listas de seleção, mas permanecem no histórico." },
+    ],
+    [
+      "Não digite nomes de empresas soltos em outras telas: cadastre aqui uma vez e selecione onde for necessário.",
+      "Empresas com contrato vigente de combustível, manutenção ou higienização aparecem automaticamente no Mapa da rede.",
+      "Cada órgão enxerga apenas o próprio cadastro.",
+    ],
+  ),
+
+  "/funcionarios": t(
+    "Funcionários",
+    "Cadastro das pessoas do próprio órgão. É a fonte usada para escolher solicitante, responsável, fiscal de contrato, condutor, beneficiário de diária e autorizador nas demais telas.",
+    [
+      "Clique em Novo e informe nome, CPF e matrícula.",
+      "Indique a unidade de lotação, o cargo e a função (por exemplo, fiscal de contrato ou gestor de frota).",
+      "Mantenha a situação atualizada quando a pessoa mudar de lotação ou deixar o órgão.",
+    ],
+    [
+      { label: "Nome e CPF", description: "Identificação da pessoa; o CPF impede duplicidade de cadastro.", tags: REQ },
+      { label: "Matrícula", description: "Registro funcional usado nos documentos e nas conferências." },
+      { label: "Unidade de lotação", description: "Escolhida em Secretarias/Unidades. É essa lotação que sugere automaticamente a unidade solicitante nas manutenções e reservas.", tags: REQ },
+      { label: "Cargo e função", description: "A função identifica papéis operacionais (fiscal, gestor, almoxarife) e orienta a seleção nas telas correspondentes.", tags: COND },
+      { label: "Situação", description: "Somente pessoas ativas aparecem nas listas de seleção; inativos permanecem no histórico.", tags: REQ },
+    ],
+    [
+      "Nomes nunca devem ser digitados livremente em contratos, diárias ou manutenções: selecione a pessoa cadastrada aqui.",
+      "Para que a pessoa possa conduzir veículos, cadastre-a também em Condutores, com habilitação e validade.",
+      "Acesso ao sistema é concedido separadamente em Usuários e permissões.",
     ],
   ),
 
@@ -920,11 +1038,16 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Desative o acesso quando o servidor deixar a função.",
     ],
     [
-      { label: "E-mail", description: "Usado para acesso e recuperação de senha.", tags: REQ },
-      { label: "Perfil de acesso", description: "Define as telas e ações permitidas.", tags: REQ },
-      { label: "Situação", description: "Usuários inativos não conseguem acessar o sistema." },
+      { label: "E-mail institucional", description: "É o login da pessoa e o endereço usado para recuperar senha. Não pode se repetir.", tags: REQ },
+      { label: "Funcionário vinculado", description: "Associe o acesso à pessoa já cadastrada em Funcionários, para que os registros fiquem identificados.", tags: COND },
+      { label: "Perfil de acesso", description: "Define o que a pessoa pode ver e fazer: administrador do órgão, gestor de frota, gestor de unidade, operador ou auditor.", tags: REQ },
+      { label: "Situação", description: "Usuários inativos continuam no histórico, mas não conseguem entrar no sistema." },
     ],
-    ["Alterações de perfil ficam registradas para auditoria."],
+    [
+      "Conceda o menor perfil necessário: operador registra o dia a dia, auditor apenas consulta.",
+      "O usuário só enxerga dados do órgão em que foi cadastrado.",
+      "Criação, alteração de perfil e desativação ficam registradas para auditoria.",
+    ]
   ),
 
   "/migracao": t(
@@ -951,7 +1074,8 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Baixe o arquivo compactado gerado.",
     ],
     [
-      { label: "Resumo do pacote", description: "Mostra os conjuntos e a quantidade de registros incluídos.", tags: AUTO },
+      { label: "Resumo do pacote", description: "Lista os conjuntos de dados e a quantidade de registros que serão incluídos.", tags: AUTO },
+      { label: "Progresso", description: "Acompanha a geração; em bases grandes o processo pode levar alguns minutos.", tags: AUTO },
       { label: "Arquivo final", description: "Pacote compactado com planilhas, versão em formato de dados e documento de conferência.", tags: AUTO },
     ],
     [
