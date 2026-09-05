@@ -132,7 +132,11 @@ function Plataforma() {
         <TabsContent value="backup" className="pt-5">
           <BackupTab />
         </TabsContent>
+        <TabsContent value="modulos" className="pt-5">
+          <ModulesTab />
+        </TabsContent>
         <TabsContent value="config" className="pt-5">
+
           <SettingsTab />
         </TabsContent>
         <TabsContent value="documentacao" className="pt-5">
