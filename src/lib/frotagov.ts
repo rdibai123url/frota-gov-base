@@ -1630,7 +1630,7 @@ export function useMaintenanceRecords() {
       const { data, error } = await supabase
         .from("maintenance_records")
         .select(
-          "*, vehicle:vehicles(id, plate,asset_code, brand, model, current_km, hour_meter, status), supplier:suppliers(id, legal_name, trade_name), request:maintenance_requests(id, code, kind), parts:maintenance_parts(*), commitment:commitments(id, number), quota:quotas(id, name)",
+          "*, vehicle:vehicles(id, plate,asset_code, brand, model, current_km, hour_meter, status), supplier:suppliers(id, legal_name, trade_name), request:maintenance_requests(id, code, kind), parts:maintenance_parts(*), commitment:commitments(id, number), quota:quotas(id, name), contract:contracts(id, number), contract_item:contract_items(id, item_number, description, measure_unit, unit_price)",
         )
         .order("entry_at", { ascending: false });
       if (error) throw error;
