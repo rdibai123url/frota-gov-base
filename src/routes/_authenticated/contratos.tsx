@@ -1230,7 +1230,7 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
     }
 
     const periodValue = parseBRNumber(get("period_value"));
-    const { error } = await supabase.from("contract_amendments").insert({
+    const { data: amendment, error } = await supabase.from("contract_amendments").insert({
       organization_id: orgId!,
       contract_id: contract.id,
       number: get("number"),
