@@ -363,18 +363,7 @@ function Planos() {
               </div>
               <div>
                 <Label>Tipo de serviço</Label>
-                <Select value={serviceType} onValueChange={setServiceType}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {MAINTENANCE_SERVICE_TYPES.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <ServiceTypeSelect value={serviceType} onChange={setServiceType} />
               </div>
               <div>
                 <Label>Veículo específico</Label>
