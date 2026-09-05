@@ -428,6 +428,7 @@ function MapaRede() {
                 <SelectItem value="Credenciado">Credenciados</SelectItem>
                 <SelectItem value="Posto / fornecedor">Postos / fornecedores</SelectItem>
                 <SelectItem value="Oficina">Oficinas</SelectItem>
+                <SelectItem value="Higienização / lava-jato">Higienização / lava-jatos</SelectItem>
               </SelectContent>
             </Select>
           </div>
