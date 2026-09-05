@@ -994,8 +994,56 @@ function Manutencoes() {
           <DialogHeader>
             <DialogTitle>{editingRec ? `Editar manutenção ${editingRec.code}` : "Registrar manutenção"}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={submitRec} className="space-y-4">
+          <form key={`${editingRec?.id ?? "novo"}-${recRequest}`} onSubmit={submitRec} className="space-y-4">
+            {!editingRec && (
+              <div className="rounded-lg border bg-muted/30 p-3">
+                <Label>Como deseja registrar?</Label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={recMode === "solicitacao" ? "default" : "outline"}
+                    onClick={() => setRecMode("solicitacao")}
+                  >
+                    Usar solicitação existente
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={recMode === "avulsa" ? "default" : "outline"}
+                    onClick={() => {
+                      setRecMode("avulsa");
+                      setRecRequest(NONE);
+                    }}
+                  >
+                    Registrar manutenção sem solicitação prévia
+                  </Button>
+                </div>
+              </div>
+            )}
             <div className="grid gap-4 sm:grid-cols-3">
+              {recMode === "solicitacao" && !editingRec && (
+                <div className="sm:col-span-3">
+                  <Label>Solicitação *</Label>
+                  <Select value={recRequest} onValueChange={pickRequest}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a solicitação" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={NONE}>Selecione</SelectItem>
+                      {openRequests.map((r) => (
+                        <SelectItem key={r.id} value={r.id}>
+                          {r.code} — {(r.vehicle?.plate ?? r.vehicle?.asset_code ?? "")} — {r.description.slice(0, 40)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Os dados já registrados na solicitação são aproveitados automaticamente: bem, unidade, tipo, plano
+                    preventivo, descrição, medições e observações.
+                  </p>
+                </div>
+              )}
               <div>
                 <Label>Veículo *</Label>
                 <Select value={recVehicle} onValueChange={setRecVehicle}>
@@ -1007,22 +1055,6 @@ function Manutencoes() {
                     {vehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
                         {(v.plate ?? v.asset_code)} — {v.model ?? ""}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Solicitação</Label>
-                <Select value={recRequest} onValueChange={setRecRequest}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NONE}>Sem solicitação</SelectItem>
-                    {openRequests.map((r) => (
-                      <SelectItem key={r.id} value={r.id}>
-                        {r.code} — {(r.vehicle?.plate ?? r.vehicle?.asset_code ?? "")}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1059,6 +1091,7 @@ function Manutencoes() {
                   </SelectContent>
                 </Select>
               </div>
+
               <div>
                 <Label htmlFor="entry_at">Entrada *</Label>
                 <Input
