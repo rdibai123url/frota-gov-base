@@ -414,6 +414,7 @@ function NewFuelingDialog({
   const [time, setTime] = useState(now.toTimeString().slice(0, 5));
   const [driver, setDriver] = useState("");
   const [operator, setOperator] = useState(perms.userName);
+  const [operatorEmployee, setOperatorEmployee] = useState(NONE);
   const [odometer, setOdometer] = useState("");
   const [hourMeter, setHourMeter] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -581,6 +582,7 @@ function NewFuelingDialog({
         driver_name: driverId === NONE ? driver || null : null,
         authorization_id: selectedAuth?.id ?? null,
         without_authorization_reason: needsAuthReason ? noAuthReason.trim() : null,
+        operator_employee_id: operatorEmployee === NONE ? null : operatorEmployee,
         operator_name: operator || perms.userName || null,
         odometer_km: odometer === "" ? null : Number(odometer.replace(",", ".")),
         hour_meter: hourMeter === "" ? null : Number(hourMeter.replace(",", ".")),
@@ -821,8 +823,35 @@ function NewFuelingDialog({
               <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
             </div>
             <div>
-              <Label htmlFor="operator">Responsável pelo registro</Label>
-              <Input id="operator" value={operator} onChange={(e) => setOperator(e.target.value)} />
+              <Label>Responsável pelo registro</Label>
+              <Select
+                value={operatorEmployee}
+                onValueChange={(v) => {
+                  setOperatorEmployee(v);
+                  const emp = employees.find((e) => e.id === v);
+                  if (emp) setOperator(emp.full_name);
+                }}
+              >
+                <SelectTrigger><SelectValue placeholder="Selecione no cadastro de pessoas" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>Não vincular</SelectItem>
+                  {employees
+                    .filter((e) => e.active)
+                    .map((e) => (
+                      <SelectItem key={e.id} value={e.id}>
+                        {e.full_name}
+                        {e.registration ? ` — ${e.registration}` : ""}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+              <Input
+                className="mt-2"
+                id="operator"
+                value={operator}
+                onChange={(e) => setOperator(e.target.value)}
+                placeholder="Nome do responsável"
+              />
             </div>
             <div>
               <Label>Condutor</Label>
