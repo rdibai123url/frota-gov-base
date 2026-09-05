@@ -821,8 +821,26 @@ function Manutencoes() {
                 </Select>
               </div>
               <div>
-                <Label>Unidade</Label>
-                <Select value={reqUnit} onValueChange={setReqUnit}>
+                <Label>Funcionário solicitante</Label>
+                <Select value={reqEmployee} onValueChange={pickRequesterEmployee}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Não informar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NONE}>Não informar</SelectItem>
+                    {employees
+                      .filter((e) => e.active)
+                      .map((e) => (
+                        <SelectItem key={e.id} value={e.id}>
+                          {e.full_name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Unidade solicitante</Label>
+                <Select value={reqUnit} onValueChange={setReqUnit} disabled={!canManageFleet && reqEmployee !== NONE}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -835,22 +853,9 @@ function Manutencoes() {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-              <div>
-                <Label>Centro de custo</Label>
-                <Select value={reqCenter} onValueChange={setReqCenter}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NONE}>Não informar</SelectItem>
-                    {centers.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.code} — {c.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Preenchida automaticamente pela unidade do funcionário solicitante.
+                </p>
               </div>
               <div>
                 <Label>Plano preventivo</Label>
@@ -860,14 +865,20 @@ function Manutencoes() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={NONE}>Não vincular</SelectItem>
-                    {plans.map((p) => (
+                    {plansForVehicle(reqVehicle).map((p) => (
                       <SelectItem key={p.id} value={p.id}>
                         {p.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {reqVehicle === NONE ? (
+                  <p className="mt-1 text-xs text-muted-foreground">Selecione o veículo para ver os planos do bem.</p>
+                ) : plansForVehicle(reqVehicle).length === 0 ? (
+                  <p className="mt-1 text-xs text-muted-foreground">Nenhum plano cadastrado para este bem.</p>
+                ) : null}
               </div>
+
               <div>
                 <Label htmlFor="odometer_km">KM atual</Label>
                 <Input id="odometer_km" name="odometer_km" inputMode="numeric" defaultValue={editingReq?.odometer_km ?? ""} />
