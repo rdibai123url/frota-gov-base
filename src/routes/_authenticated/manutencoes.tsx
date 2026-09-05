@@ -1155,19 +1155,21 @@ function Manutencoes() {
               </div>
               <div>
                 <Label htmlFor="odometer_km">KM na manutenção</Label>
-                <Input id="odometer_km" name="odometer_km" inputMode="numeric" defaultValue={editingRec?.odometer_km ?? ""} />
+                <Input
+                  id="odometer_km"
+                  name="odometer_km"
+                  inputMode="numeric"
+                  defaultValue={editingRec?.odometer_km ?? selectedRequest?.odometer_km ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="hour_meter">Horímetro</Label>
-                <Input id="hour_meter" name="hour_meter" inputMode="numeric" defaultValue={editingRec?.hour_meter ?? ""} />
-              </div>
-              <div>
-                <Label htmlFor="labor_value">Mão de obra (R$)</Label>
-                <MoneyInput id="labor_value" name="labor_value" defaultValue={editingRec?.labor_value ?? ""} />
-              </div>
-              <div>
-                <Label htmlFor="other_value">Outros valores (R$)</Label>
-                <MoneyInput id="other_value" name="other_value" defaultValue={editingRec?.other_value ?? ""} />
+                <Input
+                  id="hour_meter"
+                  name="hour_meter"
+                  inputMode="numeric"
+                  defaultValue={editingRec?.hour_meter ?? selectedRequest?.hour_meter ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="invoice_number">Nota fiscal</Label>
@@ -1178,57 +1180,109 @@ function Manutencoes() {
                 <Input id="warranty_days" name="warranty_days" inputMode="numeric" defaultValue={editingRec?.warranty_days ?? ""} />
               </div>
               <div>
-                <Label>Centro de custo</Label>
-                <Select value={recCenter} onValueChange={setRecCenter}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NONE}>Não informar</SelectItem>
-                    {centers.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.code} — {c.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="other_value">Outros valores (R$)</Label>
+                <MoneyInput id="other_value" name="other_value" defaultValue={editingRec?.other_value ?? ""} />
               </div>
-              <div>
-                <Label>Empenho</Label>
-                <Select value={recCommitment} onValueChange={setRecCommitment}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NONE}>Sem empenho</SelectItem>
-                    {commitments
-                      .filter((c) => c.status === "ativo")
-                      .map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {c.number} — saldo {brl(Number(c.available_value))}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+
+              {/* Bloco 5.3 — mão de obra por contrato ou compra direta */}
+              <div className="sm:col-span-3 rounded-lg border bg-muted/20 p-3">
+                <Label>Execução do serviço</Label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={recOrigin === "contrato" ? "default" : "outline"}
+                    onClick={() => setRecOrigin("contrato")}
+                  >
+                    Por contrato
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={recOrigin === "compra_direta" ? "default" : "outline"}
+                    onClick={() => {
+                      setRecOrigin("compra_direta");
+                      setRecContract(NONE);
+                      setRecItem(NONE);
+                    }}
+                  >
+                    Compra direta / pronto pagamento
+                  </Button>
+                </div>
+
+                {recOrigin === "contrato" ? (
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <Label>Contrato vigente *</Label>
+                      <Select
+                        value={recContract}
+                        onValueChange={(v) => {
+                          setRecContract(v);
+                          setRecItem(NONE);
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o contrato" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={NONE}>Selecione</SelectItem>
+                          {contractsForMaintenance.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {c.number} — {c.supplier?.trade_name ?? c.supplier?.legal_name ?? c.entity?.name ?? ""}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Item de mão de obra / serviço *</Label>
+                      <Select value={recItem} onValueChange={setRecItem} disabled={recContract === NONE}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o item do contrato" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={NONE}>Selecione</SelectItem>
+                          {itemsOfContract(recContract).map((i) => (
+                            <SelectItem key={i.id} value={i.id}>
+                              {i.item_number ? `Item ${i.item_number} — ` : ""}
+                              {i.description} — {brl(Number(i.unit_price))}/{i.measure_unit ?? "un"}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="labor_quantity">Quantidade executada (horas/serviços) *</Label>
+                      <Input
+                        id="labor_quantity"
+                        inputMode="decimal"
+                        value={recLaborQty}
+                        onChange={(e) => setRecLaborQty(e.target.value)}
+                        placeholder="0,00"
+                      />
+                    </div>
+                    <div>
+                      <Label>Valor unitário do item (contratual)</Label>
+                      <Input value={brl(laborUnitPrice)} readOnly disabled />
+                    </div>
+                    {selectedItem && (
+                      <div className="sm:col-span-2 text-sm">
+                        <p className="text-muted-foreground">
+                          Saldo disponível do item: {num(contractItemBalance(selectedItem), 2)}{" "}
+                          {selectedItem.measure_unit ?? "un"}
+                        </p>
+                        <p className="gov-title mt-1 text-lg">Total da mão de obra: {brl(laborTotal)}</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="mt-3 max-w-xs">
+                    <Label htmlFor="labor_value">Mão de obra (R$)</Label>
+                    <MoneyInput id="labor_value" name="labor_value" defaultValue={editingRec?.labor_value ?? ""} />
+                  </div>
+                )}
               </div>
-              <div>
-                <Label>Cota</Label>
-                <Select value={recQuota} onValueChange={setRecQuota}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NONE}>Sem cota</SelectItem>
-                    {quotas
-                      .filter((q) => q.active && q.quota_type === "financeira")
-                      .map((q) => (
-                        <SelectItem key={q.id} value={q.id}>
-                          {q.name} — saldo {brl(Number(q.balance_amount))}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
+
               <div className="sm:col-span-3">
                 <Label htmlFor="services">Serviços executados *</Label>
                 <Textarea id="services" name="services" rows={3} defaultValue={editingRec?.services ?? ""} required />
