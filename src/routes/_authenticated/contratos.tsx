@@ -1142,10 +1142,37 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
   const [kind, setKind] = useState<ContractAmendmentKind>("prorrogacao");
   const [saving, setSaving] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [rows, setRows] = useState<AmendmentItemRow[]>([]);
 
   const createsPeriod = AMENDMENT_CREATES_PERIOD.includes(kind);
   const changesValue = AMENDMENT_CHANGES_VALUE.includes(kind);
+  const changesItems = kind === "acrescimo" || kind === "supressao" || kind === "combinado";
   const help = CONTRACT_AMENDMENT_KINDS.find((k) => k.value === kind)?.help ?? "";
+  const contractItems = (contract?.items ?? []).filter((i) => i.active !== false);
+
+  /** Impacto financeiro da planilha do aditivo (acréscimos menos supressões). */
+  const rowsDelta = rows.reduce(
+    (sum, r) => sum + (r.operation === "supressao" ? -1 : 1) * parseBRNumber(r.quantity) * parseBRNumber(r.unit_price),
+    0,
+  );
+
+  const updateRow = (key: string, patch: Partial<AmendmentItemRow>) =>
+    setRows((prev) => prev.map((r) => (r.key === key ? { ...r, ...patch } : r)));
+
+  function addRow(existing: boolean) {
+    setRows((prev) => [
+      ...prev,
+      {
+        key: crypto.randomUUID(),
+        operation: kind === "supressao" ? "supressao" : "acrescimo",
+        contract_item_id: existing ? (contractItems[0]?.id ?? null) : null,
+        description: "",
+        measure_unit: "litro",
+        quantity: "",
+        unit_price: existing ? String(contractItems[0]?.unit_price ?? "") : "",
+      },
+    ]);
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
