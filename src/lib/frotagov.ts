@@ -1614,7 +1614,7 @@ export function useMaintenanceRequests() {
       const { data, error } = await supabase
         .from("maintenance_requests")
         .select(
-          "*, vehicle:vehicles(id, plate,asset_code, brand, model, current_km, hour_meter, status), unit:units(id, name, acronym), cost_center:cost_centers(id, code, name), plan:maintenance_plans(id, name)",
+          "*, vehicle:vehicles(id, plate,asset_code, brand, model, current_km, hour_meter, status), unit:units(id, name, acronym), cost_center:cost_centers(id, code, name), plan:maintenance_plans(id, name), requester_employee:employees(id, full_name, unit_id)",
         )
         .order("requested_at", { ascending: false });
       if (error) throw error;
