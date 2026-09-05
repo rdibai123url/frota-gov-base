@@ -294,7 +294,7 @@ export function SupplyOrderPanel({
                       <TableCell>{i.item_number ?? "—"}</TableCell>
                       <TableCell className="font-medium">{i.description}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {[i.brand, i.item_code, i.reference].filter(Boolean).join(" · ") || "—"}
+                        {[i.item_code, i.notes].filter(Boolean).join(" · ") || "—"}
                       </TableCell>
                       <TableCell>{i.measure_unit}</TableCell>
                       <TableCell className="text-right">{num(b.quantity, 2)}</TableCell>
