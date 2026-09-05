@@ -4,6 +4,7 @@ import { ArrowLeftRight, Boxes, ClipboardCheck, Plus, Warehouse as WarehouseIcon
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/app-shell";
+import { ReceiveOfpButton } from "@/components/ofp-panel";
 import { ListPagination, usePaged } from "@/components/list-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -140,10 +141,11 @@ function Almoxarifado() {
     <div>
       <PageHeader
         title="Almoxarifado"
-        description="Depósitos, saldos por item e lote, entradas, saídas, transferências, reservas e inventário físico. Movimentações não são excluídas — correções são feitas por estorno ou ajuste auditado."
+        description="Depósitos, saldos por item e lote, entradas, saídas, transferências, reservas e inventário físico. A entrada por compra nasce do recebimento da OFP; entradas excepcionais (saldo inicial, devolução, doação, ajuste e correção) exigem justificativa e ficam registradas na auditoria."
         action={
           canManageFleet ? (
             <div className="flex flex-wrap gap-2">
+              <ReceiveOfpButton />
               <Button variant="outline" onClick={() => setWhOpen(true)}>
                 <WarehouseIcon className="mr-2 h-4 w-4" /> Novo depósito
               </Button>
