@@ -669,6 +669,26 @@ function Contratos() {
                 </Select>
               </div>
               <div>
+                <Label htmlFor="procedure_number">{PROCEDURE_LABELS[modality] ?? "Número do procedimento"}</Label>
+                <Input
+                  id="procedure_number"
+                  name="procedure_number"
+                  defaultValue={editing?.procedure_number ?? ""}
+                  maxLength={40}
+                />
+              </div>
+              <div className="flex items-start gap-2 rounded-md border p-3 sm:col-span-2">
+                <Checkbox id="srp" checked={srp} onCheckedChange={(v) => setSrp(v === true)} />
+                <div>
+                  <Label htmlFor="srp" className="cursor-pointer">
+                    Sistema de Registro de Preços (SRP)
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Marque quando o contrato decorre de ata de registro de preços.
+                  </p>
+                </div>
+              </div>
+              <div>
                 <Label>Objeto do contrato *</Label>
                 <Select value={objectKind} onValueChange={setObjectKind}>
                   <SelectTrigger>
