@@ -38,7 +38,6 @@ import {
   type WorkshopStatus,
 } from "@/lib/frotagov";
 import { useInvalidate } from "@/lib/frotagov";
-import { CONTRACT_MODALITIES, CONTRACT_STATUS, brl } from "@/lib/frotagov";
 import { networkCategoryLabel, useNetworkCompanies, type NetworkCompany } from "@/lib/rede";
 import { CompanyDialog } from "@/routes/_authenticated/fornecedores";
 
