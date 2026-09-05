@@ -208,6 +208,10 @@ function Contratos() {
     setSupplierId(c.supplier_id ?? NONE);
     setObjectKind(c.object_kind ?? "combustivel_oleos");
     setValueFromItems(Boolean(c.value_from_items));
+    setSrp(Boolean(c.srp));
+    setEntityId(c.entity_id ?? null);
+    setFiscalId(c.fiscal_employee_id ?? null);
+    setManagerId(c.manager_employee_id ?? null);
     setFile(null);
     setOpen(true);
   }
