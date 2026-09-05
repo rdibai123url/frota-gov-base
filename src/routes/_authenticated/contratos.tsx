@@ -193,6 +193,10 @@ function Contratos() {
     setSupplierId(NONE);
     setObjectKind("combustivel_oleos");
     setValueFromItems(false);
+    setSrp(false);
+    setEntityId(null);
+    setFiscalId(null);
+    setManagerId(null);
     setFile(null);
     setOpen(true);
   }
