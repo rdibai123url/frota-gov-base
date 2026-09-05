@@ -27,6 +27,8 @@ import { HelpButton } from "@/components/help-button";
 import { cn } from "@/lib/utils";
 import { supabase, useBrasaoUrl, useOrganization, useProfile, ROLE_LABELS } from "@/lib/frotagov";
 import { useIsSuperAdmin, usePlatformSession, usePlatformContextActions } from "@/lib/platform";
+import { moduleForPath, useModuleMap } from "@/lib/modulos";
+
 
 
 type NavLeaf = { to: string; label: string };
