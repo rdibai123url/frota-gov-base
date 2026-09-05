@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { ServiceTypeSelect } from "@/components/cadastro-rapido";
+
 import {
   DUE_LABELS,
   MAINTENANCE_SERVICE_TYPES,
@@ -363,18 +365,7 @@ function Planos() {
               </div>
               <div>
                 <Label>Tipo de serviço</Label>
-                <Select value={serviceType} onValueChange={setServiceType}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {MAINTENANCE_SERVICE_TYPES.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <ServiceTypeSelect value={serviceType} onChange={setServiceType} />
               </div>
               <div>
                 <Label>Veículo específico</Label>

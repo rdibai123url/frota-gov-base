@@ -27,6 +27,8 @@ import { HelpButton } from "@/components/help-button";
 import { cn } from "@/lib/utils";
 import { supabase, useBrasaoUrl, useOrganization, useProfile, ROLE_LABELS } from "@/lib/frotagov";
 import { useIsSuperAdmin, usePlatformSession, usePlatformContextActions } from "@/lib/platform";
+import { moduleForPath, useModuleMap } from "@/lib/modulos";
+
 
 
 type NavLeaf = { to: string; label: string };
@@ -179,7 +181,27 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { isSuperAdmin } = useIsSuperAdmin();
   const { data: platformSession } = usePlatformSession();
   const { exitOrg } = usePlatformContextActions();
-  const navGroups = isSuperAdmin ? [PLATFORM_NAV, ...NAV] : NAV;
+  const { map: modules, isLoading: modulesLoading } = useModuleMap();
+
+  /** Bloco 6.1 — o menu mostra apenas os módulos habilitados para o órgão. */
+  const visibleNav = NAV.map((group) => {
+    if (group.to) {
+      const mod = moduleForPath(group.to);
+      return mod && modules[mod.key] === false ? null : group;
+    }
+    const items = (group.items ?? []).filter((leaf) => {
+      const mod = moduleForPath(leaf.to);
+      return !mod || modules[mod.key] !== false;
+    });
+    return items.length ? { ...group, items } : null;
+  }).filter((g): g is NavGroup => g !== null);
+
+  const navGroups = isSuperAdmin ? [PLATFORM_NAV, ...visibleNav] : visibleNav;
+
+  const currentModule = moduleForPath(pathname);
+  const blocked = !modulesLoading && !!currentModule && modules[currentModule.key] === false;
+
+
 
 
   async function handleSignOut() {
@@ -395,8 +417,25 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-          <div className="mx-auto w-full max-w-6xl">{children}</div>
+          <div className="mx-auto w-full max-w-6xl">
+            {blocked ? (
+              <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-8 text-center">
+                <h1 className="gov-title text-xl">Módulo indisponível para este órgão</h1>
+                <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
+                  O módulo <strong>{currentModule?.label}</strong> não está habilitado na implantação deste órgão. Os
+                  dados já registrados permanecem preservados e voltam a ficar acessíveis assim que a Administração da
+                  Plataforma habilitar o módulo novamente.
+                </p>
+                <Button className="mt-5" onClick={() => navigate({ to: "/painel" })}>
+                  Voltar ao painel
+                </Button>
+              </div>
+            ) : (
+              children
+            )}
+          </div>
         </main>
+
       </div>
     </div>
     </TooltipProvider>

@@ -14,6 +14,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReopenReviewTab } from "@/components/reopen-review";
 import { ImportMigrationTab } from "@/components/import-migration";
 import { BackupTab } from "@/components/backup-admin";
+import { ModulesTab } from "@/components/modulos-orgao";
+
 
 import { exportXlsx } from "@/lib/reports";
 import { DocsTab, MatrixTab } from "@/components/homologacao";
@@ -104,7 +106,9 @@ function Plataforma() {
           <TabsTrigger value="importacao">Importação e migração</TabsTrigger>
 
           <TabsTrigger value="backup">Backup externo</TabsTrigger>
+          <TabsTrigger value="modulos">Módulos por órgão</TabsTrigger>
           <TabsTrigger value="config">Configurações</TabsTrigger>
+
           <TabsTrigger value="documentacao">Documentação / Homologação</TabsTrigger>
           <TabsTrigger value="matriz">Matriz de funcionalidades</TabsTrigger>
           <TabsTrigger value="auditoria">Auditoria e lançamento</TabsTrigger>
@@ -128,7 +132,11 @@ function Plataforma() {
         <TabsContent value="backup" className="pt-5">
           <BackupTab />
         </TabsContent>
+        <TabsContent value="modulos" className="pt-5">
+          <ModulesTab />
+        </TabsContent>
         <TabsContent value="config" className="pt-5">
+
           <SettingsTab />
         </TabsContent>
         <TabsContent value="documentacao" className="pt-5">

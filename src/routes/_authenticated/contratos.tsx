@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import { MoneyInput, LitersInput, CnpjInput } from "@/components/form-fields";
 import { PageHeader } from "@/components/app-shell";
+import { SummaryCards } from "@/components/summary-cards";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -393,20 +394,15 @@ function Contratos() {
         }
       />
 
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        {[
+      <SummaryCards
+        cards={[
           { label: "Contratos vigentes", value: String(totals.vigentes) },
           { label: "Valor contratado", value: brl(totals.total) },
           { label: "Valor consumido", value: brl(totals.consumed) },
           { label: "Reservado", value: brl(totals.reserved) },
           { label: "Saldo disponível", value: brl(totals.balance) },
-        ].map((c) => (
-          <div key={c.label} className="rounded-lg border bg-card p-5 shadow-card">
-            <p className="text-sm text-muted-foreground">{c.label}</p>
-            <p className="gov-title mt-2 text-2xl">{c.value}</p>
-          </div>
-        ))}
-      </div>
+        ]}
+      />
 
       <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div>

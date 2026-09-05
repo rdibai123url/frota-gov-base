@@ -1383,6 +1383,7 @@ export type MaintenanceRequestRow = MaintenanceRequest & {
   unit: UnitRef | null;
   cost_center: Pick<CostCenter, "id" | "code" | "name"> | null;
   plan: Pick<MaintenancePlan, "id" | "name"> | null;
+  requester_employee: { id: string; full_name: string; unit_id: string | null } | null;
 };
 export type MaintenanceRecordRow = MaintenanceRecord & {
   vehicle: VehicleRef | null;
@@ -1391,7 +1392,10 @@ export type MaintenanceRecordRow = MaintenanceRecord & {
   parts: MaintenancePart[] | null;
   commitment: Pick<Commitment, "id" | "number"> | null;
   quota: Pick<Quota, "id" | "name"> | null;
+  contract: Pick<Contract, "id" | "number"> | null;
+  contract_item: Pick<ContractItem, "id" | "item_number" | "description" | "measure_unit" | "unit_price"> | null;
 };
+
 export type TireRow = Tire & {
   vehicle: VehicleRef | null;
   supplier: Pick<Supplier, "id" | "legal_name" | "trade_name"> | null;
@@ -1445,6 +1449,7 @@ export const TIRE_POSITIONS = [
 
 export const PART_CATEGORIES = ["Motor", "Freios", "Suspensão", "Elétrica", "Filtros", "Lubrificantes", "Carroceria", "Outros"];
 
+/** Lista de apoio (fallback). Os tipos oficiais ficam em maintenance_service_types, por órgão. */
 export const MAINTENANCE_SERVICE_TYPES = [
   "Troca de óleo e filtros",
   "Revisão geral",
@@ -1456,6 +1461,59 @@ export const MAINTENANCE_SERVICE_TYPES = [
   "Ar-condicionado",
   "Outros",
 ];
+
+export type MaintenanceServiceType = Database["public"]["Tables"]["maintenance_service_types"]["Row"];
+
+/** Bloco 5.7 — tipos de serviço cadastrados pelo próprio órgão. */
+export function useMaintenanceServiceTypes() {
+  return useQuery({
+    queryKey: ["maintenance-service-types"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("maintenance_service_types")
+        .select("*")
+        .eq("active", true)
+        .order("name");
+      if (error) throw error;
+      return (data ?? []) as MaintenanceServiceType[];
+    },
+  });
+}
+
+export type BudgetReference = Database["public"]["Tables"]["budget_references"]["Row"];
+export type BudgetReferenceKind = "dotacao" | "fonte" | "elemento";
+
+export const BUDGET_REFERENCE_LABELS: Record<BudgetReferenceKind, string> = {
+  dotacao: "Dotação orçamentária",
+  fonte: "Fonte de recurso",
+  elemento: "Elemento de despesa",
+};
+
+/** Bloco 6.3 — cadastros auxiliares reutilizáveis de empenho. */
+export function useBudgetReferences() {
+  return useQuery({
+    queryKey: ["budget-references"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("budget_references")
+        .select("*")
+        .eq("active", true)
+        .order("value");
+      if (error) throw error;
+      return (data ?? []) as BudgetReference[];
+    },
+  });
+}
+
+/** Saldo disponível de um item contratual (quantidade menos reservado e consumido). */
+export function contractItemBalance(item: {
+  quantity?: number | null;
+  reserved_quantity?: number | null;
+  consumed_quantity?: number | null;
+}) {
+  return Number(item.quantity ?? 0) - Number(item.reserved_quantity ?? 0) - Number(item.consumed_quantity ?? 0);
+}
+
 
 /* ------------------------- regras de vencimento ------------------------- */
 
@@ -1560,7 +1618,7 @@ export function useMaintenanceRequests() {
       const { data, error } = await supabase
         .from("maintenance_requests")
         .select(
-          "*, vehicle:vehicles(id, plate,asset_code, brand, model, current_km, hour_meter, status), unit:units(id, name, acronym), cost_center:cost_centers(id, code, name), plan:maintenance_plans(id, name)",
+          "*, vehicle:vehicles(id, plate,asset_code, brand, model, current_km, hour_meter, status), unit:units(id, name, acronym), cost_center:cost_centers(id, code, name), plan:maintenance_plans(id, name), requester_employee:employees(id, full_name, unit_id)",
         )
         .order("requested_at", { ascending: false });
       if (error) throw error;
@@ -1576,7 +1634,7 @@ export function useMaintenanceRecords() {
       const { data, error } = await supabase
         .from("maintenance_records")
         .select(
-          "*, vehicle:vehicles(id, plate,asset_code, brand, model, current_km, hour_meter, status), supplier:suppliers(id, legal_name, trade_name), request:maintenance_requests(id, code, kind), parts:maintenance_parts(*), commitment:commitments(id, number), quota:quotas(id, name)",
+          "*, vehicle:vehicles(id, plate,asset_code, brand, model, current_km, hour_meter, status), supplier:suppliers(id, legal_name, trade_name), request:maintenance_requests(id, code, kind), parts:maintenance_parts(*), commitment:commitments(id, number), quota:quotas(id, name), contract:contracts(id, number), contract_item:contract_items(id, item_number, description, measure_unit, unit_price)",
         )
         .order("entry_at", { ascending: false });
       if (error) throw error;
