@@ -123,6 +123,8 @@ function StatusBadge({ status }: { status: ContractRow["status"] }) {
 function Contratos() {
   const { data: contracts = [], isLoading } = useContracts();
   const { data: suppliers = [] } = useSuppliers();
+  const { data: entities = [], isLoading: loadingEntities } = useExternalEntities();
+  const { data: employees = [], isLoading: loadingEmployees } = useEmployees();
   const { data: fuels = [] } = useFuelTypes();
   const { data: objectKinds = [] } = useContractObjectKinds();
   const kindOptions = objectKinds.length
