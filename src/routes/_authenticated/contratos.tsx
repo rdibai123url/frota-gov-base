@@ -125,6 +125,14 @@ function Contratos() {
   const { data: suppliers = [] } = useSuppliers();
   const { data: entities = [], isLoading: loadingEntities } = useExternalEntities();
   const { data: employees = [], isLoading: loadingEmployees } = useEmployees();
+  /** Nome da empresa contratada: cadastro mestre primeiro, fornecedor legado como alternativa. */
+  const companyName = (c: ContractRow) => {
+    const e = entities.find((x) => x.id === c.entity_id);
+    if (e) return e.trade_name || e.name;
+    return c.supplier ? c.supplier.trade_name || c.supplier.legal_name : "";
+  };
+  const employeeName = (id: string | null | undefined) =>
+    employees.find((e) => e.id === id)?.full_name ?? "não informado";
   const { data: fuels = [] } = useFuelTypes();
   const { data: objectKinds = [] } = useContractObjectKinds();
   const kindOptions = objectKinds.length
