@@ -710,8 +710,32 @@ function Contratos() {
                 <Label htmlFor="object">Descrição do objeto *</Label>
                 <Textarea id="object" name="object" defaultValue={editing?.object ?? ""} rows={2} required />
               </div>
+              <div className="sm:col-span-2">
+                <Label>Empresa contratada (cadastro mestre)</Label>
+                <EntitySelect
+                  value={entityId}
+                  onChange={setEntityId}
+                  loading={loadingEntities}
+                  placeholder="Buscar empresa ou pessoa cadastrada"
+                  searchPlaceholder="Nome, nome fantasia ou documento…"
+                  emptyLabel="Nenhuma pessoa ou empresa cadastrada ainda."
+                  createHref="/entidades-externas"
+                  createLabel="Cadastrar empresa"
+                  options={entities
+                    .filter((e) => e.active || e.id === entityId)
+                    .map((e) => ({
+                      value: e.id,
+                      label: e.trade_name || e.name,
+                      description: [e.document ? maskCNPJ(e.document) : null, e.city].filter(Boolean).join(" · "),
+                      keywords: [e.name, e.trade_name, e.document],
+                    }))}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  A empresa vem do cadastro único de pessoas e empresas externas — não é preciso duplicar o cadastro.
+                </p>
+              </div>
               <div>
-                <Label>Fornecedor contratado</Label>
+                <Label>Fornecedor de abastecimento (opcional)</Label>
                 <Select value={supplierId} onValueChange={setSupplierId}>
                   <SelectTrigger>
                     <SelectValue />
@@ -725,6 +749,45 @@ function Contratos() {
                     ))}
                   </SelectContent>
                 </Select>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Usado pelos lançamentos de abastecimento já vinculados a este fornecedor.
+                </p>
+              </div>
+              <div>
+                <Label>Fiscal do contrato</Label>
+                <EntitySelect
+                  value={fiscalId}
+                  onChange={setFiscalId}
+                  loading={loadingEmployees}
+                  placeholder="Selecionar fiscal"
+                  emptyLabel="Nenhum funcionário com função de fiscal."
+                  createHref="/funcionarios"
+                  createLabel="Cadastrar funcionário"
+                  options={employeesByFunction(employees, "fiscal_contrato").map((e) => ({
+                    value: e.id,
+                    label: e.full_name,
+                    description: e.job_title,
+                    keywords: [e.registration, e.cpf],
+                  }))}
+                />
+              </div>
+              <div>
+                <Label>Gestor do contrato</Label>
+                <EntitySelect
+                  value={managerId}
+                  onChange={setManagerId}
+                  loading={loadingEmployees}
+                  placeholder="Selecionar gestor"
+                  emptyLabel="Nenhum funcionário com função de gestor."
+                  createHref="/funcionarios"
+                  createLabel="Cadastrar funcionário"
+                  options={employeesByFunction(employees, "gestor_contrato").map((e) => ({
+                    value: e.id,
+                    label: e.full_name,
+                    description: e.job_title,
+                    keywords: [e.registration, e.cpf],
+                  }))}
+                />
               </div>
               <div>
                 <Label htmlFor="cnpj">CNPJ</Label>
