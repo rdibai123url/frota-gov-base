@@ -140,6 +140,10 @@ function Contratos() {
   const [supplierId, setSupplierId] = useState(NONE);
   const [objectKind, setObjectKind] = useState("combustivel_oleos");
   const [valueFromItems, setValueFromItems] = useState(false);
+  const [srp, setSrp] = useState(false);
+  const [entityId, setEntityId] = useState<string | null>(null);
+  const [fiscalId, setFiscalId] = useState<string | null>(null);
+  const [managerId, setManagerId] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
