@@ -72,6 +72,7 @@ import {
   useCostCenters,
   useQuotas,
 } from "@/lib/frotagov";
+import { useEmployees } from "@/lib/pessoas";
 
 export const Route = createFileRoute("/_authenticated/abastecimentos")({
   head: () => ({
@@ -402,6 +403,7 @@ function NewFuelingDialog({
   const { data: centers = [] } = useCostCenters();
   const { data: quotas = [] } = useQuotas();
   const perms = usePerms();
+  const { data: employees = [] } = useEmployees();
 
   const now = new Date();
   const [authId, setAuthId] = useState(NONE);
