@@ -165,6 +165,10 @@ function Veiculos() {
     setVehicleType(NONE);
     setFuelType(NONE);
     setServerVehicle(false);
+    setAcquisitionKind("aquisicao");
+    setConditionState("novo");
+    setAcquisitionEntity(NONE);
+    setLeaseContract(NONE);
     setOpen(true);
   }
 
@@ -175,6 +179,10 @@ function Veiculos() {
     setVehicleType(v.vehicle_type ?? NONE);
     setFuelType(v.fuel_type ?? NONE);
     setServerVehicle(Boolean(v.is_private_server_vehicle));
+    setAcquisitionKind((v.acquisition_kind as "aquisicao" | "locado") ?? "aquisicao");
+    setConditionState((v.condition_state as "novo" | "usado") ?? "novo");
+    setAcquisitionEntity(v.acquisition_entity_id ?? NONE);
+    setLeaseContract(v.lease_contract_id ?? NONE);
     setOpen(true);
   }
 
