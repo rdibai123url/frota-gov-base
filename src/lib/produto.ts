@@ -36,8 +36,8 @@ export const PRODUCT_AUDIT: AuditRow[] = [
     item: "Manutenção (13 itens no mesmo grupo)",
     classification: "Essencial",
     decision: "Consolidado",
-    before: "Manutenção reunia oficina, almoxarifado, rede credenciada, mapa, portal do credenciado, cotações e ordens de serviço.",
-    after: "Manutenção mantém apenas oficina e insumos; rede credenciada, mapa, credenciados, portal, cotações e ordens de serviço passaram para a área \"Rede credenciada e compras\".",
+    before: "Manutenção reunia oficina, almoxarifado, prestadores do órgão, mapa, portal do credenciado, cotações e ordens de serviço.",
+    after: "Manutenção mantém apenas oficina e insumos; prestadores do órgão, mapa, credenciados, portal, cotações e ordens de serviço passaram para a área \"Prestadores e compras\".",
   },
   {
     area: "Menu",
@@ -45,15 +45,15 @@ export const PRODUCT_AUDIT: AuditRow[] = [
     classification: "Essencial",
     decision: "Movido",
     before: "Listado no meio dos itens de manutenção do órgão, embora seja a tela usada pelo estabelecimento.",
-    after: "Agrupado com rede credenciada e cartão virtual, onde o gestor administra o credenciamento.",
+    after: "Agrupado com prestadores do órgão e cartão virtual, onde o gestor administra o credenciamento.",
   },
   {
     area: "Menu",
-    item: "Mapa da rede credenciada",
+    item: "Mapa dos prestadores do órgão",
     classification: "Avançada",
     decision: "Movido",
     before: "Item separado dentro de Manutenção.",
-    after: "Item da área de rede credenciada, ao lado do cadastro que alimenta o mapa.",
+    after: "Item da área de prestadores do órgão, ao lado do cadastro que alimenta o mapa.",
   },
   {
     area: "Menu",
@@ -168,7 +168,7 @@ export const LAUNCH_REPORT: LaunchSection[] = [
     title: "Visão geral",
     items: [
       "Sistema de gestão de frotas públicas multi-órgão, com isolamento total de dados, trilha de auditoria e Portal da Transparência.",
-      "Cobre frota, abastecimento, manutenção, contratos e orçamento, legal e patrimonial, almoxarifado, rede credenciada e prestação de contas.",
+      "Cobre frota, abastecimento, manutenção, contratos e orçamento, legal e patrimonial, almoxarifado, prestadores do órgão e prestação de contas.",
     ],
   },
   {
