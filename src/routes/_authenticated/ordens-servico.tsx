@@ -121,6 +121,10 @@ function OrdensServico() {
       toast.error("Selecione um processo com proposta aprovada.");
       return;
     }
+    if (origin === "contrato" && (contract === NONE || contractItem === NONE)) {
+      toast.error("Para origem contrato, selecione o contrato e o item contratual.");
+      return;
+    }
     if (!chosenQuotation.vehicle_id) {
       toast.error("A cotação não tem veículo vinculado (compra para estoque). Use o módulo de Almoxarifado / OFP.");
       return;
@@ -142,8 +146,8 @@ function OrdensServico() {
       warranty_days: chosenProposal.warranty_days,
       expense_origin: origin,
       cost_center_id: costCenter === NONE ? null : costCenter,
-      contract_id: contract === NONE ? null : contract,
-      contract_item_id: contractItem === NONE ? null : contractItem,
+      contract_id: origin === "contrato" && contract !== NONE ? contract : null,
+      contract_item_id: origin === "contrato" && contractItem !== NONE ? contractItem : null,
       commitment_id: commitment === NONE ? null : commitment,
       quota_id: quota === NONE ? null : quota,
       authorizer_id: userId,
@@ -353,69 +357,60 @@ function OrdensServico() {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label>Centro de custo</Label>
-                <Select value={costCenter} onValueChange={setCostCenter}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NONE}>Não informado</SelectItem>
-                    {costCenters.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.code} — {c.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>
-                  Contrato{" "}
-                  {origin !== "contrato" ? (
-                    <span className="text-xs font-normal text-muted-foreground">
-                      (opcional — compra direta/pronto pagamento pode usar oficina não contratada)
-                    </span>
-                  ) : null}
-                </Label>
-                <Select
-                  value={contract}
-                  onValueChange={(v) => {
-                    setContract(v);
-                    setContractItem(NONE);
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NONE}>Sem contrato</SelectItem>
-                    {contracts.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.number}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Item contratual</Label>
-                <Select value={contractItem} onValueChange={setContractItem} disabled={contract === NONE}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NONE}>Não vincular</SelectItem>
-                    {contractItems
-                      .filter((i) => i.contract_id === contract)
-                      .map((i) => (
-                        <SelectItem key={i.id} value={i.id}>
-                          {i.description.slice(0, 40)}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Bloco 5.5 / 5.9 — centro de custo, empenho e cota saem da tela operacional; são derivados
+                  da origem/contrato e permanecem como metadado auditável no banco. */}
+              {origin === "contrato" ? (
+                <>
+                  <div>
+                    <Label>Contrato *</Label>
+                    <Select
+                      value={contract}
+                      onValueChange={(v) => {
+                        setContract(v);
+                        setContractItem(NONE);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o contrato" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={NONE}>Selecione</SelectItem>
+                        {contracts
+                          .filter((c) => c.status === "vigente")
+                          .map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {c.number}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Item contratual *</Label>
+                    <Select value={contractItem} onValueChange={setContractItem} disabled={contract === NONE}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o item" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={NONE}>Selecione</SelectItem>
+                        {contractItems
+                          .filter((i) => i.contract_id === contract)
+                          .map((i) => (
+                            <SelectItem key={i.id} value={i.id}>
+                              {i.item_number ? `Item ${i.item_number} — ` : ""}
+                              {i.description.slice(0, 48)}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              ) : (
+                <p className="sm:col-span-2 text-xs text-muted-foreground">
+                  Compra direta / pronto pagamento: contrato não é exigido e a oficina da proposta aprovada pode não ser
+                  contratada ou credenciada.
+                </p>
+              )}
               <div className="sm:col-span-2">
                 <Label htmlFor="services">Descrição dos serviços</Label>
                 <Textarea
