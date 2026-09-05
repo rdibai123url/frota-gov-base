@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { PageHeader } from "@/components/app-shell";
+import { printDocument } from "@/lib/reports";
 import { MoneyInput } from "@/components/form-fields";
 import { ListPagination, usePaged } from "@/components/list-pagination";
 import { Badge } from "@/components/ui/badge";
@@ -146,7 +147,7 @@ function Limpeza() {
 
   function printCleaning(c: VehicleCleaningRow) {
     const ok = printDocument({
-      organization: org?.name ?? "FrotaGov",
+      organization: org?.short_name || org?.legal_name || "FrotaGov",
       logoUrl: org?.logo_url ?? null,
       title: "Autorização de limpeza / higienização de veículo",
       subtitle: "Apresentar no estabelecimento prestador",
