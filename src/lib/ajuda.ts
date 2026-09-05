@@ -919,7 +919,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       { label: "Produto vinculado", description: "Combustível, peça ou tipo de serviço já cadastrado. É esse vínculo que faz o item aparecer nas telas de abastecimento e manutenção.", tags: REQ },
       { label: "Unidade de medida", description: "Litro, hora, peça, serviço; deve ser a mesma usada no consumo.", tags: REQ },
       { label: "Quantidade contratada", description: "Limite total previsto para o item; alterações só por aditivo.", tags: REQ },
-      { label: "Valor unitário", description: "Preço contratado por unidade. É esse preço que as demais telas usam, bloqueado para edição.", tags: ["Obrigatório", "Calculado no total"] as unknown as FieldTag[] },
+      { label: "Valor unitário", description: "Preço contratado por unidade; o total do item é calculado pela quantidade. É esse preço que as demais telas usam, bloqueado para edição.", tags: ["Obrigatório", "Calculado"] },
       { label: "Valor total do item", description: "Quantidade multiplicada pelo valor unitário.", tags: CALC },
       { label: "Consumido / reservado / saldo", description: "Atualizados automaticamente pelas autorizações, abastecimentos, manutenções e ordens de serviço.", tags: ["Automático", "Calculado"] },
     ],
