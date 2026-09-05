@@ -417,8 +417,25 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-          <div className="mx-auto w-full max-w-6xl">{children}</div>
+          <div className="mx-auto w-full max-w-6xl">
+            {blocked ? (
+              <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-8 text-center">
+                <h1 className="gov-title text-xl">Módulo indisponível para este órgão</h1>
+                <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
+                  O módulo <strong>{currentModule?.label}</strong> não está habilitado na implantação deste órgão. Os
+                  dados já registrados permanecem preservados e voltam a ficar acessíveis assim que a Administração da
+                  Plataforma habilitar o módulo novamente.
+                </p>
+                <Button className="mt-5" onClick={() => navigate({ to: "/painel" })}>
+                  Voltar ao painel
+                </Button>
+              </div>
+            ) : (
+              children
+            )}
+          </div>
         </main>
+
       </div>
     </div>
     </TooltipProvider>
