@@ -173,7 +173,7 @@ const LABELS: Record<string, string> = {
   valor_unitario: "Valor unitário (R$)",
   valor_total: "Valor total (R$)",
   comprovacao: "Comprovação",
-  objeto_tipo: "Objeto do contrato",
+  objeto_tipo: "Tipo de contrato",
   servidor: "Servidor",
   cpf: "CPF",
   matricula: "Matrícula",
@@ -213,6 +213,7 @@ function Relatorios() {
   const [vehicleId, setVehicleId] = useState("todos");
   const [driverId, setDriverId] = useState("todos");
   const [objectKind, setObjectKind] = useState("todos");
+  const [contractId, setContractId] = useState("todos");
   const [page, setPage] = useState(1);
 
   const { data: units = [] } = useUnits();
@@ -229,11 +230,14 @@ function Relatorios() {
   const caps = CAPS[report];
 
   const { data, isLoading } = useQuery({
-    queryKey: ["report", report, from, to, unitId, vehicleId, driverId, objectKind],
+    queryKey: ["report", report, from, to, unitId, vehicleId, driverId, objectKind, contractId],
     queryFn: async (): Promise<Record<string, unknown>[]> => {
       const unit = caps.unit && unitId !== "todas" ? unitId : null;
       const vehicle = caps.vehicle && vehicleId !== "todos" ? vehicleId : null;
       const driver = caps.driver && driverId !== "todos" ? driverId : null;
+      // Bloco 6.6 — quando um contrato específico é escolhido, os relatórios cruzam apenas os
+      // consumos/execuções vinculados a ele.
+      const contract = contractId !== "todos" ? contractId : null;
       const start = `${from}T00:00:00`;
 
       const end = `${to}T23:59:59`;
@@ -400,6 +404,7 @@ function Relatorios() {
         if (unit) q = q.eq("unit_id", unit);
         if (vehicle) q = q.eq("vehicle_id", vehicle);
         if (driver) q = q.eq("driver_id", driver);
+        if (contract) q = q.eq("contract_id", contract);
         const { data: fuelings, error } = await q;
         if (error) throw error;
 
@@ -426,6 +431,7 @@ function Relatorios() {
           .lte("entry_at", end);
         if (unit) mq = mq.eq("unit_id", unit);
         if (vehicle) mq = mq.eq("vehicle_id", vehicle);
+        if (contract) mq = mq.eq("contract_id", contract);
         const { data: maints } = await mq;
 
         type Acc = { veiculo: string; unidade: string; litros: number; combustivel: number; manutencao: number };
@@ -478,6 +484,7 @@ function Relatorios() {
           .order("entry_at", { ascending: false });
         if (unit) q = q.eq("unit_id", unit);
         if (vehicle) q = q.eq("vehicle_id", vehicle);
+        if (contract) q = q.eq("contract_id", contract);
         const { data: rows, error } = await q;
         if (error) throw error;
         return (rows ?? []).map((m) => ({
@@ -507,6 +514,7 @@ function Relatorios() {
           .order("performed_at", { ascending: false });
         if (unit) q = q.eq("unit_id", unit);
         if (vehicle) q = q.eq("vehicle_id", vehicle);
+        if (contract) q = q.eq("contract_id", contract);
         const { data: rows, error } = await q;
         if (error) throw error;
         return (rows ?? []).map((c) => ({
@@ -534,6 +542,7 @@ function Relatorios() {
           .or(`valid_to.is.null,valid_to.gte.${from}`)
           .order("valid_from", { ascending: false });
         if (objectKind !== "todos") cq = cq.eq("object_kind", objectKind);
+        if (contract) cq = cq.eq("id", contract);
         const { data: contracts, error } = await cq;
         if (error) throw error;
         const { data: commitments } = await supabase
@@ -936,7 +945,7 @@ function Relatorios() {
     return Object.keys(first).map((k) => ({ key: k, label: label(k) }));
   }, [rows]);
 
-  useEffect(() => setPage(1), [report, from, to, unitId, vehicleId, driverId, objectKind]);
+  useEffect(() => setPage(1), [report, from, to, unitId, vehicleId, driverId, objectKind, contractId]);
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const pageRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
@@ -958,7 +967,7 @@ function Relatorios() {
     { label: "Veículo", value: caps.vehicle ? vehicleName : "Não se aplica" },
     { label: "Condutor", value: caps.driver ? driverName : "Não se aplica" },
     {
-      label: "Objeto do contrato",
+      label: "Tipo de contrato",
       value:
         report !== "contratos"
           ? "Não se aplica"
