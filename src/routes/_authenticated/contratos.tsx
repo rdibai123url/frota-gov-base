@@ -1205,10 +1205,21 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
     }
     const delta = parseBRNumber(get("delta_value"));
     const percent = parseBRNumber(get("percent"));
-    if (changesValue && !delta && !percent) {
-      toast.error("Informe o valor ou o percentual da alteração.");
+    if (changesValue && !delta && !percent && rows.length === 0) {
+      toast.error("Informe o valor, o percentual ou a planilha de itens da alteração.");
       return;
     }
+    for (const r of rows) {
+      if (!r.contract_item_id && r.description.trim().length < 2) {
+        toast.error("Descreva o item novo incluído pelo aditivo.");
+        return;
+      }
+      if (!(parseBRNumber(r.quantity) > 0) || !(parseBRNumber(r.unit_price) > 0)) {
+        toast.error("Quantidade e valor unitário dos itens do aditivo devem ser maiores que zero.");
+        return;
+      }
+    }
+
 
     setSaving(true);
     let attachment: string | null = null;
