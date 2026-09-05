@@ -54,7 +54,7 @@ export const Route = createFileRoute("/_authenticated/ordens-servico")({
       {
         name: "description",
         content:
-          "Ordens de serviço eletrônicas emitidas à rede credenciada, com peças aprovadas, prazos, garantias, origem do recurso e controle de execução.",
+          "Ordens de serviço eletrônicas emitidas aos prestadores cadastrados pelo próprio órgão, com peças aprovadas, prazos, garantias, origem do recurso e controle de execução.",
       },
       { property: "og:title", content: "Ordens de Serviço — FrotaGov" },
       { property: "og:description", content: "Emissão e acompanhamento de ordens de serviço da frota pública." },

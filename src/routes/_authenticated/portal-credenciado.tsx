@@ -29,12 +29,12 @@ export const Route = createFileRoute("/_authenticated/portal-credenciado")({
       {
         name: "description",
         content:
-          "Área externa da rede credenciada para localizar o ativo pelo cartão virtual, capturar abastecimento e manutenção autorizados e confirmar ordens de fornecimento de peças.",
+          "Área externa para empresas cadastradas ou convidadas pelo órgão localizarem o ativo pelo cartão virtual, capturar abastecimento e manutenção autorizados e confirmar ordens de fornecimento de peças.",
       },
       { property: "og:title", content: "Portal do credenciado — FrotaGov" },
       {
         property: "og:description",
-        content: "Captura eletrônica de abastecimento, manutenção e fornecimento pela rede credenciada.",
+        content: "Captura eletrônica de abastecimento, manutenção e fornecimento pelas empresas credenciadas pelo órgão.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -86,7 +86,7 @@ function PortalCredenciado() {
   if (!me?.partner) {
     return (
       <div>
-        <PageHeader title="Portal do credenciado" description="Área exclusiva da rede credenciada." />
+        <PageHeader title="Portal do credenciado" description="Área exclusiva das empresas cadastradas ou convidadas pelo órgão. Não há catálogo público de prestadores." />
         <div className="gov-card p-6 text-sm text-muted-foreground">
           Seu usuário não está vinculado a um credenciado ativo. Solicite ao órgão o cadastro do seu e-mail em
           Credenciados → Usuários do credenciado.

@@ -55,7 +55,7 @@ export const Route = createFileRoute("/_authenticated/credenciados")({
       {
         name: "description",
         content:
-          "Gestão da rede credenciada com acesso ao portal externo, usuários do credenciado, cartão virtual do ativo e capturas operacionais em posto e oficina.",
+          "Gestão dos credenciados do próprio órgão com acesso ao portal externo, usuários do credenciado, cartão virtual do ativo e capturas operacionais em posto e oficina.",
       },
       { property: "og:title", content: "Credenciados e cartão virtual — FrotaGov" },
       {
@@ -237,8 +237,8 @@ function Credenciados() {
   return (
     <div>
       <PageHeader
-        title="Credenciados e cartão virtual"
-        description="Rede credenciada com acesso ao portal externo, usuários operadores, cartão virtual do ativo e capturas realizadas em posto e oficina. O cartão virtual é identificação e autorização operacional — não é meio de pagamento."
+        title="Credenciados do órgão e cartão virtual"
+        description="Empresas cadastradas ou convidadas pelo próprio órgão, com acesso ao portal externo, usuários operadores, cartão virtual do ativo e capturas realizadas em posto e oficina. O cartão virtual é identificação e autorização operacional — não é meio de pagamento."
         action={
           canManageFleet ? (
             <Button onClick={() => setForm({ ...emptyPartner })}>
@@ -286,7 +286,7 @@ function Credenciados() {
                 {!isLoading && partners.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={6} className="text-muted-foreground">
-                      Nenhum credenciado cadastrado.
+                      Nenhum credenciado cadastrado pelo órgão.
                     </TableCell>
                   </TableRow>
                 )}
@@ -785,7 +785,7 @@ function CardsPanel({
   return (
     <div className="space-y-4">
       <div className="gov-card p-4 text-sm text-muted-foreground">
-        O cartão virtual identifica o ativo na rede credenciada (órgão, ativo, placa ou patrimônio, situação,
+        O cartão virtual identifica o ativo junto aos credenciados do órgão (órgão, ativo, placa ou patrimônio, situação,
         combustível e autorizações abertas). Não expõe dados pessoais e não é meio de pagamento.
       </div>
       {canManageFleet && (

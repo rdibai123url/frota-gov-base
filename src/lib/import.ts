@@ -624,8 +624,8 @@ export const IMPORT_MODULES: ImportModule[] = [
   },
   {
     id: "rede_credenciada",
-    label: "Rede credenciada (oficinas)",
-    description: "Oficinas e prestadores credenciados para manutenção.",
+    label: "Oficinas e prestadores do órgão",
+    description: "Oficinas e prestadores do próprio órgão para manutenção.",
     order: 19,
     depends: [],
     dedupe: ["cnpj", "legal_name"],

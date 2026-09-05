@@ -44,14 +44,14 @@ import { CompanyDialog } from "@/routes/_authenticated/fornecedores";
 export const Route = createFileRoute("/_authenticated/rede-credenciada")({
   head: () => ({
     meta: [
-      { title: "Rede credenciada — FrotaGov" },
+      { title: "Oficinas e prestadores do órgão — FrotaGov" },
       {
         name: "description",
         content:
-          "Cadastro de oficinas e estabelecimentos credenciados do órgão, com especialidades, marcas atendidas, vigência do credenciamento e documentos.",
+          "Cadastro próprio do órgão de oficinas e prestadores, com especialidades, marcas atendidas, vigência e documentos.",
       },
-      { property: "og:title", content: "Rede credenciada — FrotaGov" },
-      { property: "og:description", content: "Oficinas credenciadas para manutenção da frota pública." },
+      { property: "og:title", content: "Oficinas e prestadores do órgão — FrotaGov" },
+      { property: "og:description", content: "Oficinas e prestadores cadastrados pelo próprio órgão para manutenção da frota." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -206,8 +206,8 @@ function RedeCredenciada() {
   return (
     <>
       <PageHeader
-        title="Rede credenciada"
-        description="A rede é formada automaticamente pelas empresas com contrato ou credenciamento vigente de manutenção e higienização. O cadastro da empresa é feito em Pessoas e Empresas Externas."
+        title="Oficinas e prestadores do órgão"
+        description="Lista formada apenas pelas empresas cadastradas pelo próprio órgão com contrato ou credenciamento vigente de manutenção e higienização. O FrotaGov não fornece prestadores; o cadastro da empresa é feito em Pessoas e Empresas Externas."
         action={
           <Button asChild variant="outline" className="gap-2">
             <Link to="/entidades-externas">
@@ -294,7 +294,7 @@ function RedeCredenciada() {
               <TableRow>
                 <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
                   <Building2 className="mx-auto mb-2 size-6 opacity-50" />
-                  Nenhuma oficina credenciada.
+                  Nenhuma oficina cadastrada pelo órgão.
                 </TableCell>
               </TableRow>
             )}
@@ -511,7 +511,7 @@ function RedeCredenciada() {
 }
 
 /**
- * Rede derivada dos contratos: manutenção, higienização e credenciamento.
+ * Prestadores derivados dos contratos do próprio órgão: manutenção, higienização e credenciamento.
  * Uma empresa aparece uma única vez, mesmo com vários contratos.
  */
 function NetworkFromContracts() {
@@ -546,7 +546,7 @@ function NetworkFromContracts() {
               <TableRow>
                 <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
                   <Building2 className="mx-auto mb-2 size-6 opacity-50" />
-                  Nenhuma empresa com contrato ou credenciamento vigente de manutenção ou higienização.
+                  Nenhuma empresa do órgão com contrato ou credenciamento vigente de manutenção ou higienização.
                 </TableCell>
               </TableRow>
             )}

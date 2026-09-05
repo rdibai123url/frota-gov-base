@@ -1,5 +1,5 @@
 /**
- * Fase 10 — Bloco 6 / Rodada 1 Etapa 2: geolocalização da rede credenciada.
+ * Fase 10 — Bloco 6 / Rodada 1 Etapa 2: geolocalização dos prestadores cadastrados pelo órgão.
  *
  * Mapa interativo real (OpenStreetMap + Leaflet, sem API paga) com pins por
  * tipo de estabelecimento, popup com dados do cadastro, ponto de referência,
@@ -53,16 +53,16 @@ const RedeMap = lazy(() => import("@/components/rede-map"));
 export const Route = createFileRoute("/_authenticated/mapa-rede")({
   head: () => ({
     meta: [
-      { title: "Mapa da rede credenciada — FrotaGov" },
+      { title: "Mapa dos prestadores do órgão — FrotaGov" },
       {
         name: "description",
         content:
           "Mapa interativo com postos, oficinas e credenciados do órgão, busca por proximidade, filtros por tipo de atendimento e situação.",
       },
-      { property: "og:title", content: "Mapa da rede credenciada — FrotaGov" },
+      { property: "og:title", content: "Mapa dos prestadores do órgão — FrotaGov" },
       {
         property: "og:description",
-        content: "Localização da rede credenciada da frota pública com distância aproximada por unidade.",
+        content: "Localização dos prestadores cadastrados pelo próprio órgão, com distância aproximada por unidade.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -432,8 +432,8 @@ function MapaRede() {
   return (
     <>
       <PageHeader
-        title="Mapa da rede credenciada"
-        description="Postos, oficinas e credenciados no mapa. A distância é uma estimativa em linha reta entre as coordenadas — não considera o trajeto pelas ruas."
+        title="Mapa dos prestadores do órgão"
+        description="Somente postos, oficinas e prestadores cadastrados pelo próprio órgão. A distância é uma estimativa em linha reta entre as coordenadas — não considera o trajeto pelas ruas."
         action={
           <Button
             variant="outline"
@@ -446,7 +446,7 @@ function MapaRede() {
                   distancia: r.distancia === null ? "—" : formatNumberBR(r.distancia, 2),
                 })),
                 {
-                  title: "Rede credenciada por localização",
+                  title: "Prestadores do órgão por localização",
                   organization: org?.legal_name ?? null,
                   issuedBy: userName,
                 },
@@ -596,7 +596,7 @@ function MapaRede() {
             {!isLoading && rows.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
-                  Nenhum estabelecimento encontrado com os filtros aplicados.
+                  Nenhum prestador cadastrado pelo órgão foi encontrado com os filtros aplicados.
                 </TableCell>
               </TableRow>
             )}

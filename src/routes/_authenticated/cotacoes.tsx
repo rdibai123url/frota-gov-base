@@ -182,7 +182,7 @@ function Cotacoes() {
     <>
       <PageHeader
         title="Cotações"
-        description="Processos eletrônicos de cotação junto à rede credenciada, com meta de no mínimo 3 propostas válidas."
+        description="Processos eletrônicos de cotação junto às empresas cadastradas pelo próprio órgão, com meta de no mínimo 3 propostas válidas."
         action={
           canManageFleet && orgId ? (
             <Button

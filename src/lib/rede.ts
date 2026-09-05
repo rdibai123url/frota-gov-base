@@ -1,7 +1,7 @@
 /* =====================================================================
  * FASE 11 — Bloco 3: rede operacional derivada dos contratos.
  *
- * A operação (fornecedores/postos, oficinas/rede credenciada e mapa)
+ * A operação (fornecedores/postos, oficinas/prestadores do órgão e mapa)
  * não tem mais cadastro solto: as empresas são deduzidas dos contratos
  * vigentes do próprio órgão, usando o cadastro mestre de Pessoas e
  * Empresas Externas como identidade. Empresas sem contrato continuam
