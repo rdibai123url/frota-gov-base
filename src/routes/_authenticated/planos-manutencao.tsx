@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { ServiceTypeSelect } from "@/components/cadastro-rapido";
+
 import {
   DUE_LABELS,
   MAINTENANCE_SERVICE_TYPES,
