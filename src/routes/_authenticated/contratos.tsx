@@ -51,8 +51,11 @@ import {
   periodBalance,
   useContractAmendments,
   useContractPeriods,
+  useExternalEntities,
   type ContractAmendmentKind,
 } from "@/lib/frotagov";
+import { EntitySelect } from "@/components/entity-select";
+import { employeesByFunction, useEmployees } from "@/lib/pessoas";
 
 export const Route = createFileRoute("/_authenticated/contratos")({
   head: () => ({
