@@ -51,8 +51,11 @@ import {
   periodBalance,
   useContractAmendments,
   useContractPeriods,
+  useExternalEntities,
   type ContractAmendmentKind,
 } from "@/lib/frotagov";
+import { EntitySelect } from "@/components/entity-select";
+import { employeesByFunction, useEmployees } from "@/lib/pessoas";
 
 export const Route = createFileRoute("/_authenticated/contratos")({
   head: () => ({
@@ -75,9 +78,22 @@ export const Route = createFileRoute("/_authenticated/contratos")({
 const ALL = "__all__";
 const NONE = "__none__";
 
+/** Rótulo do número do procedimento conforme a modalidade escolhida. */
+const PROCEDURE_LABELS: Record<string, string> = {
+  pregao: "Número do pregão",
+  concorrencia: "Número da concorrência",
+  dispensa: "Número da dispensa",
+  inexigibilidade: "Número da inexigibilidade",
+  adesao_ata: "Número da ata / adesão",
+  contratacao_direta: "Número da contratação direta",
+  credenciamento: "Número do edital de credenciamento",
+  outro: "Número do procedimento",
+};
+
 const contractSchema = z.object({
   number: z.string().trim().min(1, "Informe o número do contrato").max(40),
   process_number: z.string().trim().max(40).optional(),
+  procedure_number: z.string().trim().max(40).optional(),
   object: z.string().trim().min(3, "Descreva o objeto do contrato").max(400),
   cnpj: z.string().trim().optional(),
   signed_at: z.string().optional(),
@@ -107,6 +123,16 @@ function StatusBadge({ status }: { status: ContractRow["status"] }) {
 function Contratos() {
   const { data: contracts = [], isLoading } = useContracts();
   const { data: suppliers = [] } = useSuppliers();
+  const { data: entities = [], isLoading: loadingEntities } = useExternalEntities();
+  const { data: employees = [], isLoading: loadingEmployees } = useEmployees();
+  /** Nome da empresa contratada: cadastro mestre primeiro, fornecedor legado como alternativa. */
+  const companyName = (c: ContractRow) => {
+    const e = entities.find((x) => x.id === c.entity_id);
+    if (e) return e.trade_name || e.name;
+    return c.supplier ? c.supplier.trade_name || c.supplier.legal_name : "";
+  };
+  const employeeName = (id: string | null | undefined) =>
+    employees.find((e) => e.id === id)?.full_name ?? "não informado";
   const { data: fuels = [] } = useFuelTypes();
   const { data: objectKinds = [] } = useContractObjectKinds();
   const kindOptions = objectKinds.length
@@ -122,6 +148,10 @@ function Contratos() {
   const [supplierId, setSupplierId] = useState(NONE);
   const [objectKind, setObjectKind] = useState("combustivel_oleos");
   const [valueFromItems, setValueFromItems] = useState(false);
+  const [srp, setSrp] = useState(false);
+  const [entityId, setEntityId] = useState<string | null>(null);
+  const [fiscalId, setFiscalId] = useState<string | null>(null);
+  const [managerId, setManagerId] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -171,6 +201,10 @@ function Contratos() {
     setSupplierId(NONE);
     setObjectKind("combustivel_oleos");
     setValueFromItems(false);
+    setSrp(false);
+    setEntityId(null);
+    setFiscalId(null);
+    setManagerId(null);
     setFile(null);
     setOpen(true);
   }
@@ -182,6 +216,10 @@ function Contratos() {
     setSupplierId(c.supplier_id ?? NONE);
     setObjectKind(c.object_kind ?? "combustivel_oleos");
     setValueFromItems(Boolean(c.value_from_items));
+    setSrp(Boolean(c.srp));
+    setEntityId(c.entity_id ?? null);
+    setFiscalId(c.fiscal_employee_id ?? null);
+    setManagerId(c.manager_employee_id ?? null);
     setFile(null);
     setOpen(true);
   }
@@ -223,6 +261,11 @@ function Contratos() {
       object: d.object,
       object_kind: objectKind,
       value_from_items: valueFromItems,
+      srp,
+      procedure_number: d.procedure_number || null,
+      entity_id: entityId,
+      fiscal_employee_id: fiscalId,
+      manager_employee_id: managerId,
       supplier_id: supplierId === NONE ? null : supplierId,
       cnpj: onlyDigits(d.cnpj) || null,
       signed_at: d.signed_at || null,
@@ -443,8 +486,12 @@ function Contratos() {
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">{c.object}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {c.supplier ? c.supplier.trade_name || c.supplier.legal_name : "Sem fornecedor"} ·
-                    {" "}Processo {c.process_number || "—"} · Vigência {dateBR(c.valid_from)} a {dateBR(c.valid_to)}
+                    {companyName(c) || "Sem empresa informada"} ·{" "}
+                    Processo {c.process_number || "—"} · Vigência {dateBR(c.valid_from)} a {dateBR(c.valid_to)}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Fiscal: {employeeName(c.fiscal_employee_id)} · Gestor: {employeeName(c.manager_employee_id)}
+                    {c.srp ? " · Registro de preços (SRP)" : ""}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -455,7 +502,18 @@ function Contratos() {
                   )}
                   {canManageFinance && (
                     <>
-                      <Button variant="outline" size="sm" className="gap-2" onClick={() => openNewItem(c)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                        disabled={c.status !== "rascunho"}
+                        title={
+                          c.status === "rascunho"
+                            ? "Incluir item na planilha inicial do contrato"
+                            : "Contrato já assinado: itens só podem ser incluídos ou alterados por aditivo."
+                        }
+                        onClick={() => openNewItem(c)}
+                      >
                         <Package className="size-4" /> Novo item
                       </Button>
                       <Button variant="outline" size="sm" className="gap-2" onClick={() => setAmendFor(c)}>
@@ -634,6 +692,26 @@ function Contratos() {
                 </Select>
               </div>
               <div>
+                <Label htmlFor="procedure_number">{PROCEDURE_LABELS[modality] ?? "Número do procedimento"}</Label>
+                <Input
+                  id="procedure_number"
+                  name="procedure_number"
+                  defaultValue={editing?.procedure_number ?? ""}
+                  maxLength={40}
+                />
+              </div>
+              <div className="flex items-start gap-2 rounded-md border p-3 sm:col-span-2">
+                <Checkbox id="srp" checked={srp} onCheckedChange={(v) => setSrp(v === true)} />
+                <div>
+                  <Label htmlFor="srp" className="cursor-pointer">
+                    Sistema de Registro de Preços (SRP)
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Marque quando o contrato decorre de ata de registro de preços.
+                  </p>
+                </div>
+              </div>
+              <div>
                 <Label>Objeto do contrato *</Label>
                 <Select value={objectKind} onValueChange={setObjectKind}>
                   <SelectTrigger>
@@ -655,8 +733,32 @@ function Contratos() {
                 <Label htmlFor="object">Descrição do objeto *</Label>
                 <Textarea id="object" name="object" defaultValue={editing?.object ?? ""} rows={2} required />
               </div>
+              <div className="sm:col-span-2">
+                <Label>Empresa contratada (cadastro mestre)</Label>
+                <EntitySelect
+                  value={entityId}
+                  onChange={setEntityId}
+                  loading={loadingEntities}
+                  placeholder="Buscar empresa ou pessoa cadastrada"
+                  searchPlaceholder="Nome, nome fantasia ou documento…"
+                  emptyLabel="Nenhuma pessoa ou empresa cadastrada ainda."
+                  createHref="/entidades-externas"
+                  createLabel="Cadastrar empresa"
+                  options={entities
+                    .filter((e) => e.active || e.id === entityId)
+                    .map((e) => ({
+                      value: e.id,
+                      label: e.trade_name || e.name,
+                      description: [e.document ? maskCNPJ(e.document) : null, e.city].filter(Boolean).join(" · "),
+                      keywords: [e.name, e.trade_name, e.document],
+                    }))}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  A empresa vem do cadastro único de pessoas e empresas externas — não é preciso duplicar o cadastro.
+                </p>
+              </div>
               <div>
-                <Label>Fornecedor contratado</Label>
+                <Label>Fornecedor de abastecimento (opcional)</Label>
                 <Select value={supplierId} onValueChange={setSupplierId}>
                   <SelectTrigger>
                     <SelectValue />
@@ -670,6 +772,45 @@ function Contratos() {
                     ))}
                   </SelectContent>
                 </Select>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Usado pelos lançamentos de abastecimento já vinculados a este fornecedor.
+                </p>
+              </div>
+              <div>
+                <Label>Fiscal do contrato</Label>
+                <EntitySelect
+                  value={fiscalId}
+                  onChange={setFiscalId}
+                  loading={loadingEmployees}
+                  placeholder="Selecionar fiscal"
+                  emptyLabel="Nenhum funcionário com função de fiscal."
+                  createHref="/funcionarios"
+                  createLabel="Cadastrar funcionário"
+                  options={employeesByFunction(employees, "fiscal_contrato").map((e) => ({
+                    value: e.id,
+                    label: e.full_name,
+                    description: e.job_title,
+                    keywords: [e.registration, e.cpf],
+                  }))}
+                />
+              </div>
+              <div>
+                <Label>Gestor do contrato</Label>
+                <EntitySelect
+                  value={managerId}
+                  onChange={setManagerId}
+                  loading={loadingEmployees}
+                  placeholder="Selecionar gestor"
+                  emptyLabel="Nenhum funcionário com função de gestor."
+                  createHref="/funcionarios"
+                  createLabel="Cadastrar funcionário"
+                  options={employeesByFunction(employees, "gestor_contrato").map((e) => ({
+                    value: e.id,
+                    label: e.full_name,
+                    description: e.job_title,
+                    keywords: [e.registration, e.cpf],
+                  }))}
+                />
               </div>
               <div>
                 <Label htmlFor="cnpj">CNPJ</Label>
@@ -995,16 +1136,54 @@ function ContractPeriodsPanel({
   );
 }
 
+/** Linha da planilha de itens do aditivo (acréscimo, supressão ou item novo). */
+type AmendmentItemRow = {
+  key: string;
+  operation: "acrescimo" | "supressao";
+  contract_item_id: string | null;
+  description: string;
+  measure_unit: string;
+  quantity: string;
+  unit_price: string;
+};
+
 function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; onClose: () => void }) {
   const { orgId, userId } = usePerms();
   const invalidate = useInvalidate();
   const [kind, setKind] = useState<ContractAmendmentKind>("prorrogacao");
   const [saving, setSaving] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [rows, setRows] = useState<AmendmentItemRow[]>([]);
 
   const createsPeriod = AMENDMENT_CREATES_PERIOD.includes(kind);
   const changesValue = AMENDMENT_CHANGES_VALUE.includes(kind);
+  const changesItems = kind === "acrescimo" || kind === "supressao" || kind === "combinado";
   const help = CONTRACT_AMENDMENT_KINDS.find((k) => k.value === kind)?.help ?? "";
+  const contractItems = (contract?.items ?? []).filter((i) => i.active !== false);
+
+  /** Impacto financeiro da planilha do aditivo (acréscimos menos supressões). */
+  const rowsDelta = rows.reduce(
+    (sum, r) => sum + (r.operation === "supressao" ? -1 : 1) * parseBRNumber(r.quantity) * parseBRNumber(r.unit_price),
+    0,
+  );
+
+  const updateRow = (key: string, patch: Partial<AmendmentItemRow>) =>
+    setRows((prev) => prev.map((r) => (r.key === key ? { ...r, ...patch } : r)));
+
+  function addRow(existing: boolean) {
+    setRows((prev) => [
+      ...prev,
+      {
+        key: crypto.randomUUID(),
+        operation: kind === "supressao" ? "supressao" : "acrescimo",
+        contract_item_id: existing ? (contractItems[0]?.id ?? null) : null,
+        description: "",
+        measure_unit: "litro",
+        quantity: "",
+        unit_price: existing ? String(contractItems[0]?.unit_price ?? "") : "",
+      },
+    ]);
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -1026,10 +1205,21 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
     }
     const delta = parseBRNumber(get("delta_value"));
     const percent = parseBRNumber(get("percent"));
-    if (changesValue && !delta && !percent) {
-      toast.error("Informe o valor ou o percentual da alteração.");
+    if (changesValue && !delta && !percent && rows.length === 0) {
+      toast.error("Informe o valor, o percentual ou a planilha de itens da alteração.");
       return;
     }
+    for (const r of rows) {
+      if (!r.contract_item_id && r.description.trim().length < 2) {
+        toast.error("Descreva o item novo incluído pelo aditivo.");
+        return;
+      }
+      if (!(parseBRNumber(r.quantity) > 0) || !(parseBRNumber(r.unit_price) > 0)) {
+        toast.error("Quantidade e valor unitário dos itens do aditivo devem ser maiores que zero.");
+        return;
+      }
+    }
+
 
     setSaving(true);
     let attachment: string | null = null;
@@ -1040,7 +1230,7 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
     }
 
     const periodValue = parseBRNumber(get("period_value"));
-    const { error } = await supabase.from("contract_amendments").insert({
+    const { data: amendment, error } = await supabase.from("contract_amendments").insert({
       organization_id: orgId!,
       contract_id: contract.id,
       number: get("number"),
@@ -1056,15 +1246,42 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
       justification: get("justification"),
       attachment_path: attachment,
       created_by: userId,
-    });
-    setSaving(false);
-    if (error) {
-      toast.error(error.message || "Não foi possível registrar o aditivo.");
+    })
+      .select("id")
+      .maybeSingle();
+    if (error || !amendment) {
+      setSaving(false);
+      toast.error(error?.message || "Não foi possível registrar o aditivo.");
       return;
     }
-    toast.success("Aditivo registrado. Contrato e vigências atualizados.");
+
+    if (rows.length > 0) {
+      const { error: itemsError } = await supabase.from("contract_amendment_items").insert(
+        rows.map((r) => ({
+          organization_id: orgId!,
+          amendment_id: amendment.id,
+          contract_id: contract.id,
+          contract_item_id: r.contract_item_id,
+          operation: r.operation,
+          description: r.contract_item_id ? null : r.description.trim(),
+          measure_unit: r.measure_unit,
+          quantity: parseBRNumber(r.quantity),
+          unit_price: parseBRNumber(r.unit_price),
+        })),
+      );
+      if (itemsError) {
+        setSaving(false);
+        toast.error(itemsError.message || "O aditivo foi registrado, mas a planilha de itens não pôde ser aplicada.");
+        invalidate(["contracts", "contract-periods", "contract-amendments", "contract-items"]);
+        return;
+      }
+    }
+
+    setSaving(false);
+    toast.success("Aditivo registrado. Contrato, vigências e itens atualizados.");
     invalidate(["contracts", "contract-periods", "contract-amendments", "contract-items"]);
     setFile(null);
+    setRows([]);
     onClose();
   }
 
@@ -1147,6 +1364,141 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
                 Valor atual do contrato: <strong>{brl(Number(contract?.current_value ?? 0))}</strong>. O valor original
                 é preservado e o histórico registra valor anterior e posterior.
               </p>
+            </div>
+          )}
+
+          {changesItems && (
+            <div className="space-y-3 rounded-md border bg-muted/30 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <Label>Planilha de itens do aditivo</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Acrescente ou suprima quantidade de itens já contratados, ou inclua itens novos. Fora do aditivo, a
+                    planilha do contrato assinado fica bloqueada.
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={contractItems.length === 0}
+                    onClick={() => addRow(true)}
+                  >
+                    Item existente
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" onClick={() => addRow(false)}>
+                    Item novo
+                  </Button>
+                </div>
+              </div>
+
+              {rows.length === 0 ? (
+                <p className="text-xs text-muted-foreground">Nenhum item incluído nesta planilha.</p>
+              ) : (
+                <div className="space-y-3">
+                  {rows.map((r) => (
+                    <div key={r.key} className="grid gap-2 rounded-md border bg-card p-3 sm:grid-cols-6">
+                      <div className="sm:col-span-2">
+                        <Label className="text-xs">Item</Label>
+                        {r.contract_item_id ? (
+                          <Select
+                            value={r.contract_item_id}
+                            onValueChange={(v) => {
+                              const it = contractItems.find((i) => i.id === v);
+                              updateRow(r.key, {
+                                contract_item_id: v,
+                                measure_unit: it?.measure_unit ?? r.measure_unit,
+                                unit_price: String(it?.unit_price ?? r.unit_price),
+                              });
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {contractItems.map((i) => (
+                                <SelectItem key={i.id} value={i.id}>
+                                  {i.item_number ? `${i.item_number} — ` : ""}
+                                  {i.description}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input
+                            value={r.description}
+                            placeholder="Descrição do item novo"
+                            onChange={(e) => updateRow(r.key, { description: e.target.value })}
+                          />
+                        )}
+                      </div>
+                      <div>
+                        <Label className="text-xs">Operação</Label>
+                        <Select
+                          value={r.operation}
+                          onValueChange={(v) => updateRow(r.key, { operation: v as AmendmentItemRow["operation"] })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="acrescimo">Acréscimo</SelectItem>
+                            <SelectItem value="supressao" disabled={!r.contract_item_id}>
+                              Supressão
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Unidade</Label>
+                        <Select
+                          value={r.measure_unit}
+                          onValueChange={(v) => updateRow(r.key, { measure_unit: v })}
+                          disabled={!!r.contract_item_id}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {MEASURE_UNITS.map((u) => (
+                              <SelectItem key={u} value={u}>
+                                {u}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Quantidade</Label>
+                        <LitersInput value={r.quantity} onValueChange={(v) => updateRow(r.key, { quantity: v })} />
+                      </div>
+                      <div className="flex items-end gap-2">
+                        <div className="flex-1">
+                          <Label className="text-xs">Valor unitário</Label>
+                          <MoneyInput
+                            value={r.unit_price}
+                            onValueChange={(v) => updateRow(r.key, { unit_price: v })}
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Remover item do aditivo"
+                          onClick={() => setRows((prev) => prev.filter((x) => x.key !== r.key))}
+                        >
+                          <Ban className="size-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  <p className="text-xs text-muted-foreground">
+                    Impacto da planilha: <strong>{brl(rowsDelta)}</strong>. Informe também o valor do aditivo acima para
+                    atualizar o valor global do contrato.
+                  </p>
+                </div>
+              )}
             </div>
           )}
 

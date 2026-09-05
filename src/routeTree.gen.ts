@@ -32,6 +32,7 @@ import { Route as AuthenticatedEntidadesExternasRouteImport } from './routes/_au
 import { Route as AuthenticatedEquipamentosRouteImport } from './routes/_authenticated/equipamentos'
 import { Route as AuthenticatedExportacaoRouteImport } from './routes/_authenticated/exportacao'
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
+import { Route as AuthenticatedFuncionariosRouteImport } from './routes/_authenticated/funcionarios'
 import { Route as AuthenticatedHistoricoVeiculoRouteImport } from './routes/_authenticated/historico-veiculo'
 import { Route as AuthenticatedIntegracoesRouteImport } from './routes/_authenticated/integracoes'
 import { Route as AuthenticatedInteligenciaRouteImport } from './routes/_authenticated/inteligencia'
@@ -193,6 +194,12 @@ const AuthenticatedFornecedoresRoute =
   AuthenticatedFornecedoresRouteImport.update({
     id: '/fornecedores',
     path: '/fornecedores',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedFuncionariosRoute =
+  AuthenticatedFuncionariosRouteImport.update({
+    id: '/funcionarios',
+    path: '/funcionarios',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedHistoricoVeiculoRoute =
@@ -423,6 +430,7 @@ export interface FileRoutesByFullPath {
   '/equipamentos': typeof AuthenticatedEquipamentosRoute
   '/exportacao': typeof AuthenticatedExportacaoRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
+  '/funcionarios': typeof AuthenticatedFuncionariosRoute
   '/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/integracoes': typeof AuthenticatedIntegracoesRoute
   '/inteligencia': typeof AuthenticatedInteligenciaRoute
@@ -485,6 +493,7 @@ export interface FileRoutesByTo {
   '/equipamentos': typeof AuthenticatedEquipamentosRoute
   '/exportacao': typeof AuthenticatedExportacaoRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
+  '/funcionarios': typeof AuthenticatedFuncionariosRoute
   '/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/integracoes': typeof AuthenticatedIntegracoesRoute
   '/inteligencia': typeof AuthenticatedInteligenciaRoute
@@ -549,6 +558,7 @@ export interface FileRoutesById {
   '/_authenticated/equipamentos': typeof AuthenticatedEquipamentosRoute
   '/_authenticated/exportacao': typeof AuthenticatedExportacaoRoute
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
+  '/_authenticated/funcionarios': typeof AuthenticatedFuncionariosRoute
   '/_authenticated/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/_authenticated/integracoes': typeof AuthenticatedIntegracoesRoute
   '/_authenticated/inteligencia': typeof AuthenticatedInteligenciaRoute
@@ -613,6 +623,7 @@ export interface FileRouteTypes {
     | '/equipamentos'
     | '/exportacao'
     | '/fornecedores'
+    | '/funcionarios'
     | '/historico-veiculo'
     | '/integracoes'
     | '/inteligencia'
@@ -675,6 +686,7 @@ export interface FileRouteTypes {
     | '/equipamentos'
     | '/exportacao'
     | '/fornecedores'
+    | '/funcionarios'
     | '/historico-veiculo'
     | '/integracoes'
     | '/inteligencia'
@@ -738,6 +750,7 @@ export interface FileRouteTypes {
     | '/_authenticated/equipamentos'
     | '/_authenticated/exportacao'
     | '/_authenticated/fornecedores'
+    | '/_authenticated/funcionarios'
     | '/_authenticated/historico-veiculo'
     | '/_authenticated/integracoes'
     | '/_authenticated/inteligencia'
@@ -953,6 +966,13 @@ declare module '@tanstack/react-router' {
       path: '/fornecedores'
       fullPath: '/fornecedores'
       preLoaderRoute: typeof AuthenticatedFornecedoresRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/funcionarios': {
+      id: '/_authenticated/funcionarios'
+      path: '/funcionarios'
+      fullPath: '/funcionarios'
+      preLoaderRoute: typeof AuthenticatedFuncionariosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/historico-veiculo': {
@@ -1244,6 +1264,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEquipamentosRoute: typeof AuthenticatedEquipamentosRoute
   AuthenticatedExportacaoRoute: typeof AuthenticatedExportacaoRoute
   AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
+  AuthenticatedFuncionariosRoute: typeof AuthenticatedFuncionariosRoute
   AuthenticatedHistoricoVeiculoRoute: typeof AuthenticatedHistoricoVeiculoRoute
   AuthenticatedIntegracoesRoute: typeof AuthenticatedIntegracoesRoute
   AuthenticatedInteligenciaRoute: typeof AuthenticatedInteligenciaRoute
@@ -1297,6 +1318,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEquipamentosRoute: AuthenticatedEquipamentosRoute,
   AuthenticatedExportacaoRoute: AuthenticatedExportacaoRoute,
   AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,
+  AuthenticatedFuncionariosRoute: AuthenticatedFuncionariosRoute,
   AuthenticatedHistoricoVeiculoRoute: AuthenticatedHistoricoVeiculoRoute,
   AuthenticatedIntegracoesRoute: AuthenticatedIntegracoesRoute,
   AuthenticatedInteligenciaRoute: AuthenticatedInteligenciaRoute,

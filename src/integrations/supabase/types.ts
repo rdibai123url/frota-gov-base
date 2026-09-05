@@ -1705,6 +1705,105 @@ export type Database = {
           },
         ]
       }
+      contract_amendment_items: {
+        Row: {
+          amendment_id: string
+          contract_id: string
+          contract_item_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          fuel_type_id: string | null
+          id: string
+          material_kind: string
+          measure_unit: string
+          new_quantity: number | null
+          notes: string | null
+          operation: string
+          organization_id: string
+          previous_quantity: number | null
+          quantity: number
+          total_value: number
+          unit_price: number
+        }
+        Insert: {
+          amendment_id: string
+          contract_id: string
+          contract_item_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          fuel_type_id?: string | null
+          id?: string
+          material_kind?: string
+          measure_unit?: string
+          new_quantity?: number | null
+          notes?: string | null
+          operation: string
+          organization_id: string
+          previous_quantity?: number | null
+          quantity?: number
+          total_value?: number
+          unit_price?: number
+        }
+        Update: {
+          amendment_id?: string
+          contract_id?: string
+          contract_item_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          fuel_type_id?: string | null
+          id?: string
+          material_kind?: string
+          measure_unit?: string
+          new_quantity?: number | null
+          notes?: string | null
+          operation?: string
+          organization_id?: string
+          previous_quantity?: number | null
+          quantity?: number
+          total_value?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_amendment_items_amendment_id_fkey"
+            columns: ["amendment_id"]
+            isOneToOne: false
+            referencedRelation: "contract_amendments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_amendment_items_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_amendment_items_contract_item_id_fkey"
+            columns: ["contract_item_id"]
+            isOneToOne: false
+            referencedRelation: "contract_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_amendment_items_fuel_type_id_fkey"
+            columns: ["fuel_type_id"]
+            isOneToOne: false
+            referencedRelation: "fuel_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_amendment_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contract_amendments: {
         Row: {
           attachment_path: string | null
@@ -2034,9 +2133,12 @@ export type Database = {
           created_by: string | null
           current_period_id: string | null
           current_value: number
+          entity_id: string | null
+          fiscal_employee_id: string | null
           id: string
           import_batch_id: string | null
           initial_value: number
+          manager_employee_id: string | null
           modality: Database["public"]["Enums"]["contract_modality"]
           notes: string | null
           number: string
@@ -2045,8 +2147,10 @@ export type Database = {
           organization_id: string
           original_valid_from: string | null
           original_valid_to: string | null
+          procedure_number: string | null
           process_number: string | null
           signed_at: string | null
+          srp: boolean
           status: Database["public"]["Enums"]["contract_status"]
           supplier_id: string | null
           updated_at: string
@@ -2064,9 +2168,12 @@ export type Database = {
           created_by?: string | null
           current_period_id?: string | null
           current_value?: number
+          entity_id?: string | null
+          fiscal_employee_id?: string | null
           id?: string
           import_batch_id?: string | null
           initial_value?: number
+          manager_employee_id?: string | null
           modality?: Database["public"]["Enums"]["contract_modality"]
           notes?: string | null
           number: string
@@ -2075,8 +2182,10 @@ export type Database = {
           organization_id: string
           original_valid_from?: string | null
           original_valid_to?: string | null
+          procedure_number?: string | null
           process_number?: string | null
           signed_at?: string | null
+          srp?: boolean
           status?: Database["public"]["Enums"]["contract_status"]
           supplier_id?: string | null
           updated_at?: string
@@ -2094,9 +2203,12 @@ export type Database = {
           created_by?: string | null
           current_period_id?: string | null
           current_value?: number
+          entity_id?: string | null
+          fiscal_employee_id?: string | null
           id?: string
           import_batch_id?: string | null
           initial_value?: number
+          manager_employee_id?: string | null
           modality?: Database["public"]["Enums"]["contract_modality"]
           notes?: string | null
           number?: string
@@ -2105,8 +2217,10 @@ export type Database = {
           organization_id?: string
           original_valid_from?: string | null
           original_valid_to?: string | null
+          procedure_number?: string | null
           process_number?: string | null
           signed_at?: string | null
+          srp?: boolean
           status?: Database["public"]["Enums"]["contract_status"]
           supplier_id?: string | null
           updated_at?: string
@@ -2121,6 +2235,27 @@ export type Database = {
             columns: ["current_period_id"]
             isOneToOne: false
             referencedRelation: "contract_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "external_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_fiscal_employee_id_fkey"
+            columns: ["fiscal_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_manager_employee_id_fkey"
+            columns: ["manager_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
           {
@@ -2806,6 +2941,98 @@ export type Database = {
           },
         ]
       }
+      employees: {
+        Row: {
+          active: boolean
+          cpf: string | null
+          created_at: string
+          created_by: string | null
+          driver_id: string | null
+          email: string | null
+          full_name: string
+          functions: string[]
+          id: string
+          job_title: string | null
+          notes: string | null
+          organization_id: string
+          phone: string | null
+          registration: string | null
+          unit_id: string | null
+          updated_at: string
+          updated_by: string | null
+          user_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          cpf?: string | null
+          created_at?: string
+          created_by?: string | null
+          driver_id?: string | null
+          email?: string | null
+          full_name: string
+          functions?: string[]
+          id?: string
+          job_title?: string | null
+          notes?: string | null
+          organization_id: string
+          phone?: string | null
+          registration?: string | null
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          cpf?: string | null
+          created_at?: string
+          created_by?: string | null
+          driver_id?: string | null
+          email?: string | null
+          full_name?: string
+          functions?: string[]
+          id?: string
+          job_title?: string | null
+          notes?: string | null
+          organization_id?: string
+          phone?: string | null
+          registration?: string | null
+          unit_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employees_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       equipment_types: {
         Row: {
           active: boolean
@@ -2857,9 +3084,12 @@ export type Database = {
         Row: {
           active: boolean
           address: string | null
+          categories: string[]
           city: string | null
+          contact_name: string | null
           created_at: string
           created_by: string | null
+          district: string | null
           document: string | null
           email: string | null
           geocode_precision: string | null
@@ -2877,6 +3107,7 @@ export type Database = {
           organization_id: string
           phone: string | null
           state: string | null
+          trade_name: string | null
           updated_at: string
           updated_by: string | null
           zip_code: string | null
@@ -2884,9 +3115,12 @@ export type Database = {
         Insert: {
           active?: boolean
           address?: string | null
+          categories?: string[]
           city?: string | null
+          contact_name?: string | null
           created_at?: string
           created_by?: string | null
+          district?: string | null
           document?: string | null
           email?: string | null
           geocode_precision?: string | null
@@ -2904,6 +3138,7 @@ export type Database = {
           organization_id: string
           phone?: string | null
           state?: string | null
+          trade_name?: string | null
           updated_at?: string
           updated_by?: string | null
           zip_code?: string | null
@@ -2911,9 +3146,12 @@ export type Database = {
         Update: {
           active?: boolean
           address?: string | null
+          categories?: string[]
           city?: string | null
+          contact_name?: string | null
           created_at?: string
           created_by?: string | null
+          district?: string | null
           document?: string | null
           email?: string | null
           geocode_precision?: string | null
@@ -2931,6 +3169,7 @@ export type Database = {
           organization_id?: string
           phone?: string | null
           state?: string | null
+          trade_name?: string | null
           updated_at?: string
           updated_by?: string | null
           zip_code?: string | null
@@ -10662,6 +10901,7 @@ export type Database = {
         | "adesao_ata"
         | "contratacao_direta"
         | "outro"
+        | "credenciamento"
       contract_status:
         | "rascunho"
         | "vigente"
@@ -11072,6 +11312,7 @@ export const Constants = {
         "adesao_ata",
         "contratacao_direta",
         "outro",
+        "credenciamento",
       ],
       contract_status: [
         "rascunho",
