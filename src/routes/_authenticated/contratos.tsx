@@ -1367,6 +1367,141 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
             </div>
           )}
 
+          {changesItems && (
+            <div className="space-y-3 rounded-md border bg-muted/30 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <Label>Planilha de itens do aditivo</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Acrescente ou suprima quantidade de itens já contratados, ou inclua itens novos. Fora do aditivo, a
+                    planilha do contrato assinado fica bloqueada.
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={contractItems.length === 0}
+                    onClick={() => addRow(true)}
+                  >
+                    Item existente
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" onClick={() => addRow(false)}>
+                    Item novo
+                  </Button>
+                </div>
+              </div>
+
+              {rows.length === 0 ? (
+                <p className="text-xs text-muted-foreground">Nenhum item incluído nesta planilha.</p>
+              ) : (
+                <div className="space-y-3">
+                  {rows.map((r) => (
+                    <div key={r.key} className="grid gap-2 rounded-md border bg-card p-3 sm:grid-cols-6">
+                      <div className="sm:col-span-2">
+                        <Label className="text-xs">Item</Label>
+                        {r.contract_item_id ? (
+                          <Select
+                            value={r.contract_item_id}
+                            onValueChange={(v) => {
+                              const it = contractItems.find((i) => i.id === v);
+                              updateRow(r.key, {
+                                contract_item_id: v,
+                                measure_unit: it?.measure_unit ?? r.measure_unit,
+                                unit_price: String(it?.unit_price ?? r.unit_price),
+                              });
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {contractItems.map((i) => (
+                                <SelectItem key={i.id} value={i.id}>
+                                  {i.item_number ? `${i.item_number} — ` : ""}
+                                  {i.description}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input
+                            value={r.description}
+                            placeholder="Descrição do item novo"
+                            onChange={(e) => updateRow(r.key, { description: e.target.value })}
+                          />
+                        )}
+                      </div>
+                      <div>
+                        <Label className="text-xs">Operação</Label>
+                        <Select
+                          value={r.operation}
+                          onValueChange={(v) => updateRow(r.key, { operation: v as AmendmentItemRow["operation"] })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="acrescimo">Acréscimo</SelectItem>
+                            <SelectItem value="supressao" disabled={!r.contract_item_id}>
+                              Supressão
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Unidade</Label>
+                        <Select
+                          value={r.measure_unit}
+                          onValueChange={(v) => updateRow(r.key, { measure_unit: v })}
+                          disabled={!!r.contract_item_id}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {MEASURE_UNITS.map((u) => (
+                              <SelectItem key={u} value={u}>
+                                {u}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Quantidade</Label>
+                        <LitersInput value={r.quantity} onValueChange={(v) => updateRow(r.key, { quantity: v })} />
+                      </div>
+                      <div className="flex items-end gap-2">
+                        <div className="flex-1">
+                          <Label className="text-xs">Valor unitário</Label>
+                          <MoneyInput
+                            value={r.unit_price}
+                            onValueChange={(v) => updateRow(r.key, { unit_price: v })}
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Remover item do aditivo"
+                          onClick={() => setRows((prev) => prev.filter((x) => x.key !== r.key))}
+                        >
+                          <Ban className="size-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  <p className="text-xs text-muted-foreground">
+                    Impacto da planilha: <strong>{brl(rowsDelta)}</strong>. Informe também o valor do aditivo acima para
+                    atualizar o valor global do contrato.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
           <div>
             <Label htmlFor="justification">Fundamento / justificativa *</Label>
             <Textarea id="justification" name="justification" rows={3} required />
