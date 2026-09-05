@@ -397,6 +397,20 @@ function Manutencoes() {
       toast.error("Selecione o veículo.");
       return;
     }
+    if (recOrigin === "contrato") {
+      if (recContract === NONE || recItem === NONE) {
+        toast.error("Selecione o contrato e o item de mão de obra/serviço.");
+        return;
+      }
+      if (laborQty <= 0) {
+        toast.error("Informe a quantidade de horas/serviços executados.");
+        return;
+      }
+      if (selectedItem && laborQty > contractItemBalance(selectedItem) + Number(editingRec?.labor_quantity ?? 0)) {
+        toast.error("Quantidade acima do saldo disponível no item do contrato.");
+        return;
+      }
+    }
     const d = parsed.data;
     const req = recRequest === NONE ? null : requests.find((r) => r.id === recRequest) ?? null;
     if (req && req.vehicle_id !== recVehicle) {
@@ -426,15 +440,20 @@ function Manutencoes() {
       services: d.services,
       odometer_km: numOrNull(d.odometer_km ?? null),
       hour_meter: numOrNull(d.hour_meter ?? null),
-      labor_value: numOrNull(d.labor_value ?? null) ?? 0,
+      labor_value: recOrigin === "contrato" ? laborTotal : numOrNull(d.labor_value ?? null) ?? 0,
+      contract_id: recOrigin === "contrato" && recContract !== NONE ? recContract : null,
+      contract_item_id: recOrigin === "contrato" && recItem !== NONE ? recItem : null,
+      labor_quantity: recOrigin === "contrato" ? laborQty : null,
+      labor_unit_price: recOrigin === "contrato" ? laborUnitPrice : null,
       other_value: numOrNull(d.other_value ?? null) ?? 0,
       invoice_number: d.invoice_number || null,
       warranty_days: d.warranty_days ? Number(d.warranty_days) : null,
       notes: d.notes || null,
+      /* Metadados financeiros derivados: mantidos para relatórios e integrações, sem digitação na tela operacional. */
       cost_center_id: recCenter === NONE ? null : recCenter,
       commitment_id: recCommitment === NONE ? null : recCommitment,
       quota_id: recQuota === NONE ? null : recQuota,
-      expense_origin: (recCommitment !== NONE ? "contrato" : "compra_direta") as "contrato" | "compra_direta",
+      expense_origin: recOrigin,
       ...(recAttachment ? { attachment_path: recAttachment } : {}),
     };
     const { error } = editingRec
@@ -447,7 +466,7 @@ function Manutencoes() {
     }
     toast.success(editingRec ? "Manutenção atualizada." : "Manutenção registrada.");
     setRecFile(null);
-    invalidate(["maintenance-records", "maintenance-requests", "vehicles"]);
+    invalidate(["maintenance-records", "maintenance-requests", "vehicles", "contracts", "contract-items"]);
     setRecOpen(false);
   }
 
@@ -1285,11 +1304,17 @@ function Manutencoes() {
 
               <div className="sm:col-span-3">
                 <Label htmlFor="services">Serviços executados *</Label>
-                <Textarea id="services" name="services" rows={3} defaultValue={editingRec?.services ?? ""} required />
+                <Textarea
+                  id="services"
+                  name="services"
+                  rows={3}
+                  defaultValue={editingRec?.services ?? selectedRequest?.description ?? ""}
+                  required
+                />
               </div>
               <div className="sm:col-span-3">
                 <Label htmlFor="notes">Observações</Label>
-                <Textarea id="notes" name="notes" rows={2} defaultValue={editingRec?.notes ?? ""} />
+                <Textarea id="notes" name="notes" rows={2} defaultValue={editingRec?.notes ?? selectedRequest?.notes ?? ""} />
               </div>
               <div className="sm:col-span-3">
                 <Label htmlFor="rec-file">Nota fiscal ou documento (opcional)</Label>
@@ -1312,8 +1337,9 @@ function Manutencoes() {
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              As peças são lançadas após salvar, pelo botão de peças na lista. O valor de peças é somado automaticamente ao
-              total. Ao concluir, o saldo do empenho/cota informado é consumido.
+              As peças são lançadas após salvar, pelo botão de peças na lista, e o valor é somado automaticamente ao total.
+              Quando a execução é por contrato, o preço vem do item contratual e o consumo do saldo é registrado de forma
+              auditável; centro de custo, empenho e cota são derivados da origem e não precisam ser digitados aqui.
             </p>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setRecOpen(false)}>
