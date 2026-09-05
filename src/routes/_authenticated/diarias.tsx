@@ -39,6 +39,7 @@ import {
   useVehicles,
 } from "@/lib/frotagov";
 import { useCostCenters, useCommitments } from "@/lib/frotagov";
+import { useEmployees, useLegalProvisions } from "@/lib/pessoas";
 import { formatCPF, formatMoney, formatNumberBR, onlyDigits, parseBRNumber, isValidCPF } from "@/lib/format";
 import {
   DIARY_PROOF_STATUS,
@@ -92,12 +93,16 @@ function Diarias() {
   const { data: org } = useOrganization();
   const { data: brasao } = useBrasaoUrl(org?.logo_url);
   const perms = usePerms();
+  const { data: employees = [] } = useEmployees();
+  const { data: provisions = [] } = useLegalProvisions();
+  const activeEmployees = employees.filter((e) => e.active);
   const invalidate = useInvalidate();
 
   const [q, setQ] = useState("");
   const [fStatus, setFStatus] = useState(ALL);
   const [fUnit, setFUnit] = useState(ALL);
   const [openNew, setOpenNew] = useState(false);
+  const [openProvisions, setOpenProvisions] = useState(false);
   const [detail, setDetail] = useState<DiaryRow | null>(null);
   const [proofOf, setProofOf] = useState<DiaryRow | null>(null);
   const [reasonOf, setReasonOf] = useState<{ row: DiaryRow; kind: "rejeitada" | "cancelada" } | null>(null);
@@ -209,6 +214,10 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
     const { error } = await supabase.from("diaries").insert({
       organization_id: perms.orgId!,
       unit_id: get("unit_id") === NONE ? null : get("unit_id") || null,
+      requester_employee_id: get("requester_employee_id") === NONE ? null : get("requester_employee_id") || null,
+      beneficiary_employee_id: get("beneficiary_employee_id") === NONE ? null : get("beneficiary_employee_id") || null,
+      approver_employee_id: get("approver_employee_id") === NONE ? null : get("approver_employee_id") || null,
+      legal_provision_id: get("legal_provision_id") === NONE ? null : get("legal_provision_id") || null,
       requester_name: get("requester_name") || perms.userName,
       requester_id: perms.userId,
       beneficiary_driver_id: driverId === NONE ? null : driverId || null,
@@ -253,9 +262,14 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
         description="Requisição de Diária (RD), autorização e Comprovação de Diária (CD) com prestação de contas."
         action={
           perms.canWrite ? (
-            <Button onClick={() => setOpenNew(true)}>
-              <Plus className="mr-2 h-4 w-4" /> Nova requisição de diária
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" onClick={() => setOpenProvisions(true)}>
+                Dispositivos legais
+              </Button>
+              <Button onClick={() => setOpenNew(true)}>
+                <Plus className="mr-2 h-4 w-4" /> Nova requisição de diária
+              </Button>
+            </div>
           ) : null
         }
       />
@@ -293,6 +307,8 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
           </Select>
         </div>
       </div>
+
+      {openProvisions ? <LegalProvisionsDialog onClose={() => setOpenProvisions(false)} /> : null}
 
       <div className="gov-card overflow-x-auto">
         <Table>
@@ -377,8 +393,38 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
               </Select>
             </div>
             <div>
-              <Label>Solicitante</Label>
+              <Label>Solicitante (cadastro de pessoas)</Label>
+              <Select name="requester_employee_id" defaultValue={NONE}>
+                <SelectTrigger><SelectValue placeholder="Não vincular" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>Não vincular</SelectItem>
+                  {activeEmployees.map((e) => <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Nome do solicitante</Label>
               <Input name="requester_name" defaultValue={perms.userName} />
+            </div>
+            <div>
+              <Label>Beneficiário (cadastro de pessoas)</Label>
+              <Select name="beneficiary_employee_id" defaultValue={NONE}>
+                <SelectTrigger><SelectValue placeholder="Não vincular" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>Não vincular</SelectItem>
+                  {activeEmployees.map((e) => <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Autoridade concedente (cadastro de pessoas)</Label>
+              <Select name="approver_employee_id" defaultValue={NONE}>
+                <SelectTrigger><SelectValue placeholder="Não vincular" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>Não vincular</SelectItem>
+                  {activeEmployees.map((e) => <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Beneficiário — condutor cadastrado</Label>
@@ -437,7 +483,24 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
             <div className="sm:col-span-2"><Label>Finalidade / motivo *</Label><Textarea name="purpose" required rows={2} /></div>
             <div><Label>Evento / atividade</Label><Input name="event_name" /></div>
             <div><Label>Local do evento</Label><Input name="event_location" /></div>
-            <div><Label>Dispositivo legal / norma</Label><Input name="legal_basis" placeholder="Ex.: Decreto Municipal nº 000/0000" /></div>
+            <div>
+              <Label>Dispositivo legal / norma (cadastro)</Label>
+              <Select name="legal_provision_id" defaultValue={NONE}>
+                <SelectTrigger><SelectValue placeholder="Selecione a norma cadastrada" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>Não vincular</SelectItem>
+                  {provisions
+                    .filter((p) => p.active)
+                    .map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.code ? `${p.code} — ` : ""}
+                        {p.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div><Label>Dispositivo legal (texto livre)</Label><Input name="legal_basis" placeholder="Ex.: Decreto Municipal nº 000/0000" /></div>
             <div><Label>Prazo / período de aplicação</Label><Input name="application_period" /></div>
             <div>
               <Label>Centro de custo</Label>
@@ -750,6 +813,100 @@ function ProofDialog({ diary, onClose }: { diary: DiaryRow; onClose: () => void 
             Encerrar comprovação
           </Button>
         </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/**
+ * Cadastro simples dos dispositivos legais (normas) que fundamentam as diárias.
+ * O órgão mantém a lista e as requisições apenas referenciam a norma.
+ */
+function LegalProvisionsDialog({ onClose }: { onClose: () => void }) {
+  const perms = usePerms();
+  const invalidate = useInvalidate();
+  const { data: provisions = [] } = useLegalProvisions();
+  const [code, setCode] = useState("");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  async function save() {
+    if (name.trim().length < 3) {
+      toast.error("Informe o nome da norma.");
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase.from("legal_provisions").insert({
+      organization_id: perms.orgId!,
+      code: code.trim() || null,
+      name: name.trim(),
+      description: description.trim() || null,
+      created_by: perms.userId,
+    });
+    setSaving(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setCode("");
+    setName("");
+    setDescription("");
+    toast.success("Dispositivo legal cadastrado.");
+    invalidate(["legal-provisions"]);
+  }
+
+  return (
+    <Dialog open onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Dispositivos legais das diárias</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-3 sm:grid-cols-[140px_1fr]">
+          <div>
+            <Label>Código</Label>
+            <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Ex.: DEC 123/2025" />
+          </div>
+          <div>
+            <Label>Norma *</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Decreto Municipal nº 123/2025" />
+          </div>
+          <div className="sm:col-span-2">
+            <Label>Descrição</Label>
+            <Input value={description} onChange={(e) => setDescription(e.target.value)} />
+          </div>
+        </div>
+        <div>
+          <Button onClick={save} disabled={saving || !perms.canWrite}>
+            {saving ? "Salvando…" : "Cadastrar norma"}
+          </Button>
+        </div>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Código</TableHead>
+                <TableHead>Norma</TableHead>
+                <TableHead>Situação</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {provisions.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={3}>Nenhuma norma cadastrada.</TableCell>
+                </TableRow>
+              ) : (
+                provisions.map((p) => (
+                  <TableRow key={p.id}>
+                    <TableCell>{p.code ?? "—"}</TableCell>
+                    <TableCell>{p.name}</TableCell>
+                    <TableCell>{p.active ? "Ativa" : "Inativa"}</TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </DialogContent>
     </Dialog>
   );

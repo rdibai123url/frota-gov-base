@@ -370,7 +370,14 @@ function OrdensServico() {
                 </Select>
               </div>
               <div>
-                <Label>Contrato</Label>
+                <Label>
+                  Contrato{" "}
+                  {origin !== "contrato" ? (
+                    <span className="text-xs font-normal text-muted-foreground">
+                      (opcional — compra direta/pronto pagamento pode usar oficina não contratada)
+                    </span>
+                  ) : null}
+                </Label>
                 <Select
                   value={contract}
                   onValueChange={(v) => {
@@ -404,42 +411,6 @@ function OrdensServico() {
                       .map((i) => (
                         <SelectItem key={i.id} value={i.id}>
                           {i.description.slice(0, 40)}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Empenho</Label>
-                <Select value={commitment} onValueChange={setCommitment}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NONE}>Sem empenho</SelectItem>
-                    {commitments
-                      .filter((c) => c.status === "ativo")
-                      .map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {c.number} — saldo {brl(Number(c.available_value ?? 0))}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Cota</Label>
-                <Select value={quota} onValueChange={setQuota}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NONE}>Sem cota</SelectItem>
-                    {quotas
-                      .filter((q) => q.active && q.quota_type === "financeira")
-                      .map((q) => (
-                        <SelectItem key={q.id} value={q.id}>
-                          {q.name} — saldo {brl(Number(q.balance_amount ?? 0))}
                         </SelectItem>
                       ))}
                   </SelectContent>

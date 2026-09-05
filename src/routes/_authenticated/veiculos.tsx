@@ -38,6 +38,9 @@ import {
   usePerms,
   useUnits,
   useVehicles,
+  useContracts,
+  useExternalEntities,
+  dateBR,
   WRITE_ROLES,
   type Vehicle,
   type VehicleStatus,
@@ -70,6 +73,9 @@ const schema = z.object({
   asset_code: z.string().trim().max(40).optional(),
   renavam: z.string().trim().max(20).optional(),
   chassis: z.string().trim().max(30).optional(),
+  invoice_number: z.string().trim().max(40).optional(),
+  acquisition_date: z.string().trim().optional(),
+  acquisition_value: z.string().trim().optional(),
   brand: z.string().trim().max(60).optional(),
   model: z.string().trim().max(80).optional(),
   year_manufacture: z.string().trim().optional(),
@@ -93,6 +99,8 @@ const statusVariant = (s: VehicleStatus) =>
 function Veiculos() {
   const { data: vehicles = [], isLoading } = useVehicles();
   const { data: units = [] } = useUnits();
+  const { data: contracts = [] } = useContracts();
+  const { data: entities = [] } = useExternalEntities();
   const { data: me } = useProfile();
   const perms = usePerms();
   const invalidate = useInvalidate();
@@ -110,7 +118,23 @@ function Veiculos() {
   const [vehicleType, setVehicleType] = useState<string>(NONE);
   const [fuelType, setFuelType] = useState<string>(NONE);
   const [serverVehicle, setServerVehicle] = useState(false);
+  // Bloco 4: forma de incorporação e estado do bem.
+  const [acquisitionKind, setAcquisitionKind] = useState<"aquisicao" | "locado">("aquisicao");
+  const [conditionState, setConditionState] = useState<"novo" | "usado">("novo");
+  const [acquisitionEntity, setAcquisitionEntity] = useState<string>(NONE);
+  const [leaseContract, setLeaseContract] = useState<string>(NONE);
   const [saving, setSaving] = useState(false);
+
+  // Dados do contrato de locação exibidos automaticamente (sem redigitação).
+  const leaseInfo = useMemo(() => {
+    const c = contracts.find((x) => x.id === leaseContract);
+    if (!c) return null;
+    return {
+      company: c.entity?.trade_name || c.entity?.name || c.supplier?.legal_name || "—",
+      from: c.valid_from,
+      to: c.valid_to,
+    };
+  }, [contracts, leaseContract]);
 
   const canWrite = Boolean(perms.orgId) && (me?.roles ?? []).some((r) => WRITE_ROLES.includes(r));
   const unitName = (id: string | null) => units.find((u) => u.id === id)?.name ?? "—";
@@ -141,6 +165,10 @@ function Veiculos() {
     setVehicleType(NONE);
     setFuelType(NONE);
     setServerVehicle(false);
+    setAcquisitionKind("aquisicao");
+    setConditionState("novo");
+    setAcquisitionEntity(NONE);
+    setLeaseContract(NONE);
     setOpen(true);
   }
 
@@ -151,6 +179,10 @@ function Veiculos() {
     setVehicleType(v.vehicle_type ?? NONE);
     setFuelType(v.fuel_type ?? NONE);
     setServerVehicle(Boolean(v.is_private_server_vehicle));
+    setAcquisitionKind((v.acquisition_kind as "aquisicao" | "locado") ?? "aquisicao");
+    setConditionState((v.condition_state as "novo" | "usado") ?? "novo");
+    setAcquisitionEntity(v.acquisition_entity_id ?? NONE);
+    setLeaseContract(v.lease_contract_id ?? NONE);
     setOpen(true);
   }
 
@@ -171,6 +203,13 @@ function Veiculos() {
       asset_code: d.asset_code || null,
       renavam: d.renavam || null,
       chassis: d.chassis || null,
+      acquisition_kind: acquisitionKind,
+      condition_state: conditionState,
+      invoice_number: acquisitionKind === "aquisicao" ? d.invoice_number || null : null,
+      acquisition_date: acquisitionKind === "aquisicao" ? d.acquisition_date || null : null,
+      acquisition_value: acquisitionKind === "aquisicao" ? num(d.acquisition_value) : null,
+      acquisition_entity_id: acquisitionKind === "aquisicao" && acquisitionEntity !== NONE ? acquisitionEntity : null,
+      lease_contract_id: acquisitionKind === "locado" && leaseContract !== NONE ? leaseContract : null,
       brand: d.brand || null,
       model: d.model || null,
       year_manufacture: num(d.year_manufacture),
@@ -425,9 +464,98 @@ function Veiculos() {
                 <Input id="renavam" name="renavam" defaultValue={editing?.renavam ?? ""} />
               </div>
               <div className="space-y-1.5 sm:col-span-2">
-                <Label htmlFor="chassis">Chassi</Label>
+                <Label htmlFor="chassis">Chassi / VIN</Label>
                 <Input id="chassis" name="chassis" defaultValue={editing?.chassis ?? ""} />
               </div>
+              <div className="space-y-1.5">
+                <Label>Forma de incorporação</Label>
+                <Select value={acquisitionKind} onValueChange={(v) => setAcquisitionKind(v as "aquisicao" | "locado")}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="aquisicao">Aquisição</SelectItem>
+                    <SelectItem value="locado">Locado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Estado do veículo</Label>
+                <Select value={conditionState} onValueChange={(v) => setConditionState(v as "novo" | "usado")}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="novo">Novo</SelectItem>
+                    <SelectItem value="usado">Usado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {acquisitionKind === "aquisicao" ? (
+                <>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="invoice_number">N° da nota fiscal</Label>
+                    <Input id="invoice_number" name="invoice_number" defaultValue={editing?.invoice_number ?? ""} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="acquisition_date">Data da aquisição</Label>
+                    <Input
+                      id="acquisition_date"
+                      name="acquisition_date"
+                      type="date"
+                      defaultValue={editing?.acquisition_date ?? ""}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="acquisition_value">Valor de aquisição (R$)</Label>
+                    <Input
+                      id="acquisition_value"
+                      name="acquisition_value"
+                      inputMode="decimal"
+                      defaultValue={editing?.acquisition_value ?? ""}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Fornecedor da aquisição</Label>
+                    <Select value={acquisitionEntity} onValueChange={setAcquisitionEntity}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Empresa do cadastro mestre" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={NONE}>Não informar</SelectItem>
+                        {entities.map((e) => (
+                          <SelectItem key={e.id} value={e.id}>
+                            {e.trade_name || e.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label>Contrato de locação</Label>
+                  <Select value={leaseContract} onValueChange={setLeaseContract}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o contrato já cadastrado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={NONE}>Não informar</SelectItem>
+                      {contracts.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.number} — {c.object.slice(0, 40)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {leaseInfo ? (
+                    <p className="text-xs text-muted-foreground">
+                      Empresa contratada: {leaseInfo.company} · Vigência {dateBR(leaseInfo.from)} a{" "}
+                      {dateBR(leaseInfo.to)}. O valor da locação vem do contrato e não é digitado aqui.
+                    </p>
+                  ) : null}
+                </div>
+              )}
               <div className="space-y-1.5">
                 <Label htmlFor="brand">Marca</Label>
                 <Input id="brand" name="brand" defaultValue={editing?.brand ?? ""} />

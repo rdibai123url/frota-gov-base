@@ -86,3 +86,17 @@ export function useEmployees() {
 export function employeesByFunction(rows: EmployeeRow[] | Employee[], fn: string) {
   return (rows as Employee[]).filter((e) => e.active && (e.functions ?? []).includes(fn));
 }
+
+export type LegalProvision = Database["public"]["Tables"]["legal_provisions"]["Row"];
+
+/** Dispositivos legais (normas) cadastrados pelo órgão, usados nas diárias. */
+export function useLegalProvisions() {
+  return useQuery({
+    queryKey: ["legal-provisions"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("legal_provisions").select("*").order("name");
+      if (error) throw error;
+      return (data ?? []) as LegalProvision[];
+    },
+  });
+}

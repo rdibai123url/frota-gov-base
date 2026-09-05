@@ -4,6 +4,7 @@ import { ArrowLeftRight, Boxes, ClipboardCheck, Plus, Warehouse as WarehouseIcon
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/app-shell";
+import { ReceiveOfpButton } from "@/components/ofp-panel";
 import { ListPagination, usePaged } from "@/components/list-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -140,10 +141,11 @@ function Almoxarifado() {
     <div>
       <PageHeader
         title="Almoxarifado"
-        description="Depósitos, saldos por item e lote, entradas, saídas, transferências, reservas e inventário físico. Movimentações não são excluídas — correções são feitas por estorno ou ajuste auditado."
+        description="Depósitos, saldos por item e lote, entradas, saídas, transferências, reservas e inventário físico. A entrada por compra nasce do recebimento da OFP; entradas excepcionais (saldo inicial, devolução, doação, ajuste e correção) exigem justificativa e ficam registradas na auditoria."
         action={
           canManageFleet ? (
             <div className="flex flex-wrap gap-2">
+              <ReceiveOfpButton />
               <Button variant="outline" onClick={() => setWhOpen(true)}>
                 <WarehouseIcon className="mr-2 h-4 w-4" /> Novo depósito
               </Button>
@@ -703,6 +705,11 @@ function MovementDialog({
   );
 }
 
+/**
+ * Transferência entre depósitos com um ou vários itens.
+ * Cada linha é enviada ao servidor pela rotina de transferência já existente,
+ * que valida saldo e registra a movimentação auditada.
+ */
 function TransferDialog({
   open,
   onClose,
@@ -715,87 +722,138 @@ function TransferDialog({
   parts: { id: string; label: string }[];
 }) {
   const invalidate = useInvalidate();
-  const [f, setF] = useState({ from: "", to: "", part: "", quantity: "", lot: "", reason: "" });
+  const [f, setF] = useState({ from: "", to: "", reason: "" });
+  const [rows, setRows] = useState<{ key: string; part: string; quantity: string; lot: string }[]>([
+    { key: crypto.randomUUID(), part: "", quantity: "", lot: "" },
+  ]);
+  const [saving, setSaving] = useState(false);
+
+  function update(key: string, patch: Partial<{ part: string; quantity: string; lot: string }>) {
+    setRows((cur) => cur.map((r) => (r.key === key ? { ...r, ...patch } : r)));
+  }
 
   async function save() {
-    const q = parseBRNumber(f.quantity);
-    if (!f.from || !f.to || !f.part || !q) {
-      toast.error("Informe origem, destino, item e quantidade");
+    const valid = rows.filter((r) => r.part && (parseBRNumber(r.quantity) ?? 0) > 0);
+    if (!f.from || !f.to || valid.length === 0) {
+      toast.error("Informe origem, destino e ao menos um item com quantidade");
       return;
     }
-    const { error } = await supabase.rpc(
-      "stock_transfer",
-      rpcArgs({ _from: f.from, _to: f.to, _part: f.part, _quantity: q, _lot: f.lot.trim(), _reason: f.reason.trim() || undefined }),
-    );
-    if (error) {
-      toast.error(dbMessage(error));
+    if (f.from === f.to) {
+      toast.error("Origem e destino devem ser diferentes");
       return;
     }
-    toast.success("Transferência realizada");
+    setSaving(true);
+    for (const r of valid) {
+      const { error } = await supabase.rpc(
+        "stock_transfer",
+        rpcArgs({
+          _from: f.from,
+          _to: f.to,
+          _part: r.part,
+          _quantity: parseBRNumber(r.quantity) ?? 0,
+          _lot: r.lot.trim(),
+          _reason: f.reason.trim() || undefined,
+        }),
+      );
+      if (error) {
+        setSaving(false);
+        toast.error(dbMessage(error));
+        invalidate(["stock-balances", "stock-movements"]);
+        return;
+      }
+    }
+    setSaving(false);
+    toast.success(`Transferência realizada (${valid.length} ${valid.length === 1 ? "item" : "itens"})`);
+    setRows([{ key: crypto.randomUUID(), part: "", quantity: "", lot: "" }]);
     onClose();
     invalidate(["stock-balances", "stock-movements"]);
   }
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Transferência entre depósitos</DialogTitle>
         </DialogHeader>
         <div className="grid gap-3">
-          <div>
-            <Label>Origem *</Label>
-            <Select value={f.from} onValueChange={(v) => setF({ ...f, from: v })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                {warehouses.map((w) => (
-                  <SelectItem key={w.id} value={w.id}>
-                    {w.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <Label>Unidade / depósito de origem *</Label>
+              <Select value={f.from} onValueChange={(v) => setF({ ...f, from: v })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {warehouses.map((w) => (
+                    <SelectItem key={w.id} value={w.id}>
+                      {w.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Unidade / depósito de destino *</Label>
+              <Select value={f.to} onValueChange={(v) => setF({ ...f, to: v })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {warehouses.map((w) => (
+                    <SelectItem key={w.id} value={w.id}>
+                      {w.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <div>
-            <Label>Destino *</Label>
-            <Select value={f.to} onValueChange={(v) => setF({ ...f, to: v })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                {warehouses.map((w) => (
-                  <SelectItem key={w.id} value={w.id}>
-                    {w.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+
+          <div className="space-y-2">
+            <Label>Itens *</Label>
+            {rows.map((r) => (
+              <div key={r.key} className="grid gap-2 sm:grid-cols-[1fr_120px_120px_40px]">
+                <Select value={r.part} onValueChange={(v) => update(r.key, { part: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Item" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {parts.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  placeholder="Quantidade"
+                  inputMode="decimal"
+                  value={r.quantity}
+                  onChange={(e) => update(r.key, { quantity: e.target.value })}
+                />
+                <Input placeholder="Lote" value={r.lot} onChange={(e) => update(r.key, { lot: e.target.value })} />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Remover item"
+                  disabled={rows.length === 1}
+                  onClick={() => setRows((cur) => cur.filter((x) => x.key !== r.key))}
+                >
+                  ×
+                </Button>
+              </div>
+            ))}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setRows((cur) => [...cur, { key: crypto.randomUUID(), part: "", quantity: "", lot: "" }])
+              }
+            >
+              Incluir item
+            </Button>
           </div>
-          <div>
-            <Label>Item *</Label>
-            <Select value={f.part} onValueChange={(v) => setF({ ...f, part: v })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                {parts.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label>Quantidade *</Label>
-            <Input value={f.quantity} onChange={(e) => setF({ ...f, quantity: e.target.value })} />
-          </div>
-          <div>
-            <Label>Lote</Label>
-            <Input value={f.lot} onChange={(e) => setF({ ...f, lot: e.target.value })} />
-          </div>
+
           <div>
             <Label>Motivo</Label>
             <Input value={f.reason} onChange={(e) => setF({ ...f, reason: e.target.value })} />
@@ -805,7 +863,9 @@ function TransferDialog({
           <Button variant="outline" onClick={onClose}>
             Cancelar
           </Button>
-          <Button onClick={save}>Transferir</Button>
+          <Button onClick={save} disabled={saving}>
+            {saving ? "Transferindo…" : "Transferir"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

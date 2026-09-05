@@ -2450,12 +2450,14 @@ export type Database = {
       diaries: {
         Row: {
           application_period: string | null
+          approver_employee_id: string | null
           attachment_paths: string[]
           authorized_at: string | null
           authorized_by: string | null
           authorized_by_name: string | null
           beneficiary_cpf: string | null
           beneficiary_driver_id: string | null
+          beneficiary_employee_id: string | null
           beneficiary_name: string
           beneficiary_role: string | null
           budget_note: string | null
@@ -2478,6 +2480,7 @@ export type Database = {
           import_batch_id: string | null
           legacy_source: string | null
           legal_basis: string | null
+          legal_provision_id: string | null
           notes: string | null
           organization_id: string
           origin_city: string | null
@@ -2487,6 +2490,7 @@ export type Database = {
           quantity: number
           reject_reason: string | null
           requested_at: string | null
+          requester_employee_id: string | null
           requester_id: string | null
           requester_name: string | null
           return_at: string | null
@@ -2501,12 +2505,14 @@ export type Database = {
         }
         Insert: {
           application_period?: string | null
+          approver_employee_id?: string | null
           attachment_paths?: string[]
           authorized_at?: string | null
           authorized_by?: string | null
           authorized_by_name?: string | null
           beneficiary_cpf?: string | null
           beneficiary_driver_id?: string | null
+          beneficiary_employee_id?: string | null
           beneficiary_name: string
           beneficiary_role?: string | null
           budget_note?: string | null
@@ -2529,6 +2535,7 @@ export type Database = {
           import_batch_id?: string | null
           legacy_source?: string | null
           legal_basis?: string | null
+          legal_provision_id?: string | null
           notes?: string | null
           organization_id: string
           origin_city?: string | null
@@ -2538,6 +2545,7 @@ export type Database = {
           quantity?: number
           reject_reason?: string | null
           requested_at?: string | null
+          requester_employee_id?: string | null
           requester_id?: string | null
           requester_name?: string | null
           return_at?: string | null
@@ -2552,12 +2560,14 @@ export type Database = {
         }
         Update: {
           application_period?: string | null
+          approver_employee_id?: string | null
           attachment_paths?: string[]
           authorized_at?: string | null
           authorized_by?: string | null
           authorized_by_name?: string | null
           beneficiary_cpf?: string | null
           beneficiary_driver_id?: string | null
+          beneficiary_employee_id?: string | null
           beneficiary_name?: string
           beneficiary_role?: string | null
           budget_note?: string | null
@@ -2580,6 +2590,7 @@ export type Database = {
           import_batch_id?: string | null
           legacy_source?: string | null
           legal_basis?: string | null
+          legal_provision_id?: string | null
           notes?: string | null
           organization_id?: string
           origin_city?: string | null
@@ -2589,6 +2600,7 @@ export type Database = {
           quantity?: number
           reject_reason?: string | null
           requested_at?: string | null
+          requester_employee_id?: string | null
           requester_id?: string | null
           requester_name?: string | null
           return_at?: string | null
@@ -2603,10 +2615,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "diaries_approver_employee_id_fkey"
+            columns: ["approver_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "diaries_beneficiary_driver_id_fkey"
             columns: ["beneficiary_driver_id"]
             isOneToOne: false
             referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diaries_beneficiary_employee_id_fkey"
+            columns: ["beneficiary_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
           {
@@ -2624,10 +2650,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "diaries_legal_provision_id_fkey"
+            columns: ["legal_provision_id"]
+            isOneToOne: false
+            referencedRelation: "legal_provisions"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "diaries_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diaries_requester_employee_id_fkey"
+            columns: ["requester_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
           {
@@ -3203,6 +3243,7 @@ export type Database = {
           created_by: string | null
           driver_id: string | null
           expense_origin: Database["public"]["Enums"]["expense_origin"]
+          fill_tank: boolean
           fuel_type_id: string | null
           hour_meter: number | null
           id: string
@@ -3248,6 +3289,7 @@ export type Database = {
           created_by?: string | null
           driver_id?: string | null
           expense_origin?: Database["public"]["Enums"]["expense_origin"]
+          fill_tank?: boolean
           fuel_type_id?: string | null
           hour_meter?: number | null
           id?: string
@@ -3293,6 +3335,7 @@ export type Database = {
           created_by?: string | null
           driver_id?: string | null
           expense_origin?: Database["public"]["Enums"]["expense_origin"]
+          fill_tank?: boolean
           fuel_type_id?: string | null
           hour_meter?: number | null
           id?: string
@@ -3491,13 +3534,19 @@ export type Database = {
           acronym: string | null
           active: boolean
           category: string
+          contract_id: string | null
+          contract_item_id: string | null
+          contracted_quantity: number | null
           created_at: string
           created_by: string | null
+          custom_name: string | null
           id: string
           import_batch_id: string | null
           measure_unit: string
           name: string
           organization_id: string
+          total_value: number | null
+          unit_price: number | null
           updated_at: string
           updated_by: string | null
         }
@@ -3505,13 +3554,19 @@ export type Database = {
           acronym?: string | null
           active?: boolean
           category?: string
+          contract_id?: string | null
+          contract_item_id?: string | null
+          contracted_quantity?: number | null
           created_at?: string
           created_by?: string | null
+          custom_name?: string | null
           id?: string
           import_batch_id?: string | null
           measure_unit?: string
           name: string
           organization_id: string
+          total_value?: number | null
+          unit_price?: number | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -3519,17 +3574,37 @@ export type Database = {
           acronym?: string | null
           active?: boolean
           category?: string
+          contract_id?: string | null
+          contract_item_id?: string | null
+          contracted_quantity?: number | null
           created_at?: string
           created_by?: string | null
+          custom_name?: string | null
           id?: string
           import_batch_id?: string | null
           measure_unit?: string
           name?: string
           organization_id?: string
+          total_value?: number | null
+          unit_price?: number | null
           updated_at?: string
           updated_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fuel_types_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_types_contract_item_id_fkey"
+            columns: ["contract_item_id"]
+            isOneToOne: false
+            referencedRelation: "contract_items"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fuel_types_organization_id_fkey"
             columns: ["organization_id"]
@@ -3678,6 +3753,7 @@ export type Database = {
           legacy_source: string | null
           notes: string | null
           odometer_km: number | null
+          operator_employee_id: string | null
           operator_name: string | null
           organization_id: string
           quantity: number
@@ -3728,6 +3804,7 @@ export type Database = {
           legacy_source?: string | null
           notes?: string | null
           odometer_km?: number | null
+          operator_employee_id?: string | null
           operator_name?: string | null
           organization_id: string
           quantity: number
@@ -3778,6 +3855,7 @@ export type Database = {
           legacy_source?: string | null
           notes?: string | null
           odometer_km?: number | null
+          operator_employee_id?: string | null
           operator_name?: string | null
           organization_id?: string
           quantity?: number
@@ -3846,6 +3924,13 @@ export type Database = {
             columns: ["fuel_type_id"]
             isOneToOne: false
             referencedRelation: "fuel_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuelings_operator_employee_id_fkey"
+            columns: ["operator_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
           {
@@ -4871,6 +4956,53 @@ export type Database = {
             columns: ["unit_id"]
             isOneToOne: false
             referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legal_provisions: {
+        Row: {
+          active: boolean
+          code: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          active?: boolean
+          code?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          active?: boolean
+          code?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_provisions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -8237,7 +8369,9 @@ export type Database = {
       }
       supply_order_items: {
         Row: {
+          cancelled_quantity: number
           compatibility_warning: string | null
+          contract_item_id: string | null
           created_at: string
           created_by: string | null
           delivered_quantity: number
@@ -8257,7 +8391,9 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          cancelled_quantity?: number
           compatibility_warning?: string | null
+          contract_item_id?: string | null
           created_at?: string
           created_by?: string | null
           delivered_quantity?: number
@@ -8277,7 +8413,9 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          cancelled_quantity?: number
           compatibility_warning?: string | null
+          contract_item_id?: string | null
           created_at?: string
           created_by?: string | null
           delivered_quantity?: number
@@ -8297,6 +8435,13 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "supply_order_items_contract_item_id_fkey"
+            columns: ["contract_item_id"]
+            isOneToOne: false
+            referencedRelation: "contract_items"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "supply_order_items_organization_id_fkey"
             columns: ["organization_id"]
@@ -8320,6 +8465,98 @@ export type Database = {
           },
         ]
       }
+      supply_order_receipts: {
+        Row: {
+          attachment_path: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          invoice_date: string | null
+          invoice_number: string | null
+          invoice_value: number | null
+          notes: string | null
+          occurred_at: string
+          organization_id: string
+          quantity: number
+          supply_order_id: string
+          supply_order_item_id: string
+          total_value: number
+          unit_value: number
+          updated_at: string
+          updated_by: string | null
+          warehouse_id: string | null
+        }
+        Insert: {
+          attachment_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invoice_date?: string | null
+          invoice_number?: string | null
+          invoice_value?: number | null
+          notes?: string | null
+          occurred_at?: string
+          organization_id: string
+          quantity: number
+          supply_order_id: string
+          supply_order_item_id: string
+          total_value?: number
+          unit_value?: number
+          updated_at?: string
+          updated_by?: string | null
+          warehouse_id?: string | null
+        }
+        Update: {
+          attachment_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invoice_date?: string | null
+          invoice_number?: string | null
+          invoice_value?: number | null
+          notes?: string | null
+          occurred_at?: string
+          organization_id?: string
+          quantity?: number
+          supply_order_id?: string
+          supply_order_item_id?: string
+          total_value?: number
+          unit_value?: number
+          updated_at?: string
+          updated_by?: string | null
+          warehouse_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supply_order_receipts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_order_receipts_supply_order_id_fkey"
+            columns: ["supply_order_id"]
+            isOneToOne: false
+            referencedRelation: "supply_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_order_receipts_supply_order_item_id_fkey"
+            columns: ["supply_order_item_id"]
+            isOneToOne: false
+            referencedRelation: "supply_order_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_order_receipts_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       supply_orders: {
         Row: {
           accepted_at: string | null
@@ -8327,11 +8564,13 @@ export type Database = {
           attachment_path: string | null
           budget_reserved: boolean
           cancel_reason: string | null
+          cancelled_at: string | null
           code: string
           commitment_id: string | null
           consumed_value: number
           contract_id: string | null
           contract_item_id: string | null
+          contract_reserved: boolean
           cost_center_id: string | null
           created_at: string
           created_by: string | null
@@ -8357,6 +8596,7 @@ export type Database = {
           updated_at: string
           updated_by: string | null
           vehicle_id: string | null
+          warehouse_id: string | null
         }
         Insert: {
           accepted_at?: string | null
@@ -8364,11 +8604,13 @@ export type Database = {
           attachment_path?: string | null
           budget_reserved?: boolean
           cancel_reason?: string | null
+          cancelled_at?: string | null
           code: string
           commitment_id?: string | null
           consumed_value?: number
           contract_id?: string | null
           contract_item_id?: string | null
+          contract_reserved?: boolean
           cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -8394,6 +8636,7 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           vehicle_id?: string | null
+          warehouse_id?: string | null
         }
         Update: {
           accepted_at?: string | null
@@ -8401,11 +8644,13 @@ export type Database = {
           attachment_path?: string | null
           budget_reserved?: boolean
           cancel_reason?: string | null
+          cancelled_at?: string | null
           code?: string
           commitment_id?: string | null
           consumed_value?: number
           contract_id?: string | null
           contract_item_id?: string | null
+          contract_reserved?: boolean
           cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -8431,6 +8676,7 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           vehicle_id?: string | null
+          warehouse_id?: string | null
         }
         Relationships: [
           {
@@ -8508,6 +8754,13 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_orders_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
             referencedColumns: ["id"]
           },
         ]
@@ -9639,6 +9892,7 @@ export type Database = {
         Row: {
           actual_departure: string | null
           actual_return: string | null
+          authorizer_employee_id: string | null
           authorizer_id: string | null
           authorizer_name: string | null
           cancel_reason: string | null
@@ -9646,6 +9900,8 @@ export type Database = {
           created_at: string
           created_by: string | null
           destination: string | null
+          destination_city: string | null
+          destination_state: string | null
           driver_id: string | null
           end_km: number | null
           id: string
@@ -9655,10 +9911,13 @@ export type Database = {
           notes: string | null
           organization_id: string
           origin: string | null
+          origin_city: string | null
+          origin_state: string | null
           passengers: string[]
           planned_departure: string
           planned_return: string | null
           purpose: string | null
+          requester_employee_id: string | null
           requester_id: string | null
           requester_name: string | null
           start_km: number | null
@@ -9672,6 +9931,7 @@ export type Database = {
         Insert: {
           actual_departure?: string | null
           actual_return?: string | null
+          authorizer_employee_id?: string | null
           authorizer_id?: string | null
           authorizer_name?: string | null
           cancel_reason?: string | null
@@ -9679,6 +9939,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           destination?: string | null
+          destination_city?: string | null
+          destination_state?: string | null
           driver_id?: string | null
           end_km?: number | null
           id?: string
@@ -9688,10 +9950,13 @@ export type Database = {
           notes?: string | null
           organization_id: string
           origin?: string | null
+          origin_city?: string | null
+          origin_state?: string | null
           passengers?: string[]
           planned_departure: string
           planned_return?: string | null
           purpose?: string | null
+          requester_employee_id?: string | null
           requester_id?: string | null
           requester_name?: string | null
           start_km?: number | null
@@ -9705,6 +9970,7 @@ export type Database = {
         Update: {
           actual_departure?: string | null
           actual_return?: string | null
+          authorizer_employee_id?: string | null
           authorizer_id?: string | null
           authorizer_name?: string | null
           cancel_reason?: string | null
@@ -9712,6 +9978,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           destination?: string | null
+          destination_city?: string | null
+          destination_state?: string | null
           driver_id?: string | null
           end_km?: number | null
           id?: string
@@ -9721,10 +9989,13 @@ export type Database = {
           notes?: string | null
           organization_id?: string
           origin?: string | null
+          origin_city?: string | null
+          origin_state?: string | null
           passengers?: string[]
           planned_departure?: string
           planned_return?: string | null
           purpose?: string | null
+          requester_employee_id?: string | null
           requester_id?: string | null
           requester_name?: string | null
           start_km?: number | null
@@ -9737,6 +10008,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "vehicle_usages_authorizer_employee_id_fkey"
+            columns: ["authorizer_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "vehicle_usages_driver_id_fkey"
             columns: ["driver_id"]
             isOneToOne: false
@@ -9748,6 +10026,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_usages_requester_employee_id_fkey"
+            columns: ["requester_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
           {
@@ -9769,6 +10054,8 @@ export type Database = {
       vehicles: {
         Row: {
           acquisition_date: string | null
+          acquisition_entity_id: string | null
+          acquisition_kind: string | null
           acquisition_value: number | null
           asset_class: string
           asset_code: string | null
@@ -9776,6 +10063,7 @@ export type Database = {
           capacity_desc: string | null
           chassis: string | null
           color: string | null
+          condition_state: string | null
           cost_center_id: string | null
           created_at: string
           created_by: string | null
@@ -9800,7 +10088,9 @@ export type Database = {
           hour_meter: number | null
           id: string
           import_batch_id: string | null
+          invoice_number: string | null
           is_private_server_vehicle: boolean
+          lease_contract_id: string | null
           manufacturer: string | null
           meter_kind: string
           model: string | null
@@ -9826,6 +10116,8 @@ export type Database = {
         }
         Insert: {
           acquisition_date?: string | null
+          acquisition_entity_id?: string | null
+          acquisition_kind?: string | null
           acquisition_value?: number | null
           asset_class?: string
           asset_code?: string | null
@@ -9833,6 +10125,7 @@ export type Database = {
           capacity_desc?: string | null
           chassis?: string | null
           color?: string | null
+          condition_state?: string | null
           cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -9857,7 +10150,9 @@ export type Database = {
           hour_meter?: number | null
           id?: string
           import_batch_id?: string | null
+          invoice_number?: string | null
           is_private_server_vehicle?: boolean
+          lease_contract_id?: string | null
           manufacturer?: string | null
           meter_kind?: string
           model?: string | null
@@ -9883,6 +10178,8 @@ export type Database = {
         }
         Update: {
           acquisition_date?: string | null
+          acquisition_entity_id?: string | null
+          acquisition_kind?: string | null
           acquisition_value?: number | null
           asset_class?: string
           asset_code?: string | null
@@ -9890,6 +10187,7 @@ export type Database = {
           capacity_desc?: string | null
           chassis?: string | null
           color?: string | null
+          condition_state?: string | null
           cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -9914,7 +10212,9 @@ export type Database = {
           hour_meter?: number | null
           id?: string
           import_batch_id?: string | null
+          invoice_number?: string | null
           is_private_server_vehicle?: boolean
+          lease_contract_id?: string | null
           manufacturer?: string | null
           meter_kind?: string
           model?: string | null
@@ -9940,10 +10240,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "vehicles_acquisition_entity_id_fkey"
+            columns: ["acquisition_entity_id"]
+            isOneToOne: false
+            referencedRelation: "external_entities"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "vehicles_cost_center_id_fkey"
             columns: ["cost_center_id"]
             isOneToOne: false
             referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicles_lease_contract_id_fkey"
+            columns: ["lease_contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
             referencedColumns: ["id"]
           },
           {
@@ -10464,6 +10778,10 @@ export type Database = {
       can_register_fueling: { Args: never; Returns: boolean }
       can_register_occurrence: { Args: never; Returns: boolean }
       can_write: { Args: never; Returns: boolean }
+      cancel_supply_order_balance: {
+        Args: { _order: string; _reason: string }
+        Returns: undefined
+      }
       close_transparency_period: {
         Args: {
           _checklist: Json
@@ -10607,6 +10925,7 @@ export type Database = {
       inventory_apply: { Args: { _inventory: string }; Returns: number }
       is_partner_user: { Args: never; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      issue_supply_order: { Args: { _order: string }; Returns: undefined }
       log_budget_block: {
         Args: { _entity_id: string; _entity_type: string; _message: string }
         Returns: undefined

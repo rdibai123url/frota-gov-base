@@ -73,9 +73,7 @@ const NAV: NavGroup[] = [
       { to: "/planos-manutencao", label: "Planos preventivos" },
       { to: "/limpeza", label: "Limpeza da frota" },
       { to: "/pecas", label: "Peças e acessórios" },
-      { to: "/ofp", label: "Ordens de Fornecimento (OFP)" },
       { to: "/almoxarifado", label: "Almoxarifado" },
-      { to: "/pneus", label: "Pneus" },
     ],
   },
   {

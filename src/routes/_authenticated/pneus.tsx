@@ -85,7 +85,11 @@ const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "
   baixado: "destructive",
 };
 
-function Pneus() {
+/**
+ * Controle individual de pneus. Passa a ser exibido também como aba dentro de
+ * Peças e Acessórios (`embedded`), preservando os atributos específicos.
+ */
+export function Pneus({ embedded = false }: { embedded?: boolean } = {}) {
   const { data: tires = [], isLoading } = useTires();
   const { data: vehicles = [] } = useVehicles();
   const { data: suppliers = [] } = useSuppliers();
@@ -233,17 +237,19 @@ function Pneus() {
   const paged = usePaged(filtered);
   return (
     <>
-      <PageHeader
-        title="Pneus"
-        description="Cada pneu é controlado individualmente por código, com posição no veículo e histórico de movimentações."
-        action={
-          canManageFleet && orgId ? (
-            <Button onClick={openNew} className="gap-2">
-              <Plus className="size-4" /> Novo pneu
-            </Button>
-          ) : undefined
-        }
-      />
+      {!embedded && (
+        <PageHeader
+          title="Pneus"
+          description="Cada pneu é controlado individualmente por código, com posição no veículo e histórico de movimentações."
+          action={
+            canManageFleet && orgId ? (
+              <Button onClick={openNew} className="gap-2">
+                <Plus className="size-4" /> Novo pneu
+              </Button>
+            ) : undefined
+          }
+        />
+      )}
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[

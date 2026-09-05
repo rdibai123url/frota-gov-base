@@ -1,7 +1,7 @@
 import { ListPagination, usePaged } from "@/components/list-pagination";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Building2, Pencil, Plus, Upload } from "lucide-react";
+import { Building2, FileText, Pencil, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import { autoGeocode } from "@/lib/geocode";
@@ -38,6 +38,8 @@ import {
   type WorkshopStatus,
 } from "@/lib/frotagov";
 import { useInvalidate } from "@/lib/frotagov";
+import { networkCategoryLabel, useNetworkCompanies, type NetworkCompany } from "@/lib/rede";
+import { CompanyDialog } from "@/routes/_authenticated/fornecedores";
 
 export const Route = createFileRoute("/_authenticated/rede-credenciada")({
   head: () => ({
@@ -108,18 +110,6 @@ function RedeCredenciada() {
     );
   }, [workshops, search, fStatus, fSpecialty]);
 
-  function openNew() {
-    setEditing(null);
-    setStatus("em_analise");
-    setUf("");
-    setCnpj("");
-    setRadius("");
-    setSpecialties([]);
-    setUrgency(false);
-    setWeekend(false);
-    setFile(null);
-    setOpen(true);
-  }
 
   function openEdit(w: Workshop) {
     setEditing(w);
@@ -217,15 +207,24 @@ function RedeCredenciada() {
     <>
       <PageHeader
         title="Rede credenciada"
-        description="Oficinas e estabelecimentos habilitados a receber cotações e ordens de serviço do órgão."
+        description="A rede é formada automaticamente pelas empresas com contrato ou credenciamento vigente de manutenção e higienização. O cadastro da empresa é feito em Pessoas e Empresas Externas."
         action={
-          canManageFleet && orgId ? (
-            <Button onClick={openNew} className="gap-2">
-              <Plus className="size-4" /> Nova oficina
-            </Button>
-          ) : undefined
+          <Button asChild variant="outline" className="gap-2">
+            <Link to="/entidades-externas">
+              <Building2 className="size-4" /> Cadastro de empresas
+            </Link>
+          </Button>
         }
       />
+
+      <NetworkFromContracts />
+
+      <h2 className="mb-3 mt-8 text-lg font-semibold">Oficinas cadastradas anteriormente</h2>
+      <p className="mb-4 text-sm text-muted-foreground">
+        Registros históricos preservados. É possível corrigir endereço, contato e localização, mas novas oficinas passam
+        a entrar pela via contratual.
+      </p>
+
 
       <div className="mb-4 grid gap-3 sm:grid-cols-3">
         <div>
@@ -507,6 +506,89 @@ function RedeCredenciada() {
           </form>
         </DialogContent>
       </Dialog>
+    </>
+  );
+}
+
+/**
+ * Rede derivada dos contratos: manutenção, higienização e credenciamento.
+ * Uma empresa aparece uma única vez, mesmo com vários contratos.
+ */
+function NetworkFromContracts() {
+  const { companies, isLoading } = useNetworkCompanies(["manutencao", "higienizacao"]);
+  const [detail, setDetail] = useState<NetworkCompany | null>(null);
+  const paged = usePaged(companies);
+
+  return (
+    <>
+      <div className="overflow-x-auto rounded-lg border bg-card shadow-card">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Empresa</TableHead>
+              <TableHead>CNPJ / CPF</TableHead>
+              <TableHead>Município / UF</TableHead>
+              <TableHead>Contato / responsável</TableHead>
+              <TableHead>Atende</TableHead>
+              <TableHead>Vínculo</TableHead>
+              <TableHead className="w-28" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading && (
+              <TableRow>
+                <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+                  Carregando…
+                </TableCell>
+              </TableRow>
+            )}
+            {!isLoading && companies.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                  <Building2 className="mx-auto mb-2 size-6 opacity-50" />
+                  Nenhuma empresa com contrato ou credenciamento vigente de manutenção ou higienização.
+                </TableCell>
+              </TableRow>
+            )}
+            {paged.rows.map((c) => {
+              const first = c.contracts[0];
+              return (
+                <TableRow key={c.key}>
+                  <TableCell className="font-medium">
+                    {c.name}
+                    {c.tradeName ? <span className="block text-xs text-muted-foreground">{c.tradeName}</span> : null}
+                  </TableCell>
+                  <TableCell>{formatCNPJ(c.document) || "—"}</TableCell>
+                  <TableCell>{[c.city, c.state].filter(Boolean).join(" / ") || "—"}</TableCell>
+                  <TableCell>{[c.contactName, c.phone].filter(Boolean).join(" · ") || "—"}</TableCell>
+                  <TableCell className="space-x-1">
+                    {c.categories.map((k) => (
+                      <Badge key={k} variant="outline">
+                        {networkCategoryLabel(k)}
+                      </Badge>
+                    ))}
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    {c.accredited ? <Badge>Credenciamento</Badge> : <Badge variant="secondary">Contrato</Badge>}
+                    {first ? (
+                      <span className="block text-xs text-muted-foreground">
+                        {first.number} · até {dateBR(first.valid_to)}
+                      </span>
+                    ) : null}
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="ghost" size="sm" className="gap-2" onClick={() => setDetail(c)}>
+                      <FileText className="size-4" /> Detalhes
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+        <ListPagination state={paged} />
+      </div>
+      <CompanyDialog company={detail} onClose={() => setDetail(null)} />
     </>
   );
 }
