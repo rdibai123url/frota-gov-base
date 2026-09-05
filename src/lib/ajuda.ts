@@ -330,17 +330,27 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     "Manutenções",
     "Registro de manutenções corretivas e preventivas, com serviços, peças, custos, oficina e tempo de indisponibilidade.",
     [
-      "Abra uma manutenção informando o bem e o tipo.",
-      "Lance serviços, peças e valores.",
-      "Encerre a manutenção com a data de conclusão.",
+      "Na solicitação, informe o funcionário solicitante (a unidade solicitante é sugerida automaticamente) e o bem, quando a solicitação for para um bem específico.",
+      "Ao registrar, escolha entre \"Usar solicitação existente\" (que preenche automaticamente os dados já informados) e \"Registrar manutenção sem solicitação prévia\".",
+      "Escolha a origem: por contrato (com oficina contratada, contrato e item de mão de obra) ou fora de contrato.",
+      "Lance as peças substituídas/utilizadas e encerre a manutenção com a data de conclusão.",
     ],
     [
-      { label: "Tipo", description: "Corretiva, preventiva ou preditiva.", tags: REQ },
-      { label: "Oficina", description: "Rede credenciada ou fornecedor cadastrado.", tags: COND },
+      { label: "Unidade solicitante", description: "Sugerida a partir da unidade do funcionário solicitante; pode ser ajustada por quem tem permissão.", tags: ["Automático", "Obrigatório"] },
+      { label: "Tipo", description: "Corretiva ou preventiva.", tags: REQ },
+      { label: "Plano preventivo", description: "Lista apenas os planos cadastrados para o bem selecionado.", tags: COND },
+      { label: "Oficina e contrato", description: "Na origem por contrato, a oficina contratada e o contrato vigente definem os itens disponíveis.", tags: COND },
+      { label: "Valor unitário", description: "Vem do item contratual e fica bloqueado para edição; o total é quantidade × valor unitário.", tags: ["Automático", "Calculado"] },
+      { label: "Peças substituídas/utilizadas", description: "Selecionadas entre os itens do contrato, com nº do item, descrição, referência, unidade, saldo disponível e valor unitário.", tags: COND },
       { label: "Custo total", description: "Soma de serviços e peças lançados.", tags: CALC },
       { label: "Período de indisponibilidade", description: "Diferença entre entrada e saída; alimenta o indicador de disponibilidade da frota.", tags: CALC },
     ],
-    ["Enquanto a manutenção estiver aberta, o bem é contabilizado como indisponível."],
+    [
+      "Centro de custo, empenho e cota não aparecem na tela operacional: são derivados da origem/contrato e permanecem registrados para auditoria e relatórios.",
+      "Não é permitido consumir peça ou serviço acima do saldo do item contratual.",
+      "Ao concluir manutenção vinculada a plano preventivo, o histórico do plano é atualizado e a próxima manutenção é calculada pela periodicidade cadastrada, sem duplicar evento em caso de reedição.",
+      "Enquanto a manutenção estiver aberta, o bem é contabilizado como indisponível.",
+    ],
   ),
 
   "/planos-manutencao": t(
@@ -349,11 +359,13 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     [
       "Crie o plano e escolha os bens ou o tipo de bem.",
       "Defina o intervalo (km, horas ou meses).",
+      "No campo Tipo de serviço, use o botão + para cadastrar um novo tipo sem sair da tela.",
       "Acompanhe os avisos gerados na tela de Alertas.",
     ],
     [
+      { label: "Tipo de serviço", description: "Escolhido da lista do órgão; o botão + cria o tipo e já o deixa selecionado.", tags: REQ },
       { label: "Intervalo", description: "Base do próximo vencimento do plano.", tags: REQ },
-      { label: "Próxima revisão", description: "Calculada a partir da última execução e do intervalo.", tags: CALC },
+      { label: "Próxima revisão", description: "Calculada a partir da última execução e do intervalo, atualizada quando uma manutenção do plano é concluída.", tags: CALC },
     ],
   ),
 
@@ -363,10 +375,12 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     [
       "Registre a limpeza informando bem e data.",
       "Informe o tipo de serviço e o custo, quando houver.",
+      "Use \"Imprimir / Gerar PDF\" para emitir a solicitação institucional a ser apresentada no estabelecimento.",
       "Use os filtros para conferir a periodicidade por bem.",
     ],
     [
       { label: "Tipo de serviço", description: "Lavagem simples, completa, higienização ou outro.", tags: REQ },
+      { label: "Imprimir / Gerar PDF", description: "Documento com brasão e dados do órgão, código, bem, tipo de limpeza, prestador quando definido, solicitante, data e observações.", tags: AUTO },
     ],
   ),
 
