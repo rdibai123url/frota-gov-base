@@ -1,12 +1,14 @@
 import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Cog, Pencil, Plus } from "lucide-react";
+import { Cog, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import { PageHeader } from "@/components/app-shell";
 import { PartCompatibilityPanel } from "@/components/part-compatibility-panel";
+import { SupplyOrderPanel } from "@/components/ofp-panel";
+import { Pneus } from "@/routes/_authenticated/pneus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -91,14 +93,6 @@ function Pecas() {
     [applied, fVehicle],
   );
 
-  function openNew() {
-    setEditing(null);
-    setCategory(PART_CATEGORIES[0]!);
-    setMeasure("unidade");
-    setActive(true);
-    setOpen(true);
-  }
-
   function openEdit(p: PartCatalog) {
     setEditing(p);
     setCategory(p.category ?? PART_CATEGORIES[0]!);
@@ -144,22 +138,25 @@ function Pecas() {
     <>
       <PageHeader
         title="Peças e acessórios"
-        description="Catálogo padronizado do órgão e histórico de aplicação por veículo."
-        action={
-          canManageFleet && orgId ? (
-            <Button onClick={openNew} className="gap-2">
-              <Plus className="size-4" /> Nova peça
-            </Button>
-          ) : undefined
-        }
+        description="Peças, acessórios e pneus nascem dos itens do contrato. Selecione o contrato para ver itens, saldos e emitir Ordem de Fornecimento (OFP)."
       />
 
-      <Tabs defaultValue="catalogo">
+      <Tabs defaultValue="contrato">
         <TabsList className="mb-4">
+          <TabsTrigger value="contrato">Itens do contrato e OFP</TabsTrigger>
+          <TabsTrigger value="pneus">Pneus</TabsTrigger>
           <TabsTrigger value="catalogo">Catálogo</TabsTrigger>
           <TabsTrigger value="compatibilidade">Compatibilidade</TabsTrigger>
           <TabsTrigger value="historico">Histórico por veículo</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="contrato">
+          <SupplyOrderPanel />
+        </TabsContent>
+
+        <TabsContent value="pneus">
+          <Pneus embedded />
+        </TabsContent>
 
         <TabsContent value="compatibilidade">
           <PartCompatibilityPanel />
