@@ -182,3 +182,61 @@ export function printReport(meta: ReportMeta, columns: ReportColumn[], rows: Rep
   win.document.close();
   return true;
 }
+
+/**
+ * Documento institucional de um único registro (A4 retrato) — usado, por exemplo,
+ * na autorização de limpeza/higienização apresentada no estabelecimento (Bloco 5.8).
+ */
+export function printDocument(meta: {
+  organization: string;
+  logoUrl?: string | null;
+  title: string;
+  subtitle?: string;
+  code?: string | null;
+  fields: { label: string; value: string }[];
+  notes?: string | null;
+  issuedBy?: string | null;
+  signatureLabels?: string[];
+}) {
+  const fields = meta.fields.filter((f) => f.value);
+  const signatures = meta.signatureLabels ?? ["Autorizado por (órgão)", "Recebido por (estabelecimento)"];
+  const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8" />
+<title>${escapeHtml(meta.title)}</title>
+<style>
+  @page { size: A4 portrait; margin: 16mm; }
+  body { font-family: "Source Sans 3", Arial, Helvetica, sans-serif; color: #12203a; margin: 0; }
+  header { border-bottom: 2px solid #12203a; padding-bottom: 10px; margin-bottom: 16px; display: flex; gap: 12px; align-items: flex-start; }
+  .brasao { width: 66px; height: 66px; object-fit: contain; }
+  h1 { font-size: 15pt; margin: 0 0 2px; }
+  h2 { font-size: 12pt; margin: 0; color: #3b4a66; }
+  .code { margin-top: 4px; font-size: 10pt; font-weight: 700; }
+  dl { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; font-size: 10pt; }
+  dt { font-weight: 700; color: #48566f; font-size: 8.5pt; text-transform: uppercase; letter-spacing: .3px; }
+  dd { margin: 0 0 6px; }
+  .notes { margin-top: 14px; font-size: 10pt; border: 1px solid #c9d2e0; padding: 8px; min-height: 60px; }
+  .sign { margin-top: 46px; display: flex; gap: 32px; }
+  .sign div { flex: 1; border-top: 1px solid #12203a; padding-top: 4px; font-size: 9pt; text-align: center; }
+  footer { margin-top: 26px; font-size: 8pt; color: #6b7890; }
+</style></head><body>
+<header>
+  ${meta.logoUrl ? `<img class="brasao" src="${escapeHtml(meta.logoUrl)}" alt="Brasão do órgão" />` : ""}
+  <div>
+    <h1>${escapeHtml(meta.organization || "FrotaGov")}</h1>
+    <h2>${escapeHtml(meta.title)}</h2>
+    ${meta.subtitle ? `<div style="font-size:9pt;color:#48566f">${escapeHtml(meta.subtitle)}</div>` : ""}
+    ${meta.code ? `<div class="code">Documento nº ${escapeHtml(meta.code)}</div>` : ""}
+  </div>
+</header>
+<dl>${fields.map((f) => `<div><dt>${escapeHtml(f.label)}</dt><dd>${escapeHtml(f.value)}</dd></div>`).join("")}</dl>
+<div class="notes"><strong style="font-size:8.5pt">Observações</strong><br />${escapeHtml(meta.notes || "—")}</div>
+<div class="sign">${signatures.map((s) => `<div>${escapeHtml(s)}</div>`).join("")}</div>
+<footer>Emitido em ${escapeHtml(stamp())}${meta.issuedBy ? ` por ${escapeHtml(meta.issuedBy)}` : ""} — FrotaGov. Documento gerado eletronicamente.</footer>
+<script>window.onload = function () { setTimeout(function () { window.print(); }, 350); };</script>
+</body></html>`;
+  const win = window.open("", "_blank", "width=900,height=1000");
+  if (!win) return false;
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
+  return true;
+}
