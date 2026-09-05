@@ -209,6 +209,10 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
     const { error } = await supabase.from("diaries").insert({
       organization_id: perms.orgId!,
       unit_id: get("unit_id") === NONE ? null : get("unit_id") || null,
+      requester_employee_id: get("requester_employee_id") === NONE ? null : get("requester_employee_id") || null,
+      beneficiary_employee_id: get("beneficiary_employee_id") === NONE ? null : get("beneficiary_employee_id") || null,
+      approver_employee_id: get("approver_employee_id") === NONE ? null : get("approver_employee_id") || null,
+      legal_provision_id: get("legal_provision_id") === NONE ? null : get("legal_provision_id") || null,
       requester_name: get("requester_name") || perms.userName,
       requester_id: perms.userId,
       beneficiary_driver_id: driverId === NONE ? null : driverId || null,
@@ -377,8 +381,38 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
               </Select>
             </div>
             <div>
-              <Label>Solicitante</Label>
+              <Label>Solicitante (cadastro de pessoas)</Label>
+              <Select name="requester_employee_id" defaultValue={NONE}>
+                <SelectTrigger><SelectValue placeholder="Não vincular" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>Não vincular</SelectItem>
+                  {activeEmployees.map((e) => <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Nome do solicitante</Label>
               <Input name="requester_name" defaultValue={perms.userName} />
+            </div>
+            <div>
+              <Label>Beneficiário (cadastro de pessoas)</Label>
+              <Select name="beneficiary_employee_id" defaultValue={NONE}>
+                <SelectTrigger><SelectValue placeholder="Não vincular" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>Não vincular</SelectItem>
+                  {activeEmployees.map((e) => <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Autoridade concedente (cadastro de pessoas)</Label>
+              <Select name="approver_employee_id" defaultValue={NONE}>
+                <SelectTrigger><SelectValue placeholder="Não vincular" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>Não vincular</SelectItem>
+                  {activeEmployees.map((e) => <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Beneficiário — condutor cadastrado</Label>
@@ -437,7 +471,24 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
             <div className="sm:col-span-2"><Label>Finalidade / motivo *</Label><Textarea name="purpose" required rows={2} /></div>
             <div><Label>Evento / atividade</Label><Input name="event_name" /></div>
             <div><Label>Local do evento</Label><Input name="event_location" /></div>
-            <div><Label>Dispositivo legal / norma</Label><Input name="legal_basis" placeholder="Ex.: Decreto Municipal nº 000/0000" /></div>
+            <div>
+              <Label>Dispositivo legal / norma (cadastro)</Label>
+              <Select name="legal_provision_id" defaultValue={NONE}>
+                <SelectTrigger><SelectValue placeholder="Selecione a norma cadastrada" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>Não vincular</SelectItem>
+                  {provisions
+                    .filter((p) => p.active)
+                    .map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.code ? `${p.code} — ` : ""}
+                        {p.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div><Label>Dispositivo legal (texto livre)</Label><Input name="legal_basis" placeholder="Ex.: Decreto Municipal nº 000/0000" /></div>
             <div><Label>Prazo / período de aplicação</Label><Input name="application_period" /></div>
             <div>
               <Label>Centro de custo</Label>
