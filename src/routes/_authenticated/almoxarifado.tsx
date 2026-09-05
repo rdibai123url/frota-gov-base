@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { HelpInlineButton } from "@/components/help-button";
 import { Textarea } from "@/components/ui/textarea";
 import { parseBRNumber } from "@/lib/format";
 import {
@@ -249,6 +250,10 @@ function Almoxarifado() {
         </TabsContent>
 
         <TabsContent value="movimentacoes">
+          <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
+            <HelpInlineButton topicKey="/almoxarifado/transferencias" />
+            <span>Ajuda sobre transferências entre depósitos</span>
+          </div>
           <div className="gov-card overflow-hidden">
             <Table>
               <TableHeader>

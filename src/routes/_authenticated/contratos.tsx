@@ -11,6 +11,7 @@ import { SummaryCards } from "@/components/summary-cards";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { HelpInlineButton } from "@/components/help-button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -1054,6 +1055,15 @@ function ContractPeriodsPanel({
             {amendments.length} · {current ? brl(periodBalance(current)) : "—"}
           </p>
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1">
+          <HelpInlineButton topicKey="/contratos/itens" /> Ajuda sobre itens do contrato
+        </span>
+        <span className="flex items-center gap-1">
+          <HelpInlineButton topicKey="/contratos/aditivos" /> Ajuda sobre aditivos
+        </span>
       </div>
 
       <details className="rounded-md border bg-muted/20 p-3">
