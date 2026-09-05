@@ -39,6 +39,7 @@ import {
   useVehicles,
 } from "@/lib/frotagov";
 import { useCostCenters, useCommitments } from "@/lib/frotagov";
+import { useEmployees, useLegalProvisions } from "@/lib/pessoas";
 import { formatCPF, formatMoney, formatNumberBR, onlyDigits, parseBRNumber, isValidCPF } from "@/lib/format";
 import {
   DIARY_PROOF_STATUS,
@@ -92,6 +93,9 @@ function Diarias() {
   const { data: org } = useOrganization();
   const { data: brasao } = useBrasaoUrl(org?.logo_url);
   const perms = usePerms();
+  const { data: employees = [] } = useEmployees();
+  const { data: provisions = [] } = useLegalProvisions();
+  const activeEmployees = employees.filter((e) => e.active);
   const invalidate = useInvalidate();
 
   const [q, setQ] = useState("");
