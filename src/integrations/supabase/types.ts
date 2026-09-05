@@ -1326,6 +1326,53 @@ export type Database = {
           },
         ]
       }
+      budget_references: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          kind: string
+          organization_id: string
+          updated_at: string
+          updated_by: string | null
+          value: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          kind: string
+          organization_id: string
+          updated_at?: string
+          updated_by?: string | null
+          value: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          kind?: string
+          organization_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_references_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cleaning_types: {
         Row: {
           active: boolean
@@ -5009,6 +5056,7 @@ export type Database = {
       }
       maintenance_parts: {
         Row: {
+          contract_item_id: string | null
           created_at: string
           created_by: string | null
           description: string
@@ -5031,6 +5079,7 @@ export type Database = {
           warranty_until: string | null
         }
         Insert: {
+          contract_item_id?: string | null
           created_at?: string
           created_by?: string | null
           description: string
@@ -5053,6 +5102,7 @@ export type Database = {
           warranty_until?: string | null
         }
         Update: {
+          contract_item_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string
@@ -5075,6 +5125,13 @@ export type Database = {
           warranty_until?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "maintenance_parts_contract_item_id_fkey"
+            columns: ["contract_item_id"]
+            isOneToOne: false
+            referencedRelation: "contract_items"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "maintenance_parts_maintenance_record_id_fkey"
             columns: ["maintenance_record_id"]
@@ -5271,6 +5328,7 @@ export type Database = {
           code: string | null
           commitment_id: string | null
           contract_id: string | null
+          contract_item_id: string | null
           cost_center_id: string | null
           created_at: string
           created_by: string | null
@@ -5282,6 +5340,8 @@ export type Database = {
           import_batch_id: string | null
           invoice_number: string | null
           kind: Database["public"]["Enums"]["maintenance_kind"]
+          labor_quantity: number | null
+          labor_unit_price: number | null
           labor_value: number
           legacy_source: string | null
           notes: string | null
@@ -5311,6 +5371,7 @@ export type Database = {
           code?: string | null
           commitment_id?: string | null
           contract_id?: string | null
+          contract_item_id?: string | null
           cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -5322,6 +5383,8 @@ export type Database = {
           import_batch_id?: string | null
           invoice_number?: string | null
           kind?: Database["public"]["Enums"]["maintenance_kind"]
+          labor_quantity?: number | null
+          labor_unit_price?: number | null
           labor_value?: number
           legacy_source?: string | null
           notes?: string | null
@@ -5351,6 +5414,7 @@ export type Database = {
           code?: string | null
           commitment_id?: string | null
           contract_id?: string | null
+          contract_item_id?: string | null
           cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -5362,6 +5426,8 @@ export type Database = {
           import_batch_id?: string | null
           invoice_number?: string | null
           kind?: Database["public"]["Enums"]["maintenance_kind"]
+          labor_quantity?: number | null
+          labor_unit_price?: number | null
           labor_value?: number
           legacy_source?: string | null
           notes?: string | null
@@ -5403,6 +5469,13 @@ export type Database = {
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_records_contract_item_id_fkey"
+            columns: ["contract_item_id"]
+            isOneToOne: false
+            referencedRelation: "contract_items"
             referencedColumns: ["id"]
           },
           {
@@ -5481,6 +5554,7 @@ export type Database = {
           plan_id: string | null
           priority: Database["public"]["Enums"]["maintenance_priority"]
           requested_at: string
+          requester_employee_id: string | null
           requester_id: string | null
           requester_name: string | null
           status: Database["public"]["Enums"]["maintenance_request_status"]
@@ -5506,6 +5580,7 @@ export type Database = {
           plan_id?: string | null
           priority?: Database["public"]["Enums"]["maintenance_priority"]
           requested_at?: string
+          requester_employee_id?: string | null
           requester_id?: string | null
           requester_name?: string | null
           status?: Database["public"]["Enums"]["maintenance_request_status"]
@@ -5531,6 +5606,7 @@ export type Database = {
           plan_id?: string | null
           priority?: Database["public"]["Enums"]["maintenance_priority"]
           requested_at?: string
+          requester_employee_id?: string | null
           requester_id?: string | null
           requester_name?: string | null
           status?: Database["public"]["Enums"]["maintenance_request_status"]
@@ -5562,6 +5638,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "maintenance_requests_requester_employee_id_fkey"
+            columns: ["requester_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "maintenance_requests_unit_id_fkey"
             columns: ["unit_id"]
             isOneToOne: false
@@ -5573,6 +5656,53 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maintenance_service_types: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          sort_order: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          sort_order?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          sort_order?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_service_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -5940,6 +6070,50 @@ export type Database = {
             foreignKeyName: "org_email_settings_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_modules: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          enabled: boolean
+          id: string
+          module_key: string
+          notes: string | null
+          organization_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          id?: string
+          module_key: string
+          notes?: string | null
+          organization_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          id?: string
+          module_key?: string
+          notes?: string | null
+          organization_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_modules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
