@@ -1393,39 +1393,96 @@ function Manutencoes() {
             </div>
 
             <form onSubmit={addPart} className="grid gap-4 sm:grid-cols-3">
-              <div className="sm:col-span-3">
-                <Label>Peça do catálogo</Label>
-                <Select value={partId} onValueChange={setPartId}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NONE}>Peça avulsa (descrever)</SelectItem>
-                    {catalog
-                      .filter((c) => c.active)
-                      .map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {c.internal_code ? `${c.internal_code} — ` : ""}
-                          {c.description}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              {partId === NONE && (
-                <div className="sm:col-span-3">
-                  <Label htmlFor="description">Descrição da peça *</Label>
-                  <Input id="description" name="description" />
-                </div>
+              {partsTarget?.contract_id ? (
+                <>
+                  {/* Bloco 5.4 — peças somente entre os itens do contrato da manutenção */}
+                  <div className="sm:col-span-3">
+                    <Label>Peça do contrato *</Label>
+                    <Select value={partItem} onValueChange={setPartItem}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o item do contrato" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={NONE}>Selecione</SelectItem>
+                        {itemsOfContract(partsTarget.contract_id).map((i) => (
+                          <SelectItem key={i.id} value={i.id}>
+                            {i.item_number ? `Item ${i.item_number} — ` : ""}
+                            {i.description}
+                            {i.brand ? ` · ${i.brand}` : ""}
+                            {i.item_code ? ` · ${i.item_code}` : ""} — saldo {num(contractItemBalance(i), 2)}{" "}
+                            {i.measure_unit ?? "un"} — {brl(Number(i.unit_price))}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="quantity">Quantidade utilizada *</Label>
+                    <Input
+                      id="quantity"
+                      name="quantity"
+                      inputMode="decimal"
+                      value={partQty}
+                      onChange={(e) => setPartQty(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Valor unitário contratual</Label>
+                    <Input value={brl(Number(selectedPartItem?.unit_price ?? 0))} readOnly disabled />
+                  </div>
+                  <div>
+                    <Label>Total da linha</Label>
+                    <Input
+                      value={brl(Number(selectedPartItem?.unit_price ?? 0) * (parseBRNumber(partQty || "0") || 0))}
+                      readOnly
+                      disabled
+                    />
+                  </div>
+                  {selectedPartItem && (
+                    <p className="sm:col-span-3 text-xs text-muted-foreground">
+                      Unidade {selectedPartItem.measure_unit ?? "un"} · saldo disponível{" "}
+                      {num(contractItemBalance(selectedPartItem), 2)}. O consumo é registrado no item contratual de forma
+                      auditável e não pode ultrapassar o saldo.
+                    </p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div className="sm:col-span-3">
+                    <Label>Peça do catálogo</Label>
+                    <Select value={partId} onValueChange={setPartId}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={NONE}>Peça avulsa (descrever)</SelectItem>
+                        {catalog
+                          .filter((c) => c.active)
+                          .map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {c.internal_code ? `${c.internal_code} — ` : ""}
+                              {c.description}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {partId === NONE && (
+                    <div className="sm:col-span-3">
+                      <Label htmlFor="description">Descrição da peça *</Label>
+                      <Input id="description" name="description" />
+                    </div>
+                  )}
+                  <div>
+                    <Label htmlFor="quantity">Quantidade *</Label>
+                    <Input id="quantity" name="quantity" inputMode="decimal" defaultValue="1" />
+                  </div>
+                  <div>
+                    <Label htmlFor="unit_value">Valor unitário (R$)</Label>
+                    <MoneyInput id="unit_value" name="unit_value" />
+                  </div>
+                </>
               )}
-              <div>
-                <Label htmlFor="quantity">Quantidade *</Label>
-                <Input id="quantity" name="quantity" inputMode="decimal" defaultValue="1" />
-              </div>
-              <div>
-                <Label htmlFor="unit_value">Valor unitário (R$)</Label>
-                <MoneyInput id="unit_value" name="unit_value" />
-              </div>
               <div>
                 <Label htmlFor="warranty_days">Garantia (dias)</Label>
                 <Input id="warranty_days" name="warranty_days" inputMode="numeric" />
@@ -1434,12 +1491,24 @@ function Manutencoes() {
                 <Label htmlFor="notes">Observações</Label>
                 <Input id="notes" name="notes" />
               </div>
-              <div className="sm:col-span-3 flex justify-end">
+              <div className="sm:col-span-3 flex items-center justify-between">
+                <p className="text-sm">
+                  Total geral das peças:{" "}
+                  <strong>
+                    {brl(
+                      (records.find((r) => r.id === partsTarget?.id)?.parts ?? []).reduce(
+                        (s, p) => s + Number(p.total_value ?? 0),
+                        0,
+                      ),
+                    )}
+                  </strong>
+                </p>
                 <Button type="submit" className="gap-2">
                   <Plus className="size-4" /> Adicionar peça
                 </Button>
               </div>
             </form>
+
           </div>
         </DialogContent>
       </Dialog>
