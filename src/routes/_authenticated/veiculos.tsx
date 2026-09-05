@@ -38,6 +38,9 @@ import {
   usePerms,
   useUnits,
   useVehicles,
+  useContracts,
+  useExternalEntities,
+  dateBR,
   WRITE_ROLES,
   type Vehicle,
   type VehicleStatus,
@@ -96,6 +99,8 @@ const statusVariant = (s: VehicleStatus) =>
 function Veiculos() {
   const { data: vehicles = [], isLoading } = useVehicles();
   const { data: units = [] } = useUnits();
+  const { data: contracts = [] } = useContracts();
+  const { data: entities = [] } = useExternalEntities();
   const { data: me } = useProfile();
   const perms = usePerms();
   const invalidate = useInvalidate();
@@ -119,6 +124,17 @@ function Veiculos() {
   const [acquisitionEntity, setAcquisitionEntity] = useState<string>(NONE);
   const [leaseContract, setLeaseContract] = useState<string>(NONE);
   const [saving, setSaving] = useState(false);
+
+  // Dados do contrato de locação exibidos automaticamente (sem redigitação).
+  const leaseInfo = useMemo(() => {
+    const c = contracts.find((x) => x.id === leaseContract);
+    if (!c) return null;
+    return {
+      company: c.entity?.trade_name || c.entity?.name || c.supplier?.legal_name || "—",
+      from: c.valid_from,
+      to: c.valid_to,
+    };
+  }, [contracts, leaseContract]);
 
   const canWrite = Boolean(perms.orgId) && (me?.roles ?? []).some((r) => WRITE_ROLES.includes(r));
   const unitName = (id: string | null) => units.find((u) => u.id === id)?.name ?? "—";
