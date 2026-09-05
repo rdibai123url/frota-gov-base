@@ -56,6 +56,8 @@ export const Route = createFileRoute("/_authenticated/combustiveis")({
   component: Combustiveis,
 });
 
+const NONE = "__none__";
+
 const schema = z.object({
   name: z.string().trim().min(2, "Informe o nome do combustível").max(80),
   acronym: z.string().trim().max(10).optional(),
