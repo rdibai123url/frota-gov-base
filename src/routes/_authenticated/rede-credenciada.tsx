@@ -205,15 +205,24 @@ function RedeCredenciada() {
     <>
       <PageHeader
         title="Rede credenciada"
-        description="Oficinas e estabelecimentos habilitados a receber cotações e ordens de serviço do órgão."
+        description="A rede é formada automaticamente pelas empresas com contrato ou credenciamento vigente de manutenção e higienização. O cadastro da empresa é feito em Pessoas e Empresas Externas."
         action={
-          canManageFleet && orgId ? (
-            <Button onClick={openNew} className="gap-2">
-              <Plus className="size-4" /> Nova oficina
-            </Button>
-          ) : undefined
+          <Button asChild variant="outline" className="gap-2">
+            <Link to="/entidades-externas">
+              <Building2 className="size-4" /> Cadastro de empresas
+            </Link>
+          </Button>
         }
       />
+
+      <NetworkFromContracts />
+
+      <h2 className="mb-3 mt-8 text-lg font-semibold">Oficinas cadastradas anteriormente</h2>
+      <p className="mb-4 text-sm text-muted-foreground">
+        Registros históricos preservados. É possível corrigir endereço, contato e localização, mas novas oficinas passam
+        a entrar pela via contratual.
+      </p>
+
 
       <div className="mb-4 grid gap-3 sm:grid-cols-3">
         <div>
