@@ -290,6 +290,7 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
   const { data: vehicles = [] } = useVehicles();
   const { data: drivers = [] } = useDrivers();
   const { data: units = [] } = useUnits();
+  const { data: employees = [] } = useEmployees();
   const { data: usages = [] } = useVehicleUsages();
   const perms = usePerms();
 
@@ -299,8 +300,14 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
   const [authorizer, setAuthorizer] = useState(perms.canWrite ? perms.userName : "");
   const [plannedOut, setPlannedOut] = useState(toLocalInput(new Date().toISOString()));
   const [plannedBack, setPlannedBack] = useState("");
+  const [requesterEmployee, setRequesterEmployee] = useState(NONE);
+  const [authorizerEmployee, setAuthorizerEmployee] = useState(NONE);
   const [origin, setOrigin] = useState("");
+  const [originCity, setOriginCity] = useState("");
+  const [originState, setOriginState] = useState(NONE);
   const [destination, setDestination] = useState("");
+  const [destinationCity, setDestinationCity] = useState("");
+  const [destinationState, setDestinationState] = useState(NONE);
   const [purpose, setPurpose] = useState("");
   const [startKm, setStartKm] = useState("");
   const [passengers, setPassengers] = useState("");
@@ -377,6 +384,8 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
       vehicle_id: vehicle.id,
       unit_id: vehicle.unit_id,
       driver_id: driver.id,
+      requester_employee_id: requesterEmployee === NONE ? null : requesterEmployee,
+      authorizer_employee_id: authorizerEmployee === NONE ? null : authorizerEmployee,
       requester_name: requester.trim() || perms.userName,
       requester_id: perms.userId,
       authorizer_name: authorizer.trim() || null,
@@ -384,7 +393,11 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
       planned_departure: new Date(plannedOut).toISOString(),
       planned_return: plannedBack ? new Date(plannedBack).toISOString() : null,
       origin: origin.trim() || null,
+      origin_city: originCity.trim() || null,
+      origin_state: originState === NONE ? null : originState,
       destination: destination.trim() || null,
+      destination_city: destinationCity.trim() || null,
+      destination_state: destinationState === NONE ? null : destinationState,
       purpose: purpose.trim() || null,
       start_km: startKm ? Number(startKm) : null,
       passengers: passengers
@@ -452,12 +465,62 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
             </Select>
           </div>
           <div>
-            <Label htmlFor="req">Solicitante / responsável</Label>
-            <Input id="req" value={requester} onChange={(e) => setRequester(e.target.value)} />
+            <Label>Solicitante (funcionário)</Label>
+            <Select
+              value={requesterEmployee}
+              onValueChange={(v) => {
+                setRequesterEmployee(v);
+                const emp = employees.find((e) => e.id === v);
+                if (emp) setRequester(emp.full_name);
+              }}
+            >
+              <SelectTrigger><SelectValue placeholder="Selecione no cadastro de pessoas" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>Não vincular</SelectItem>
+                {employees
+                  .filter((e) => e.active)
+                  .map((e) => (
+                    <SelectItem key={e.id} value={e.id}>
+                      {e.full_name}
+                      {e.registration ? ` — ${e.registration}` : ""}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
-            <Label htmlFor="aut">Autorizador</Label>
-            <Input id="aut" value={authorizer} onChange={(e) => setAuthorizer(e.target.value)} />
+            <Label>Autorizador (funcionário)</Label>
+            <Select
+              value={authorizerEmployee}
+              onValueChange={(v) => {
+                setAuthorizerEmployee(v);
+                const emp = employees.find((e) => e.id === v);
+                setAuthorizer(emp ? emp.full_name : "");
+              }}
+            >
+              <SelectTrigger><SelectValue placeholder="Selecione no cadastro de pessoas" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>Não vincular</SelectItem>
+                {employees
+                  .filter((e) => e.active)
+                  .map((e) => (
+                    <SelectItem key={e.id} value={e.id}>
+                      {e.full_name}
+                      {e.registration ? ` — ${e.registration}` : ""}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="sm:col-span-2 grid gap-3 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="req">Nome do solicitante</Label>
+              <Input id="req" value={requester} onChange={(e) => setRequester(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="aut">Nome do autorizador</Label>
+              <Input id="aut" value={authorizer} onChange={(e) => setAuthorizer(e.target.value)} />
+            </div>
           </div>
           <div>
             <Label htmlFor="km">KM inicial</Label>
@@ -472,12 +535,48 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
             <Input id="pb" type="datetime-local" value={plannedBack} onChange={(e) => setPlannedBack(e.target.value)} />
           </div>
           <div>
-            <Label htmlFor="ori">Origem</Label>
+            <Label htmlFor="ori">Origem (local)</Label>
             <Input id="ori" value={origin} onChange={(e) => setOrigin(e.target.value)} />
           </div>
+          <div className="grid grid-cols-[1fr_100px] gap-2">
+            <div>
+              <Label htmlFor="oric">Cidade de origem</Label>
+              <Input id="oric" value={originCity} onChange={(e) => setOriginCity(e.target.value)} />
+            </div>
+            <div>
+              <Label>UF</Label>
+              <Select value={originState} onValueChange={setOriginState}>
+                <SelectTrigger><SelectValue placeholder="UF" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>—</SelectItem>
+                  {UF_LIST.map((uf) => (
+                    <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <div>
-            <Label htmlFor="dst">Destino</Label>
+            <Label htmlFor="dst">Destino (local)</Label>
             <Input id="dst" value={destination} onChange={(e) => setDestination(e.target.value)} />
+          </div>
+          <div className="grid grid-cols-[1fr_100px] gap-2">
+            <div>
+              <Label htmlFor="dstc">Cidade de destino</Label>
+              <Input id="dstc" value={destinationCity} onChange={(e) => setDestinationCity(e.target.value)} />
+            </div>
+            <div>
+              <Label>UF</Label>
+              <Select value={destinationState} onValueChange={setDestinationState}>
+                <SelectTrigger><SelectValue placeholder="UF" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>—</SelectItem>
+                  {UF_LIST.map((uf) => (
+                    <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <div className="sm:col-span-2">
             <Label htmlFor="fin">Finalidade / serviço</Label>
