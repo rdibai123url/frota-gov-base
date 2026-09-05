@@ -106,7 +106,9 @@ function Plataforma() {
           <TabsTrigger value="importacao">Importação e migração</TabsTrigger>
 
           <TabsTrigger value="backup">Backup externo</TabsTrigger>
+          <TabsTrigger value="modulos">Módulos por órgão</TabsTrigger>
           <TabsTrigger value="config">Configurações</TabsTrigger>
+
           <TabsTrigger value="documentacao">Documentação / Homologação</TabsTrigger>
           <TabsTrigger value="matriz">Matriz de funcionalidades</TabsTrigger>
           <TabsTrigger value="auditoria">Auditoria e lançamento</TabsTrigger>
