@@ -1383,6 +1383,7 @@ export type MaintenanceRequestRow = MaintenanceRequest & {
   unit: UnitRef | null;
   cost_center: Pick<CostCenter, "id" | "code" | "name"> | null;
   plan: Pick<MaintenancePlan, "id" | "name"> | null;
+  requester_employee: { id: string; full_name: string; unit_id: string | null } | null;
 };
 export type MaintenanceRecordRow = MaintenanceRecord & {
   vehicle: VehicleRef | null;
@@ -1391,7 +1392,10 @@ export type MaintenanceRecordRow = MaintenanceRecord & {
   parts: MaintenancePart[] | null;
   commitment: Pick<Commitment, "id" | "number"> | null;
   quota: Pick<Quota, "id" | "name"> | null;
+  contract: Pick<Contract, "id" | "number"> | null;
+  contract_item: Pick<ContractItem, "id" | "item_number" | "description" | "measure_unit" | "unit_price"> | null;
 };
+
 export type TireRow = Tire & {
   vehicle: VehicleRef | null;
   supplier: Pick<Supplier, "id" | "legal_name" | "trade_name"> | null;
