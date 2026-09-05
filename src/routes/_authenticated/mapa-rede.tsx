@@ -378,23 +378,28 @@ function MapaRede() {
     let ok = 0;
     let falhou = 0;
     let interrompido = false;
+    let errosSeguidos = 0;
     const lote = pendentes.slice(0, 25);
     for (const p of lote) {
-      try {
-        const r = await geocodeRecord(p.table, p.recordId, {
-          address: p.address,
-          district: p.district,
-          city: p.city,
-          state: p.state,
-          zip_code: p.zip_code,
-        });
-        if (r.status === "geocodificado") ok += 1;
-        else falhou += 1;
-      } catch {
-        // Falha de rede ou limite do serviço: interrompe o lote para não
-        // insistir contra o serviço gratuito; o restante continua pendente.
-        interrompido = true;
-        break;
+      const r = await geocodeRecord(p.table, p.recordId, {
+        address: p.address,
+        district: p.district,
+        city: p.city,
+        state: p.state,
+        zip_code: p.zip_code,
+      });
+      if (r.status === "geocodificado") {
+        ok += 1;
+        errosSeguidos = 0;
+      } else {
+        falhou += 1;
+        // "falhou" indica indisponibilidade/limite do serviço; três seguidas
+        // interrompem o lote para não insistir contra o serviço gratuito.
+        errosSeguidos = r.status === "falhou" ? errosSeguidos + 1 : 0;
+        if (errosSeguidos >= 3) {
+          interrompido = true;
+          break;
+        }
       }
       await new Promise((res) => setTimeout(res, 1100));
     }
