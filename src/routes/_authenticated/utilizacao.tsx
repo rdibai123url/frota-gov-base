@@ -43,7 +43,9 @@ import {
   useVehicles,
   type UsageRow,
   type UsageStatus,
+  UF_LIST,
 } from "@/lib/frotagov";
+import { useEmployees } from "@/lib/pessoas";
 
 export const Route = createFileRoute("/_authenticated/utilizacao")({
   head: () => ({
