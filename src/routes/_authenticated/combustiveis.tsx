@@ -101,6 +101,8 @@ function Combustiveis() {
       measure_unit: unit,
       category,
       active,
+      contract_id: contractId === NONE ? null : contractId,
+      contract_item_id: itemId === NONE ? null : itemId,
     };
     const { error } = editing
       ? await supabase.from("fuel_types").update(payload).eq("id", editing.id)
