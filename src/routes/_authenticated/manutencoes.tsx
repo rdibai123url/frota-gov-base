@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { useEmployees } from "@/lib/pessoas";
 import {
   MAINTENANCE_KINDS,
   MAINTENANCE_PRIORITIES,
@@ -116,6 +117,7 @@ function Manutencoes() {
   const { data: centers = [] } = useCostCenters();
   const { data: suppliers = [] } = useSuppliers();
   const { data: plans = [] } = useMaintenancePlans();
+  const { data: employees = [] } = useEmployees();
   const { data: commitments = [] } = useCommitments();
   const { data: quotas = [] } = useQuotas();
   const { data: catalog = [] } = usePartsCatalog();
@@ -194,11 +196,29 @@ function Manutencoes() {
 
   /* ------------------------------- ações -------------------------------- */
 
+  /** Bloco 5.6 — só planos preventivos cadastrados para o bem selecionado. */
+  function plansForVehicle(vehicleId: string) {
+    if (vehicleId === NONE) return [];
+    const vehicle = vehicles.find((v) => v.id === vehicleId);
+    return plans.filter(
+      (p) =>
+        p.active !== false &&
+        (p.vehicle_id === vehicleId || (!p.vehicle_id && (!p.vehicle_type || p.vehicle_type === vehicle?.vehicle_type))),
+    );
+  }
+
+  /** Bloco 5.1 — ao escolher o solicitante, sugerir a unidade vinculada a ele. */
+  function pickRequesterEmployee(id: string) {
+    setReqEmployee(id);
+    const emp = employees.find((e) => e.id === id);
+    if (emp?.unit_id) setReqUnit(emp.unit_id);
+  }
+
   function openNewReq() {
     setEditingReq(null);
     setReqVehicle(NONE);
     setReqUnit(NONE);
-    setReqCenter(NONE);
+    setReqEmployee(NONE);
     setReqPlan(NONE);
     setReqKind("corretiva");
     setReqPriority("normal");
@@ -210,7 +230,7 @@ function Manutencoes() {
     setEditingReq(r);
     setReqVehicle(r.vehicle_id);
     setReqUnit(r.unit_id ?? NONE);
-    setReqCenter(r.cost_center_id ?? NONE);
+    setReqEmployee(r.requester_employee_id ?? NONE);
     setReqPlan(r.plan_id ?? NONE);
     setReqKind(r.kind);
     setReqPriority(r.priority);
@@ -248,7 +268,7 @@ function Manutencoes() {
     const payload = {
       vehicle_id: reqVehicle,
       unit_id: reqUnit === NONE ? null : reqUnit,
-      cost_center_id: reqCenter === NONE ? null : reqCenter,
+      requester_employee_id: reqEmployee === NONE ? null : reqEmployee,
       plan_id: reqPlan === NONE ? null : reqPlan,
       kind: reqKind,
       priority: reqPriority,
