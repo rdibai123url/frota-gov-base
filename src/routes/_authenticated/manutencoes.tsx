@@ -147,6 +147,11 @@ function Manutencoes() {
   const [recVehicle, setRecVehicle] = useState(NONE);
   const [recRequest, setRecRequest] = useState(NONE);
   const [recSupplier, setRecSupplier] = useState(NONE);
+  const [recMode, setRecMode] = useState<"solicitacao" | "avulsa">("solicitacao");
+  const [recOrigin, setRecOrigin] = useState<"contrato" | "compra_direta">("compra_direta");
+  const [recContract, setRecContract] = useState(NONE);
+  const [recItem, setRecItem] = useState(NONE);
+  const [recLaborQty, setRecLaborQty] = useState("");
   const [recKind, setRecKind] = useState<MaintenanceKind>("corretiva");
   const [recCenter, setRecCenter] = useState(NONE);
   const [recCommitment, setRecCommitment] = useState(NONE);
@@ -320,6 +325,30 @@ function Manutencoes() {
     setCancelOpen(false);
   }
 
+  /** Solicitação vinculada ao registro em edição/criação (Bloco 5.2). */
+  const selectedRequest = recRequest === NONE ? null : requests.find((r) => r.id === recRequest) ?? null;
+
+  /** Bloco 5.2 — aproveita todos os dados já registrados na solicitação. */
+  function pickRequest(id: string) {
+    setRecRequest(id);
+    const r = requests.find((x) => x.id === id);
+    if (!r) return;
+    setRecVehicle(r.vehicle_id);
+    setRecKind(r.kind);
+  }
+
+  const contractsForMaintenance = contracts.filter(
+    (c) => c.status === "vigente" && (c.items ?? []).some((i) => i.active !== false),
+  );
+  const itemsOfContract = (contractId: string) =>
+    contractId === NONE
+      ? []
+      : (contracts.find((c) => c.id === contractId)?.items ?? []).filter((i) => i.active !== false);
+  const selectedItem = itemsOfContract(recContract).find((i) => i.id === recItem) ?? null;
+  const laborUnitPrice = Number(selectedItem?.unit_price ?? 0);
+  const laborQty = parseBRNumber(recLaborQty || "0") || 0;
+  const laborTotal = laborUnitPrice * laborQty;
+
   function openNewRec(fromRequest?: MaintenanceRequestRow) {
     setEditingRec(null);
     setRecVehicle(fromRequest?.vehicle_id ?? NONE);
@@ -329,6 +358,11 @@ function Manutencoes() {
     setRecCenter(fromRequest?.cost_center_id ?? NONE);
     setRecCommitment(NONE);
     setRecQuota(NONE);
+    setRecMode(fromRequest ? "solicitacao" : "solicitacao");
+    setRecOrigin("compra_direta");
+    setRecContract(NONE);
+    setRecItem(NONE);
+    setRecLaborQty("");
     setRecOpen(true);
   }
 
@@ -341,6 +375,11 @@ function Manutencoes() {
     setRecCenter(r.cost_center_id ?? NONE);
     setRecCommitment(r.commitment_id ?? NONE);
     setRecQuota(r.quota_id ?? NONE);
+    setRecMode(r.request_id ? "solicitacao" : "avulsa");
+    setRecOrigin(r.expense_origin === "contrato" ? "contrato" : "compra_direta");
+    setRecContract(r.contract_id ?? NONE);
+    setRecItem(r.contract_item_id ?? NONE);
+    setRecLaborQty(r.labor_quantity ? String(r.labor_quantity) : "");
     setRecOpen(true);
   }
 
