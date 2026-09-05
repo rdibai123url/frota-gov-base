@@ -478,8 +478,12 @@ function Contratos() {
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">{c.object}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {c.supplier ? c.supplier.trade_name || c.supplier.legal_name : "Sem fornecedor"} ·
-                    {" "}Processo {c.process_number || "—"} · Vigência {dateBR(c.valid_from)} a {dateBR(c.valid_to)}
+                    {companyName(c) || "Sem empresa informada"} ·{" "}
+                    Processo {c.process_number || "—"} · Vigência {dateBR(c.valid_from)} a {dateBR(c.valid_to)}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Fiscal: {employeeName(c.fiscal_employee_id)} · Gestor: {employeeName(c.manager_employee_id)}
+                    {c.srp ? " · Registro de preços (SRP)" : ""}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -490,7 +494,18 @@ function Contratos() {
                   )}
                   {canManageFinance && (
                     <>
-                      <Button variant="outline" size="sm" className="gap-2" onClick={() => openNewItem(c)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                        disabled={c.status !== "rascunho"}
+                        title={
+                          c.status === "rascunho"
+                            ? "Incluir item na planilha inicial do contrato"
+                            : "Contrato já assinado: itens só podem ser incluídos ou alterados por aditivo."
+                        }
+                        onClick={() => openNewItem(c)}
+                      >
                         <Package className="size-4" /> Novo item
                       </Button>
                       <Button variant="outline" size="sm" className="gap-2" onClick={() => setAmendFor(c)}>
