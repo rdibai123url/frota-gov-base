@@ -1246,15 +1246,42 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
       justification: get("justification"),
       attachment_path: attachment,
       created_by: userId,
-    });
-    setSaving(false);
-    if (error) {
-      toast.error(error.message || "Não foi possível registrar o aditivo.");
+    })
+      .select("id")
+      .maybeSingle();
+    if (error || !amendment) {
+      setSaving(false);
+      toast.error(error?.message || "Não foi possível registrar o aditivo.");
       return;
     }
-    toast.success("Aditivo registrado. Contrato e vigências atualizados.");
+
+    if (rows.length > 0) {
+      const { error: itemsError } = await supabase.from("contract_amendment_items").insert(
+        rows.map((r) => ({
+          organization_id: orgId!,
+          amendment_id: amendment.id,
+          contract_id: contract.id,
+          contract_item_id: r.contract_item_id,
+          operation: r.operation,
+          description: r.contract_item_id ? null : r.description.trim(),
+          measure_unit: r.measure_unit,
+          quantity: parseBRNumber(r.quantity),
+          unit_price: parseBRNumber(r.unit_price),
+        })),
+      );
+      if (itemsError) {
+        setSaving(false);
+        toast.error(itemsError.message || "O aditivo foi registrado, mas a planilha de itens não pôde ser aplicada.");
+        invalidate(["contracts", "contract-periods", "contract-amendments", "contract-items"]);
+        return;
+      }
+    }
+
+    setSaving(false);
+    toast.success("Aditivo registrado. Contrato, vigências e itens atualizados.");
     invalidate(["contracts", "contract-periods", "contract-amendments", "contract-items"]);
     setFile(null);
+    setRows([]);
     onClose();
   }
 
