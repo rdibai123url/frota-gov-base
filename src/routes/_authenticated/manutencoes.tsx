@@ -127,8 +127,9 @@ function Manutencoes() {
   const [editingReq, setEditingReq] = useState<MaintenanceRequestRow | null>(null);
   const [reqVehicle, setReqVehicle] = useState(NONE);
   const [reqUnit, setReqUnit] = useState(NONE);
-  const [reqCenter, setReqCenter] = useState(NONE);
+  const [reqEmployee, setReqEmployee] = useState(NONE);
   const [reqPlan, setReqPlan] = useState(NONE);
+
   const [reqKind, setReqKind] = useState<MaintenanceKind>("corretiva");
   const [reqPriority, setReqPriority] = useState<MaintenancePriority>("normal");
   const [reqStatus, setReqStatus] = useState<MaintenanceRequestStatus>("aberta");
