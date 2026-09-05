@@ -416,7 +416,7 @@ function Painel() {
         <StatCard label="Limpezas agendadas" value={limpeza.agendadas} icon={Droplets} tone={limpeza.agendadas > 0 ? "warning" : "default"} />
       </div>
 
-      <h2 className="gov-title mt-10 mb-4 text-lg">Rede credenciada, cotações e ordens de serviço</h2>
+      <h2 className="gov-title mt-10 mb-4 text-lg">Prestadores do órgão, cotações e ordens de serviço</h2>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Cotações abertas" value={rede.cotacoesAbertas} icon={FileSearch} />
         <StatCard label="Aguardando propostas" value={rede.aguardandoPropostas} icon={FileSearch} />

@@ -188,7 +188,7 @@ export const LAUNCH_REPORT: LaunchSection[] = [
     items: [
       "Inteligência da frota (consumo, custo por km/hora, TCO e economicidade).",
       "Almoxarifado, ordens de fornecimento e compatibilidade de peças.",
-      "Rede credenciada digital, cartão virtual do bem, portal do credenciado e mapa.",
+      "Cadastro digital de prestadores do próprio órgão, cartão virtual do bem, portal do credenciado e mapa.",
       "Sustentabilidade da frota, Central de Integrações, chaves de API e exportação integral.",
     ],
   },
@@ -206,7 +206,7 @@ export const LAUNCH_REPORT: LaunchSection[] = [
     title: "Fora do núcleo do produto",
     items: [
       "Cartão magnético físico, terminal POS, adquirência e processamento bancário.",
-      "Rede credenciada própria da fornecedora do sistema.",
+      "Rede de prestadores própria da fornecedora do sistema, marketplace de oficinas ou base compartilhada entre órgãos.",
       "Aplicativo nativo publicado em lojas e assinatura digital com certificado.",
       "Notificações por e-mail ou WhatsApp e autenticação em dois fatores.",
     ],

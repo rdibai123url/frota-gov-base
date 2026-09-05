@@ -1,7 +1,7 @@
 /**
  * FrotaGov — cadastro rápido de empresa a partir da cotação.
  *
- * Grava no mesmo cadastro da Rede credenciada (public.workshops), respeitando
+ * Grava no mesmo cadastro de prestadores do órgão (public.workshops), respeitando
  * organization_id e RLS. Não cria base paralela.
  */
 import * as React from "react";
@@ -178,7 +178,7 @@ export function NovaEmpresaCotacaoDialog({
           <DialogTitle>Cadastrar nova empresa</DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
-          O cadastro entra na Rede credenciada do próprio órgão e fica disponível para as demais telas.
+          O cadastro entra na lista de prestadores do próprio órgão e fica disponível para as demais telas.
         </p>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">

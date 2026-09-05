@@ -3,7 +3,7 @@
  *
  * Central de Integrações (DETRAN, SIAFIC, LDAP/SSO, FIPE, Webhooks, API),
  * histórico de valor de mercado/FIPE dos ativos, fatores de emissão (ESG)
- * e apoio à geolocalização da rede credenciada.
+ * e apoio à geolocalização dos prestadores cadastrados pelo órgão.
  *
  * Princípios:
  * - Nenhuma integração externa é simulada. Sem credencial configurada o

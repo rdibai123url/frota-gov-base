@@ -80,13 +80,13 @@ const NAV: NavGroup[] = [
   },
   {
     id: "rede",
-    label: "Rede credenciada e compras",
+    label: "Prestadores e compras",
     icon: ClipboardList,
     items: [
-      { to: "/rede-credenciada", label: "Oficinas e rede credenciada" },
-      { to: "/credenciados", label: "Credenciados e cartão virtual" },
+      { to: "/rede-credenciada", label: "Oficinas e prestadores do órgão" },
+      { to: "/credenciados", label: "Credenciados do órgão e cartão virtual" },
       { to: "/portal-credenciado", label: "Portal do credenciado" },
-      { to: "/mapa-rede", label: "Mapa da rede" },
+      { to: "/mapa-rede", label: "Mapa dos prestadores do órgão" },
       { to: "/cotacoes", label: "Cotações" },
       { to: "/ordens-servico", label: "Ordens de Serviço" },
     ],

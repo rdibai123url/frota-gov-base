@@ -42,7 +42,7 @@ const MODULES_RESUMO = [
   "Cotações e propostas",
   "Multas, acidentes e seguros",
   "Diárias e prestações de contas",
-  "Rede credenciada, capturas e cartões virtuais",
+  "Prestadores do órgão, capturas e cartões virtuais",
   "Peças, almoxarifado, OFP, estoque e inventários",
   "Inteligência de consumo, alertas e transparência",
   "Migrações, backups e registros de auditoria",

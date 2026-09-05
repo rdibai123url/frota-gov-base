@@ -1,5 +1,5 @@
 /**
- * Mapa interativo da rede credenciada — OpenStreetMap + Leaflet.
+ * Mapa interativo dos prestadores cadastrados pelo órgão — OpenStreetMap + Leaflet.
  *
  * Sem API paga e sem chave: os ladrilhos vêm do OpenStreetMap, com a
  * atribuição exigida pela licença. Carregado apenas no navegador.
