@@ -101,11 +101,35 @@ function enderecoDe(p: {
   return [p.address, p.district, [p.city, p.state].filter(Boolean).join(" / ")].filter(Boolean).join(" — ");
 }
 
+type NetworkEntity = {
+  id: string;
+  name: string;
+  trade_name: string | null;
+  address: string | null;
+  district: string | null;
+  city: string | null;
+  state: string | null;
+  zip_code: string | null;
+  phone: string | null;
+  categories: string[] | null;
+  latitude: number | null;
+  longitude: number | null;
+  geocode_status: string | null;
+};
+
+/** Classificação do ponto no mapa a partir do objeto do contrato. */
+function contractPointKind(objectKind: string | null, categories: string[]) {
+  if (objectKind === "combustivel_oleos" || categories.includes("posto")) return "Posto / fornecedor";
+  if (objectKind === "higienizacao" || categories.includes("lava-jato")) return "Higienização / lava-jato";
+  if (objectKind === "manutencao" || categories.includes("oficina")) return "Oficina";
+  return "Credenciado";
+}
+
 function useNetworkPoints() {
   return useQuery({
     queryKey: ["rede-geolocalizada"],
     queryFn: async () => {
-      const [partners, suppliers, workshops] = await Promise.all([
+      const [partners, suppliers, workshops, entities] = await Promise.all([
         supabase
           .from("accredited_partners")
           .select(
@@ -121,8 +145,42 @@ function useNetworkPoints() {
           .select(
             "id, legal_name, trade_name, address, district, city, state, zip_code, phone, status, specialties, latitude, longitude, geocode_status",
           ),
+        // Empresas do cadastro mestre habilitadas por contrato: oficinas,
+        // postos e lava-jatos entram no mapa automaticamente.
+        supabase
+          .from("contracts")
+          .select(
+            "id, status, object_kind, entity:external_entities(id, name, trade_name, address, district, city, state, zip_code, phone, categories, latitude, longitude, geocode_status)",
+          )
+          .in("status", ["vigente", "suspenso"]),
       ]);
       const points: Point[] = [];
+      const seen = new Set<string>();
+      for (const c of entities.data ?? []) {
+        const e = (c as { entity: NetworkEntity | null }).entity;
+        if (!e || seen.has(e.id)) continue;
+        seen.add(e.id);
+        points.push({
+          id: `empresa-${e.id}`,
+          table: "external_entities",
+          recordId: e.id,
+          nome: e.trade_name || e.name,
+          tipo: contractPointKind(c.object_kind, e.categories ?? []),
+          especialidades: (e.categories ?? []).join(", "),
+          endereco: enderecoDe(e),
+          telefone: e.phone ?? null,
+          cidade: [e.city, e.state].filter(Boolean).join(" / "),
+          situacao: "contrato vigente",
+          latitude: e.latitude,
+          longitude: e.longitude,
+          geocode_status: e.geocode_status ?? "pendente",
+          address: e.address,
+          district: e.district,
+          city: e.city,
+          state: e.state,
+          zip_code: e.zip_code,
+        });
+      }
       for (const p of partners.data ?? []) {
         points.push({
           id: `credenciado-${p.id}`,
@@ -198,6 +256,7 @@ const ALL = "__all__";
 
 const LEGEND = [
   { tipo: "Posto / fornecedor", cor: "#1d4ed8" },
+  { tipo: "Higienização / lava-jato", cor: "#0369a1" },
   { tipo: "Oficina", cor: "#b45309" },
   { tipo: "Credenciado", cor: "#047857" },
 ];
