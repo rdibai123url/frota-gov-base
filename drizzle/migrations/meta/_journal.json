@@ -15,6 +15,13 @@
       "when": 1789133329110,
       "tag": "0001_viagem_realizado_e_alertas_resolucao",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789136555773,
+      "tag": "0002_vehicle_trip_checklists",
+      "breakpoints": true
     }
   ]
 }
