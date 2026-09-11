@@ -430,7 +430,10 @@ function NewFuelingDialog({
   const [justification, setJustification] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [closeAuth, setCloseAuth] = useState(true);
+  const [fullTank, setFullTank] = useState(false);
+  const [usageId, setUsageId] = useState(NONE);
   const [saving, setSaving] = useState(false);
+  const { data: usages = [] } = useVehicleUsages();
 
   const usableAuths = useMemo(() => auths.filter((a) => authorizationUsable(a)), [auths]);
   const selectedAuth: AuthorizationRow | null = usableAuths.find((a) => a.id === authId) ?? null;
