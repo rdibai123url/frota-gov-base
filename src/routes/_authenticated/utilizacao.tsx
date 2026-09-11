@@ -47,6 +47,7 @@ import {
 } from "@/lib/frotagov";
 import { useEmployees } from "@/lib/pessoas";
 import { computeRoute } from "@/lib/rotas.functions";
+import { computeTripResult, useCandidateFuelings, useUsageFuelings } from "@/lib/viagem-resultado";
 import {
   CONSUMPTION_SOURCE_LABEL,
   DISTANCE_SOURCE_LABEL,
