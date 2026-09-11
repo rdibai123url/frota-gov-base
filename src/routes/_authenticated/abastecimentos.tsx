@@ -974,6 +974,48 @@ function NewFuelingDialog({
               />
             </div>
             <div className="sm:col-span-2">
+              <Label>Viagem / utilização vinculada</Label>
+              <Select value={usageId} onValueChange={setUsageId} disabled={usageOptions.length === 0}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue
+                    placeholder={
+                      usageOptions.length === 0
+                        ? "Nenhuma viagem compatível do mesmo bem no período"
+                        : "Não vincular a uma viagem"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>Não vincular a uma viagem</SelectItem>
+                  {usageOptions.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>
+                      {(u.code ?? "Utilização")} — {dateTimeBR(u.planned_departure)}
+                      {u.destination ? ` · ${u.destination}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {suggestedUsage && usageId === NONE
+                  ? `Sugestão: ${suggestedUsage.code ?? "utilização"} de ${dateTimeBR(suggestedUsage.planned_departure)}. Confirme se este abastecimento pertence a essa viagem.`
+                  : "Vincule quando o abastecimento pertencer a uma viagem registrada. O órgão, o bem e o período são validados ao salvar."}
+              </p>
+            </div>
+            <div className="sm:col-span-2 rounded-md border bg-muted/30 p-3">
+              <div className="flex items-start gap-2">
+                <Checkbox id="fulltank" checked={fullTank} onCheckedChange={(v) => setFullTank(v === true)} />
+                <div>
+                  <Label htmlFor="fulltank" className="cursor-pointer">
+                    Tanque cheio
+                  </Label>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Marque quando o abastecimento completou efetivamente o tanque. Essa informação é usada
+                    no cálculo confiável do consumo efetivo (km/l) entre dois abastecimentos completos.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="sm:col-span-2">
               <Label htmlFor="notes">Observações</Label>
               <Textarea id="notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
             </div>
