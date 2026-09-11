@@ -27,6 +27,7 @@ import { Route as AuthenticatedCotasRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedCotasServidorRouteImport } from './routes/_authenticated/cotas-servidor'
 import { Route as AuthenticatedCredenciadosRouteImport } from './routes/_authenticated/credenciados'
 import { Route as AuthenticatedDiariasRouteImport } from './routes/_authenticated/diarias'
+import { Route as AuthenticatedDisponibilidadeRouteImport } from './routes/_authenticated/disponibilidade'
 import { Route as AuthenticatedEmpenhosRouteImport } from './routes/_authenticated/empenhos'
 import { Route as AuthenticatedEntidadesExternasRouteImport } from './routes/_authenticated/entidades-externas'
 import { Route as AuthenticatedEquipamentosRouteImport } from './routes/_authenticated/equipamentos'
@@ -168,6 +169,12 @@ const AuthenticatedDiariasRoute = AuthenticatedDiariasRouteImport.update({
   path: '/diarias',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDisponibilidadeRoute =
+  AuthenticatedDisponibilidadeRouteImport.update({
+    id: '/disponibilidade',
+    path: '/disponibilidade',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedEmpenhosRoute = AuthenticatedEmpenhosRouteImport.update({
   id: '/empenhos',
   path: '/empenhos',
@@ -425,6 +432,7 @@ export interface FileRoutesByFullPath {
   '/cotas-servidor': typeof AuthenticatedCotasServidorRoute
   '/credenciados': typeof AuthenticatedCredenciadosRoute
   '/diarias': typeof AuthenticatedDiariasRoute
+  '/disponibilidade': typeof AuthenticatedDisponibilidadeRoute
   '/empenhos': typeof AuthenticatedEmpenhosRoute
   '/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
   '/equipamentos': typeof AuthenticatedEquipamentosRoute
@@ -488,6 +496,7 @@ export interface FileRoutesByTo {
   '/cotas-servidor': typeof AuthenticatedCotasServidorRoute
   '/credenciados': typeof AuthenticatedCredenciadosRoute
   '/diarias': typeof AuthenticatedDiariasRoute
+  '/disponibilidade': typeof AuthenticatedDisponibilidadeRoute
   '/empenhos': typeof AuthenticatedEmpenhosRoute
   '/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
   '/equipamentos': typeof AuthenticatedEquipamentosRoute
@@ -553,6 +562,7 @@ export interface FileRoutesById {
   '/_authenticated/cotas-servidor': typeof AuthenticatedCotasServidorRoute
   '/_authenticated/credenciados': typeof AuthenticatedCredenciadosRoute
   '/_authenticated/diarias': typeof AuthenticatedDiariasRoute
+  '/_authenticated/disponibilidade': typeof AuthenticatedDisponibilidadeRoute
   '/_authenticated/empenhos': typeof AuthenticatedEmpenhosRoute
   '/_authenticated/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
   '/_authenticated/equipamentos': typeof AuthenticatedEquipamentosRoute
@@ -618,6 +628,7 @@ export interface FileRouteTypes {
     | '/cotas-servidor'
     | '/credenciados'
     | '/diarias'
+    | '/disponibilidade'
     | '/empenhos'
     | '/entidades-externas'
     | '/equipamentos'
@@ -681,6 +692,7 @@ export interface FileRouteTypes {
     | '/cotas-servidor'
     | '/credenciados'
     | '/diarias'
+    | '/disponibilidade'
     | '/empenhos'
     | '/entidades-externas'
     | '/equipamentos'
@@ -745,6 +757,7 @@ export interface FileRouteTypes {
     | '/_authenticated/cotas-servidor'
     | '/_authenticated/credenciados'
     | '/_authenticated/diarias'
+    | '/_authenticated/disponibilidade'
     | '/_authenticated/empenhos'
     | '/_authenticated/entidades-externas'
     | '/_authenticated/equipamentos'
@@ -931,6 +944,13 @@ declare module '@tanstack/react-router' {
       path: '/diarias'
       fullPath: '/diarias'
       preLoaderRoute: typeof AuthenticatedDiariasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/disponibilidade': {
+      id: '/_authenticated/disponibilidade'
+      path: '/disponibilidade'
+      fullPath: '/disponibilidade'
+      preLoaderRoute: typeof AuthenticatedDisponibilidadeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/empenhos': {
@@ -1259,6 +1279,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCotasServidorRoute: typeof AuthenticatedCotasServidorRoute
   AuthenticatedCredenciadosRoute: typeof AuthenticatedCredenciadosRoute
   AuthenticatedDiariasRoute: typeof AuthenticatedDiariasRoute
+  AuthenticatedDisponibilidadeRoute: typeof AuthenticatedDisponibilidadeRoute
   AuthenticatedEmpenhosRoute: typeof AuthenticatedEmpenhosRoute
   AuthenticatedEntidadesExternasRoute: typeof AuthenticatedEntidadesExternasRoute
   AuthenticatedEquipamentosRoute: typeof AuthenticatedEquipamentosRoute
@@ -1313,6 +1334,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCotasServidorRoute: AuthenticatedCotasServidorRoute,
   AuthenticatedCredenciadosRoute: AuthenticatedCredenciadosRoute,
   AuthenticatedDiariasRoute: AuthenticatedDiariasRoute,
+  AuthenticatedDisponibilidadeRoute: AuthenticatedDisponibilidadeRoute,
   AuthenticatedEmpenhosRoute: AuthenticatedEmpenhosRoute,
   AuthenticatedEntidadesExternasRoute: AuthenticatedEntidadesExternasRoute,
   AuthenticatedEquipamentosRoute: AuthenticatedEquipamentosRoute,

@@ -9804,6 +9804,133 @@ export type Database = {
           },
         ]
       }
+      vehicle_checklist_photos: {
+        Row: {
+          caption: string | null
+          checklist_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          organization_id: string
+          storage_path: string
+        }
+        Insert: {
+          caption?: string | null
+          checklist_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id: string
+          storage_path: string
+        }
+        Update: {
+          caption?: string | null
+          checklist_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_checklist_photos_checklist_id_fkey"
+            columns: ["checklist_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_checklists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_checklist_photos_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_checklists: {
+        Row: {
+          active: boolean
+          completed_at: string
+          completed_by: string | null
+          completed_by_name: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          observations: string | null
+          odometer_km: number | null
+          organization_id: string
+          responses: Json
+          stage: string
+          updated_at: string
+          updated_by: string | null
+          usage_id: string
+          vehicle_id: string
+          void_reason: string | null
+        }
+        Insert: {
+          active?: boolean
+          completed_at?: string
+          completed_by?: string | null
+          completed_by_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          observations?: string | null
+          odometer_km?: number | null
+          organization_id: string
+          responses?: Json
+          stage: string
+          updated_at?: string
+          updated_by?: string | null
+          usage_id: string
+          vehicle_id: string
+          void_reason?: string | null
+        }
+        Update: {
+          active?: boolean
+          completed_at?: string
+          completed_by?: string | null
+          completed_by_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          observations?: string | null
+          odometer_km?: number | null
+          organization_id?: string
+          responses?: Json
+          stage?: string
+          updated_at?: string
+          updated_by?: string | null
+          usage_id?: string
+          vehicle_id?: string
+          void_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_checklists_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_checklists_usage_id_fkey"
+            columns: ["usage_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_usages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_checklists_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicle_cleanings: {
         Row: {
           attachment_path: string | null
