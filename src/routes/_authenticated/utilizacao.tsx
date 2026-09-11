@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Search, CarFront, LogOut, LogIn, Ban, Eye } from "lucide-react";
+import { Plus, Search, CarFront, LogOut, LogIn, Ban, Eye, Route as RouteIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/app-shell";
@@ -46,6 +46,16 @@ import {
   UF_LIST,
 } from "@/lib/frotagov";
 import { useEmployees } from "@/lib/pessoas";
+import { computeRoute } from "@/lib/rotas.functions";
+import {
+  CONSUMPTION_SOURCE_LABEL,
+  DISTANCE_SOURCE_LABEL,
+  durationLabel,
+  estimateTrip,
+  useVehicleConsumption,
+} from "@/lib/viagens";
+import { Switch } from "@/components/ui/switch";
+import { brl } from "@/lib/frotagov";
 
 export const Route = createFileRoute("/_authenticated/utilizacao")({
   head: () => ({
@@ -317,9 +327,74 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
   const [justification, setJustification] = useState("");
   const [saving, setSaving] = useState(false);
 
+  /* ------------------- inteligência de viagem (estimativa) ------------------ */
+  const [roundTrip, setRoundTrip] = useState(false);
+  const [routeKm, setRouteKm] = useState<number | null>(null);
+  const [routeMin, setRouteMin] = useState<number | null>(null);
+  const [routeGeometry, setRouteGeometry] = useState<unknown>(null);
+  const [distanceSource, setDistanceSource] = useState<"nao_calculada" | "rota" | "manual">("nao_calculada");
+  const [manualKm, setManualKm] = useState("");
+  const [fuelPrice, setFuelPrice] = useState("");
+  const [routing, setRouting] = useState(false);
+  const [routeNote, setRouteNote] = useState("");
+
   const vehicle = vehicles.find((v) => v.id === vehicleId) ?? null;
   const driver = drivers.find((d) => d.id === driverId) ?? null;
   const unit = units.find((u) => u.id === vehicle?.unit_id) ?? null;
+
+  const consumption = useVehicleConsumption(vehicle?.id ?? null, {
+    assetClass: vehicle?.asset_class ?? null,
+    category: vehicle?.vehicle_type ?? null,
+    brand: vehicle?.brand ?? null,
+    model: vehicle?.model ?? null,
+  });
+  const oneWayKm = distanceSource === "manual" ? Number(manualKm || 0) : routeKm;
+  const trip = estimateTrip({
+    distanceKm: oneWayKm,
+    roundTrip,
+    kmpl: consumption.kmpl,
+    fuelPrice: fuelPrice ? Number(fuelPrice) : null,
+  });
+
+  /** Calcula a rota rodoviária provável entre os endereços informados. */
+  async function calcularRota() {
+    if (!originCity.trim() || !destinationCity.trim()) {
+      toast.error("Informe ao menos a cidade de origem e a de destino.");
+      return;
+    }
+    setRouting(true);
+    try {
+      const res = await computeRoute({
+        data: {
+          origin: {
+            address: origin,
+            city: originCity,
+            state: originState === NONE ? null : originState,
+          },
+          destination: {
+            address: destination,
+            city: destinationCity,
+            state: destinationState === NONE ? null : destinationState,
+          },
+        },
+      });
+      setRouteNote(res.message);
+      if (res.ok) {
+        setRouteKm(res.distanceKm);
+        setRouteMin(res.durationMin);
+        setRouteGeometry(res.geometry);
+        setDistanceSource("rota");
+        toast.success("Rota estimada calculada.");
+      } else {
+        toast.warning(res.message);
+      }
+    } catch {
+      setRouteNote("Não foi possível consultar o serviço de rotas agora.");
+      toast.message("Serviço de rotas indisponível. Você pode informar a distância manualmente.");
+    } finally {
+      setRouting(false);
+    }
+  }
 
   const issues: { level: "erro" | "alerta" | "info"; message: string }[] = [];
   if (!vehicle) issues.push({ level: "erro", message: "Selecione o veículo." });
@@ -407,6 +482,18 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
         .map((p) => p.trim())
         .filter(Boolean),
       notes: notes.trim() || null,
+      round_trip: roundTrip,
+      estimated_distance_km: trip.totalKm,
+      estimated_duration_min: routeMin,
+      route_geometry: (routeGeometry ?? null) as never,
+      route_provider: distanceSource === "rota" ? "osrm" : null,
+      route_calculated_at: distanceSource === "rota" ? new Date().toISOString() : null,
+      distance_source: distanceSource,
+      estimated_consumption_kmpl: consumption.kmpl,
+      consumption_source: consumption.source,
+      estimated_liters: trip.liters,
+      fuel_price_used: fuelPrice ? Number(fuelPrice) : null,
+      estimated_cost: trip.cost,
       maintenance_justification: needsJustification ? justification.trim() : null,
       status: (perms.canWrite ? "autorizada" : "solicitada") as UsageStatus,
       created_by: perms.userId,
