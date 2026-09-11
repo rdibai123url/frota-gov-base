@@ -24,12 +24,15 @@ export type RoutePoint = {
   state?: string | null;
 };
 
+/** Geometria simplificada da rota (GeoJSON LineString), só para desenhar no mapa. */
+export type RouteGeometry = { type: string; coordinates: [number, number][] };
+
 export type RouteResult = {
   ok: boolean;
   status: "calculada" | "sem_endereco" | "nao_encontrado" | "falhou";
   distanceKm: number | null;
   durationMin: number | null;
-  geometry: unknown | null;
+  geometry: RouteGeometry | null;
   provider: string;
   cached: boolean;
   message: string;
@@ -79,11 +82,6 @@ function normalize(parts: (string | null | undefined)[]) {
     .join(", ")
     .replace(/\s+/g, " ")
     .toLowerCase();
-}
-
-type Supa = Parameters<Parameters<typeof buildHandler>[0]>[0]["context"]["supabase"];
-function buildHandler<T>(fn: (arg: { context: { supabase: unknown } }) => T) {
-  return fn;
 }
 
 /** Converte um endereço em coordenadas, reaproveitando o cache do sistema. */
@@ -190,7 +188,7 @@ export const computeRoute = createServerFn({ method: "POST" })
       `${routerUrl}/${origin.lon},${origin.lat};${destination.lon},${destination.lat}` +
       `?overview=simplified&geometries=geojson&alternatives=false&steps=false`;
     const json = (await getJson(url)) as
-      | { code?: string; routes?: Array<{ distance: number; duration: number; geometry: unknown }> }
+      | { code?: string; routes?: Array<{ distance: number; duration: number; geometry: RouteGeometry }> }
       | null;
 
     if (!json) {
