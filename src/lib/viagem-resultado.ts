@@ -75,8 +75,8 @@ export function computeTripResult(input: {
   let effectiveNote: string | null = null;
 
   if (fullTanks.length >= 2) {
-    const first = fullTanks[0];
-    const last = fullTanks[fullTanks.length - 1];
+    const first = fullTanks[0]!;
+    const last = fullTanks[fullTanks.length - 1]!;
     const km = Number(last.odometer_km) - Number(first.odometer_km);
     // Consome-se o que foi abastecido DEPOIS do primeiro tanque cheio.
     const usedLiters = fullTanks.slice(1).reduce((s, f) => s + Number(f.quantity ?? 0), 0);

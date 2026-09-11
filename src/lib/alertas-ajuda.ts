@@ -88,27 +88,16 @@ const CORRECTIVE_PREFIX = [
   "cnh_",
 ];
 
-const DEFAULT_CORRECTIVE = (type: string): AlertGuidance =>
-  G(
-    "corretivo",
-    "Há um dado pendente ou vencido no cadastro de origem desta ocorrência.",
-    "Enquanto o dado não for corrigido, o fluxo que depende dele pode ser recusado.",
-    [
-      "Abra o registro citado na mensagem do alerta.",
-      "Atualize o dado pendente (documento, saldo, data ou informação obrigatória).",
-      "O alerta sai da lista de abertos sozinho quando a pendência deixa de existir.",
-    ],
-  ) && {
-    kind: "corretivo" as const,
-    meaning: "Há um dado pendente ou vencido no cadastro de origem desta ocorrência.",
-    impact: "Enquanto o dado não for corrigido, o fluxo que depende dele pode ser recusado.",
-    steps: [
-      "Abra o registro citado na mensagem do alerta.",
-      "Atualize o dado pendente (documento, saldo, data ou informação obrigatória).",
-      "O alerta sai da lista de abertos sozinho quando a pendência deixa de existir.",
-    ],
-    type,
-  };
+const DEFAULT_CORRECTIVE: AlertGuidance = G(
+  "corretivo",
+  "Há um dado pendente ou vencido no cadastro de origem desta ocorrência.",
+  "Enquanto o dado não for corrigido, o fluxo que depende dele pode ser recusado.",
+  [
+    "Abra o registro citado na mensagem do alerta.",
+    "Atualize o dado pendente (documento, saldo, data ou informação obrigatória).",
+    "O alerta sai da lista de abertos sozinho quando a pendência deixa de existir.",
+  ],
+);
 
 const DEFAULT_ADVISORY: AlertGuidance = G(
   "orientativo",
@@ -123,10 +112,7 @@ const DEFAULT_ADVISORY: AlertGuidance = G(
 export function alertGuidance(type: string): AlertGuidance {
   const found = GUIDANCE[type];
   if (found) return found;
-  if (CORRECTIVE_PREFIX.some((p) => type.startsWith(p))) {
-    const d = DEFAULT_CORRECTIVE(type);
-    return { kind: d.kind, meaning: d.meaning, impact: d.impact, steps: d.steps };
-  }
+  if (CORRECTIVE_PREFIX.some((p) => type.startsWith(p))) return DEFAULT_CORRECTIVE;
   return DEFAULT_ADVISORY;
 }
 
