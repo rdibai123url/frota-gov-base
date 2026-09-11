@@ -20,6 +20,7 @@ import {
   useUsageChecklists,
   type ChecklistAnswer,
   type ChecklistStage,
+  type ChecklistWithPhotos,
 } from "@/lib/checklists";
 import { dateTimeBR, num, supabase, useInvalidate, usePerms, type UsageRow } from "@/lib/frotagov";
 
@@ -94,7 +95,7 @@ export function VehicleChecklistPanel({ usage, compact = false }: { usage: Usage
   );
 }
 
-function ChecklistDialog({ usage, stage, existing, departure, onClose }: { usage: UsageRow; stage: ChecklistStage; existing: ReturnType<typeof useUsageChecklists>["data"] extends (infer T)[] ? T | null : never; departure: ReturnType<typeof useUsageChecklists>["data"] extends (infer T)[] ? T | null : never; onClose: () => void }) {
+function ChecklistDialog({ usage, stage, existing, departure, onClose }: { usage: UsageRow; stage: ChecklistStage; existing: ChecklistWithPhotos | null; departure: ChecklistWithPhotos | null; onClose: () => void }) {
   const perms = usePerms();
   const invalidate = useInvalidate();
   const [responses, setResponses] = useState<Record<string, ChecklistAnswer>>(() => parseChecklistResponses(existing?.responses));

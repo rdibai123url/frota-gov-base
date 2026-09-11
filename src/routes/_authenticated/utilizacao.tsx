@@ -57,6 +57,7 @@ import {
 } from "@/lib/viagens";
 import { Switch } from "@/components/ui/switch";
 import { brl } from "@/lib/frotagov";
+import { VehicleChecklistPanel } from "@/components/vehicle-checklist";
 
 export const Route = createFileRoute("/_authenticated/utilizacao")({
   head: () => ({
@@ -991,6 +992,7 @@ function UsageDetail({ usage, onClose }: { usage: UsageRow; onClose: () => void 
             </div>
           ))}
         </dl>
+        <VehicleChecklistPanel usage={usage} />
         {usage.status === "concluida" && <TripResultBlock usage={usage} />}
       </DialogContent>
     </Dialog>
@@ -1036,6 +1038,7 @@ function CloseUsageDialog({ usage, onClose, onSaved }: { usage: UsageRow; onClos
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4">
+          <VehicleChecklistPanel usage={usage} compact />
           <div>
             <Label htmlFor="ekm">KM final</Label>
             <Input id="ekm" type="number" value={endKm} onChange={(e) => setEndKm(e.target.value)} />

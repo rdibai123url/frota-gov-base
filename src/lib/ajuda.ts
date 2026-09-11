@@ -148,6 +148,34 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   ),
 
+  "/utilizacao/checklist": t(
+    "Checklist de saída e retorno",
+    "Registra as condições do veículo antes e depois da utilização. A comparação ajuda a identificar possíveis novas ocorrências sem atribuir culpa.",
+    [
+      "Na saída, confira cada item antes de iniciar a utilização.",
+      "No retorno, repita a conferência durante o fechamento.",
+      "Marque Com problema, descreva a ocorrência e anexe fotos quando necessário.",
+    ],
+    [
+      { label: "Situação dos itens", description: "Escolha OK, Com problema ou Não se aplica para cada item.", tags: REQ },
+      { label: "Odômetro", description: "Informe a marcação observada no momento da conferência.", tags: COND },
+      { label: "Fotos", description: "Ficam em armazenamento privado do órgão e apoiam a análise de avarias.", tags: COND },
+      { label: "Responsável e data/hora", description: "Registrados automaticamente ao salvar.", tags: AUTO },
+    ],
+    ["Uma diferença no retorno é apenas uma possível nova ocorrência e deve ser analisada.", "Itens com problema podem originar uma solicitação de manutenção com os dados básicos reaproveitados."],
+  ),
+
+  "/disponibilidade": t(
+    "Disponibilidade da Frota",
+    "Consolida a situação operacional atual de cada veículo ou equipamento a partir dos registros do órgão.",
+    ["Use os indicadores para filtrar rapidamente.", "Refine por unidade, situação, classe ou bem.", "Abra o item para tratar a utilização, manutenção, obrigação ou ficha relacionada."],
+    [
+      { label: "Situação atual", description: "Calculada a partir da situação cadastral, obrigação vencida, manutenção, uso e reserva; não é digitada nesta tela.", tags: CALC },
+      { label: "Motivo principal", description: "Mostra a condição de maior prioridade que determinou a situação.", tags: AUTO },
+    ],
+    ["Prioridade: bloqueio ou indisponibilidade cadastral/documental; manutenção; uso; reserva; disponível.", "A tela não mostra mapa porque não há localização real dos veículos registrada no sistema."],
+  ),
+
   "/diarias": t(
     "Diárias",
     "Controle de diárias de viagem vinculadas a deslocamentos da frota, com valores, período e prestação de contas.",
