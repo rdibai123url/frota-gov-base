@@ -593,9 +593,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         </CommandDialog>
 
         {isDemoOrg && (
-          <div className="border-b border-warning/40 bg-warning/20 px-4 py-2.5 text-sm font-medium text-foreground sm:px-6">
-            AMBIENTE DE DEMONSTRAÇÃO — os dados exibidos são fictícios e destinados a apresentação
-            comercial e treinamento. Não utilize para operação real.
+          <div className="flex items-center gap-2.5 border-b border-warning/25 bg-warning/8 px-4 py-2 text-[13px] text-foreground sm:px-6">
+            <Info className="size-4 shrink-0 text-warning" />
+            <p className="min-w-0">
+              <span className="font-semibold">Ambiente de demonstração.</span> Os dados exibidos são
+              fictícios, destinados a apresentação e treinamento. Não utilize para operação real.
+            </p>
           </div>
         )}
 
@@ -682,9 +685,12 @@ export function PageHeader({
   const trail = useBreadcrumb(pathname);
 
   return (
-    <div className="mb-6 border-b pb-4">
+    <div className="mb-5 border-b border-border pb-4">
       {trail && (
-        <nav aria-label="Trilha de navegação" className="mb-1.5 text-xs text-muted-foreground">
+        <nav
+          aria-label="Trilha de navegação"
+          className="mb-1.5 text-[12.5px] text-muted-foreground"
+        >
           <span>{trail.group}</span>
           {trail.leaf && (
             <>
@@ -699,11 +705,11 @@ export function PageHeader({
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:justify-between">
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-2">
-            <h1 className="gov-title min-w-0 truncate text-2xl">{title}</h1>
+            <h1 className="gov-page-title min-w-0 truncate">{title}</h1>
             <HelpButton pathname={pathname} {...(helpKey ? { topicKey: helpKey } : {})} />
           </div>
           {description && (
-            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{description}</p>
+            <p className="mt-1.5 max-w-3xl text-[13.5px] text-muted-foreground">{description}</p>
           )}
         </div>
         {action && <div className="flex flex-wrap items-center gap-2">{action}</div>}

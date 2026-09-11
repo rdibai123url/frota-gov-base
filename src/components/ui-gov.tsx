@@ -29,36 +29,6 @@ const TONE_CLASS: Record<StatusTone, string> = {
   neutral: "border-border bg-surface-strong text-muted-foreground",
 };
 
-/** Cabeçalho padrão de página: caminho, título, subtítulo e ações à direita. */
-export function PageHeader({
-  breadcrumb,
-  title,
-  description,
-  actions,
-  className,
-}: {
-  breadcrumb?: string;
-  title: string;
-  description?: string;
-  actions?: ReactNode;
-  className?: string;
-}) {
-  return (
-    <header className={cn("mb-4 flex flex-wrap items-end justify-between gap-3", className)}>
-      <div className="min-w-0">
-        {breadcrumb ? (
-          <p className="mb-1 truncate text-[12.5px] text-muted-foreground">{breadcrumb}</p>
-        ) : null}
-        <h1 className="gov-page-title truncate">{title}</h1>
-        {description ? (
-          <p className="mt-1 max-w-3xl text-[13.5px] text-muted-foreground">{description}</p>
-        ) : null}
-      </div>
-      {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
-    </header>
-  );
-}
-
 /**
  * Vocabulário único de estados do sistema. A chave é o texto já usado nas
  * telas (em português), para que a mesma situação tenha sempre a mesma cor.
