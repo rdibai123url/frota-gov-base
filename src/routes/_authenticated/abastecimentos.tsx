@@ -1098,6 +1098,24 @@ function DetailDialog({ fueling, onClose }: { fueling: FuelingRow | null; onClos
           <Row label="KM registrado" value={fueling.odometer_km != null ? num(Number(fueling.odometer_km), 0) : null} />
           <Row label="Horímetro" value={fueling.hour_meter != null ? num(Number(fueling.hour_meter), 1) : null} />
           <Row
+            label="Tanque cheio"
+            value={
+              fueling.full_tank
+                ? "Sim — usado no cálculo de consumo efetivo"
+                : "Não informado como tanque cheio"
+            }
+          />
+          <Row
+            label="Viagem vinculada"
+            value={
+              fueling.usage
+                ? `${fueling.usage.code ?? "Utilização"} — ${dateTimeBR(fueling.usage.planned_departure)}${
+                    fueling.usage.destination ? ` · ${fueling.usage.destination}` : ""
+                  }`
+                : "Não vinculado a nenhuma viagem"
+            }
+          />
+          <Row
             label="Condutor"
             value={
               fueling.driver?.full_name ??
