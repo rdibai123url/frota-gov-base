@@ -47,6 +47,7 @@ import {
 } from "@/lib/frotagov";
 import { useEmployees } from "@/lib/pessoas";
 import { computeRoute } from "@/lib/rotas.functions";
+import { computeTripResult, useCandidateFuelings, useUsageFuelings } from "@/lib/viagem-resultado";
 import {
   CONSUMPTION_SOURCE_LABEL,
   DISTANCE_SOURCE_LABEL,
@@ -794,6 +795,151 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
   );
 }
 
+function TripResultBlock({ usage }: { usage: UsageRow }) {
+  const perms = usePerms();
+  const invalidate = useInvalidate();
+  const { data: linked = [] } = useUsageFuelings(usage.id);
+  const from = usage.actual_departure ?? usage.planned_departure ?? null;
+  const to = usage.actual_return ?? usage.planned_return ?? null;
+  const { data: candidates = [] } = useCandidateFuelings({
+    vehicleId: usage.vehicle_id,
+    from,
+    to,
+    enabled: perms.canRegister,
+  });
+  const [linking, setLinking] = useState<string | null>(null);
+
+  const result = useMemo(
+    () =>
+      computeTripResult({
+        startKm: usage.start_km,
+        endKm: usage.end_km,
+        plannedKm: usage.estimated_distance_km,
+        fuelings: linked,
+      }),
+    [usage.start_km, usage.end_km, usage.estimated_distance_km, linked],
+  );
+
+  async function link(id: string) {
+    setLinking(id);
+    const { error } = await supabase.from("fuelings").update({ usage_id: usage.id }).eq("id", id);
+    setLinking(null);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Abastecimento vinculado à viagem.");
+    invalidate(["usage-fuelings", "usage-fuelings-candidates", "fuelings"]);
+  }
+
+  const mapUrl =
+    usage.origin && usage.destination
+      ? `https://www.openstreetmap.org/directions?from=${encodeURIComponent(usage.origin)}&to=${encodeURIComponent(usage.destination)}`
+      : null;
+
+  const cell = (k: string, v: string) => (
+    <div key={k}>
+      <dt className="text-xs uppercase tracking-wide text-muted-foreground">{k}</dt>
+      <dd className="text-sm">{v}</dd>
+    </div>
+  );
+
+  return (
+    <section className="mt-2 space-y-4 rounded-lg border bg-muted/40 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="gov-title text-sm uppercase tracking-wider">Planejado x realizado</h3>
+        {mapUrl && (
+          <Button variant="outline" size="sm" className="gap-2" asChild>
+            <a href={mapUrl} target="_blank" rel="noreferrer">
+              <RouteIcon className="size-4" /> Ver rota no mapa
+            </a>
+          </Button>
+        )}
+      </div>
+
+      <dl className="grid gap-3 sm:grid-cols-3">
+        {cell("Distância planejada", result.plannedKm != null ? `${num(result.plannedKm, 1)} km` : "—")}
+        {cell("KM realizado (odômetro)", result.realKm != null ? `${num(result.realKm, 1)} km` : "—")}
+        {cell(
+          "Diferença",
+          result.diffKm != null
+            ? `${result.diffKm > 0 ? "+" : ""}${num(result.diffKm, 1)} km${result.diffPct != null ? ` (${result.diffPct > 0 ? "+" : ""}${num(result.diffPct, 1)}%)` : ""}`
+            : "—",
+        )}
+        {cell("Odômetro de saída", usage.start_km != null ? num(usage.start_km, 0) : "—")}
+        {cell("Odômetro de retorno", usage.end_km != null ? num(usage.end_km, 0) : "—")}
+        {cell("Abastecimentos vinculados", String(result.fuelingCount))}
+        {cell("Litros abastecidos na viagem", result.liters != null ? `${num(result.liters, 2)} L` : "—")}
+        {cell("Valor abastecido na viagem", result.value != null ? brl(result.value) : "—")}
+        {cell("Preço médio por litro", result.avgPrice != null ? brl(result.avgPrice) : "—")}
+        {cell("Litros estimados", usage.estimated_liters != null ? `${num(usage.estimated_liters, 1)} L` : "—")}
+        {cell("Custo estimado", usage.estimated_cost != null ? brl(usage.estimated_cost) : "—")}
+        {cell(
+          "Consumo de referência",
+          usage.estimated_consumption_kmpl != null
+            ? `${num(usage.estimated_consumption_kmpl, 2)} km/l (${CONSUMPTION_SOURCE_LABEL[usage.consumption_source ?? ""] ?? "origem não informada"})`
+            : "—",
+        )}
+      </dl>
+
+      <div className="rounded-md border bg-card p-3 text-sm">
+        <p className="font-medium">
+          {result.effectiveKmpl != null
+            ? `Consumo efetivo: ${num(result.effectiveKmpl, 2)} km/l`
+            : "Consumo efetivo indisponível"}
+        </p>
+        <p className="text-muted-foreground">
+          {result.effectiveKmpl != null
+            ? "Apurado entre dois abastecimentos de tanque cheio com odômetro registrado."
+            : result.effectiveNote}
+        </p>
+      </div>
+
+      {linked.length > 0 && (
+        <div>
+          <p className="mb-1 text-xs uppercase tracking-wide text-muted-foreground">Abastecimentos da viagem</p>
+          <ul className="space-y-1 text-sm">
+            {linked.map((f) => (
+              <li key={f.id} className="flex flex-wrap gap-2 rounded-md bg-card px-3 py-2">
+                <span>{dateTimeBR(f.fueled_at)}</span>
+                <span>{num(f.quantity ?? 0, 2)} L</span>
+                <span>{brl(f.total_value ?? 0)}</span>
+                {f.full_tank && <Badge variant="outline">Tanque cheio</Badge>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {perms.canRegister && candidates.length > 0 && (
+        <div>
+          <p className="mb-1 text-xs uppercase tracking-wide text-muted-foreground">
+            Abastecimentos do mesmo bem no período, ainda sem viagem
+          </p>
+          <ul className="space-y-1 text-sm">
+            {candidates.map((f) => (
+              <li key={f.id} className="flex flex-wrap items-center gap-2 rounded-md bg-card px-3 py-2">
+                <span>{dateTimeBR(f.fueled_at)}</span>
+                <span>{num(f.quantity ?? 0, 2)} L</span>
+                <span>{brl(f.total_value ?? 0)}</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="ml-auto"
+                  disabled={linking === f.id}
+                  onClick={() => link(f.id)}
+                >
+                  {linking === f.id ? "Vinculando…" : "Vincular à viagem"}
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function UsageDetail({ usage, onClose }: { usage: UsageRow; onClose: () => void }) {
   const items: [string, string][] = [
     ["Número", usage.code ?? "—"],
@@ -832,7 +978,7 @@ function UsageDetail({ usage, onClose }: { usage: UsageRow; onClose: () => void 
   ];
   return (
     <Dialog open onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-h-[92vh] max-w-2xl overflow-y-auto">
+      <DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Utilização {usage.code}</DialogTitle>
           <DialogDescription>Registro completo do deslocamento para fins de auditoria.</DialogDescription>
@@ -845,6 +991,7 @@ function UsageDetail({ usage, onClose }: { usage: UsageRow; onClose: () => void 
             </div>
           ))}
         </dl>
+        {usage.status === "concluida" && <TripResultBlock usage={usage} />}
       </DialogContent>
     </Dialog>
   );

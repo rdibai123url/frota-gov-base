@@ -45,7 +45,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { HelpButton } from "@/components/help-button";
 import { cn } from "@/lib/utils";
-import { supabase, useBrasaoUrl, useOrganization, useProfile, ROLE_LABELS } from "@/lib/frotagov";
+import { supabase, useBrasaoUrl, useOpenAlertCount, useOrganization, useProfile, ROLE_LABELS } from "@/lib/frotagov";
 import { useIsSuperAdmin, usePlatformSession, usePlatformContextActions } from "@/lib/platform";
 import { moduleForPath, useModuleMap } from "@/lib/modulos";
 
@@ -231,6 +231,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { data: platformSession } = usePlatformSession();
   const { exitOrg } = usePlatformContextActions();
   const { map: modules, isLoading: modulesLoading } = useModuleMap();
+  /** Contador de alertas abertos: destaca o item do menu enquanto houver pendência. */
+  const { data: openAlerts = 0 } = useOpenAlertCount();
 
   /** Bloco 6.1 — o menu mostra apenas os módulos habilitados para o órgão. */
   const visibleNav = NAV.map((group) => {
@@ -314,13 +316,17 @@ export function AppShell({ children }: { children: ReactNode }) {
                   setOpenGroup(group.id);
                 }}
                 className={cn(
-                  "flex w-full cursor-pointer items-center justify-center rounded-md py-2.5 transition-colors",
+                  "relative flex w-full cursor-pointer items-center justify-center rounded-md py-2.5 transition-colors",
                   inGroup
                     ? "bg-sidebar-accent text-sidebar-accent-foreground"
                     : "text-sidebar-foreground/70 hover:bg-white/6 hover:text-sidebar-accent-foreground",
+                  group.id === "alertas" && openAlerts > 0 && "text-warning",
                 )}
               >
                 <group.icon className="size-[18px]" />
+                {group.id === "alertas" && openAlerts > 0 && (
+                  <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-warning" />
+                )}
               </button>
             );
             return (
@@ -343,10 +349,16 @@ export function AppShell({ children }: { children: ReactNode }) {
                   active
                     ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-sidebar-primary"
                     : "text-sidebar-foreground/75 hover:bg-white/6 hover:text-sidebar-accent-foreground",
+                  group.id === "alertas" && openAlerts > 0 && "text-warning",
                 )}
               >
                 <group.icon className="size-4 shrink-0" />
                 <span className="truncate">{group.label}</span>
+                {group.id === "alertas" && openAlerts > 0 && (
+                  <span className="ml-auto rounded-full bg-warning/20 px-2 py-0.5 text-[11px] font-semibold text-warning">
+                    {openAlerts}
+                  </span>
+                )}
               </Link>
             );
           }

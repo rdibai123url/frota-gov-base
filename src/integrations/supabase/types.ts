@@ -3677,6 +3677,8 @@ export type Database = {
           message: string
           organization_id: string
           period_key: string | null
+          resolution_kind: string | null
+          resolution_reason: string | null
           resolved_at: string | null
           resolved_by: string | null
           severity: Database["public"]["Enums"]["alert_severity"]
@@ -3700,6 +3702,8 @@ export type Database = {
           message: string
           organization_id: string
           period_key?: string | null
+          resolution_kind?: string | null
+          resolution_reason?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
           severity?: Database["public"]["Enums"]["alert_severity"]
@@ -3723,6 +3727,8 @@ export type Database = {
           message?: string
           organization_id?: string
           period_key?: string | null
+          resolution_kind?: string | null
+          resolution_reason?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
           severity?: Database["public"]["Enums"]["alert_severity"]
@@ -3793,6 +3799,7 @@ export type Database = {
           expense_origin: Database["public"]["Enums"]["expense_origin"]
           fuel_type_id: string | null
           fueled_at: string
+          full_tank: boolean
           hour_meter: number | null
           id: string
           import_batch_id: string | null
@@ -3817,6 +3824,7 @@ export type Database = {
           unit_price: number
           updated_at: string
           updated_by: string | null
+          usage_id: string | null
           vehicle_id: string
           vehicle_updated: boolean
           without_authorization_reason: string | null
@@ -3844,6 +3852,7 @@ export type Database = {
           expense_origin?: Database["public"]["Enums"]["expense_origin"]
           fuel_type_id?: string | null
           fueled_at?: string
+          full_tank?: boolean
           hour_meter?: number | null
           id?: string
           import_batch_id?: string | null
@@ -3868,6 +3877,7 @@ export type Database = {
           unit_price: number
           updated_at?: string
           updated_by?: string | null
+          usage_id?: string | null
           vehicle_id: string
           vehicle_updated?: boolean
           without_authorization_reason?: string | null
@@ -3895,6 +3905,7 @@ export type Database = {
           expense_origin?: Database["public"]["Enums"]["expense_origin"]
           fuel_type_id?: string | null
           fueled_at?: string
+          full_tank?: boolean
           hour_meter?: number | null
           id?: string
           import_batch_id?: string | null
@@ -3919,6 +3930,7 @@ export type Database = {
           unit_price?: number
           updated_at?: string
           updated_by?: string | null
+          usage_id?: string | null
           vehicle_id?: string
           vehicle_updated?: boolean
           without_authorization_reason?: string | null
@@ -4013,6 +4025,13 @@ export type Database = {
             columns: ["unit_id"]
             isOneToOne: false
             referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuelings_usage_id_fkey"
+            columns: ["usage_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_usages"
             referencedColumns: ["id"]
           },
           {
@@ -11057,6 +11076,10 @@ export type Database = {
         Returns: string
       }
       current_org_id: { Args: never; Returns: string }
+      dismiss_alert: {
+        Args: { _id: string; _reason: string }
+        Returns: undefined
+      }
       ensure_transparency_period: {
         Args: { _month: number; _year: number }
         Returns: string
@@ -11294,6 +11317,7 @@ export type Database = {
         }
         Returns: string
       }
+      resolve_stale_alerts: { Args: never; Returns: number }
       review_transparency_reopen: {
         Args: { _decision: string; _justification: string; _request: string }
         Returns: undefined
