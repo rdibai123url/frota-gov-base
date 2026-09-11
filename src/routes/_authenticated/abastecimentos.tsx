@@ -71,6 +71,7 @@ import {
   useContracts,
   useCostCenters,
   useQuotas,
+  useVehicleUsages,
 } from "@/lib/frotagov";
 import { useEmployees } from "@/lib/pessoas";
 

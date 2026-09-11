@@ -135,9 +135,11 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       { label: "Combustível e custo estimados", description: "Calculados pela distância total dividida pelo consumo; o custo só aparece quando o preço do litro é informado.", tags: CALC },
       { label: "Planejado x realizado", description: "Aparece no detalhe da utilização concluída. Compara a distância planejada com o KM do odômetro e mostra litros, valor e preço médio dos abastecimentos da viagem.", tags: CALC },
       { label: "Consumo efetivo", description: "Só é apurado quando há abastecimento de tanque cheio no início e no fim do trecho, ambos com odômetro. Sem essa base, o sistema informa que está indisponível em vez de estimar.", tags: COND },
-      { label: "Vincular abastecimento à viagem", description: "Lista abastecimentos do mesmo bem no período que ainda não pertencem a nenhuma viagem; o vínculo é validado por órgão, bem e data.", tags: COND },
+      { label: "Vincular abastecimento à viagem", description: "Lista abastecimentos do mesmo bem no período que ainda não pertencem a nenhuma viagem; o vínculo é validado por órgão, bem e data. O vínculo também pode ser feito na tela de Abastecimentos.", tags: COND },
     ],
     [
+      "Três números diferentes: KM oficial (odômetro de retorno menos o de saída), litros abastecidos na viagem (o que foi comprado) e consumo efetivo km/l (só com dois tanques cheios com odômetro).",
+      "Litros e valor da viagem somam apenas os abastecimentos vinculados àquela utilização.",
       "A marcação de retorno não pode ser menor que a de saída.",
       "Um bem não pode ter duas utilizações abertas ao mesmo tempo.",
       "Só aparecem bens e condutores do próprio órgão; bens em manutenção, cedidos ou baixados não podem ser reservados.",
