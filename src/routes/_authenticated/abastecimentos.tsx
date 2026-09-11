@@ -308,7 +308,18 @@ function Abastecimentos() {
                 <TableCell className="font-medium">{(f.vehicle?.plate ?? f.vehicle?.asset_code ?? "—")}</TableCell>
                 <TableCell>{f.unit?.acronym || f.unit?.name || "—"}</TableCell>
                 <TableCell>{f.fuel?.name ?? "—"}</TableCell>
-                <TableCell className="text-right">{formatLiters(Number(f.quantity))}</TableCell>
+                <TableCell className="text-right">
+                  {formatLiters(Number(f.quantity))}
+                  {f.full_tank && (
+                    <span
+                      className="ml-1 text-xs text-muted-foreground"
+                      title="Tanque cheio"
+                      aria-label="Tanque cheio"
+                    >
+                      · cheio
+                    </span>
+                  )}
+                </TableCell>
                 <TableCell className="text-right">{brl(Number(f.unit_price))}</TableCell>
                 <TableCell className="text-right font-medium">{brl(Number(f.total_value))}</TableCell>
                 <TableCell className="text-right">
