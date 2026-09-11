@@ -1287,17 +1287,25 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
 
   "/alertas": t(
     "Alertas e inconsistências",
-    "Lista as pendências que exigem ação: documentos vencidos, habilitações a vencer, manutenções atrasadas, consumo fora do padrão e lançamentos inconsistentes.",
+    "Reúne dois tipos de ocorrência: avisos orientativos, que servem para decisão do gestor, e inconsistências corretivas, que dependem de corrigir um dado no cadastro de origem.",
     [
-      "Filtre por tipo de alerta ou gravidade.",
-      "Clique no alerta para abrir o registro de origem.",
-      "Resolva o cadastro ou lançamento indicado; o alerta some sozinho.",
+      "Use o filtro de situação para ver abertos ou o histórico já resolvido.",
+      "Clique no ícone de informação da linha para ver o que significa, o impacto e os passos daquele alerta.",
+      "Em inconsistência corretiva, corrija o dado indicado: o alerta sai dos abertos sozinho.",
+      "Em aviso orientativo, use Resolver e informe a justificativa; o dado de origem não é alterado.",
     ],
     [
-      { label: "Tipo de alerta", description: "Documentos, habilitação, manutenção, consumo ou saldo." },
-      { label: "Gravidade", description: "Calculada pela proximidade do vencimento ou pelo desvio observado.", tags: CALC },
+      { label: "Tratamento", description: "Orientativo (pode ser encerrado com justificativa) ou Corretivo (só sai quando o dado for corrigido).", tags: AUTO },
+      { label: "Detalhe", description: "Motivo exato que gerou a ocorrência, calculado pelas regras do órgão.", tags: AUTO },
+      { label: "Situação", description: "Aberto, resolvido automaticamente, resolvido por correção ou resolvido por decisão do usuário.", tags: AUTO },
+      { label: "Justificativa do encerramento", description: "Obrigatória ao resolver um aviso orientativo; fica registrada com autor e data.", tags: COND },
     ],
-    ["Os alertas são recalculados automaticamente; não há como marcar como lido sem resolver a origem."],
+    [
+      "Nenhum alerta é apagado: o encerrado sai da lista de abertos e continua no histórico.",
+      "Inconsistência corretiva não pode ser ignorada.",
+      "Resolver aviso orientativo exige perfil de administração do órgão ou gestor de frota.",
+      "Enquanto houver alerta aberto, o item do menu fica em âmbar com o número de pendências.",
+    ],
   ),
 
   "/plataforma": t(
