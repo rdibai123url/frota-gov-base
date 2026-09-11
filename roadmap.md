@@ -23,6 +23,14 @@ Execução em etapas. Cada bloco só é marcado como concluído após migração
 - [x] 18. Migração/exportação dos novos tipos — exportação v10.6.0 com pasta 14_integracoes
 - [ ] 19. Regressão geral dos Blocos 1–6 com usuário autenticado + relatório final de aderência
 
+## Ciclo atual — fechamento de viagem e alertas
+- [ ] A. Utilização: bloco "Planejado x Realizado" (odômetros, km real, diferença km/%, abastecimentos vinculados, litros, valor, preço médio/litro, consumo efetivo só com base válida, ver rota no mapa)
+- [ ] B. Vincular abastecimentos existentes à utilização (órgão, veículo, intervalo, sem duplicidade)
+- [ ] C. Alertas: classificação orientativo (resolver/ignorar com justificativa e auditoria) x corretivo (checklist dinâmico e resolução automática)
+- [ ] D. Menu "Alertas e inconsistências" em âmbar com contador de abertos
+- [ ] E. Filtro de histórico: abertos, resolvidos automaticamente, por correção, por decisão do usuário, todos
+- [ ] F. Revisão global dos textos de ajuda "i"
+
 ## Decisões de arquitetura
 - Máquinas/equipamentos são registrados na mesma tabela `vehicles`, com
   discriminador `asset_class` ('veiculo' | 'equipamento'). Isso mantém, sem
