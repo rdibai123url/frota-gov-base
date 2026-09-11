@@ -5,22 +5,23 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * FrotaGov — design system institucional.
- * Paleta: vermelho institucional (ação), grafite/preto (base), branco e cinzas neutros (leitura).
- * Tipografia: Barlow (títulos) + Source Sans 3 (texto).
+ * FrotaGov — design system institucional "Cinza Institucional Público".
+ * Paleta: grafite (ação e navegação), cinzas neutros (estrutura e leitura),
+ * branco (superfícies). Vermelho é reservado a erro, exclusão e alerta crítico.
+ * Tipografia: Inter (interface) + Inter Tight (títulos).
  */
 
 
 @theme inline {
-  --font-sans: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Barlow", ui-sans-serif, system-ui, sans-serif;
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter Tight", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --radius-sm: calc(var(--radius) - 3px);
+  --radius-md: calc(var(--radius) - 1px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  --radius-xl: calc(var(--radius) + 2px);
+  --radius-2xl: calc(var(--radius) + 4px);
+  --radius-3xl: calc(var(--radius) + 8px);
+  --radius-4xl: calc(var(--radius) + 12px);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -58,9 +59,9 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --shadow-card: 0 1px 2px oklch(0.2 0 0 / 6%), 0 1px 3px oklch(0.2 0 0 / 5%);
-  --shadow-panel: 0 10px 34px oklch(0.2 0 0 / 10%);
-  --shadow-focus: 0 0 0 3px color-mix(in oklab, var(--ring) 28%, transparent);
+  --shadow-card: 0 1px 1px rgb(17 24 39 / 4%), 0 1px 3px rgb(17 24 39 / 5%);
+  --shadow-panel: 0 8px 28px rgb(17 24 39 / 10%);
+  --shadow-focus: 0 0 0 3px color-mix(in oklab, var(--ring) 22%, transparent);
   /* Estados operacionais — vocabulário visual único do FrotaGov. */
   --color-status-ok: var(--status-ok);
   --color-status-info: var(--status-info);
@@ -73,96 +74,96 @@
 }
 
 :root {
-  --radius: 0.5rem;
-  --background: oklch(0.982 0.001 250);
-  --foreground: oklch(0.19 0.004 250);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.19 0.004 250);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.19 0.004 250);
-  --primary: oklch(0.47 0.175 26);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.955 0.002 250);
-  --secondary-foreground: oklch(0.28 0.005 250);
-  --muted: oklch(0.963 0.002 250);
-  --muted-foreground: oklch(0.5 0.006 250);
-  --accent: oklch(0.945 0.012 26);
-  --accent-foreground: oklch(0.35 0.12 26);
-  --destructive: oklch(0.58 0.215 22);
-  --destructive-foreground: oklch(0.99 0 0);
-  --success: oklch(0.52 0.11 158);
-  --success-foreground: oklch(0.99 0 0);
-  --warning: oklch(0.74 0.14 72);
-  --warning-foreground: oklch(0.2 0.01 60);
-  --border: oklch(0.905 0.002 250);
-  --input: oklch(0.885 0.002 250);
-  --ring: oklch(0.47 0.175 26);
-  --chart-1: oklch(0.47 0.175 26);
-  --chart-2: oklch(0.32 0.006 250);
-  --chart-3: oklch(0.66 0.008 250);
-  --chart-4: oklch(0.74 0.14 72);
-  --chart-5: oklch(0.52 0.11 158);
-  --sidebar: oklch(0.19 0.004 250);
-  --sidebar-foreground: oklch(0.9 0.002 250);
-  --sidebar-primary: oklch(0.52 0.19 26);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.27 0.006 250);
-  --sidebar-accent-foreground: oklch(0.98 0 0);
-  --sidebar-border: oklch(0.29 0.005 250);
-  --sidebar-ring: oklch(0.52 0.19 26);
-  --status-ok: oklch(0.52 0.11 158);
-  --status-info: oklch(0.5 0.11 250);
-  --status-warn: oklch(0.66 0.13 72);
-  --status-danger: oklch(0.55 0.2 25);
-  --status-neutral: oklch(0.5 0.006 250);
-  --surface: oklch(0.972 0.001 250);
-  --surface-strong: oklch(0.94 0.002 250);
+  --radius: 0.4375rem;
+  --background: #f3f4f6;
+  --foreground: #1f2937;
+  --card: #ffffff;
+  --card-foreground: #1f2937;
+  --popover: #ffffff;
+  --popover-foreground: #1f2937;
+  --primary: #374151;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #374151;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --accent: #eef2f7;
+  --accent-foreground: #2d3748;
+  --destructive: #c53030;
+  --destructive-foreground: #ffffff;
+  --success: #2e7d32;
+  --success-foreground: #ffffff;
+  --warning: #b7791f;
+  --warning-foreground: #ffffff;
+  --border: #d1d5db;
+  --input: #d1d5db;
+  --ring: #4b5563;
+  --chart-1: #374151;
+  --chart-2: #9ca3af;
+  --chart-3: #4a5568;
+  --chart-4: #b7791f;
+  --chart-5: #2e7d32;
+  --sidebar: #2d3748;
+  --sidebar-foreground: #e5e7eb;
+  --sidebar-primary: #cbd5e1;
+  --sidebar-primary-foreground: #1f2937;
+  --sidebar-accent: #4b5563;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #3f4a5a;
+  --sidebar-ring: #9ca3af;
+  --status-ok: #2e7d32;
+  --status-info: #4a5568;
+  --status-warn: #b7791f;
+  --status-danger: #c53030;
+  --status-neutral: #6b7280;
+  --surface: #f9fafb;
+  --surface-strong: #f3f4f6;
 }
 
 .dark {
-  --background: oklch(0.17 0.003 250);
-  --foreground: oklch(0.95 0.002 250);
-  --card: oklch(0.215 0.004 250);
-  --card-foreground: oklch(0.95 0.002 250);
-  --popover: oklch(0.215 0.004 250);
-  --popover-foreground: oklch(0.95 0.002 250);
-  --primary: oklch(0.62 0.2 26);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.27 0.005 250);
-  --secondary-foreground: oklch(0.95 0.002 250);
-  --muted: oklch(0.27 0.005 250);
-  --muted-foreground: oklch(0.72 0.004 250);
-  --accent: oklch(0.3 0.03 26);
-  --accent-foreground: oklch(0.95 0.01 26);
-  --destructive: oklch(0.66 0.21 22);
-  --destructive-foreground: oklch(0.99 0 0);
-  --success: oklch(0.64 0.12 158);
-  --success-foreground: oklch(0.16 0.01 158);
-  --warning: oklch(0.79 0.14 72);
-  --warning-foreground: oklch(0.18 0.01 60);
-  --border: oklch(1 0 0 / 13%);
-  --input: oklch(1 0 0 / 17%);
-  --ring: oklch(0.62 0.2 26);
-  --chart-1: oklch(0.62 0.2 26);
-  --chart-2: oklch(0.85 0.003 250);
-  --chart-3: oklch(0.6 0.005 250);
-  --chart-4: oklch(0.79 0.14 72);
-  --chart-5: oklch(0.64 0.12 158);
-  --sidebar: oklch(0.145 0.003 250);
-  --sidebar-foreground: oklch(0.9 0.002 250);
-  --sidebar-primary: oklch(0.62 0.2 26);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.25 0.005 250);
-  --sidebar-accent-foreground: oklch(0.98 0 0);
-  --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: oklch(0.62 0.2 26);
-  --status-ok: oklch(0.68 0.13 158);
-  --status-info: oklch(0.68 0.12 250);
-  --status-warn: oklch(0.79 0.14 72);
-  --status-danger: oklch(0.68 0.2 25);
-  --status-neutral: oklch(0.72 0.004 250);
-  --surface: oklch(0.2 0.003 250);
-  --surface-strong: oklch(0.245 0.004 250);
+  --background: #111827;
+  --foreground: #e5e7eb;
+  --card: #1a2230;
+  --card-foreground: #e5e7eb;
+  --popover: #1a2230;
+  --popover-foreground: #e5e7eb;
+  --primary: #cbd5e1;
+  --primary-foreground: #1f2937;
+  --secondary: #273142;
+  --secondary-foreground: #e5e7eb;
+  --muted: #273142;
+  --muted-foreground: #9ca3af;
+  --accent: #2f3a4c;
+  --accent-foreground: #f3f4f6;
+  --destructive: #e05252;
+  --destructive-foreground: #1f2937;
+  --success: #4caf50;
+  --success-foreground: #10231a;
+  --warning: #d69e2e;
+  --warning-foreground: #1f2937;
+  --border: #37415180;
+  --input: #4b5563;
+  --ring: #9ca3af;
+  --chart-1: #cbd5e1;
+  --chart-2: #6b7280;
+  --chart-3: #94a3b8;
+  --chart-4: #d69e2e;
+  --chart-5: #4caf50;
+  --sidebar: #171f2b;
+  --sidebar-foreground: #d1d5db;
+  --sidebar-primary: #cbd5e1;
+  --sidebar-primary-foreground: #1f2937;
+  --sidebar-accent: #374151;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #2b3544;
+  --sidebar-ring: #9ca3af;
+  --status-ok: #4caf50;
+  --status-info: #a0aec0;
+  --status-warn: #d69e2e;
+  --status-danger: #e05252;
+  --status-neutral: #9ca3af;
+  --surface: #1a2230;
+  --surface-strong: #222c3c;
 }
 
 
@@ -175,6 +176,7 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    font-size: 14.5px;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -187,12 +189,21 @@
     text-wrap: balance;
   }
 
+  label {
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+
   :focus-visible {
     outline: 2px solid var(--color-ring);
     outline-offset: 2px;
   }
 
   /* Densidade e legibilidade padrão de tabelas institucionais */
+  table {
+    font-size: 13.5px;
+  }
+
   table th {
     font-family: var(--font-display);
     letter-spacing: 0.02em;
@@ -213,26 +224,51 @@
 
 @utility gov-title {
   font-family: var(--font-display);
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-weight: 700;
+  letter-spacing: -0.012em;
+}
+
+/* Título de página: 26–30px, peso 700. */
+@utility gov-page-title {
+  font-family: var(--font-display);
+  font-size: 27px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+/* Título de seção: 18–20px. */
+@utility gov-section-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.012em;
 }
 
 /* Rótulo de seção/coluna no padrão ERP: curto, alto e discreto. */
 @utility gov-label {
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 600;
   line-height: 1.2;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--color-muted-foreground);
 }
 
 /* Faixa de filtros e barras utilitárias das telas de operação. */
 @utility gov-band {
-  background: var(--color-surface);
+  background: var(--color-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
+}
+
+/* Campo somente leitura: preenchido automaticamente ou calculado. */
+@utility gov-readonly {
+  background: var(--color-surface-strong);
+  color: var(--color-muted-foreground);
+  border-style: dashed;
 }
 
 /* Tabela densa com cabeçalho fixo dentro de um contêiner rolável. */
@@ -240,17 +276,18 @@
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 13px;
+  font-size: 13.5px;
 
   & thead th {
     position: sticky;
     top: 0;
     z-index: 2;
     background: var(--color-surface-strong);
-    padding: 8px 10px;
+    padding: 9px 12px;
     text-align: left;
-    font-size: 11px;
-    letter-spacing: 0.05em;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--color-muted-foreground);
     border-bottom: 1px solid var(--color-border);
@@ -258,12 +295,12 @@
   }
 
   & tbody td {
-    padding: 7px 10px;
-    border-bottom: 1px solid color-mix(in oklab, var(--color-border) 70%, transparent);
+    padding: 8px 12px;
+    border-bottom: 1px solid color-mix(in oklab, var(--color-border) 55%, transparent);
     vertical-align: middle;
   }
 
   & tbody tr:hover td {
-    background: color-mix(in oklab, var(--color-accent) 45%, transparent);
+    background: var(--color-accent);
   }
 }

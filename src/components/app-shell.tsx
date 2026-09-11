@@ -22,6 +22,7 @@ import {
   Search,
   PanelLeftClose,
   PanelLeftOpen,
+  Info,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -316,7 +317,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   "flex w-full cursor-pointer items-center justify-center rounded-md py-2.5 transition-colors",
                   inGroup
                     ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "opacity-70 hover:bg-sidebar-accent/60 hover:opacity-100",
+                    : "text-sidebar-foreground/70 hover:bg-white/6 hover:text-sidebar-accent-foreground",
                 )}
               >
                 <group.icon className="size-[18px]" />
@@ -341,7 +342,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   "relative flex items-center gap-3 rounded-md px-3 py-2 text-[13.5px] transition-colors",
                   active
                     ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-sidebar-primary"
-                    : "opacity-75 hover:bg-sidebar-accent/60 hover:opacity-100",
+                    : "text-sidebar-foreground/75 hover:bg-white/6 hover:text-sidebar-accent-foreground",
                 )}
               >
                 <group.icon className="size-4 shrink-0" />
@@ -358,11 +359,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                 aria-expanded={expanded}
                 onClick={() => setOpenGroup(expanded ? null : group.id)}
                 className={cn(
-                  "flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-[13.5px] transition-colors",
+                  "flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-[13.5px] transition-colors hover:bg-white/6",
                   inGroup
-                    ? "font-semibold text-sidebar-accent-foreground opacity-100"
-                    : "opacity-75 hover:opacity-100",
-                  "hover:bg-sidebar-accent/60",
+                    ? "font-semibold text-sidebar-accent-foreground"
+                    : "text-sidebar-foreground/75 hover:text-sidebar-accent-foreground",
                 )}
               >
                 <group.icon className="size-4 shrink-0" />
@@ -383,8 +383,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                         className={cn(
                           "relative block truncate rounded-md px-3 py-1.5 text-[13px] transition-colors",
                           active
-                            ? "bg-sidebar-primary/18 font-semibold text-sidebar-accent-foreground before:absolute before:inset-y-1 before:-left-[13px] before:w-[3px] before:rounded-full before:bg-sidebar-primary"
-                            : "opacity-70 hover:bg-sidebar-accent/50 hover:opacity-100",
+                            ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground before:absolute before:inset-y-1 before:-left-[13px] before:w-[3px] before:rounded-full before:bg-sidebar-primary"
+                            : "text-sidebar-foreground/70 hover:bg-white/6 hover:text-sidebar-accent-foreground",
                         )}
                       >
                         {leaf.label}
@@ -471,7 +471,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex items-center gap-2 border-b bg-card px-4 py-2.5 shadow-card sm:px-6">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-card px-4 sm:px-6">
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setOpen(true)}>
             <Menu className="size-5" />
           </Button>
@@ -491,35 +491,31 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Tooltip>
 
           {brasao ? (
-            <img
-              src={brasao}
-              alt="Brasão do órgão"
-              className="size-9 rounded-sm object-contain"
-            />
+            <img src={brasao} alt="Brasão do órgão" className="size-8 rounded-sm object-contain" />
           ) : (
-            <div className="flex size-9 items-center justify-center rounded-sm bg-secondary text-secondary-foreground">
-              <Landmark className="size-5" />
+            <div className="flex size-8 items-center justify-center rounded-sm bg-muted text-muted-foreground">
+              <Landmark className="size-[18px]" />
             </div>
           )}
-          <div className="min-w-0">
-            <p className="gov-title truncate text-sm sm:text-[15px]">
+          <div className="min-w-0 leading-tight">
+            <p className="gov-title truncate text-[14.5px]">
               {org?.legal_name ?? "Órgão não configurado"}
             </p>
-            <p className="truncate text-[11px] text-muted-foreground">
+            <p className="truncate text-[12px] text-muted-foreground">
               {[org?.short_name, org?.city, org?.state].filter(Boolean).join(" · ") ||
                 "Complete os dados do órgão"}
             </p>
           </div>
 
-          <div className="ml-auto flex items-center gap-1.5">
+          <div className="ml-auto flex items-center gap-1">
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="hidden items-center gap-2 rounded-md border bg-surface px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent md:flex"
+              className="hidden h-8 items-center gap-2 rounded-md border border-border bg-surface px-2.5 text-[12.5px] text-muted-foreground transition-colors hover:bg-muted md:flex"
             >
               <Search className="size-3.5" />
               <span>Buscar tela…</span>
-              <kbd className="rounded border bg-card px-1 text-[10px]">Ctrl K</kbd>
+              <kbd className="rounded border border-border bg-card px-1 text-[10px]">Ctrl K</kbd>
             </button>
             <Button
               variant="ghost"
@@ -593,9 +589,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         </CommandDialog>
 
         {isDemoOrg && (
-          <div className="border-b border-warning/40 bg-warning/20 px-4 py-2.5 text-sm font-medium text-foreground sm:px-6">
-            AMBIENTE DE DEMONSTRAÇÃO — os dados exibidos são fictícios e destinados a apresentação
-            comercial e treinamento. Não utilize para operação real.
+          <div className="flex items-center gap-2.5 border-b border-warning/25 bg-warning/8 px-4 py-2 text-[13px] text-foreground sm:px-6">
+            <Info className="size-4 shrink-0 text-warning" />
+            <p className="min-w-0">
+              <span className="font-semibold">Ambiente de demonstração.</span> Os dados exibidos são
+              fictícios, destinados a apresentação e treinamento. Não utilize para operação real.
+            </p>
           </div>
         )}
 
@@ -682,9 +681,12 @@ export function PageHeader({
   const trail = useBreadcrumb(pathname);
 
   return (
-    <div className="mb-6 border-b pb-4">
+    <div className="mb-5 border-b border-border pb-4">
       {trail && (
-        <nav aria-label="Trilha de navegação" className="mb-1.5 text-xs text-muted-foreground">
+        <nav
+          aria-label="Trilha de navegação"
+          className="mb-1.5 text-[12.5px] text-muted-foreground"
+        >
           <span>{trail.group}</span>
           {trail.leaf && (
             <>
@@ -699,11 +701,11 @@ export function PageHeader({
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:justify-between">
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-2">
-            <h1 className="gov-title min-w-0 truncate text-2xl">{title}</h1>
+            <h1 className="gov-page-title min-w-0 truncate">{title}</h1>
             <HelpButton pathname={pathname} {...(helpKey ? { topicKey: helpKey } : {})} />
           </div>
           {description && (
-            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{description}</p>
+            <p className="mt-1.5 max-w-3xl text-[13.5px] text-muted-foreground">{description}</p>
           )}
         </div>
         {action && <div className="flex flex-wrap items-center gap-2">{action}</div>}
