@@ -24,12 +24,12 @@ Execução em etapas. Cada bloco só é marcado como concluído após migração
 - [ ] 19. Regressão geral dos Blocos 1–6 com usuário autenticado + relatório final de aderência
 
 ## Ciclo atual — fechamento de viagem e alertas
-- [ ] A. Utilização: bloco "Planejado x Realizado" (odômetros, km real, diferença km/%, abastecimentos vinculados, litros, valor, preço médio/litro, consumo efetivo só com base válida, ver rota no mapa)
-- [ ] B. Vincular abastecimentos existentes à utilização (órgão, veículo, intervalo, sem duplicidade)
-- [ ] C. Alertas: classificação orientativo (resolver/ignorar com justificativa e auditoria) x corretivo (checklist dinâmico e resolução automática)
-- [ ] D. Menu "Alertas e inconsistências" em âmbar com contador de abertos
-- [ ] E. Filtro de histórico: abertos, resolvidos automaticamente, por correção, por decisão do usuário, todos
-- [ ] F. Revisão global dos textos de ajuda "i"
+- [x] A. Utilização: bloco "Planejado x Realizado" (odômetros, km real, diferença km/%, abastecimentos vinculados, litros, valor, preço médio/litro, consumo efetivo só com base válida, ver rota no mapa)
+- [x] B. Vincular abastecimentos existentes à utilização (órgão, veículo, intervalo, sem duplicidade)
+- [x] C. Alertas: classificação orientativo (resolver/ignorar com justificativa e auditoria) x corretivo (checklist dinâmico e resolução automática)
+- [x] D. Menu "Alertas e inconsistências" em âmbar com contador de abertos
+- [x] E. Filtro de histórico: abertos, resolvidos automaticamente, por correção, por decisão do usuário, todos
+- [x] F. Revisão global dos textos de ajuda "i"
 
 ## Decisões de arquitetura
 - Máquinas/equipamentos são registrados na mesma tabela `vehicles`, com
