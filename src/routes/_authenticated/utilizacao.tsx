@@ -484,7 +484,7 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
       notes: notes.trim() || null,
       round_trip: roundTrip,
       estimated_distance_km: trip.totalKm,
-      estimated_duration_min: routeMin,
+      estimated_duration_min: roundTrip && routeMin ? routeMin * 2 : routeMin,
       route_geometry: (routeGeometry ?? null) as never,
       route_provider: distanceSource === "rota" ? "osrm" : null,
       route_calculated_at: distanceSource === "rota" ? new Date().toISOString() : null,
@@ -808,6 +808,19 @@ function UsageDetail({ usage, onClose }: { usage: UsageRow; onClose: () => void 
     ["Saída real", dateTimeBR(usage.actual_departure)],
     ["Retorno real", dateTimeBR(usage.actual_return)],
     ["Origem", usage.origin ?? "—"],
+    ["Ida e volta", usage.round_trip ? "Sim" : "Não"],
+    [
+      "Distância estimada",
+      usage.estimated_distance_km != null
+        ? `${num(usage.estimated_distance_km, 1)} km (${DISTANCE_SOURCE_LABEL[usage.distance_source ?? "nao_calculada"] ?? "—"})`
+        : "—",
+    ],
+    ["Duração estimada", durationLabel(usage.estimated_duration_min)],
+    [
+      "Combustível estimado",
+      usage.estimated_liters != null ? `${num(usage.estimated_liters, 1)} L` : "—",
+    ],
+    ["Custo estimado", usage.estimated_cost != null ? brl(usage.estimated_cost) : "—"],
     ["Destino", usage.destination ?? "—"],
     ["Finalidade", usage.purpose ?? "—"],
     ["KM inicial", usage.start_km != null ? num(usage.start_km, 0) : "—"],
