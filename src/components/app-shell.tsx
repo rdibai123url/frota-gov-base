@@ -491,35 +491,31 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Tooltip>
 
           {brasao ? (
-            <img
-              src={brasao}
-              alt="Brasão do órgão"
-              className="size-9 rounded-sm object-contain"
-            />
+            <img src={brasao} alt="Brasão do órgão" className="size-8 rounded-sm object-contain" />
           ) : (
-            <div className="flex size-9 items-center justify-center rounded-sm bg-secondary text-secondary-foreground">
-              <Landmark className="size-5" />
+            <div className="flex size-8 items-center justify-center rounded-sm bg-muted text-muted-foreground">
+              <Landmark className="size-[18px]" />
             </div>
           )}
-          <div className="min-w-0">
-            <p className="gov-title truncate text-sm sm:text-[15px]">
+          <div className="min-w-0 leading-tight">
+            <p className="gov-title truncate text-[14.5px]">
               {org?.legal_name ?? "Órgão não configurado"}
             </p>
-            <p className="truncate text-[11px] text-muted-foreground">
+            <p className="truncate text-[12px] text-muted-foreground">
               {[org?.short_name, org?.city, org?.state].filter(Boolean).join(" · ") ||
                 "Complete os dados do órgão"}
             </p>
           </div>
 
-          <div className="ml-auto flex items-center gap-1.5">
+          <div className="ml-auto flex items-center gap-1">
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="hidden items-center gap-2 rounded-md border bg-surface px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent md:flex"
+              className="hidden h-8 items-center gap-2 rounded-md border border-border bg-surface px-2.5 text-[12.5px] text-muted-foreground transition-colors hover:bg-muted md:flex"
             >
               <Search className="size-3.5" />
               <span>Buscar tela…</span>
-              <kbd className="rounded border bg-card px-1 text-[10px]">Ctrl K</kbd>
+              <kbd className="rounded border border-border bg-card px-1 text-[10px]">Ctrl K</kbd>
             </button>
             <Button
               variant="ghost"
