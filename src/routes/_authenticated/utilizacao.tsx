@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Search, CarFront, LogOut, LogIn, Ban, Eye } from "lucide-react";
+import { Plus, Search, CarFront, LogOut, LogIn, Ban, Eye, Route as RouteIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/app-shell";
@@ -46,6 +46,16 @@ import {
   UF_LIST,
 } from "@/lib/frotagov";
 import { useEmployees } from "@/lib/pessoas";
+import { computeRoute } from "@/lib/rotas.functions";
+import {
+  CONSUMPTION_SOURCE_LABEL,
+  DISTANCE_SOURCE_LABEL,
+  durationLabel,
+  estimateTrip,
+  useVehicleConsumption,
+} from "@/lib/viagens";
+import { Switch } from "@/components/ui/switch";
+import { brl } from "@/lib/frotagov";
 
 export const Route = createFileRoute("/_authenticated/utilizacao")({
   head: () => ({
@@ -317,9 +327,74 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
   const [justification, setJustification] = useState("");
   const [saving, setSaving] = useState(false);
 
+  /* ------------------- inteligência de viagem (estimativa) ------------------ */
+  const [roundTrip, setRoundTrip] = useState(false);
+  const [routeKm, setRouteKm] = useState<number | null>(null);
+  const [routeMin, setRouteMin] = useState<number | null>(null);
+  const [routeGeometry, setRouteGeometry] = useState<unknown>(null);
+  const [distanceSource, setDistanceSource] = useState<"nao_calculada" | "rota" | "manual">("nao_calculada");
+  const [manualKm, setManualKm] = useState("");
+  const [fuelPrice, setFuelPrice] = useState("");
+  const [routing, setRouting] = useState(false);
+  const [routeNote, setRouteNote] = useState("");
+
   const vehicle = vehicles.find((v) => v.id === vehicleId) ?? null;
   const driver = drivers.find((d) => d.id === driverId) ?? null;
   const unit = units.find((u) => u.id === vehicle?.unit_id) ?? null;
+
+  const consumption = useVehicleConsumption(vehicle?.id ?? null, {
+    assetClass: vehicle?.asset_class ?? null,
+    category: vehicle?.vehicle_type ?? null,
+    brand: vehicle?.brand ?? null,
+    model: vehicle?.model ?? null,
+  });
+  const oneWayKm = distanceSource === "manual" ? Number(manualKm || 0) : routeKm;
+  const trip = estimateTrip({
+    distanceKm: oneWayKm,
+    roundTrip,
+    kmpl: consumption.kmpl,
+    fuelPrice: fuelPrice ? Number(fuelPrice) : null,
+  });
+
+  /** Calcula a rota rodoviária provável entre os endereços informados. */
+  async function calcularRota() {
+    if (!originCity.trim() || !destinationCity.trim()) {
+      toast.error("Informe ao menos a cidade de origem e a de destino.");
+      return;
+    }
+    setRouting(true);
+    try {
+      const res = await computeRoute({
+        data: {
+          origin: {
+            address: origin,
+            city: originCity,
+            state: originState === NONE ? null : originState,
+          },
+          destination: {
+            address: destination,
+            city: destinationCity,
+            state: destinationState === NONE ? null : destinationState,
+          },
+        },
+      });
+      setRouteNote(res.message);
+      if (res.ok) {
+        setRouteKm(res.distanceKm);
+        setRouteMin(res.durationMin);
+        setRouteGeometry(res.geometry);
+        setDistanceSource("rota");
+        toast.success("Rota estimada calculada.");
+      } else {
+        toast.warning(res.message);
+      }
+    } catch {
+      setRouteNote("Não foi possível consultar o serviço de rotas agora.");
+      toast.message("Serviço de rotas indisponível. Você pode informar a distância manualmente.");
+    } finally {
+      setRouting(false);
+    }
+  }
 
   const issues: { level: "erro" | "alerta" | "info"; message: string }[] = [];
   if (!vehicle) issues.push({ level: "erro", message: "Selecione o veículo." });
@@ -407,6 +482,18 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
         .map((p) => p.trim())
         .filter(Boolean),
       notes: notes.trim() || null,
+      round_trip: roundTrip,
+      estimated_distance_km: trip.totalKm,
+      estimated_duration_min: roundTrip && routeMin ? routeMin * 2 : routeMin,
+      route_geometry: (routeGeometry ?? null) as never,
+      route_provider: distanceSource === "rota" ? "osrm" : null,
+      route_calculated_at: distanceSource === "rota" ? new Date().toISOString() : null,
+      distance_source: distanceSource,
+      estimated_consumption_kmpl: consumption.kmpl,
+      consumption_source: consumption.source,
+      estimated_liters: trip.liters,
+      fuel_price_used: fuelPrice ? Number(fuelPrice) : null,
+      estimated_cost: trip.cost,
       maintenance_justification: needsJustification ? justification.trim() : null,
       status: (perms.canWrite ? "autorizada" : "solicitada") as UsageStatus,
       created_by: perms.userId,
@@ -580,6 +667,89 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
               </Select>
             </div>
           </div>
+          {/* Inteligência de viagem: rota, distância e consumo estimado. */}
+          <div className="gov-band sm:col-span-2 p-3">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <p className="flex items-center gap-2 text-sm font-medium">
+                <RouteIcon className="size-4" /> Estimativa da viagem
+              </p>
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 text-sm">
+                  <Switch checked={roundTrip} onCheckedChange={setRoundTrip} />
+                  Ida e volta
+                </label>
+                <Button type="button" variant="outline" size="sm" onClick={calcularRota} disabled={routing}>
+                  {routing ? <Loader2 className="size-4 animate-spin" /> : <RouteIcon className="size-4" />}
+                  {routing ? "Calculando…" : "Calcular rota"}
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div>
+                <Label htmlFor="kmman">Distância só de ida (km)</Label>
+                <Input
+                  id="kmman"
+                  inputMode="decimal"
+                  value={distanceSource === "manual" ? manualKm : routeKm != null ? String(routeKm) : ""}
+                  onChange={(e) => {
+                    setManualKm(e.target.value);
+                    setDistanceSource(e.target.value ? "manual" : "nao_calculada");
+                  }}
+                  placeholder="Calcule a rota ou informe"
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  {DISTANCE_SOURCE_LABEL[distanceSource]}
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="prc">Preço do litro (opcional)</Label>
+                <Input
+                  id="prc"
+                  inputMode="decimal"
+                  value={fuelPrice}
+                  onChange={(e) => setFuelPrice(e.target.value)}
+                  placeholder="Ex.: 6,29"
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground">Usado apenas para estimar o custo.</p>
+              </div>
+              <div>
+                <Label>Consumo considerado</Label>
+                <Input
+                  readOnly
+                  className="bg-muted/50"
+                  value={consumption.kmpl ? `${num(consumption.kmpl, 2)} km/l` : "—"}
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  {consumption.source ? CONSUMPTION_SOURCE_LABEL[consumption.source] : consumption.note}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-3 grid gap-2 text-sm sm:grid-cols-4">
+              <div>
+                <p className="gov-label">Distância total</p>
+                <p className="tabular-nums">{trip.totalKm != null ? `${num(trip.totalKm, 1)} km` : "—"}</p>
+              </div>
+              <div>
+                <p className="gov-label">Duração estimada</p>
+                <p className="tabular-nums">{durationLabel(roundTrip && routeMin ? routeMin * 2 : routeMin)}</p>
+              </div>
+              <div>
+                <p className="gov-label">Combustível estimado</p>
+                <p className="tabular-nums">{trip.liters != null ? `${num(trip.liters, 1)} L` : "—"}</p>
+              </div>
+              <div>
+                <p className="gov-label">Custo estimado</p>
+                <p className="tabular-nums">{trip.cost != null ? brl(trip.cost) : "—"}</p>
+              </div>
+            </div>
+
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              {routeNote || "Valores estimados para planejamento. A quilometragem oficial continua sendo a registrada na saída e no retorno."}
+            </p>
+          </div>
+
           <div className="sm:col-span-2">
             <Label htmlFor="fin">Finalidade / serviço</Label>
             <Input id="fin" value={purpose} onChange={(e) => setPurpose(e.target.value)} />
@@ -638,6 +808,19 @@ function UsageDetail({ usage, onClose }: { usage: UsageRow; onClose: () => void 
     ["Saída real", dateTimeBR(usage.actual_departure)],
     ["Retorno real", dateTimeBR(usage.actual_return)],
     ["Origem", usage.origin ?? "—"],
+    ["Ida e volta", usage.round_trip ? "Sim" : "Não"],
+    [
+      "Distância estimada",
+      usage.estimated_distance_km != null
+        ? `${num(usage.estimated_distance_km, 1)} km (${DISTANCE_SOURCE_LABEL[usage.distance_source ?? "nao_calculada"] ?? "—"})`
+        : "—",
+    ],
+    ["Duração estimada", durationLabel(usage.estimated_duration_min)],
+    [
+      "Combustível estimado",
+      usage.estimated_liters != null ? `${num(usage.estimated_liters, 1)} L` : "—",
+    ],
+    ["Custo estimado", usage.estimated_cost != null ? brl(usage.estimated_cost) : "—"],
     ["Destino", usage.destination ?? "—"],
     ["Finalidade", usage.purpose ?? "—"],
     ["KM inicial", usage.start_km != null ? num(usage.start_km, 0) : "—"],

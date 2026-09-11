@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
 import {
   Truck,
@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 
 import { PageHeader } from "@/components/app-shell";
+import { EmptyState, KpiCard, SectionCard, type StatusTone } from "@/components/ui-gov";
 import { useDiaries, diaryIndicators } from "@/lib/diarias";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -92,33 +93,38 @@ export const Route = createFileRoute("/_authenticated/painel")({
   component: Painel,
 });
 
+/**
+ * Indicador do painel. Continua recebendo exatamente os mesmos números
+ * calculados abaixo; muda apenas a apresentação (compacta, com faixa de
+ * estado e, quando informado o destino, clicável para a tela de origem).
+ */
 function StatCard({
   label,
   value,
   icon: Icon,
   tone = "default",
+  to,
+  hint,
 }: {
   label: string;
   value: number | string;
   icon: typeof Truck;
   tone?: "default" | "success" | "warning";
+  /** Tela que detalha este indicador. */
+  to?: string;
+  hint?: string;
 }) {
-  const toneClass =
-    tone === "success"
-      ? "bg-success/10 text-success"
-      : tone === "warning"
-        ? "bg-warning/15 text-warning"
-        : "bg-secondary text-secondary-foreground";
+  const navigate = useNavigate();
+  const kpiTone: StatusTone = tone === "success" ? "ok" : tone === "warning" ? "warn" : "info";
   return (
-    <div className="rounded-lg border bg-card p-5 shadow-card">
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <span className={`flex size-9 items-center justify-center rounded-md ${toneClass}`}>
-          <Icon className="size-4" />
-        </span>
-      </div>
-      <p className="gov-title mt-3 text-3xl">{value}</p>
-    </div>
+    <KpiCard
+      label={label}
+      value={value}
+      hint={hint ?? (to ? "Ver detalhes" : undefined)}
+      tone={kpiTone}
+      icon={<Icon className="size-4" />}
+      onClick={to ? () => navigate({ to }) : undefined}
+    />
   );
 }
 
@@ -349,7 +355,7 @@ function Painel() {
       />
 
       <Tabs defaultValue="geral">
-        <TabsList className="flex h-auto flex-wrap justify-start">
+        <TabsList className="flex h-auto flex-wrap justify-start gap-1 bg-surface p-1">
           <TabsTrigger value="geral">Visão geral</TabsTrigger>
           <TabsTrigger value="abastecimento">Abastecimento</TabsTrigger>
           <TabsTrigger value="manutencao">Manutenção</TabsTrigger>
@@ -358,39 +364,39 @@ function Painel() {
         </TabsList>
 
         <TabsContent value="geral" className="pt-5">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <StatCard label="Total de veículos" value={isLoading ? "—" : vehicles.length} icon={Truck} />
-        <StatCard label="Veículos ativos" value={ativos} icon={CircleCheck} tone="success" />
-        <StatCard label="Em manutenção" value={manutencao} icon={Wrench} tone="warning" />
-        <StatCard label="Secretarias / Unidades" value={units.length} icon={Building2} />
-        <StatCard label="Usuários" value={users.length} icon={Users} />
+      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5">
+        <StatCard label="Total de veículos" value={isLoading ? "—" : vehicles.length} icon={Truck} to="/veiculos" />
+        <StatCard label="Veículos ativos" value={ativos} icon={CircleCheck} tone="success" to="/veiculos" />
+        <StatCard label="Em manutenção" value={manutencao} icon={Wrench} tone="warning" to="/manutencoes" />
+        <StatCard label="Secretarias / Unidades" value={units.length} icon={Building2} to="/unidades" />
+        <StatCard label="Usuários" value={users.length} icon={Users} to="/usuarios" />
       </div>
         </TabsContent>
 
         <TabsContent value="abastecimento" className="pt-5">
-      <h2 className="gov-title mb-4 text-lg">Abastecimento no mês</h2>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <StatCard label="Abastecimentos no mês" value={mes.count} icon={Fuel} />
+      <h2 className="gov-label mb-2.5">Abastecimento no mês</h2>
+      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5">
+        <StatCard label="Abastecimentos no mês" value={mes.count} icon={Fuel} to="/abastecimentos" />
         <StatCard label="Quantidade abastecida" value={num(mes.quantity, 2)} icon={Droplets} />
         <StatCard label="Valor gasto no mês" value={brl(mes.total)} icon={Banknote} />
         <StatCard label="Veículos abastecidos" value={mes.vehicles} icon={Truck} />
-        <StatCard label="Alertas em aberto" value={abertos} icon={BellRing} tone={abertos > 0 ? "warning" : "default"} />
+        <StatCard label="Alertas em aberto" value={abertos} icon={BellRing} to="/alertas" tone={abertos > 0 ? "warning" : "default"} />
       </div>
 
-      <h2 className="gov-title mt-10 mb-4 text-lg">Condutores e autorizações</h2>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <StatCard label="Condutores ativos" value={condutoresAtivos} icon={IdCard} />
-        <StatCard label="CNHs vencidas" value={cnhVencidas} icon={IdCard} tone={cnhVencidas > 0 ? "warning" : "default"} />
+      <h2 className="gov-label mb-2.5 mt-7">Condutores e autorizações</h2>
+      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5">
+        <StatCard label="Condutores ativos" value={condutoresAtivos} icon={IdCard} to="/condutores" />
+        <StatCard label="CNHs vencidas" value={cnhVencidas} icon={IdCard} to="/condutores" tone={cnhVencidas > 0 ? "warning" : "default"} />
         <StatCard label="CNHs a vencer (30 dias)" value={cnhAVencer} icon={IdCard} tone={cnhAVencer > 0 ? "warning" : "default"} />
-        <StatCard label="Autorizações abertas" value={autAbertas} icon={Ticket} />
+        <StatCard label="Autorizações abertas" value={autAbertas} icon={Ticket} to="/autorizacoes" />
         <StatCard label="Autorizações utilizadas no mês" value={autUsadasMes} icon={Ticket} tone="success" />
       </div>
         </TabsContent>
 
         <TabsContent value="manutencao" className="pt-5">
-      <h2 className="gov-title mb-4 text-lg">Manutenção, peças e pneus</h2>
+      <h2 className="gov-label mb-2.5">Manutenção, peças e pneus</h2>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-6">
         <StatCard
           label="Preventivas vencidas"
           value={manut.vencidas}
@@ -403,22 +409,22 @@ function Painel() {
           icon={ClipboardList}
           tone={manut.proximas > 0 ? "warning" : "default"}
         />
-        <StatCard label="Solicitações em aberto" value={manut.solicitacoesAbertas} icon={Wrench} />
+        <StatCard label="Solicitações em aberto" value={manut.solicitacoesAbertas} icon={Wrench} to="/manutencoes" />
         <StatCard label="Veículos em oficina" value={manut.emOficina} icon={Wrench} tone={manut.emOficina > 0 ? "warning" : "default"} />
         <StatCard label="Custo de manutenção no mês" value={brl(manut.custoMes)} icon={Cog} />
         <StatCard label="Pneus instalados / estoque" value={`${manut.pneusInstalados} / ${manut.pneusEstoque}`} icon={CircleDot} />
       </div>
 
-      <h2 className="gov-title mt-10 mb-4 text-lg">Limpeza da frota</h2>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <StatCard label="Limpezas no mês" value={limpeza.mes} icon={Droplets} />
+      <h2 className="gov-label mb-2.5 mt-7">Limpeza da frota</h2>
+      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3">
+        <StatCard label="Limpezas no mês" value={limpeza.mes} icon={Droplets} to="/limpeza" />
         <StatCard label="Gasto com limpeza no mês" value={brl(limpeza.valorMes)} icon={Banknote} />
         <StatCard label="Limpezas agendadas" value={limpeza.agendadas} icon={Droplets} tone={limpeza.agendadas > 0 ? "warning" : "default"} />
       </div>
 
-      <h2 className="gov-title mt-10 mb-4 text-lg">Prestadores do órgão, cotações e ordens de serviço</h2>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Cotações abertas" value={rede.cotacoesAbertas} icon={FileSearch} />
+      <h2 className="gov-label mb-2.5 mt-7">Prestadores do órgão, cotações e ordens de serviço</h2>
+      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-4">
+        <StatCard label="Cotações abertas" value={rede.cotacoesAbertas} icon={FileSearch} to="/cotacoes" />
         <StatCard label="Aguardando propostas" value={rede.aguardandoPropostas} icon={FileSearch} />
         <StatCard
           label={`Processos com menos de ${MIN_PROPOSALS} propostas`}
@@ -427,7 +433,7 @@ function Painel() {
           tone={rede.poucasPropostas > 0 ? "warning" : "default"}
         />
         <StatCard label="Oficinas credenciadas ativas" value={rede.oficinasAtivas} icon={Building} />
-        <StatCard label="OS em aberto" value={rede.osAbertas} icon={FileCheck2} />
+        <StatCard label="OS em aberto" value={rede.osAbertas} icon={FileCheck2} to="/ordens-servico" />
         <StatCard label="OS em execução" value={rede.osEmExecucao} icon={FileCheck2} />
         <StatCard
           label="OS atrasadas"
@@ -441,12 +447,12 @@ function Painel() {
         </TabsContent>
 
         <TabsContent value="financeiro" className="pt-5">
-      <h2 className="gov-title mb-4 text-lg">Execução orçamentária</h2>
+      <h2 className="gov-label mb-2.5">Execução orçamentária</h2>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
-        <StatCard label="Contratos vigentes" value={financeiro.contratosVigentes} icon={FileText} />
+      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-6">
+        <StatCard label="Contratos vigentes" value={financeiro.contratosVigentes} icon={FileText} to="/contratos" />
         <StatCard label="Saldo contratual" value={brl(financeiro.saldoContratual)} icon={FileText} tone="success" />
-        <StatCard label="Empenhos ativos" value={financeiro.empenhosAtivos} icon={Wallet} />
+        <StatCard label="Empenhos ativos" value={financeiro.empenhosAtivos} icon={Wallet} to="/empenhos" />
         <StatCard label="Saldo de empenhos" value={brl(financeiro.saldoEmpenhos)} icon={Wallet} tone="success" />
         <StatCard
           label="Cotas com saldo crítico"
@@ -465,9 +471,9 @@ function Painel() {
         </TabsContent>
 
         <TabsContent value="administrativo" className="pt-5">
-      <h2 className="gov-title mb-4 text-lg">Gestão administrativa, legal e patrimonial</h2>
+      <h2 className="gov-label mb-2.5">Gestão administrativa, legal e patrimonial</h2>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-4">
         <StatCard
           label="Multas em aberto"
           value={admin.multasAbertas}
@@ -503,8 +509,8 @@ function Painel() {
         <StatCard label="Baixas e alienações acumuladas" value={admin.baixas} icon={Landmark} />
       </div>
 
-      <h2 className="gov-title mb-4 mt-8 text-lg">Diárias</h2>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <h2 className="gov-label mb-2.5 mt-7">Diárias</h2>
+      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5">
         <StatCard label="Solicitadas no mês" value={diariasKpi.requestedMonth} icon={Plane} />
         <StatCard label="Autorizadas" value={diariasKpi.authorized} icon={FileCheck2} tone="success" />
         <StatCard
@@ -525,47 +531,61 @@ function Painel() {
         </TabsContent>
       </Tabs>
 
-      <h2 className="gov-title mt-10 mb-4 text-lg">Gasto dos últimos 6 meses</h2>
-
-      <div className="rounded-lg border bg-card p-5 shadow-card">
-        {maxTotal === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">
-            Ainda não há abastecimentos registrados para exibir o histórico.
-          </p>
-        ) : (
-          <div className="flex h-48 items-end gap-3">
-            {ultimos6.map((m) => (
-              <div key={m.label} className="flex flex-1 flex-col items-center gap-2">
-                <span className="text-[11px] text-muted-foreground">{m.total > 0 ? brl(m.total) : ""}</span>
-                <div
-                  className="w-full rounded-t bg-primary/80"
-                  style={{ height: `${Math.max(4, (m.total / maxTotal) * 140)}px` }}
-                  title={`${num(m.quantity, 2)} abastecidos`}
-                />
-                <span className="text-xs capitalize text-muted-foreground">{m.label}</span>
-              </div>
-            ))}
-          </div>
-        )}
+      <div className="mt-7">
+        <SectionCard
+          title="Gasto com abastecimento — últimos 6 meses"
+          description="Valores dos abastecimentos válidos; passe o cursor para ver a quantidade."
+          action={
+            <Link
+              to="/abastecimentos"
+              className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+            >
+              Ver abastecimentos <ArrowRight className="size-3.5" />
+            </Link>
+          }
+        >
+          {maxTotal === 0 ? (
+            <EmptyState
+              title="Ainda não há abastecimentos registrados"
+              description="Assim que o primeiro abastecimento for lançado, o histórico dos últimos seis meses aparece aqui."
+              icon={<Fuel className="size-5" />}
+            />
+          ) : (
+            <div className="flex h-52 items-end gap-2 sm:gap-4">
+              {ultimos6.map((m) => (
+                <div key={m.label} className="group flex flex-1 flex-col items-center gap-2">
+                  <span className="text-[11px] tabular-nums text-muted-foreground">
+                    {m.total > 0 ? brl(m.total) : ""}
+                  </span>
+                  <div
+                    className="w-full rounded-t-md bg-primary/75 transition-colors group-hover:bg-primary"
+                    style={{ height: `${Math.max(4, (m.total / maxTotal) * 150)}px` }}
+                    title={`${num(m.quantity, 2)} abastecidos em ${m.label}`}
+                  />
+                  <span className="text-xs capitalize text-muted-foreground">{m.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </SectionCard>
       </div>
 
-
-      <h2 className="gov-title mt-10 mb-4 text-lg">Atalhos</h2>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <h2 className="gov-label mb-2.5 mt-7">Atalhos das telas mais usadas</h2>
+      <div className="grid gap-2 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {SHORTCUTS.map((s) => (
           <Link
             key={s.to}
             to={s.to}
-            className="group flex items-center gap-4 rounded-lg border bg-card p-5 shadow-card transition-colors hover:border-accent"
+            className="group flex items-center gap-2.5 rounded-lg border bg-card px-3 py-2.5 shadow-card transition-colors hover:border-primary/40 hover:bg-accent/40"
           >
-            <span className="flex size-10 items-center justify-center rounded-md bg-primary/8 text-primary">
-              <s.icon className="size-5" />
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <s.icon className="size-4" />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="gov-title block text-base">{s.label}</span>
-              <span className="block text-sm text-muted-foreground">{s.text}</span>
+              <span className="gov-title block truncate text-[13px]">{s.label}</span>
+              <span className="block truncate text-[11px] text-muted-foreground">{s.text}</span>
             </span>
-            <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
+            <ArrowRight className="size-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
           </Link>
         ))}
       </div>
