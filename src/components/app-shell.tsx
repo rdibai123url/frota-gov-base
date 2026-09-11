@@ -317,7 +317,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   "flex w-full cursor-pointer items-center justify-center rounded-md py-2.5 transition-colors",
                   inGroup
                     ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "opacity-70 hover:bg-sidebar-accent/60 hover:opacity-100",
+                    : "text-sidebar-foreground/70 hover:bg-white/6 hover:text-sidebar-accent-foreground",
                 )}
               >
                 <group.icon className="size-[18px]" />
@@ -342,7 +342,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   "relative flex items-center gap-3 rounded-md px-3 py-2 text-[13.5px] transition-colors",
                   active
                     ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-sidebar-primary"
-                    : "opacity-75 hover:bg-sidebar-accent/60 hover:opacity-100",
+                    : "text-sidebar-foreground/75 hover:bg-white/6 hover:text-sidebar-accent-foreground",
                 )}
               >
                 <group.icon className="size-4 shrink-0" />
@@ -359,11 +359,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                 aria-expanded={expanded}
                 onClick={() => setOpenGroup(expanded ? null : group.id)}
                 className={cn(
-                  "flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-[13.5px] transition-colors",
+                  "flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-[13.5px] transition-colors hover:bg-white/6",
                   inGroup
-                    ? "font-semibold text-sidebar-accent-foreground opacity-100"
-                    : "opacity-75 hover:opacity-100",
-                  "hover:bg-sidebar-accent/60",
+                    ? "font-semibold text-sidebar-accent-foreground"
+                    : "text-sidebar-foreground/75 hover:text-sidebar-accent-foreground",
                 )}
               >
                 <group.icon className="size-4 shrink-0" />
@@ -384,8 +383,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                         className={cn(
                           "relative block truncate rounded-md px-3 py-1.5 text-[13px] transition-colors",
                           active
-                            ? "bg-sidebar-primary/18 font-semibold text-sidebar-accent-foreground before:absolute before:inset-y-1 before:-left-[13px] before:w-[3px] before:rounded-full before:bg-sidebar-primary"
-                            : "opacity-70 hover:bg-sidebar-accent/50 hover:opacity-100",
+                            ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground before:absolute before:inset-y-1 before:-left-[13px] before:w-[3px] before:rounded-full before:bg-sidebar-primary"
+                            : "text-sidebar-foreground/70 hover:bg-white/6 hover:text-sidebar-accent-foreground",
                         )}
                       >
                         {leaf.label}
