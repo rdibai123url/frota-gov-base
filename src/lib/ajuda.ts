@@ -133,12 +133,16 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       { label: "Distância só de ida (km)", description: "Preenchida pelo cálculo da rota. Se o serviço de mapas não responder, digite a distância conhecida.", tags: COND },
       { label: "Consumo considerado", description: "Vem da média real de km/l dos abastecimentos do próprio veículo nos últimos 12 meses; sem histórico, usa o parâmetro cadastrado em Inteligência. Não é digitado aqui.", tags: AUTO },
       { label: "Combustível e custo estimados", description: "Calculados pela distância total dividida pelo consumo; o custo só aparece quando o preço do litro é informado.", tags: CALC },
+      { label: "Planejado x realizado", description: "Aparece no detalhe da utilização concluída. Compara a distância planejada com o KM do odômetro e mostra litros, valor e preço médio dos abastecimentos da viagem.", tags: CALC },
+      { label: "Consumo efetivo", description: "Só é apurado quando há abastecimento de tanque cheio no início e no fim do trecho, ambos com odômetro. Sem essa base, o sistema informa que está indisponível em vez de estimar.", tags: COND },
+      { label: "Vincular abastecimento à viagem", description: "Lista abastecimentos do mesmo bem no período que ainda não pertencem a nenhuma viagem; o vínculo é validado por órgão, bem e data.", tags: COND },
     ],
     [
       "A marcação de retorno não pode ser menor que a de saída.",
       "Um bem não pode ter duas utilizações abertas ao mesmo tempo.",
       "Só aparecem bens e condutores do próprio órgão; bens em manutenção, cedidos ou baixados não podem ser reservados.",
       "O histórico de utilização alimenta o filtro de veículos por condutor nos relatórios.",
+      "A quilometragem oficial vem sempre do odômetro; litros abastecidos não são tratados como litros consumidos.",
     ],
   ),
 
