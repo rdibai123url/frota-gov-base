@@ -323,10 +323,14 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       { label: "Valor total", description: "Quantidade multiplicada pelo valor unitário.", tags: CALC },
       { label: "Marcação do medidor", description: "Base do cálculo de consumo médio.", tags: REQ },
       { label: "Encerra a autorização", description: "Quando marcado, devolve o saldo não utilizado.", tags: AUTO },
+      { label: "Tanque cheio", description: "Marque quando o abastecimento completou efetivamente o tanque. Essa marcação é o que permite calcular o consumo efetivo em km/l entre dois abastecimentos completos." },
+      { label: "Viagem / utilização", description: "Vincula o abastecimento a uma viagem do mesmo bem no período. O sistema apenas sugere quando há uma única viagem compatível; a confirmação é sua.", tags: COND },
     ],
     [
       "A marcação informada deve ser maior ou igual à última registrada para o bem.",
       "Abastecimentos de lubrificantes e aditivos não entram no cálculo de consumo médio.",
+      "Quilometragem oficial vem do odômetro; litros abastecidos são o que foi comprado, não o que foi consumido.",
+      "Sem duas marcações de tanque cheio com odômetro, o km/l efetivo fica indisponível — isso é apenas informação, não impede o registro nem gera inconsistência.",
     ],
   ),
 

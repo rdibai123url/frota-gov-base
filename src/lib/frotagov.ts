@@ -291,6 +291,7 @@ export type FuelingRow = Fueling & {
   commitment: { id: string; number: string; exercise: number } | null;
   cost_center: { id: string; code: string; name: string } | null;
   quota: { id: string; name: string } | null;
+  usage: { id: string; code: string | null; planned_departure: string; destination: string | null } | null;
 };
 
 
@@ -400,7 +401,7 @@ export function useSuppliers() {
 }
 
 const FUELING_SELECT =
-  "*, vehicle:vehicles(id, plate, asset_code, fuel_type, tank_capacity, status), unit:units(id, name, acronym), supplier:suppliers(id, legal_name, trade_name), fuel:fuel_types(id, name, measure_unit), driver:drivers(id, full_name), authorization:fuel_authorizations(id, code, max_quantity, consumed_quantity), contract:contracts(id, number), contract_item:contract_items(id, description, measure_unit), commitment:commitments(id, number, exercise), cost_center:cost_centers(id, code, name), quota:quotas(id, name)";
+  "*, vehicle:vehicles(id, plate, asset_code, fuel_type, tank_capacity, status), unit:units(id, name, acronym), supplier:suppliers(id, legal_name, trade_name), fuel:fuel_types(id, name, measure_unit), driver:drivers(id, full_name), authorization:fuel_authorizations(id, code, max_quantity, consumed_quantity), contract:contracts(id, number), contract_item:contract_items(id, description, measure_unit), commitment:commitments(id, number, exercise), cost_center:cost_centers(id, code, name), quota:quotas(id, name), usage:vehicle_usages(id, code, planned_departure, destination)";
 
 
 export function useFuelings() {
