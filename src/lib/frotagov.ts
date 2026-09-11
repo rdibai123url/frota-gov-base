@@ -436,6 +436,22 @@ export function useFuelingAlerts() {
   });
 }
 
+/** Contador de alertas abertos do órgão (destaque no menu). */
+export function useOpenAlertCount() {
+  return useQuery({
+    queryKey: ["fueling-alerts-open-count"],
+    staleTime: 60_000,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("fueling_alerts")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "aberto");
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+}
+
 export function useComprovanteUrl(path: string | null | undefined) {
   return useQuery({
     queryKey: ["comprovante", path],
