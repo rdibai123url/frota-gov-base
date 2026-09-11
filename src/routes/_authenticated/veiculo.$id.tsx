@@ -16,6 +16,7 @@ import {
   type DeviationClass,
 } from "@/lib/inteligencia";
 import { ArrowLeft, Truck } from "lucide-react";
+import { CHECKLIST_ANSWER_LABEL, CHECKLIST_ITEMS, checklistProblems, parseChecklistResponses, useVehicleChecklists } from "@/lib/checklists";
 
 import { PageHeader } from "@/components/app-shell";
 import { ValorDeMercado } from "@/components/valor-mercado";
@@ -97,6 +98,7 @@ function HistoricoVeiculo() {
   const { data: movements = [] } = useAssetMovements();
   const { data: diaries = [] } = useDiaries();
   const { data: cleanings = [] } = useVehicleCleanings(id);
+  const { data: checklists = [] } = useVehicleChecklists(id);
 
   const vehicle = vehicles.find((v) => v.id === id) ?? null;
   const vUsages = useMemo(() => usages.filter((u) => u.vehicle_id === id), [usages, id]);
@@ -176,6 +178,17 @@ function HistoricoVeiculo() {
         u.destination ?? "—",
       ),
     );
+    checklists.forEach((checklist) => {
+      const problems = checklistProblems(checklist);
+      push(
+        checklist.completed_at,
+        "checklist",
+        "Checklist",
+        `Checklist de ${checklist.stage}`,
+        problems.length ? `${problems.length} item(ns) com problema: ${problems.map((item) => item.label).join(", ")}` : "Todos os itens conferidos sem problema.",
+        checklist.odometer_km != null ? `${num(Number(checklist.odometer_km), 0)} km` : "",
+      );
+    });
     vFuelings.forEach((f) =>
       push(
         f.fueled_at,
@@ -286,6 +299,7 @@ function HistoricoVeiculo() {
     vMovements,
     vDiaries,
     vUsages,
+    checklists,
     vFuelings,
     vAuths,
     vRecords,
@@ -499,6 +513,7 @@ function HistoricoVeiculo() {
               <TabsTrigger value="abastecimentos">Abastecimentos</TabsTrigger>
               <TabsTrigger value="autorizacoes">Autorizações</TabsTrigger>
               <TabsTrigger value="utilizacoes">Utilizações</TabsTrigger>
+              <TabsTrigger value="checklists">Checklists</TabsTrigger>
               <TabsTrigger value="diarias">Diárias</TabsTrigger>
               <TabsTrigger value="multas">Multas</TabsTrigger>
               <TabsTrigger value="sinistros">Sinistros</TabsTrigger>
@@ -699,6 +714,26 @@ function HistoricoVeiculo() {
                   f.odometer_km ? num(Number(f.odometer_km), 0) : "—",
                   f.status === "valido" ? "Válido" : "Cancelado",
                 ])}
+              />
+            </TabsContent>
+
+            <TabsContent value="checklists">
+              <HistTable
+                head={["Data", "Etapa", "Responsável", "Odômetro", "Resultado", "Observações"]}
+                empty="Nenhum checklist registrado."
+                rows={checklists.map((checklist) => {
+                  const responses = parseChecklistResponses(checklist.responses);
+                  const problems = CHECKLIST_ITEMS.filter((item) => responses[item.key] === "problema");
+                  const answered = CHECKLIST_ITEMS.filter((item) => responses[item.key]).length;
+                  return [
+                    dateTimeBR(checklist.completed_at),
+                    checklist.stage === "saida" ? "Saída" : "Retorno",
+                    checklist.completed_by_name ?? "—",
+                    checklist.odometer_km != null ? `${num(Number(checklist.odometer_km), 0)} km` : "—",
+                    problems.length ? `${problems.length} problema(s): ${problems.map((item) => item.label).join(", ")}` : `${answered} itens: ${CHECKLIST_ANSWER_LABEL.ok}`,
+                    checklist.observations ?? "—",
+                  ];
+                })}
               />
             </TabsContent>
 
