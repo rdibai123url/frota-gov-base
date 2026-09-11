@@ -128,6 +128,11 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       { label: "Marcação de saída / retorno", description: "Hodômetro ou horímetro conforme o bem.", tags: REQ },
       { label: "Distância percorrida", description: "Diferença entre retorno e saída.", tags: CALC },
       { label: "Finalidade e destino", description: "Justificativa do uso; aparece nos relatórios e na transparência." },
+      { label: "Calcular rota", description: "Estima a distância e a duração pela rota rodoviária entre as cidades de origem e destino informadas. Serve para planejar; não substitui a marcação real.", tags: COND },
+      { label: "Ida e volta", description: "Marque para dobrar a distância e a duração estimadas do trajeto." },
+      { label: "Distância só de ida (km)", description: "Preenchida pelo cálculo da rota. Se o serviço de mapas não responder, digite a distância conhecida.", tags: COND },
+      { label: "Consumo considerado", description: "Vem da média real de km/l dos abastecimentos do próprio veículo nos últimos 12 meses; sem histórico, usa o parâmetro cadastrado em Inteligência. Não é digitado aqui.", tags: AUTO },
+      { label: "Combustível e custo estimados", description: "Calculados pela distância total dividida pelo consumo; o custo só aparece quando o preço do litro é informado.", tags: CALC },
     ],
     [
       "A marcação de retorno não pode ser menor que a de saída.",
