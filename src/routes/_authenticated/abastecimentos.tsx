@@ -456,6 +456,34 @@ function NewFuelingDialog({
   const price = parseBRNumber(unitPrice);
   const total = qty * price;
 
+  /**
+   * Viagens do mesmo bem cuja janela comporta a data/hora do abastecimento
+   * (mesma tolerância de 12 h validada pelo banco). Nunca vincula sozinho:
+   * quando houver uma única opção, ela é apenas sugerida.
+   */
+  const usageOptions = useMemo(() => {
+    if (vehicleId === NONE || !date || !time) return [];
+    const at = new Date(`${date}T${time}:00`).getTime();
+    if (!Number.isFinite(at)) return [];
+    const TOL = 12 * 3600 * 1000;
+    return usages.filter((u) => {
+      if (u.vehicle_id !== vehicleId) return false;
+      if (u.status === "cancelada") return false;
+      const startRaw = u.actual_departure ?? u.planned_departure;
+      if (!startRaw) return false;
+      const start = new Date(startRaw).getTime() - TOL;
+      const endRaw = u.actual_return ?? u.planned_return;
+      const end = (endRaw ? new Date(endRaw).getTime() : Date.now()) + TOL;
+      return at >= start && at <= end;
+    });
+  }, [usages, vehicleId, date, time]);
+
+  const suggestedUsage = usageOptions.length === 1 ? usageOptions[0]! : null;
+
+  useEffect(() => {
+    if (usageId !== NONE && !usageOptions.some((u) => u.id === usageId)) setUsageId(NONE);
+  }, [usageOptions, usageId]);
+
   const issues = useMemo(
     () =>
       evaluateFueling(
