@@ -7446,6 +7446,54 @@ export type Database = {
           },
         ]
       }
+      route_cache: {
+        Row: {
+          cache_key: string
+          created_at: string
+          destination_lat: number
+          destination_lon: number
+          distance_km: number | null
+          duration_min: number | null
+          found: boolean
+          geometry: Json | null
+          id: string
+          origin_lat: number
+          origin_lon: number
+          provider: string
+          updated_at: string
+        }
+        Insert: {
+          cache_key: string
+          created_at?: string
+          destination_lat: number
+          destination_lon: number
+          distance_km?: number | null
+          duration_min?: number | null
+          found?: boolean
+          geometry?: Json | null
+          id?: string
+          origin_lat: number
+          origin_lon: number
+          provider: string
+          updated_at?: string
+        }
+        Update: {
+          cache_key?: string
+          created_at?: string
+          destination_lat?: number
+          destination_lon?: number
+          distance_km?: number | null
+          duration_min?: number | null
+          found?: boolean
+          geometry?: Json | null
+          id?: string
+          origin_lat?: number
+          origin_lon?: number
+          provider?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       server_fuel_quotas: {
         Row: {
           alert_threshold_percent: number
@@ -10071,13 +10119,21 @@ export type Database = {
           authorizer_name: string | null
           cancel_reason: string | null
           code: string | null
+          consumption_source: string | null
           created_at: string
           created_by: string | null
           destination: string | null
           destination_city: string | null
           destination_state: string | null
+          distance_source: string
           driver_id: string | null
           end_km: number | null
+          estimated_consumption_kmpl: number | null
+          estimated_cost: number | null
+          estimated_distance_km: number | null
+          estimated_duration_min: number | null
+          estimated_liters: number | null
+          fuel_price_used: number | null
           id: string
           import_batch_id: string | null
           legacy_source: string | null
@@ -10094,6 +10150,10 @@ export type Database = {
           requester_employee_id: string | null
           requester_id: string | null
           requester_name: string | null
+          round_trip: boolean
+          route_calculated_at: string | null
+          route_geometry: Json | null
+          route_provider: string | null
           start_km: number | null
           status: Database["public"]["Enums"]["usage_status"]
           unit_id: string | null
@@ -10110,13 +10170,21 @@ export type Database = {
           authorizer_name?: string | null
           cancel_reason?: string | null
           code?: string | null
+          consumption_source?: string | null
           created_at?: string
           created_by?: string | null
           destination?: string | null
           destination_city?: string | null
           destination_state?: string | null
+          distance_source?: string
           driver_id?: string | null
           end_km?: number | null
+          estimated_consumption_kmpl?: number | null
+          estimated_cost?: number | null
+          estimated_distance_km?: number | null
+          estimated_duration_min?: number | null
+          estimated_liters?: number | null
+          fuel_price_used?: number | null
           id?: string
           import_batch_id?: string | null
           legacy_source?: string | null
@@ -10133,6 +10201,10 @@ export type Database = {
           requester_employee_id?: string | null
           requester_id?: string | null
           requester_name?: string | null
+          round_trip?: boolean
+          route_calculated_at?: string | null
+          route_geometry?: Json | null
+          route_provider?: string | null
           start_km?: number | null
           status?: Database["public"]["Enums"]["usage_status"]
           unit_id?: string | null
@@ -10149,13 +10221,21 @@ export type Database = {
           authorizer_name?: string | null
           cancel_reason?: string | null
           code?: string | null
+          consumption_source?: string | null
           created_at?: string
           created_by?: string | null
           destination?: string | null
           destination_city?: string | null
           destination_state?: string | null
+          distance_source?: string
           driver_id?: string | null
           end_km?: number | null
+          estimated_consumption_kmpl?: number | null
+          estimated_cost?: number | null
+          estimated_distance_km?: number | null
+          estimated_duration_min?: number | null
+          estimated_liters?: number | null
+          fuel_price_used?: number | null
           id?: string
           import_batch_id?: string | null
           legacy_source?: string | null
@@ -10172,6 +10252,10 @@ export type Database = {
           requester_employee_id?: string | null
           requester_id?: string | null
           requester_name?: string | null
+          round_trip?: boolean
+          route_calculated_at?: string | null
+          route_geometry?: Json | null
+          route_provider?: string | null
           start_km?: number | null
           status?: Database["public"]["Enums"]["usage_status"]
           unit_id?: string | null
