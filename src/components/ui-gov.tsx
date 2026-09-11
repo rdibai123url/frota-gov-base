@@ -22,12 +22,42 @@ import { cn } from "@/lib/utils";
 export type StatusTone = "ok" | "info" | "warn" | "danger" | "neutral";
 
 const TONE_CLASS: Record<StatusTone, string> = {
-  ok: "border-status-ok/35 bg-status-ok/12 text-status-ok",
-  info: "border-status-info/35 bg-status-info/12 text-status-info",
-  warn: "border-status-warn/40 bg-status-warn/15 text-status-warn",
-  danger: "border-status-danger/35 bg-status-danger/12 text-status-danger",
-  neutral: "border-border bg-muted text-muted-foreground",
+  ok: "border-status-ok/25 bg-status-ok/10 text-status-ok",
+  info: "border-status-info/25 bg-status-info/10 text-status-info",
+  warn: "border-status-warn/30 bg-status-warn/12 text-status-warn",
+  danger: "border-status-danger/25 bg-status-danger/10 text-status-danger",
+  neutral: "border-border bg-surface-strong text-muted-foreground",
 };
+
+/** Cabeçalho padrão de página: caminho, título, subtítulo e ações à direita. */
+export function PageHeader({
+  breadcrumb,
+  title,
+  description,
+  actions,
+  className,
+}: {
+  breadcrumb?: string;
+  title: string;
+  description?: string;
+  actions?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <header className={cn("mb-4 flex flex-wrap items-end justify-between gap-3", className)}>
+      <div className="min-w-0">
+        {breadcrumb ? (
+          <p className="mb-1 truncate text-[12.5px] text-muted-foreground">{breadcrumb}</p>
+        ) : null}
+        <h1 className="gov-page-title truncate">{title}</h1>
+        {description ? (
+          <p className="mt-1 max-w-3xl text-[13.5px] text-muted-foreground">{description}</p>
+        ) : null}
+      </div>
+      {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
+    </header>
+  );
+}
 
 /**
  * Vocabulário único de estados do sistema. A chave é o texto já usado nas
@@ -168,7 +198,7 @@ export function KpiCard({
   );
 
   const base =
-    "relative overflow-hidden rounded-lg border bg-card px-3 pb-3 pt-2.5 text-left shadow-card";
+    "relative overflow-hidden rounded-lg border border-border bg-card px-3.5 pb-3 pt-3 text-left shadow-card";
 
   if (!onClick) return <div className={cn(base, className)}>{body}</div>;
 
@@ -178,7 +208,7 @@ export function KpiCard({
       onClick={onClick}
       className={cn(
         base,
-        "cursor-pointer transition-colors hover:border-primary/40 hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "cursor-pointer transition-colors hover:border-muted-foreground/40 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         className,
       )}
     >
