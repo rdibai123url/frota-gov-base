@@ -34,7 +34,7 @@ export function VehicleChecklistPanel({ usage, compact = false }: { usage: Usage
   const returned = rows.find((x) => x.stage === "retorno") ?? null;
   const newProblems = newReturnProblems(departure, returned);
 
-  async function createMaintenance() {
+  async function createMaintenance(): Promise<void> {
     const target = maintenanceStage === "saida" ? departure : returned;
     if (!target || !perms.orgId) return;
     const problems = checklistProblems(target);
@@ -53,7 +53,7 @@ export function VehicleChecklistPanel({ usage, compact = false }: { usage: Usage
       notes: `Origem: checklist de ${maintenanceStage} da utilização ${usage.code ?? usage.id}. ${target.observations ?? ""}`.trim(),
       created_by: perms.userId,
     });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Solicitação de manutenção registrada com os dados do checklist.");
     setMaintenanceStage(null);
     invalidate(["maintenance-requests", "vehicles", "vehicle-status-history"]);
@@ -106,24 +106,24 @@ function ChecklistDialog({ usage, stage, existing, departure, onClose }: { usage
   useEffect(() => { if (stage === "retorno" && departure && Object.keys(responses).length === 0) setResponses(parseChecklistResponses(departure.responses)); }, [stage, departure, responses]);
   const problems = useMemo(() => CHECKLIST_ITEMS.filter((item) => responses[item.key] === "problema"), [responses]);
 
-  async function save() {
+  async function save(): Promise<void> {
     if (!perms.orgId) return;
     const missing = CHECKLIST_ITEMS.filter((item) => !responses[item.key]);
-    if (missing.length) return toast.error(`Responda todos os itens (${missing.length} pendente(s)).`);
-    if (problems.length && !observations.trim()) return toast.error("Descreva os problemas ou avarias nas observações.");
+    if (missing.length) { toast.error(`Responda todos os itens (${missing.length} pendente(s)).`); return; }
+    if (problems.length && !observations.trim()) { toast.error("Descreva os problemas ou avarias nas observações."); return; }
     setSaving(true);
     const payload = { organization_id: perms.orgId, usage_id: usage.id, vehicle_id: usage.vehicle_id, stage, responses, observations: observations.trim() || null, odometer_km: odometer ? Number(odometer) : null, completed_at: new Date().toISOString(), completed_by: perms.userId, completed_by_name: perms.userName, active: true };
     const result = existing
       ? await supabase.from("vehicle_checklists").update(payload).eq("id", existing.id).select("id").single()
       : await supabase.from("vehicle_checklists").insert(payload).select("id").single();
-    if (result.error || !result.data) { setSaving(false); return toast.error(result.error?.message ?? "Não foi possível salvar o checklist."); }
+    if (result.error || !result.data) { setSaving(false); toast.error(result.error?.message ?? "Não foi possível salvar o checklist."); return; }
     try {
       for (const file of files) {
         const path = await uploadChecklistPhoto(perms.orgId, usage.id, stage, file);
         const { error } = await supabase.from("vehicle_checklist_photos").insert({ organization_id: perms.orgId, checklist_id: result.data.id, storage_path: path, created_by: perms.userId });
         if (error) throw error;
       }
-    } catch (error) { setSaving(false); return toast.error(error instanceof Error ? error.message : "Checklist salvo, mas uma foto não foi anexada."); }
+    } catch (error) { setSaving(false); toast.error(error instanceof Error ? error.message : "Checklist salvo, mas uma foto não foi anexada."); return; }
     setSaving(false);
     toast.success(`Checklist de ${stage} salvo.`);
     invalidate(["vehicle-checklists", "vehicle-checklists-by-vehicle"]);
