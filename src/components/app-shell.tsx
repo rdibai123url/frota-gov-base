@@ -19,10 +19,29 @@ import {
   FolderCog,
   FileBarChart,
   UserRound,
+  Search,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { HelpButton } from "@/components/help-button";
 import { cn } from "@/lib/utils";
 import { supabase, useBrasaoUrl, useOrganization, useProfile, ROLE_LABELS } from "@/lib/frotagov";
@@ -165,8 +184,37 @@ function groupForPath(pathname: string) {
 }
 
 
+/** Preferência de menu compacto — fica no navegador do usuário, por dispositivo. */
+const COLLAPSE_KEY = "frotagov:menu-compacto";
+
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  useEffect(() => {
+    setCollapsed(window.localStorage.getItem(COLLAPSE_KEY) === "1");
+  }, []);
+
+  function toggleCollapsed() {
+    setCollapsed((prev) => {
+      const next = !prev;
+      window.localStorage.setItem(COLLAPSE_KEY, next ? "1" : "0");
+      return next;
+    });
+  }
+
+  /** Atalho de teclado padrão de ERP para a busca de telas. */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchOpen((v) => !v);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -216,20 +264,72 @@ export function AppShell({ children }: { children: ReactNode }) {
   /** Órgãos de demonstração são identificados pelo próprio nome cadastrado. */
   const isDemoOrg = /demonstra|\bdemo\b/i.test(`${org?.legal_name ?? ""} ${org?.short_name ?? ""}`);
 
-  const sidebar = (
+  /** Todas as telas visíveis, em lista plana, para a busca rápida. */
+  const searchTargets = navGroups.flatMap((g) =>
+    g.to ? [{ to: g.to, label: g.label, group: g.label }] : (g.items ?? []).map((i) => ({ ...i, group: g.label })),
+  );
+
+  /**
+   * O menu tem dois modos: completo (rótulos) e compacto (somente ícones com
+   * dica ao passar o mouse). O modo compacto libera largura para as tabelas.
+   */
+  const renderSidebar = (compact: boolean) => (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
-      <div className="flex items-center gap-3 border-b border-sidebar-border px-5 py-5">
-        <div className="flex size-9 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
+      <div
+        className={cn(
+          "flex items-center gap-3 border-b border-sidebar-border py-4",
+          compact ? "justify-center px-2" : "px-4",
+        )}
+      >
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
           <ShieldCheck className="size-5" />
         </div>
-        <div className="leading-tight">
-          <p className="gov-title text-lg">FrotaGov</p>
-          <p className="text-[11px] uppercase tracking-widest opacity-70">Gestão de frotas públicas</p>
-        </div>
+        {!compact && (
+          <div className="min-w-0 leading-tight">
+            <p className="gov-title text-lg">FrotaGov</p>
+            <p className="truncate text-[11px] uppercase tracking-widest opacity-70">
+              Gestão de frotas públicas
+            </p>
+          </div>
+        )}
       </div>
 
-      <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-3">
+      <nav className={cn("flex-1 space-y-0.5 overflow-y-auto py-3", compact ? "px-2" : "px-3")}>
         {navGroups.map((group) => {
+          const inGroup = currentGroup === group.id;
+
+          if (compact) {
+            const node = (
+              <button
+                type="button"
+                aria-label={group.label}
+                onClick={() => {
+                  if (group.to) {
+                    navigate({ to: group.to });
+                    return;
+                  }
+                  setCollapsed(false);
+                  window.localStorage.setItem(COLLAPSE_KEY, "0");
+                  setOpenGroup(group.id);
+                }}
+                className={cn(
+                  "flex w-full cursor-pointer items-center justify-center rounded-md py-2.5 transition-colors",
+                  inGroup
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                    : "opacity-70 hover:bg-sidebar-accent/60 hover:opacity-100",
+                )}
+              >
+                <group.icon className="size-[18px]" />
+              </button>
+            );
+            return (
+              <Tooltip key={group.id}>
+                <TooltipTrigger asChild>{node}</TooltipTrigger>
+                <TooltipContent side="right">{group.label}</TooltipContent>
+              </Tooltip>
+            );
+          }
+
           if (group.to) {
             const active = pathname.startsWith(group.to);
             return (
@@ -251,7 +351,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           }
 
           const expanded = openGroup === group.id;
-          const inGroup = currentGroup === group.id;
           return (
             <div key={group.id}>
               <button
@@ -300,30 +399,49 @@ export function AppShell({ children }: { children: ReactNode }) {
       </nav>
 
 
-      <div className="border-t border-sidebar-border px-4 py-4 text-xs">
-        <p className="truncate font-medium">{me?.profile?.full_name || me?.email}</p>
-        <p className="mt-0.5 truncate opacity-70">{primaryRoleLabel}</p>
-        <Link
-          to="/perfil"
-          onClick={() => setOpen(false)}
-          className={cn(
-            "mt-3 flex items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors hover:bg-sidebar-accent",
-            pathname.startsWith("/perfil")
-              ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-              : "opacity-85",
-          )}
-        >
-          <UserRound className="size-4" /> Perfil e segurança
-        </Link>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleSignOut}
-          className="mt-1 w-full justify-start gap-2 px-2 text-sidebar-foreground hover:bg-sidebar-accent"
-        >
-          <LogOut className="size-4" /> Sair
-        </Button>
-      </div>
+
+      {compact ? (
+        <div className="border-t border-sidebar-border p-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                aria-label="Perfil e segurança"
+                onClick={() => navigate({ to: "/perfil" })}
+                className="flex w-full cursor-pointer items-center justify-center rounded-md py-2.5 opacity-75 transition-colors hover:bg-sidebar-accent/60 hover:opacity-100"
+              >
+                <UserRound className="size-[18px]" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">Perfil e segurança</TooltipContent>
+          </Tooltip>
+        </div>
+      ) : (
+        <div className="border-t border-sidebar-border px-4 py-4 text-xs">
+          <p className="truncate font-medium">{me?.profile?.full_name || me?.email}</p>
+          <p className="mt-0.5 truncate opacity-70">{primaryRoleLabel}</p>
+          <Link
+            to="/perfil"
+            onClick={() => setOpen(false)}
+            className={cn(
+              "mt-3 flex items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors hover:bg-sidebar-accent",
+              pathname.startsWith("/perfil")
+                ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+                : "opacity-85",
+            )}
+          >
+            <UserRound className="size-4" /> Perfil e segurança
+          </Link>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSignOut}
+            className="mt-1 w-full justify-start gap-2 px-2 text-sidebar-foreground hover:bg-sidebar-accent"
+          >
+            <LogOut className="size-4" /> Sair
+          </Button>
+        </div>
+      )}
     </div>
   );
 
@@ -331,14 +449,16 @@ export function AppShell({ children }: { children: ReactNode }) {
     <TooltipProvider delayDuration={200}>
     <div className="flex min-h-screen bg-background">
 
-      <aside className="hidden w-72 shrink-0 lg:block">
-        <div className="fixed inset-y-0 w-72">{sidebar}</div>
+      <aside className={cn("hidden shrink-0 lg:block", collapsed ? "w-16" : "w-64")}>
+        <div className={cn("fixed inset-y-0", collapsed ? "w-16" : "w-64")}>
+          {renderSidebar(collapsed)}
+        </div>
       </aside>
 
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-foreground/40" onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 left-0 w-72">{sidebar}</div>
+          <div className="absolute inset-y-0 left-0 w-72">{renderSidebar(false)}</div>
           <Button
             variant="secondary"
             size="icon"
@@ -351,31 +471,126 @@ export function AppShell({ children }: { children: ReactNode }) {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex items-center gap-3 border-b bg-card px-4 py-3 shadow-card sm:px-6">
+        <header className="sticky top-0 z-30 flex items-center gap-2 border-b bg-card px-4 py-2.5 shadow-card sm:px-6">
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setOpen(true)}>
             <Menu className="size-5" />
           </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hidden lg:inline-flex"
+                aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
+                onClick={toggleCollapsed}
+              >
+                {collapsed ? <PanelLeftOpen className="size-5" /> : <PanelLeftClose className="size-5" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{collapsed ? "Expandir menu" : "Recolher menu"}</TooltipContent>
+          </Tooltip>
+
           {brasao ? (
             <img
               src={brasao}
               alt="Brasão do órgão"
-              className="size-10 rounded-sm object-contain"
+              className="size-9 rounded-sm object-contain"
             />
           ) : (
-            <div className="flex size-10 items-center justify-center rounded-sm bg-secondary text-secondary-foreground">
+            <div className="flex size-9 items-center justify-center rounded-sm bg-secondary text-secondary-foreground">
               <Landmark className="size-5" />
             </div>
           )}
           <div className="min-w-0">
-            <p className="gov-title truncate text-sm sm:text-base">
+            <p className="gov-title truncate text-sm sm:text-[15px]">
               {org?.legal_name ?? "Órgão não configurado"}
             </p>
-            <p className="truncate text-xs text-muted-foreground">
+            <p className="truncate text-[11px] text-muted-foreground">
               {[org?.short_name, org?.city, org?.state].filter(Boolean).join(" · ") ||
                 "Complete os dados do órgão"}
             </p>
           </div>
+
+          <div className="ml-auto flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              className="hidden items-center gap-2 rounded-md border bg-surface px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent md:flex"
+            >
+              <Search className="size-3.5" />
+              <span>Buscar tela…</span>
+              <kbd className="rounded border bg-card px-1 text-[10px]">Ctrl K</kbd>
+            </button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              aria-label="Buscar tela"
+              onClick={() => setSearchOpen(true)}
+            >
+              <Search className="size-5" />
+            </Button>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Alertas e inconsistências"
+                  onClick={() => navigate({ to: "/alertas" })}
+                >
+                  <BellRing className="size-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Alertas e inconsistências</TooltipContent>
+            </Tooltip>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Sua conta">
+                  <UserRound className="size-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-60">
+                <DropdownMenuLabel className="truncate">
+                  {me?.profile?.full_name || me?.email}
+                  <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+                    {primaryRoleLabel}
+                  </span>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => navigate({ to: "/perfil" })}>
+                  <UserRound className="size-4" /> Perfil e segurança
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => void handleSignOut()}>
+                  <LogOut className="size-4" /> Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </header>
+
+        <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
+          <CommandInput placeholder="Buscar tela do FrotaGov…" />
+          <CommandList>
+            <CommandEmpty>Nenhuma tela encontrada.</CommandEmpty>
+            <CommandGroup heading="Telas disponíveis para este órgão">
+              {searchTargets.map((t) => (
+                <CommandItem
+                  key={t.to}
+                  value={`${t.label} ${t.group}`}
+                  onSelect={() => {
+                    setSearchOpen(false);
+                    navigate({ to: t.to });
+                  }}
+                >
+                  <span>{t.label}</span>
+                  <span className="ml-auto text-[11px] text-muted-foreground">{t.group}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </CommandDialog>
 
         {isDemoOrg && (
           <div className="border-b border-warning/40 bg-warning/20 px-4 py-2.5 text-sm font-medium text-foreground sm:px-6">
@@ -416,8 +631,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         )}
 
 
-        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-          <div className="mx-auto w-full max-w-6xl">
+        <main className="flex-1 px-4 py-5 sm:px-6 lg:px-7">
+          <div className="mx-auto w-full max-w-[1500px]">
             {blocked ? (
               <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-8 text-center">
                 <h1 className="gov-title text-xl">Módulo indisponível para este órgão</h1>
