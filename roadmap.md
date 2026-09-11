@@ -41,3 +41,6 @@ Execução em etapas. Cada bloco só é marcado como concluído após migração
 - Nada de exclusão física: cancelamento/inativação com motivo.
 - Integrações externas entregues como conector configurável com status
   "não configurado"; nunca declaradas ativas sem credencial oficial.
+## Ciclo atual — checklist e disponibilidade
+- [ ] G. Checklist de saída e retorno com fotos, histórico e atalho de manutenção
+- [ ] H. Central de disponibilidade da frota com status derivados, filtros e indicadores
