@@ -721,7 +721,7 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
                   value={consumption.kmpl ? `${num(consumption.kmpl, 2)} km/l` : "—"}
                 />
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  {CONSUMPTION_SOURCE_LABEL[consumption.source] ?? consumption.detail}
+                  {consumption.source ? CONSUMPTION_SOURCE_LABEL[consumption.source] : consumption.note}
                 </p>
               </div>
             </div>
@@ -733,7 +733,7 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
               </div>
               <div>
                 <p className="gov-label">Duração estimada</p>
-                <p className="tabular-nums">{durationLabel(routeMin, roundTrip)}</p>
+                <p className="tabular-nums">{durationLabel(roundTrip && routeMin ? routeMin * 2 : routeMin)}</p>
               </div>
               <div>
                 <p className="gov-label">Combustível estimado</p>
