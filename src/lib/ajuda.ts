@@ -135,9 +135,11 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       { label: "Combustível e custo estimados", description: "Calculados pela distância total dividida pelo consumo; o custo só aparece quando o preço do litro é informado.", tags: CALC },
       { label: "Planejado x realizado", description: "Aparece no detalhe da utilização concluída. Compara a distância planejada com o KM do odômetro e mostra litros, valor e preço médio dos abastecimentos da viagem.", tags: CALC },
       { label: "Consumo efetivo", description: "Só é apurado quando há abastecimento de tanque cheio no início e no fim do trecho, ambos com odômetro. Sem essa base, o sistema informa que está indisponível em vez de estimar.", tags: COND },
-      { label: "Vincular abastecimento à viagem", description: "Lista abastecimentos do mesmo bem no período que ainda não pertencem a nenhuma viagem; o vínculo é validado por órgão, bem e data.", tags: COND },
+      { label: "Vincular abastecimento à viagem", description: "Lista abastecimentos do mesmo bem no período que ainda não pertencem a nenhuma viagem; o vínculo é validado por órgão, bem e data. O vínculo também pode ser feito na tela de Abastecimentos.", tags: COND },
     ],
     [
+      "Três números diferentes: KM oficial (odômetro de retorno menos o de saída), litros abastecidos na viagem (o que foi comprado) e consumo efetivo km/l (só com dois tanques cheios com odômetro).",
+      "Litros e valor da viagem somam apenas os abastecimentos vinculados àquela utilização.",
       "A marcação de retorno não pode ser menor que a de saída.",
       "Um bem não pode ter duas utilizações abertas ao mesmo tempo.",
       "Só aparecem bens e condutores do próprio órgão; bens em manutenção, cedidos ou baixados não podem ser reservados.",
@@ -323,10 +325,14 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       { label: "Valor total", description: "Quantidade multiplicada pelo valor unitário.", tags: CALC },
       { label: "Marcação do medidor", description: "Base do cálculo de consumo médio.", tags: REQ },
       { label: "Encerra a autorização", description: "Quando marcado, devolve o saldo não utilizado.", tags: AUTO },
+      { label: "Tanque cheio", description: "Marque quando o abastecimento completou efetivamente o tanque. Essa marcação é o que permite calcular o consumo efetivo em km/l entre dois abastecimentos completos." },
+      { label: "Viagem / utilização", description: "Vincula o abastecimento a uma viagem do mesmo bem no período. O sistema apenas sugere quando há uma única viagem compatível; a confirmação é sua.", tags: COND },
     ],
     [
       "A marcação informada deve ser maior ou igual à última registrada para o bem.",
       "Abastecimentos de lubrificantes e aditivos não entram no cálculo de consumo médio.",
+      "Quilometragem oficial vem do odômetro; litros abastecidos são o que foi comprado, não o que foi consumido.",
+      "Sem duas marcações de tanque cheio com odômetro, o km/l efetivo fica indisponível — isso é apenas informação, não impede o registro nem gera inconsistência.",
     ],
   ),
 

@@ -71,6 +71,7 @@ import {
   useContracts,
   useCostCenters,
   useQuotas,
+  useVehicleUsages,
 } from "@/lib/frotagov";
 import { useEmployees } from "@/lib/pessoas";
 
@@ -307,7 +308,18 @@ function Abastecimentos() {
                 <TableCell className="font-medium">{(f.vehicle?.plate ?? f.vehicle?.asset_code ?? "—")}</TableCell>
                 <TableCell>{f.unit?.acronym || f.unit?.name || "—"}</TableCell>
                 <TableCell>{f.fuel?.name ?? "—"}</TableCell>
-                <TableCell className="text-right">{formatLiters(Number(f.quantity))}</TableCell>
+                <TableCell className="text-right">
+                  {formatLiters(Number(f.quantity))}
+                  {f.full_tank && (
+                    <span
+                      className="ml-1 text-xs text-muted-foreground"
+                      title="Tanque cheio"
+                      aria-label="Tanque cheio"
+                    >
+                      · cheio
+                    </span>
+                  )}
+                </TableCell>
                 <TableCell className="text-right">{brl(Number(f.unit_price))}</TableCell>
                 <TableCell className="text-right font-medium">{brl(Number(f.total_value))}</TableCell>
                 <TableCell className="text-right">
@@ -429,7 +441,10 @@ function NewFuelingDialog({
   const [justification, setJustification] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [closeAuth, setCloseAuth] = useState(true);
+  const [fullTank, setFullTank] = useState(false);
+  const [usageId, setUsageId] = useState(NONE);
   const [saving, setSaving] = useState(false);
+  const { data: usages = [] } = useVehicleUsages();
 
   const usableAuths = useMemo(() => auths.filter((a) => authorizationUsable(a)), [auths]);
   const selectedAuth: AuthorizationRow | null = usableAuths.find((a) => a.id === authId) ?? null;
@@ -451,6 +466,34 @@ function NewFuelingDialog({
   const qty = parseBRNumber(quantity);
   const price = parseBRNumber(unitPrice);
   const total = qty * price;
+
+  /**
+   * Viagens do mesmo bem cuja janela comporta a data/hora do abastecimento
+   * (mesma tolerância de 12 h validada pelo banco). Nunca vincula sozinho:
+   * quando houver uma única opção, ela é apenas sugerida.
+   */
+  const usageOptions = useMemo(() => {
+    if (vehicleId === NONE || !date || !time) return [];
+    const at = new Date(`${date}T${time}:00`).getTime();
+    if (!Number.isFinite(at)) return [];
+    const TOL = 12 * 3600 * 1000;
+    return usages.filter((u) => {
+      if (u.vehicle_id !== vehicleId) return false;
+      if (u.status === "cancelada") return false;
+      const startRaw = u.actual_departure ?? u.planned_departure;
+      if (!startRaw) return false;
+      const start = new Date(startRaw).getTime() - TOL;
+      const endRaw = u.actual_return ?? u.planned_return;
+      const end = (endRaw ? new Date(endRaw).getTime() : Date.now()) + TOL;
+      return at >= start && at <= end;
+    });
+  }, [usages, vehicleId, date, time]);
+
+  const suggestedUsage = usageOptions.length === 1 ? usageOptions[0]! : null;
+
+  useEffect(() => {
+    if (usageId !== NONE && !usageOptions.some((u) => u.id === usageId)) setUsageId(NONE);
+  }, [usageOptions, usageId]);
 
   const issues = useMemo(
     () =>
@@ -598,6 +641,8 @@ function NewFuelingDialog({
         alert_flags: alerts.map((a) => a.type),
         alert_justification: needsJustification ? justification.trim() : null,
         closes_authorization: selectedAuth ? closeAuth : false,
+        full_tank: fullTank,
+        usage_id: usageId === NONE ? null : usageId,
         created_by: perms.userId,
       })
       .select("id")
@@ -940,6 +985,48 @@ function NewFuelingDialog({
               />
             </div>
             <div className="sm:col-span-2">
+              <Label>Viagem / utilização vinculada</Label>
+              <Select value={usageId} onValueChange={setUsageId} disabled={usageOptions.length === 0}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue
+                    placeholder={
+                      usageOptions.length === 0
+                        ? "Nenhuma viagem compatível do mesmo bem no período"
+                        : "Não vincular a uma viagem"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>Não vincular a uma viagem</SelectItem>
+                  {usageOptions.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>
+                      {(u.code ?? "Utilização")} — {dateTimeBR(u.planned_departure)}
+                      {u.destination ? ` · ${u.destination}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {suggestedUsage && usageId === NONE
+                  ? `Sugestão: ${suggestedUsage.code ?? "utilização"} de ${dateTimeBR(suggestedUsage.planned_departure)}. Confirme se este abastecimento pertence a essa viagem.`
+                  : "Vincule quando o abastecimento pertencer a uma viagem registrada. O órgão, o bem e o período são validados ao salvar."}
+              </p>
+            </div>
+            <div className="sm:col-span-2 rounded-md border bg-muted/30 p-3">
+              <div className="flex items-start gap-2">
+                <Checkbox id="fulltank" checked={fullTank} onCheckedChange={(v) => setFullTank(v === true)} />
+                <div>
+                  <Label htmlFor="fulltank" className="cursor-pointer">
+                    Tanque cheio
+                  </Label>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Marque quando o abastecimento completou efetivamente o tanque. Essa informação é usada
+                    no cálculo confiável do consumo efetivo (km/l) entre dois abastecimentos completos.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="sm:col-span-2">
               <Label htmlFor="notes">Observações</Label>
               <Textarea id="notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
             </div>
@@ -1010,6 +1097,24 @@ function DetailDialog({ fueling, onClose }: { fueling: FuelingRow | null; onClos
           <Row label="Valor total" value={brl(Number(fueling.total_value))} />
           <Row label="KM registrado" value={fueling.odometer_km != null ? num(Number(fueling.odometer_km), 0) : null} />
           <Row label="Horímetro" value={fueling.hour_meter != null ? num(Number(fueling.hour_meter), 1) : null} />
+          <Row
+            label="Tanque cheio"
+            value={
+              fueling.full_tank
+                ? "Sim — usado no cálculo de consumo efetivo"
+                : "Não informado como tanque cheio"
+            }
+          />
+          <Row
+            label="Viagem vinculada"
+            value={
+              fueling.usage
+                ? `${fueling.usage.code ?? "Utilização"} — ${dateTimeBR(fueling.usage.planned_departure)}${
+                    fueling.usage.destination ? ` · ${fueling.usage.destination}` : ""
+                  }`
+                : "Não vinculado a nenhuma viagem"
+            }
+          />
           <Row
             label="Condutor"
             value={
