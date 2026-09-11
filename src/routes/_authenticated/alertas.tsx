@@ -84,7 +84,7 @@ function Alertas() {
       // Fecha sozinho as inconsistências corretivas cuja causa já não existe.
       supabase.rpc("resolve_stale_alerts"),
     ]).then(() =>
-      invalidate(["fueling-alerts"]),
+      invalidate(["fueling-alerts", "fueling-alerts-open-count"]),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -262,7 +262,7 @@ function Alertas() {
         <DismissDialog
           alert={dismissing}
           onClose={() => setDismissing(null)}
-          onSaved={() => invalidate(["fueling-alerts"])}
+          onSaved={() => invalidate(["fueling-alerts", "fueling-alerts-open-count"])}
         />
       )}
     </>
