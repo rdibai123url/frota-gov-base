@@ -667,6 +667,89 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
               </Select>
             </div>
           </div>
+          {/* Inteligência de viagem: rota, distância e consumo estimado. */}
+          <div className="gov-band sm:col-span-2 p-3">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <p className="flex items-center gap-2 text-sm font-medium">
+                <RouteIcon className="size-4" /> Estimativa da viagem
+              </p>
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 text-sm">
+                  <Switch checked={roundTrip} onCheckedChange={setRoundTrip} />
+                  Ida e volta
+                </label>
+                <Button type="button" variant="outline" size="sm" onClick={calcularRota} disabled={routing}>
+                  {routing ? <Loader2 className="size-4 animate-spin" /> : <RouteIcon className="size-4" />}
+                  {routing ? "Calculando…" : "Calcular rota"}
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div>
+                <Label htmlFor="kmman">Distância só de ida (km)</Label>
+                <Input
+                  id="kmman"
+                  inputMode="decimal"
+                  value={distanceSource === "manual" ? manualKm : routeKm != null ? String(routeKm) : ""}
+                  onChange={(e) => {
+                    setManualKm(e.target.value);
+                    setDistanceSource(e.target.value ? "manual" : "nao_calculada");
+                  }}
+                  placeholder="Calcule a rota ou informe"
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  {DISTANCE_SOURCE_LABEL[distanceSource]}
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="prc">Preço do litro (opcional)</Label>
+                <Input
+                  id="prc"
+                  inputMode="decimal"
+                  value={fuelPrice}
+                  onChange={(e) => setFuelPrice(e.target.value)}
+                  placeholder="Ex.: 6,29"
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground">Usado apenas para estimar o custo.</p>
+              </div>
+              <div>
+                <Label>Consumo considerado</Label>
+                <Input
+                  readOnly
+                  className="bg-muted/50"
+                  value={consumption.kmpl ? `${num(consumption.kmpl, 2)} km/l` : "—"}
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  {CONSUMPTION_SOURCE_LABEL[consumption.source] ?? consumption.detail}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-3 grid gap-2 text-sm sm:grid-cols-4">
+              <div>
+                <p className="gov-label">Distância total</p>
+                <p className="tabular-nums">{trip.totalKm != null ? `${num(trip.totalKm, 1)} km` : "—"}</p>
+              </div>
+              <div>
+                <p className="gov-label">Duração estimada</p>
+                <p className="tabular-nums">{durationLabel(routeMin, roundTrip)}</p>
+              </div>
+              <div>
+                <p className="gov-label">Combustível estimado</p>
+                <p className="tabular-nums">{trip.liters != null ? `${num(trip.liters, 1)} L` : "—"}</p>
+              </div>
+              <div>
+                <p className="gov-label">Custo estimado</p>
+                <p className="tabular-nums">{trip.cost != null ? brl(trip.cost) : "—"}</p>
+              </div>
+            </div>
+
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              {routeNote || "Valores estimados para planejamento. A quilometragem oficial continua sendo a registrada na saída e no retorno."}
+            </p>
+          </div>
+
           <div className="sm:col-span-2">
             <Label htmlFor="fin">Finalidade / serviço</Label>
             <Input id="fin" value={purpose} onChange={(e) => setPurpose(e.target.value)} />
