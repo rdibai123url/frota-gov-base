@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { useServerFn } from "@tanstack/react-start";
 import { listInstitutionalLogins, recordLoginEvent } from "@/lib/identidade.functions";
 
@@ -127,8 +126,8 @@ function AuthPage() {
     const { error } = await supabase.auth.signInWithPassword(parsed.data);
     setLoading(false);
     if (error) {
-      await logLogin({ data: { email: parsed.data.email, method: "senha", success: false, reason: "Credenciais inválidas" } });
-      toast.error("Não foi possível entrar: verifique e-mail e senha.");
+      console.error("Erro de login Supabase:", error);
+      toast.error(`Erro no login: ${error.message}`);
       return;
     }
     await logLogin({ data: { email: parsed.data.email, method: "senha", success: true } });
@@ -136,15 +135,16 @@ function AuthPage() {
   }
 
   async function handleGoogle() {
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/painel`,
+      },
     });
-    if (result.error) {
+  
+    if (error) {
       toast.error("Falha ao entrar com Google.");
-      return;
     }
-    if (result.redirected) return;
-    navigate({ to: "/painel", replace: true });
   }
 
   return (

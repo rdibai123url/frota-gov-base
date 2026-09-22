@@ -28,9 +28,6 @@ export function isInternalHost(host: string): boolean {
   // Ambientes de edição/pré-visualização da plataforma (exigem login).
   if (/^id-preview(-[a-z0-9]+)?--/.test(h)) return true;
   if (/(^|\.)preview[-.]/.test(h)) return true;
-  if (/-dev\.lovable\.app$/.test(h)) return true;
-  if (/\.(lovableproject|lovableproject-dev|gpt-eng)\.com$/.test(h)) return true;
-  if (/\.(gptengineer\.run|lovable\.dev|sandbox\.lovable\.app)$/.test(h)) return true;
   return false;
 }
 
