@@ -589,57 +589,8 @@ export const submitProposalByToken = createServerFn({ method: "POST" })
     const requestedById = new Map((requested ?? []).map((i) => [i.id, i]));
 
     const orgId = invite.organization_id;
-    const digits = (data.cnpj || "").replace(/\D/g, "");
-    const name = (data.companyName || "").trim() || invite.email || "Empresa convidada";
 
-    // A proposta é sempre vinculada a uma empresa do cadastro do órgão.
-    let workshopId = invite.workshop_id as string | null;
-    if (!workshopId) {
-      if (digits) {
-        const { data: byCnpj } = await supabaseAdmin
-          .from("workshops")
-          .select("id")
-          .eq("organization_id", orgId)
-          .eq("cnpj", digits)
-          .maybeSingle();
-        workshopId = byCnpj?.id ?? null;
-      }
-      if (!workshopId) {
-        const { data: novo, error } = await supabaseAdmin
-          .from("workshops")
-          .insert({
-            organization_id: orgId,
-            legal_name: name,
-            trade_name: name,
-            cnpj: digits || null,
-            email: invite.email,
-            phone: data.phone || null,
-            contact_name: data.contactName || invite.contact_name,
-            status: "ativo",
-          })
-          .select("id")
-          .maybeSingle();
-        if (error || !novo) return { ok: false, message: "Não foi possível registrar a empresa da proposta." };
-        workshopId = novo.id;
-      }
-      await supabaseAdmin.from("quotation_invitations").update({ workshop_id: workshopId }).eq("id", invite.id);
-    }
-
-    const { data: existing } = await supabaseAdmin
-      .from("quotation_proposals")
-      .select("id")
-      .eq("quotation_id", quotation.id)
-      .eq("workshop_id", workshopId!)
-      .maybeSingle();
-    if (existing) {
-      await supabaseAdmin
-        .from("quotation_invitations")
-        .update({ send_status: "respondido", status: "respondida", responded_at: new Date().toISOString(), proposal_id: existing.id })
-        .eq("id", invite.id);
-      return { ok: false, message: "Já existe proposta desta empresa nesta cotação." };
-    }
-
-    // Conferência dos valores no servidor (o banco recalcula de novo ao gravar).
+    // Conferência dos valores no servidor (o banco recalcula e valida novamente ao gravar).
     const round2 = (n: number) => Math.round((Number.isFinite(n) ? n : 0) * 100) / 100;
     const laborHours = kindHasServices ? Math.max(0, data.laborHours || 0) : 0;
     const laborHourValue = kindHasServices ? Math.max(0, data.laborHourValue || 0) : 0;
@@ -689,7 +640,12 @@ export const submitProposalByToken = createServerFn({ method: "POST" })
         _organization_id: orgId,
         _quotation_id: quotation.id,
         _invitation_id: invite.id,
-        _workshop_id: workshopId!,
+        _workshop_id: invite.workshop_id ?? null,
+        _company_name: (data.companyName || "").trim() || invite.email || "Empresa convidada",
+        _cnpj: data.cnpj || null,
+        _contact_name: data.contactName || invite.contact_name || null,
+        _phone: data.phone || null,
+        _email: invite.email || null,
         _source: "link",
         _execution_days: data.executionDays,
         _warranty_days: kindHasServices ? data.warrantyDays : null,

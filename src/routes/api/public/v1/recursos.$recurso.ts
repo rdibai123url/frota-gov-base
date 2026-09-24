@@ -76,7 +76,7 @@ const RESOURCES: Record<
     table: "drivers",
     scope: "frota:read",
     columns:
-      "id, full_name, registration, bond, license_category, license_expires_at, active, unit_id, cpf",
+      "id, full_name, registration_number, bond_type, license_categories, license_expiry, active, unit_id, cpf",
     order: "full_name",
     dateColumn: "updated_at",
     maskCpf: ["cpf"],
@@ -95,7 +95,7 @@ const RESOURCES: Record<
     table: "fuel_authorizations",
     scope: "abastecimento:read",
     columns:
-      "id, number, vehicle_id, fuel_type_id, supplier_id, status, authorized_quantity, authorized_value, valid_until, created_at",
+      "id, code, vehicle_id, fuel_type_id, supplier_id, status, max_quantity, max_value, valid_until, created_at",
     order: "created_at",
     dateColumn: "created_at",
   },
@@ -131,7 +131,7 @@ const RESOURCES: Record<
     table: "maintenance_records",
     scope: "manutencao:read",
     columns:
-      "id, code, vehicle_id, kind, status, workshop_id, entry_at, exit_at, services, total_value",
+      "id, code, vehicle_id, kind, status, supplier_id, entry_at, exit_at, services, total_value",
     order: "entry_at",
     dateColumn: "entry_at",
   },
@@ -167,16 +167,16 @@ const RESOURCES: Record<
     table: "supply_orders",
     scope: "almoxarifado:read",
     columns:
-      "id, number, status, supplier_id, contract_id, requested_at, total_value",
-    order: "requested_at",
-    dateColumn: "requested_at",
+      "id, code, status, supplier_id, contract_id, created_at, issued_at, max_value, reserved_value, consumed_value",
+    order: "created_at",
+    dateColumn: "created_at",
   },
 
   estoque: {
     table: "stock_balances",
     scope: "almoxarifado:read",
     columns:
-      "id, warehouse_id, part_id, quantity, reserved_quantity, minimum_quantity, average_cost",
+      "id, warehouse_id, part_id, quantity, reserved_quantity, min_quantity, average_cost",
     order: "part_id",
     dateColumn: "updated_at",
   },

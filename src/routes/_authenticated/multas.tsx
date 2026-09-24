@@ -198,6 +198,7 @@ function Multas() {
     }
     const d = parsed.data;
     setSaving(true);
+    const uploadedPaths: string[] = [];
     try {
       const files = ["notification", "defense", "decision", "payment"] as const;
       const paths: Record<string, string | null> = {};
@@ -205,6 +206,7 @@ function Multas() {
         const input = form.elements.namedItem(`file_${key}`) as HTMLInputElement | null;
         const file = input?.files?.[0];
         paths[key] = file && orgId ? await uploadFleetFile(orgId, file, "multas") : null;
+        if (paths[key]) uploadedPaths.push(paths[key]!);
       }
       const payload = {
         vehicle_id: vehicleId,
@@ -236,10 +238,27 @@ function Multas() {
         ? await supabase.from("traffic_fines").update({ ...payload, updated_by: userId }).eq("id", editing.id)
         : await supabase.from("traffic_fines").insert({ ...payload, organization_id: orgId!, created_by: userId });
       if (error) throw error;
+
+      if (editing) {
+        const replacedOldPaths = [
+          paths["notification"] ? editing.notification_path : null,
+          paths["defense"] ? editing.defense_path : null,
+          paths["decision"] ? editing.decision_path : null,
+          paths["payment"] ? editing.payment_path : null,
+        ].filter((path): path is string => Boolean(path));
+
+        if (replacedOldPaths.length > 0) {
+          await supabase.storage.from("frota").remove(replacedOldPaths);
+        }
+      }
+
       toast.success(editing ? "Multa atualizada." : "Multa registrada.");
       invalidate(["traffic-fines", "fueling-alerts"]);
       setOpen(false);
     } catch (err) {
+      if (uploadedPaths.length > 0) {
+        await supabase.storage.from("frota").remove(uploadedPaths);
+      }
       const e2 = err as { code?: string };
       toast.error(e2.code === "23505" ? "Já existe multa com esse número de auto." : dbMessage(err));
     } finally {

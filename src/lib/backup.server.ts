@@ -11,7 +11,7 @@ import { Buffer } from "node:buffer";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Admin = SupabaseClient<any, any, any>;
 
-export const APP_SCHEMA_VERSION = "11.0.0";
+export const APP_SCHEMA_VERSION = "11.1.0";
 
 /** Tabelas do órgão copiadas no backup relacional. */
 export const BACKUP_TABLES = [
@@ -21,6 +21,8 @@ export const BACKUP_TABLES = [
   "cost_centers",
   "profiles",
   "user_roles",
+  "employees",
+  "organization_modules",
   "org_counters",
 
   // Frota
@@ -36,6 +38,7 @@ export const BACKUP_TABLES = [
   "meter_corrections",
 
   // Diárias
+  "legal_provisions",
   "diaries",
   "diary_proofs",
 
@@ -63,14 +66,17 @@ export const BACKUP_TABLES = [
   "contract_items",
   "contract_periods",
   "contract_amendments",
+  "contract_amendment_items",
   "commitments",
   "commitment_movements",
   "quotas",
   "quota_supplements",
   "budget_movements",
   "opening_balances",
+  "budget_references",
 
   // Manutenção
+  "maintenance_service_types",
   "maintenance_plans",
   "maintenance_plan_items",
   "maintenance_requests",
@@ -96,6 +102,7 @@ export const BACKUP_TABLES = [
   "supply_orders",
   "supply_order_items",
   "warehouses",
+  "supply_order_receipts",
   "stock_balances",
   "stock_movements",
   "stock_reservations",
@@ -145,6 +152,16 @@ export const BACKUP_TABLES = [
   "activity_logs",
   "audit_logs",
 ] as const;
+
+/**
+ * Colunas de conflito usadas na restauração.
+ * A maioria das tabelas usa `id`; estas três têm chave primária diferente.
+ */
+export const RESTORE_CONFLICT_COLUMNS: Partial<Record<(typeof BACKUP_TABLES)[number], string>> = {
+  org_counters: "organization_id,counter_key",
+  maintenance_settings: "organization_id",
+  transparency_settings: "organization_id",
+};
 
 /** Colunas nunca exportadas (hashes e material sensível de autenticação). */
 const REDACTED_COLUMNS: Record<string, string[]> = {

@@ -269,6 +269,7 @@ function Contratos() {
     setSaving(true);
 
     let attachment: string | null = editing?.attachment_path ?? null;
+    let uploadedAttachment: string | null = null;
     if (file) {
       const path = `${orgId}/${crypto.randomUUID()}-${file.name.replace(/[^\w.-]/g, "_")}`;
       const up = await supabase.storage.from("contratos").upload(path, file, { upsert: false });
@@ -278,6 +279,7 @@ function Contratos() {
         return;
       }
       attachment = path;
+      uploadedAttachment = path;
     }
 
     const payload = {
@@ -309,11 +311,23 @@ function Contratos() {
       : await supabase.from("contracts").insert({ ...payload, organization_id: orgId!, created_by: userId });
     setSaving(false);
     if (error) {
+      if (uploadedAttachment) {
+        await supabase.storage.from("contratos").remove([uploadedAttachment]);
+      }
       toast.error(
         error.code === "23505" ? "Já existe um contrato com esse número." : "Não foi possível salvar o contrato.",
       );
       return;
     }
+
+    if (
+      editing?.attachment_path &&
+      uploadedAttachment &&
+      editing.attachment_path !== uploadedAttachment
+    ) {
+      await supabase.storage.from("contratos").remove([editing.attachment_path]);
+    }
+
     toast.success(editing ? "Contrato atualizado." : "Contrato cadastrado.");
     invalidate(["contracts", "contract-items"]);
     setOpen(false);
@@ -1272,10 +1286,17 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
 
     setSaving(true);
     let attachment: string | null = null;
+    let uploadedAmendmentAttachment: string | null = null;
     if (file && orgId) {
       const path = `${orgId}/aditivos/${Date.now()}-${file.name.replace(/[^\w.\-]+/g, "_")}`;
       const up = await supabase.storage.from("contratos").upload(path, file);
-      if (!up.error) attachment = path;
+      if (up.error) {
+        setSaving(false);
+        toast.error("Não foi possível enviar o anexo do aditivo.");
+        return;
+      }
+      attachment = path;
+      uploadedAmendmentAttachment = path;
     }
 
     const periodValue = parseBRNumber(get("period_value"));
@@ -1299,6 +1320,9 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
       .select("id")
       .maybeSingle();
     if (error || !amendment) {
+      if (uploadedAmendmentAttachment) {
+        await supabase.storage.from("contratos").remove([uploadedAmendmentAttachment]);
+      }
       setSaving(false);
       toast.error(error?.message || "Não foi possível registrar o aditivo.");
       return;

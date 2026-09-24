@@ -682,7 +682,15 @@ function NewFuelingDialog({
       if (upErr) {
         toast.warning("Abastecimento salvo, mas o comprovante não pôde ser anexado.");
       } else {
-        await supabase.from("fuelings").update({ attachment_path: path }).eq("id", data.id);
+        const { error: linkErr } = await supabase
+          .from("fuelings")
+          .update({ attachment_path: path })
+          .eq("id", data.id);
+
+        if (linkErr) {
+          await supabase.storage.from("comprovantes").remove([path]);
+          toast.warning("Abastecimento salvo, mas o comprovante não pôde ser vinculado.");
+        }
       }
     }
 

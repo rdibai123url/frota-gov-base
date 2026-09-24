@@ -558,6 +558,9 @@ function ServiceOrderDetail({
       toast.error(dbMessage(err));
       return;
     }
+    const item = items.find((i) => i.id === itemId);
+    const oldPath = item?.return_attachment_path ?? null;
+
     const { error } = await supabase
       .from("service_order_items")
       .update({
@@ -569,9 +572,17 @@ function ServiceOrderDetail({
       })
       .eq("id", itemId);
     if (error) {
+      if (path) {
+        await supabase.storage.from("manutencao").remove([path]);
+      }
       toast.error(dbMessage(error));
       return;
     }
+
+    if (oldPath && path && oldPath !== path) {
+      await supabase.storage.from("manutencao").remove([oldPath]);
+    }
+
     setFile(null);
     toast.success("Devolução da peça registrada.");
     refresh();

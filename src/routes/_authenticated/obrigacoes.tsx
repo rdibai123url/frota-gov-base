@@ -150,10 +150,12 @@ function Obrigacoes() {
     }
     const d = parsed.data;
     setSaving(true);
+    let uploadedAttachment: string | null = null;
     try {
       const input = form.elements.namedItem("file") as HTMLInputElement | null;
       const file = input?.files?.[0];
       const path = file && orgId ? await uploadFleetFile(orgId, file, "obrigacoes") : null;
+      uploadedAttachment = path;
       const payload = {
         vehicle_id: vehicleId,
         obligation_type: d.obligation_type,
@@ -172,10 +174,22 @@ function Obrigacoes() {
         ? await supabase.from("vehicle_obligations").update({ ...payload, updated_by: userId }).eq("id", editing.id)
         : await supabase.from("vehicle_obligations").insert({ ...payload, organization_id: orgId!, created_by: userId });
       if (error) throw error;
+
+      if (
+        editing?.attachment_path &&
+        uploadedAttachment &&
+        editing.attachment_path !== uploadedAttachment
+      ) {
+        await supabase.storage.from("frota").remove([editing.attachment_path]);
+      }
+
       toast.success(editing ? "Obrigação atualizada." : "Obrigação registrada.");
       invalidate(["vehicle-obligations", "fueling-alerts"]);
       setOpen(false);
     } catch (err) {
+      if (uploadedAttachment) {
+        await supabase.storage.from("frota").remove([uploadedAttachment]);
+      }
       toast.error(dbMessage(err));
     } finally {
       setSaving(false);

@@ -236,9 +236,13 @@ function Limpeza() {
     }
 
     setSaving(true);
+    let uploadedAttachment: string | null = null;
     try {
       let attachment = editing?.attachment_path ?? null;
-      if (file) attachment = await uploadMaintenanceFile(orgId, file, "limpeza");
+      if (file) {
+        attachment = await uploadMaintenanceFile(orgId, file, "limpeza");
+        uploadedAttachment = attachment;
+      }
 
       const payload = {
         organization_id: orgId,
@@ -264,10 +268,21 @@ function Limpeza() {
         : await supabase.from("vehicle_cleanings").insert(payload);
       if (error) throw error;
 
+      if (
+        editing?.attachment_path &&
+        uploadedAttachment &&
+        editing.attachment_path !== uploadedAttachment
+      ) {
+        await supabase.storage.from("manutencao").remove([editing.attachment_path]);
+      }
+
       toast.success(editing ? "Serviço de limpeza atualizado." : "Serviço de limpeza registrado.");
       setOpen(false);
       invalidate(["vehicle-cleanings", "vehicles", "commitments", "quotas", "contracts"]);
     } catch (error) {
+      if (uploadedAttachment) {
+        await supabase.storage.from("manutencao").remove([uploadedAttachment]);
+      }
       toast.error(dbMessage(error));
     } finally {
       setSaving(false);

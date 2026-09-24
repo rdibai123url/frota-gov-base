@@ -188,6 +188,7 @@ function CotasServidor() {
 
     setSaving(true);
     let attachment = editing?.attachment_path ?? null;
+    let uploadedAttachment: string | null = null;
     if (file) {
       const path = `${orgId}/${crypto.randomUUID()}-${file.name.replace(/[^\w.-]/g, "_")}`;
       const up = await supabase.storage.from("contratos").upload(path, file, { upsert: false });
@@ -197,6 +198,7 @@ function CotasServidor() {
         return;
       }
       attachment = path;
+      uploadedAttachment = path;
     }
 
     const payload = {
@@ -223,9 +225,21 @@ function CotasServidor() {
       : await supabase.from("server_fuel_quotas").insert({ ...payload, organization_id: orgId!, created_by: userId });
     setSaving(false);
     if (error) {
+      if (uploadedAttachment) {
+        await supabase.storage.from("contratos").remove([uploadedAttachment]);
+      }
       toast.error(error.message || "Não foi possível salvar a cota.");
       return;
     }
+
+    if (
+      editing?.attachment_path &&
+      uploadedAttachment &&
+      editing.attachment_path !== uploadedAttachment
+    ) {
+      await supabase.storage.from("contratos").remove([editing.attachment_path]);
+    }
+
     toast.success(editing ? "Cota atualizada." : "Cota cadastrada.");
     invalidate(["server-fuel-quotas", "server-quota-fuelings", "vehicles"]);
     setOpen(false);

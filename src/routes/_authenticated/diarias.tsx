@@ -353,11 +353,12 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
                     <Button size="icon" variant="ghost" title="Imprimir RD" onClick={() => printRD(d)}>
                       <Printer className="h-4 w-4" />
                     </Button>
-                    {perms.canWrite && (
-                      <Button size="icon" variant="ghost" title="Comprovação (CD)" onClick={() => setProofOf(d)}>
-                        <FileCheck2 className="h-4 w-4" />
-                      </Button>
-                    )}
+                    {perms.canWrite &&
+                      ["viagem_realizada", "aguardando_comprovacao", "comprovada"].includes(d.status) && (
+                        <Button size="icon" variant="ghost" title="Comprovação (CD)" onClick={() => setProofOf(d)}>
+                          <FileCheck2 className="h-4 w-4" />
+                        </Button>
+                      )}
                   </div>
                 </TableCell>
               </TableRow>
@@ -692,6 +693,10 @@ function ProofDialog({ diary, onClose }: { diary: DiaryRow; onClose: () => void 
     if (finalize && balance > 0 && !resolved) {
       { toast.error("Existe saldo a restituir. Confirme a devolução antes de encerrar."); return; }
     }
+    if (finalize && diary.status !== "aguardando_comprovacao") {
+      toast.error('Coloque a diária em "Aguardando comprovação" antes de encerrar a prestação de contas.');
+      return;
+    }
     const payload = {
       organization_id: perms.orgId!,
       diary_id: diary.id,
@@ -721,17 +726,6 @@ function ProofDialog({ diary, onClose }: { diary: DiaryRow; onClose: () => void 
     const { error } = existing
       ? await supabase.from("diary_proofs").update(payload).eq("id", existing.id)
       : await supabase.from("diary_proofs").insert({ ...payload, created_by: perms.userId });
-    if (!error && finalize) {
-      await supabase
-        .from("diaries")
-        .update({
-          status: "comprovada",
-          closed_at: new Date().toISOString(),
-          closed_by: perms.userId,
-          closed_by_name: perms.userName,
-        })
-        .eq("id", diary.id);
-    }
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success(finalize ? "Comprovação encerrada." : "Comprovação salva.");

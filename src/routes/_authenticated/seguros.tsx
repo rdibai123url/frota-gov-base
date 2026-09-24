@@ -138,10 +138,15 @@ function Seguros() {
       return;
     }
     setSaving(true);
+    let uploadedAttachment: string | null = null;
     try {
       const input = form.elements.namedItem("file") as HTMLInputElement | null;
       const file = input?.files?.[0];
-      const path = file && orgId ? await uploadFleetFile(orgId, file, "seguros") : null;
+      let path = editing?.attachment_path ?? null;
+      if (file && orgId) {
+        path = await uploadFleetFile(orgId, file, "seguros");
+        uploadedAttachment = path;
+      }
       /*
        * A apólice e todos os veículos cobertos são gravados em uma única
        * transação no banco. Se qualquer vínculo falhar, nenhuma alteração
@@ -177,10 +182,22 @@ function Seguros() {
       if (error || !policyId) {
         throw error ?? new Error("Não foi possível salvar a apólice.");
       }
+
+      if (
+        editing?.attachment_path &&
+        uploadedAttachment &&
+        editing.attachment_path !== uploadedAttachment
+      ) {
+        await supabase.storage.from("frota").remove([editing.attachment_path]);
+      }
+
       toast.success(editing ? "Apólice atualizada." : "Apólice registrada.");
       invalidate(["insurance-policies", "fueling-alerts"]);
       setOpen(false);
     } catch (err) {
+      if (uploadedAttachment) {
+        await supabase.storage.from("frota").remove([uploadedAttachment]);
+      }
       const e2 = err as { code?: string };
       toast.error(e2.code === "23505" ? "Já existe apólice com esse número." : dbMessage(err));
     } finally {

@@ -113,9 +113,22 @@ function Orgao() {
       return;
     }
     const d = parsed.data;
+    const cnpjDigits = onlyDigits(d.cnpj);
+    if (cnpjDigits && !isValidCNPJ(cnpjDigits)) {
+      toast.error("CNPJ inválido.");
+      return;
+    }
+
+    const cpfDigits = onlyDigits(d.authority_cpf);
+    if (cpfDigits && !isValidCPF(cpfDigits)) {
+      toast.error("CPF da autoridade inválido.");
+      return;
+    }
+
     setSaving(true);
 
     let logoPath = org.logo_url;
+    let uploadedLogoPath: string | null = null;
     if (file) {
       const ext = file.name.split(".").pop()?.toLowerCase() || "png";
       const path = `${org.id}/brasao-${Date.now()}.${ext}`;
@@ -128,19 +141,7 @@ function Orgao() {
         return;
       }
       logoPath = path;
-    }
-
-    const cnpjDigits = onlyDigits(d.cnpj);
-    if (cnpjDigits && !isValidCNPJ(cnpjDigits)) {
-      setSaving(false);
-      toast.error("CNPJ inválido.");
-      return;
-    }
-    const cpfDigits = onlyDigits(d.authority_cpf);
-    if (cpfDigits && !isValidCPF(cpfDigits)) {
-      setSaving(false);
-      toast.error("CPF da autoridade inválido.");
-      return;
+      uploadedLogoPath = path;
     }
 
     const { error } = await supabase
@@ -169,9 +170,22 @@ function Orgao() {
 
     setSaving(false);
     if (error) {
+      if (uploadedLogoPath) {
+        await supabase.storage.from("brasoes").remove([uploadedLogoPath]);
+      }
       toast.error("Não foi possível salvar os dados do órgão.");
       return;
     }
+
+    if (
+      uploadedLogoPath &&
+      org.logo_url &&
+      org.logo_url !== uploadedLogoPath &&
+      !org.logo_url.startsWith("http")
+    ) {
+      await supabase.storage.from("brasoes").remove([org.logo_url]);
+    }
+
     setFile(null);
     setPreview(null);
     toast.success("Dados do órgão atualizados.");

@@ -198,9 +198,9 @@ function Sinistros() {
     }
     const d = parsed.data;
     setSaving(true);
+    const uploaded: string[] = [];
     try {
       const input = form.elements.namedItem("files") as HTMLInputElement | null;
-      const uploaded: string[] = [];
       for (const file of Array.from(input?.files ?? [])) {
         if (orgId) uploaded.push(await uploadFleetFile(orgId, file, "sinistros"));
       }
@@ -246,6 +246,9 @@ function Sinistros() {
       invalidate(["accidents", "vehicles", "vehicle-status-history", "fueling-alerts"]);
       setOpen(false);
     } catch (err) {
+      if (uploaded.length > 0) {
+        await supabase.storage.from("frota").remove(uploaded);
+      }
       toast.error(dbMessage(err));
     } finally {
       setSaving(false);

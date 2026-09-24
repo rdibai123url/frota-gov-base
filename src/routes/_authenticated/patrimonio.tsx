@@ -167,10 +167,12 @@ function Patrimonio() {
     }
     const d = parsed.data;
     setSaving(true);
+    let uploadedAttachment: string | null = null;
     try {
       const input = form.elements.namedItem("file") as HTMLInputElement | null;
       const file = input?.files?.[0];
       const path = file && orgId ? await uploadFleetFile(orgId, file, "patrimonio") : null;
+      uploadedAttachment = path;
       const { error } = await supabase.from("asset_movements").insert({
         organization_id: orgId!,
         vehicle_id: vehicleId,
@@ -205,6 +207,9 @@ function Patrimonio() {
       invalidate(["asset-movements", "vehicles", "vehicle-status-history", "fueling-alerts"]);
       setOpen(false);
     } catch (err) {
+      if (uploadedAttachment) {
+        await supabase.storage.from("frota").remove([uploadedAttachment]);
+      }
       toast.error(dbMessage(err));
     } finally {
       setSaving(false);

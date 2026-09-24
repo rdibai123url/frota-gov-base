@@ -1112,23 +1112,38 @@ function ParametersTab({
       toast.error("Informe o ativo e a justificativa.");
       return;
     }
+  
+    if (!meter.occurred_at) {
+      toast.error("Informe a data e hora da correção.");
+      return;
+    }
+  
+    const newValue = parseBRNumber(meter.new_value);
+  
+    if (newValue === null || newValue < 0) {
+      toast.error("Informe um novo valor de medidor válido.");
+      return;
+    }
+  
     const { error } = await supabase.from("meter_corrections").insert({
       organization_id: orgId,
       vehicle_id: meter.vehicle_id,
       meter: meter.meter,
       occurred_at: new Date(meter.occurred_at).toISOString(),
-      new_value: parseBRNumber(meter.new_value) ?? 0,
-      reason: meter.reason,
+      new_value: newValue,
+      reason: meter.reason.trim(),
       created_by: userId,
       updated_by: userId,
     });
+  
     if (error) {
       toast.error(error.message);
       return;
     }
+  
     toast.success("Correção de medidor registrada. Os trechos afetados saem das médias.");
     setMeterOpen(false);
-    await invalidate(["meter-corrections", "intel-segments"]);
+    await invalidate(["meter-corrections", "intel-segments", "vehicles"]);
   }
 
   const numericFields: { key: string; label: string; hint: string; fallback: number }[] = [

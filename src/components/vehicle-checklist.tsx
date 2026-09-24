@@ -120,8 +120,17 @@ function ChecklistDialog({ usage, stage, existing, departure, onClose }: { usage
     try {
       for (const file of files) {
         const path = await uploadChecklistPhoto(perms.orgId, usage.id, stage, file);
-        const { error } = await supabase.from("vehicle_checklist_photos").insert({ organization_id: perms.orgId, checklist_id: result.data.id, storage_path: path, created_by: perms.userId });
-        if (error) throw error;
+        const { error } = await supabase.from("vehicle_checklist_photos").insert({
+          organization_id: perms.orgId,
+          checklist_id: result.data.id,
+          storage_path: path,
+          created_by: perms.userId,
+        });
+
+        if (error) {
+          await supabase.storage.from("checklist-frota").remove([path]);
+          throw error;
+        }
       }
     } catch (error) { setSaving(false); toast.error(error instanceof Error ? error.message : "Checklist salvo, mas uma foto não foi anexada."); return; }
     setSaving(false);

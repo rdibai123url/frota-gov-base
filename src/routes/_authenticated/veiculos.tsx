@@ -212,6 +212,19 @@ function Veiculos() {
     // Só permite vincular unidades do próprio órgão (lista já é filtrada por RLS).
     const safeUnitId = unitId !== NONE && units.some((u) => u.id === unitId) ? unitId : null;
 
+    const currentKm = num(d.current_km);
+    const hourMeter = num(d.hour_meter);
+
+    if (currentKm !== null && currentKm < 0) {
+      toast.error("A quilometragem não pode ser negativa.");
+      return;
+    }
+
+    if (hourMeter !== null && hourMeter < 0) {
+      toast.error("O horímetro não pode ser negativo.");
+      return;
+    }
+
     const payload = {
       asset_class: "veiculo",
       plate: d.plate.toUpperCase(),
@@ -233,8 +246,8 @@ function Veiculos() {
       vehicle_type: vehicleType === NONE ? null : vehicleType,
       fuel_type: fuelType === NONE ? null : fuelType,
       tank_capacity: num(d.tank_capacity),
-      current_km: num(d.current_km),
-      hour_meter: num(d.hour_meter),
+      current_km: currentKm,
+      hour_meter: hourMeter,
       // A unidade só muda pelo fluxo de movimentação patrimonial (Frota → Movimentação patrimonial).
       ...(editing ? {} : { unit_id: safeUnitId }),
       status,
@@ -649,6 +662,7 @@ function Veiculos() {
                   id="current_km"
                   name="current_km"
                   inputMode="decimal"
+                  min="0"
                   defaultValue={editing?.current_km ?? ""}
                 />
               </div>
@@ -658,6 +672,7 @@ function Veiculos() {
                   id="hour_meter"
                   name="hour_meter"
                   inputMode="decimal"
+                  min="0"
                   defaultValue={editing?.hour_meter ?? ""}
                 />
               </div>

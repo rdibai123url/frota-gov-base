@@ -266,10 +266,12 @@ function Manutencoes() {
     }
     const d = parsed.data;
     setSavingReq(true);
-    let reqAttachment: string | null = null;
+    let reqAttachment: string | null = editingReq?.attachment_path ?? null;
+    let uploadedReqAttachment: string | null = null;
     if (reqFile) {
       try {
         reqAttachment = await uploadMaintenanceFile(orgId!, reqFile, "solicitacoes");
+        uploadedReqAttachment = reqAttachment;
       } catch (err) {
         setSavingReq(false);
         toast.error(err instanceof Error ? err.message : "Falha ao enviar o anexo.");
@@ -301,9 +303,21 @@ function Manutencoes() {
         });
     setSavingReq(false);
     if (error) {
+      if (uploadedReqAttachment) {
+        await supabase.storage.from("manutencao").remove([uploadedReqAttachment]);
+      }
       toast.error(dbMessage(error));
       return;
     }
+
+    if (
+      editingReq?.attachment_path &&
+      uploadedReqAttachment &&
+      editingReq.attachment_path !== uploadedReqAttachment
+    ) {
+      await supabase.storage.from("manutencao").remove([editingReq.attachment_path]);
+    }
+
     toast.success(editingReq ? "Solicitação atualizada." : "Solicitação registrada.");
     setReqFile(null);
     invalidate(["maintenance-requests", "vehicles", "vehicle-status-history"]);
@@ -423,10 +437,12 @@ function Manutencoes() {
       return;
     }
     setSavingRec(true);
-    let recAttachment: string | null = null;
+    let recAttachment: string | null = editingRec?.attachment_path ?? null;
+    let uploadedRecAttachment: string | null = null;
     if (recFile) {
       try {
         recAttachment = await uploadMaintenanceFile(orgId!, recFile, "manutencoes");
+        uploadedRecAttachment = recAttachment;
       } catch (err) {
         setSavingRec(false);
         toast.error(err instanceof Error ? err.message : "Falha ao enviar o anexo.");
@@ -466,9 +482,21 @@ function Manutencoes() {
       : await supabase.from("maintenance_records").insert({ ...payload, organization_id: orgId!, created_by: userId });
     setSavingRec(false);
     if (error) {
+      if (uploadedRecAttachment) {
+        await supabase.storage.from("manutencao").remove([uploadedRecAttachment]);
+      }
       toast.error(dbMessage(error));
       return;
     }
+
+    if (
+      editingRec?.attachment_path &&
+      uploadedRecAttachment &&
+      editingRec.attachment_path !== uploadedRecAttachment
+    ) {
+      await supabase.storage.from("manutencao").remove([editingRec.attachment_path]);
+    }
+
     toast.success(editingRec ? "Manutenção atualizada." : "Manutenção registrada.");
     setRecFile(null);
     invalidate(["maintenance-records", "maintenance-requests", "vehicles", "contracts", "contract-items"]);

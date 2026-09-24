@@ -143,8 +143,12 @@ function RedeCredenciada() {
     const d = parsed.data;
     setSaving(true);
     let attachment = editing?.attachment_path ?? null;
+    let uploadedAttachment: string | null = null;
     try {
-      if (file && orgId) attachment = await uploadMaintenanceFile(orgId, file, "credenciados");
+      if (file && orgId) {
+        attachment = await uploadMaintenanceFile(orgId, file, "credenciados");
+        uploadedAttachment = attachment;
+      }
     } catch (err) {
       setSaving(false);
       toast.error(dbMessage(err));

@@ -157,12 +157,13 @@ export const restoreBackup = createServerFn({ method: "POST" })
     if (data.confirmation.trim().toUpperCase() !== "RESTAURAR") throw new Error('Digite "RESTAURAR" para confirmar.');
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { runBackup, BACKUP_TABLES, sha256Hex } = await import("./backup.server");
-const { Buffer } = await import("node:buffer");
+    const { runBackup, BACKUP_TABLES, RESTORE_CONFLICT_COLUMNS, sha256Hex } =
+      await import("./backup.server");
+    const { Buffer } = await import("node:buffer");
 
     const { data: run } = await supabaseAdmin
       .from("backup_runs")
-      .select("id, organization_id, object_key, status")
+      .select("id, organization_id, object_key, status, checksum")
       .eq("id", data.runId)
       .maybeSingle();
     if (!run?.object_key) throw new Error("Esta execução não possui pacote restaurável na plataforma.");
@@ -191,7 +192,16 @@ const { Buffer } = await import("node:buffer");
     try {
       const { data: file, error } = await supabaseAdmin.storage.from("backups").download(run.object_key);
       if (error || !file) throw new Error("Pacote de backup não encontrado no armazenamento.");
-      const parsed = JSON.parse(await file.text()) as {
+
+      const bundleBytes = new Uint8Array(await file.arrayBuffer());
+      if (run.checksum) {
+        const actualBundleChecksum = await sha256Hex(bundleBytes);
+        if (actualBundleChecksum !== run.checksum) {
+          throw new Error("Falha de integridade: o pacote de backup não corresponde ao checksum registrado.");
+        }
+      }
+
+      const parsed = JSON.parse(Buffer.from(bundleBytes).toString("utf8")) as {
         data?: Record<string, Record<string, unknown>[]>;
         files?: {
           bucket: string;
@@ -207,60 +217,60 @@ const { Buffer } = await import("node:buffer");
       let restoredFiles = 0;
       let skippedFiles = 0;
       // Valida a integridade dos anexos antes de iniciar a restauração.
-for (const item of parsed.files ?? []) {
-  if (!item.content_base64) continue;
+      for (const item of parsed.files ?? []) {
+        if (!item.content_base64) continue;
 
-  const bytes = Buffer.from(item.content_base64, "base64");
+        const bytes = Buffer.from(item.content_base64, "base64");
 
-  if (item.checksum) {
-    const actualChecksum = await sha256Hex(bytes);
+        if (item.checksum) {
+          const actualChecksum = await sha256Hex(bytes);
 
-    if (actualChecksum !== item.checksum) {
-      throw new Error(
-        `Falha de integridade no arquivo ${item.bucket}/${item.path}.`,
-      );
-    }
-  }
-}
+          if (actualChecksum !== item.checksum) {
+            throw new Error(`Falha de integridade no arquivo ${item.bucket}/${item.path}.`);
+          }
+        }
+      }
       for (const table of BACKUP_TABLES) {
         const rows = parsed.data?.[table];
         if (!rows?.length) continue;
         for (let i = 0; i < rows.length; i += 200) {
           const chunk = rows.slice(i, i + 200);
-          const { error: upErr } = await supabaseAdmin.from(table).upsert(chunk as never, { onConflict: "id" });
+          const onConflict = RESTORE_CONFLICT_COLUMNS[table] ?? "id";
+          const { error: upErr } = await supabaseAdmin
+            .from(table)
+            .upsert(chunk as never, { onConflict });
           if (upErr) throw new Error(`Tabela ${table}: ${upErr.message}`);
           restored += chunk.length;
         }
       }
       // Restaura os arquivos privados nos buckets originais.
-for (const item of parsed.files ?? []) {
-  if (!item.content_base64) {
-    skippedFiles += 1;
-    continue;
-  }
+      for (const item of parsed.files ?? []) {
+        if (!item.content_base64) {
+          skippedFiles += 1;
+          continue;
+        }
 
-  const bytes = Buffer.from(item.content_base64, "base64");
+        const bytes = Buffer.from(item.content_base64, "base64");
 
-  const { error: storageError } = await supabaseAdmin.storage
-    .from(item.bucket)
-    .upload(item.path, bytes, {
-      upsert: true,
-    });
+        const { error: storageError } = await supabaseAdmin.storage
+          .from(item.bucket)
+          .upload(item.path, bytes, {
+            upsert: true,
+          });
 
-  if (storageError) {
-    throw new Error(
-      `Arquivo ${item.bucket}/${item.path}: ${storageError.message}`,
-    );
-  }
+        if (storageError) {
+          throw new Error(`Arquivo ${item.bucket}/${item.path}: ${storageError.message}`);
+        }
 
-  restoredFiles += 1;
-}
-const summary =
-`${restored} registros reaplicados. ` +
-`${restoredFiles} arquivo(s) restaurado(s).` +
-(skippedFiles > 0
-  ? ` ${skippedFiles} arquivo(s) antigo(s) sem conteúdo binário foram ignorados.`
-  : "");
+        restoredFiles += 1;
+      }
+
+      const summary =
+        `${restored} registros reaplicados. ` +
+        `${restoredFiles} arquivo(s) restaurado(s).` +
+        (skippedFiles > 0
+          ? ` ${skippedFiles} arquivo(s) antigo(s) sem conteúdo binário foram ignorados.`
+          : "");
       await supabaseAdmin
         .from("backup_restores")
         .update({ status: "concluido", finished_at: new Date().toISOString(), result_summary: summary })
