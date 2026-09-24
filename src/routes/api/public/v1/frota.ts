@@ -14,6 +14,7 @@ const json = (body: unknown, status = 200) =>
 
 const MAX_PAGE_SIZE = 200;
 const DEFAULT_PAGE_SIZE = 50;
+const RATE_LIMIT_PER_MINUTE = 120;
 
 export const Route = createFileRoute("/api/public/v1/frota")({
   server: {
@@ -39,9 +40,26 @@ export const Route = createFileRoute("/api/public/v1/frota")({
         if (scopes.length && !scopes.includes("frota:read") && !scopes.includes("*"))
           return json({ error: "Chave sem permissão para o recurso de frota." }, 403);
 
+        const since = new Date(Date.now() - 60_000).toISOString();
+        const { count: recent } = await supabaseAdmin
+          .from("integration_logs")
+          .select("id", { count: "exact", head: true })
+          .eq("organization_id", key.organization_id)
+          .eq("kind", "api")
+          .gte("created_at", since);
+
+        if ((recent ?? 0) >= RATE_LIMIT_PER_MINUTE) {
+          return json({ error: "Limite de requisições por minuto excedido." }, 429);
+        }
+
         const url = new URL(request.url);
-        const page = Math.max(1, Number(url.searchParams.get("pagina") ?? url.searchParams.get("page") ?? 1) || 1);
-        const requested = Number(url.searchParams.get("por_pagina") ?? url.searchParams.get("page_size") ?? DEFAULT_PAGE_SIZE);
+        const page = Math.max(
+          1,
+          Number(url.searchParams.get("pagina") ?? url.searchParams.get("page") ?? 1) || 1,
+        );
+        const requested = Number(
+          url.searchParams.get("por_pagina") ?? url.searchParams.get("page_size") ?? DEFAULT_PAGE_SIZE,
+        );
         const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, requested || DEFAULT_PAGE_SIZE));
         const status = url.searchParams.get("situacao");
         const fromIndex = (page - 1) * pageSize;
@@ -52,6 +70,7 @@ export const Route = createFileRoute("/api/public/v1/frota")({
           .eq("organization_id", key.organization_id)
           .order("asset_code")
           .range(fromIndex, fromIndex + pageSize - 1);
+
         if (status) q = q.eq("status", status as never);
 
         const { data: vehicles, count, error } = await q;
@@ -62,7 +81,19 @@ export const Route = createFileRoute("/api/public/v1/frota")({
           .update({ last_used_at: new Date().toISOString() })
           .eq("id", key.id);
 
+        await supabaseAdmin.from("integration_logs").insert({
+          organization_id: key.organization_id,
+          kind: "api",
+          operation: "GET /v1/frota",
+          direction: "saida",
+          status: "sucesso",
+          message: `Consulta autenticada pela chave ${prefix}.`,
+          records_total: vehicles?.length ?? 0,
+          records_ok: vehicles?.length ?? 0,
+        });
+
         const total = count ?? vehicles?.length ?? 0;
+
         return json({
           version: "v1",
           generated_at: new Date().toISOString(),

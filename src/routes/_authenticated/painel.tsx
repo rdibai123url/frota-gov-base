@@ -367,7 +367,7 @@ function Painel() {
       <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5">
         <StatCard label="Total de veículos" value={isLoading ? "—" : vehicles.length} icon={Truck} to="/veiculos" />
         <StatCard label="Veículos ativos" value={ativos} icon={CircleCheck} tone="success" to="/veiculos" />
-        <StatCard label="Em manutenção" value={manutencao} icon={Wrench} tone="warning" to="/manutencoes" />
+        <StatCard label="Em manutenção" value={manutencao} icon={Wrench} tone="warning" to="/veiculos" />
         <StatCard label="Secretarias / Unidades" value={units.length} icon={Building2} to="/unidades" />
         <StatCard label="Usuários" value={users.length} icon={Users} to="/usuarios" />
       </div>

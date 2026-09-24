@@ -444,17 +444,32 @@ function ServiceCapture() {
   const order = orders.find((o) => o.id === selected);
 
   async function send() {
-    if (!selected) {
+    if (!selected || !order) {
       toast.error("Selecione a ordem de serviço");
       return;
     }
+
+    const executedValue = parseBRNumber(form.executed_value);
+    if (executedValue === null || executedValue < 0) {
+      toast.error("Informe um valor executado válido.");
+      return;
+    }
+
+    const approvedValue = Number(order.approved_value ?? 0);
+    if (executedValue > approvedValue) {
+      toast.error(
+        `O valor executado não pode ultrapassar o autorizado (${brl(approvedValue)}).`,
+      );
+      return;
+    }
+
     setBusy(true);
     const now = new Date().toISOString();
     const { error } = await supabase.rpc("partner_capture_service", rpcArgs({
       _service_order: selected,
       _started_at: now,
       _finished_at: form.finish === "final" ? now : undefined,
-      _executed_value: parseBRNumber(form.executed_value) ?? undefined,
+      _executed_value: executedValue,
       _odometer: parseBRNumber(form.odometer) ?? undefined,
       _hour_meter: parseBRNumber(form.hour_meter) ?? undefined,
       _document: form.document.trim() || undefined,
@@ -494,9 +509,16 @@ function ServiceCapture() {
       {order && (
         <div className="grid gap-3 sm:grid-cols-3">
           <div>
-            <Label>Valor executado</Label>
-            <Input value={form.executed_value} onChange={(e) => setForm({ ...form, executed_value: e.target.value })} />
-            <p className="mt-1 text-xs text-muted-foreground">Autorizado: {brl(order.approved_value)}</p>
+            <Label>Valor executado *</Label>
+            <Input
+              value={form.executed_value}
+              onChange={(e) => setForm({ ...form, executed_value: e.target.value })}
+              inputMode="decimal"
+              aria-describedby="service-executed-value-help"
+            />
+            <p id="service-executed-value-help" className="mt-1 text-xs text-muted-foreground">
+              Autorizado: {brl(order.approved_value)}. O valor executado não pode ultrapassar este limite.
+            </p>
           </div>
           <div>
             <Label>Hodômetro (km)</Label>

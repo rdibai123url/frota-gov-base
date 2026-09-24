@@ -312,23 +312,95 @@ export const confirmPasswordChanged = createServerFn({ method: "POST" })
 
 /* ---------------------------- chaves de API --------------------------- */
 
+const API_KEY_SCOPES = [
+  "frota:read",
+  "abastecimento:read",
+  "contratos:read",
+  "manutencao:read",
+  "almoxarifado:read",
+  "legal:read",
+  "*",
+] as const;
+
+const API_KEY_SCOPE_SET = new Set<string>(API_KEY_SCOPES);
+
+
 export const issueApiKey = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { name: string; scopes: string[]; expiresAt?: string | null }) => data)
   .handler(async ({ data, context }) => {
     const { supabaseAdmin, organizationId } = await assertCanManageUsers(context.userId);
+
+    const name = data.name.trim();
+    if (name.length < 3 || name.length > 120) {
+      throw new Error("Informe um nome entre 3 e 120 caracteres.");
+    }
+
+    const scopes = Array.from(
+      new Set(
+        (data.scopes ?? [])
+          .map((scope) => scope.trim())
+          .filter(Boolean),
+      ),
+    );
+
+    if (scopes.length === 0) {
+      throw new Error("Selecione ao menos um escopo para a chave.");
+    }
+
+    const invalidScopes = scopes.filter((scope) => !API_KEY_SCOPE_SET.has(scope));
+    if (invalidScopes.length > 0) {
+      throw new Error(`Escopo de API inválido: ${invalidScopes.join(", ")}.`);
+    }
+
+    if (scopes.includes("*") && scopes.length > 1) {
+      throw new Error('O escopo "*" deve ser usado sozinho.');
+    }
+
+    let expiresAt: string | null = null;
+    if (data.expiresAt) {
+      const rawExpiry = data.expiresAt.trim();
+      const parsed = /^\d{4}-\d{2}-\d{2}$/.test(rawExpiry)
+        ? new Date(`${rawExpiry}T23:59:59.999Z`)
+        : new Date(rawExpiry);
+
+      if (Number.isNaN(parsed.getTime())) {
+        throw new Error("Data de validade inválida.");
+      }
+
+      if (parsed.getTime() <= Date.now()) {
+        throw new Error("A validade da chave deve ser futura.");
+      }
+
+      expiresAt = parsed.toISOString();
+    }
+
     const raw = tempPassword() + tempPassword();
     const prefix = `fg_${crypto.randomUUID().slice(0, 8)}`;
     const key = `${prefix}.${raw}`;
+
     const { error } = await supabaseAdmin.from("org_api_keys").insert({
       organization_id: organizationId,
-      name: data.name,
+      name,
       prefix,
       key_hash: await sha256(key),
-      scopes: data.scopes.length ? data.scopes : ["frota:read"],
-      expires_at: data.expiresAt || null,
+      scopes,
+      expires_at: expiresAt,
       created_by: context.userId,
     });
+
     if (error) throw new Error(error.message);
+
+    await supabaseAdmin.from("activity_logs").insert({
+      organization_id: organizationId,
+      actor_id: context.userId,
+      event_type: "seguranca",
+      area: "Integrações",
+      screen: "Chaves de API",
+      entity: "org_api_keys",
+      action: "INSERT",
+      summary: `Chave de API "${name}" emitida com escopos: ${scopes.join(", ")}`,
+    });
+
     return { key };
   });
