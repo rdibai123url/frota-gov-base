@@ -140,7 +140,9 @@ function OrdensServico() {
       unit_id: unitId === NONE ? chosenQuotation.unit_id : unitId,
       workshop_id: chosenProposal.workshop_id,
       services: String(fd.get("services") ?? chosenQuotation.description),
-      approved_value: Number(chosenProposal.total_value),
+      approved_value: Number(
+        chosenProposal.net_value ?? chosenProposal.total_value
+      ),
       execution_days: chosenProposal.execution_days,
       deadline_at: (fd.get("deadline_at") as string) || null,
       warranty_days: chosenProposal.warranty_days,

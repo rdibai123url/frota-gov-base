@@ -1024,10 +1024,20 @@ function InventoryPanel({
   }
 
   async function saveCount(id: string, counted: string, justification: string) {
-    const q = parseBRNumber(counted);
+    const raw = counted.trim();
+    const q = raw === "" ? null : parseBRNumber(raw);
+  
+    if (q !== null && (q === undefined || q < 0)) {
+      toast.error("A quantidade contada não pode ser negativa.");
+      return;
+    }
+  
     const { error } = await supabase
       .from("inventory_items")
-      .update({ counted_quantity: q ?? 0, justification: justification.trim() || null })
+      .update({
+        counted_quantity: raw === "" ? null : q,
+        justification: justification.trim() || null,
+      })
       .eq("id", id);
     if (error) {
       toast.error(dbMessage(error));
