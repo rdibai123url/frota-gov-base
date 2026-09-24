@@ -50,3 +50,7 @@ Importe o repositório na Vercel, configure as variáveis de ambiente e faça o 
 ## Banco
 
 O banco permanece no Supabase. As migrations ficam versionadas no repositório, enquanto os dados reais permanecem no PostgreSQL/Supabase.
+
+## Desenvolvimento assistido por Codex
+
+Este repositório está preparado para desenvolvimento assistido por Codex, com validação de lint e build antes do envio de alterações.
