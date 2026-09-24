@@ -157,7 +157,8 @@ export const restoreBackup = createServerFn({ method: "POST" })
     if (data.confirmation.trim().toUpperCase() !== "RESTAURAR") throw new Error('Digite "RESTAURAR" para confirmar.');
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { runBackup, BACKUP_TABLES } = await import("./backup.server");
+    const { runBackup, BACKUP_TABLES, sha256Hex } = await import("./backup.server");
+const { Buffer } = await import("node:buffer");
 
     const { data: run } = await supabaseAdmin
       .from("backup_runs")
@@ -190,8 +191,37 @@ export const restoreBackup = createServerFn({ method: "POST" })
     try {
       const { data: file, error } = await supabaseAdmin.storage.from("backups").download(run.object_key);
       if (error || !file) throw new Error("Pacote de backup não encontrado no armazenamento.");
-      const parsed = JSON.parse(await file.text()) as { data?: Record<string, Record<string, unknown>[]> };
+      const parsed = JSON.parse(await file.text()) as {
+        data?: Record<string, Record<string, unknown>[]>;
+        files?: {
+          bucket: string;
+          path: string;
+          size: number | null;
+          updated_at: string | null;
+          content_base64?: string | null;
+          checksum?: string | null;
+        }[];
+      };
+      
       let restored = 0;
+      let restoredFiles = 0;
+      let skippedFiles = 0;
+      // Valida a integridade dos anexos antes de iniciar a restauração.
+for (const item of parsed.files ?? []) {
+  if (!item.content_base64) continue;
+
+  const bytes = Buffer.from(item.content_base64, "base64");
+
+  if (item.checksum) {
+    const actualChecksum = await sha256Hex(bytes);
+
+    if (actualChecksum !== item.checksum) {
+      throw new Error(
+        `Falha de integridade no arquivo ${item.bucket}/${item.path}.`,
+      );
+    }
+  }
+}
       for (const table of BACKUP_TABLES) {
         const rows = parsed.data?.[table];
         if (!rows?.length) continue;
@@ -202,7 +232,35 @@ export const restoreBackup = createServerFn({ method: "POST" })
           restored += chunk.length;
         }
       }
-      const summary = `${restored} registros reaplicados a partir do pacote.`;
+      // Restaura os arquivos privados nos buckets originais.
+for (const item of parsed.files ?? []) {
+  if (!item.content_base64) {
+    skippedFiles += 1;
+    continue;
+  }
+
+  const bytes = Buffer.from(item.content_base64, "base64");
+
+  const { error: storageError } = await supabaseAdmin.storage
+    .from(item.bucket)
+    .upload(item.path, bytes, {
+      upsert: true,
+    });
+
+  if (storageError) {
+    throw new Error(
+      `Arquivo ${item.bucket}/${item.path}: ${storageError.message}`,
+    );
+  }
+
+  restoredFiles += 1;
+}
+const summary =
+`${restored} registros reaplicados. ` +
+`${restoredFiles} arquivo(s) restaurado(s).` +
+(skippedFiles > 0
+  ? ` ${skippedFiles} arquivo(s) antigo(s) sem conteúdo binário foram ignorados.`
+  : "");
       await supabaseAdmin
         .from("backup_restores")
         .update({ status: "concluido", finished_at: new Date().toISOString(), result_summary: summary })

@@ -6,34 +6,144 @@
  * NOME do segredo é guardado na configuração do órgão.
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { Buffer } from "node:buffer";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Admin = SupabaseClient<any, any, any>;
 
-export const APP_SCHEMA_VERSION = "10.0.0";
+export const APP_SCHEMA_VERSION = "11.0.0";
 
 /** Tabelas do órgão copiadas no backup relacional. */
 export const BACKUP_TABLES = [
-  "organizations", "units", "cost_centers", "profiles", "user_roles",
-  "vehicles", "vehicle_status_history", "vehicle_usages", "vehicle_obligations",
-  "drivers", "diaries", "diary_proofs",
-  "suppliers", "supplier_contracts", "external_entities", "workshops",
-  "fuel_types", "fuel_limits", "fuel_authorizations", "fuelings", "fueling_alerts",
-  "maintenance_plans", "maintenance_plan_items", "maintenance_requests",
-  "maintenance_records", "maintenance_parts", "maintenance_settings",
-  "parts_catalog", "tires", "tire_movements",
-  "quotations", "quotation_items", "quotation_invitations",
-  "quotation_proposals", "quotation_proposal_items",
-  "service_orders", "service_order_items",
-  "contracts", "contract_items", "contract_periods", "contract_amendments",
-  "commitments", "commitment_movements", "quotas", "quota_supplements",
-  "budget_movements", "opening_balances",
-  "traffic_fines", "accidents", "insurance_policies", "insurance_vehicles",
+  // Órgão, estrutura e usuários
+  "organizations",
+  "units",
+  "cost_centers",
+  "profiles",
+  "user_roles",
+  "org_counters",
+
+  // Frota
+  "vehicles",
+  "equipment_types",
+  "vehicle_status_history",
+  "vehicle_usages",
+  "vehicle_obligations",
+  "vehicle_cleanings",
+  "cleaning_types",
+  "drivers",
   "asset_movements",
-  "transparency_settings", "transparency_periods", "transparency_publications",
-  "transparency_reopen_requests", "transparency_delivery_attempts",
-  "import_batches", "import_rows", "report_presets", "org_counters",
-  "activity_logs", "audit_logs",
+  "meter_corrections",
+
+  // Diárias
+  "diaries",
+  "diary_proofs",
+
+  // Pessoas, empresas e rede
+  "suppliers",
+  "supplier_contracts",
+  "external_entities",
+  "workshops",
+  "accredited_partners",
+  "partner_users",
+  "partner_captures",
+  "asset_cards",
+  "asset_card_uses",
+
+  // Abastecimento
+  "fuel_types",
+  "fuel_limits",
+  "fuel_authorizations",
+  "fuelings",
+  "fueling_alerts",
+  "server_fuel_quotas",
+
+  // Contratos e orçamento
+  "contracts",
+  "contract_items",
+  "contract_periods",
+  "contract_amendments",
+  "commitments",
+  "commitment_movements",
+  "quotas",
+  "quota_supplements",
+  "budget_movements",
+  "opening_balances",
+
+  // Manutenção
+  "maintenance_plans",
+  "maintenance_plan_items",
+  "maintenance_requests",
+  "maintenance_records",
+  "maintenance_parts",
+  "maintenance_settings",
+  "service_orders",
+  "service_order_items",
+
+  // Compras e cotações
+  "quotations",
+  "quotation_items",
+  "quotation_invitations",
+  "quotation_proposals",
+  "quotation_proposal_items",
+
+  // Peças, pneus e almoxarifado
+  "parts_catalog",
+  "part_compatibilities",
+  "compatibility_overrides",
+  "tires",
+  "tire_movements",
+  "supply_orders",
+  "supply_order_items",
+  "warehouses",
+  "stock_balances",
+  "stock_movements",
+  "stock_reservations",
+  "inventories",
+  "inventory_items",
+
+  // Jurídico / patrimonial
+  "traffic_fines",
+  "accidents",
+  "insurance_policies",
+  "insurance_vehicles",
+
+  // Inteligência e sustentabilidade
+  "consumption_parameters",
+  "intelligence_settings",
+  "asset_market_values",
+  "emission_factors",
+
+  // Transparência
+  "transparency_settings",
+  "transparency_periods",
+  "transparency_publications",
+  "transparency_reopen_requests",
+  "transparency_delivery_attempts",
+
+  // Migração e relatórios
+  "import_batches",
+  "import_rows",
+  "report_presets",
+
+  // Integrações
+  "integration_connectors",
+  "integration_mappings",
+  "integration_logs",
+  "detran_snapshots",
+  "webhook_endpoints",
+  "webhook_deliveries",
+
+  // Identidade institucional
+  "sso_providers",
+  "sso_claim_mappings",
+  "ldap_directories",
+  "ldap_group_mappings",
+  "auth_login_events",
+
+  // Auditoria
+  "activity_logs",
+  "audit_logs",
 ] as const;
 
 /** Colunas nunca exportadas (hashes e material sensível de autenticação). */
@@ -251,7 +361,14 @@ async function collect(admin: Admin, settings: BackupSettingsRow, org: { id: str
     }
   }
 
-  const files: { bucket: string; path: string; size: number | null; updated_at: string | null }[] = [];
+  const files: {
+    bucket: string;
+    path: string;
+    size: number | null;
+    updated_at: string | null;
+    content_base64?: string | null;
+    checksum?: string | null;
+  }[] = [];
   let fileBytes = 0;
   if (settings.include_storage) {
     for (const bucket of BACKUP_BUCKETS) {
@@ -270,8 +387,34 @@ async function collect(admin: Admin, settings: BackupSettingsRow, org: { id: str
             continue;
           }
           const size = (entry.metadata as { size?: number } | null)?.size ?? null;
-          files.push({ bucket, path: full, size, updated_at: entry.updated_at ?? null });
-          fileBytes += size ?? 0;
+
+let contentBase64: string | null = null;
+let fileChecksum: string | null = null;
+
+if ((fileBytes + (size ?? 0)) <= MAX_FILE_BYTES) {
+  const { data: downloaded, error: downloadError } =
+    await admin.storage.from(bucket).download(full);
+
+  if (downloadError || !downloaded) {
+    warnings.push(`Arquivo ${bucket}/${full}: não foi possível copiar o conteúdo.`);
+  } else {
+    const bytes = new Uint8Array(await downloaded.arrayBuffer());
+
+    contentBase64 = Buffer.from(bytes).toString("base64");
+    fileChecksum = await sha256Hex(bytes);
+  }
+}
+
+files.push({
+  bucket,
+  path: full,
+  size,
+  updated_at: entry.updated_at ?? null,
+  content_base64: contentBase64,
+  checksum: fileChecksum,
+});
+
+fileBytes += size ?? 0;
           if (files.length >= MAX_FILES) break;
         }
         if (files.length >= MAX_FILES) break;
@@ -374,7 +517,9 @@ export async function runBackup(
   const log: string[] = [];
   try {
     const collected = await collect(admin, config, org as { id: string; legal_name: string });
-    log.push(`Coleta concluída: ${collected.recordCount} registros, ${collected.fileCount} anexos inventariados.`);
+    log.push(
+      `Coleta concluída: ${collected.recordCount} registros, ${collected.fileCount} anexos processados.`,
+    );
 
     const checksum = await sha256Hex(collected.bundle);
     const slug = orgSlug((org as { legal_name: string }).legal_name);
