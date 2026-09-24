@@ -67,7 +67,7 @@ const NONE = "__none__";
 type ItemDraft = { part_id: string; description: string; quantity: string; unit_value: string; measure_unit: string };
 
 function OFP() {
-  const { canManageFleet, orgId, userId, userName } = usePerms();
+  const { canManageFleet, orgId, userName } = usePerms();
   const invalidate = useInvalidate();
   const { data: orders = [], isLoading } = useSupplyOrders();
   const { data: partners = [] } = usePartners();
@@ -111,11 +111,13 @@ function OFP() {
 
   async function create() {
     if (!orgId) return;
+
     const rows = drafts.filter((d) => d.description.trim() && parseBRNumber(d.quantity));
     if (!rows.length) {
       toast.error("Inclua ao menos um item com descrição e quantidade");
       return;
     }
+
     if (form.vehicle_id !== NONE) {
       for (const d of rows) {
         if (d.part_id === NONE) continue;
@@ -125,48 +127,47 @@ function OFP() {
         }
       }
     }
-    const { data, error } = await supabase
-      .from("supply_orders")
-      .insert({
-        organization_id: orgId,
-        code: "",
-        unit_id: form.unit_id === NONE ? null : form.unit_id,
-        vehicle_id: form.vehicle_id === NONE ? null : form.vehicle_id,
-        partner_id: form.partner_id === NONE ? null : form.partner_id,
-        supplier_id: form.supplier_id === NONE ? null : form.supplier_id,
-        expense_origin: form.expense_origin,
-        contract_id: form.contract_id === NONE ? null : form.contract_id,
-        contract_item_id: form.contract_item_id === NONE ? null : form.contract_item_id,
-        cost_center_id: form.cost_center_id === NONE ? null : form.cost_center_id,
-        deadline_at: form.deadline_at || null,
-        delivery_place: form.delivery_place.trim() || null,
-        justification: form.justification.trim() || null,
-        requester_id: userId,
-        requester_name: userName,
-        created_by: userId,
-      })
-      .select("id")
-      .single();
-    if (error || !data) {
-      toast.error(dbMessage(error));
-      return;
-    }
-    const { error: e2 } = await supabase.from("supply_order_items").insert(
-      rows.map((d) => ({
-        organization_id: orgId,
-        supply_order_id: data.id,
+
+    /*
+     * A criação da OFP e de todos os seus itens acontece em uma única
+     * transação no banco. Se qualquer item falhar, nenhuma parte da OFP
+     * fica gravada.
+     *
+     * O cast abaixo é temporário até a próxima regeneração dos tipos
+     * TypeScript do Supabase incluir a RPC supply_order_create.
+     */
+    const callRpc = supabase.rpc as unknown as (
+      functionName: string,
+      args: Record<string, unknown>,
+    ) => Promise<{ data: string | null; error: { message: string } | null }>;
+
+    const { data, error } = await callRpc("supply_order_create", {
+      _unit_id: form.unit_id === NONE ? null : form.unit_id,
+      _vehicle_id: form.vehicle_id === NONE ? null : form.vehicle_id,
+      _partner_id: form.partner_id === NONE ? null : form.partner_id,
+      _supplier_id: form.supplier_id === NONE ? null : form.supplier_id,
+      _expense_origin: form.expense_origin,
+      _contract_id: form.contract_id === NONE ? null : form.contract_id,
+      _contract_item_id: form.contract_item_id === NONE ? null : form.contract_item_id,
+      _cost_center_id: form.cost_center_id === NONE ? null : form.cost_center_id,
+      _deadline_at: form.deadline_at || null,
+      _delivery_place: form.delivery_place.trim() || null,
+      _justification: form.justification.trim() || null,
+      _requester_name: userName || null,
+      _items: rows.map((d) => ({
         part_id: d.part_id === NONE ? null : d.part_id,
         description: d.description.trim(),
         measure_unit: d.measure_unit,
         quantity: parseBRNumber(d.quantity) ?? 0,
         unit_value: parseBRNumber(d.unit_value) ?? 0,
-        created_by: userId,
       })),
-    );
-    if (e2) {
-      toast.error(dbMessage(e2));
+    });
+
+    if (error || !data) {
+      toast.error(error?.message ?? "Não foi possível criar a OFP.");
       return;
     }
+
     toast.success("OFP criada em rascunho");
     setOpen(false);
     setDrafts([{ part_id: NONE, description: "", quantity: "", unit_value: "", measure_unit: "unidade" }]);

@@ -712,8 +712,8 @@ function MovementDialog({
 
 /**
  * Transferência entre depósitos com um ou vários itens.
- * Cada linha é enviada ao servidor pela rotina de transferência já existente,
- * que valida saldo e registra a movimentação auditada.
+ * Todos os itens são enviados ao banco em uma única transação atômica,
+ * que valida saldos e registra as movimentações auditadas.
  */
 function TransferDialog({
   open,
@@ -747,28 +747,44 @@ function TransferDialog({
       toast.error("Origem e destino devem ser diferentes");
       return;
     }
+
     setSaving(true);
-    for (const r of valid) {
-      const { error } = await supabase.rpc(
-        "stock_transfer",
-        rpcArgs({
-          _from: f.from,
-          _to: f.to,
-          _part: r.part,
-          _quantity: parseBRNumber(r.quantity) ?? 0,
-          _lot: r.lot.trim(),
-          _reason: f.reason.trim() || undefined,
-        }),
-      );
-      if (error) {
-        setSaving(false);
-        toast.error(dbMessage(error));
-        invalidate(["stock-balances", "stock-movements"]);
-        return;
-      }
-    }
+
+    /*
+     * Todos os itens são enviados ao banco em uma única transação.
+     * Se qualquer item falhar, nenhuma transferência do lote é gravada.
+     *
+     * O cast é temporário até a próxima regeneração dos tipos TypeScript
+     * do Supabase incluir a RPC stock_transfer_batch.
+     */
+    const callRpc = supabase.rpc as unknown as (
+      functionName: string,
+      args: Record<string, unknown>,
+    ) => Promise<{ data: number | null; error: { message: string } | null }>;
+
+    const { data, error } = await callRpc("stock_transfer_batch", {
+      _from: f.from,
+      _to: f.to,
+      _items: valid.map((r) => ({
+        part_id: r.part,
+        quantity: parseBRNumber(r.quantity) ?? 0,
+        lot: r.lot.trim(),
+      })),
+      _reason: f.reason.trim() || null,
+    });
+
     setSaving(false);
-    toast.success(`Transferência realizada (${valid.length} ${valid.length === 1 ? "item" : "itens"})`);
+
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+
+    const transferred = Number(data ?? valid.length);
+    toast.success(
+      `Transferência realizada (${transferred} ${transferred === 1 ? "item" : "itens"})`,
+    );
+
     setRows([{ key: crypto.randomUUID(), part: "", quantity: "", lot: "" }]);
     onClose();
     invalidate(["stock-balances", "stock-movements"]);

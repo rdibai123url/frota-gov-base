@@ -671,58 +671,55 @@ export const submitProposalByToken = createServerFn({ method: "POST" })
       return { ok: false, message: "O desconto em reais não pode ser maior que o valor bruto da proposta." };
     }
 
-    const { data: proposal, error: pErr } = await supabaseAdmin
-      .from("quotation_proposals")
-      .insert({
-        organization_id: orgId,
-        quotation_id: quotation.id,
-        workshop_id: workshopId!,
-        source: "link",
-        execution_days: data.executionDays,
-        warranty_days: kindHasServices ? data.warrantyDays : null,
-        parts_warranty_days: kindHasParts ? data.partsWarrantyDays : null,
-        valid_days: data.validDays,
-        payment_terms: data.paymentTerms || null,
-        labor_hours: laborHours,
-        labor_hour_value: laborHourValue,
-        labor_value: laborValue,
-        services_value: servicesValue,
-        notes: data.notes || null,
-      })
-      .select("id")
-      .maybeSingle();
-    if (pErr || !proposal) return { ok: false, message: "Não foi possível registrar a proposta." };
+    /*
+     * Proposta + itens + desconto + marcação do convite como respondido
+     * são gravados em uma única transação no banco.
+     *
+     * O cast é temporário até a próxima regeneração dos tipos TypeScript
+     * do Supabase incluir a RPC quotation_proposal_submit_atomic.
+     */
+    const callRpc = supabaseAdmin.rpc as unknown as (
+      functionName: string,
+      args: Record<string, unknown>,
+    ) => Promise<{ data: string | null; error: { message: string } | null }>;
 
-    const rows = validItems.map((i) => ({
-      organization_id: orgId,
-      proposal_id: proposal.id,
-      quotation_item_id: i.quotationItemId,
-      description: i.description.trim(),
-      brand: i.brand || null,
-      part_number: i.partNumber || null,
-      quantity: i.quantity || 1,
-      unit_value: i.unitValue || 0,
-    }));
-    if (rows.length) await supabaseAdmin.from("quotation_proposal_items").insert(rows);
+    const { data: proposalId, error: proposalError } = await callRpc(
+      "quotation_proposal_submit_atomic",
+      {
+        _organization_id: orgId,
+        _quotation_id: quotation.id,
+        _invitation_id: invite.id,
+        _workshop_id: workshopId!,
+        _source: "link",
+        _execution_days: data.executionDays,
+        _warranty_days: kindHasServices ? data.warrantyDays : null,
+        _parts_warranty_days: kindHasParts ? data.partsWarrantyDays : null,
+        _valid_days: data.validDays,
+        _payment_terms: data.paymentTerms || null,
+        _labor_hours: laborHours,
+        _labor_hour_value: laborHourValue,
+        _labor_value: laborValue,
+        _services_value: servicesValue,
+        _discount_mode: data.discountMode,
+        _discount_input: discountInput,
+        _notes: data.notes || null,
+        _items: validItems.map((i) => ({
+          quotation_item_id: i.quotationItemId,
+          description: i.description.trim(),
+          brand: i.brand || null,
+          part_number: i.partNumber || null,
+          quantity: i.quantity || 1,
+          unit_value: i.unitValue || 0,
+        })),
+      },
+    );
 
-    // O desconto entra depois dos itens, quando o valor bruto já está completo.
-    if (discountInput > 0) {
-      await supabaseAdmin
-        .from("quotation_proposals")
-        .update({ discount_mode: data.discountMode, discount_input: discountInput })
-        .eq("id", proposal.id);
+    if (proposalError || !proposalId) {
+      return {
+        ok: false,
+        message: proposalError?.message ?? "Não foi possível registrar a proposta.",
+      };
     }
-
-
-    await supabaseAdmin
-      .from("quotation_invitations")
-      .update({
-        send_status: "respondido",
-        status: "respondida",
-        responded_at: new Date().toISOString(),
-        proposal_id: proposal.id,
-      })
-      .eq("id", invite.id);
 
     return { ok: true, message: "Proposta registrada com sucesso." };
   });

@@ -161,57 +161,56 @@ function Usuarios() {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!editing) return;
+
     const parsed = schema.safeParse(Object.fromEntries(new FormData(e.currentTarget)));
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos");
       return;
     }
+
     setSaving(true);
 
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .update({
-        full_name: parsed.data.full_name,
-        job_title: parsed.data.job_title || null,
-        phone: parsed.data.phone || null,
-        unit_id: unitId === NONE ? null : unitId,
-        active,
-      })
-      .eq("id", editing.id);
+    /*
+     * Administradores salvam perfil + papel em uma única transação no banco.
+     * Se qualquer etapa falhar, nenhuma alteração parcial fica gravada.
+     *
+     * O próprio usuário continua podendo editar seus dados básicos, mas não
+     * consegue alterar papel, unidade ou situação de acesso.
+     */
+    if (canManage) {
+      const callRpc = supabase.rpc as unknown as (
+        functionName: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ data: null; error: { message: string } | null }>;
 
-    if (profileError) {
-      setSaving(false);
-      toast.error("Não foi possível salvar os dados do usuário.");
-      return;
-    }
+      const { error } = await callRpc("update_org_user_atomic", {
+        _user_id: editing.id,
+        _full_name: parsed.data.full_name,
+        _job_title: parsed.data.job_title || null,
+        _phone: parsed.data.phone || null,
+        _unit_id: unitId === NONE ? null : unitId,
+        _active: active,
+        _role: role === NONE ? null : role,
+      });
 
-    // Papéis: nunca é possível conceder super_admin por esta tela (bloqueado também no banco).
-    const currentRoles: AppRole[] = editing.roles.filter((r) => r !== "super_admin");
-    const desired: AppRole[] = role === NONE ? [] : [role as AppRole];
-    const toRemove = currentRoles.filter((r) => !desired.includes(r));
-    const toAdd = desired.filter((r) => !currentRoles.includes(r));
-
-    for (const r of toRemove) {
-      const { error } = await supabase
-        .from("user_roles")
-        .delete()
-        .eq("user_id", editing.id)
-        .eq("role", r);
       if (error) {
         setSaving(false);
-        toast.error("Não foi possível remover o perfil anterior.");
+        toast.error(error.message || "Não foi possível salvar os dados do usuário.");
         return;
       }
-    }
-    for (const r of toAdd) {
-      const { error } = await supabase.from("user_roles").insert({
-        user_id: editing.id,
-        role: r,
-        organization_id: me?.profile?.organization_id ?? null,
-      });
+    } else {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          full_name: parsed.data.full_name,
+          job_title: parsed.data.job_title || null,
+          phone: parsed.data.phone || null,
+        })
+        .eq("id", editing.id);
+
       if (error) {
         setSaving(false);
-        toast.error("Não foi possível conceder o perfil informado.");
+        toast.error("Não foi possível salvar os dados do usuário.");
         return;
       }
     }
