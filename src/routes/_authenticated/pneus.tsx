@@ -195,17 +195,58 @@ export function Pneus({ embedded = false }: { embedded?: boolean } = {}) {
   async function onMove(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!moving) return;
+
     const form = new FormData(e.currentTarget);
-    const km = numOrNull(String(form.get("km") ?? ""));
+    const rawKm = String(form.get("km") ?? "").trim();
+    const km = numOrNull(rawKm);
     const reason = String(form.get("reason") ?? "").trim();
-    if (moveStatus === "instalado" && moveVehicle === NONE) {
-      toast.error("Selecione o veículo para instalar o pneu.");
+
+    if (rawKm && km === null) {
+      toast.error("Informe um KM válido.");
       return;
     }
-    if (moveStatus !== "instalado" && moving.status === "instalado" && !reason) {
-      toast.error("Informe o motivo da retirada.");
+
+    if (km !== null && km < 0) {
+      toast.error("O KM não pode ser negativo.");
       return;
     }
+
+    if (moveStatus === "instalado") {
+      if (moveVehicle === NONE) {
+        toast.error("Selecione o veículo para instalar o pneu.");
+        return;
+      }
+
+      if (!movePosition) {
+        toast.error("Selecione a posição do pneu.");
+        return;
+      }
+
+      if (km === null) {
+        toast.error("Informe o KM do veículo no momento da instalação.");
+        return;
+      }
+    }
+
+    if (moveStatus !== "instalado" && moving.status === "instalado") {
+      if (!reason) {
+        toast.error("Informe o motivo da retirada.");
+        return;
+      }
+
+      if (
+        km !== null &&
+        moving.install_km !== null &&
+        moving.install_km !== undefined &&
+        km < Number(moving.install_km)
+      ) {
+        toast.error(
+          `O KM da retirada não pode ser menor que o KM da instalação (${num(Number(moving.install_km), 0)} km).`,
+        );
+        return;
+      }
+    }
+
     const payload =
       moveStatus === "instalado"
         ? {
@@ -539,8 +580,20 @@ export function Pneus({ embedded = false }: { embedded?: boolean } = {}) {
               </div>
             )}
             <div>
-              <Label htmlFor="km">KM do veículo</Label>
-              <Input id="km" name="km" inputMode="numeric" />
+              <Label htmlFor="km">KM do veículo{moveStatus === "instalado" ? " *" : ""}</Label>
+              <Input
+                id="km"
+                name="km"
+                inputMode="numeric"
+                required={moveStatus === "instalado"}
+                placeholder={
+                  moveStatus === "instalado"
+                    ? "Obrigatório na instalação"
+                    : moving?.install_km != null
+                      ? `Instalação: ${num(Number(moving.install_km), 0)} km`
+                      : undefined
+                }
+              />
             </div>
             <div>
               <Label htmlFor="reason">Motivo / observação</Label>

@@ -194,6 +194,21 @@ function Veiculos() {
       return;
     }
     const d = parsed.data;
+
+    if (acquisitionKind === "locado" && leaseContract === NONE) {
+      toast.error("Veículo locado exige contrato de locação vinculado.");
+      return;
+    }
+
+    if (
+      acquisitionKind === "locado" &&
+      leaseContract !== NONE &&
+      !contracts.some((c) => c.id === leaseContract)
+    ) {
+      toast.error("Selecione um contrato de locação válido.");
+      return;
+    }
+
     // Só permite vincular unidades do próprio órgão (lista já é filtrada por RLS).
     const safeUnitId = unitId !== NONE && units.some((u) => u.id === unitId) ? unitId : null;
 
@@ -534,13 +549,15 @@ function Veiculos() {
                 </>
               ) : (
                 <div className="space-y-1.5 sm:col-span-2">
-                  <Label>Contrato de locação</Label>
+                  <Label>Contrato de locação *</Label>
                   <Select value={leaseContract} onValueChange={setLeaseContract}>
-                    <SelectTrigger>
+                    <SelectTrigger aria-required="true">
                       <SelectValue placeholder="Selecione o contrato já cadastrado" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={NONE}>Não informar</SelectItem>
+                      <SelectItem value={NONE} disabled>
+                        Selecione o contrato
+                      </SelectItem>
                       {contracts.map((c) => (
                         <SelectItem key={c.id} value={c.id}>
                           {c.number} — {c.object.slice(0, 40)}
