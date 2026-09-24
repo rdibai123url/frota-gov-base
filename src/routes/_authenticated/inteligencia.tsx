@@ -1022,7 +1022,6 @@ function ParametersTab({
     vehicle_id: "",
     meter: "hodometro",
     occurred_at: new Date().toISOString().slice(0, 16),
-    previous_value: "",
     new_value: "",
     reason: "",
   });
@@ -1118,7 +1117,6 @@ function ParametersTab({
       vehicle_id: meter.vehicle_id,
       meter: meter.meter,
       occurred_at: new Date(meter.occurred_at).toISOString(),
-      previous_value: parseBRNumber(meter.previous_value),
       new_value: parseBRNumber(meter.new_value) ?? 0,
       reason: meter.reason,
       created_by: userId,
@@ -1434,7 +1432,24 @@ function ParametersTab({
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label>Valor anterior</Label>
-                <Input value={meter.previous_value} onChange={(e) => setMeter((m) => ({ ...m, previous_value: e.target.value }))} />
+                <Input
+                  value={
+                    meter.vehicle_id
+                      ? (() => {
+                          const vehicle = vehicles.find((v) => v.id === meter.vehicle_id);
+                          if (!vehicle) return "";
+                          return meter.meter === "horimetro"
+                            ? String(vehicle.hour_meter ?? "")
+                            : String(vehicle.current_km ?? "");
+                        })()
+                      : ""
+                  }
+                  readOnly
+                  disabled
+                />
+                <p className="text-xs text-muted-foreground">
+                  Obtido automaticamente do valor atual do ativo.
+                </p>
               </div>
               <div className="space-y-1.5">
                 <Label>Novo valor</Label>
