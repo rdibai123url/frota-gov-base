@@ -79,7 +79,7 @@ function Seguros() {
   const { data: suppliers = [] } = useSuppliers();
   const { data: contracts = [] } = useContracts();
   const { data: vehicles = [] } = useVehicles();
-  const { canManageFleet, orgId, userId } = usePerms();
+  const { canManageFleet, orgId } = usePerms();
   const invalidate = useInvalidate();
 
   const [open, setOpen] = useState(false);
@@ -142,50 +142,40 @@ function Seguros() {
       const input = form.elements.namedItem("file") as HTMLInputElement | null;
       const file = input?.files?.[0];
       const path = file && orgId ? await uploadFleetFile(orgId, file, "seguros") : null;
-      const payload = {
-        insurer_name: d.insurer_name,
-        policy_number: d.policy_number,
-        supplier_id: supplierId === NONE ? null : supplierId,
-        contract_id: contractId === NONE ? null : contractId,
-        valid_from: d.valid_from,
-        valid_to: d.valid_to,
-        premium_value: numOrNull(d.premium_value) ?? 0,
-        deductible_value: numOrNull(d.deductible_value),
-        coverages: d.coverages || null,
-        limits_notes: d.limits_notes || null,
-        notes: d.notes || null,
-        status,
-        ...(path ? { attachment_path: path } : {}),
-        ...(renewFrom ? { renewed_from_id: renewFrom.id } : {}),
-      };
-      let policyId = editing?.id ?? "";
-      if (editing) {
-        const { error } = await supabase
-          .from("insurance_policies")
-          .update({ ...payload, updated_by: userId })
-          .eq("id", editing.id);
-        if (error) throw error;
-      } else {
-        const { data, error } = await supabase
-          .from("insurance_policies")
-          .insert({ ...payload, organization_id: orgId!, created_by: userId })
-          .select("id")
-          .single();
-        if (error) throw error;
-        policyId = data.id;
-      }
+      /*
+       * A apólice e todos os veículos cobertos são gravados em uma única
+       * transação no banco. Se qualquer vínculo falhar, nenhuma alteração
+       * parcial da apólice permanece salva.
+       *
+       * O cast é temporário até a próxima regeneração dos tipos TypeScript
+       * do Supabase incluir a RPC insurance_policy_save_atomic.
+       */
+      const callRpc = supabase.rpc as unknown as (
+        functionName: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ data: string | null; error: { message: string; code?: string } | null }>;
 
-      await supabase.from("insurance_vehicles").delete().eq("policy_id", policyId);
-      if (covered.length > 0) {
-        const { error } = await supabase.from("insurance_vehicles").insert(
-          covered.map((vehicle_id) => ({
-            organization_id: orgId!,
-            policy_id: policyId,
-            vehicle_id,
-            created_by: userId,
-          })),
-        );
-        if (error) throw error;
+      const { data: policyId, error } = await callRpc("insurance_policy_save_atomic", {
+        _policy_id: editing?.id ?? null,
+        _insurer_name: d.insurer_name,
+        _policy_number: d.policy_number,
+        _supplier_id: supplierId === NONE ? null : supplierId,
+        _contract_id: contractId === NONE ? null : contractId,
+        _valid_from: d.valid_from,
+        _valid_to: d.valid_to,
+        _premium_value: numOrNull(d.premium_value) ?? 0,
+        _deductible_value: numOrNull(d.deductible_value),
+        _coverages: d.coverages || null,
+        _limits_notes: d.limits_notes || null,
+        _notes: d.notes || null,
+        _status: status,
+        _attachment_path: path,
+        _renewed_from_id: renewFrom?.id ?? null,
+        _vehicles: covered.map((vehicle_id) => ({ vehicle_id })),
+      });
+
+      if (error || !policyId) {
+        throw error ?? new Error("Não foi possível salvar a apólice.");
       }
       toast.success(editing ? "Apólice atualizada." : "Apólice registrada.");
       invalidate(["insurance-policies", "fueling-alerts"]);

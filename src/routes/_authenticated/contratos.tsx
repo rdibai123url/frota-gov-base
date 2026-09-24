@@ -242,6 +242,30 @@ function Contratos() {
       toast.error("O fim da vigência deve ser posterior ao início.");
       return;
     }
+
+    const initialValue = money(d.initial_value);
+    const currentValue = money(d.current_value) || initialValue;
+
+    if (initialValue < 0 || currentValue < 0) {
+      toast.error("Os valores do contrato não podem ser negativos.");
+      return;
+    }
+
+    if (status === "vigente") {
+      if (!d.signed_at) {
+        toast.error("Para deixar o contrato vigente, informe a data de assinatura.");
+        return;
+      }
+      if (!d.valid_from || !d.valid_to) {
+        toast.error("Para deixar o contrato vigente, informe o início e o fim da vigência.");
+        return;
+      }
+      if (!(currentValue > 0)) {
+        toast.error("Para deixar o contrato vigente, informe um valor atual maior que zero.");
+        return;
+      }
+    }
+
     setSaving(true);
 
     let attachment: string | null = editing?.attachment_path ?? null;
@@ -273,8 +297,8 @@ function Contratos() {
       signed_at: d.signed_at || null,
       valid_from: d.valid_from || null,
       valid_to: d.valid_to || null,
-      initial_value: money(d.initial_value),
-      current_value: money(d.current_value) || money(d.initial_value),
+      initial_value: initialValue,
+      current_value: currentValue,
       status: status as ContractRow["status"],
       notes: d.notes || null,
       attachment_path: attachment,
@@ -833,16 +857,34 @@ function Contratos() {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="signed_at">Assinatura</Label>
-                <Input id="signed_at" name="signed_at" type="date" defaultValue={editing?.signed_at ?? ""} />
+                <Label htmlFor="signed_at">Assinatura{status === "vigente" ? " *" : ""}</Label>
+                <Input
+                  id="signed_at"
+                  name="signed_at"
+                  type="date"
+                  defaultValue={editing?.signed_at ?? ""}
+                  required={status === "vigente"}
+                />
               </div>
               <div>
-                <Label htmlFor="valid_from">Início da vigência</Label>
-                <Input id="valid_from" name="valid_from" type="date" defaultValue={editing?.valid_from ?? ""} />
+                <Label htmlFor="valid_from">Início da vigência{status === "vigente" ? " *" : ""}</Label>
+                <Input
+                  id="valid_from"
+                  name="valid_from"
+                  type="date"
+                  defaultValue={editing?.valid_from ?? ""}
+                  required={status === "vigente"}
+                />
               </div>
               <div>
-                <Label htmlFor="valid_to">Fim da vigência</Label>
-                <Input id="valid_to" name="valid_to" type="date" defaultValue={editing?.valid_to ?? ""} />
+                <Label htmlFor="valid_to">Fim da vigência{status === "vigente" ? " *" : ""}</Label>
+                <Input
+                  id="valid_to"
+                  name="valid_to"
+                  type="date"
+                  defaultValue={editing?.valid_to ?? ""}
+                  required={status === "vigente"}
+                />
               </div>
               <div>
                 <Label htmlFor="initial_value">Valor global inicial (R$)</Label>
@@ -853,11 +895,12 @@ function Contratos() {
                 />
               </div>
               <div>
-                <Label htmlFor="current_value">Valor atual (R$)</Label>
+                <Label htmlFor="current_value">Valor atual (R$){status === "vigente" ? " *" : ""}</Label>
                 <MoneyInput
                   id="current_value"
                   name="current_value"
                   defaultValue={editing ? Number(editing.current_value) : ""}
+                  required={status === "vigente"}
                 />
               </div>
               <div className="sm:col-span-3 flex items-start gap-2 rounded-md border p-3">

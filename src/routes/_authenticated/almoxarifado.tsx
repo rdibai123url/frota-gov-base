@@ -343,8 +343,24 @@ function Almoxarifado() {
                             variant="outline"
                             onClick={async () => {
                               const v = window.prompt("Quantidade a consumir:");
-                              const q = parseBRNumber(v ?? "");
-                              if (!q) return;
+                              if (v === null) return;
+
+                              const q = parseBRNumber(v);
+                              if (!(q > 0)) {
+                                toast.error("Informe uma quantidade maior que zero.");
+                                return;
+                              }
+
+                              const pending =
+                                Number(r.quantity) -
+                                Number(r.consumed_quantity) -
+                                Number(r.released_quantity);
+
+                              if (q > pending + 0.00005) {
+                                toast.error(`A quantidade não pode ser maior que o saldo reservado (${num(pending, 4)}).`);
+                                return;
+                              }
+
                               const { error } = await supabase.rpc(
                                 "stock_reservation_settle",
                                 rpcArgs({ _reservation: r.id, _consume: q, _reason: "Consumo de reserva" }),
@@ -364,8 +380,24 @@ function Almoxarifado() {
                             variant="outline"
                             onClick={async () => {
                               const v = window.prompt("Quantidade a liberar:");
-                              const q = parseBRNumber(v ?? "");
-                              if (!q) return;
+                              if (v === null) return;
+
+                              const q = parseBRNumber(v);
+                              if (!(q > 0)) {
+                                toast.error("Informe uma quantidade maior que zero.");
+                                return;
+                              }
+
+                              const pending =
+                                Number(r.quantity) -
+                                Number(r.consumed_quantity) -
+                                Number(r.released_quantity);
+
+                              if (q > pending + 0.00005) {
+                                toast.error(`A quantidade não pode ser maior que o saldo reservado (${num(pending, 4)}).`);
+                                return;
+                              }
+
                               const { error } = await supabase.rpc(
                                 "stock_reservation_settle",
                                 rpcArgs({ _reservation: r.id, _release: q, _reason: "Liberação de reserva" }),
