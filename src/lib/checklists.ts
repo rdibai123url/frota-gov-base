@@ -54,7 +54,9 @@ export function newReturnProblems(
 ) {
   const out = parseChecklistResponses(departure?.responses);
   const back = parseChecklistResponses(returned?.responses);
-  return CHECKLIST_ITEMS.filter((item) => back[item.key] === "problema" && out[item.key] !== "problema");
+  return CHECKLIST_ITEMS.filter(
+    (item) => back[item.key] === "problema" && out[item.key] !== "problema",
+  );
 }
 
 export function useUsageChecklists(usageId: string | null) {
@@ -93,17 +95,26 @@ export function useVehicleChecklists(vehicleId: string | null) {
   });
 }
 
-export async function uploadChecklistPhoto(orgId: string, usageId: string, stage: ChecklistStage, file: File) {
+export async function uploadChecklistPhoto(
+  orgId: string,
+  usageId: string,
+  stage: ChecklistStage,
+  file: File,
+) {
   if (!file.type.startsWith("image/")) throw new Error("Selecione somente arquivos de imagem.");
-  const safe = file.name.replace(/[^\w.\-]+/g, "_");
+  const safe = file.name.replace(/[^\w.-]+/g, "_");
   const path = `${orgId}/${usageId}/${stage}/${Date.now()}-${crypto.randomUUID()}-${safe}`;
-  const { error } = await supabase.storage.from("checklist-frota").upload(path, file, { upsert: false });
+  const { error } = await supabase.storage
+    .from("checklist-frota")
+    .upload(path, file, { upsert: false });
   if (error) throw error;
   return path;
 }
 
 export async function openChecklistPhoto(path: string) {
-  const { data, error } = await supabase.storage.from("checklist-frota").createSignedUrl(path, 60 * 30);
+  const { data, error } = await supabase.storage
+    .from("checklist-frota")
+    .createSignedUrl(path, 60 * 30);
   if (error || !data?.signedUrl) throw error ?? new Error("Não foi possível abrir a foto.");
   window.open(data.signedUrl, "_blank", "noopener");
 }

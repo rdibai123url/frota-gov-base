@@ -12,9 +12,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   SERVER_QUOTA_PERIODS,
   SERVER_QUOTA_STATUS,
@@ -53,7 +72,8 @@ export const Route = createFileRoute("/_authenticated/cotas-servidor")({
       { property: "og:title", content: "Cotas de combustível de servidor — FrotaGov" },
       {
         property: "og:description",
-        content: "Controle de cotas semanais e mensais de combustível para veículos particulares de servidores.",
+        content:
+          "Controle de cotas semanais e mensais de combustível para veículos particulares de servidores.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -80,7 +100,9 @@ const schema = z.object({
 
 function StatusBadge({ status }: { status: ServerQuotaStatus }) {
   return (
-    <Badge variant={status === "ativa" ? "default" : status === "suspensa" ? "destructive" : "secondary"}>
+    <Badge
+      variant={status === "ativa" ? "default" : status === "suspensa" ? "destructive" : "secondary"}
+    >
       {label(SERVER_QUOTA_STATUS, status)}
     </Badge>
   );
@@ -108,7 +130,10 @@ function CotasServidor() {
   const [fStatus, setFStatus] = useState(ALL);
   const [search, setSearch] = useState("");
 
-  const serverVehicles = useMemo(() => vehicles.filter((v) => v.is_private_server_vehicle), [vehicles]);
+  const serverVehicles = useMemo(
+    () => vehicles.filter((v) => v.is_private_server_vehicle),
+    [vehicles],
+  );
 
   const rows = useMemo(
     () =>
@@ -119,7 +144,7 @@ function CotasServidor() {
           const s = search.trim().toLowerCase();
           return (
             !s ||
-            `${q.beneficiary_name} ${q.beneficiary_cpf} ${q.registration_code ?? ""} ${(q.vehicle?.plate ?? q.vehicle?.asset_code ?? "")}`
+            `${q.beneficiary_name} ${q.beneficiary_cpf} ${q.registration_code ?? ""} ${q.vehicle?.plate ?? q.vehicle?.asset_code ?? ""}`
               .toLowerCase()
               .includes(s)
           );
@@ -222,7 +247,9 @@ function CotasServidor() {
 
     const { error } = editing
       ? await supabase.from("server_fuel_quotas").update(payload).eq("id", editing.id)
-      : await supabase.from("server_fuel_quotas").insert({ ...payload, organization_id: orgId!, created_by: userId });
+      : await supabase
+          .from("server_fuel_quotas")
+          .insert({ ...payload, organization_id: orgId!, created_by: userId });
     setSaving(false);
     if (error) {
       if (uploadedAttachment) {
@@ -269,8 +296,8 @@ function CotasServidor() {
 
       {serverVehicles.length === 0 && (
         <div className="mb-6 rounded-lg border bg-card p-5 text-sm text-muted-foreground shadow-card">
-          Nenhum veículo está marcado como “particular de servidor com cota de combustível”. Marque o veículo em Frota →
-          Veículos para poder conceder a cota.
+          Nenhum veículo está marcado como “particular de servidor com cota de combustível”. Marque
+          o veículo em Frota → Veículos para poder conceder a cota.
         </div>
       )}
 
@@ -354,7 +381,7 @@ function CotasServidor() {
                     </span>
                   </TableCell>
                   <TableCell>
-                    {(q.vehicle?.plate ?? q.vehicle?.asset_code ?? "—")}
+                    {q.vehicle?.plate ?? q.vehicle?.asset_code ?? "—"}
                     <span className="block text-xs text-muted-foreground">
                       {[q.vehicle?.brand, q.vehicle?.model].filter(Boolean).join(" ") || "—"}
                       {q.fuel ? ` · ${q.fuel.name}` : " · qualquer combustível"}
@@ -364,13 +391,17 @@ function CotasServidor() {
                     {label(SERVER_QUOTA_PERIODS, q.period)}
                     <span className="block text-xs text-muted-foreground">
                       Ciclo {dateBR(usage.cycleStart.toISOString().slice(0, 10))} a{" "}
-                      {dateBR(new Date(usage.cycleEnd.getTime() - 86400000).toISOString().slice(0, 10))}
+                      {dateBR(
+                        new Date(usage.cycleEnd.getTime() - 86400000).toISOString().slice(0, 10),
+                      )}
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
                     {formatLiters(usage.total)} L
                     {q.quota_value != null && (
-                      <span className="block text-xs text-muted-foreground">até {brl(Number(q.quota_value))}</span>
+                      <span className="block text-xs text-muted-foreground">
+                        até {brl(Number(q.quota_value))}
+                      </span>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
@@ -379,7 +410,9 @@ function CotasServidor() {
                   </TableCell>
                   <TableCell className="text-right font-medium">
                     {formatLiters(usage.balance)} L
-                    <span className="block text-xs text-muted-foreground">{num(usage.percent, 1)}% usado</span>
+                    <span className="block text-xs text-muted-foreground">
+                      {num(usage.percent, 1)}% usado
+                    </span>
                   </TableCell>
                   <TableCell className="text-sm">
                     {dateBR(q.start_date)} a {q.end_date ? dateBR(q.end_date) : "indeterminado"}
@@ -406,7 +439,12 @@ function CotasServidor() {
                         </Button>
                       )}
                       {canManageFleet && (
-                        <Button variant="ghost" size="icon" aria-label="Editar cota" onClick={() => openEdit(q)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Editar cota"
+                          onClick={() => openEdit(q)}
+                        >
                           <Pencil className="size-4" />
                         </Button>
                       )}
@@ -423,7 +461,9 @@ function CotasServidor() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing ? "Editar cota de servidor" : "Nova cota de servidor"}</DialogTitle>
+            <DialogTitle>
+              {editing ? "Editar cota de servidor" : "Nova cota de servidor"}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-3">
@@ -438,7 +478,11 @@ function CotasServidor() {
               </div>
               <div>
                 <Label htmlFor="beneficiary_cpf">CPF *</Label>
-                <CpfInput id="beneficiary_cpf" name="beneficiary_cpf" defaultValue={editing?.beneficiary_cpf ?? ""} />
+                <CpfInput
+                  id="beneficiary_cpf"
+                  name="beneficiary_cpf"
+                  defaultValue={editing?.beneficiary_cpf ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="registration_code">Matrícula</Label>
@@ -478,7 +522,8 @@ function CotasServidor() {
                     <SelectItem value={NONE}>Selecione</SelectItem>
                     {serverVehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        {(v.plate ?? v.asset_code)} — {[v.brand, v.model].filter(Boolean).join(" ") || "sem modelo"}
+                        {v.plate ?? v.asset_code} —{" "}
+                        {[v.brand, v.model].filter(Boolean).join(" ") || "sem modelo"}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -543,7 +588,12 @@ function CotasServidor() {
               </div>
               <div>
                 <Label htmlFor="end_date">Fim da vigência</Label>
-                <Input id="end_date" name="end_date" type="date" defaultValue={editing?.end_date ?? ""} />
+                <Input
+                  id="end_date"
+                  name="end_date"
+                  type="date"
+                  defaultValue={editing?.end_date ?? ""}
+                />
               </div>
               <div>
                 <Label>Situação *</Label>
@@ -562,7 +612,12 @@ function CotasServidor() {
               </div>
               <div className="sm:col-span-3">
                 <Label htmlFor="justification">Justificativa / ato de concessão</Label>
-                <Textarea id="justification" name="justification" rows={2} defaultValue={editing?.justification ?? ""} />
+                <Textarea
+                  id="justification"
+                  name="justification"
+                  rows={2}
+                  defaultValue={editing?.justification ?? ""}
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label htmlFor="file">Anexo do ato (PDF)</Label>
@@ -584,9 +639,10 @@ function CotasServidor() {
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              O saldo da cota não acumula entre ciclos: a cada nova semana ou mês o servidor volta a dispor do total
-              concedido. Autorizações e abastecimentos acima da cota são bloqueados; a liberação excepcional exige
-              justificativa de gestor de frota e fica registrada na auditoria.
+              O saldo da cota não acumula entre ciclos: a cada nova semana ou mês o servidor volta a
+              dispor do total concedido. Autorizações e abastecimentos acima da cota são bloqueados;
+              a liberação excepcional exige justificativa de gestor de frota e fica registrada na
+              auditoria.
             </p>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>

@@ -7,8 +7,21 @@ import { PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   supabase,
   useBrasaoUrl,
@@ -45,7 +58,6 @@ import {
   type DowntimeRow,
 } from "@/lib/inteligencia";
 
-
 export const Route = createFileRoute("/_authenticated/relatorios")({
   head: () => ({
     meta: [
@@ -56,7 +68,10 @@ export const Route = createFileRoute("/_authenticated/relatorios")({
           "Relatórios gerenciais de frota, abastecimento, manutenção, utilização, contratos e custos por veículo, com exportação em CSV, Excel e PDF.",
       },
       { property: "og:title", content: "Relatórios avançados — FrotaGov" },
-      { property: "og:description", content: "Consolide custos, consumo e utilização da frota e exporte os resultados." },
+      {
+        property: "og:description",
+        content: "Consolide custos, consumo e utilização da frota e exporte os resultados.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -95,31 +110,31 @@ type ReportKey = (typeof REPORTS)[number]["value"];
  * Filtros suportados por relatório. Um filtro só é habilitado quando a origem
  * de dados possui a coluna correspondente — nunca exibimos filtro que não filtra.
  */
-const CAPS: Record<ReportKey, { date: boolean; unit: boolean; vehicle: boolean; driver: boolean }> = {
-  frota: { date: false, unit: true, vehicle: true, driver: false },
-  abastecimento: { date: true, unit: true, vehicle: true, driver: true },
-  manutencao: { date: true, unit: true, vehicle: true, driver: false },
-  utilizacao: { date: true, unit: true, vehicle: true, driver: true },
-  custo_veiculo: { date: true, unit: true, vehicle: true, driver: false },
-  contratos: { date: true, unit: false, vehicle: false, driver: false },
-  legal: { date: true, unit: true, vehicle: true, driver: true },
-  patrimonio: { date: true, unit: true, vehicle: true, driver: false },
-  diarias: { date: true, unit: true, vehicle: false, driver: true },
-  limpeza: { date: true, unit: true, vehicle: true, driver: false },
-  cotas_servidor: { date: true, unit: true, vehicle: true, driver: false },
-  cred_capturas: { date: true, unit: false, vehicle: true, driver: false },
-  cred_cartoes: { date: false, unit: true, vehicle: true, driver: false },
-  ofp: { date: true, unit: true, vehicle: true, driver: false },
-  estoque_mov: { date: true, unit: false, vehicle: true, driver: false },
-  estoque_saldo: { date: false, unit: false, vehicle: false, driver: false },
-  int_consumo: { date: true, unit: true, vehicle: true, driver: true },
-  int_ranking: { date: true, unit: true, vehicle: true, driver: true },
-  int_desvios: { date: true, unit: true, vehicle: true, driver: true },
-  int_despesas: { date: true, unit: true, vehicle: true, driver: false },
-  int_tco: { date: true, unit: true, vehicle: true, driver: false },
-  int_economicidade: { date: true, unit: true, vehicle: true, driver: false },
-};
-
+const CAPS: Record<ReportKey, { date: boolean; unit: boolean; vehicle: boolean; driver: boolean }> =
+  {
+    frota: { date: false, unit: true, vehicle: true, driver: false },
+    abastecimento: { date: true, unit: true, vehicle: true, driver: true },
+    manutencao: { date: true, unit: true, vehicle: true, driver: false },
+    utilizacao: { date: true, unit: true, vehicle: true, driver: true },
+    custo_veiculo: { date: true, unit: true, vehicle: true, driver: false },
+    contratos: { date: true, unit: false, vehicle: false, driver: false },
+    legal: { date: true, unit: true, vehicle: true, driver: true },
+    patrimonio: { date: true, unit: true, vehicle: true, driver: false },
+    diarias: { date: true, unit: true, vehicle: false, driver: true },
+    limpeza: { date: true, unit: true, vehicle: true, driver: false },
+    cotas_servidor: { date: true, unit: true, vehicle: true, driver: false },
+    cred_capturas: { date: true, unit: false, vehicle: true, driver: false },
+    cred_cartoes: { date: false, unit: true, vehicle: true, driver: false },
+    ofp: { date: true, unit: true, vehicle: true, driver: false },
+    estoque_mov: { date: true, unit: false, vehicle: true, driver: false },
+    estoque_saldo: { date: false, unit: false, vehicle: false, driver: false },
+    int_consumo: { date: true, unit: true, vehicle: true, driver: true },
+    int_ranking: { date: true, unit: true, vehicle: true, driver: true },
+    int_desvios: { date: true, unit: true, vehicle: true, driver: true },
+    int_despesas: { date: true, unit: true, vehicle: true, driver: false },
+    int_tco: { date: true, unit: true, vehicle: true, driver: false },
+    int_economicidade: { date: true, unit: true, vehicle: true, driver: false },
+  };
 
 const LABELS: Record<string, string> = {
   data: "Data",
@@ -275,10 +290,15 @@ function Relatorios() {
 
   // Se o filtro pai invalidar o filho selecionado, o filho é limpo automaticamente.
   useEffect(() => {
-    if (vehicleId !== "todos" && !availableVehicles.some((v) => v.id === vehicleId)) setVehicleId("todos");
+    if (vehicleId !== "todos" && !availableVehicles.some((v) => v.id === vehicleId))
+      setVehicleId("todos");
   }, [availableVehicles, vehicleId]);
   useEffect(() => {
-    if (contractId !== "todos" && contractOptions.length && !contractOptions.some((c) => c.id === contractId)) {
+    if (
+      contractId !== "todos" &&
+      contractOptions.length &&
+      !contractOptions.some((c) => c.id === contractId)
+    ) {
       setContractId("todos");
     }
   }, [contractOptions, contractId]);
@@ -288,8 +308,18 @@ function Relatorios() {
     return Array.from({ length: 6 }, (_, i) => String(y - i));
   }, []);
   const MONTHS = [
-    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+    "Janeiro",
+    "Fevereiro",
+    "Março",
+    "Abril",
+    "Maio",
+    "Junho",
+    "Julho",
+    "Agosto",
+    "Setembro",
+    "Outubro",
+    "Novembro",
+    "Dezembro",
   ];
   const applyPeriod = (year: string, month: string) => {
     if (month === "todos") {
@@ -318,25 +348,30 @@ function Relatorios() {
 
       /* ===== Fase 10 / Bloco 2 — relatórios de inteligência ===== */
       if (report.startsWith("int_")) {
-        const [{ data: segRaw }, { data: costRaw }, { data: downRaw }, { data: paramsRaw }, { data: cfg }] =
-          await Promise.all([
-            supabase.rpc("fleet_consumption_segments", {
-              _from: from,
-              _to: to,
-              ...(unit ? { _unit: unit } : {}),
-              ...(vehicle ? { _vehicle: vehicle } : {}),
-              ...(driver ? { _driver: driver } : {}),
-            }),
-            supabase.rpc("fleet_cost_rows", {
-              _from: from,
-              _to: to,
-              ...(unit ? { _unit: unit } : {}),
-              ...(vehicle ? { _vehicle: vehicle } : {}),
-            }),
-            supabase.rpc("fleet_downtime", { _from: from, _to: to }),
-            supabase.from("consumption_parameters").select("*"),
-            supabase.from("intelligence_settings").select("*").maybeSingle(),
-          ]);
+        const [
+          { data: segRaw },
+          { data: costRaw },
+          { data: downRaw },
+          { data: paramsRaw },
+          { data: cfg },
+        ] = await Promise.all([
+          supabase.rpc("fleet_consumption_segments", {
+            _from: from,
+            _to: to,
+            ...(unit ? { _unit: unit } : {}),
+            ...(vehicle ? { _vehicle: vehicle } : {}),
+            ...(driver ? { _driver: driver } : {}),
+          }),
+          supabase.rpc("fleet_cost_rows", {
+            _from: from,
+            _to: to,
+            ...(unit ? { _unit: unit } : {}),
+            ...(vehicle ? { _vehicle: vehicle } : {}),
+          }),
+          supabase.rpc("fleet_downtime", { _from: from, _to: to }),
+          supabase.from("consumption_parameters").select("*"),
+          supabase.from("intelligence_settings").select("*").maybeSingle(),
+        ]);
 
         const segments = (segRaw ?? []) as ConsumptionSegment[];
         const costRows = (costRaw ?? []) as CostRow[];
@@ -351,7 +386,13 @@ function Relatorios() {
           const metric = a.km > 0 ? "km_l" : "l_h";
           const p = matchParameter(
             params,
-            { vehicleId: a.vehicleId, assetClass: a.assetClass, category: a.category, brand: a.brand, model: a.model },
+            {
+              vehicleId: a.vehicleId,
+              assetClass: a.assetClass,
+              category: a.category,
+              brand: a.brand,
+              model: a.model,
+            },
             metric,
           );
           const { klass, deviationPct } = classifyDeviation(metric === "km_l" ? a.kmL : a.lH, p);
@@ -369,7 +410,8 @@ function Relatorios() {
             horas: formatNumberBR(a.hours, 1),
             km_l: a.kmL != null ? formatNumberBR(a.kmL, 2) : "—",
             l_h: a.lH != null ? formatNumberBR(a.lH, 2) : "—",
-            esperado: expectedMap.get(a.key) != null ? formatNumberBR(expectedMap.get(a.key)!, 2) : "—",
+            esperado:
+              expectedMap.get(a.key) != null ? formatNumberBR(expectedMap.get(a.key)!, 2) : "—",
             desvio: pctMap.get(a.key) != null ? `${pctMap.get(a.key)!.toFixed(1)}%` : "—",
             classificacao: DEVIATION_LABEL[devMap.get(a.key) ?? "sem_parametro"],
             gasto: formatMoney(a.value),
@@ -397,7 +439,8 @@ function Relatorios() {
         if (report === "int_despesas") {
           return costsByMonth(costRows).map((m) => {
             const row: Record<string, unknown> = { competencia: monthLabel(m.competencia) };
-            for (const c of COST_CATEGORIES) row[c.value] = formatMoney(catValue(m.totals, c.value));
+            for (const c of COST_CATEGORIES)
+              row[c.value] = formatMoney(catValue(m.totals, c.value));
             row["total"] = formatMoney(m.totals.total);
             return row;
           });
@@ -408,13 +451,16 @@ function Relatorios() {
           return assetCosts.map((a) => {
             const cons = byAsset.find((c) => c.vehicleId === a.vehicleId);
             const row: Record<string, unknown> = { ativo: a.label, unidade: a.unitName ?? "—" };
-            for (const c of COST_CATEGORIES) row[c.value] = formatMoney(catValue(a.totals, c.value));
+            for (const c of COST_CATEGORIES)
+              row[c.value] = formatMoney(catValue(a.totals, c.value));
             row["total"] = formatMoney(a.totals.total);
             row["km"] = formatNumberBR(cons?.km ?? 0, 0);
             row["horas"] = formatNumberBR(cons?.hours ?? 0, 1);
             row["custo_km"] = cons?.km ? formatMoney(a.totals.total / cons.km) : "—";
             row["custo_hora"] = cons?.hours ? formatMoney(a.totals.total / cons.hours) : "—";
-            row["participacao"] = totalFrota ? `${((a.totals.total / totalFrota) * 100).toFixed(1)}%` : "—";
+            row["participacao"] = totalFrota
+              ? `${((a.totals.total / totalFrota) * 100).toFixed(1)}%`
+              : "—";
             return row;
           });
         }
@@ -460,7 +506,9 @@ function Relatorios() {
           modelo: v.model ?? "—",
           ano: v.year_model ?? "—",
           unidade: v.unit?.name ?? "—",
-          propriedade: v.is_private_server_vehicle ? "Particular de servidor (cota)" : "Frota oficial",
+          propriedade: v.is_private_server_vehicle
+            ? "Particular de servidor (cota)"
+            : "Frota oficial",
           hodometro: v.current_km ?? "—",
           situacao: v.status,
         }));
@@ -500,7 +548,9 @@ function Relatorios() {
 
         let mq = supabase
           .from("maintenance_records")
-          .select("id, total_value, vehicle:vehicles(id, plate, asset_code), unit:units(name), entry_at")
+          .select(
+            "id, total_value, vehicle:vehicles(id, plate, asset_code), unit:units(name), entry_at",
+          )
           .gte("entry_at", start)
           .lte("entry_at", end);
         if (unit) mq = mq.eq("unit_id", unit);
@@ -508,7 +558,13 @@ function Relatorios() {
         if (contract) mq = mq.eq("contract_id", contract);
         const { data: maints } = await mq;
 
-        type Acc = { veiculo: string; unidade: string; litros: number; combustivel: number; manutencao: number };
+        type Acc = {
+          veiculo: string;
+          unidade: string;
+          litros: number;
+          combustivel: number;
+          manutencao: number;
+        };
         const acc = new Map<string, Acc>();
         const blank = (veiculo: string, unidade: string): Acc => ({
           veiculo,
@@ -521,16 +577,19 @@ function Relatorios() {
           if (f.status === "cancelado") continue;
           const key = f.vehicle?.id ?? "—";
           const row =
-            acc.get(key) ?? blank(f.vehicle?.plate ?? f.vehicle?.asset_code ?? "—", f.unit?.name ?? "—");
+            acc.get(key) ??
+            blank(f.vehicle?.plate ?? f.vehicle?.asset_code ?? "—", f.unit?.name ?? "—");
           // Óleos, fluidos e aditivos não entram no total de litros de combustível.
-          if ((f.fuel_type?.category ?? "combustivel") === "combustivel") row.litros += Number(f.quantity ?? 0);
+          if ((f.fuel_type?.category ?? "combustivel") === "combustivel")
+            row.litros += Number(f.quantity ?? 0);
           row.combustivel += Number(f.total_value ?? 0);
           acc.set(key, row);
         }
         for (const m of maints ?? []) {
           const key = m.vehicle?.id ?? "—";
           const row =
-            acc.get(key) ?? blank(m.vehicle?.plate ?? m.vehicle?.asset_code ?? "—", m.unit?.name ?? "—");
+            acc.get(key) ??
+            blank(m.vehicle?.plate ?? m.vehicle?.asset_code ?? "—", m.unit?.name ?? "—");
           row.manutencao += Number(m.total_value ?? 0);
           acc.set(key, row);
         }
@@ -545,7 +604,6 @@ function Relatorios() {
             total: formatMoney(r.combustivel + r.manutencao),
           }));
       }
-
 
       if (report === "manutencao") {
         let q = supabase
@@ -717,7 +775,9 @@ function Relatorios() {
 
         let oq = supabase
           .from("vehicle_obligations")
-          .select("obligation_type, due_date, status, amount, notes, vehicle:vehicles(plate, asset_code, unit:units(name))")
+          .select(
+            "obligation_type, due_date, status, amount, notes, vehicle:vehicles(plate, asset_code, unit:units(name))",
+          )
           .gte("due_date", from)
           .lte("due_date", to);
         if (vehicle) oq = oq.eq("vehicle_id", vehicle);
@@ -767,7 +827,7 @@ function Relatorios() {
             valor: formatMoney(o.amount),
             situacao: o.status,
           });
-        return rows.sort((a, b) => String(a['data']).localeCompare(String(b['data'])));
+        return rows.sort((a, b) => String(a["data"]).localeCompare(String(b["data"])));
       }
 
       if (report === "diarias") {
@@ -905,7 +965,10 @@ function Relatorios() {
         const { data: rows, error } = await q;
         if (error) throw error;
         return (rows ?? []).map((o) => {
-          const items = (o.items ?? []) as { quantity: number; delivered_quantity: number | null }[];
+          const items = (o.items ?? []) as {
+            quantity: number;
+            delivered_quantity: number | null;
+          }[];
           const qt = items.reduce((s, i) => s + Number(i.quantity ?? 0), 0);
           const dl = items.reduce((s, i) => s + Number(i.delivered_quantity ?? 0), 0);
           return {
@@ -983,7 +1046,6 @@ function Relatorios() {
         });
       }
 
-
       let q = supabase
         .from("vehicle_usages")
         .select(
@@ -1006,7 +1068,10 @@ function Relatorios() {
         destino: u.destination ?? "—",
         saida: new Date(u.actual_departure ?? u.planned_departure).toLocaleString("pt-BR"),
         retorno: u.actual_return ? new Date(u.actual_return).toLocaleString("pt-BR") : "—",
-        km: u.start_km != null && u.end_km != null ? String(Number(u.end_km) - Number(u.start_km)) : "—",
+        km:
+          u.start_km != null && u.end_km != null
+            ? String(Number(u.end_km) - Number(u.start_km))
+            : "—",
         situacao: u.status,
       }));
     },
@@ -1019,7 +1084,10 @@ function Relatorios() {
     return Object.keys(first).map((k) => ({ key: k, label: label(k) }));
   }, [rows]);
 
-  useEffect(() => setPage(1), [report, from, to, unitId, vehicleId, driverId, objectKind, contractId]);
+  useEffect(
+    () => setPage(1),
+    [report, from, to, unitId, vehicleId, driverId, objectKind, contractId],
+  );
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const pageRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
@@ -1033,7 +1101,8 @@ function Relatorios() {
       : (vehicles.find((v) => v.id === vehicleId)?.plate ??
         vehicles.find((v) => v.id === vehicleId)?.asset_code ??
         "—");
-  const driverName = driverId === "todos" ? "Todos" : (drivers.find((d) => d.id === driverId)?.full_name ?? "—");
+  const driverName =
+    driverId === "todos" ? "Todos" : (drivers.find((d) => d.id === driverId)?.full_name ?? "—");
   const periodText = usesDate ? `${day(from)} a ${day(to)}` : "Posição atual";
   const issuedBy = [me?.profile?.full_name, me?.email].filter(Boolean).join(" — ") || "—";
 
@@ -1042,10 +1111,7 @@ function Relatorios() {
     { label: "Condutor", value: caps.driver ? driverName : "Não se aplica" },
     {
       label: "Tipo de contrato",
-      value:
-        objectKind === "todos"
-            ? "Todos"
-            : objectKindLabel(objectKind, objectKinds),
+      value: objectKind === "todos" ? "Todos" : objectKindLabel(objectKind, objectKinds),
     },
     {
       label: "Contrato",
@@ -1082,7 +1148,6 @@ function Relatorios() {
     });
   }
 
-
   return (
     <>
       <PageHeader
@@ -1094,10 +1159,14 @@ function Relatorios() {
         <div className="space-y-1.5 lg:col-span-2">
           <Label>Relatório</Label>
           <Select value={report} onValueChange={(v) => setReport(v as ReportKey)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               {REPORTS.map((r) => (
-                <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                <SelectItem key={r.value} value={r.value}>
+                  {r.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -1106,13 +1175,20 @@ function Relatorios() {
           <Label>Ano</Label>
           <Select
             value={year}
-            onValueChange={(v) => { setYear(v); applyPeriod(v, month); }}
+            onValueChange={(v) => {
+              setYear(v);
+              applyPeriod(v, month);
+            }}
             disabled={!usesDate}
           >
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               {yearOptions.map((y) => (
-                <SelectItem key={y} value={y}>{y}</SelectItem>
+                <SelectItem key={y} value={y}>
+                  {y}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -1121,34 +1197,55 @@ function Relatorios() {
           <Label>Mês</Label>
           <Select
             value={month}
-            onValueChange={(v) => { setMonth(v); applyPeriod(year, v); }}
+            onValueChange={(v) => {
+              setMonth(v);
+              applyPeriod(year, v);
+            }}
             disabled={!usesDate}
           >
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Ano inteiro</SelectItem>
               {MONTHS.map((m, i) => (
-                <SelectItem key={m} value={String(i + 1)}>{m}</SelectItem>
+                <SelectItem key={m} value={String(i + 1)}>
+                  {m}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-1.5">
           <Label>De</Label>
-          <Input type="date" value={from} disabled={!usesDate} onChange={(e) => setFrom(e.target.value)} />
+          <Input
+            type="date"
+            value={from}
+            disabled={!usesDate}
+            onChange={(e) => setFrom(e.target.value)}
+          />
         </div>
         <div className="space-y-1.5">
           <Label>Até</Label>
-          <Input type="date" value={to} disabled={!usesDate} onChange={(e) => setTo(e.target.value)} />
+          <Input
+            type="date"
+            value={to}
+            disabled={!usesDate}
+            onChange={(e) => setTo(e.target.value)}
+          />
         </div>
         <div className="space-y-1.5">
           <Label>Secretaria / unidade</Label>
           <Select value={unitId} onValueChange={setUnitId} disabled={!caps.unit}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="todas">Todas</SelectItem>
               {units.map((u) => (
-                <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                <SelectItem key={u.id} value={u.id}>
+                  {u.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -1156,11 +1253,15 @@ function Relatorios() {
         <div className="space-y-1.5">
           <Label>Veículo</Label>
           <Select value={vehicleId} onValueChange={setVehicleId} disabled={!caps.vehicle}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Todos</SelectItem>
               {availableVehicles.map((v) => (
-                <SelectItem key={v.id} value={v.id}>{v.plate ?? v.asset_code ?? v.id}</SelectItem>
+                <SelectItem key={v.id} value={v.id}>
+                  {v.plate ?? v.asset_code ?? v.id}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -1168,11 +1269,15 @@ function Relatorios() {
         <div className="space-y-1.5">
           <Label>Condutor / motorista</Label>
           <Select value={driverId} onValueChange={setDriverId} disabled={!caps.driver}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Todos</SelectItem>
               {drivers.map((d) => (
-                <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
+                <SelectItem key={d.id} value={d.id}>
+                  {d.full_name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -1180,11 +1285,15 @@ function Relatorios() {
         <div className="space-y-1.5">
           <Label>Tipo de contrato</Label>
           <Select value={objectKind} onValueChange={setObjectKind}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Todos</SelectItem>
               {kindOptions.map((k) => (
-                <SelectItem key={k.value} value={k.value}>{k.label}</SelectItem>
+                <SelectItem key={k.value} value={k.value}>
+                  {k.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -1192,7 +1301,9 @@ function Relatorios() {
         <div className="space-y-1.5">
           <Label>Contrato</Label>
           <Select value={contractId} onValueChange={setContractId}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Todos</SelectItem>
               {contractOptions.map((c) => (
@@ -1212,24 +1323,45 @@ function Relatorios() {
       <div className="mb-4 rounded-lg border bg-card p-4 shadow-card">
         <div className="flex items-start gap-4">
           {logoUrl ? (
-            <img src={logoUrl} alt={`Brasão de ${meta.organization}`} className="size-14 shrink-0 object-contain" />
+            <img
+              src={logoUrl}
+              alt={`Brasão de ${meta.organization}`}
+              className="size-14 shrink-0 object-contain"
+            />
           ) : null}
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold uppercase tracking-wide">{meta.organization}</p>
-            {meta.subtitle ? <p className="text-xs text-muted-foreground">{meta.subtitle}</p> : null}
+            {meta.subtitle ? (
+              <p className="text-xs text-muted-foreground">{meta.subtitle}</p>
+            ) : null}
             <h2 className="mt-1 text-base font-semibold text-foreground">{reportLabel}</h2>
             <dl className="mt-2 grid gap-x-6 gap-y-1 text-xs text-muted-foreground sm:grid-cols-2 lg:grid-cols-3">
-              <div><dt className="inline font-medium">Secretaria/unidade: </dt><dd className="inline">{meta.unit}</dd></div>
-              <div><dt className="inline font-medium">Período: </dt><dd className="inline">{periodText}</dd></div>
+              <div>
+                <dt className="inline font-medium">Secretaria/unidade: </dt>
+                <dd className="inline">{meta.unit}</dd>
+              </div>
+              <div>
+                <dt className="inline font-medium">Período: </dt>
+                <dd className="inline">{periodText}</dd>
+              </div>
               {filters.map((f) => (
                 <div key={f.label}>
                   <dt className="inline font-medium">{f.label}: </dt>
                   <dd className="inline">{f.value}</dd>
                 </div>
               ))}
-              <div><dt className="inline font-medium">Emitido em: </dt><dd className="inline">{new Date().toLocaleString("pt-BR")}</dd></div>
-              <div><dt className="inline font-medium">Emitido por: </dt><dd className="inline">{issuedBy}</dd></div>
-              <div><dt className="inline font-medium">Total de registros: </dt><dd className="inline">{rows.length}</dd></div>
+              <div>
+                <dt className="inline font-medium">Emitido em: </dt>
+                <dd className="inline">{new Date().toLocaleString("pt-BR")}</dd>
+              </div>
+              <div>
+                <dt className="inline font-medium">Emitido por: </dt>
+                <dd className="inline">{issuedBy}</dd>
+              </div>
+              <div>
+                <dt className="inline font-medium">Total de registros: </dt>
+                <dd className="inline">{rows.length}</dd>
+              </div>
             </dl>
           </div>
         </div>
@@ -1240,18 +1372,32 @@ function Relatorios() {
           <FileBarChart className="size-4" /> {rows.length} linha(s)
         </p>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" disabled={!rows.length} onClick={() => handleExport("csv")}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!rows.length}
+            onClick={() => handleExport("csv")}
+          >
             <Download className="size-4" /> CSV
           </Button>
-          <Button variant="outline" size="sm" disabled={!rows.length} onClick={() => handleExport("xlsx")}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!rows.length}
+            onClick={() => handleExport("xlsx")}
+          >
             <Download className="size-4" /> Excel (.xlsx)
           </Button>
-          <Button variant="outline" size="sm" disabled={!rows.length} onClick={() => handleExport("pdf")}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!rows.length}
+            onClick={() => handleExport("pdf")}
+          >
             <Printer className="size-4" /> Imprimir / PDF
           </Button>
         </div>
       </div>
-
 
       <div className="overflow-x-auto rounded-lg border bg-card shadow-card">
         <Table>
@@ -1266,14 +1412,20 @@ function Relatorios() {
           <TableBody>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={Math.max(1, columns.length)} className="py-10 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={Math.max(1, columns.length)}
+                  className="py-10 text-center text-muted-foreground"
+                >
                   Carregando...
                 </TableCell>
               </TableRow>
             )}
             {!isLoading && rows.length === 0 && (
               <TableRow>
-                <TableCell colSpan={Math.max(1, columns.length)} className="py-10 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={Math.max(1, columns.length)}
+                  className="py-10 text-center text-muted-foreground"
+                >
                   Nenhum dado para os filtros informados.
                 </TableCell>
               </TableRow>
@@ -1297,10 +1449,20 @@ function Relatorios() {
             Página {page} de {totalPages}
           </p>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
               Anterior
             </Button>
-            <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
               Próxima
             </Button>
           </div>

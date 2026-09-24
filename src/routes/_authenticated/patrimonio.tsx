@@ -9,11 +9,30 @@ import { PageHeader } from "@/components/app-shell";
 import { MoneyInput } from "@/components/form-fields";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import {
   ASSET_MOVEMENT_KINDS,
@@ -54,7 +73,10 @@ export const Route = createFileRoute("/_authenticated/patrimonio")({
           "Cessões, locações, remanejamentos, doações, leilões, alienações e baixas dos veículos do órgão, com termo imprimível e histórico.",
       },
       { property: "og:title", content: "Movimentação Patrimonial — FrotaGov" },
-      { property: "og:description", content: "Controle patrimonial dos veículos públicos com rastreabilidade total." },
+      {
+        property: "og:description",
+        content: "Controle patrimonial dos veículos públicos com rastreabilidade total.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -116,7 +138,10 @@ function Patrimonio() {
 
   const filtered = useMemo(
     () =>
-      movements.filter((m) => (fVehicle === ALL || m.vehicle_id === fVehicle) && (fKind === ALL || m.kind === fKind)),
+      movements.filter(
+        (m) =>
+          (fVehicle === ALL || m.vehicle_id === fVehicle) && (fKind === ALL || m.kind === fKind),
+      ),
     [movements, fVehicle, fKind],
   );
 
@@ -223,11 +248,17 @@ function Patrimonio() {
       ["Código da movimentação", m.code ?? "—"],
       ["Tipo", label(ASSET_MOVEMENT_KINDS, m.kind)],
       ["Data", dateBR(m.moved_on)],
-      ["Veículo", `${(m.vehicle?.plate ?? m.vehicle?.asset_code ?? "—")} — ${m.vehicle?.brand ?? ""} ${m.vehicle?.model ?? ""}`],
+      [
+        "Veículo",
+        `${m.vehicle?.plate ?? m.vehicle?.asset_code ?? "—"} — ${m.vehicle?.brand ?? ""} ${m.vehicle?.model ?? ""}`,
+      ],
       ["Código patrimonial", m.asset_code ?? "—"],
       ["Unidade de origem", m.from_unit?.name ?? "—"],
       ["Unidade de destino", m.unit?.name ?? "—"],
-      ["Entidade externa", m.entity ? `${m.entity.name} (${m.entity.document ?? "sem documento"})` : "—"],
+      [
+        "Entidade externa",
+        m.entity ? `${m.entity.name} (${m.entity.document ?? "sem documento"})` : "—",
+      ],
       ["Proprietário", m.owner_name ?? org?.legal_name ?? "—"],
       ["Usuário / fiel depositário", m.holder_name ?? "—"],
       ["Hodômetro", m.odometer_km !== null ? `${num(Number(m.odometer_km), 0)} km` : "—"],
@@ -243,7 +274,8 @@ function Patrimonio() {
       ["Motivo", m.reason ?? "—"],
       ["Observações", m.notes ?? "—"],
     ];
-    const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c] ?? c);
+    const esc = (s: string) =>
+      s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c] ?? c);
     w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
 <title>Termo de movimentação patrimonial ${esc(m.code ?? "")}</title>
 <style>
@@ -307,7 +339,7 @@ td:first-child{width:34%;font-weight:bold}
               <SelectItem value={ALL}>Todos</SelectItem>
               {vehicles.map((v) => (
                 <SelectItem key={v.id} value={v.id}>
-                  {(v.plate ?? v.asset_code)}
+                  {v.plate ?? v.asset_code}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -363,7 +395,7 @@ td:first-child{width:34%;font-weight:bold}
             {paged.rows.map((m) => (
               <TableRow key={m.id}>
                 <TableCell className="font-medium">{m.code ?? "—"}</TableCell>
-                <TableCell>{(m.vehicle?.plate ?? m.vehicle?.asset_code ?? "—")}</TableCell>
+                <TableCell>{m.vehicle?.plate ?? m.vehicle?.asset_code ?? "—"}</TableCell>
                 <TableCell>
                   <Badge variant={DISPOSAL_KINDS.includes(m.kind) ? "destructive" : "outline"}>
                     {label(ASSET_MOVEMENT_KINDS, m.kind)}
@@ -388,7 +420,12 @@ td:first-child{width:34%;font-weight:bold}
                         <Paperclip className="size-4" />
                       </Button>
                     )}
-                    <Button variant="ghost" size="icon" aria-label="Imprimir termo" onClick={() => printTerm(m)}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Imprimir termo"
+                      onClick={() => printTerm(m)}
+                    >
                       <Printer className="size-4" />
                     </Button>
                   </div>
@@ -417,7 +454,7 @@ td:first-child{width:34%;font-weight:bold}
                     <SelectItem value={NONE}>Selecione</SelectItem>
                     {vehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        {(v.plate ?? v.asset_code)} — {v.brand ?? ""} {v.model ?? ""}
+                        {v.plate ?? v.asset_code} — {v.brand ?? ""} {v.model ?? ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -523,7 +560,11 @@ td:first-child{width:34%;font-weight:bold}
               </div>
               <div>
                 <Label htmlFor="odometer_km">Hodômetro (km)</Label>
-                <MoneyInput id="odometer_km" name="odometer_km" defaultValue={vehicle?.current_km ?? ""} />
+                <MoneyInput
+                  id="odometer_km"
+                  name="odometer_km"
+                  defaultValue={vehicle?.current_km ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="hour_meter">Horímetro</Label>

@@ -26,7 +26,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   ALERT_CATEGORIES,
   alertLabel,
@@ -48,7 +55,10 @@ export const Route = createFileRoute("/_authenticated/alertas")({
           "Ocorrências detectadas nos abastecimentos: combustível incompatível, tanque excedido, duplicidades e abastecimentos próximos.",
       },
       { property: "og:title", content: "Alertas e Inconsistências — FrotaGov" },
-      { property: "og:description", content: "Acompanhe as inconsistências de abastecimento do órgão." },
+      {
+        property: "og:description",
+        content: "Acompanhe as inconsistências de abastecimento do órgão.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -78,14 +88,15 @@ function Alertas() {
   const [dismissing, setDismissing] = useState<AlertLike | null>(null);
 
   useEffect(() => {
-    void Promise.all([supabase.rpc("refresh_financial_alerts"), supabase.rpc("refresh_maintenance_alerts"),
-      supabase.rpc("refresh_procurement_alerts"), supabase.rpc("refresh_fleet_alerts"),
+    void Promise.all([
+      supabase.rpc("refresh_financial_alerts"),
+      supabase.rpc("refresh_maintenance_alerts"),
+      supabase.rpc("refresh_procurement_alerts"),
+      supabase.rpc("refresh_fleet_alerts"),
       supabase.rpc("refresh_intelligence_alerts"),
       // Fecha sozinho as inconsistências corretivas cuja causa já não existe.
       supabase.rpc("resolve_stale_alerts"),
-    ]).then(() =>
-      invalidate(["fueling-alerts", "fueling-alerts-open-count"]),
-    );
+    ]).then(() => invalidate(["fueling-alerts", "fueling-alerts-open-count"]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -123,7 +134,9 @@ function Alertas() {
         <div>
           <Label className="text-xs">Categoria</Label>
           <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Todas</SelectItem>
               {ALERT_CATEGORIES.map((c) => (
@@ -137,10 +150,14 @@ function Alertas() {
         <div>
           <Label className="text-xs">Situação</Label>
           <Select value={view} onValueChange={setView}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               {VIEWS.map((v) => (
-                <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
+                <SelectItem key={v.value} value={v.value}>
+                  {v.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -148,7 +165,9 @@ function Alertas() {
         <div>
           <Label className="text-xs">Tipo de ocorrência</Label>
           <Select value={type} onValueChange={setType}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Todos</SelectItem>
               {types.map((t) => (
@@ -193,7 +212,11 @@ function Alertas() {
           </TableHeader>
           <TableBody>
             {isLoading && (
-              <TableRow><TableCell colSpan={8} className="py-8 text-center text-muted-foreground">Carregando…</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
+                  Carregando…
+                </TableCell>
+              </TableRow>
             )}
             {!isLoading && filtered.length === 0 && (
               <TableRow>
@@ -218,10 +241,14 @@ function Alertas() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">{label(ALERT_CATEGORIES, a.category ?? "abastecimento")}</Badge>
+                    <Badge variant="outline">
+                      {label(ALERT_CATEGORIES, a.category ?? "abastecimento")}
+                    </Badge>
                   </TableCell>
-                  <TableCell>{(a.vehicle?.plate ?? a.vehicle?.asset_code ?? "—")}</TableCell>
-                  <TableCell className="max-w-sm text-sm text-muted-foreground">{a.message}</TableCell>
+                  <TableCell>{a.vehicle?.plate ?? a.vehicle?.asset_code ?? "—"}</TableCell>
+                  <TableCell className="max-w-sm text-sm text-muted-foreground">
+                    {a.message}
+                  </TableCell>
                   <TableCell className="whitespace-nowrap">{dateTimeBR(a.created_at)}</TableCell>
                   <TableCell>
                     {a.status === "aberto" ? (
@@ -242,11 +269,18 @@ function Alertas() {
                       >
                         <Info className="size-4" />
                       </Button>
-                      {perms.canManageFleet && a.status === "aberto" && g.kind === "orientativo" && (
-                        <Button variant="outline" size="sm" className="gap-2" onClick={() => setDismissing(a)}>
-                          <CheckCircle2 className="size-4" /> Resolver
-                        </Button>
-                      )}
+                      {perms.canManageFleet &&
+                        a.status === "aberto" &&
+                        g.kind === "orientativo" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                            onClick={() => setDismissing(a)}
+                          >
+                            <CheckCircle2 className="size-4" /> Resolver
+                          </Button>
+                        )}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -293,15 +327,26 @@ function GuideDialog({ alert, onClose }: { alert: AlertLike; onClose: () => void
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 text-sm">
-          <p><span className="font-medium">O que significa: </span>{g.meaning}</p>
-          <p><span className="font-medium">Por que foi gerada: </span>{alert.message ?? "—"}</p>
-          <p><span className="font-medium">Impacto: </span>{g.impact}</p>
+          <p>
+            <span className="font-medium">O que significa: </span>
+            {g.meaning}
+          </p>
+          <p>
+            <span className="font-medium">Por que foi gerada: </span>
+            {alert.message ?? "—"}
+          </p>
+          <p>
+            <span className="font-medium">Impacto: </span>
+            {g.impact}
+          </p>
           <div>
             <p className="mb-1 font-medium">
               {g.kind === "corretivo" ? "Passos de correção pendentes" : "Passos recomendados"}
             </p>
             <ol className="list-decimal space-y-1 pl-5 text-muted-foreground">
-              {g.steps.map((s) => <li key={s}>{s}</li>)}
+              {g.steps.map((s) => (
+                <li key={s}>{s}</li>
+              ))}
             </ol>
           </div>
           {alert.resolution_reason && (
@@ -334,7 +379,10 @@ function DismissDialog({
       return;
     }
     setSaving(true);
-    const { error } = await supabase.rpc("dismiss_alert", { _id: alert.id, _reason: reason.trim() });
+    const { error } = await supabase.rpc("dismiss_alert", {
+      _id: alert.id,
+      _reason: reason.trim(),
+    });
     setSaving(false);
     if (error) {
       toast.error(error.message);
@@ -351,8 +399,8 @@ function DismissDialog({
         <DialogHeader>
           <DialogTitle>Resolver / ignorar alerta</DialogTitle>
           <DialogDescription>
-            O dado de origem não é alterado. O alerta sai dos abertos e fica no histórico com seu nome,
-            data e justificativa.
+            O dado de origem não é alterado. O alerta sai dos abertos e fica no histórico com seu
+            nome, data e justificativa.
           </DialogDescription>
         </DialogHeader>
         <Textarea
@@ -362,8 +410,12 @@ function DismissDialog({
           placeholder="Justificativa do encerramento"
         />
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Voltar</Button>
-          <Button onClick={submit} disabled={saving}>{saving ? "Registrando…" : "Confirmar"}</Button>
+          <Button variant="outline" onClick={onClose}>
+            Voltar
+          </Button>
+          <Button onClick={submit} disabled={saving}>
+            {saving ? "Registrando…" : "Confirmar"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

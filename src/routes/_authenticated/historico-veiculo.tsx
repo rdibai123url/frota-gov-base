@@ -6,7 +6,14 @@ import { PageHeader } from "@/components/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { VEHICLE_STATUS, label, useVehicles } from "@/lib/frotagov";
 
 export const Route = createFileRoute("/_authenticated/historico-veiculo")({
@@ -78,7 +85,7 @@ function HistoricoVeiculoIndex() {
             )}
             {filtered.map((v) => (
               <TableRow key={v.id}>
-                <TableCell className="font-medium">{(v.plate ?? v.asset_code)}</TableCell>
+                <TableCell className="font-medium">{v.plate ?? v.asset_code}</TableCell>
                 <TableCell>{[v.brand, v.model].filter(Boolean).join(" ") || "—"}</TableCell>
                 <TableCell>
                   <Badge variant="secondary">{label(VEHICLE_STATUS, v.status)}</Badge>

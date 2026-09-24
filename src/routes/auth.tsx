@@ -18,9 +18,15 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Acesso ao sistema — FrotaGov" },
-      { name: "description", content: "Entre no FrotaGov ou cadastre seu órgão público para gerir a frota." },
+      {
+        name: "description",
+        content: "Entre no FrotaGov ou cadastre seu órgão público para gerir a frota.",
+      },
       { property: "og:title", content: "Acesso ao sistema — FrotaGov" },
-      { property: "og:description", content: "Autenticação segura para gestores de frota de órgãos públicos." },
+      {
+        property: "og:description",
+        content: "Autenticação segura para gestores de frota de órgãos públicos.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -65,7 +71,13 @@ function AuthPage() {
     }
     const { data, error } = await supabase.auth.signInWithSSO({ domain });
     if (error || !data?.url) {
-      await logLogin({ data: { method: "saml", success: false, reason: error?.message ?? "Provedor não habilitado" } });
+      await logLogin({
+        data: {
+          method: "saml",
+          success: false,
+          reason: error?.message ?? "Provedor não habilitado",
+        },
+      });
       toast.error("O login institucional ainda não está habilitado para este domínio.");
       return;
     }
@@ -109,7 +121,6 @@ function AuthPage() {
     toast.success("Se o e-mail estiver cadastrado, enviaremos o link de recuperação.");
   }
 
-
   async function handleSignIn(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
@@ -141,7 +152,7 @@ function AuthPage() {
         redirectTo: `${window.location.origin}/painel`,
       },
     });
-  
+
     if (error) {
       toast.error("Falha ao entrar com Google.");
     }
@@ -171,7 +182,13 @@ function AuthPage() {
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="in-pass">Senha</Label>
-                    <Input id="in-pass" name="password" type="password" autoComplete="current-password" required />
+                    <Input
+                      id="in-pass"
+                      name="password"
+                      type="password"
+                      autoComplete="current-password"
+                      required
+                    />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
                     Entrar
@@ -190,7 +207,8 @@ function AuthPage() {
                 </button>
 
                 <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
-                  <span className="h-px flex-1 bg-border" /> ou <span className="h-px flex-1 bg-border" />
+                  <span className="h-px flex-1 bg-border" /> ou{" "}
+                  <span className="h-px flex-1 bg-border" />
                 </div>
                 <Button variant="outline" className="w-full" onClick={handleGoogle}>
                   Continuar com Google
@@ -209,7 +227,8 @@ function AuthPage() {
                       </Button>
                     ))}
                     <p className="text-center text-xs text-muted-foreground">
-                      Login institucional configurado pelo seu órgão. O acesso por e-mail e senha continua disponível.
+                      Login institucional configurado pelo seu órgão. O acesso por e-mail e senha
+                      continua disponível.
                     </p>
                   </div>
                 )}
@@ -224,14 +243,20 @@ function AuthPage() {
                 </div>
                 {sent ? (
                   <p className="rounded-md bg-secondary/60 p-3 text-sm text-muted-foreground">
-                    Se o e-mail informado estiver cadastrado, o link de redefinição foi enviado. Verifique
-                    também a caixa de spam. O link tem validade limitada.
+                    Se o e-mail informado estiver cadastrado, o link de redefinição foi enviado.
+                    Verifique também a caixa de spam. O link tem validade limitada.
                   </p>
                 ) : (
                   <form onSubmit={handleRecover} className="space-y-4">
                     <div className="space-y-1.5">
                       <Label htmlFor="rec-email">E-mail institucional</Label>
-                      <Input id="rec-email" name="email" type="email" autoComplete="email" required />
+                      <Input
+                        id="rec-email"
+                        name="email"
+                        type="email"
+                        autoComplete="email"
+                        required
+                      />
                     </div>
                     <Button type="submit" className="w-full" disabled={sending}>
                       Enviar link de recuperação
@@ -248,7 +273,6 @@ function AuthPage() {
               </div>
             )}
           </div>
-
 
           <p className="mt-4 text-center text-xs text-muted-foreground">
             Acesso restrito a servidores e gestores autorizados. O cadastro de órgãos e do

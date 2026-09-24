@@ -8,18 +8,47 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, Link2, Mail, Plus, RefreshCw, Send, Settings2, Trash2, X } from "lucide-react";
+import {
+  AlertTriangle,
+  Link2,
+  Mail,
+  Plus,
+  RefreshCw,
+  Send,
+  Settings2,
+  Trash2,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   createInvites,
   getEmailProviderStatus,
@@ -28,9 +57,15 @@ import {
   sendInvites,
   type InviteTarget,
 } from "@/lib/cotacoes-convites.functions";
-import { dateTimeBR, dbMessage, supabase, useInvalidate, useSuppliers, useWorkshops } from "@/lib/frotagov";
+import {
+  dateTimeBR,
+  dbMessage,
+  supabase,
+  useInvalidate,
+  useSuppliers,
+  useWorkshops,
+} from "@/lib/frotagov";
 import { NO_PUBLIC_BASE_MESSAGE, isPublicInviteLink } from "@/lib/link-publico";
-
 
 type InviteRow = {
   id: string;
@@ -52,7 +87,10 @@ type InviteRow = {
   workshop?: { legal_name: string; trade_name: string | null } | null;
 };
 
-const SEND_STATUS: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+const SEND_STATUS: Record<
+  string,
+  { label: string; variant: "default" | "secondary" | "destructive" | "outline" }
+> = {
   pendente: { label: "Pendente", variant: "outline" },
   enviado: { label: "Enviado", variant: "secondary" },
   erro: { label: "Erro no envio", variant: "destructive" },
@@ -106,11 +144,21 @@ export function ConvitesCotacao({
   const [openConfig, setOpenConfig] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const hasCredential = Boolean(settings?.has_secret) || (settings?.provider === "resend" && Boolean(platform?.platformResend));
-  const configured = Boolean(settings?.enabled && settings.provider !== "nenhum" && settings.from_email && hasCredential);
+  const hasCredential =
+    Boolean(settings?.has_secret) ||
+    (settings?.provider === "resend" && Boolean(platform?.platformResend));
+  const configured = Boolean(
+    settings?.enabled && settings.provider !== "nenhum" && settings.from_email && hasCredential,
+  );
 
   function refresh() {
-    invalidate(["quotations", "quotation-invitations", "quotation-proposals", "proposal-items", "org-email-settings"]);
+    invalidate([
+      "quotations",
+      "quotation-invitations",
+      "quotation-proposals",
+      "proposal-items",
+      "org-email-settings",
+    ]);
   }
 
   async function resend(id: string) {
@@ -149,7 +197,6 @@ export function ConvitesCotacao({
     }
   }
 
-
   async function removeInvite(id: string) {
     const { error } = await supabase.from("quotation_invitations").delete().eq("id", id);
     if (error) {
@@ -165,10 +212,16 @@ export function ConvitesCotacao({
         <div className="flex flex-wrap items-center gap-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm">
           <AlertTriangle className="size-4 shrink-0" />
           <span className="min-w-0 flex-1">
-            Envio de e-mail não configurado. Você pode convidar e copiar o link de cada empresa para enviar por outro meio.
+            Envio de e-mail não configurado. Você pode convidar e copiar o link de cada empresa para
+            enviar por outro meio.
           </span>
           {canConfigure && (
-            <Button size="sm" variant="outline" className="gap-1" onClick={() => setOpenConfig(true)}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1"
+              onClick={() => setOpenConfig(true)}
+            >
               <Settings2 className="size-3.5" /> Configurar envio
             </Button>
           )}
@@ -177,11 +230,17 @@ export function ConvitesCotacao({
 
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-muted-foreground">
-          {invites.length} convite(s) · {invites.filter((i) => i.send_status === "respondido").length} respondido(s)
+          {invites.length} convite(s) ·{" "}
+          {invites.filter((i) => i.send_status === "respondido").length} respondido(s)
         </p>
         <div className="flex gap-2">
           {canConfigure && configured && (
-            <Button size="sm" variant="outline" className="gap-1" onClick={() => setOpenConfig(true)}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1"
+              onClick={() => setOpenConfig(true)}
+            >
               <Settings2 className="size-3.5" /> Envio de e-mail
             </Button>
           )}
@@ -223,17 +282,32 @@ export function ConvitesCotacao({
                 <TableRow key={i.id}>
                   <TableCell>
                     <span className="block font-medium">
-                      {i.workshop?.trade_name || i.workshop?.legal_name || i.contact_name || "Convidado por e-mail"}
+                      {i.workshop?.trade_name ||
+                        i.workshop?.legal_name ||
+                        i.contact_name ||
+                        "Convidado por e-mail"}
                     </span>
-                    <span className="block text-xs text-muted-foreground">{i.email ?? "sem e-mail"}</span>
-                    {i.is_manual && <Badge variant="outline" className="mt-1 text-[10px]">E-mail avulso</Badge>}
+                    <span className="block text-xs text-muted-foreground">
+                      {i.email ?? "sem e-mail"}
+                    </span>
+                    {i.is_manual && (
+                      <Badge variant="outline" className="mt-1 text-[10px]">
+                        E-mail avulso
+                      </Badge>
+                    )}
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">
                     <span className="block">Criado em {dateTimeBR(i.invited_at)}</span>
                     {i.sent_at && <span className="block">Enviado em {dateTimeBR(i.sent_at)}</span>}
-                    {i.responded_at && <span className="block">Respondido em {dateTimeBR(i.responded_at)}</span>}
+                    {i.responded_at && (
+                      <span className="block">Respondido em {dateTimeBR(i.responded_at)}</span>
+                    )}
                     <span className="block">Tentativas: {i.attempts}</span>
-                    {i.last_error && <span className="block text-destructive">Último erro: {i.last_error.slice(0, 120)}</span>}
+                    {i.last_error && (
+                      <span className="block text-destructive">
+                        Último erro: {i.last_error.slice(0, 120)}
+                      </span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge variant={st.variant}>{st.label}</Badge>
@@ -241,14 +315,30 @@ export function ConvitesCotacao({
                   <TableCell className="text-right">
                     {canManage && !closed && (
                       <div className="flex flex-wrap justify-end gap-1">
-                        <Button variant="outline" size="sm" className="gap-1" disabled={busy} onClick={() => resend(i.id)}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1"
+                          disabled={busy}
+                          onClick={() => resend(i.id)}
+                        >
                           <RefreshCw className="size-3.5" /> Reenviar
                         </Button>
-                        <Button variant="outline" size="sm" className="gap-1" onClick={() => copyLink(i.id)}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1"
+                          onClick={() => copyLink(i.id)}
+                        >
                           <Link2 className="size-3.5" /> Copiar link
                         </Button>
                         {i.send_status !== "respondido" && (
-                          <Button variant="ghost" size="icon" aria-label="Remover convite" onClick={() => removeInvite(i.id)}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Remover convite"
+                            onClick={() => removeInvite(i.id)}
+                          >
                             <Trash2 className="size-4" />
                           </Button>
                         )}
@@ -376,7 +466,13 @@ function EnviarConvitesDialog({
             label: supplierMatch.trade_name || supplierMatch.legal_name,
             detail: "Vinculado à empresa cadastrada",
           }
-        : { kind: "manual", email, contactName: manualName || null, label: email, detail: "E-mail avulso" };
+        : {
+            kind: "manual",
+            email,
+            contactName: manualName || null,
+            label: email,
+            detail: "E-mail avulso",
+          };
     setList((prev) => [...prev, entry]);
     setManual("");
     setManualName("");
@@ -392,7 +488,12 @@ function EnviarConvitesDialog({
       const res = await createInvites({
         data: {
           quotationId,
-          targets: list.map((r) => ({ kind: r.kind, id: r.id ?? null, email: r.email, contactName: r.contactName ?? null })),
+          targets: list.map((r) => ({
+            kind: r.kind,
+            id: r.id ?? null,
+            email: r.email,
+            contactName: r.contactName ?? null,
+          })),
         },
       });
       res.skipped.forEach((s) => toast.error(`${s.email}: ${s.reason}`));
@@ -405,7 +506,9 @@ function EnviarConvitesDialog({
           `Convite(s) registrado(s). Envio de e-mail não configurado — copie o link de cada convidado na lista.`,
         );
       } else {
-        const send = await sendInvites({ data: { quotationId, invitationIds: res.created.map((c) => c.id) } });
+        const send = await sendInvites({
+          data: { quotationId, invitationIds: res.created.map((c) => c.id) },
+        });
         const ok = send.results.filter((r) => r.ok).length;
         const fail = send.results.length - ok;
         if (ok) toast.success(`${ok} convite(s) enviado(s) individualmente.`);
@@ -440,7 +543,9 @@ function EnviarConvitesDialog({
             />
             <div className="max-h-56 overflow-y-auto rounded-md border">
               {candidates.length === 0 && (
-                <p className="p-3 text-sm text-muted-foreground">Nenhuma empresa disponível com e-mail cadastrado.</p>
+                <p className="p-3 text-sm text-muted-foreground">
+                  Nenhuma empresa disponível com e-mail cadastrado.
+                </p>
               )}
               {candidates.map((c) => (
                 <label
@@ -473,7 +578,11 @@ function EnviarConvitesDialog({
             </div>
             <div>
               <Label htmlFor="manual-name">Responsável (opcional)</Label>
-              <Input id="manual-name" value={manualName} onChange={(e) => setManualName(e.target.value)} />
+              <Input
+                id="manual-name"
+                value={manualName}
+                onChange={(e) => setManualName(e.target.value)}
+              />
             </div>
             <Button type="button" variant="outline" className="gap-1" onClick={addManual}>
               <Plus className="size-4" /> Adicionar
@@ -483,9 +592,16 @@ function EnviarConvitesDialog({
           <section className="space-y-2">
             <Label>Lista final ({list.length})</Label>
             <div className="rounded-md border">
-              {list.length === 0 && <p className="p-3 text-sm text-muted-foreground">Nenhum destinatário selecionado.</p>}
+              {list.length === 0 && (
+                <p className="p-3 text-sm text-muted-foreground">
+                  Nenhum destinatário selecionado.
+                </p>
+              )}
               {list.map((r, idx) => (
-                <div key={`${r.email}-${idx}`} className="flex items-center gap-2 border-b px-3 py-2 last:border-b-0">
+                <div
+                  key={`${r.email}-${idx}`}
+                  className="flex items-center gap-2 border-b px-3 py-2 last:border-b-0"
+                >
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-medium">{r.label}</span>
                     <span className="block truncate text-xs text-muted-foreground">
@@ -504,7 +620,8 @@ function EnviarConvitesDialog({
               ))}
             </div>
             <p className="text-xs text-muted-foreground">
-              Cada empresa recebe uma mensagem individual, com link exclusivo. Ninguém vê os demais convidados.
+              Cada empresa recebe uma mensagem individual, com link exclusivo. Ninguém vê os demais
+              convidados.
             </p>
           </section>
         </div>
@@ -514,7 +631,11 @@ function EnviarConvitesDialog({
             Cancelar
           </Button>
           <Button onClick={submit} disabled={busy || list.length === 0}>
-            {busy ? "Processando…" : configured ? "Revisar e enviar" : "Registrar convites (sem envio)"}
+            {busy
+              ? "Processando…"
+              : configured
+                ? "Revisar e enviar"
+                : "Registrar convites (sem envio)"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -560,7 +681,11 @@ function ConfiguracaoEmailDialog({
       }
       const platformKey = provider === "resend" && Boolean(platform?.platformResend);
       if (!settings?.has_secret && !platformKey && !secret.trim()) {
-        toast.error(provider === "smtp" ? "Informe a senha do usuário SMTP." : "Informe a chave de API do provedor.");
+        toast.error(
+          provider === "smtp"
+            ? "Informe a senha do usuário SMTP."
+            : "Informe a chave de API do provedor.",
+        );
         return;
       }
       if (provider === "smtp" && !String(fd.get("smtpHost") ?? "").trim()) {
@@ -625,15 +750,30 @@ function ConfiguracaoEmailDialog({
             </div>
             <div>
               <Label htmlFor="fromName">Nome do remetente</Label>
-              <Input id="fromName" name="fromName" defaultValue={settings?.from_name ?? ""} maxLength={80} />
+              <Input
+                id="fromName"
+                name="fromName"
+                defaultValue={settings?.from_name ?? ""}
+                maxLength={80}
+              />
             </div>
             <div>
               <Label htmlFor="fromEmail">E-mail remetente *</Label>
-              <Input id="fromEmail" name="fromEmail" type="email" defaultValue={settings?.from_email ?? ""} />
+              <Input
+                id="fromEmail"
+                name="fromEmail"
+                type="email"
+                defaultValue={settings?.from_email ?? ""}
+              />
             </div>
             <div>
               <Label htmlFor="replyTo">Responder para</Label>
-              <Input id="replyTo" name="replyTo" type="email" defaultValue={settings?.reply_to ?? ""} />
+              <Input
+                id="replyTo"
+                name="replyTo"
+                type="email"
+                defaultValue={settings?.reply_to ?? ""}
+              />
             </div>
             {provider === "smtp" && (
               <>
@@ -643,7 +783,12 @@ function ConfiguracaoEmailDialog({
                 </div>
                 <div>
                   <Label htmlFor="smtpPort">Porta</Label>
-                  <Input id="smtpPort" name="smtpPort" type="number" defaultValue={settings?.smtp_port ?? 587} />
+                  <Input
+                    id="smtpPort"
+                    name="smtpPort"
+                    type="number"
+                    defaultValue={settings?.smtp_port ?? 587}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="smtpUser">Usuário</Label>
@@ -660,14 +805,16 @@ function ConfiguracaoEmailDialog({
                 placeholder="https://frota.seuorgao.gov.br"
               />
               <p className="mt-1 text-xs text-muted-foreground">
-                É o endereço usado no link enviado ao fornecedor. Precisa ser um endereço público (ex.:
-                https://frota.seuorgao.gov.br). Endereços locais, de rede interna ou de pré-visualização do editor não
-                são aceitos, porque exigem login e não abrem para quem está fora do órgão.
+                É o endereço usado no link enviado ao fornecedor. Precisa ser um endereço público
+                (ex.: https://frota.seuorgao.gov.br). Endereços locais, de rede interna ou de
+                pré-visualização do editor não são aceitos, porque exigem login e não abrem para
+                quem está fora do órgão.
               </p>
-
             </div>
             <div className="sm:col-span-2">
-              <Label htmlFor="secret">{provider === "smtp" ? "Senha do usuário SMTP" : "Chave de API do provedor"}</Label>
+              <Label htmlFor="secret">
+                {provider === "smtp" ? "Senha do usuário SMTP" : "Chave de API do provedor"}
+              </Label>
               <Input
                 id="secret"
                 type="password"
@@ -683,8 +830,8 @@ function ConfiguracaoEmailDialog({
                 }
               />
               <p className="mt-1 text-xs text-muted-foreground">
-                A credencial fica guardada em área restrita do servidor. Ela nunca é exibida, exportada ou devolvida ao
-                navegador.
+                A credencial fica guardada em área restrita do servidor. Ela nunca é exibida,
+                exportada ou devolvida ao navegador.
               </p>
             </div>
           </div>

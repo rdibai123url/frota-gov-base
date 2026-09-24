@@ -9,15 +9,13 @@ export type SummaryCard = { label: string; value: string; hint?: string };
 
 export function SummaryCards({ cards, className }: { cards: SummaryCard[]; className?: string }) {
   return (
-    <div
-      className={cn(
-        "mb-5 grid gap-2 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5",
-        className,
-      )}
-    >
+    <div className={cn("mb-5 grid gap-2 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5", className)}>
       {cards.map((c) => (
         <div key={c.label} className="rounded-lg border bg-card px-3 py-2.5 shadow-card">
-          <p className="truncate text-[11px] uppercase tracking-wide text-muted-foreground" title={c.label}>
+          <p
+            className="truncate text-[11px] uppercase tracking-wide text-muted-foreground"
+            title={c.label}
+          >
             {c.label}
           </p>
           <p

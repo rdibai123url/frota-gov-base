@@ -25,7 +25,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   ASSET_OWNERSHIP,
   FUEL_TYPES,
@@ -137,7 +144,15 @@ function Equipamentos() {
       if (unitFilter !== "all" && (v.unit_id ?? NONE) !== unitFilter) return false;
       if (ownershipFilter !== "all" && v.ownership !== ownershipFilter) return false;
       if (!q) return true;
-      return [v.asset_code, v.plate, v.brand, v.model, v.manufacturer, v.serial_number, v.equipment_type]
+      return [
+        v.asset_code,
+        v.plate,
+        v.brand,
+        v.model,
+        v.manufacturer,
+        v.serial_number,
+        v.equipment_type,
+      ]
         .filter(Boolean)
         .some((f) => String(f).toLowerCase().includes(q));
     });
@@ -247,7 +262,9 @@ function Equipamentos() {
     if (v.meter_kind !== "horimetro" && v.current_km != null)
       parts.push(`${v.current_km.toLocaleString("pt-BR")} km`);
     if (v.meter_kind !== "hodometro" && v.hour_meter != null)
-      parts.push(`${v.hour_meter.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} h`);
+      parts.push(
+        `${v.hour_meter.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} h`,
+      );
     return parts.join(" · ") || "—";
   };
 
@@ -278,31 +295,61 @@ function Equipamentos() {
             className="pl-9"
           />
         </div>
-        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(0); }}>
-          <SelectTrigger><SelectValue placeholder="Situação" /></SelectTrigger>
+        <Select
+          value={statusFilter}
+          onValueChange={(v) => {
+            setStatusFilter(v);
+            setPage(0);
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Situação" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas as situações</SelectItem>
             {VEHICLE_STATUS.map((s) => (
-              <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+              <SelectItem key={s.value} value={s.value}>
+                {s.label}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <Select value={ownershipFilter} onValueChange={(v) => { setOwnershipFilter(v); setPage(0); }}>
-          <SelectTrigger><SelectValue placeholder="Propriedade / uso" /></SelectTrigger>
+        <Select
+          value={ownershipFilter}
+          onValueChange={(v) => {
+            setOwnershipFilter(v);
+            setPage(0);
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Propriedade / uso" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas as formas de uso</SelectItem>
             {ASSET_OWNERSHIP.map((o) => (
-              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <Select value={unitFilter} onValueChange={(v) => { setUnitFilter(v); setPage(0); }}>
-          <SelectTrigger><SelectValue placeholder="Unidade" /></SelectTrigger>
+        <Select
+          value={unitFilter}
+          onValueChange={(v) => {
+            setUnitFilter(v);
+            setPage(0);
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Unidade" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas as unidades</SelectItem>
             <SelectItem value={NONE}>Sem unidade</SelectItem>
             {units.map((u) => (
-              <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+              <SelectItem key={u.id} value={u.id}>
+                {u.name}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -325,7 +372,9 @@ function Equipamentos() {
           <TableBody>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={8} className="py-10 text-center text-muted-foreground">Carregando...</TableCell>
+                <TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
+                  Carregando...
+                </TableCell>
               </TableRow>
             )}
             {!isLoading && rows.length === 0 && (
@@ -356,19 +405,31 @@ function Equipamentos() {
                 <TableCell className="text-sm">{v.equipment_type || "—"}</TableCell>
                 <TableCell className="text-sm">{unitName(v.unit_id)}</TableCell>
                 <TableCell className="text-sm">{meterCell(v)}</TableCell>
-                <TableCell className="text-sm">{label(ASSET_OWNERSHIP, v.ownership ?? "proprio")}</TableCell>
+                <TableCell className="text-sm">
+                  {label(ASSET_OWNERSHIP, v.ownership ?? "proprio")}
+                </TableCell>
                 <TableCell>
                   <Badge variant={statusVariant(v.status)}>{label(VEHICLE_STATUS, v.status)}</Badge>
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
-                    <Button asChild variant="ghost" size="icon" aria-label="Histórico do equipamento">
+                    <Button
+                      asChild
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Histórico do equipamento"
+                    >
                       <Link to="/veiculo/$id" params={{ id: v.id }}>
                         <History className="size-4" />
                       </Link>
                     </Button>
                     {canWrite && (
-                      <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => openEdit(v)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Editar"
+                        onClick={() => openEdit(v)}
+                      >
                         <Pencil className="size-4" />
                       </Button>
                     )}
@@ -385,7 +446,12 @@ function Equipamentos() {
           {filtered.length} máquina(s)/equipamento(s) · página {current + 1} de {pageCount}
         </span>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" disabled={current === 0} onClick={() => setPage(current - 1)}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={current === 0}
+            onClick={() => setPage(current - 1)}
+          >
             Anterior
           </Button>
           <Button
@@ -402,26 +468,40 @@ function Equipamentos() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{editing ? "Editar máquina/equipamento" : "Nova máquina/equipamento"}</DialogTitle>
+            <DialogTitle>
+              {editing ? "Editar máquina/equipamento" : "Nova máquina/equipamento"}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div className="space-y-1.5">
                 <Label htmlFor="asset_code">Patrimônio / identificação *</Label>
-                <Input id="asset_code" name="asset_code" defaultValue={editing?.asset_code ?? ""} required />
+                <Input
+                  id="asset_code"
+                  name="asset_code"
+                  defaultValue={editing?.asset_code ?? ""}
+                  required
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>Tipo de equipamento</Label>
-                <Select value={equipmentType} onValueChange={(v) => {
-                  setEquipmentType(v);
-                  const t = types.find((x) => x.name === v);
-                  if (t) setMeterKind(t.default_meter_kind);
-                }}>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <Select
+                  value={equipmentType}
+                  onValueChange={(v) => {
+                    setEquipmentType(v);
+                    const t = types.find((x) => x.name === v);
+                    if (t) setMeterKind(t.default_meter_kind);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={NONE}>Não informado</SelectItem>
                     {types.map((t) => (
-                      <SelectItem key={t.id} value={t.name}>{t.name}</SelectItem>
+                      <SelectItem key={t.id} value={t.name}>
+                        {t.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -432,7 +512,11 @@ function Equipamentos() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="manufacturer">Fabricante</Label>
-                <Input id="manufacturer" name="manufacturer" defaultValue={editing?.manufacturer ?? ""} />
+                <Input
+                  id="manufacturer"
+                  name="manufacturer"
+                  defaultValue={editing?.manufacturer ?? ""}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="brand">Marca</Label>
@@ -448,11 +532,19 @@ function Equipamentos() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="serial_number">Número de série</Label>
-                <Input id="serial_number" name="serial_number" defaultValue={editing?.serial_number ?? ""} />
+                <Input
+                  id="serial_number"
+                  name="serial_number"
+                  defaultValue={editing?.serial_number ?? ""}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="engine_number">Número do motor</Label>
-                <Input id="engine_number" name="engine_number" defaultValue={editing?.engine_number ?? ""} />
+                <Input
+                  id="engine_number"
+                  name="engine_number"
+                  defaultValue={editing?.engine_number ?? ""}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="year_manufacture">Ano</Label>
@@ -466,41 +558,69 @@ function Equipamentos() {
               <div className="space-y-1.5">
                 <Label>Combustível / produto</Label>
                 <Select value={fuelType} onValueChange={setFuelType}>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={NONE}>Não informado</SelectItem>
                     {FUEL_TYPES.map((f) => (
-                      <SelectItem key={f} value={f}>{f}</SelectItem>
+                      <SelectItem key={f} value={f}>
+                        {f}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="tank_capacity">Capacidade do tanque (L)</Label>
-                <Input id="tank_capacity" name="tank_capacity" inputMode="decimal" defaultValue={editing?.tank_capacity ?? ""} />
+                <Input
+                  id="tank_capacity"
+                  name="tank_capacity"
+                  inputMode="decimal"
+                  defaultValue={editing?.tank_capacity ?? ""}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>Medidor</Label>
                 <Select value={meterKind} onValueChange={setMeterKind}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {METER_KINDS.map((m) => (
-                      <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                      <SelectItem key={m.value} value={m.value}>
+                        {m.label}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="current_km">Hodômetro (km)</Label>
-                <Input id="current_km" name="current_km" inputMode="decimal" defaultValue={editing?.current_km ?? ""} />
+                <Input
+                  id="current_km"
+                  name="current_km"
+                  inputMode="decimal"
+                  defaultValue={editing?.current_km ?? ""}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="hour_meter">Horímetro (h)</Label>
-                <Input id="hour_meter" name="hour_meter" inputMode="decimal" defaultValue={editing?.hour_meter ?? ""} />
+                <Input
+                  id="hour_meter"
+                  name="hour_meter"
+                  inputMode="decimal"
+                  defaultValue={editing?.hour_meter ?? ""}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="power_hp">Potência (cv)</Label>
-                <Input id="power_hp" name="power_hp" inputMode="decimal" defaultValue={editing?.power_hp ?? ""} />
+                <Input
+                  id="power_hp"
+                  name="power_hp"
+                  inputMode="decimal"
+                  defaultValue={editing?.power_hp ?? ""}
+                />
               </div>
               <div className="space-y-1.5 sm:col-span-2">
                 <Label htmlFor="capacity_desc">Peso / capacidade</Label>
@@ -514,10 +634,14 @@ function Equipamentos() {
               <div className="space-y-1.5">
                 <Label>Propriedade / uso</Label>
                 <Select value={ownership} onValueChange={setOwnership}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {ASSET_OWNERSHIP.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                      <SelectItem key={o.value} value={o.value}>
+                        {o.label}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -525,11 +649,15 @@ function Equipamentos() {
               <div className="space-y-1.5">
                 <Label>Centro de custo</Label>
                 <Select value={costCenterId} onValueChange={setCostCenterId}>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={NONE}>Não informado</SelectItem>
                     {costCenters.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -538,11 +666,15 @@ function Equipamentos() {
                 <div className="space-y-1.5">
                   <Label>Unidade / secretaria</Label>
                   <Select value={unitId} onValueChange={setUnitId}>
-                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value={NONE}>Sem unidade</SelectItem>
                       {units.map((u) => (
-                        <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                        <SelectItem key={u.id} value={u.id}>
+                          {u.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -550,7 +682,12 @@ function Equipamentos() {
               )}
               <div className="space-y-1.5">
                 <Label htmlFor="acquisition_date">Data de aquisição</Label>
-                <Input id="acquisition_date" name="acquisition_date" type="date" defaultValue={editing?.acquisition_date ?? ""} />
+                <Input
+                  id="acquisition_date"
+                  name="acquisition_date"
+                  type="date"
+                  defaultValue={editing?.acquisition_date ?? ""}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="acquisition_value">Valor de aquisição (R$)</Label>
@@ -564,10 +701,14 @@ function Equipamentos() {
               <div className="space-y-1.5">
                 <Label>Situação</Label>
                 <Select value={status} onValueChange={(v) => setStatus(v as VehicleStatus)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {VEHICLE_STATUS.map((s) => (
-                      <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                      <SelectItem key={s.value} value={s.value}>
+                        {s.label}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -579,8 +720,8 @@ function Equipamentos() {
             </div>
             {editing && (
               <p className="text-xs text-muted-foreground">
-                A unidade responsável é alterada pelo fluxo de Frota → Movimentação patrimonial, preservando o
-                histórico do bem.
+                A unidade responsável é alterada pelo fluxo de Frota → Movimentação patrimonial,
+                preservando o histórico do bem.
               </p>
             )}
             <DialogFooter>

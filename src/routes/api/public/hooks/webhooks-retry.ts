@@ -61,7 +61,11 @@ export const Route = createFileRoute("/api/public/hooks/webhooks-retry")({
           if (!endpoint || !endpoint.active) {
             await supabaseAdmin
               .from("webhook_deliveries")
-              .update({ status: "descartada", error_message: "Endpoint inativo ou removido.", next_retry_at: null })
+              .update({
+                status: "descartada",
+                error_message: "Endpoint inativo ou removido.",
+                next_retry_at: null,
+              })
               .eq("id", delivery.id);
             results.push({ id: delivery.id, status: "descartada" });
             continue;
@@ -83,7 +87,8 @@ export const Route = createFileRoute("/api/public/hooks/webhooks-retry")({
             "x-frotagov-delivery": delivery.id,
             "x-frotagov-attempt": String(attempt),
           };
-          if (secret) headers["x-frotagov-signature"] = `sha256=${await hmacSha256Hex(secret, body)}`;
+          if (secret)
+            headers["x-frotagov-signature"] = `sha256=${await hmacSha256Hex(secret, body)}`;
 
           let responseStatus: number | null = null;
           let responseBody = "";
@@ -108,7 +113,11 @@ export const Route = createFileRoute("/api/public/hooks/webhooks-retry")({
 
           const maxRetries = endpoint.max_retries ?? 5;
           const exhausted = attempt >= maxRetries;
-          const status: "pendente" | "entregue" | "falha" = failure ? (exhausted ? "falha" : "pendente") : "entregue";
+          const status: "pendente" | "entregue" | "falha" = failure
+            ? exhausted
+              ? "falha"
+              : "pendente"
+            : "entregue";
           const backoff = BACKOFF_MINUTES[Math.min(attempt - 1, BACKOFF_MINUTES.length - 1)] ?? 180;
 
           await supabaseAdmin
@@ -121,7 +130,9 @@ export const Route = createFileRoute("/api/public/hooks/webhooks-retry")({
               error_message: failure,
               delivered_at: failure ? null : new Date().toISOString(),
               next_retry_at:
-                status === "pendente" ? new Date(Date.now() + backoff * 60_000).toISOString() : null,
+                status === "pendente"
+                  ? new Date(Date.now() + backoff * 60_000).toISOString()
+                  : null,
             })
             .eq("id", delivery.id);
 

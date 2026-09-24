@@ -12,7 +12,14 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -21,13 +28,33 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { formatBRL, formatPercent } from "@/lib/format";
 import { exportReportCsv } from "@/lib/reports";
 import { useInvalidate, usePerms } from "@/lib/frotagov";
-import { FIPE_DISCLAIMER, FIPE_KINDS, FIPE_STATUS_LABEL, depreciation, useFipeFleet } from "@/lib/fipe";
-import { fipeBrands, fipeModels, fipeQuoteVehicle, fipeRefreshAll, fipeYears, type FipeItem, type FipeKind } from "@/lib/fipe.functions";
+import {
+  FIPE_DISCLAIMER,
+  FIPE_KINDS,
+  FIPE_STATUS_LABEL,
+  depreciation,
+  useFipeFleet,
+} from "@/lib/fipe";
+import {
+  fipeBrands,
+  fipeModels,
+  fipeQuoteVehicle,
+  fipeRefreshAll,
+  fipeYears,
+  type FipeItem,
+  type FipeKind,
+} from "@/lib/fipe.functions";
 
 const dt = (v?: string | null) => (v ? new Date(v).toLocaleString("pt-BR") : "—");
 
@@ -45,7 +72,11 @@ export function FipePanel() {
     const t = search.trim().toLowerCase();
     if (!t) return fleet;
     return fleet.filter((v) =>
-      [v.plate, v.asset_code, v.brand, v.model, v.fipe_code].some((x) => String(x ?? "").toLowerCase().includes(t)),
+      [v.plate, v.asset_code, v.brand, v.model, v.fipe_code].some((x) =>
+        String(x ?? "")
+          .toLowerCase()
+          .includes(t),
+      ),
     );
   }, [fleet, search]);
 
@@ -102,7 +133,6 @@ export function FipePanel() {
                     ultima_consulta: v.fipe_last_query_at ?? "",
                   })),
                 )
-
               }
             >
               <Download className="mr-2 h-4 w-4" />
@@ -167,7 +197,9 @@ export function FipePanel() {
                   return (
                     <TableRow key={v.id}>
                       <TableCell>
-                        <div className="font-medium">{v.plate ?? v.asset_code ?? "Sem identificação"}</div>
+                        <div className="font-medium">
+                          {v.plate ?? v.asset_code ?? "Sem identificação"}
+                        </div>
                         <div className="text-xs text-muted-foreground">
                           {[v.brand, v.model, v.year_model].filter(Boolean).join(" · ") || "—"}
                         </div>
@@ -177,20 +209,27 @@ export function FipePanel() {
                           <>
                             <div>{v.fipe_model_name ?? v.fipe_model_code}</div>
                             <div className="text-xs text-muted-foreground">
-                              Código {v.fipe_code ?? "—"} · {v.fipe_reference_label ?? "sem referência"}
+                              Código {v.fipe_code ?? "—"} ·{" "}
+                              {v.fipe_reference_label ?? "sem referência"}
                             </div>
                           </>
                         ) : (
                           <span className="text-muted-foreground">Sem vínculo</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-right">{v.fipe_value ? formatBRL(v.fipe_value) : "—"}</TableCell>
-                      <TableCell className="text-right">{dep === null ? "—" : formatPercent(dep * 100)}</TableCell>
+                      <TableCell className="text-right">
+                        {v.fipe_value ? formatBRL(v.fipe_value) : "—"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {dep === null ? "—" : formatPercent(dep * 100)}
+                      </TableCell>
                       <TableCell>
                         <Badge variant={v.fipe_last_status === "ok" ? "default" : "secondary"}>
                           {FIPE_STATUS_LABEL[v.fipe_last_status ?? ""] ?? "Nunca consultado"}
                         </Badge>
-                        <div className="text-xs text-muted-foreground">{dt(v.fipe_last_query_at)}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {dt(v.fipe_last_query_at)}
+                        </div>
                       </TableCell>
                       <TableCell className="text-right">
                         {canManageFleet && (
@@ -298,7 +337,9 @@ export function LinkDialog({ vehicle, onClose }: { vehicle: Vehicle; onClose: ()
         setError(r.message);
         toast.error(r.message);
       } else {
-        toast.success(`Valor registrado: ${formatBRL(r.value ?? 0)} (${r.referenceLabel ?? "referência atual"}).`);
+        toast.success(
+          `Valor registrado: ${formatBRL(r.value ?? 0)} (${r.referenceLabel ?? "referência atual"}).`,
+        );
         invalidate(["vehicles", "asset_market_values"]);
         onClose();
       }
@@ -350,7 +391,12 @@ export function LinkDialog({ vehicle, onClose }: { vehicle: Vehicle; onClose: ()
           <div className="space-y-1">
             <Label>Marca</Label>
             {brands.length === 0 ? (
-              <Button variant="outline" className="w-full" onClick={() => void loadBrands(kind)} disabled={loading === "marcas"}>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => void loadBrands(kind)}
+                disabled={loading === "marcas"}
+              >
                 {loading === "marcas" ? "Buscando marcas…" : "Buscar marcas"}
               </Button>
             ) : (
@@ -390,7 +436,9 @@ export function LinkDialog({ vehicle, onClose }: { vehicle: Vehicle; onClose: ()
               }}
             >
               <SelectTrigger>
-                <SelectValue placeholder={loading === "modelos" ? "Buscando modelos…" : "Selecione o modelo"} />
+                <SelectValue
+                  placeholder={loading === "modelos" ? "Buscando modelos…" : "Selecione o modelo"}
+                />
               </SelectTrigger>
               <SelectContent className="max-h-72">
                 {models.map((m) => (
@@ -406,7 +454,9 @@ export function LinkDialog({ vehicle, onClose }: { vehicle: Vehicle; onClose: ()
             <Label>Ano e combustível</Label>
             <Select value={year} disabled={years.length === 0} onValueChange={setYear}>
               <SelectTrigger>
-                <SelectValue placeholder={loading === "anos" ? "Buscando anos…" : "Selecione o ano"} />
+                <SelectValue
+                  placeholder={loading === "anos" ? "Buscando anos…" : "Selecione o ano"}
+                />
               </SelectTrigger>
               <SelectContent className="max-h-72">
                 {years.map((y) => (
@@ -420,7 +470,8 @@ export function LinkDialog({ vehicle, onClose }: { vehicle: Vehicle; onClose: ()
 
           {error && <p className="text-sm text-destructive">{error}</p>}
           <p className="text-xs text-muted-foreground">
-            Sem correspondência na tabela, o cadastro do bem continua normal e o vínculo pode ser feito depois.
+            Sem correspondência na tabela, o cadastro do bem continua normal e o vínculo pode ser
+            feito depois.
           </p>
         </div>
 

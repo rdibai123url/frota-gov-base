@@ -11,12 +11,31 @@ import { SupplyOrderPanel } from "@/components/ofp-panel";
 import { Pneus } from "@/routes/_authenticated/pneus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -45,7 +64,10 @@ export const Route = createFileRoute("/_authenticated/pecas")({
           "Catálogo de peças e acessórios do órgão e histórico de aplicação por veículo, com quantidade, valores, fornecedor e garantia.",
       },
       { property: "og:title", content: "Peças e acessórios — FrotaGov" },
-      { property: "og:description", content: "Catálogo e histórico de peças aplicadas na frota pública." },
+      {
+        property: "og:description",
+        content: "Catálogo e histórico de peças aplicadas na frota pública.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -79,12 +101,19 @@ function Pecas() {
   const [search, setSearch] = useState("");
   const [fVehicle, setFVehicle] = useState(ALL);
 
-  const plateOf = useMemo(() => new Map(vehicles.map((v) => [v.id, (v.plate ?? v.asset_code)])), [vehicles]);
+  const plateOf = useMemo(
+    () => new Map(vehicles.map((v) => [v.id, v.plate ?? v.asset_code])),
+    [vehicles],
+  );
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return parts.filter(
-      (p) => !q || `${p.internal_code ?? ""} ${p.description} ${p.brand ?? ""} ${p.reference ?? ""}`.toLowerCase().includes(q),
+      (p) =>
+        !q ||
+        `${p.internal_code ?? ""} ${p.description} ${p.brand ?? ""} ${p.reference ?? ""}`
+          .toLowerCase()
+          .includes(q),
     );
   }, [parts, search]);
 
@@ -121,11 +150,18 @@ function Pecas() {
       notes: d.notes || null,
     };
     const { error } = editing
-      ? await supabase.from("parts_catalog").update({ ...payload, updated_by: userId }).eq("id", editing.id)
-      : await supabase.from("parts_catalog").insert({ ...payload, organization_id: orgId!, created_by: userId });
+      ? await supabase
+          .from("parts_catalog")
+          .update({ ...payload, updated_by: userId })
+          .eq("id", editing.id)
+      : await supabase
+          .from("parts_catalog")
+          .insert({ ...payload, organization_id: orgId!, created_by: userId });
     setSaving(false);
     if (error) {
-      toast.error(error.code === "23505" ? "Já existe uma peça com esse código." : dbMessage(error));
+      toast.error(
+        error.code === "23505" ? "Já existe uma peça com esse código." : dbMessage(error),
+      );
       return;
     }
     toast.success(editing ? "Peça atualizada." : "Peça cadastrada.");
@@ -165,7 +201,11 @@ function Pecas() {
         <TabsContent value="catalogo">
           <div className="mb-4 max-w-sm">
             <Label>Buscar</Label>
-            <Input placeholder="Código, descrição, marca" value={search} onChange={(e) => setSearch(e.target.value)} />
+            <Input
+              placeholder="Código, descrição, marca"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
           <div className="overflow-x-auto rounded-lg border bg-card shadow-card">
             <Table>
@@ -207,11 +247,18 @@ function Pecas() {
                     <TableCell>{p.category || "—"}</TableCell>
                     <TableCell>{p.measure_unit}</TableCell>
                     <TableCell>
-                      <Badge variant={p.active ? "default" : "secondary"}>{p.active ? "Ativa" : "Inativa"}</Badge>
+                      <Badge variant={p.active ? "default" : "secondary"}>
+                        {p.active ? "Ativa" : "Inativa"}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       {canManageFleet && (
-                        <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => openEdit(p)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Editar"
+                          onClick={() => openEdit(p)}
+                        >
                           <Pencil className="size-4" />
                         </Button>
                       )}
@@ -235,7 +282,7 @@ function Pecas() {
                 <SelectItem value={ALL}>Todos</SelectItem>
                 {vehicles.map((v) => (
                   <SelectItem key={v.id} value={v.id}>
-                    {(v.plate ?? v.asset_code)}
+                    {v.plate ?? v.asset_code}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -274,8 +321,12 @@ function Pecas() {
                     </TableCell>
                     <TableCell className="text-right">{num(Number(h.quantity), 2)}</TableCell>
                     <TableCell className="text-right">{brl(Number(h.unit_value))}</TableCell>
-                    <TableCell className="text-right font-medium">{brl(Number(h.total_value))}</TableCell>
-                    <TableCell>{h.warranty_until ? `até ${dateBR(h.warranty_until)}` : "—"}</TableCell>
+                    <TableCell className="text-right font-medium">
+                      {brl(Number(h.total_value))}
+                    </TableCell>
+                    <TableCell>
+                      {h.warranty_until ? `até ${dateBR(h.warranty_until)}` : "—"}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -287,17 +338,28 @@ function Pecas() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing ? `Editar peça ${editing.description}` : "Nova peça"}</DialogTitle>
+            <DialogTitle>
+              {editing ? `Editar peça ${editing.description}` : "Nova peça"}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="internal_code">Código interno</Label>
-                <Input id="internal_code" name="internal_code" defaultValue={editing?.internal_code ?? ""} />
+                <Input
+                  id="internal_code"
+                  name="internal_code"
+                  defaultValue={editing?.internal_code ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="description">Descrição *</Label>
-                <Input id="description" name="description" defaultValue={editing?.description ?? ""} required />
+                <Input
+                  id="description"
+                  name="description"
+                  defaultValue={editing?.description ?? ""}
+                  required
+                />
               </div>
               <div>
                 <Label htmlFor="brand">Marca</Label>

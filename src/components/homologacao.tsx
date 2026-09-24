@@ -6,8 +6,21 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   ACTIVE_MODULES,
   MATRIX_STATUSES,
@@ -103,7 +116,9 @@ export function DocsTab({ environment }: { environment: { label: string; value: 
                 <TableRow key={m.route + m.module}>
                   <TableCell className="text-sm font-medium">
                     {m.module}
-                    {m.note && <span className="block text-xs text-muted-foreground">{m.note}</span>}
+                    {m.note && (
+                      <span className="block text-xs text-muted-foreground">{m.note}</span>
+                    )}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">{m.route}</TableCell>
                   <TableCell>
@@ -165,7 +180,10 @@ export function MatrixTab({ organization }: { organization?: string | null }) {
 
   const counts = useMemo(
     () =>
-      MATRIX_STATUSES.map((s) => ({ status: s, total: FEATURE_MATRIX.filter((r) => r.status === s).length })),
+      MATRIX_STATUSES.map((s) => ({
+        status: s,
+        total: FEATURE_MATRIX.filter((r) => r.status === s).length,
+      })),
     [],
   );
 
@@ -185,16 +203,24 @@ export function MatrixTab({ organization }: { organization?: string | null }) {
       <div className="mb-4 grid gap-3 rounded-lg border bg-card p-4 shadow-card sm:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-1.5 lg:col-span-2">
           <Label>Busca</Label>
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Funcionalidade ou observação" />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Funcionalidade ou observação"
+          />
         </div>
         <div className="space-y-1.5">
           <Label>Módulo</Label>
           <Select value={module} onValueChange={setModule}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Todos</SelectItem>
               {modules.map((m) => (
-                <SelectItem key={m} value={m}>{m}</SelectItem>
+                <SelectItem key={m} value={m}>
+                  {m}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -202,11 +228,15 @@ export function MatrixTab({ organization }: { organization?: string | null }) {
         <div className="space-y-1.5">
           <Label>Status</Label>
           <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Todos</SelectItem>
               {MATRIX_STATUSES.map((s) => (
-                <SelectItem key={s} value={s}>{s}</SelectItem>
+                <SelectItem key={s} value={s}>
+                  {s}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -215,13 +245,28 @@ export function MatrixTab({ organization }: { organization?: string | null }) {
 
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
-          {rows.length} de {FEATURE_MATRIX.length} — {counts.map((c) => `${c.status}: ${c.total}`).join(" · ")}
+          {rows.length} de {FEATURE_MATRIX.length} —{" "}
+          {counts.map((c) => `${c.status}: ${c.total}`).join(" · ")}
         </p>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => { exportReportCsv("matriz-funcionalidades-frotagov", MATRIX_COLUMNS, rows); void log("CSV"); }}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              exportReportCsv("matriz-funcionalidades-frotagov", MATRIX_COLUMNS, rows);
+              void log("CSV");
+            }}
+          >
             <Download className="size-4" /> CSV
           </Button>
-          <Button variant="outline" size="sm" onClick={() => { exportXlsx("matriz-funcionalidades-frotagov", MATRIX_COLUMNS, rows, "Matriz"); void log("XLSX"); }}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              exportXlsx("matriz-funcionalidades-frotagov", MATRIX_COLUMNS, rows, "Matriz");
+              void log("XLSX");
+            }}
+          >
             <Download className="size-4" /> Excel (.xlsx)
           </Button>
           <Button
@@ -273,7 +318,15 @@ export function MatrixTab({ organization }: { organization?: string | null }) {
                 <TableCell className="text-sm text-muted-foreground">{r.module}</TableCell>
                 <TableCell className="text-sm font-medium">{r.feature}</TableCell>
                 <TableCell>
-                  <Badge variant={r.status === "Sim" ? "default" : r.status === "Não" || r.status === "Fora do núcleo" ? "outline" : "secondary"}>
+                  <Badge
+                    variant={
+                      r.status === "Sim"
+                        ? "default"
+                        : r.status === "Não" || r.status === "Fora do núcleo"
+                          ? "outline"
+                          : "secondary"
+                    }
+                  >
                     {r.status}
                   </Badge>
                 </TableCell>
@@ -286,9 +339,10 @@ export function MatrixTab({ organization }: { organization?: string | null }) {
       </div>
 
       <p className="mt-3 text-xs text-muted-foreground">
-        Situações: <strong>Sim</strong> atende integralmente; <strong>Parcial</strong> atende com limitação
-        descrita; <strong>Depende de credencial</strong> está pronto, mas exige convênio, credencial ou
-        parceiro externo do órgão; <strong>Fora do núcleo</strong> não faz parte do produto; <strong>Não</strong>
+        Situações: <strong>Sim</strong> atende integralmente; <strong>Parcial</strong> atende com
+        limitação descrita; <strong>Depende de credencial</strong> está pronto, mas exige convênio,
+        credencial ou parceiro externo do órgão; <strong>Fora do núcleo</strong> não faz parte do
+        produto; <strong>Não</strong>
         não está implementado.
       </p>
       <p className="mt-2 text-xs text-muted-foreground">

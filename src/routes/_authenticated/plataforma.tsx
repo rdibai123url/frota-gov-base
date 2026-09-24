@@ -16,13 +16,31 @@ import { ImportMigrationTab } from "@/components/import-migration";
 import { BackupTab } from "@/components/backup-admin";
 import { ModulesTab } from "@/components/modulos-orgao";
 
-
 import { exportXlsx } from "@/lib/reports";
 import { DocsTab, MatrixTab } from "@/components/homologacao";
 import { AuditTab } from "@/components/auditoria-produto";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { supabase, useInvalidate, ROLE_LABELS, type AppRole } from "@/lib/frotagov";
 import { maskCNPJ, maskCPF, formatCNPJ, onlyDigits, isValidCPF, isValidCNPJ } from "@/lib/format";
 import {
@@ -48,7 +66,10 @@ export const Route = createFileRoute("/_authenticated/plataforma")({
           "Área exclusiva do Super Admin: órgãos cadastrados, administradores globais, logs de auditoria e configurações da plataforma.",
       },
       { property: "og:title", content: "Administração da Plataforma — FrotaGov" },
-      { property: "og:description", content: "Gestão multi-órgão, logs globais e configurações do FrotaGov." },
+      {
+        property: "og:description",
+        content: "Gestão multi-órgão, logs globais e configurações do FrotaGov.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -56,7 +77,15 @@ export const Route = createFileRoute("/_authenticated/plataforma")({
   component: Plataforma,
 });
 
-const ORG_TYPES = ["prefeitura", "camara", "consorcio", "autarquia", "fundacao", "secretaria", "outro"];
+const ORG_TYPES = [
+  "prefeitura",
+  "camara",
+  "consorcio",
+  "autarquia",
+  "fundacao",
+  "secretaria",
+  "outro",
+];
 const PAGE_SIZE = 25;
 
 const orgSchema = z.object({
@@ -136,14 +165,20 @@ function Plataforma() {
           <ModulesTab />
         </TabsContent>
         <TabsContent value="config" className="pt-5">
-
           <SettingsTab />
         </TabsContent>
         <TabsContent value="documentacao" className="pt-5">
           <DocsTab
             environment={[
-              { label: "Ambiente", value: typeof window === "undefined" ? "—" : window.location.host },
-              { label: "Rotinas automáticas", value: "Alertas e expiração a cada hora; limpeza de logs às 03:20; backup externo diário por órgão" },
+              {
+                label: "Ambiente",
+                value: typeof window === "undefined" ? "—" : window.location.host,
+              },
+              {
+                label: "Rotinas automáticas",
+                value:
+                  "Alertas e expiração a cada hora; limpeza de logs às 03:20; backup externo diário por órgão",
+              },
             ]}
           />
         </TabsContent>
@@ -154,7 +189,6 @@ function Plataforma() {
           <AuditTab organization="FrotaGov" />
         </TabsContent>
       </Tabs>
-
     </>
   );
 }
@@ -202,7 +236,9 @@ function OrgsTab() {
   const [orgType, setOrgType] = useState("prefeitura");
   const [cnpj, setCnpj] = useState("");
   const [cpf, setCpf] = useState("");
-  const [credential, setCredential] = useState<{ email: string; tempPassword: string } | null>(null);
+  const [credential, setCredential] = useState<{ email: string; tempPassword: string } | null>(
+    null,
+  );
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -288,10 +324,14 @@ function OrgsTab() {
               <TableRow key={o.id}>
                 <TableCell className="font-medium">
                   {o.legal_name}
-                  {o.short_name && <span className="block text-xs text-muted-foreground">{o.short_name}</span>}
+                  {o.short_name && (
+                    <span className="block text-xs text-muted-foreground">{o.short_name}</span>
+                  )}
                 </TableCell>
                 <TableCell className="text-sm">{formatCNPJ(o.cnpj)}</TableCell>
-                <TableCell className="text-sm">{[o.city, o.state].filter(Boolean).join(" / ") || "—"}</TableCell>
+                <TableCell className="text-sm">
+                  {[o.city, o.state].filter(Boolean).join(" / ") || "—"}
+                </TableCell>
                 <TableCell>
                   {session?.organization_id === o.id ? (
                     <Badge>Em contexto</Badge>
@@ -353,7 +393,12 @@ function OrgsTab() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="cnpj">CNPJ</Label>
-                <Input id="cnpj" value={cnpj} onChange={(e) => setCnpj(maskCNPJ(e.target.value))} placeholder="00.000.000/0000-00" />
+                <Input
+                  id="cnpj"
+                  value={cnpj}
+                  onChange={(e) => setCnpj(maskCNPJ(e.target.value))}
+                  placeholder="00.000.000/0000-00"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="city">Município</Label>
@@ -374,7 +419,12 @@ function OrgsTab() {
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="cpf">CPF</Label>
-                  <Input id="cpf" value={cpf} onChange={(e) => setCpf(maskCPF(e.target.value))} placeholder="000.000.000-00" />
+                  <Input
+                    id="cpf"
+                    value={cpf}
+                    onChange={(e) => setCpf(maskCPF(e.target.value))}
+                    placeholder="000.000.000-00"
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="email">E-mail institucional *</Label>
@@ -458,7 +508,9 @@ function GlobalUsersTab() {
                 <TableCell className="text-sm">{u.email || "—"}</TableCell>
                 <TableCell className="text-sm">{orgName(u.organization_id)}</TableCell>
                 <TableCell className="space-x-1">
-                  {u.roles.length === 0 && <span className="text-muted-foreground">Sem perfil</span>}
+                  {u.roles.length === 0 && (
+                    <span className="text-muted-foreground">Sem perfil</span>
+                  )}
                   {u.roles.map((r) => (
                     <Badge key={r} variant={r === "super_admin" ? "destructive" : "secondary"}>
                       {ROLE_LABELS[r]}
@@ -466,7 +518,9 @@ function GlobalUsersTab() {
                   ))}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={u.active ? "default" : "outline"}>{u.active ? "Ativo" : "Inativo"}</Badge>
+                  <Badge variant={u.active ? "default" : "outline"}>
+                    {u.active ? "Ativo" : "Inativo"}
+                  </Badge>
                 </TableCell>
               </TableRow>
             ))}
@@ -474,8 +528,8 @@ function GlobalUsersTab() {
         </Table>
       </div>
       <p className="mt-3 text-xs text-muted-foreground">
-        A criação de usuários de um órgão é feita pelo administrador do próprio órgão, em Cadastros →
-        Usuários e Permissões.
+        A criação de usuários de um órgão é feita pelo administrador do próprio órgão, em Cadastros
+        → Usuários e Permissões.
       </p>
     </>
   );
@@ -562,49 +616,98 @@ function LogsTab() {
       <div className="mb-4 grid gap-3 rounded-lg border bg-card p-4 shadow-card sm:grid-cols-2 lg:grid-cols-6">
         <div className="space-y-1.5 lg:col-span-2">
           <Label>Busca</Label>
-          <Input value={q} onChange={(e) => { setQ(e.target.value); setPage(0); }} placeholder="Resumo, e-mail, entidade" />
+          <Input
+            value={q}
+            onChange={(e) => {
+              setQ(e.target.value);
+              setPage(0);
+            }}
+            placeholder="Resumo, e-mail, entidade"
+          />
         </div>
         <div className="space-y-1.5">
           <Label>Órgão</Label>
-          <Select value={organizationId} onValueChange={(v) => { setOrganizationId(v); setPage(0); }}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+          <Select
+            value={organizationId}
+            onValueChange={(v) => {
+              setOrganizationId(v);
+              setPage(0);
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Todos</SelectItem>
               {orgs.map((o) => (
-                <SelectItem key={o.id} value={o.id}>{o.short_name || o.legal_name}</SelectItem>
+                <SelectItem key={o.id} value={o.id}>
+                  {o.short_name || o.legal_name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-1.5">
           <Label>Tipo</Label>
-          <Select value={eventType} onValueChange={(v) => { setEventType(v); setPage(0); }}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+          <Select
+            value={eventType}
+            onValueChange={(v) => {
+              setEventType(v);
+              setPage(0);
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Todos</SelectItem>
               {LOG_EVENT_TYPES.map((t) => (
-                <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                <SelectItem key={t.value} value={t.value}>
+                  {t.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-1.5">
           <Label>De</Label>
-          <Input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(0); }} />
+          <Input
+            type="date"
+            value={from}
+            onChange={(e) => {
+              setFrom(e.target.value);
+              setPage(0);
+            }}
+          />
         </div>
         <div className="space-y-1.5">
           <Label>Até</Label>
-          <Input type="date" value={to} onChange={(e) => { setTo(e.target.value); setPage(0); }} />
+          <Input
+            type="date"
+            value={to}
+            onChange={(e) => {
+              setTo(e.target.value);
+              setPage(0);
+            }}
+          />
         </div>
       </div>
 
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">{total} registro(s)</p>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => exportCsv("logs-globais", LOG_COLUMNS, exportRows)}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => exportCsv("logs-globais", LOG_COLUMNS, exportRows)}
+          >
             <Download className="size-4" /> CSV
           </Button>
-          <Button variant="outline" size="sm" onClick={() => exportXlsx("logs-globais", LOG_COLUMNS, exportRows, "Logs globais")}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => exportXlsx("logs-globais", LOG_COLUMNS, exportRows, "Logs globais")}
+          >
             <Download className="size-4" /> Excel
           </Button>
         </div>
@@ -625,7 +728,9 @@ function LogsTab() {
           <TableBody>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">Carregando...</TableCell>
+                <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
+                  Carregando...
+                </TableCell>
               </TableRow>
             )}
             {!isLoading && rows.length === 0 && (
@@ -643,10 +748,16 @@ function LogsTab() {
                 <TableCell className="text-sm">{orgName(r.organization_id)}</TableCell>
                 <TableCell className="text-sm">
                   {r.actor_email ?? r.actor_name ?? "—"}
-                  {r.as_super_admin && <Badge variant="destructive" className="ml-2">Super Admin</Badge>}
+                  {r.as_super_admin && (
+                    <Badge variant="destructive" className="ml-2">
+                      Super Admin
+                    </Badge>
+                  )}
                 </TableCell>
                 <TableCell className="text-sm">{r.event_type}</TableCell>
-                <TableCell className="text-sm">{[r.entity, r.action].filter(Boolean).join(" · ") || "—"}</TableCell>
+                <TableCell className="text-sm">
+                  {[r.entity, r.action].filter(Boolean).join(" · ") || "—"}
+                </TableCell>
                 <TableCell className="text-sm">{r.summary ?? "—"}</TableCell>
               </TableRow>
             ))}
@@ -655,7 +766,12 @@ function LogsTab() {
       </div>
 
       <div className="mt-3 flex items-center justify-end gap-2">
-        <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={page === 0}
+          onClick={() => setPage((p) => p - 1)}
+        >
           Anterior
         </Button>
         <span className="text-sm text-muted-foreground">
@@ -709,15 +825,27 @@ function SettingsTab() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="max-w-2xl space-y-4 rounded-lg border bg-card p-5 shadow-card">
+    <form
+      onSubmit={onSubmit}
+      className="max-w-2xl space-y-4 rounded-lg border bg-card p-5 shadow-card"
+    >
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor="platform_name">Nome da plataforma</Label>
-          <Input id="platform_name" name="platform_name" defaultValue={settings?.platform_name ?? "FrotaGov"} />
+          <Input
+            id="platform_name"
+            name="platform_name"
+            defaultValue={settings?.platform_name ?? "FrotaGov"}
+          />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="support_email">E-mail de suporte</Label>
-          <Input id="support_email" name="support_email" type="email" defaultValue={settings?.support_email ?? ""} />
+          <Input
+            id="support_email"
+            name="support_email"
+            type="email"
+            defaultValue={settings?.support_email ?? ""}
+          />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="log_retention_days">Retenção de logs (dias)</Label>
@@ -739,7 +867,9 @@ function SettingsTab() {
           value="Os logs globais são mantidos pelo período de retenção configurado. A limpeza é executada por rotina interna do banco, sem exclusão física de dados operacionais."
         />
       </div>
-      <Button type="submit" disabled={saving}>Salvar configurações</Button>
+      <Button type="submit" disabled={saving}>
+        Salvar configurações
+      </Button>
     </form>
   );
 }

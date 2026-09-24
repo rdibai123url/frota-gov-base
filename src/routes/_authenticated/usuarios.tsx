@@ -25,7 +25,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   ROLE_LABELS,
   supabase,
@@ -50,7 +57,10 @@ export const Route = createFileRoute("/_authenticated/usuarios")({
           "Gestão dos usuários do órgão e dos perfis de acesso: administrador, gestor de frota, responsável de unidade, operador e fiscal.",
       },
       { property: "og:title", content: "Usuários e permissões — FrotaGov" },
-      { property: "og:description", content: "Controle os acessos e perfis dos usuários do órgão." },
+      {
+        property: "og:description",
+        content: "Controle os acessos e perfis dos usuários do órgão.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -92,7 +102,9 @@ function Usuarios() {
   const [newRole, setNewRole] = useState<string>("operator");
   const [newUnit, setNewUnit] = useState<string>(NONE);
   const [newCpf, setNewCpf] = useState("");
-  const [credential, setCredential] = useState<{ email: string; tempPassword: string } | null>(null);
+  const [credential, setCredential] = useState<{ email: string; tempPassword: string } | null>(
+    null,
+  );
   const perms = usePerms();
 
   const myRoles = me?.roles ?? [];
@@ -283,7 +295,9 @@ function Usuarios() {
                 </TableCell>
                 <TableCell className="text-sm">{u.email || "—"}</TableCell>
                 <TableCell className="space-x-1">
-                  {u.roles.length === 0 && <span className="text-muted-foreground">Sem perfil</span>}
+                  {u.roles.length === 0 && (
+                    <span className="text-muted-foreground">Sem perfil</span>
+                  )}
                   {u.roles.map((r) => (
                     <Badge key={r} variant={r === "super_admin" ? "destructive" : "secondary"}>
                       {ROLE_LABELS[r]}
@@ -371,8 +385,8 @@ function Usuarios() {
                   </Select>
                   {editing.roles.includes("super_admin") && (
                     <p className="text-xs text-muted-foreground">
-                      Este usuário possui perfil de Super Admin da plataforma, que não é alterado por
-                      aqui.
+                      Este usuário possui perfil de Super Admin da plataforma, que não é alterado
+                      por aqui.
                     </p>
                   )}
                 </div>
@@ -450,10 +464,14 @@ function Usuarios() {
               <div className="space-y-1.5">
                 <Label>Perfil de acesso *</Label>
                 <Select value={newRole} onValueChange={setNewRole}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {ASSIGNABLE_ROLES.map((r) => (
-                      <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>
+                      <SelectItem key={r} value={r}>
+                        {ROLE_LABELS[r]}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -461,11 +479,15 @@ function Usuarios() {
               <div className="space-y-1.5">
                 <Label>Secretaria / unidade</Label>
                 <Select value={newUnit} onValueChange={setNewUnit}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={NONE}>Sem vínculo</SelectItem>
                     {units.map((u) => (
-                      <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -476,8 +498,12 @@ function Usuarios() {
               primeiro acesso.
             </p>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setCreating(false)}>Cancelar</Button>
-              <Button type="submit" disabled={saving}>Criar usuário</Button>
+              <Button type="button" variant="outline" onClick={() => setCreating(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={saving}>
+                Criar usuário
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>

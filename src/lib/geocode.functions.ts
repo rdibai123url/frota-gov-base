@@ -63,10 +63,26 @@ async function fetchWithTimeout(url: string) {
 
 export const geocodeAddress = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { address?: string; district?: string; city?: string; state?: string; zip?: string; force?: boolean }) => data)
+  .inputValidator(
+    (data: {
+      address?: string;
+      district?: string;
+      city?: string;
+      state?: string;
+      zip?: string;
+      force?: boolean;
+    }) => data,
+  )
   .handler(async ({ data, context }): Promise<GeocodeResult> => {
     const { provider, baseUrl } = providerConfig();
-    const query = normalizeQuery([data.address, data.district, data.city, data.state, data.zip, "Brasil"]);
+    const query = normalizeQuery([
+      data.address,
+      data.district,
+      data.city,
+      data.state,
+      data.zip,
+      "Brasil",
+    ]);
     const base: GeocodeResult = {
       ok: false,
       status: "sem_endereco",
@@ -102,7 +118,12 @@ export const geocodeAddress = createServerFn({ method: "POST" })
               cached: true,
               message: "Coordenadas obtidas do cache do sistema.",
             }
-          : { ...base, status: "nao_encontrado", cached: true, message: "Endereço não localizado pelo provedor (consulta em cache)." };
+          : {
+              ...base,
+              status: "nao_encontrado",
+              cached: true,
+              message: "Endereço não localizado pelo provedor (consulta em cache).",
+            };
       }
     }
 
@@ -112,7 +133,11 @@ export const geocodeAddress = createServerFn({ method: "POST" })
       if (!res.ok) {
         const body = await res.text();
         console.error(`Geocodificação falhou [${res.status}]: ${body.slice(0, 300)}`);
-        return { ...base, status: "falhou", message: `Serviço de geocodificação indisponível (${res.status}).` };
+        return {
+          ...base,
+          status: "falhou",
+          message: `Serviço de geocodificação indisponível (${res.status}).`,
+        };
       }
       const json = (await res.json()) as Array<{
         lat: string;
@@ -141,7 +166,11 @@ export const geocodeAddress = createServerFn({ method: "POST" })
       );
 
       if (!found) {
-        return { ...base, status: "nao_encontrado", message: "Endereço não localizado pelo provedor de mapas." };
+        return {
+          ...base,
+          status: "nao_encontrado",
+          message: "Endereço não localizado pelo provedor de mapas.",
+        };
       }
       return {
         ok: true,
@@ -156,6 +185,10 @@ export const geocodeAddress = createServerFn({ method: "POST" })
       };
     } catch (err) {
       console.error("Geocodificação falhou:", err);
-      return { ...base, status: "falhou", message: "Não foi possível consultar o serviço de mapas agora." };
+      return {
+        ...base,
+        status: "falhou",
+        message: "Não foi possível consultar o serviço de mapas agora.",
+      };
     }
   });

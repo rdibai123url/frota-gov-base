@@ -29,7 +29,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import { supabase, useInvalidate, usePerms } from "@/lib/frotagov";
 import { formatBRL, formatNumberBR, parseBRNumber } from "@/lib/format";
@@ -121,7 +128,9 @@ export function ValorDeMercado({
       <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div>
           <CardTitle className="text-base">
-            {assetClass === "equipamento" ? "Valor de mercado / avaliação" : "Valor de mercado (FIPE)"}
+            {assetClass === "equipamento"
+              ? "Valor de mercado / avaliação"
+              : "Valor de mercado (FIPE)"}
           </CardTitle>
           <p className="text-sm text-muted-foreground">
             {fipeReady
@@ -143,7 +152,9 @@ export function ValorDeMercado({
           <Info
             label="Variação"
             value={
-              variation === null ? "—" : `${variation >= 0 ? "+" : ""}${formatNumberBR(variation, 1)}%`
+              variation === null
+                ? "—"
+                : `${variation >= 0 ? "+" : ""}${formatNumberBR(variation, 1)}%`
             }
             icon={variation === null ? undefined : variation >= 0 ? "up" : "down"}
           />
@@ -159,8 +170,9 @@ export function ValorDeMercado({
 
         {(maintenanceCost12m ?? 0) > 0 && current && (
           <p className="rounded-md border bg-muted/40 p-3 text-sm">
-            Custo de manutenção dos últimos 12 meses: <strong>{formatBRL(maintenanceCost12m ?? 0)}</strong> — 24
-            meses: <strong>{formatBRL(maintenanceCost24m ?? 0)}</strong>. Valor de mercado atual:{" "}
+            Custo de manutenção dos últimos 12 meses:{" "}
+            <strong>{formatBRL(maintenanceCost12m ?? 0)}</strong> — 24 meses:{" "}
+            <strong>{formatBRL(maintenanceCost24m ?? 0)}</strong>. Valor de mercado atual:{" "}
             <strong>{formatBRL(current.value)}</strong>.
             {ratio24 !== null && ratio24 >= 50
               ? " O gasto acumulado já representa metade ou mais do valor do bem — avaliar substituição/alienação."
@@ -198,7 +210,9 @@ export function ValorDeMercado({
                 <TableRow key={v.id}>
                   <TableCell>{brDate(v.reference_date)}</TableCell>
                   <TableCell className="font-medium">{formatBRL(v.value)}</TableCell>
-                  <TableCell>{SOURCES.find((s) => s.value === v.source)?.label ?? v.source}</TableCell>
+                  <TableCell>
+                    {SOURCES.find((s) => s.value === v.source)?.label ?? v.source}
+                  </TableCell>
                   <TableCell>
                     <Badge variant="outline">{v.origin}</Badge>
                   </TableCell>
@@ -254,7 +268,11 @@ export function ValorDeMercado({
               </div>
               <div className="sm:col-span-2">
                 <Label htmlFor="source_reference">Referência da fonte</Label>
-                <Input id="source_reference" name="source_reference" placeholder="Tabela, laudo ou documento" />
+                <Input
+                  id="source_reference"
+                  name="source_reference"
+                  placeholder="Tabela, laudo ou documento"
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label htmlFor="notes">Observações</Label>
@@ -276,7 +294,15 @@ export function ValorDeMercado({
   );
 }
 
-function Info({ label, value, icon }: { label: string; value: string; icon?: "up" | "down" | undefined }) {
+function Info({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: string;
+  icon?: "up" | "down" | undefined;
+}) {
   return (
     <div className="rounded-lg border p-3">
       <p className="text-xs text-muted-foreground">{label}</p>

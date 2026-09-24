@@ -65,7 +65,9 @@ export function parseFipeValue(v: string | number | null | undefined): number {
 
 /** "setembro de 2026" -> "2026-09-01" */
 export function parseFipeReference(label: string | null | undefined): string {
-  const t = String(label ?? "").toLowerCase().trim();
+  const t = String(label ?? "")
+    .toLowerCase()
+    .trim();
   const m = MONTHS.findIndex((x) => t.startsWith(x));
   const year = t.match(/(\d{4})/)?.[1];
   if (m < 0 || !year) {
@@ -75,7 +77,11 @@ export function parseFipeReference(label: string | null | undefined): string {
   return `${year}-${String(m + 1).padStart(2, "0")}-01`;
 }
 
-async function fetchJson(url: string, headers: Record<string, string>, attempt = 1): Promise<unknown> {
+async function fetchJson(
+  url: string,
+  headers: Record<string, string>,
+  attempt = 1,
+): Promise<unknown> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   try {
@@ -89,7 +95,8 @@ async function fetchJson(url: string, headers: Record<string, string>, attempt =
     const body = (await res.json().catch(() => null)) as unknown;
     if (!res.ok) {
       const msg =
-        (body as { error?: string } | null)?.error ?? `Consulta recusada pelo provedor (HTTP ${res.status}).`;
+        (body as { error?: string } | null)?.error ??
+        `Consulta recusada pelo provedor (HTTP ${res.status}).`;
       throw new Error(msg);
     }
     return body;
@@ -107,21 +114,19 @@ async function fipeConfig(supabase: Ctx["supabase"]) {
     .select("*")
     .eq("kind", "fipe")
     .maybeSingle();
-  const connector = data as
-    | {
-        id: string;
-        organization_id: string;
-        base_url: string | null;
-        secret_name: string | null;
-        status: string;
-        config: Record<string, unknown> | null;
-        rate_limit_per_minute: number | null;
-        sync_interval_days: number | null;
-        last_sync_at: string | null;
-        failure_count: number | null;
-        last_error_at: string | null;
-      }
-    | null;
+  const connector = data as {
+    id: string;
+    organization_id: string;
+    base_url: string | null;
+    secret_name: string | null;
+    status: string;
+    config: Record<string, unknown> | null;
+    rate_limit_per_minute: number | null;
+    sync_interval_days: number | null;
+    last_sync_at: string | null;
+    failure_count: number | null;
+    last_error_at: string | null;
+  } | null;
   const secret = connector?.secret_name ? process.env[connector.secret_name] : undefined;
   const headers: Record<string, string> = { accept: "application/json" };
   if (secret) headers["authorization"] = `Bearer ${secret}`;
@@ -184,7 +189,10 @@ export const fipeModels = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { baseUrl, headers } = await fipeConfig(context.supabase as never);
     try {
-      const res = (await fetchJson(`${baseUrl}/${data.kind}/marcas/${data.brand}/modelos`, headers)) as {
+      const res = (await fetchJson(
+        `${baseUrl}/${data.kind}/marcas/${data.brand}/modelos`,
+        headers,
+      )) as {
         modelos?: { codigo: number | string; nome: string }[];
       };
       const items = (res?.modelos ?? []).map((m) => ({ codigo: String(m.codigo), nome: m.nome }));
@@ -204,7 +212,11 @@ export const fipeYears = createServerFn({ method: "POST" })
         `${baseUrl}/${data.kind}/marcas/${data.brand}/modelos/${data.model}/anos`,
         headers,
       )) as FipeItem[];
-      return { ok: true as const, items: (list ?? []).map((i) => ({ codigo: String(i.codigo), nome: i.nome })), message: "" };
+      return {
+        ok: true as const,
+        items: (list ?? []).map((i) => ({ codigo: String(i.codigo), nome: i.nome })),
+        message: "",
+      };
     } catch (e) {
       return { ok: false as const, items: [] as FipeItem[], message: msgOf(e) };
     }
@@ -238,7 +250,8 @@ async function quote(
       Combustivel?: string;
     };
     const value = parseFipeValue(r?.Valor);
-    if (!value) return { ok: false, message: "O provedor não retornou valor para esta combinação." };
+    if (!value)
+      return { ok: false, message: "O provedor não retornou valor para esta combinação." };
     return {
       ok: true,
       message: "Consulta à Tabela FIPE via provedor configurado concluída.",
@@ -284,7 +297,8 @@ async function saveHistory(
   const { error } = await supabase.from("asset_market_values").insert(payload);
   // Índice único por veículo/mês/origem: repetir a consulta no mesmo mês
   // apenas confirma o valor, sem duplicar nem apagar histórico.
-  if (error && !String(error.message ?? "").includes("duplicate key")) throw new Error(error.message);
+  if (error && !String(error.message ?? "").includes("duplicate key"))
+    throw new Error(error.message);
   return { duplicated: Boolean(error) };
 }
 
@@ -393,7 +407,9 @@ export const fipeRefreshAll = createServerFn({ method: "POST" })
     const limit = Math.min(Math.max(data.limit ?? 60, 1), 200);
     const { data: vehicles } = await supabase
       .from("vehicles")
-      .select("id, organization_id, plate, asset_code, fipe_kind, fipe_brand_code, fipe_model_code, fipe_year_code")
+      .select(
+        "id, organization_id, plate, asset_code, fipe_kind, fipe_brand_code, fipe_model_code, fipe_year_code",
+      )
       .not("fipe_year_code", "is", null)
       .limit(limit);
 
@@ -456,10 +472,11 @@ export const fipeRefreshAll = createServerFn({ method: "POST" })
       .from("integration_connectors")
       .update({
         last_attempt_at: new Date().toISOString(),
-        last_sync_at: ok > 0 ? new Date().toISOString() : connector.last_sync_at ?? null,
+        last_sync_at: ok > 0 ? new Date().toISOString() : (connector.last_sync_at ?? null),
         last_result: `Atualização FIPE: ${ok} veículo(s) atualizado(s), ${err} sem retorno.`,
         failure_count: err > 0 && ok === 0 ? (connector.failure_count ?? 0) + 1 : 0,
-        last_error_at: err > 0 && ok === 0 ? new Date().toISOString() : connector.last_error_at ?? null,
+        last_error_at:
+          err > 0 && ok === 0 ? new Date().toISOString() : (connector.last_error_at ?? null),
         next_sync_at: new Date(Date.now() + interval * 86400000).toISOString(),
       })
       .eq("id", connector.id);

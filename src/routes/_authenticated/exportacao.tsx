@@ -24,7 +24,8 @@ export const Route = createFileRoute("/_authenticated/exportacao")({
       { property: "og:title", content: "Exportar dados — FrotaGov" },
       {
         property: "og:description",
-        content: "Baixe todos os dados do órgão em um único pacote, sem depender de suporte técnico.",
+        content:
+          "Baixe todos os dados do órgão em um único pacote, sem depender de suporte técnico.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -66,7 +67,9 @@ function Exportacao() {
     try {
       const data = await exportFn({});
       const bytes = Uint8Array.from(atob(data.base64), (c) => c.charCodeAt(0));
-      const url = URL.createObjectURL(new Blob([bytes as unknown as BlobPart], { type: "application/zip" }));
+      const url = URL.createObjectURL(
+        new Blob([bytes as unknown as BlobPart], { type: "application/zip" }),
+      );
       const link = document.createElement("a");
       link.href = url;
       link.download = data.fileName;
@@ -99,8 +102,8 @@ function Exportacao() {
           <ShieldCheck className="h-4 w-4" />
           <AlertTitle>Acesso restrito</AlertTitle>
           <AlertDescription>
-            A exportação completa é permitida apenas ao Super Admin, ao Administrador do órgão e à Auditoria /
-            Controladoria. Solicite o arquivo a um desses perfis.
+            A exportação completa é permitida apenas ao Super Admin, ao Administrador do órgão e à
+            Auditoria / Controladoria. Solicite o arquivo a um desses perfis.
           </AlertDescription>
         </Alert>
       ) : (
@@ -112,10 +115,10 @@ function Exportacao() {
                 Exportação completa
               </CardTitle>
               <CardDescription>
-                Um único arquivo compactado (.zip) com todos os módulos do FrotaGov: planilhas em CSV (Excel, LibreOffice
-                e Google Planilhas) e arquivos JSON das estruturas mais complexas. Inclui registros ativos, inativos,
-                históricos e cancelados, com os identificadores necessários para reconstruir os vínculos em outro
-                sistema.
+                Um único arquivo compactado (.zip) com todos os módulos do FrotaGov: planilhas em
+                CSV (Excel, LibreOffice e Google Planilhas) e arquivos JSON das estruturas mais
+                complexas. Inclui registros ativos, inativos, históricos e cancelados, com os
+                identificadores necessários para reconstruir os vínculos em outro sistema.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
@@ -134,10 +137,15 @@ function Exportacao() {
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-muted-foreground">
-                  Em órgãos com muitos registros a geração pode levar alguns minutos. Mantenha esta página aberta.
+                  Em órgãos com muitos registros a geração pode levar alguns minutos. Mantenha esta
+                  página aberta.
                 </p>
                 <Button onClick={handleExport} disabled={running} size="lg" className="shrink-0">
-                  {running ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                  {running ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="mr-2 h-4 w-4" />
+                  )}
                   {running ? "Preparando arquivo…" : "Exportar todos os dados"}
                 </Button>
               </div>
@@ -147,9 +155,11 @@ function Exportacao() {
                   <ShieldCheck className="h-4 w-4" />
                   <AlertTitle>Arquivo gerado</AlertTitle>
                   <AlertDescription>
-                    <span className="block break-all font-medium text-foreground">{result.fileName}</span>
-                    {result.fileCount} arquivos • {result.recordCount.toLocaleString("pt-BR")} registros •{" "}
-                    {formatBytes(result.bytes)}
+                    <span className="block break-all font-medium text-foreground">
+                      {result.fileName}
+                    </span>
+                    {result.fileCount} arquivos • {result.recordCount.toLocaleString("pt-BR")}{" "}
+                    registros • {formatBytes(result.bytes)}
                     <span className="mt-1 block break-all text-xs">SHA-256: {result.checksum}</span>
                   </AlertDescription>
                 </Alert>
@@ -163,24 +173,26 @@ function Exportacao() {
             </CardHeader>
             <CardContent className="space-y-3 text-sm text-muted-foreground">
               <p>
-                <strong className="text-foreground">Organização:</strong> pastas por área, um arquivo por conjunto de
-                dados, com nomes em português.
+                <strong className="text-foreground">Organização:</strong> pastas por área, um
+                arquivo por conjunto de dados, com nomes em português.
               </p>
               <p>
-                <strong className="text-foreground">Formatos:</strong> CSV em UTF-8 com BOM, separador ponto e vírgula,
-                além de JSON para as estruturas relacionais.
+                <strong className="text-foreground">Formatos:</strong> CSV em UTF-8 com BOM,
+                separador ponto e vírgula, além de JSON para as estruturas relacionais.
               </p>
               <p>
-                <strong className="text-foreground">Datas e documentos:</strong> valores originais em ISO 8601 e colunas
-                auxiliares no formato brasileiro e só com dígitos.
+                <strong className="text-foreground">Datas e documentos:</strong> valores originais
+                em ISO 8601 e colunas auxiliares no formato brasileiro e só com dígitos.
               </p>
               <p>
-                <strong className="text-foreground">Manifesto:</strong> arquivo com órgão, data/hora, responsável,
-                versão, lista de arquivos e contagem de registros, mais um LEIA-ME explicativo.
+                <strong className="text-foreground">Manifesto:</strong> arquivo com órgão,
+                data/hora, responsável, versão, lista de arquivos e contagem de registros, mais um
+                LEIA-ME explicativo.
               </p>
               <p>
-                <strong className="text-foreground">Segurança:</strong> nenhuma senha, hash, token, código de segurança
-                de cartão ou chave de API é incluída. Toda exportação fica registrada na auditoria.
+                <strong className="text-foreground">Segurança:</strong> nenhuma senha, hash, token,
+                código de segurança de cartão ou chave de API é incluída. Toda exportação fica
+                registrada na auditoria.
               </p>
             </CardContent>
           </Card>

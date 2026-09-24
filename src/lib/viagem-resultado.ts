@@ -62,7 +62,9 @@ export function computeTripResult(input: {
   const plannedKm = input.plannedKm != null ? round(Number(input.plannedKm), 1) : null;
   const diffKm = realKm != null && plannedKm != null ? round(realKm - plannedKm, 1) : null;
   const diffPct =
-    diffKm != null && plannedKm != null && plannedKm > 0 ? round((diffKm / plannedKm) * 100, 1) : null;
+    diffKm != null && plannedKm != null && plannedKm > 0
+      ? round((diffKm / plannedKm) * 100, 1)
+      : null;
 
   const avgPrice = liters > 0 && value > 0 ? round(value / liters, 3) : null;
 

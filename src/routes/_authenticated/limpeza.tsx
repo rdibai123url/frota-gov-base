@@ -11,12 +11,31 @@ import { ListPagination, usePaged } from "@/components/list-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -25,7 +44,6 @@ import {
   dateTimeBR,
   dbMessage,
   label,
-
   openMaintenanceFile,
   parseBRNumber,
   supabase,
@@ -57,7 +75,10 @@ export const Route = createFileRoute("/_authenticated/limpeza")({
           "Registro de lavagem e higienização de veículos oficiais, com tipos de serviço, fornecedor, contrato, empenho, cota, valores e comprovantes.",
       },
       { property: "og:title", content: "Limpeza da frota — FrotaGov" },
-      { property: "og:description", content: "Controle dos serviços de limpeza e higienização dos veículos do órgão." },
+      {
+        property: "og:description",
+        content: "Controle dos serviços de limpeza e higienização dos veículos do órgão.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -75,11 +96,12 @@ const numOrNull = (v: FormDataEntryValue | null) => {
   return Number.isFinite(n) ? n : null;
 };
 
-const STATUS_VARIANT: Record<CleaningStatus, "default" | "secondary" | "destructive" | "outline"> = {
-  agendada: "outline",
-  realizada: "secondary",
-  cancelada: "destructive",
-};
+const STATUS_VARIANT: Record<CleaningStatus, "default" | "secondary" | "destructive" | "outline"> =
+  {
+    agendada: "outline",
+    realizada: "secondary",
+    cancelada: "destructive",
+  };
 
 const cleaningSchema = z.object({
   performed_at: z.string().min(1, "Informe a data e hora do serviço"),
@@ -137,7 +159,7 @@ function Limpeza() {
         const q = search.trim().toLowerCase();
         return (
           !q ||
-          `${c.code ?? ""} ${(c.vehicle?.plate ?? c.vehicle?.asset_code ?? "")} ${(c.service_types ?? []).join(" ")} ${c.supplier?.legal_name ?? ""}`
+          `${c.code ?? ""} ${c.vehicle?.plate ?? c.vehicle?.asset_code ?? ""} ${(c.service_types ?? []).join(" ")} ${c.supplier?.legal_name ?? ""}`
             .toLowerCase()
             .includes(q)
         );
@@ -153,10 +175,17 @@ function Limpeza() {
       subtitle: "Apresentar no estabelecimento prestador",
       code: c.code,
       fields: [
-        { label: "Veículo / bem", value: `${c.vehicle?.plate ?? c.vehicle?.asset_code ?? "—"} ${c.vehicle?.model ?? ""}`.trim() },
+        {
+          label: "Veículo / bem",
+          value:
+            `${c.vehicle?.plate ?? c.vehicle?.asset_code ?? "—"} ${c.vehicle?.model ?? ""}`.trim(),
+        },
         { label: "Unidade solicitante", value: units.find((u) => u.id === c.unit_id)?.name ?? "—" },
         { label: "Tipo de limpeza", value: (c.service_types ?? []).join(", ") || "—" },
-        { label: "Prestador", value: c.supplier?.trade_name ?? c.supplier?.legal_name ?? "A definir" },
+        {
+          label: "Prestador",
+          value: c.supplier?.trade_name ?? c.supplier?.legal_name ?? "A definir",
+        },
         { label: "Data prevista / realizada", value: dateTimeBR(c.performed_at) },
         { label: "Situação", value: label(CLEANING_STATUS, c.status) },
       ],
@@ -368,7 +397,11 @@ function Limpeza() {
       <div className="grid gap-4 px-4 pb-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card title="Serviços realizados" value={String(totals.total)} hint="Todo o período" />
         <Card title="Gasto acumulado" value={brl(totals.valor)} hint="Serviços realizados" />
-        <Card title="No mês corrente" value={`${totals.mes} · ${brl(totals.valorMes)}`} hint="Quantidade e valor" />
+        <Card
+          title="No mês corrente"
+          value={`${totals.mes} · ${brl(totals.valorMes)}`}
+          hint="Quantidade e valor"
+        />
         <Card title="Agendados" value={String(totals.agendadas)} hint="Ainda não realizados" />
       </div>
 
@@ -400,7 +433,7 @@ function Limpeza() {
             <SelectItem value={ALL}>Todos os veículos</SelectItem>
             {vehicles.map((v) => (
               <SelectItem key={v.id} value={v.id}>
-                {(v.plate ?? v.asset_code)} — {v.model}
+                {v.plate ?? v.asset_code} — {v.model}
               </SelectItem>
             ))}
           </SelectContent>
@@ -453,7 +486,7 @@ function Limpeza() {
                 <TableRow key={c.id}>
                   <TableCell className="font-medium">{c.code ?? "—"}</TableCell>
                   <TableCell>
-                    {(c.vehicle?.plate ?? c.vehicle?.asset_code ?? "—")}
+                    {c.vehicle?.plate ?? c.vehicle?.asset_code ?? "—"}
                     <div className="text-xs text-muted-foreground">{c.vehicle?.model ?? ""}</div>
                   </TableCell>
                   <TableCell>{dateTimeBR(c.performed_at)}</TableCell>
@@ -469,7 +502,9 @@ function Limpeza() {
                   <TableCell>{c.supplier?.trade_name ?? c.supplier?.legal_name ?? "—"}</TableCell>
                   <TableCell className="text-right">{brl(Number(c.total_value ?? 0))}</TableCell>
                   <TableCell>
-                    <Badge variant={STATUS_VARIANT[c.status]}>{label(CLEANING_STATUS, c.status)}</Badge>
+                    <Badge variant={STATUS_VARIANT[c.status]}>
+                      {label(CLEANING_STATUS, c.status)}
+                    </Badge>
                     {c.status === "cancelada" && c.cancel_reason ? (
                       <div className="text-xs text-muted-foreground">{c.cancel_reason}</div>
                     ) : null}
@@ -481,14 +516,23 @@ function Limpeza() {
                           variant="ghost"
                           size="icon"
                           title="Abrir comprovante"
-                          onClick={() => openMaintenanceFile(c.attachment_path!).catch((e) => toast.error(dbMessage(e)))}
+                          onClick={() =>
+                            openMaintenanceFile(c.attachment_path!).catch((e) =>
+                              toast.error(dbMessage(e)),
+                            )
+                          }
                         >
                           <Paperclip className="size-4" />
                         </Button>
                       ) : null}
                       {canManageFleet && c.status !== "cancelada" ? (
                         <>
-                          <Button variant="ghost" size="icon" title="Editar" onClick={() => openEdit(c)}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Editar"
+                            onClick={() => openEdit(c)}
+                          >
                             <Pencil className="size-4" />
                           </Button>
                           <Button
@@ -518,7 +562,9 @@ function Limpeza() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-3xl">
           <DialogHeader>
-            <DialogTitle>{editing ? `Editar limpeza ${editing.code ?? ""}` : "Novo serviço de limpeza"}</DialogTitle>
+            <DialogTitle>
+              {editing ? `Editar limpeza ${editing.code ?? ""}` : "Novo serviço de limpeza"}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={submit} className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
@@ -531,7 +577,7 @@ function Limpeza() {
                   <SelectItem value={NONE}>Selecione</SelectItem>
                   {vehicles.map((v) => (
                     <SelectItem key={v.id} value={v.id}>
-                      {(v.plate ?? v.asset_code)} — {v.model}
+                      {v.plate ?? v.asset_code} — {v.model}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -578,14 +624,18 @@ function Limpeza() {
               <Label>Tipos de serviço executados</Label>
               <div className="grid gap-2 rounded-md border border-border p-3 sm:grid-cols-2">
                 {activeTypes.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Cadastre um tipo de limpeza para começar.</p>
+                  <p className="text-sm text-muted-foreground">
+                    Cadastre um tipo de limpeza para começar.
+                  </p>
                 ) : (
                   activeTypes.map((t) => (
                     <label key={t.id} className="flex items-center gap-2 text-sm">
                       <Checkbox
                         checked={selected.includes(t.id)}
                         onCheckedChange={(v) =>
-                          setSelected((prev) => (v ? [...prev, t.id] : prev.filter((id) => id !== t.id)))
+                          setSelected((prev) =>
+                            v ? [...prev, t.id] : prev.filter((id) => id !== t.id),
+                          )
                         }
                       />
                       <span>{t.name}</span>
@@ -677,11 +727,19 @@ function Limpeza() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="total_value">Valor total</Label>
-              <MoneyInput id="total_value" name="total_value" defaultValue={editing?.total_value ?? 0} />
+              <MoneyInput
+                id="total_value"
+                name="total_value"
+                defaultValue={editing?.total_value ?? 0}
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="invoice_number">Nota fiscal</Label>
-              <Input id="invoice_number" name="invoice_number" defaultValue={editing?.invoice_number ?? ""} />
+              <Input
+                id="invoice_number"
+                name="invoice_number"
+                defaultValue={editing?.invoice_number ?? ""}
+              />
             </div>
             <div className="grid gap-2">
               <Label>Situação</Label>
@@ -729,7 +787,8 @@ function Limpeza() {
               <Label htmlFor="reason">Motivo do cancelamento</Label>
               <Textarea id="reason" name="reason" rows={3} required />
               <p className="text-xs text-muted-foreground">
-                O registro é mantido no histórico para auditoria e o saldo consumido é estornado automaticamente.
+                O registro é mantido no histórico para auditoria e o saldo consumido é estornado
+                automaticamente.
               </p>
             </div>
             <DialogFooter>
@@ -768,7 +827,9 @@ function Limpeza() {
                   {types.map((t) => (
                     <TableRow key={t.id}>
                       <TableCell className="font-medium">{t.name}</TableCell>
-                      <TableCell className="text-muted-foreground">{t.description ?? "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {t.description ?? "—"}
+                      </TableCell>
                       <TableCell className="text-right">
                         <Switch
                           checked={t.active}
@@ -785,7 +846,11 @@ function Limpeza() {
               <form onSubmit={saveType} className="grid gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="type-name">Nome do tipo</Label>
-                  <Input id="type-name" value={typeName} onChange={(e) => setTypeName(e.target.value)} />
+                  <Input
+                    id="type-name"
+                    value={typeName}
+                    onChange={(e) => setTypeName(e.target.value)}
+                  />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="type-description">Descrição</Label>

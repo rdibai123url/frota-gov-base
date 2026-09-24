@@ -5,13 +5,40 @@ import { toast } from "sonner";
 import { ListPagination, usePaged } from "@/components/list-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useCompatibilityOverrides, usePartCompatibilities } from "@/lib/almoxarifado";
-import { dateTimeBR, dbMessage, supabase, useInvalidate, usePartsCatalog, usePerms, useVehicles } from "@/lib/frotagov";
+import {
+  dateTimeBR,
+  dbMessage,
+  supabase,
+  useInvalidate,
+  usePartsCatalog,
+  usePerms,
+  useVehicles,
+} from "@/lib/frotagov";
 
 const NONE = "__none__";
 
@@ -104,8 +131,9 @@ export function PartCompatibilityPanel() {
   return (
     <div className="space-y-4">
       <div className="gov-card p-4 text-sm text-muted-foreground">
-        Peças sem nenhuma compatibilidade cadastrada são aceitas em qualquer ativo. A partir do primeiro registro, a
-        aplicação em ativo fora da matriz exige justificativa auditada de perfil autorizado.
+        Peças sem nenhuma compatibilidade cadastrada são aceitas em qualquer ativo. A partir do
+        primeiro registro, a aplicação em ativo fora da matriz exige justificativa auditada de
+        perfil autorizado.
       </div>
       {canManageFleet && (
         <Button onClick={() => setOpen(true)}>
@@ -136,17 +164,25 @@ export function PartCompatibilityPanel() {
             {paged.rows.map((r) => (
               <TableRow key={r.id}>
                 <TableCell>{partLabel.get(r.part_id) ?? "—"}</TableCell>
-                <TableCell>{r.scope === "ativo" ? "Ativo específico" : "Família / modelo"}</TableCell>
+                <TableCell>
+                  {r.scope === "ativo" ? "Ativo específico" : "Família / modelo"}
+                </TableCell>
                 <TableCell>
                   {r.scope === "ativo"
-                    ? (r.vehicle_id ? (vehicleLabel.get(r.vehicle_id) ?? "—") : "—")
-                    : [r.brand, r.model, r.engine, r.version, r.equipment_type].filter(Boolean).join(" · ") || "—"}
+                    ? r.vehicle_id
+                      ? (vehicleLabel.get(r.vehicle_id) ?? "—")
+                      : "—"
+                    : [r.brand, r.model, r.engine, r.version, r.equipment_type]
+                        .filter(Boolean)
+                        .join(" · ") || "—"}
                 </TableCell>
                 <TableCell>
                   {r.year_from ?? "—"} a {r.year_to ?? "—"}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={r.active ? "default" : "secondary"}>{r.active ? "Ativa" : "Inativa"}</Badge>
+                  <Badge variant={r.active ? "default" : "secondary"}>
+                    {r.active ? "Ativa" : "Inativa"}
+                  </Badge>
                 </TableCell>
                 <TableCell className="text-right">
                   {canManageFleet && r.active && (
@@ -188,7 +224,9 @@ export function PartCompatibilityPanel() {
                 <TableRow key={o.id}>
                   <TableCell>{dateTimeBR(o.created_at)}</TableCell>
                   <TableCell>{partLabel.get(o.part_id) ?? "—"}</TableCell>
-                  <TableCell>{o.vehicle_id ? (vehicleLabel.get(o.vehicle_id) ?? "—") : "—"}</TableCell>
+                  <TableCell>
+                    {o.vehicle_id ? (vehicleLabel.get(o.vehicle_id) ?? "—") : "—"}
+                  </TableCell>
                   <TableCell>{o.context}</TableCell>
                   <TableCell>{o.justification}</TableCell>
                   <TableCell>{o.authorized_name ?? "—"}</TableCell>
@@ -274,7 +312,10 @@ export function PartCompatibilityPanel() {
             </div>
             <div>
               <Label>Ano inicial</Label>
-              <Input value={f.year_from} onChange={(e) => setF({ ...f, year_from: e.target.value })} />
+              <Input
+                value={f.year_from}
+                onChange={(e) => setF({ ...f, year_from: e.target.value })}
+              />
             </div>
             <div>
               <Label>Ano final</Label>
@@ -290,11 +331,17 @@ export function PartCompatibilityPanel() {
             </div>
             <div>
               <Label>Tipo de equipamento</Label>
-              <Input value={f.equipment_type} onChange={(e) => setF({ ...f, equipment_type: e.target.value })} />
+              <Input
+                value={f.equipment_type}
+                onChange={(e) => setF({ ...f, equipment_type: e.target.value })}
+              />
             </div>
             <div>
               <Label>Aplicação</Label>
-              <Input value={f.application} onChange={(e) => setF({ ...f, application: e.target.value })} />
+              <Input
+                value={f.application}
+                onChange={(e) => setF({ ...f, application: e.target.value })}
+              />
             </div>
           </div>
           <DialogFooter>

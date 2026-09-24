@@ -14,6 +14,8 @@
  * não foi possível calcular e o servidor pode digitar a distância manualmente.
  */
 import { createServerFn } from "@tanstack/react-start";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -46,8 +48,7 @@ function config() {
   return {
     provider: process.env["ROUTER_PROVIDER"] || "osrm",
     routerUrl: process.env["ROUTER_BASE_URL"] || "https://router.project-osrm.org/route/v1/driving",
-    geocoderUrl:
-      process.env["GEOCODER_BASE_URL"] || "https://nominatim.openstreetmap.org/search",
+    geocoderUrl: process.env["GEOCODER_BASE_URL"] || "https://nominatim.openstreetmap.org/search",
   };
 }
 
@@ -85,7 +86,7 @@ function normalize(parts: (string | null | undefined)[]) {
 }
 
 /** Converte um endereço em coordenadas, reaproveitando o cache do sistema. */
-async function locate(supabase: any, point: RoutePoint) {
+async function locate(supabase: SupabaseClient<Database>, point: RoutePoint) {
   const query = normalize([point.address, point.district, point.city, point.state, "Brasil"]);
   if (!point.city?.trim()) return null;
 
@@ -140,7 +141,7 @@ export const computeRoute = createServerFn({ method: "POST" })
       destination: null,
     };
 
-    const supabase: any = context.supabase;
+    const supabase = context.supabase as SupabaseClient<Database>;
 
     const origin = await locate(supabase, data.origin);
     const destination = await locate(supabase, data.destination);
@@ -187,9 +188,10 @@ export const computeRoute = createServerFn({ method: "POST" })
     const url =
       `${routerUrl}/${origin.lon},${origin.lat};${destination.lon},${destination.lat}` +
       `?overview=simplified&geometries=geojson&alternatives=false&steps=false`;
-    const json = (await getJson(url)) as
-      | { code?: string; routes?: Array<{ distance: number; duration: number; geometry: RouteGeometry }> }
-      | null;
+    const json = (await getJson(url)) as {
+      code?: string;
+      routes?: Array<{ distance: number; duration: number; geometry: RouteGeometry }>;
+    } | null;
 
     if (!json) {
       return {

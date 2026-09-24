@@ -13,9 +13,28 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   MEASURE_UNITS,
   QUOTA_TYPES,
@@ -50,7 +69,10 @@ export const Route = createFileRoute("/_authenticated/cotas")({
           "Cotas financeiras e quantitativas por contrato, item, empenho, centro de custo ou unidade, com reservas, consumo, saldo e suplementações.",
       },
       { property: "og:title", content: "Cotas e saldos — FrotaGov" },
-      { property: "og:description", content: "Controle de cotas, reservas e saldos disponíveis da frota pública." },
+      {
+        property: "og:description",
+        content: "Controle de cotas, reservas e saldos disponíveis da frota pública.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -183,7 +205,9 @@ function Cotas() {
     if (editing) {
       const used = Number(editing.consumed_amount) + Number(editing.reserved_amount);
       if (granted < used) {
-        toast.error("A cota não pode ficar abaixo do já reservado/consumido. Use a suplementação para ampliar.");
+        toast.error(
+          "A cota não pode ficar abaixo do já reservado/consumido. Use a suplementação para ampliar.",
+        );
         return;
       }
     }
@@ -205,7 +229,9 @@ function Cotas() {
     };
     const { error } = editing
       ? await supabase.from("quotas").update(payload).eq("id", editing.id)
-      : await supabase.from("quotas").insert({ ...payload, organization_id: orgId!, created_by: userId });
+      : await supabase
+          .from("quotas")
+          .insert({ ...payload, organization_id: orgId!, created_by: userId });
     setSaving(false);
     if (error) {
       toast.error(dbMessage(error) || "Não foi possível salvar a cota.");
@@ -281,7 +307,11 @@ function Cotas() {
       <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <div>
           <Label>Buscar</Label>
-          <Input placeholder="Nome da cota" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input
+            placeholder="Nome da cota"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
         <div>
           <Label>Tipo</Label>
@@ -376,7 +406,8 @@ function Cotas() {
               <TableRow>
                 <TableCell colSpan={9} className="py-10 text-center text-muted-foreground">
                   <PiggyBank className="mx-auto mb-2 size-6 opacity-50" />
-                  Nenhuma cota cadastrada. Crie cotas para limitar o consumo por unidade, contrato ou empenho.
+                  Nenhuma cota cadastrada. Crie cotas para limitar o consumo por unidade, contrato
+                  ou empenho.
                 </TableCell>
               </TableRow>
             )}
@@ -406,14 +437,24 @@ function Cotas() {
                   <TableCell className="text-sm">
                     {dateBR(q.valid_from)} a {q.valid_to ? dateBR(q.valid_to) : "—"}
                   </TableCell>
-                  <TableCell className="text-right">{amountOf(q, Number(q.granted_amount))}</TableCell>
-                  <TableCell className="text-right">{amountOf(q, Number(q.reserved_amount))}</TableCell>
-                  <TableCell className="text-right">{amountOf(q, Number(q.consumed_amount))}</TableCell>
+                  <TableCell className="text-right">
+                    {amountOf(q, Number(q.granted_amount))}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {amountOf(q, Number(q.reserved_amount))}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {amountOf(q, Number(q.consumed_amount))}
+                  </TableCell>
                   <TableCell className="text-right font-medium">
                     {amountOf(q, Number(q.balance_amount ?? 0))}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Badge variant={restante <= 10 ? "destructive" : restante <= 20 ? "outline" : "secondary"}>
+                    <Badge
+                      variant={
+                        restante <= 10 ? "destructive" : restante <= 20 ? "outline" : "secondary"
+                      }
+                    >
                       {num(usado, 1)}%
                     </Badge>
                   </TableCell>
@@ -429,7 +470,12 @@ function Cotas() {
                         <TrendingUp className="size-4" />
                       </Button>
                       {canManageFinance && (
-                        <Button variant="ghost" size="icon" aria-label="Editar cota" onClick={() => openEdit(q)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Editar cota"
+                          onClick={() => openEdit(q)}
+                        >
                           <Pencil className="size-4" />
                         </Button>
                       )}
@@ -604,7 +650,12 @@ function Cotas() {
               </div>
               <div>
                 <Label htmlFor="valid_to">Vigência final</Label>
-                <Input id="valid_to" name="valid_to" type="date" defaultValue={editing?.valid_to ?? ""} />
+                <Input
+                  id="valid_to"
+                  name="valid_to"
+                  type="date"
+                  defaultValue={editing?.valid_to ?? ""}
+                />
               </div>
               <div className="flex items-center gap-3 pt-6">
                 <Switch id="active" checked={active} onCheckedChange={setActive} />
@@ -649,7 +700,9 @@ function Cotas() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Saldo</p>
-                  <p className="font-medium">{amountOf(suppOf, Number(suppOf.balance_amount ?? 0))}</p>
+                  <p className="font-medium">
+                    {amountOf(suppOf, Number(suppOf.balance_amount ?? 0))}
+                  </p>
                 </div>
               </div>
 
@@ -657,7 +710,9 @@ function Cotas() {
                 <form onSubmit={onSupplement} className="grid gap-3 sm:grid-cols-3">
                   <div>
                     <Label htmlFor="amount">
-                      {suppOf.quota_type === "financeira" ? "Valor a suplementar (R$)" : "Quantidade a suplementar"}
+                      {suppOf.quota_type === "financeira"
+                        ? "Valor a suplementar (R$)"
+                        : "Quantidade a suplementar"}
                     </Label>
                     {suppOf.quota_type === "financeira" ? (
                       <MoneyInput id="amount" name="amount" required />
@@ -682,7 +737,9 @@ function Cotas() {
                   <History className="size-4" /> Histórico de suplementações
                 </p>
                 {supplements.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Nenhuma suplementação registrada para esta cota.</p>
+                  <p className="text-sm text-muted-foreground">
+                    Nenhuma suplementação registrada para esta cota.
+                  </p>
                 ) : (
                   <Table>
                     <TableHeader>
@@ -696,8 +753,12 @@ function Cotas() {
                       {supplements.map((s) => (
                         <TableRow key={s.id}>
                           <TableCell>{dateTimeBR(s.created_at)}</TableCell>
-                          <TableCell className="text-right">{amountOf(suppOf, Number(s.amount))}</TableCell>
-                          <TableCell className="text-sm text-muted-foreground">{s.reason}</TableCell>
+                          <TableCell className="text-right">
+                            {amountOf(suppOf, Number(s.amount))}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {s.reason}
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

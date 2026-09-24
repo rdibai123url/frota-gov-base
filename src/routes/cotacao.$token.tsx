@@ -14,7 +14,11 @@ import { PropostaFields } from "@/components/proposta-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getQuotationByToken, submitProposalByToken, type PublicQuotation } from "@/lib/cotacoes-convites.functions";
+import {
+  getQuotationByToken,
+  submitProposalByToken,
+  type PublicQuotation,
+} from "@/lib/cotacoes-convites.functions";
 import { formatCNPJ } from "@/lib/format";
 import {
   asQuotationKind,
@@ -38,7 +42,10 @@ export const Route = createFileRoute("/cotacao/$token")({
   head: () => ({
     meta: [
       { title: "Responder cotação — FrotaGov" },
-      { name: "description", content: "Página segura para o fornecedor apresentar proposta em cotação de órgão público." },
+      {
+        name: "description",
+        content: "Página segura para o fornecedor apresentar proposta em cotação de órgão público.",
+      },
       { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "Responder cotação — FrotaGov" },
       { property: "og:description", content: "Envio de proposta por fornecedor convidado." },
@@ -84,7 +91,11 @@ function ResponderCotacao() {
       return;
     }
     const payload = draftToPayload(draft, kind);
-    const problem = discountProblem(payload.discountMode, payload.discountInput, payload.totals.gross);
+    const problem = discountProblem(
+      payload.discountMode,
+      payload.discountInput,
+      payload.totals.gross,
+    );
     if (problem) {
       toast.error(problem);
       return;
@@ -132,7 +143,6 @@ function ResponderCotacao() {
     }
   }
 
-
   if (loading) {
     return (
       <main className="grid min-h-screen place-items-center bg-muted/30 p-6 text-muted-foreground">
@@ -150,7 +160,8 @@ function ResponderCotacao() {
           <ShieldAlert className="mx-auto mb-3 size-8 text-destructive" />
           <h1 className="gov-title text-lg">Link indisponível</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            {state?.message ?? "Este link não é válido."} Procure o órgão responsável para receber um novo convite.
+            {state?.message ?? "Este link não é válido."} Procure o órgão responsável para receber
+            um novo convite.
           </p>
         </div>
       </main>
@@ -164,8 +175,8 @@ function ResponderCotacao() {
           <CheckCircle2 className="mx-auto mb-3 size-8 text-primary" />
           <h1 className="gov-title text-lg">Proposta recebida</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Sua proposta para a cotação {state.quotation?.code} foi registrada. O órgão fará a análise e comunicará o
-            resultado.
+            Sua proposta para a cotação {state.quotation?.code} foi registrada. O órgão fará a
+            análise e comunicará o resultado.
           </p>
         </div>
       </main>
@@ -180,7 +191,11 @@ function ResponderCotacao() {
         <header className="flex items-start gap-4 rounded-t-lg bg-foreground px-6 py-5 text-background">
           <div className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-md bg-background/10">
             {q.org_logo_url ? (
-              <img src={q.org_logo_url} alt={`Brasão de ${q.organization}`} className="size-16 object-contain" />
+              <img
+                src={q.org_logo_url}
+                alt={`Brasão de ${q.organization}`}
+                className="size-16 object-contain"
+              />
             ) : (
               <Building2 className="size-8 opacity-70" aria-hidden />
             )}
@@ -199,7 +214,8 @@ function ResponderCotacao() {
         <div className="space-y-6 rounded-b-lg border border-t-0 bg-card p-6 shadow-card">
           {expired && (
             <p className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm font-medium text-destructive">
-              Prazo para envio da proposta encerrado em {q.deadline_at ? dateTime(q.deadline_at) : "—"}.
+              Prazo para envio da proposta encerrado em{" "}
+              {q.deadline_at ? dateTime(q.deadline_at) : "—"}.
             </p>
           )}
           <section className="grid gap-2 rounded-md border bg-muted/40 p-4 text-sm">
@@ -214,7 +230,9 @@ function ResponderCotacao() {
               </p>
             )}
             <p>
-              <span className="text-muted-foreground">Prazo final para recebimento da proposta: </span>
+              <span className="text-muted-foreground">
+                Prazo final para recebimento da proposta:{" "}
+              </span>
               {q.deadline_at ? dateTime(q.deadline_at) : "sem prazo definido"}
             </p>
             {q.notes && (
@@ -229,15 +247,34 @@ function ResponderCotacao() {
             <section className="grid gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="companyName">Razão social *</Label>
-                <Input id="companyName" name="companyName" required defaultValue={state.invitation?.company ?? ""} maxLength={160} disabled={expired} />
+                <Input
+                  id="companyName"
+                  name="companyName"
+                  required
+                  defaultValue={state.invitation?.company ?? ""}
+                  maxLength={160}
+                  disabled={expired}
+                />
               </div>
               <div>
                 <Label htmlFor="cnpj">CNPJ</Label>
-                <Input id="cnpj" name="cnpj" maxLength={20} placeholder="00.000.000/0000-00" disabled={expired} />
+                <Input
+                  id="cnpj"
+                  name="cnpj"
+                  maxLength={20}
+                  placeholder="00.000.000/0000-00"
+                  disabled={expired}
+                />
               </div>
               <div>
                 <Label htmlFor="contactName">Responsável</Label>
-                <Input id="contactName" name="contactName" defaultValue={state.invitation?.contact_name ?? ""} maxLength={120} disabled={expired} />
+                <Input
+                  id="contactName"
+                  name="contactName"
+                  defaultValue={state.invitation?.contact_name ?? ""}
+                  maxLength={120}
+                  disabled={expired}
+                />
               </div>
               <div>
                 <Label htmlFor="phone">Telefone</Label>
@@ -258,7 +295,6 @@ function ResponderCotacao() {
                 lockItems
               />
             </section>
-
 
             <div className="flex justify-end">
               <Button type="submit" size="lg" disabled={sending || expired}>

@@ -25,7 +25,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   UNIT_TYPES,
   label,
@@ -43,9 +50,16 @@ export const Route = createFileRoute("/_authenticated/unidades")({
   head: () => ({
     meta: [
       { title: "Secretarias e Unidades — FrotaGov" },
-      { name: "description", content: "Cadastro da estrutura administrativa do órgão: secretarias, departamentos, diretorias e unidades." },
+      {
+        name: "description",
+        content:
+          "Cadastro da estrutura administrativa do órgão: secretarias, departamentos, diretorias e unidades.",
+      },
       { property: "og:title", content: "Secretarias e Unidades — FrotaGov" },
-      { property: "og:description", content: "Gerencie a estrutura administrativa vinculada ao órgão." },
+      {
+        property: "og:description",
+        content: "Gerencie a estrutura administrativa vinculada ao órgão.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -193,7 +207,9 @@ function Unidades() {
                 </TableCell>
                 <TableCell className="text-sm">
                   {u.phone || "—"}
-                  {u.email && <span className="block text-xs text-muted-foreground">{u.email}</span>}
+                  {u.email && (
+                    <span className="block text-xs text-muted-foreground">{u.email}</span>
+                  )}
                 </TableCell>
                 <TableCell>
                   <Badge variant={u.active ? "default" : "secondary"}>
@@ -246,11 +262,19 @@ function Unidades() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="manager_name">Responsável</Label>
-                <Input id="manager_name" name="manager_name" defaultValue={editing?.manager_name ?? ""} />
+                <Input
+                  id="manager_name"
+                  name="manager_name"
+                  defaultValue={editing?.manager_name ?? ""}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="manager_role">Cargo do responsável</Label>
-                <Input id="manager_role" name="manager_role" defaultValue={editing?.manager_role ?? ""} />
+                <Input
+                  id="manager_role"
+                  name="manager_role"
+                  defaultValue={editing?.manager_role ?? ""}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="phone">Telefone</Label>
@@ -264,7 +288,9 @@ function Unidades() {
             <div className="flex items-center justify-between rounded-md border p-3">
               <div>
                 <Label>Unidade ativa</Label>
-                <p className="text-xs text-muted-foreground">Unidades inativas não recebem novos veículos.</p>
+                <p className="text-xs text-muted-foreground">
+                  Unidades inativas não recebem novos veículos.
+                </p>
               </div>
               <Switch checked={active} onCheckedChange={setActive} />
             </div>

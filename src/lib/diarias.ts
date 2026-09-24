@@ -83,12 +83,40 @@ export const DIARY_OPEN: DiaryStatus[] = [
 
 const UNI = ["", "um", "dois", "três", "quatro", "cinco", "seis", "sete", "oito", "nove"];
 const DEZ10 = [
-  "dez", "onze", "doze", "treze", "quatorze", "quinze", "dezesseis", "dezessete", "dezoito", "dezenove",
+  "dez",
+  "onze",
+  "doze",
+  "treze",
+  "quatorze",
+  "quinze",
+  "dezesseis",
+  "dezessete",
+  "dezoito",
+  "dezenove",
 ];
-const DEZ = ["", "", "vinte", "trinta", "quarenta", "cinquenta", "sessenta", "setenta", "oitenta", "noventa"];
+const DEZ = [
+  "",
+  "",
+  "vinte",
+  "trinta",
+  "quarenta",
+  "cinquenta",
+  "sessenta",
+  "setenta",
+  "oitenta",
+  "noventa",
+];
 const CEM = [
-  "", "cento", "duzentos", "trezentos", "quatrocentos", "quinhentos", "seiscentos", "setecentos",
-  "oitocentos", "novecentos",
+  "",
+  "cento",
+  "duzentos",
+  "trezentos",
+  "quatrocentos",
+  "quinhentos",
+  "seiscentos",
+  "setecentos",
+  "oitocentos",
+  "novecentos",
 ];
 
 function trio(n: number): string {
@@ -122,7 +150,10 @@ export function moneyInWords(value: number): string {
   for (const sc of scale) {
     const q = Math.floor(rest / sc.div);
     rest = rest % sc.div;
-    if (q > 0) chunks.push(`${sc.div === 1000 && q === 1 ? "" : trio(q) + " "}${q === 1 ? sc.s : sc.p}`.trim());
+    if (q > 0)
+      chunks.push(
+        `${sc.div === 1000 && q === 1 ? "" : trio(q) + " "}${q === 1 ? sc.s : sc.p}`.trim(),
+      );
   }
   if (rest > 0) chunks.push(trio(rest));
   let out = chunks.length ? chunks.join(" e ") : "zero";
@@ -183,7 +214,8 @@ export function diaryIndicators(rows: DiaryRow[], ref = new Date()): DiaryIndica
 
 /** Comprovação vencida: 30 dias após o retorno sem prestação de contas aprovada. */
 export function isProofOverdue(r: DiaryRow, days = 30) {
-  if (r.status === "comprovada" || r.status === "cancelada" || r.status === "rejeitada") return false;
+  if (r.status === "comprovada" || r.status === "cancelada" || r.status === "rejeitada")
+    return false;
   const base = r.return_at ?? r.departure_at;
   if (!base) return false;
   const limit = new Date(base).getTime() + days * 86400000;
@@ -191,7 +223,12 @@ export function isProofOverdue(r: DiaryRow, days = 30) {
   return !approved && Date.now() > limit;
 }
 
-export type DiaryAlert = { kind: string; severity: "alta" | "media"; message: string; diary: DiaryRow };
+export type DiaryAlert = {
+  kind: string;
+  severity: "alta" | "media";
+  message: string;
+  diary: DiaryRow;
+};
 
 export function diaryAlerts(rows: DiaryRow[]): DiaryAlert[] {
   const out: DiaryAlert[] = [];
@@ -217,7 +254,9 @@ export function diaryAlerts(rows: DiaryRow[]): DiaryAlert[] {
         diary: r,
       });
     }
-    const debt = (r.proofs ?? []).find((p) => Number(p.balance_value) > 0 && !p.restitution_resolved);
+    const debt = (r.proofs ?? []).find(
+      (p) => Number(p.balance_value) > 0 && !p.restitution_resolved,
+    );
     if (debt) {
       out.push({
         kind: "saldo_restituir",

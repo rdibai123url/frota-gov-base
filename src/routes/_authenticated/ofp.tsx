@@ -8,11 +8,30 @@ import { ListPagination, usePaged } from "@/components/list-pagination";
 import { ItemHistoryInput } from "@/components/item-history-input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { parseBRNumber } from "@/lib/format";
 import { usePartners } from "@/lib/credenciados";
@@ -54,7 +73,10 @@ export const Route = createFileRoute("/_authenticated/ofp")({
           "Emissão e acompanhamento de Ordens de Fornecimento de Peças (OFP), separadas da Ordem de Serviço, com itens, reserva orçamentária, atendimento parcial e conferência.",
       },
       { property: "og:title", content: "Ordens de Fornecimento de Peças — FrotaGov" },
-      { property: "og:description", content: "Fluxo completo de fornecimento de peças e materiais da frota pública." },
+      {
+        property: "og:description",
+        content: "Fluxo completo de fornecimento de peças e materiais da frota pública.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -64,7 +86,13 @@ export const Route = createFileRoute("/_authenticated/ofp")({
 
 const NONE = "__none__";
 
-type ItemDraft = { part_id: string; description: string; quantity: string; unit_value: string; measure_unit: string };
+type ItemDraft = {
+  part_id: string;
+  description: string;
+  quantity: string;
+  unit_value: string;
+  measure_unit: string;
+};
 
 function OFP() {
   const { canManageFleet, orgId, userName } = usePerms();
@@ -123,7 +151,9 @@ function OFP() {
         if (d.part_id === NONE) continue;
         const ok = await checkCompatibility(d.part_id, form.vehicle_id);
         if (!ok) {
-          toast.warning(`Atenção: "${d.description}" não consta como compatível com o ativo selecionado.`);
+          toast.warning(
+            `Atenção: "${d.description}" não consta como compatível com o ativo selecionado.`,
+          );
         }
       }
     }
@@ -170,7 +200,9 @@ function OFP() {
 
     toast.success("OFP criada em rascunho");
     setOpen(false);
-    setDrafts([{ part_id: NONE, description: "", quantity: "", unit_value: "", measure_unit: "unidade" }]);
+    setDrafts([
+      { part_id: NONE, description: "", quantity: "", unit_value: "", measure_unit: "unidade" },
+    ]);
     invalidate(["supply-orders", "supply-order-items"]);
   }
 
@@ -187,7 +219,10 @@ function OFP() {
   async function cancel(id: string) {
     const reason = window.prompt("Motivo do cancelamento:");
     if (!reason?.trim()) return;
-    const { error } = await supabase.rpc("supply_order_cancel", { _order: id, _reason: reason.trim() });
+    const { error } = await supabase.rpc("supply_order_cancel", {
+      _order: id,
+      _reason: reason.trim(),
+    });
     if (error) {
       toast.error(dbMessage(error));
       return;
@@ -273,11 +308,12 @@ function OFP() {
                   <Button size="sm" variant="outline" onClick={() => setDetail(o.id)}>
                     Itens
                   </Button>
-                  {canManageFleet && (o.status === "rascunho" || o.status === "aguardando_aprovacao") && (
-                    <Button size="sm" onClick={() => issue(o.id)}>
-                      <FileCheck2 className="mr-1 h-4 w-4" /> Emitir
-                    </Button>
-                  )}
+                  {canManageFleet &&
+                    (o.status === "rascunho" || o.status === "aguardando_aprovacao") && (
+                      <Button size="sm" onClick={() => issue(o.id)}>
+                        <FileCheck2 className="mr-1 h-4 w-4" /> Emitir
+                      </Button>
+                    )}
                   {canManageFleet && !["cancelada", "atendida"].includes(o.status) && (
                     <Button size="sm" variant="outline" onClick={() => cancel(o.id)}>
                       <Ban className="mr-1 h-4 w-4" /> Cancelar
@@ -362,7 +398,10 @@ function OFP() {
             </div>
             <div>
               <Label>Ativo (opcional)</Label>
-              <Select value={form.vehicle_id} onValueChange={(v) => setForm({ ...form, vehicle_id: v })}>
+              <Select
+                value={form.vehicle_id}
+                onValueChange={(v) => setForm({ ...form, vehicle_id: v })}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -378,7 +417,10 @@ function OFP() {
             </div>
             <div>
               <Label>Credenciado</Label>
-              <Select value={form.partner_id} onValueChange={(v) => setForm({ ...form, partner_id: v })}>
+              <Select
+                value={form.partner_id}
+                onValueChange={(v) => setForm({ ...form, partner_id: v })}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -394,7 +436,10 @@ function OFP() {
             </div>
             <div>
               <Label>Fornecedor</Label>
-              <Select value={form.supplier_id} onValueChange={(v) => setForm({ ...form, supplier_id: v })}>
+              <Select
+                value={form.supplier_id}
+                onValueChange={(v) => setForm({ ...form, supplier_id: v })}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -428,7 +473,10 @@ function OFP() {
             </div>
             <div>
               <Label>Centro de custo</Label>
-              <Select value={form.cost_center_id} onValueChange={(v) => setForm({ ...form, cost_center_id: v })}>
+              <Select
+                value={form.cost_center_id}
+                onValueChange={(v) => setForm({ ...form, cost_center_id: v })}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -448,7 +496,9 @@ function OFP() {
                   <Label>Contrato</Label>
                   <Select
                     value={form.contract_id}
-                    onValueChange={(v) => setForm({ ...form, contract_id: v, contract_item_id: NONE })}
+                    onValueChange={(v) =>
+                      setForm({ ...form, contract_id: v, contract_item_id: NONE })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -475,7 +525,9 @@ function OFP() {
                     <SelectContent>
                       <SelectItem value={NONE}>Não informado</SelectItem>
                       {contractItems
-                        .filter((i) => form.contract_id === NONE || i.contract_id === form.contract_id)
+                        .filter(
+                          (i) => form.contract_id === NONE || i.contract_id === form.contract_id,
+                        )
                         .map((i) => (
                           <SelectItem key={i.id} value={i.id}>
                             {i.description}
@@ -596,7 +648,13 @@ function OFP() {
               onClick={() =>
                 setDrafts([
                   ...drafts,
-                  { part_id: NONE, description: "", quantity: "", unit_value: "", measure_unit: "unidade" },
+                  {
+                    part_id: NONE,
+                    description: "",
+                    quantity: "",
+                    unit_value: "",
+                    measure_unit: "unidade",
+                  },
                 ])
               }
             >

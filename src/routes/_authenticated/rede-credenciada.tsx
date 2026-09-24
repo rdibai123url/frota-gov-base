@@ -12,12 +12,31 @@ import { CnpjInput } from "@/components/form-fields";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { isValidCNPJ, onlyDigits, parseBRNumber } from "@/lib/format";
 import {
@@ -51,7 +70,10 @@ export const Route = createFileRoute("/_authenticated/rede-credenciada")({
           "Cadastro próprio do órgão de oficinas e prestadores, com especialidades, marcas atendidas, vigência e documentos.",
       },
       { property: "og:title", content: "Oficinas e prestadores do órgão — FrotaGov" },
-      { property: "og:description", content: "Oficinas e prestadores cadastrados pelo próprio órgão para manutenção da frota." },
+      {
+        property: "og:description",
+        content: "Oficinas e prestadores cadastrados pelo próprio órgão para manutenção da frota.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -104,12 +126,14 @@ function RedeCredenciada() {
     const q = search.trim().toLowerCase();
     return workshops.filter(
       (w) =>
-        (!q || `${w.legal_name} ${w.trade_name ?? ""} ${w.cnpj ?? ""} ${w.city ?? ""}`.toLowerCase().includes(q)) &&
+        (!q ||
+          `${w.legal_name} ${w.trade_name ?? ""} ${w.cnpj ?? ""} ${w.city ?? ""}`
+            .toLowerCase()
+            .includes(q)) &&
         (fStatus === ALL || w.status === fStatus) &&
         (fSpecialty === ALL || (w.specialties ?? []).includes(fSpecialty)),
     );
   }, [workshops, search, fStatus, fSpecialty]);
-
 
   function openEdit(w: Workshop) {
     setEditing(w);
@@ -184,10 +208,21 @@ function RedeCredenciada() {
       notes: d.notes || null,
     };
     const before = editing
-      ? { address: editing.address, district: editing.district, city: editing.city, state: editing.state, zip_code: editing.zip_code }
+      ? {
+          address: editing.address,
+          district: editing.district,
+          city: editing.city,
+          state: editing.state,
+          zip_code: editing.zip_code,
+        }
       : null;
     const { data: saved, error } = editing
-      ? await supabase.from("workshops").update({ ...payload, updated_by: userId }).eq("id", editing.id).select("id").maybeSingle()
+      ? await supabase
+          .from("workshops")
+          .update({ ...payload, updated_by: userId })
+          .eq("id", editing.id)
+          .select("id")
+          .maybeSingle()
       : await supabase
           .from("workshops")
           .insert({ ...payload, organization_id: orgId!, created_by: userId })
@@ -202,7 +237,9 @@ function RedeCredenciada() {
     invalidate(["workshops"]);
     setOpen(false);
     if (!payload.latitude || !payload.longitude) {
-      void autoGeocode("workshops", saved?.id ?? editing?.id, payload, before).then(() => invalidate(["workshops"]));
+      void autoGeocode("workshops", saved?.id ?? editing?.id, payload, before).then(() =>
+        invalidate(["workshops"]),
+      );
     }
   }
 
@@ -225,10 +262,9 @@ function RedeCredenciada() {
 
       <h2 className="mb-3 mt-8 text-lg font-semibold">Oficinas cadastradas anteriormente</h2>
       <p className="mb-4 text-sm text-muted-foreground">
-        Registros históricos preservados. É possível corrigir endereço, contato e localização, mas novas oficinas passam
-        a entrar pela via contratual.
+        Registros históricos preservados. É possível corrigir endereço, contato e localização, mas
+        novas oficinas passam a entrar pela via contratual.
       </p>
-
 
       <div className="mb-4 grid gap-3 sm:grid-cols-3">
         <div>
@@ -311,7 +347,11 @@ function RedeCredenciada() {
                     <button
                       type="button"
                       className="text-xs text-primary underline"
-                      onClick={() => openMaintenanceFile(w.attachment_path!).catch((e) => toast.error(dbMessage(e)))}
+                      onClick={() =>
+                        openMaintenanceFile(w.attachment_path!).catch((e) =>
+                          toast.error(dbMessage(e)),
+                        )
+                      }
                     >
                       Ver documento
                     </button>
@@ -323,7 +363,11 @@ function RedeCredenciada() {
                   <span className="text-xs text-muted-foreground">
                     {(w.specialties ?? []).join(", ") || "—"}
                   </span>
-                  {w.urgency_24h && <Badge variant="secondary" className="ml-1">24h</Badge>}
+                  {w.urgency_24h && (
+                    <Badge variant="secondary" className="ml-1">
+                      24h
+                    </Badge>
+                  )}
                 </TableCell>
                 <TableCell className="text-sm">
                   {w.accredited_at ? dateBR(w.accredited_at) : "—"}
@@ -338,7 +382,12 @@ function RedeCredenciada() {
                 </TableCell>
                 <TableCell>
                   {canManageFleet && (
-                    <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => openEdit(w)}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Editar"
+                      onClick={() => openEdit(w)}
+                    >
                       <Pencil className="size-4" />
                     </Button>
                   )}
@@ -353,13 +402,20 @@ function RedeCredenciada() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing ? `Editar ${editing.legal_name}` : "Nova oficina credenciada"}</DialogTitle>
+            <DialogTitle>
+              {editing ? `Editar ${editing.legal_name}` : "Nova oficina credenciada"}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="legal_name">Razão social *</Label>
-                <Input id="legal_name" name="legal_name" defaultValue={editing?.legal_name ?? ""} required />
+                <Input
+                  id="legal_name"
+                  name="legal_name"
+                  defaultValue={editing?.legal_name ?? ""}
+                  required
+                />
               </div>
               <div>
                 <Label htmlFor="trade_name">Nome fantasia</Label>
@@ -371,7 +427,11 @@ function RedeCredenciada() {
               </div>
               <div>
                 <Label htmlFor="contact_name">Responsável</Label>
-                <Input id="contact_name" name="contact_name" defaultValue={editing?.contact_name ?? ""} />
+                <Input
+                  id="contact_name"
+                  name="contact_name"
+                  defaultValue={editing?.contact_name ?? ""}
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label htmlFor="address">Endereço</Label>
@@ -379,11 +439,21 @@ function RedeCredenciada() {
               </div>
               <div>
                 <Label htmlFor="latitude">Latitude</Label>
-                <Input id="latitude" name="latitude" placeholder="-23,5505" defaultValue={editing?.latitude ?? ""} />
+                <Input
+                  id="latitude"
+                  name="latitude"
+                  placeholder="-23,5505"
+                  defaultValue={editing?.latitude ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="longitude">Longitude</Label>
-                <Input id="longitude" name="longitude" placeholder="-46,6333" defaultValue={editing?.longitude ?? ""} />
+                <Input
+                  id="longitude"
+                  name="longitude"
+                  placeholder="-46,6333"
+                  defaultValue={editing?.longitude ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="district">Bairro</Label>
@@ -437,7 +507,12 @@ function RedeCredenciada() {
               </div>
               <div>
                 <Label htmlFor="accredited_at">Credenciada em</Label>
-                <Input id="accredited_at" name="accredited_at" type="date" defaultValue={editing?.accredited_at ?? ""} />
+                <Input
+                  id="accredited_at"
+                  name="accredited_at"
+                  type="date"
+                  defaultValue={editing?.accredited_at ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="accredited_until">Validade do credenciamento</Label>
@@ -460,18 +535,29 @@ function RedeCredenciada() {
               </div>
               <div>
                 <Label htmlFor="coverage_area">Região de atendimento</Label>
-                <Input id="coverage_area" name="coverage_area" defaultValue={editing?.coverage_area ?? ""} />
+                <Input
+                  id="coverage_area"
+                  name="coverage_area"
+                  defaultValue={editing?.coverage_area ?? ""}
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label htmlFor="brands">Marcas atendidas (separadas por vírgula)</Label>
-                <Input id="brands" name="brands" defaultValue={(editing?.brands ?? []).join(", ")} />
+                <Input
+                  id="brands"
+                  name="brands"
+                  defaultValue={(editing?.brands ?? []).join(", ")}
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label>Especialidades atendidas</Label>
                 <div className="mt-2 grid gap-2 sm:grid-cols-3">
                   {WORKSHOP_SPECIALTIES.map((s) => (
                     <label key={s} className="flex items-center gap-2 text-sm">
-                      <Checkbox checked={specialties.includes(s)} onCheckedChange={() => toggleSpecialty(s)} />
+                      <Checkbox
+                        checked={specialties.includes(s)}
+                        onCheckedChange={() => toggleSpecialty(s)}
+                      />
                       {s}
                     </label>
                   ))}
@@ -489,7 +575,11 @@ function RedeCredenciada() {
                 <Label htmlFor="file" className="flex items-center gap-2">
                   <Upload className="size-4" /> Documento do credenciamento (privado)
                 </Label>
-                <Input id="file" type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+                <Input
+                  id="file"
+                  type="file"
+                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label htmlFor="notes">Observações</Label>
@@ -550,7 +640,8 @@ function NetworkFromContracts() {
               <TableRow>
                 <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
                   <Building2 className="mx-auto mb-2 size-6 opacity-50" />
-                  Nenhuma empresa do órgão com contrato ou credenciamento vigente de manutenção ou higienização.
+                  Nenhuma empresa do órgão com contrato ou credenciamento vigente de manutenção ou
+                  higienização.
                 </TableCell>
               </TableRow>
             )}
@@ -560,11 +651,15 @@ function NetworkFromContracts() {
                 <TableRow key={c.key}>
                   <TableCell className="font-medium">
                     {c.name}
-                    {c.tradeName ? <span className="block text-xs text-muted-foreground">{c.tradeName}</span> : null}
+                    {c.tradeName ? (
+                      <span className="block text-xs text-muted-foreground">{c.tradeName}</span>
+                    ) : null}
                   </TableCell>
                   <TableCell>{formatCNPJ(c.document) || "—"}</TableCell>
                   <TableCell>{[c.city, c.state].filter(Boolean).join(" / ") || "—"}</TableCell>
-                  <TableCell>{[c.contactName, c.phone].filter(Boolean).join(" · ") || "—"}</TableCell>
+                  <TableCell>
+                    {[c.contactName, c.phone].filter(Boolean).join(" · ") || "—"}
+                  </TableCell>
                   <TableCell className="space-x-1">
                     {c.categories.map((k) => (
                       <Badge key={k} variant="outline">
@@ -573,7 +668,11 @@ function NetworkFromContracts() {
                     ))}
                   </TableCell>
                   <TableCell className="text-sm">
-                    {c.accredited ? <Badge>Credenciamento</Badge> : <Badge variant="secondary">Contrato</Badge>}
+                    {c.accredited ? (
+                      <Badge>Credenciamento</Badge>
+                    ) : (
+                      <Badge variant="secondary">Contrato</Badge>
+                    )}
                     {first ? (
                       <span className="block text-xs text-muted-foreground">
                         {first.number} · até {dateBR(first.valid_to)}
@@ -581,7 +680,12 @@ function NetworkFromContracts() {
                     ) : null}
                   </TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="sm" className="gap-2" onClick={() => setDetail(c)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-2"
+                      onClick={() => setDetail(c)}
+                    >
                       <FileText className="size-4" /> Detalhes
                     </Button>
                   </TableCell>

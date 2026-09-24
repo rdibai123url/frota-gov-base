@@ -52,7 +52,10 @@ export function parseBRNumber(input: string | number | null | undefined): number
   if (!raw) return 0;
   const hasComma = raw.includes(",");
   const cleaned = hasComma
-    ? raw.replace(/\./g, "").replace(",", ".").replace(/[^\d.-]/g, "")
+    ? raw
+        .replace(/\./g, "")
+        .replace(",", ".")
+        .replace(/[^\d.-]/g, "")
     : raw.replace(/[^\d.-]/g, "");
   const n = Number(cleaned);
   return Number.isFinite(n) ? n : 0;
@@ -134,7 +137,10 @@ export function isValidCPF(v: string | null | undefined) {
   return calc(9) === Number(d[9]) && calc(10) === Number(d[10]);
 }
 
-export const maskCEP = (v: string) => onlyDigits(v).slice(0, 8).replace(/^(\d{5})(\d)/, "$1-$2");
+export const maskCEP = (v: string) =>
+  onlyDigits(v)
+    .slice(0, 8)
+    .replace(/^(\d{5})(\d)/, "$1-$2");
 
 /* --------------------- padrões numéricos complementares ------------------ */
 
@@ -154,8 +160,10 @@ export const formatQuantity = (value: number | string | null | undefined) =>
   formatNumberBR(value, QUANTITY_DECIMALS);
 
 /** Quantidade com unidade de medida: "3,00 UN". */
-export const formatQuantityUnit = (value: number | string | null | undefined, unit?: string | null) =>
-  `${formatQuantity(value)}${unit ? ` ${unit}` : ""}`;
+export const formatQuantityUnit = (
+  value: number | string | null | undefined,
+  unit?: string | null,
+) => `${formatQuantity(value)}${unit ? ` ${unit}` : ""}`;
 
 /** Quilometragem: milhar brasileiro, sem casas decimais artificiais. */
 export const formatKm = (value: number | string | null | undefined) =>

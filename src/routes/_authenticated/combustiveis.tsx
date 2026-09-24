@@ -25,7 +25,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   PRODUCT_CATEGORIES,
   PRODUCT_CATEGORY_LABELS,
@@ -48,7 +55,10 @@ export const Route = createFileRoute("/_authenticated/combustiveis")({
           "Cadastro de combustíveis, óleos lubrificantes, fluidos e aditivos utilizados pela frota do órgão, com categoria, unidade padrão e situação.",
       },
       { property: "og:title", content: "Combustíveis e produtos automotivos — FrotaGov" },
-      { property: "og:description", content: "Combustíveis e produtos automotivos do órgão público." },
+      {
+        property: "og:description",
+        content: "Combustíveis e produtos automotivos do órgão público.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -124,7 +134,9 @@ function Combustiveis() {
     setSaving(false);
     if (error) {
       toast.error(
-        error.code === "23505" ? "Já existe um combustível com esse nome." : "Não foi possível salvar.",
+        error.code === "23505"
+          ? "Já existe um combustível com esse nome."
+          : "Não foi possível salvar.",
       );
       return;
     }
@@ -180,7 +192,11 @@ function Combustiveis() {
                 <TableCell className="font-medium">{f.name}</TableCell>
                 <TableCell>{f.acronym || "—"}</TableCell>
                 <TableCell>
-                  <Badge variant={(f.category ?? "combustivel") === "combustivel" ? "default" : "outline"}>
+                  <Badge
+                    variant={
+                      (f.category ?? "combustivel") === "combustivel" ? "default" : "outline"
+                    }
+                  >
                     {PRODUCT_CATEGORY_LABELS[f.category ?? "combustivel"] ?? "Combustível"}
                   </Badge>
                 </TableCell>
@@ -192,7 +208,12 @@ function Combustiveis() {
                 </TableCell>
                 <TableCell>
                   {canWrite && (
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(f)} aria-label="Editar">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openEdit(f)}
+                      aria-label="Editar"
+                    >
                       <Pencil className="size-4" />
                     </Button>
                   )}
@@ -207,17 +228,30 @@ function Combustiveis() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editing ? "Editar produto" : "Novo combustível / produto automotivo"}</DialogTitle>
+            <DialogTitle>
+              {editing ? "Editar produto" : "Novo combustível / produto automotivo"}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <Label htmlFor="name">Nome *</Label>
-                <Input id="name" name="name" defaultValue={editing?.name ?? ""} required maxLength={80} />
+                <Input
+                  id="name"
+                  name="name"
+                  defaultValue={editing?.name ?? ""}
+                  required
+                  maxLength={80}
+                />
               </div>
               <div>
                 <Label htmlFor="acronym">Sigla</Label>
-                <Input id="acronym" name="acronym" defaultValue={editing?.acronym ?? ""} maxLength={10} />
+                <Input
+                  id="acronym"
+                  name="acronym"
+                  defaultValue={editing?.acronym ?? ""}
+                  maxLength={10}
+                />
               </div>
               <div>
                 <Label>Categoria *</Label>
@@ -225,7 +259,8 @@ function Combustiveis() {
                   value={category}
                   onValueChange={(v) => {
                     setCategory(v);
-                    const allowed = PRODUCT_CATEGORIES.find((c) => c.value === v)?.units ?? PRODUCT_UNITS;
+                    const allowed =
+                      PRODUCT_CATEGORIES.find((c) => c.value === v)?.units ?? PRODUCT_UNITS;
                     if (!allowed.includes(unit)) setUnit(allowed[0] ?? "litro");
                   }}
                 >
@@ -248,7 +283,9 @@ function Combustiveis() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {(PRODUCT_CATEGORIES.find((c) => c.value === category)?.units ?? PRODUCT_UNITS).map((u) => (
+                    {(
+                      PRODUCT_CATEGORIES.find((c) => c.value === category)?.units ?? PRODUCT_UNITS
+                    ).map((u) => (
                       <SelectItem key={u} value={u}>
                         {u}
                       </SelectItem>
@@ -302,7 +339,8 @@ function Combustiveis() {
             </div>
             {category !== "combustivel" && (
               <p className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
-                Produtos que não são combustível não entram no cálculo de litros de combustível nem na média km/l.
+                Produtos que não são combustível não entram no cálculo de litros de combustível nem
+                na média km/l.
               </p>
             )}
             <div className="flex items-center gap-3">

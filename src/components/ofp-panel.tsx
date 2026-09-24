@@ -25,8 +25,21 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { parseBRNumber } from "@/lib/format";
 import {
@@ -83,7 +96,9 @@ export function SupplyOrderPanel({
       contracts.filter(
         (c) =>
           (c.status === "vigente" || c.status === "suspenso") &&
-          (c.items ?? []).some((i) => i.active && kinds.includes(String(i.material_kind ?? "material"))),
+          (c.items ?? []).some(
+            (i) => i.active && kinds.includes(String(i.material_kind ?? "material")),
+          ),
       ),
     [contracts, kinds],
   );
@@ -91,7 +106,10 @@ export function SupplyOrderPanel({
   const [contractId, setContractId] = useState<string>("");
   const contract: ContractRow | null = usable.find((c) => c.id === contractId) ?? null;
   const items = useMemo(
-    () => (contract?.items ?? []).filter((i) => i.active && kinds.includes(String(i.material_kind ?? "material"))),
+    () =>
+      (contract?.items ?? []).filter(
+        (i) => i.active && kinds.includes(String(i.material_kind ?? "material")),
+      ),
     [contract, kinds],
   );
 
@@ -302,7 +320,9 @@ export function SupplyOrderPanel({
                       <TableCell className="text-right">{brl(b.total)}</TableCell>
                       <TableCell className="text-right">{num(b.consumed, 2)}</TableCell>
                       <TableCell className="text-right">{num(b.reserved, 2)}</TableCell>
-                      <TableCell className="text-right font-medium">{num(b.available, 2)}</TableCell>
+                      <TableCell className="text-right font-medium">
+                        {num(b.available, 2)}
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -342,14 +362,24 @@ export function SupplyOrderPanel({
                         </Badge>
                       </TableCell>
                       <TableCell className="space-x-1 text-right">
-                        <Button variant="ghost" size="sm" className="gap-2" onClick={() => setReceiving(o)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="gap-2"
+                          onClick={() => setReceiving(o)}
+                        >
                           <PackageCheck className="size-4" /> Receber
                         </Button>
                         {canManageFleet &&
                           o.status !== "atendida" &&
                           o.status !== "cancelada" &&
                           o.status !== "rejeitada" && (
-                            <Button variant="ghost" size="sm" className="gap-2" onClick={() => void cancelBalance(o)}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="gap-2"
+                              onClick={() => void cancelBalance(o)}
+                            >
                               <Ban className="size-4" /> Cancelar saldo
                             </Button>
                           )}
@@ -475,7 +505,9 @@ export function SupplyOrderPanel({
                             value={draft?.quantity ?? ""}
                             onChange={(e) =>
                               setDrafts((cur) =>
-                                cur.map((d) => (d.itemId === i.id ? { ...d, quantity: e.target.value } : d)),
+                                cur.map((d) =>
+                                  d.itemId === i.id ? { ...d, quantity: e.target.value } : d,
+                                ),
                               )
                             }
                           />
@@ -506,7 +538,13 @@ export function SupplyOrderPanel({
 }
 
 /** Recebimento total ou parcial de uma OFP, com registro de nota fiscal. */
-export function ReceiptDialog({ order, onClose }: { order: SupplyOrder | null; onClose: () => void }) {
+export function ReceiptDialog({
+  order,
+  onClose,
+}: {
+  order: SupplyOrder | null;
+  onClose: () => void;
+}) {
   const { orgId, userId } = usePerms();
   const invalidate = useInvalidate();
   const { data: items = [] } = useSupplyOrderItems(order?.id ?? null);
@@ -530,9 +568,13 @@ export function ReceiptDialog({ order, onClose }: { order: SupplyOrder | null; o
     }
     for (const r of rows) {
       const pending =
-        Number(r.i.quantity) - Number(r.i.delivered_quantity ?? 0) - Number(r.i.cancelled_quantity ?? 0);
+        Number(r.i.quantity) -
+        Number(r.i.delivered_quantity ?? 0) -
+        Number(r.i.cancelled_quantity ?? 0);
       if (r.q > pending) {
-        toast.error(`Quantidade acima do saldo em aberto do item ${r.i.description} (${num(pending, 2)}).`);
+        toast.error(
+          `Quantidade acima do saldo em aberto do item ${r.i.description} (${num(pending, 2)}).`,
+        );
         return;
       }
     }
@@ -581,11 +623,21 @@ export function ReceiptDialog({ order, onClose }: { order: SupplyOrder | null; o
             </div>
             <div>
               <Label htmlFor="nfd">Data da nota</Label>
-              <Input id="nfd" type="date" value={invoiceDate} onChange={(e) => setInvoiceDate(e.target.value)} />
+              <Input
+                id="nfd"
+                type="date"
+                value={invoiceDate}
+                onChange={(e) => setInvoiceDate(e.target.value)}
+              />
             </div>
             <div>
               <Label htmlFor="nfv">Valor da nota</Label>
-              <Input id="nfv" inputMode="decimal" value={invoiceValue} onChange={(e) => setInvoiceValue(e.target.value)} />
+              <Input
+                id="nfv"
+                inputMode="decimal"
+                value={invoiceValue}
+                onChange={(e) => setInvoiceValue(e.target.value)}
+              />
             </div>
             <div>
               <Label>Depósito</Label>
@@ -619,12 +671,16 @@ export function ReceiptDialog({ order, onClose }: { order: SupplyOrder | null; o
               <TableBody>
                 {items.map((i) => {
                   const pending =
-                    Number(i.quantity) - Number(i.delivered_quantity ?? 0) - Number(i.cancelled_quantity ?? 0);
+                    Number(i.quantity) -
+                    Number(i.delivered_quantity ?? 0) -
+                    Number(i.cancelled_quantity ?? 0);
                   return (
                     <TableRow key={i.id}>
                       <TableCell>{i.description}</TableCell>
                       <TableCell className="text-right">{num(Number(i.quantity), 2)}</TableCell>
-                      <TableCell className="text-right">{num(Number(i.delivered_quantity ?? 0), 2)}</TableCell>
+                      <TableCell className="text-right">
+                        {num(Number(i.delivered_quantity ?? 0), 2)}
+                      </TableCell>
                       <TableCell className="text-right font-medium">{num(pending, 2)}</TableCell>
                       <TableCell className="text-right">
                         <Input
@@ -642,8 +698,8 @@ export function ReceiptDialog({ order, onClose }: { order: SupplyOrder | null; o
             </Table>
           </div>
           <p className="text-xs text-muted-foreground">
-            Recebimento parcial mantém o saldo restante em aberto e bloqueado no contrato. Recebimento total encerra a
-            OFP. Não é possível receber acima do solicitado.
+            Recebimento parcial mantém o saldo restante em aberto e bloqueado no contrato.
+            Recebimento total encerra a OFP. Não é possível receber acima do solicitado.
           </p>
         </div>
 
@@ -681,7 +737,9 @@ export function ReceiveOfpButton() {
           </DialogHeader>
           <div className="space-y-2">
             {openOrders.length === 0 && (
-              <p className="text-sm text-muted-foreground">Nenhuma OFP em aberto para recebimento.</p>
+              <p className="text-sm text-muted-foreground">
+                Nenhuma OFP em aberto para recebimento.
+              </p>
             )}
             {openOrders.map((o) => (
               <Button

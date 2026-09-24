@@ -8,10 +8,22 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   BUDGET_REFERENCE_LABELS,
   MAINTENANCE_SERVICE_TYPES,
@@ -59,18 +71,31 @@ function QuickAddDialog({
         <div className="space-y-3">
           <div>
             <Label htmlFor="quick-value">{fieldLabel} *</Label>
-            <Input id="quick-value" value={value} onChange={(e) => setValue(e.target.value)} autoFocus />
+            <Input
+              id="quick-value"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              autoFocus
+            />
           </div>
           <div>
             <Label htmlFor="quick-desc">Descrição (opcional)</Label>
-            <Input id="quick-desc" value={description} onChange={(e) => setDescription(e.target.value)} />
+            <Input
+              id="quick-desc"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
           </div>
         </div>
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button type="button" disabled={saving || value.trim().length < 2} onClick={() => onSave(value.trim(), description.trim())}>
+          <Button
+            type="button"
+            disabled={saving || value.trim().length < 2}
+            onClick={() => onSave(value.trim(), description.trim())}
+          >
             {saving ? "Salvando…" : "Salvar e selecionar"}
           </Button>
         </DialogFooter>
@@ -80,14 +105,22 @@ function QuickAddDialog({
 }
 
 /** Bloco 5.7 — tipo de serviço do plano preventivo, com cadastro rápido no mesmo fluxo. */
-export function ServiceTypeSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+export function ServiceTypeSelect({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
   const { data: types = [] } = useMaintenanceServiceTypes();
   const { orgId, canWrite } = usePerms();
   const invalidate = useInvalidate();
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const options = Array.from(new Set([...types.map((t) => t.name), ...MAINTENANCE_SERVICE_TYPES, value].filter(Boolean)));
+  const options = Array.from(
+    new Set([...types.map((t) => t.name), ...MAINTENANCE_SERVICE_TYPES, value].filter(Boolean)),
+  );
 
   async function save(name: string, description: string) {
     if (!orgId) return;
@@ -121,7 +154,13 @@ export function ServiceTypeSelect({ value, onChange }: { value: string; onChange
         </SelectContent>
       </Select>
       {canWrite && (
-        <Button type="button" variant="outline" size="icon" aria-label="Cadastrar tipo de serviço" onClick={() => setOpen(true)}>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          aria-label="Cadastrar tipo de serviço"
+          onClick={() => setOpen(true)}
+        >
           <Plus className="size-4" />
         </Button>
       )}
@@ -153,7 +192,9 @@ export function BudgetReferenceSelect({
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const options = Array.from(new Set([...refs.filter((r) => r.kind === kind).map((r) => r.value), value].filter(Boolean)));
+  const options = Array.from(
+    new Set([...refs.filter((r) => r.kind === kind).map((r) => r.value), value].filter(Boolean)),
+  );
 
   async function save(newValue: string, description: string) {
     if (!orgId) return;
@@ -178,7 +219,10 @@ export function BudgetReferenceSelect({
 
   return (
     <div className="flex gap-2">
-      <Select value={value || "__none__"} onValueChange={(v) => onChange(v === "__none__" ? "" : v)}>
+      <Select
+        value={value || "__none__"}
+        onValueChange={(v) => onChange(v === "__none__" ? "" : v)}
+      >
         <SelectTrigger>
           <SelectValue placeholder="Selecione" />
         </SelectTrigger>

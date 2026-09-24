@@ -47,7 +47,10 @@ export const CAPTURE_KINDS = [
   { value: "fornecimento", label: "Fornecimento de peças" },
 ] as const;
 
-export function labelFrom(list: readonly { value: string; label: string }[], v: string | null | undefined) {
+export function labelFrom(
+  list: readonly { value: string; label: string }[],
+  v: string | null | undefined,
+) {
   return list.find((i) => i.value === v)?.label ?? v ?? "—";
 }
 
@@ -131,7 +134,11 @@ export function useCardUses(cardId?: string | null) {
   return useQuery({
     queryKey: ["asset-card-uses", cardId ?? "all"],
     queryFn: async () => {
-      let q = supabase.from("asset_card_uses").select("*").order("created_at", { ascending: false }).limit(300);
+      let q = supabase
+        .from("asset_card_uses")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(300);
       if (cardId) q = q.eq("card_id", cardId);
       const { data, error } = await q;
       if (error) throw error;

@@ -12,9 +12,28 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   supabase,
   useCostCenters,
@@ -106,7 +125,9 @@ function CentrosCusto() {
     };
     const { error } = editing
       ? await supabase.from("cost_centers").update(payload).eq("id", editing.id)
-      : await supabase.from("cost_centers").insert({ ...payload, organization_id: orgId!, created_by: userId });
+      : await supabase
+          .from("cost_centers")
+          .insert({ ...payload, organization_id: orgId!, created_by: userId });
     setSaving(false);
     if (error) {
       toast.error(
@@ -139,7 +160,11 @@ function CentrosCusto() {
       <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <Label>Buscar</Label>
-          <Input placeholder="Código ou nome" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input
+            placeholder="Código ou nome"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
         <div>
           <Label>Unidade</Label>
@@ -197,11 +222,18 @@ function CentrosCusto() {
                   {c.description || "—"}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={c.active ? "default" : "secondary"}>{c.active ? "Ativo" : "Inativo"}</Badge>
+                  <Badge variant={c.active ? "default" : "secondary"}>
+                    {c.active ? "Ativo" : "Inativo"}
+                  </Badge>
                 </TableCell>
                 <TableCell>
                   {canManageFinance && (
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(c)} aria-label="Editar">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openEdit(c)}
+                      aria-label="Editar"
+                    >
                       <Pencil className="size-4" />
                     </Button>
                   )}
@@ -222,7 +254,13 @@ function CentrosCusto() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="code">Código *</Label>
-                <Input id="code" name="code" defaultValue={editing?.code ?? ""} required maxLength={30} />
+                <Input
+                  id="code"
+                  name="code"
+                  defaultValue={editing?.code ?? ""}
+                  required
+                  maxLength={30}
+                />
               </div>
               <div>
                 <Label>Secretaria / unidade</Label>
@@ -242,11 +280,22 @@ function CentrosCusto() {
               </div>
               <div className="sm:col-span-2">
                 <Label htmlFor="name">Nome *</Label>
-                <Input id="name" name="name" defaultValue={editing?.name ?? ""} required maxLength={120} />
+                <Input
+                  id="name"
+                  name="name"
+                  defaultValue={editing?.name ?? ""}
+                  required
+                  maxLength={120}
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label htmlFor="description">Descrição</Label>
-                <Textarea id="description" name="description" defaultValue={editing?.description ?? ""} rows={3} />
+                <Textarea
+                  id="description"
+                  name="description"
+                  defaultValue={editing?.description ?? ""}
+                  rows={3}
+                />
               </div>
             </div>
             <div className="flex items-center gap-3">

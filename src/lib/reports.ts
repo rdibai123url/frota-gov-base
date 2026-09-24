@@ -63,17 +63,26 @@ export function exportXlsx(
   sheetName = "Dados",
   meta?: ReportMeta,
 ) {
-  const head: unknown[][] = meta ? [...headerLines(meta, rows.length).map(([k, v]) => [k, v]), []] : [];
+  const head: unknown[][] = meta
+    ? [...headerLines(meta, rows.length).map(([k, v]) => [k, v]), []]
+    : [];
   const aoa: unknown[][] = [
     ...head,
     columns.map((c) => c.label),
-    ...rows.map((r) => columns.map((c) => (typeof r[c.key] === "object" ? JSON.stringify(r[c.key]) : (r[c.key] ?? "")))),
+    ...rows.map((r) =>
+      columns.map((c) =>
+        typeof r[c.key] === "object" ? JSON.stringify(r[c.key]) : (r[c.key] ?? ""),
+      ),
+    ),
   ];
   const sheet = XLSX.utils.aoa_to_sheet(aoa);
   sheet["!cols"] = columns.map((c) => ({
     wch: Math.min(
       48,
-      Math.max(c.label.length + 2, ...rows.slice(0, 200).map((r) => String(r[c.key] ?? "").length + 2)),
+      Math.max(
+        c.label.length + 2,
+        ...rows.slice(0, 200).map((r) => String(r[c.key] ?? "").length + 2),
+      ),
     ),
   }));
   const book = XLSX.utils.book_new();
@@ -167,7 +176,10 @@ export function printReport(meta: ReportMeta, columns: ReportColumn[], rows: Rep
 <tbody>${
     rows.length
       ? rows
-          .map((r) => `<tr>${columns.map((c) => `<td>${escapeHtml(r[c.key] ?? "—")}</td>`).join("")}</tr>`)
+          .map(
+            (r) =>
+              `<tr>${columns.map((c) => `<td>${escapeHtml(r[c.key] ?? "—")}</td>`).join("")}</tr>`,
+          )
           .join("")
       : `<tr><td colspan="${Math.max(1, columns.length)}">Nenhum dado para os filtros informados.</td></tr>`
   }</tbody></table>
@@ -199,7 +211,10 @@ export function printDocument(meta: {
   signatureLabels?: string[];
 }) {
   const fields = meta.fields.filter((f) => f.value);
-  const signatures = meta.signatureLabels ?? ["Autorizado por (órgão)", "Recebido por (estabelecimento)"];
+  const signatures = meta.signatureLabels ?? [
+    "Autorizado por (órgão)",
+    "Recebido por (estabelecimento)",
+  ];
   const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8" />
 <title>${escapeHtml(meta.title)}</title>
 <style>

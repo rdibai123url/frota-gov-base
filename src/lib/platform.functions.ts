@@ -221,7 +221,8 @@ export const createOrgUser = createServerFn({ method: "POST" })
         must_change_password: true,
       },
     });
-    if (error || !created.user) throw new Error(error?.message ?? "Não foi possível criar o usuário.");
+    if (error || !created.user)
+      throw new Error(error?.message ?? "Não foi possível criar o usuário.");
 
     await supabaseAdmin.from("profiles").upsert({
       id: created.user.id,
@@ -235,9 +236,11 @@ export const createOrgUser = createServerFn({ method: "POST" })
       active: true,
       must_change_password: true,
     });
-    await supabaseAdmin
-      .from("user_roles")
-      .insert({ user_id: created.user.id, organization_id: organizationId, role: data.role as never });
+    await supabaseAdmin.from("user_roles").insert({
+      user_id: created.user.id,
+      organization_id: organizationId,
+      role: data.role as never,
+    });
 
     await supabaseAdmin.from("activity_logs").insert({
       organization_id: organizationId,
@@ -324,7 +327,6 @@ const API_KEY_SCOPES = [
 
 const API_KEY_SCOPE_SET = new Set<string>(API_KEY_SCOPES);
 
-
 export const issueApiKey = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { name: string; scopes: string[]; expiresAt?: string | null }) => data)
@@ -337,11 +339,7 @@ export const issueApiKey = createServerFn({ method: "POST" })
     }
 
     const scopes = Array.from(
-      new Set(
-        (data.scopes ?? [])
-          .map((scope) => scope.trim())
-          .filter(Boolean),
-      ),
+      new Set((data.scopes ?? []).map((scope) => scope.trim()).filter(Boolean)),
     );
 
     if (scopes.length === 0) {

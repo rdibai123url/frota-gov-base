@@ -26,7 +26,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   AUTH_STATUS,
   EXPENSE_ORIGINS,
@@ -117,7 +124,15 @@ function Autorizacoes() {
     return auths.filter((a) => {
       if (fStatus !== ALL && a.status !== fStatus) return false;
       if (t) {
-        const hay = [a.code, (a.vehicle?.plate ?? a.vehicle?.asset_code ?? ""), a.driver?.full_name, a.fuel?.name].filter(Boolean).join(" ").toLowerCase();
+        const hay = [
+          a.code,
+          a.vehicle?.plate ?? a.vehicle?.asset_code ?? "",
+          a.driver?.full_name,
+          a.fuel?.name,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
         if (!hay.includes(t)) return false;
       }
       return true;
@@ -154,17 +169,26 @@ function Autorizacoes() {
           <Label className="text-xs">Busca (código, placa, condutor, combustível)</Label>
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" placeholder="Buscar…" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              className="pl-9"
+              placeholder="Buscar…"
+            />
           </div>
         </div>
         <div>
           <Label className="text-xs">Situação</Label>
           <Select value={fStatus} onValueChange={setFStatus}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Todas</SelectItem>
               {AUTH_STATUS.map((s) => (
-                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                <SelectItem key={s.value} value={s.value}>
+                  {s.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -188,7 +212,11 @@ function Autorizacoes() {
           </TableHeader>
           <TableBody>
             {isLoading && (
-              <TableRow><TableCell colSpan={9} className="py-8 text-center text-muted-foreground">Carregando…</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={9} className="py-8 text-center text-muted-foreground">
+                  Carregando…
+                </TableCell>
+              </TableRow>
             )}
             {!isLoading && rows.length === 0 && (
               <TableRow>
@@ -200,22 +228,40 @@ function Autorizacoes() {
             {rows.map((a) => (
               <TableRow key={a.id}>
                 <TableCell className="font-mono text-xs">{a.code}</TableCell>
-                <TableCell className="font-medium">{(a.vehicle?.plate ?? a.vehicle?.asset_code ?? "—")}</TableCell>
+                <TableCell className="font-medium">
+                  {a.vehicle?.plate ?? a.vehicle?.asset_code ?? "—"}
+                </TableCell>
                 <TableCell>{a.driver?.full_name ?? "—"}</TableCell>
                 <TableCell>{a.fuel?.name ?? "—"}</TableCell>
                 <TableCell className="text-right">{formatLiters(a.max_quantity)}</TableCell>
-                <TableCell className="text-right">{formatLiters(authorizationBalance(a))}</TableCell>
-                <TableCell className="whitespace-nowrap text-xs">{dateTimeBR(a.valid_until)}</TableCell>
+                <TableCell className="text-right">
+                  {formatLiters(authorizationBalance(a))}
+                </TableCell>
+                <TableCell className="whitespace-nowrap text-xs">
+                  {dateTimeBR(a.valid_until)}
+                </TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={STATUS_STYLE[a.status]}>{label(AUTH_STATUS, a.status)}</Badge>
+                  <Badge variant="outline" className={STATUS_STYLE[a.status]}>
+                    {label(AUTH_STATUS, a.status)}
+                  </Badge>
                 </TableCell>
                 <TableCell>
                   <div className="flex justify-end gap-1">
-                    <Button variant="ghost" size="icon" aria-label="Ver QR Code" onClick={() => setDetail(a)}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Ver QR Code"
+                      onClick={() => setDetail(a)}
+                    >
                       <QrCode className="size-4" />
                     </Button>
                     {perms.canCancel && !["cancelada", "utilizada"].includes(a.status) && (
-                      <Button variant="ghost" size="icon" aria-label="Cancelar" onClick={() => setCancelling(a)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Cancelar"
+                        onClick={() => setCancelling(a)}
+                      >
                         <Ban className="size-4 text-destructive" />
                       </Button>
                     )}
@@ -229,27 +275,56 @@ function Autorizacoes() {
 
       {pages > 1 && (
         <div className="mt-4 flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">{filtered.length} autorização(ões) · página {current} de {pages}</span>
+          <span className="text-muted-foreground">
+            {filtered.length} autorização(ões) · página {current} de {pages}
+          </span>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={current <= 1} onClick={() => setPage(current - 1)}>Anterior</Button>
-            <Button variant="outline" size="sm" disabled={current >= pages} onClick={() => setPage(current + 1)}>Próxima</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={current <= 1}
+              onClick={() => setPage(current - 1)}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={current >= pages}
+              onClick={() => setPage(current + 1)}
+            >
+              Próxima
+            </Button>
           </div>
         </div>
       )}
 
       {openNew && (
-        <NewAuthorizationDialog onClose={() => setOpenNew(false)} onSaved={() => invalidate(["fuel-authorizations"])} />
+        <NewAuthorizationDialog
+          onClose={() => setOpenNew(false)}
+          onSaved={() => invalidate(["fuel-authorizations"])}
+        />
       )}
       {openLimits && <LimitsDialog onClose={() => setOpenLimits(false)} />}
       {detail && <AuthorizationDetail auth={detail} onClose={() => setDetail(null)} />}
       {cancelling && (
-        <CancelAuthDialog auth={cancelling} onClose={() => setCancelling(null)} onSaved={() => invalidate(["fuel-authorizations"])} />
+        <CancelAuthDialog
+          auth={cancelling}
+          onClose={() => setCancelling(null)}
+          onSaved={() => invalidate(["fuel-authorizations"])}
+        />
       )}
     </>
   );
 }
 
-function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
+function NewAuthorizationDialog({
+  onClose,
+  onSaved,
+}: {
+  onClose: () => void;
+  onSaved: () => void;
+}) {
   const { data: vehicles = [] } = useVehicles();
   const { data: drivers = [] } = useDrivers();
   const { data: fuels = [] } = useFuelTypes();
@@ -319,27 +394,54 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
   const issues: { level: "erro" | "alerta"; message: string }[] = [];
   if (!vehicle) issues.push({ level: "erro", message: "Selecione o veículo." });
   if (vehicle && ["inativo", "baixado"].includes(vehicle.status))
-    issues.push({ level: "erro", message: `Veículo ${(vehicle.plate ?? vehicle.asset_code)} está ${vehicle.status} e não pode ser autorizado.` });
+    issues.push({
+      level: "erro",
+      message: `Veículo ${vehicle.plate ?? vehicle.asset_code} está ${vehicle.status} e não pode ser autorizado.`,
+    });
   if (vehicle?.status === "manutencao" && !perms.canManageFleet)
-    issues.push({ level: "erro", message: "Somente Gestor de Frota ou Administrador pode autorizar veículo em manutenção." });
+    issues.push({
+      level: "erro",
+      message: "Somente Gestor de Frota ou Administrador pode autorizar veículo em manutenção.",
+    });
   if (vehicle?.status === "manutencao" && perms.canManageFleet)
     issues.push({ level: "alerta", message: "Veículo em manutenção: justificativa obrigatória." });
   if (!driver) issues.push({ level: "erro", message: "Selecione o condutor." });
-  if (driver && !driver.active) issues.push({ level: "erro", message: "Condutor inativo não pode ser autorizado." });
+  if (driver && !driver.active)
+    issues.push({ level: "erro", message: "Condutor inativo não pode ser autorizado." });
   if (driver && cnhState(driver.license_expiry) === "vencida")
     issues.push({ level: "erro", message: "CNH do condutor está vencida." });
   if (driver && cnhState(driver.license_expiry) === "a_vencer")
     issues.push({ level: "alerta", message: "CNH do condutor vence nos próximos 30 dias." });
-  if (!fuel) issues.push({ level: "erro", message: "Selecione o combustível/material autorizado." });
+  if (!fuel)
+    issues.push({ level: "erro", message: "Selecione o combustível/material autorizado." });
   if (vehicle && fuel && !fuelCompatible(vehicle.fuel_type, fuel.name))
-    issues.push({ level: "alerta", message: `Combustível ${fuel.name} incompatível com o cadastro do veículo (${vehicle.fuel_type}).` });
-  if (!(qty > 0)) issues.push({ level: "erro", message: "A quantidade máxima deve ser maior que zero." });
-  if (new Date(until) <= new Date(from)) issues.push({ level: "erro", message: "A validade final deve ser posterior à inicial." });
-  if (perms.roles.includes("unit_manager") && !perms.canManageFleet && vehicle && vehicle.unit_id !== perms.unitId)
-    issues.push({ level: "erro", message: "Você só pode autorizar veículos da sua própria unidade." });
-  if (limitMsg) issues.push({ level: "alerta", message: `Limite excedido: ${limitMsg}. Registre a exceção justificada.` });
+    issues.push({
+      level: "alerta",
+      message: `Combustível ${fuel.name} incompatível com o cadastro do veículo (${vehicle.fuel_type}).`,
+    });
+  if (!(qty > 0))
+    issues.push({ level: "erro", message: "A quantidade máxima deve ser maior que zero." });
+  if (new Date(until) <= new Date(from))
+    issues.push({ level: "erro", message: "A validade final deve ser posterior à inicial." });
+  if (
+    perms.roles.includes("unit_manager") &&
+    !perms.canManageFleet &&
+    vehicle &&
+    vehicle.unit_id !== perms.unitId
+  )
+    issues.push({
+      level: "erro",
+      message: "Você só pode autorizar veículos da sua própria unidade.",
+    });
+  if (limitMsg)
+    issues.push({
+      level: "alerta",
+      message: `Limite excedido: ${limitMsg}. Registre a exceção justificada.`,
+    });
 
-  const needsJust = vehicle?.status === "manutencao" || (vehicle && fuel && !fuelCompatible(vehicle.fuel_type, fuel.name));
+  const needsJust =
+    vehicle?.status === "manutencao" ||
+    (vehicle && fuel && !fuelCompatible(vehicle.fuel_type, fuel.name));
   const blocked = issues.some((i) => i.level === "erro");
 
   async function submit() {
@@ -400,8 +502,8 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
         <DialogHeader>
           <DialogTitle>Nova autorização de abastecimento</DialogTitle>
           <DialogDescription>
-            O código e o código de segurança são gerados automaticamente pelo sistema. O QR Code contém apenas um
-            token seguro, sem dados pessoais.
+            O código e o código de segurança são gerados automaticamente pelo sistema. O QR Code
+            contém apenas um token seguro, sem dados pessoais.
           </DialogDescription>
         </DialogHeader>
 
@@ -409,12 +511,18 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
           <div>
             <Label>Veículo *</Label>
             <Select value={vehicleId} onValueChange={setVehicleId}>
-              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE}>Selecione</SelectItem>
                 {vehicles.map((v) => (
-                  <SelectItem key={v.id} value={v.id} disabled={["inativo", "baixado"].includes(v.status)}>
-                    {(v.plate ?? v.asset_code)} — {v.model ?? v.brand ?? "veículo"}
+                  <SelectItem
+                    key={v.id}
+                    value={v.id}
+                    disabled={["inativo", "baixado"].includes(v.status)}
+                  >
+                    {v.plate ?? v.asset_code} — {v.model ?? v.brand ?? "veículo"}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -427,12 +535,15 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
           <div>
             <Label>Condutor *</Label>
             <Select value={driverId} onValueChange={setDriverId}>
-              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE}>Selecione</SelectItem>
                 {drivers.map((d) => (
                   <SelectItem key={d.id} value={d.id} disabled={!driverEligible(d)}>
-                    {d.full_name}{!driverEligible(d) ? " (indisponível)" : ""}
+                    {d.full_name}
+                    {!driverEligible(d) ? " (indisponível)" : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -441,24 +552,36 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
           <div>
             <Label>Combustível / material *</Label>
             <Select value={fuelId} onValueChange={setFuelId}>
-              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE}>Selecione</SelectItem>
-                {fuels.filter((f) => f.active).map((f) => (
-                  <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
-                ))}
+                {fuels
+                  .filter((f) => f.active)
+                  .map((f) => (
+                    <SelectItem key={f.id} value={f.id}>
+                      {f.name}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
           <div>
             <Label>Fornecedor / posto</Label>
             <Select value={supplierId} onValueChange={setSupplierId}>
-              <SelectTrigger><SelectValue placeholder="Opcional" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Opcional" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE}>Livre (qualquer credenciado)</SelectItem>
-                {suppliers.filter((s) => s.active).map((s) => (
-                  <SelectItem key={s.id} value={s.id}>{s.trade_name || s.legal_name}</SelectItem>
-                ))}
+                {suppliers
+                  .filter((s) => s.active)
+                  .map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.trade_name || s.legal_name}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
@@ -480,7 +603,8 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
             </label>
             {fillTank && !vehicle?.tank_capacity ? (
               <p className="mt-1 text-xs text-destructive">
-                Veículo sem capacidade de tanque cadastrada: informe a quantidade máxima manualmente.
+                Veículo sem capacidade de tanque cadastrada: informe a quantidade máxima
+                manualmente.
               </p>
             ) : null}
           </div>
@@ -494,19 +618,41 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
           </div>
           <div>
             <Label htmlFor="od">KM na autorização</Label>
-            <Input id="od" type="number" value={odometer} onChange={(e) => setOdometer(e.target.value)} placeholder={vehicle?.current_km ? String(vehicle.current_km) : ""} />
+            <Input
+              id="od"
+              type="number"
+              value={odometer}
+              onChange={(e) => setOdometer(e.target.value)}
+              placeholder={vehicle?.current_km ? String(vehicle.current_km) : ""}
+            />
           </div>
           <div>
             <Label htmlFor="hm">Horímetro na autorização</Label>
-            <Input id="hm" type="number" step="0.1" value={hourMeter} onChange={(e) => setHourMeter(e.target.value)} />
+            <Input
+              id="hm"
+              type="number"
+              step="0.1"
+              value={hourMeter}
+              onChange={(e) => setHourMeter(e.target.value)}
+            />
           </div>
           <div>
             <Label htmlFor="vf">Validade inicial *</Label>
-            <Input id="vf" type="datetime-local" value={from} onChange={(e) => setFrom(e.target.value)} />
+            <Input
+              id="vf"
+              type="datetime-local"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+            />
           </div>
           <div>
             <Label htmlFor="vu">Validade final *</Label>
-            <Input id="vu" type="datetime-local" value={until} onChange={(e) => setUntil(e.target.value)} />
+            <Input
+              id="vu"
+              type="datetime-local"
+              value={until}
+              onChange={(e) => setUntil(e.target.value)}
+            />
           </div>
 
           <div className="sm:col-span-2 mt-2 border-t pt-4">
@@ -518,11 +664,14 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
           <div>
             <Label>Origem da despesa</Label>
             <Select value={origin} onValueChange={(v) => setOrigin(v as ExpenseOrigin)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {EXPENSE_ORIGINS.map((o) => (
                   <SelectItem key={o.value} value={o.value} disabled={!o.ready}>
-                    {o.label}{o.ready ? "" : " (em preparação)"}
+                    {o.label}
+                    {o.ready ? "" : " (em preparação)"}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -531,12 +680,18 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
           <div>
             <Label>Centro de custo</Label>
             <Select value={centerId} onValueChange={setCenterId}>
-              <SelectTrigger><SelectValue placeholder="Opcional" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Opcional" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE}>Não informar</SelectItem>
-                {centers.filter((c) => c.active).map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.code} — {c.name}</SelectItem>
-                ))}
+                {centers
+                  .filter((c) => c.active)
+                  .map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.code} — {c.name}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
@@ -549,19 +704,27 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
                 setItemId(NONE);
               }}
             >
-              <SelectTrigger><SelectValue placeholder="Opcional" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Opcional" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE}>Sem contrato</SelectItem>
-                {contracts.filter((c) => c.status === "vigente").map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.number}</SelectItem>
-                ))}
+                {contracts
+                  .filter((c) => c.status === "vigente")
+                  .map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.number}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
           <div>
             <Label>Item do contrato</Label>
             <Select value={itemId} onValueChange={setItemId}>
-              <SelectTrigger><SelectValue placeholder="Opcional" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Opcional" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE}>Sem item</SelectItem>
                 {contractItems
@@ -569,7 +732,13 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
                   .filter((i) => fuelId === NONE || !i.fuel_type_id || i.fuel_type_id === fuelId)
                   .map((i) => (
                     <SelectItem key={i.id} value={i.id}>
-                      {i.description} · saldo {formatLiters(Number(i.quantity) - Number(i.reserved_quantity) - Number(i.consumed_quantity))} {i.measure_unit}
+                      {i.description} · saldo{" "}
+                      {formatLiters(
+                        Number(i.quantity) -
+                          Number(i.reserved_quantity) -
+                          Number(i.consumed_quantity),
+                      )}{" "}
+                      {i.measure_unit}
                     </SelectItem>
                   ))}
               </SelectContent>
@@ -578,31 +747,39 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
           <div>
             <Label>Empenho</Label>
             <Select value={commitmentId} onValueChange={setCommitmentId}>
-              <SelectTrigger><SelectValue placeholder="Opcional" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Opcional" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE}>Sem empenho</SelectItem>
-                {commitments.filter((c) => c.status === "ativo").map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.number}/{c.exercise} · saldo {brl(Number(c.available_value ?? 0))}
-                  </SelectItem>
-                ))}
+                {commitments
+                  .filter((c) => c.status === "ativo")
+                  .map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.number}/{c.exercise} · saldo {brl(Number(c.available_value ?? 0))}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
           <div>
             <Label>Cota</Label>
             <Select value={quotaId} onValueChange={setQuotaId}>
-              <SelectTrigger><SelectValue placeholder="Opcional" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Opcional" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE}>Sem cota</SelectItem>
-                {quotas.filter((q) => q.active).map((q) => (
-                  <SelectItem key={q.id} value={q.id}>
-                    {q.name} · saldo{" "}
-                    {q.quota_type === "financeira"
-                      ? brl(Number(q.balance_amount ?? 0))
-                      : `${formatLiters(Number(q.balance_amount ?? 0))} ${q.measure_unit}`}
-                  </SelectItem>
-                ))}
+                {quotas
+                  .filter((q) => q.active)
+                  .map((q) => (
+                    <SelectItem key={q.id} value={q.id}>
+                      {q.name} · saldo{" "}
+                      {q.quota_type === "financeira"
+                        ? brl(Number(q.balance_amount ?? 0))
+                        : `${formatLiters(Number(q.balance_amount ?? 0))} ${q.measure_unit}`}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
@@ -613,13 +790,23 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
           {needsJust && (
             <div className="sm:col-span-2">
               <Label htmlFor="js">Justificativa administrativa *</Label>
-              <Textarea id="js" rows={2} value={justification} onChange={(e) => setJustification(e.target.value)} />
+              <Textarea
+                id="js"
+                rows={2}
+                value={justification}
+                onChange={(e) => setJustification(e.target.value)}
+              />
             </div>
           )}
           {limitMsg && (
             <div className="sm:col-span-2">
               <Label htmlFor="ex">Justificativa da exceção de limite *</Label>
-              <Textarea id="ex" rows={2} value={exceptionReason} onChange={(e) => setExceptionReason(e.target.value)} />
+              <Textarea
+                id="ex"
+                rows={2}
+                value={exceptionReason}
+                onChange={(e) => setExceptionReason(e.target.value)}
+              />
             </div>
           )}
         </div>
@@ -627,14 +814,23 @@ function NewAuthorizationDialog({ onClose, onSaved }: { onClose: () => void; onS
         {issues.length > 0 && (
           <ul className="space-y-1 rounded-md border p-3 text-sm">
             {issues.map((i, idx) => (
-              <li key={idx} className={i.level === "erro" ? "text-destructive" : "text-warning-foreground"}>• {i.message}</li>
+              <li
+                key={idx}
+                className={i.level === "erro" ? "text-destructive" : "text-warning-foreground"}
+              >
+                • {i.message}
+              </li>
             ))}
           </ul>
         )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button onClick={submit} disabled={saving || blocked}>{saving ? "Emitindo…" : "Emitir autorização"}</Button>
+          <Button variant="outline" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button onClick={submit} disabled={saving || blocked}>
+            {saving ? "Emitindo…" : "Emitir autorização"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -648,15 +844,21 @@ function AuthorizationDetail({ auth, onClose }: { auth: AuthorizationRow; onClos
     let active = true;
     // O QR Code carrega apenas o token opaco da autorização — nenhum dado pessoal.
     QRCode.toDataURL(`frotagov:auth:${auth.qr_token}`, { width: 240, margin: 1 })
-      .then((url) => { if (active) setQr(url); })
-      .catch(() => { if (active) setQr(null); });
-    return () => { active = false; };
+      .then((url) => {
+        if (active) setQr(url);
+      })
+      .catch(() => {
+        if (active) setQr(null);
+      });
+    return () => {
+      active = false;
+    };
   }, [auth.qr_token]);
 
   const items: [string, string][] = [
     ["Código", auth.code ?? "—"],
     ["Situação", label(AUTH_STATUS, auth.status)],
-    ["Veículo", (auth.vehicle?.plate ?? auth.vehicle?.asset_code ?? "—")],
+    ["Veículo", auth.vehicle?.plate ?? auth.vehicle?.asset_code ?? "—"],
     ["Unidade", auth.unit?.name ?? "—"],
     ["Condutor", auth.driver?.full_name ?? "—"],
     ["Combustível", auth.fuel?.name ?? "—"],
@@ -664,7 +866,10 @@ function AuthorizationDetail({ auth, onClose }: { auth: AuthorizationRow; onClos
     ["Quantidade autorizada", formatLiters(auth.max_quantity)],
     ["Consumido", formatLiters(auth.consumed_quantity)],
     ["Saldo", formatLiters(authorizationBalance(auth))],
-    ["Reservado no orçamento", `${formatLiters(Number(auth.reserved_quantity ?? 0))}${auth.reserved_value != null ? ` · ${brl(Number(auth.reserved_value))}` : ""}`],
+    [
+      "Reservado no orçamento",
+      `${formatLiters(Number(auth.reserved_quantity ?? 0))}${auth.reserved_value != null ? ` · ${brl(Number(auth.reserved_value))}` : ""}`,
+    ],
     ["Valor máximo", auth.max_value ? brl(auth.max_value) : "—"],
     ["Preço unitário máximo", auth.max_unit_price ? brl(auth.max_unit_price) : "—"],
     ["Válida de", dateTimeBR(auth.valid_from)],
@@ -683,13 +888,20 @@ function AuthorizationDetail({ auth, onClose }: { auth: AuthorizationRow; onClos
         <DialogHeader>
           <DialogTitle>Autorização {auth.code}</DialogTitle>
           <DialogDescription>
-            Apresente o QR Code e o código de segurança no posto. O QR Code não contém CPF, CNH ou dados pessoais.
+            Apresente o QR Code e o código de segurança no posto. O QR Code não contém CPF, CNH ou
+            dados pessoais.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col items-center gap-3 rounded-lg border bg-muted/30 p-4">
-          {qr ? <img src={qr} alt={`QR Code da autorização ${auth.code}`} className="size-48" /> : <div className="size-48 animate-pulse rounded bg-muted" />}
+          {qr ? (
+            <img src={qr} alt={`QR Code da autorização ${auth.code}`} className="size-48" />
+          ) : (
+            <div className="size-48 animate-pulse rounded bg-muted" />
+          )}
           <div className="text-center">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">Código de segurança</p>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+              Código de segurança
+            </p>
             <p className="font-mono text-2xl font-semibold tracking-widest">{auth.security_code}</p>
           </div>
         </div>
@@ -702,7 +914,9 @@ function AuthorizationDetail({ auth, onClose }: { auth: AuthorizationRow; onClos
           ))}
         </dl>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Fechar</Button>
+          <Button variant="outline" onClick={onClose}>
+            Fechar
+          </Button>
           <Button onClick={() => window.print()}>Imprimir</Button>
         </DialogFooter>
       </DialogContent>
@@ -710,7 +924,15 @@ function AuthorizationDetail({ auth, onClose }: { auth: AuthorizationRow; onClos
   );
 }
 
-function CancelAuthDialog({ auth, onClose, onSaved }: { auth: AuthorizationRow; onClose: () => void; onSaved: () => void }) {
+function CancelAuthDialog({
+  auth,
+  onClose,
+  onSaved,
+}: {
+  auth: AuthorizationRow;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
   const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -739,12 +961,23 @@ function CancelAuthDialog({ auth, onClose, onSaved }: { auth: AuthorizationRow; 
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Cancelar autorização {auth.code}</DialogTitle>
-          <DialogDescription>O registro é preservado com o motivo informado, para auditoria.</DialogDescription>
+          <DialogDescription>
+            O registro é preservado com o motivo informado, para auditoria.
+          </DialogDescription>
         </DialogHeader>
-        <Textarea rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Motivo do cancelamento" />
+        <Textarea
+          rows={3}
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="Motivo do cancelamento"
+        />
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Voltar</Button>
-          <Button variant="destructive" onClick={submit} disabled={saving}>Confirmar cancelamento</Button>
+          <Button variant="outline" onClick={onClose}>
+            Voltar
+          </Button>
+          <Button variant="destructive" onClick={submit} disabled={saving}>
+            Confirmar cancelamento
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -816,8 +1049,8 @@ function LimitsDialog({ onClose }: { onClose: () => void }) {
         <DialogHeader>
           <DialogTitle>Limites de combustível</DialogTitle>
           <DialogDescription>
-            Configure tetos diários e mensais por órgão, unidade ou veículo. Ao exceder, a emissão exige exceção
-            justificada — ou é bloqueada quando a exceção não for permitida.
+            Configure tetos diários e mensais por órgão, unidade ou veículo. Ao exceder, a emissão
+            exige exceção justificada — ou é bloqueada quando a exceção não for permitida.
           </DialogDescription>
         </DialogHeader>
 
@@ -825,10 +1058,14 @@ function LimitsDialog({ onClose }: { onClose: () => void }) {
           <div>
             <Label className="text-xs">Abrangência</Label>
             <Select value={scope} onValueChange={(v) => setScope(v as LimitScope)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {LIMIT_SCOPES.map((s) => (
-                  <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                  <SelectItem key={s.value} value={s.value}>
+                    {s.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -837,10 +1074,16 @@ function LimitsDialog({ onClose }: { onClose: () => void }) {
             <div>
               <Label className="text-xs">Unidade</Label>
               <Select value={unitId} onValueChange={setUnitId}>
-                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Selecione</SelectItem>
-                  {units.map((u) => (<SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>))}
+                  {units.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -849,10 +1092,16 @@ function LimitsDialog({ onClose }: { onClose: () => void }) {
             <div>
               <Label className="text-xs">Veículo</Label>
               <Select value={vehicleId} onValueChange={setVehicleId}>
-                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Selecione</SelectItem>
-                  {vehicles.map((v) => (<SelectItem key={v.id} value={v.id}>{(v.plate ?? v.asset_code)}</SelectItem>))}
+                  {vehicles.map((v) => (
+                    <SelectItem key={v.id} value={v.id}>
+                      {v.plate ?? v.asset_code}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -876,7 +1125,9 @@ function LimitsDialog({ onClose }: { onClose: () => void }) {
           <div>
             <Label className="text-xs">Permite exceção?</Label>
             <Select value={allowException} onValueChange={setAllowException}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="sim">Sim, com justificativa</SelectItem>
                 <SelectItem value="nao">Não, bloquear</SelectItem>
@@ -884,7 +1135,9 @@ function LimitsDialog({ onClose }: { onClose: () => void }) {
             </Select>
           </div>
           <div className="flex items-end">
-            <Button onClick={add} disabled={saving} className="w-full">Adicionar limite</Button>
+            <Button onClick={add} disabled={saving} className="w-full">
+              Adicionar limite
+            </Button>
           </div>
         </div>
 
@@ -902,18 +1155,32 @@ function LimitsDialog({ onClose }: { onClose: () => void }) {
           </TableHeader>
           <TableBody>
             {limits.length === 0 && (
-              <TableRow><TableCell colSpan={7} className="py-6 text-center text-muted-foreground">Nenhum limite configurado.</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={7} className="py-6 text-center text-muted-foreground">
+                  Nenhum limite configurado.
+                </TableCell>
+              </TableRow>
             )}
             {limits.map((l) => (
               <TableRow key={l.id}>
                 <TableCell>{label(LIMIT_SCOPES, l.scope)}</TableCell>
                 <TableCell>
-                  {l.unit_id ? units.find((u) => u.id === l.unit_id)?.name : l.vehicle_id ? vehicles.find((v) => v.id === l.vehicle_id)?.plate : "Todo o órgão"}
+                  {l.unit_id
+                    ? units.find((u) => u.id === l.unit_id)?.name
+                    : l.vehicle_id
+                      ? vehicles.find((v) => v.id === l.vehicle_id)?.plate
+                      : "Todo o órgão"}
                 </TableCell>
-                <TableCell className="text-right">{l.daily_quantity ? formatLiters(l.daily_quantity) : "—"}</TableCell>
-                <TableCell className="text-right">{l.monthly_quantity ? formatLiters(l.monthly_quantity) : "—"}</TableCell>
+                <TableCell className="text-right">
+                  {l.daily_quantity ? formatLiters(l.daily_quantity) : "—"}
+                </TableCell>
+                <TableCell className="text-right">
+                  {l.monthly_quantity ? formatLiters(l.monthly_quantity) : "—"}
+                </TableCell>
                 <TableCell>{l.allow_exception ? "Com justificativa" : "Bloqueia"}</TableCell>
-                <TableCell>{l.active ? <Badge>Ativo</Badge> : <Badge variant="outline">Inativo</Badge>}</TableCell>
+                <TableCell>
+                  {l.active ? <Badge>Ativo</Badge> : <Badge variant="outline">Inativo</Badge>}
+                </TableCell>
                 <TableCell>
                   <Button variant="ghost" size="sm" onClick={() => toggle(l.id, l.active)}>
                     {l.active ? "Desativar" : "Ativar"}

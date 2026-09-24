@@ -25,7 +25,9 @@ export function usePlatformSession() {
       if (!auth.user) return null;
       const { data } = await supabase
         .from("platform_sessions")
-        .select("organization_id, started_at, organization:organizations(id, legal_name, short_name)")
+        .select(
+          "organization_id, started_at, organization:organizations(id, legal_name, short_name)",
+        )
         .eq("user_id", auth.user.id)
         .maybeSingle();
       return data ?? null;
@@ -43,16 +45,21 @@ export function usePlatformContextActions() {
     async enterOrg(organizationId: string) {
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) throw new Error("Sessão expirada.");
-      const { error } = await supabase
-        .from("platform_sessions")
-        .upsert({ user_id: auth.user.id, organization_id: organizationId, started_at: new Date().toISOString() });
+      const { error } = await supabase.from("platform_sessions").upsert({
+        user_id: auth.user.id,
+        organization_id: organizationId,
+        started_at: new Date().toISOString(),
+      });
       if (error) throw error;
       await reset();
     },
     async exitOrg() {
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) return;
-      const { error } = await supabase.from("platform_sessions").delete().eq("user_id", auth.user.id);
+      const { error } = await supabase
+        .from("platform_sessions")
+        .delete()
+        .eq("user_id", auth.user.id);
       if (error) throw error;
       await reset();
     },
@@ -65,10 +72,7 @@ export function useAllOrganizations() {
     queryKey: ["all-organizations", isSuperAdmin],
     enabled: isSuperAdmin,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("organizations")
-        .select("*")
-        .order("legal_name");
+      const { data, error } = await supabase.from("organizations").select("*").order("legal_name");
       if (error) throw error;
       return data ?? [];
     },
@@ -98,7 +102,10 @@ export function useActivityLogs(filters: LogFilters, enabled = true) {
       if (filters.eventType) query = query.eq("event_type", filters.eventType);
       if (filters.from) query = query.gte("created_at", `${filters.from}T00:00:00`);
       if (filters.to) query = query.lte("created_at", `${filters.to}T23:59:59`);
-      if (filters.q) query = query.or(`summary.ilike.%${filters.q}%,actor_email.ilike.%${filters.q}%,entity.ilike.%${filters.q}%`);
+      if (filters.q)
+        query = query.or(
+          `summary.ilike.%${filters.q}%,actor_email.ilike.%${filters.q}%,entity.ilike.%${filters.q}%`,
+        );
       const start = filters.page * filters.pageSize;
       const { data, error, count } = await query.range(start, start + filters.pageSize - 1);
       if (error) throw error;
@@ -138,7 +145,10 @@ export function useTransparencySettings() {
   return useQuery({
     queryKey: ["transparency-settings"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("transparency_settings").select("*").maybeSingle();
+      const { data, error } = await supabase
+        .from("transparency_settings")
+        .select("*")
+        .maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -179,7 +189,11 @@ function csvCell(value: unknown) {
 }
 
 /** Exporta linhas em CSV com separador ";" (compatível com Excel pt-BR). */
-export function exportCsv(filename: string, columns: { key: string; label: string }[], rows: Record<string, unknown>[]) {
+export function exportCsv(
+  filename: string,
+  columns: { key: string; label: string }[],
+  rows: Record<string, unknown>[],
+) {
   const header = columns.map((c) => csvCell(c.label)).join(";");
   const body = rows.map((r) => columns.map((c) => csvCell(r[c.key])).join(";")).join("\n");
   const blob = new Blob(["\uFEFF" + header + "\n" + body], { type: "text/csv;charset=utf-8" });
@@ -192,15 +206,27 @@ export function exportCsv(filename: string, columns: { key: string; label: strin
 }
 
 /** Exporta em formato de planilha (XML SpreadsheetML aberto pelo Excel). */
-export function exportExcel(filename: string, columns: { key: string; label: string }[], rows: Record<string, unknown>[]) {
+export function exportExcel(
+  filename: string,
+  columns: { key: string; label: string }[],
+  rows: Record<string, unknown>[],
+) {
   const esc = (v: unknown) =>
-    String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  const head = columns.map((c) => `<Cell><Data ss:Type="String">${esc(c.label)}</Data></Cell>`).join("");
+    String(v ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  const head = columns
+    .map((c) => `<Cell><Data ss:Type="String">${esc(c.label)}</Data></Cell>`)
+    .join("");
   const body = rows
     .map(
       (r) =>
         `<Row>${columns
-          .map((c) => `<Cell><Data ss:Type="String">${esc(typeof r[c.key] === "object" ? JSON.stringify(r[c.key]) : r[c.key])}</Data></Cell>`)
+          .map(
+            (c) =>
+              `<Cell><Data ss:Type="String">${esc(typeof r[c.key] === "object" ? JSON.stringify(r[c.key]) : r[c.key])}</Data></Cell>`,
+          )
           .join("")}</Row>`,
     )
     .join("");

@@ -4,6 +4,8 @@
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 
 type SettingsInput = {
   organizationId: string;
@@ -30,8 +32,10 @@ type SettingsInput = {
   notes?: string | null;
 };
 
-async function assertSuperAdmin(context: { supabase: { rpc: Function }; userId: string }) {
-  const { data, error } = await context.supabase.rpc("is_super_admin", { _user_id: context.userId });
+async function assertSuperAdmin(context: { supabase: SupabaseClient<Database>; userId: string }) {
+  const { data, error } = await context.supabase.rpc("is_super_admin", {
+    _user_id: context.userId,
+  });
   if (error || !data) throw new Error("Apenas o Super Admin pode executar esta ação.");
 }
 
@@ -66,7 +70,11 @@ export const testBackupDestination = createServerFn({ method: "POST" })
     const result = await testDestination(settings as never);
     await supabaseAdmin
       .from("backup_settings")
-      .update({ last_test_at: new Date().toISOString(), last_test_ok: result.ok, last_test_message: result.message })
+      .update({
+        last_test_at: new Date().toISOString(),
+        last_test_ok: result.ok,
+        last_test_message: result.message,
+      })
       .eq("organization_id", data.organizationId);
     return result;
   });
@@ -99,7 +107,9 @@ export const verifyBackupIntegrity = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!run?.object_key || !run.checksum)
       return { ok: false, message: "Execução sem cópia verificável na plataforma." };
-    const { data: file, error } = await supabaseAdmin.storage.from("backups").download(run.object_key);
+    const { data: file, error } = await supabaseAdmin.storage
+      .from("backups")
+      .download(run.object_key);
     if (error || !file) return { ok: false, message: "Arquivo não encontrado no armazenamento." };
     const checksum = await sha256Hex(new Uint8Array(await file.arrayBuffer()));
     const ok = checksum === run.checksum;
@@ -107,7 +117,12 @@ export const verifyBackupIntegrity = createServerFn({ method: "POST" })
       .from("backup_runs")
       .update({ integrity_valid: ok, integrity_checked_at: new Date().toISOString() })
       .eq("id", run.id);
-    return { ok, message: ok ? "Integridade confirmada (SHA-256)." : "Divergência de conteúdo: o arquivo foi alterado." };
+    return {
+      ok,
+      message: ok
+        ? "Integridade confirmada (SHA-256)."
+        : "Divergência de conteúdo: o arquivo foi alterado.",
+    };
   });
 
 export const downloadBackupLink = createServerFn({ method: "POST" })
@@ -116,10 +131,17 @@ export const downloadBackupLink = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context as never);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: run } = await supabaseAdmin.from("backup_runs").select("object_key").eq("id", data.runId).maybeSingle();
+    const { data: run } = await supabaseAdmin
+      .from("backup_runs")
+      .select("object_key")
+      .eq("id", data.runId)
+      .maybeSingle();
     if (!run?.object_key) return { url: null, message: "Sem cópia disponível na plataforma." };
-    const { data: signed, error } = await supabaseAdmin.storage.from("backups").createSignedUrl(run.object_key, 300);
-    if (error || !signed) return { url: null, message: "Não foi possível gerar o link temporário." };
+    const { data: signed, error } = await supabaseAdmin.storage
+      .from("backups")
+      .createSignedUrl(run.object_key, 300);
+    if (error || !signed)
+      return { url: null, message: "Não foi possível gerar o link temporário." };
     return { url: signed.signedUrl, message: "Link válido por 5 minutos." };
   });
 
@@ -153,8 +175,10 @@ export const restoreBackup = createServerFn({ method: "POST" })
   .inputValidator((input: { runId: string; justification: string; confirmation: string }) => input)
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context as never);
-    if (data.justification.trim().length < 15) throw new Error("A justificativa deve ter ao menos 15 caracteres.");
-    if (data.confirmation.trim().toUpperCase() !== "RESTAURAR") throw new Error('Digite "RESTAURAR" para confirmar.');
+    if (data.justification.trim().length < 15)
+      throw new Error("A justificativa deve ter ao menos 15 caracteres.");
+    if (data.confirmation.trim().toUpperCase() !== "RESTAURAR")
+      throw new Error('Digite "RESTAURAR" para confirmar.');
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { runBackup, BACKUP_TABLES, RESTORE_CONFLICT_COLUMNS, sha256Hex } =
@@ -166,7 +190,8 @@ export const restoreBackup = createServerFn({ method: "POST" })
       .select("id, organization_id, object_key, status, checksum")
       .eq("id", data.runId)
       .maybeSingle();
-    if (!run?.object_key) throw new Error("Esta execução não possui pacote restaurável na plataforma.");
+    if (!run?.object_key)
+      throw new Error("Esta execução não possui pacote restaurável na plataforma.");
 
     const safety = await runBackup(supabaseAdmin as never, run.organization_id, {
       kind: "manual",
@@ -190,14 +215,18 @@ export const restoreBackup = createServerFn({ method: "POST" })
       .single();
 
     try {
-      const { data: file, error } = await supabaseAdmin.storage.from("backups").download(run.object_key);
+      const { data: file, error } = await supabaseAdmin.storage
+        .from("backups")
+        .download(run.object_key);
       if (error || !file) throw new Error("Pacote de backup não encontrado no armazenamento.");
 
       const bundleBytes = new Uint8Array(await file.arrayBuffer());
       if (run.checksum) {
         const actualBundleChecksum = await sha256Hex(bundleBytes);
         if (actualBundleChecksum !== run.checksum) {
-          throw new Error("Falha de integridade: o pacote de backup não corresponde ao checksum registrado.");
+          throw new Error(
+            "Falha de integridade: o pacote de backup não corresponde ao checksum registrado.",
+          );
         }
       }
 
@@ -212,7 +241,7 @@ export const restoreBackup = createServerFn({ method: "POST" })
           checksum?: string | null;
         }[];
       };
-      
+
       let restored = 0;
       let restoredFiles = 0;
       let skippedFiles = 0;
@@ -273,7 +302,11 @@ export const restoreBackup = createServerFn({ method: "POST" })
           : "");
       await supabaseAdmin
         .from("backup_restores")
-        .update({ status: "concluido", finished_at: new Date().toISOString(), result_summary: summary })
+        .update({
+          status: "concluido",
+          finished_at: new Date().toISOString(),
+          result_summary: summary,
+        })
         .eq("id", restore!.id);
       return { ok: true, message: summary, safetyRunId: safety.runId };
     } catch (error) {

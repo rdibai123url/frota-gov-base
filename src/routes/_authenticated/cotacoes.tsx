@@ -15,11 +15,30 @@ import { PropostaFields } from "@/components/proposta-form";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { parseBRNumber } from "@/lib/format";
@@ -74,7 +93,10 @@ export const Route = createFileRoute("/_authenticated/cotacoes")({
           "Processos eletrônicos de cotação com oficinas credenciadas, recebimento de propostas, mapa comparativo e aprovação auditada.",
       },
       { property: "og:title", content: "Cotações de manutenção — FrotaGov" },
-      { property: "og:description", content: "Cotação eletrônica de serviços de manutenção da frota pública." },
+      {
+        property: "og:description",
+        content: "Cotação eletrônica de serviços de manutenção da frota pública.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -121,7 +143,9 @@ function Cotacoes() {
       (c) =>
         (fStatus === ALL || c.status === fStatus) &&
         (!q ||
-          `${c.code ?? ""} ${c.description} ${(c.vehicle?.plate ?? c.vehicle?.asset_code ?? "")}`.toLowerCase().includes(q)),
+          `${c.code ?? ""} ${c.description} ${c.vehicle?.plate ?? c.vehicle?.asset_code ?? ""}`
+            .toLowerCase()
+            .includes(q)),
     );
   }, [quotations, fStatus, search]);
 
@@ -205,7 +229,11 @@ function Cotacoes() {
       <div className="mb-4 grid gap-3 sm:grid-cols-2">
         <div>
           <Label>Buscar</Label>
-          <Input placeholder="Código, veículo, descrição" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input
+            placeholder="Código, veículo, descrição"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
         <div>
           <Label>Situação</Label>
@@ -260,9 +288,11 @@ function Cotacoes() {
                   {q.code || "—"}
                   <span className="block text-xs text-muted-foreground">{q.specialty || ""}</span>
                 </TableCell>
-                <TableCell>{(q.vehicle?.plate ?? q.vehicle?.asset_code ?? "—")}</TableCell>
+                <TableCell>{q.vehicle?.plate ?? q.vehicle?.asset_code ?? "—"}</TableCell>
                 <TableCell className="max-w-[260px] truncate">{q.description}</TableCell>
-                <TableCell className="text-sm">{q.deadline_at ? dateTimeBR(q.deadline_at) : "—"}</TableCell>
+                <TableCell className="text-sm">
+                  {q.deadline_at ? dateTimeBR(q.deadline_at) : "—"}
+                </TableCell>
                 <TableCell className="text-right text-sm">
                   {q.invited_count} / {q.valid_proposals_count}
                   {q.valid_proposals_count < MIN_PROPOSALS && q.status !== "cancelada" && (
@@ -306,7 +336,7 @@ function Cotacoes() {
                     <SelectItem value={NONE}>Sem veículo (compra para estoque)</SelectItem>
                     {vehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        {(v.plate ?? v.asset_code)} — {v.brand} {v.model}
+                        {v.plate ?? v.asset_code} — {v.brand} {v.model}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -348,7 +378,6 @@ function Cotacoes() {
                   </SelectContent>
                 </Select>
               </div>
-
 
               <div>
                 <Label>Unidade</Label>
@@ -490,7 +519,6 @@ function QuotationDetail({
       !invites.some((i) => i.workshop_id === w.id),
   );
 
-
   /** Empresas selecionáveis na proposta: convidadas + qualquer empresa ativa do órgão. */
   const proposalCompanyOptions = useMemo(() => {
     const used = new Set(proposals.map((p) => p.workshop_id).filter(Boolean) as string[]);
@@ -501,7 +529,11 @@ function QuotationDetail({
         return {
           value: w.id,
           label: w.trade_name || w.legal_name,
-          description: [w.legal_name, (w.specialties ?? []).join(", "), [w.city, w.state].filter(Boolean).join("/")]
+          description: [
+            w.legal_name,
+            (w.specialties ?? []).join(", "),
+            [w.city, w.state].filter(Boolean).join("/"),
+          ]
             .filter(Boolean)
             .join(" · "),
           keywords: [w.cnpj, w.email, w.phone],
@@ -509,7 +541,6 @@ function QuotationDetail({
         };
       });
   }, [workshops, proposals, invites]);
-
 
   function refresh() {
     invalidate([
@@ -526,7 +557,10 @@ function QuotationDetail({
     const form = e.currentTarget;
     const fd = new FormData(form);
     const description = itemDescription.trim();
-    if (!description) { toast.error("Informe a descrição do item."); return; }
+    if (!description) {
+      toast.error("Informe a descrição do item.");
+      return;
+    }
     setBusy(true);
     const { error } = await supabase.from("quotation_items").insert({
       organization_id: orgId!,
@@ -538,7 +572,10 @@ function QuotationDetail({
       created_by: userId,
     });
     setBusy(false);
-    if (error) { toast.error(dbMessage(error)); return; }
+    if (error) {
+      toast.error(dbMessage(error));
+      return;
+    }
     form.reset();
     setItemDescription("");
     setItemUnit("UN");
@@ -547,12 +584,18 @@ function QuotationDetail({
 
   async function removeItem(id: string) {
     const { error } = await supabase.from("quotation_items").delete().eq("id", id);
-    if (error) { toast.error(dbMessage(error)); return; }
+    if (error) {
+      toast.error(dbMessage(error));
+      return;
+    }
     refresh();
   }
 
   async function invite() {
-    if (!inviteWorkshop) { toast.error("Selecione uma oficina credenciada."); return; }
+    if (!inviteWorkshop) {
+      toast.error("Selecione uma oficina credenciada.");
+      return;
+    }
     setBusy(true);
     const { error } = await supabase.from("quotation_invitations").insert({
       organization_id: orgId!,
@@ -561,7 +604,10 @@ function QuotationDetail({
       created_by: userId,
     });
     setBusy(false);
-    if (error) { toast.error(dbMessage(error)); return; }
+    if (error) {
+      toast.error(dbMessage(error));
+      return;
+    }
     setInviteWorkshop("");
     toast.success("Oficina convidada.");
     refresh();
@@ -572,16 +618,29 @@ function QuotationDetail({
       .from("quotation_invitations")
       .update({ status, responded_at: new Date().toISOString(), updated_by: userId })
       .eq("id", id);
-    if (error) { toast.error(dbMessage(error)); return; }
+    if (error) {
+      toast.error(dbMessage(error));
+      return;
+    }
     refresh();
   }
 
   async function addProposal(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!proposalWorkshop) { toast.error("Selecione a empresa da proposta."); return; }
+    if (!proposalWorkshop) {
+      toast.error("Selecione a empresa da proposta.");
+      return;
+    }
     const payload = draftToPayload(draft, kind);
-    const problem = discountProblem(payload.discountMode, payload.discountInput, payload.totals.gross);
-    if (problem) { toast.error(problem); return; }
+    const problem = discountProblem(
+      payload.discountMode,
+      payload.discountInput,
+      payload.totals.gross,
+    );
+    if (problem) {
+      toast.error(problem);
+      return;
+    }
     if (payload.totals.gross <= 0) {
       toast.error("Informe ao menos um valor de serviço ou de peça na proposta.");
       return;
@@ -608,7 +667,11 @@ function QuotationDetail({
         })
         .select("id")
         .maybeSingle();
-      if (invError) { setBusy(false); toast.error(dbMessage(invError)); return; }
+      if (invError) {
+        setBusy(false);
+        toast.error(dbMessage(invError));
+        return;
+      }
       inviteId = created?.id ?? null;
     }
 
@@ -635,7 +698,11 @@ function QuotationDetail({
       })
       .select("id")
       .maybeSingle();
-    if (error) { setBusy(false); toast.error(dbMessage(error)); return; }
+    if (error) {
+      setBusy(false);
+      toast.error(dbMessage(error));
+      return;
+    }
 
     if (proposal?.id && payload.items.length) {
       const { error: itemsError } = await supabase.from("quotation_proposal_items").insert(
@@ -651,7 +718,12 @@ function QuotationDetail({
           created_by: userId,
         })),
       );
-      if (itemsError) { setBusy(false); toast.error(dbMessage(itemsError)); refresh(); return; }
+      if (itemsError) {
+        setBusy(false);
+        toast.error(dbMessage(itemsError));
+        refresh();
+        return;
+      }
     }
 
     // O desconto é gravado depois dos itens, quando o valor bruto já está completo.
@@ -660,9 +732,13 @@ function QuotationDetail({
         .from("quotation_proposals")
         .update({ discount_mode: payload.discountMode, discount_input: payload.discountInput })
         .eq("id", proposal.id);
-      if (discError) { setBusy(false); toast.error(dbMessage(discError)); refresh(); return; }
+      if (discError) {
+        setBusy(false);
+        toast.error(dbMessage(discError));
+        refresh();
+        return;
+      }
     }
-
 
     setBusy(false);
     if (inviteId) await setInviteStatus(inviteId, "respondida");
@@ -697,20 +773,28 @@ function QuotationDetail({
     refresh();
   }
 
-
   async function disqualify(p: ProposalRow) {
     const reason = window.prompt("Motivo da desclassificação:") ?? "";
-    if (!reason.trim()) { toast.error("Informe o motivo da desclassificação."); return; }
+    if (!reason.trim()) {
+      toast.error("Informe o motivo da desclassificação.");
+      return;
+    }
     const { error } = await supabase
       .from("quotation_proposals")
       .update({ status: "desclassificada", disqualify_reason: reason, updated_by: userId })
       .eq("id", p.id);
-    if (error) { toast.error(dbMessage(error)); return; }
+    if (error) {
+      toast.error(dbMessage(error));
+      return;
+    }
     refresh();
   }
 
   async function approve() {
-    if (!selected) { toast.error("Selecione a proposta vencedora."); return; }
+    if (!selected) {
+      toast.error("Selecione a proposta vencedora.");
+      return;
+    }
     setBusy(true);
     const { error } = await supabase
       .from("quotations")
@@ -724,19 +808,33 @@ function QuotationDetail({
       })
       .eq("id", quotation.id);
     setBusy(false);
-    if (error) { toast.error(dbMessage(error)); return; }
+    if (error) {
+      toast.error(dbMessage(error));
+      return;
+    }
     toast.success("Proposta aprovada. Emita a ordem de serviço.");
     refresh();
   }
 
   async function rejectAll() {
     const reason = window.prompt("Motivo da rejeição de todas as propostas:") ?? "";
-    if (!reason.trim()) { toast.error("Informe o motivo."); return; }
+    if (!reason.trim()) {
+      toast.error("Informe o motivo.");
+      return;
+    }
     const { error } = await supabase
       .from("quotations")
-      .update({ status: "cancelada", cancel_reason: reason, reject_reason: reason, updated_by: userId })
+      .update({
+        status: "cancelada",
+        cancel_reason: reason,
+        reject_reason: reason,
+        updated_by: userId,
+      })
       .eq("id", quotation.id);
-    if (error) { toast.error(dbMessage(error)); return; }
+    if (error) {
+      toast.error(dbMessage(error));
+      return;
+    }
     toast.success("Processo encerrado sem contratação.");
     refresh();
   }
@@ -766,10 +864,12 @@ function QuotationDetail({
 
       <div className="grid gap-2 rounded-md border bg-muted/30 p-3 text-sm sm:grid-cols-3">
         <p>
-          <span className="text-muted-foreground">Veículo:</span> {(quotation.vehicle?.plate ?? quotation.vehicle?.asset_code ?? "—")}
+          <span className="text-muted-foreground">Veículo:</span>{" "}
+          {quotation.vehicle?.plate ?? quotation.vehicle?.asset_code ?? "—"}
         </p>
         <p>
-          <span className="text-muted-foreground">Solicitação:</span> {quotation.request?.code ?? "—"}
+          <span className="text-muted-foreground">Solicitação:</span>{" "}
+          {quotation.request?.code ?? "—"}
         </p>
         <p>
           <span className="text-muted-foreground">Prazo:</span>{" "}
@@ -797,7 +897,11 @@ function QuotationDetail({
               Encerrar prazo e analisar
             </Button>
           )}
-          <Button size="sm" variant="outline" onClick={() => onChangeStatus(quotation, "cancelada")}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onChangeStatus(quotation, "cancelada")}
+          >
             Cancelar processo
           </Button>
         </div>
@@ -812,9 +916,11 @@ function QuotationDetail({
           <TabsTrigger value="mapa">Mapa comparativo</TabsTrigger>
         </TabsList>
 
-
         <TabsContent value="itens" className="space-y-3">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground"><HelpInlineButton topicKey="/cotacoes/itens" /><span>Ajuda desta aba</span></div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <HelpInlineButton topicKey="/cotacoes/itens" />
+            <span>Ajuda desta aba</span>
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -841,7 +947,12 @@ function QuotationDetail({
                   <TableCell className="text-right">{num(Number(i.quantity), 2)}</TableCell>
                   <TableCell>
                     {canManage && !closed && (
-                      <Button variant="ghost" size="icon" aria-label="Remover" onClick={() => removeItem(i.id)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Remover"
+                        onClick={() => removeItem(i.id)}
+                      >
                         <Trash2 className="size-4" />
                       </Button>
                     )}
@@ -859,10 +970,13 @@ function QuotationDetail({
                   name="description"
                   value={itemDescription}
                   onChange={setItemDescription}
-                  onPick={(s) => { if (s.measure_unit) setItemUnit(s.measure_unit); }}
+                  onPick={(s) => {
+                    if (s.measure_unit) setItemUnit(s.measure_unit);
+                  }}
                 />
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Sugestões vêm do histórico do próprio órgão; itens novos podem ser digitados livremente.
+                  Sugestões vêm do histórico do próprio órgão; itens novos podem ser digitados
+                  livremente.
                 </p>
               </div>
               <div>
@@ -888,7 +1002,10 @@ function QuotationDetail({
         </TabsContent>
 
         <TabsContent value="oficinas" className="space-y-4">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground"><HelpInlineButton topicKey="/cotacoes/convites" /><span>Ajuda desta aba</span></div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <HelpInlineButton topicKey="/cotacoes/convites" />
+            <span>Ajuda desta aba</span>
+          </div>
           <ConvitesCotacao
             quotationId={quotation.id}
             invites={invites as never}
@@ -901,7 +1018,10 @@ function QuotationDetail({
           {canManage && !closed && (
             <div className="flex flex-wrap items-end gap-2 rounded-md border bg-muted/30 p-3">
               <div className="min-w-64 flex-1">
-                <Label>Convidar oficina credenciada apta ({quotation.specialty || "qualquer especialidade"})</Label>
+                <Label>
+                  Convidar oficina credenciada apta (
+                  {quotation.specialty || "qualquer especialidade"})
+                </Label>
                 <Select value={inviteWorkshop} onValueChange={setInviteWorkshop}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
@@ -923,7 +1043,10 @@ function QuotationDetail({
         </TabsContent>
 
         <TabsContent value="propostas" className="space-y-4">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground"><HelpInlineButton topicKey="/cotacoes/propostas" /><span>Ajuda desta aba</span></div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <HelpInlineButton topicKey="/cotacoes/propostas" />
+            <span>Ajuda desta aba</span>
+          </div>
           <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/30 p-2 text-sm">
             <span className="text-muted-foreground">Mostrar:</span>
             {(
@@ -960,10 +1083,10 @@ function QuotationDetail({
                     <Badge variant="outline">{proposalSourceLabel(p.source)}</Badge>
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Recebida em {dateTimeBR(p.received_at)} · Execução {p.execution_days ?? "—"} dia(s) · Garantia
-                    dos serviços {p.warranty_days ?? "—"} dia(s) · Garantia das peças {p.parts_warranty_days ?? "—"}{" "}
-                    dia(s) · Validade {p.valid_days ?? "—"} dia(s) ·{" "}
-                    {p.payment_terms || "condição não informada"}
+                    Recebida em {dateTimeBR(p.received_at)} · Execução {p.execution_days ?? "—"}{" "}
+                    dia(s) · Garantia dos serviços {p.warranty_days ?? "—"} dia(s) · Garantia das
+                    peças {p.parts_warranty_days ?? "—"} dia(s) · Validade {p.valid_days ?? "—"}{" "}
+                    dia(s) · {p.payment_terms || "condição não informada"}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -983,10 +1106,10 @@ function QuotationDetail({
                 {Number(p.labor_hours) > 0
                   ? ` (${num(Number(p.labor_hours), 2)} h × ${brl(Number(p.labor_hour_value))})`
                   : ""}{" "}
-                · Outros serviços {brl(Number(p.services_value))} · Bruto {brl(Number(p.total_value))} · Desconto{" "}
-                {brl(Number(p.discount_value))}
-                {p.discount_mode === "percent" ? ` (${num(Number(p.discount_input), 2)}%)` : ""} · Líquido{" "}
-                <strong>{brl(netOf(p))}</strong>
+                · Outros serviços {brl(Number(p.services_value))} · Bruto{" "}
+                {brl(Number(p.total_value))} · Desconto {brl(Number(p.discount_value))}
+                {p.discount_mode === "percent" ? ` (${num(Number(p.discount_input), 2)}%)` : ""} ·
+                Líquido <strong>{brl(netOf(p))}</strong>
                 {p.disqualify_reason ? ` · Desclassificada: ${p.disqualify_reason}` : ""}
               </p>
               {itemsByProposal(p.id).length > 0 && (
@@ -1015,13 +1138,21 @@ function QuotationDetail({
                   </TableBody>
                 </Table>
               )}
-              {p.notes && <p className="mt-2 text-xs text-muted-foreground">Observações: {p.notes}</p>}
+              {p.notes && (
+                <p className="mt-2 text-xs text-muted-foreground">Observações: {p.notes}</p>
+              )}
             </div>
           ))}
         </TabsContent>
 
         <TabsContent value="lancar" className="space-y-4">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground"><HelpInlineButton topicKey="/cotacoes/lancar" /><HelpInlineButton topicKey="/cotacoes/servicos" /><HelpInlineButton topicKey="/cotacoes/pecas" /><HelpInlineButton topicKey="/cotacoes/servicos-pecas" /><span>Ajuda desta aba</span></div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <HelpInlineButton topicKey="/cotacoes/lancar" />
+            <HelpInlineButton topicKey="/cotacoes/servicos" />
+            <HelpInlineButton topicKey="/cotacoes/pecas" />
+            <HelpInlineButton topicKey="/cotacoes/servicos-pecas" />
+            <span>Ajuda desta aba</span>
+          </div>
           {!canManage || closed ? (
             <p className="rounded-md border p-6 text-center text-sm text-muted-foreground">
               O processo está encerrado ou você não tem permissão para lançar propostas.
@@ -1031,9 +1162,10 @@ function QuotationDetail({
               <div>
                 <p className="text-sm font-medium">Registrar proposta recebida fora do sistema</p>
                 <p className="text-xs text-muted-foreground">
-                  Use para propostas entregues em papel, e-mail ou WhatsApp. Empresas cadastradas no órgão podem ser
-                  selecionadas mesmo sem convite prévio — o convite interno é criado automaticamente, sem envio de
-                  e-mail. Cotação de <strong>{quotationKindLabel(quotation.quotation_kind)}</strong>.
+                  Use para propostas entregues em papel, e-mail ou WhatsApp. Empresas cadastradas no
+                  órgão podem ser selecionadas mesmo sem convite prévio — o convite interno é criado
+                  automaticamente, sem envio de e-mail. Cotação de{" "}
+                  <strong>{quotationKindLabel(quotation.quotation_kind)}</strong>.
                 </p>
               </div>
               <div className="max-w-md">
@@ -1082,11 +1214,11 @@ function QuotationDetail({
           />
         </TabsContent>
 
-
-
-
         <TabsContent value="mapa" className="space-y-4">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground"><HelpInlineButton topicKey="/cotacoes/mapa" /><span>Ajuda desta aba</span></div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <HelpInlineButton topicKey="/cotacoes/mapa" />
+            <span>Ajuda desta aba</span>
+          </div>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
@@ -1131,11 +1263,13 @@ function QuotationDetail({
                   ))}
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium">Prazo / gar. serviços / gar. peças / validade</TableCell>
+                  <TableCell className="font-medium">
+                    Prazo / gar. serviços / gar. peças / validade
+                  </TableCell>
                   {valid.map((p) => (
                     <TableCell key={p.id} className="text-right text-sm">
-                      {p.execution_days ?? "—"} d / {p.warranty_days ?? "—"} d / {p.parts_warranty_days ?? "—"} d /{" "}
-                      {p.valid_days ?? "—"} d
+                      {p.execution_days ?? "—"} d / {p.warranty_days ?? "—"} d /{" "}
+                      {p.parts_warranty_days ?? "—"} d / {p.valid_days ?? "—"} d
                     </TableCell>
                   ))}
                 </TableRow>
@@ -1159,7 +1293,6 @@ function QuotationDetail({
                     </TableCell>
                   ))}
                 </TableRow>
-
               </TableBody>
             </Table>
           </div>
@@ -1169,15 +1302,23 @@ function QuotationDetail({
               <p className="font-medium">Proposta aprovada</p>
               <p>
                 {valid.find((p) => p.id === quotation.selected_proposal_id)?.workshop?.trade_name ??
-                  valid.find((p) => p.id === quotation.selected_proposal_id)?.workshop?.legal_name ??
+                  valid.find((p) => p.id === quotation.selected_proposal_id)?.workshop
+                    ?.legal_name ??
                   "—"}{" "}
-                — aprovada por {quotation.approved_by_name || "—"} em {dateTimeBR(quotation.approved_at)}
+                — aprovada por {quotation.approved_by_name || "—"} em{" "}
+                {dateTimeBR(quotation.approved_at)}
               </p>
-              {quotation.choice_justification && <p className="mt-1">Justificativa: {quotation.choice_justification}</p>}
-              {quotation.few_proposals_justification && (
-                <p className="mt-1">Menos de {MIN_PROPOSALS} propostas: {quotation.few_proposals_justification}</p>
+              {quotation.choice_justification && (
+                <p className="mt-1">Justificativa: {quotation.choice_justification}</p>
               )}
-              {quotation.technical_analysis && <p className="mt-1">Análise técnica: {quotation.technical_analysis}</p>}
+              {quotation.few_proposals_justification && (
+                <p className="mt-1">
+                  Menos de {MIN_PROPOSALS} propostas: {quotation.few_proposals_justification}
+                </p>
+              )}
+              {quotation.technical_analysis && (
+                <p className="mt-1">Análise técnica: {quotation.technical_analysis}</p>
+              )}
             </div>
           ) : (
             canManage &&
@@ -1195,7 +1336,8 @@ function QuotationDetail({
                     <SelectContent>
                       {valid.map((p) => (
                         <SelectItem key={p.id} value={p.id}>
-                          {(p.workshop?.trade_name || p.workshop?.legal_name) ?? ""} — {brl(Number(p.total_value))}
+                          {(p.workshop?.trade_name || p.workshop?.legal_name) ?? ""} —{" "}
+                          {brl(Number(p.total_value))}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -1203,18 +1345,35 @@ function QuotationDetail({
                 </div>
                 <div>
                   <Label htmlFor="analysis">Análise técnica</Label>
-                  <Textarea id="analysis" rows={2} value={analysis} onChange={(e) => setAnalysis(e.target.value)} />
+                  <Textarea
+                    id="analysis"
+                    rows={2}
+                    value={analysis}
+                    onChange={(e) => setAnalysis(e.target.value)}
+                  />
                 </div>
                 <div>
-                  <Label htmlFor="choice">Justificativa da escolha (obrigatória fora do menor preço)</Label>
-                  <Textarea id="choice" rows={2} value={choiceJust} onChange={(e) => setChoiceJust(e.target.value)} />
+                  <Label htmlFor="choice">
+                    Justificativa da escolha (obrigatória fora do menor preço)
+                  </Label>
+                  <Textarea
+                    id="choice"
+                    rows={2}
+                    value={choiceJust}
+                    onChange={(e) => setChoiceJust(e.target.value)}
+                  />
                 </div>
                 {valid.length < MIN_PROPOSALS && (
                   <div>
                     <Label htmlFor="few">
                       Justificativa formal para prosseguir com menos de {MIN_PROPOSALS} propostas
                     </Label>
-                    <Textarea id="few" rows={2} value={fewJust} onChange={(e) => setFewJust(e.target.value)} />
+                    <Textarea
+                      id="few"
+                      rows={2}
+                      value={fewJust}
+                      onChange={(e) => setFewJust(e.target.value)}
+                    />
                   </div>
                 )}
                 <div className="flex flex-wrap gap-2">

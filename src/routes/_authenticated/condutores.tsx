@@ -26,7 +26,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   CNH_CATEGORIES,
   CNH_LABELS,
@@ -72,7 +79,8 @@ const PAGE_SIZE = 12;
 function CnhBadge({ expiry }: { expiry: string | null }) {
   const state = cnhState(expiry);
   if (state === "vencida") return <Badge variant="destructive">Vencida</Badge>;
-  if (state === "a_vencer") return <Badge className="bg-warning text-warning-foreground">A vencer</Badge>;
+  if (state === "a_vencer")
+    return <Badge className="bg-warning text-warning-foreground">A vencer</Badge>;
   if (state === "sem_registro") return <Badge variant="outline">Sem validade</Badge>;
   return <Badge variant="secondary">Regular</Badge>;
 }
@@ -147,17 +155,26 @@ function Condutores() {
           <Label className="text-xs">Busca (nome, matrícula, CNH ou e-mail)</Label>
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" placeholder="Buscar…" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              className="pl-9"
+              placeholder="Buscar…"
+            />
           </div>
         </div>
         <div>
           <Label className="text-xs">Unidade</Label>
           <Select value={fUnit} onValueChange={setFUnit}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Todas</SelectItem>
               {units.map((u) => (
-                <SelectItem key={u.id} value={u.id}>{u.acronym || u.name}</SelectItem>
+                <SelectItem key={u.id} value={u.id}>
+                  {u.acronym || u.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -165,7 +182,9 @@ function Condutores() {
         <div>
           <Label className="text-xs">Situação</Label>
           <Select value={fStatus} onValueChange={setFStatus}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Todas</SelectItem>
               <SelectItem value="ativo">Ativos</SelectItem>
@@ -195,7 +214,11 @@ function Condutores() {
           </TableHeader>
           <TableBody>
             {isLoading && (
-              <TableRow><TableCell colSpan={10} className="py-8 text-center text-muted-foreground">Carregando…</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={10} className="py-8 text-center text-muted-foreground">
+                  Carregando…
+                </TableCell>
+              </TableRow>
             )}
             {!isLoading && rows.length === 0 && (
               <TableRow>
@@ -212,9 +235,15 @@ function Condutores() {
                 <TableCell>{label(DRIVER_BONDS, d.bond_type)}</TableCell>
                 <TableCell>{(d.license_categories ?? []).join(", ") || "—"}</TableCell>
                 <TableCell>{dateBR(d.license_expiry)}</TableCell>
-                <TableCell><CnhBadge expiry={d.license_expiry} /></TableCell>
                 <TableCell>
-                  {d.active ? <Badge variant="default">Ativo</Badge> : <Badge variant="outline">Inativo</Badge>}
+                  <CnhBadge expiry={d.license_expiry} />
+                </TableCell>
+                <TableCell>
+                  {d.active ? (
+                    <Badge variant="default">Ativo</Badge>
+                  ) : (
+                    <Badge variant="outline">Inativo</Badge>
+                  )}
                 </TableCell>
                 <TableCell>
                   <Button
@@ -230,7 +259,12 @@ function Condutores() {
                 </TableCell>
                 <TableCell>
                   {perms.canWrite && (
-                    <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => setEditing(d)}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Editar"
+                      onClick={() => setEditing(d)}
+                    >
                       <Pencil className="size-4" />
                     </Button>
                   )}
@@ -247,8 +281,22 @@ function Condutores() {
             {filtered.length} condutor(es) · página {current} de {pages}
           </span>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={current <= 1} onClick={() => setPage(current - 1)}>Anterior</Button>
-            <Button variant="outline" size="sm" disabled={current >= pages} onClick={() => setPage(current + 1)}>Próxima</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={current <= 1}
+              onClick={() => setPage(current - 1)}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={current >= pages}
+              onClick={() => setPage(current + 1)}
+            >
+              Próxima
+            </Button>
           </div>
         </div>
       )}
@@ -403,7 +451,8 @@ function DriverDialog({
         <DialogHeader>
           <DialogTitle>{driver ? "Editar condutor" : "Novo condutor"}</DialogTitle>
           <DialogDescription>
-            CPF e matrícula são únicos dentro do órgão. Dados pessoais são exibidos apenas nesta tela restrita.
+            CPF e matrícula são únicos dentro do órgão. Dados pessoais são exibidos apenas nesta
+            tela restrita.
           </DialogDescription>
         </DialogHeader>
 
@@ -418,16 +467,24 @@ function DriverDialog({
           </div>
           <div>
             <Label htmlFor="reg">Matrícula funcional</Label>
-            <Input id="reg" value={registration} onChange={(e) => setRegistration(e.target.value)} />
+            <Input
+              id="reg"
+              value={registration}
+              onChange={(e) => setRegistration(e.target.value)}
+            />
           </div>
           <div>
             <Label>Secretaria / unidade</Label>
             <Select value={unitId} onValueChange={setUnitId}>
-              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE}>Não vinculado</SelectItem>
                 {units.map((u) => (
-                  <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                  <SelectItem key={u.id} value={u.id}>
+                    {u.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -435,10 +492,14 @@ function DriverDialog({
           <div>
             <Label>Vínculo *</Label>
             <Select value={bond} onValueChange={(v) => setBond(v as typeof bond)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {DRIVER_BONDS.map((b) => (
-                  <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>
+                  <SelectItem key={b.value} value={b.value}>
+                    {b.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -449,7 +510,12 @@ function DriverDialog({
           </div>
           <div>
             <Label htmlFor="email">E-mail</Label>
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
           <div>
             <Label htmlFor="cnh">Número da CNH</Label>
@@ -457,11 +523,21 @@ function DriverDialog({
           </div>
           <div>
             <Label htmlFor="exp">Validade da CNH</Label>
-            <Input id="exp" type="date" value={expiry} onChange={(e) => setExpiry(e.target.value)} />
+            <Input
+              id="exp"
+              type="date"
+              value={expiry}
+              onChange={(e) => setExpiry(e.target.value)}
+            />
           </div>
           <div>
             <Label htmlFor="first">Primeira habilitação</Label>
-            <Input id="first" type="date" value={firstIssue} onChange={(e) => setFirstIssue(e.target.value)} />
+            <Input
+              id="first"
+              type="date"
+              value={firstIssue}
+              onChange={(e) => setFirstIssue(e.target.value)}
+            />
           </div>
           <div className="sm:col-span-2">
             <Label>Categorias da CNH</Label>
@@ -479,8 +555,9 @@ function DriverDialog({
               ))}
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
-              A compatibilidade entre categoria e tipo de veículo é sinalizada como orientação; a validação
-              bloqueante depende da classificação técnica da frota, prevista para a próxima fase.
+              A compatibilidade entre categoria e tipo de veículo é sinalizada como orientação; a
+              validação bloqueante depende da classificação técnica da frota, prevista para a
+              próxima fase.
             </p>
           </div>
           <div className="flex items-center gap-3 rounded-md border p-3 sm:col-span-2">
@@ -491,7 +568,12 @@ function DriverDialog({
           </div>
           <div className="sm:col-span-2">
             <Label htmlFor="notes">Observações</Label>
-            <Textarea id="notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
+            <Textarea
+              id="notes"
+              rows={2}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
           </div>
         </div>
 
@@ -502,8 +584,12 @@ function DriverDialog({
         )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button onClick={submit} disabled={saving}>{saving ? "Salvando…" : "Salvar condutor"}</Button>
+          <Button variant="outline" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button onClick={submit} disabled={saving}>
+            {saving ? "Salvando…" : "Salvar condutor"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

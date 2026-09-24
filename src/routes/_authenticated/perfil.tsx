@@ -58,7 +58,10 @@ function PerfilPage() {
     }
 
     setSaving(true);
-    const { error } = await supabase.auth.updateUser({ password, current_password: current } as never);
+    const { error } = await supabase.auth.updateUser({
+      password,
+      current_password: current,
+    } as never);
     setSaving(false);
     if (error) {
       const msg = /current password|invalid|credentials/i.test(error.message)
@@ -77,7 +80,6 @@ function PerfilPage() {
         title="Perfil e segurança"
         description="Consulte seus dados de acesso e mantenha sua senha atualizada."
       />
-
 
       <section className="rounded-lg border bg-card p-6 shadow-panel">
         <div className="mb-4 flex items-center gap-3">
@@ -100,7 +102,9 @@ function PerfilPage() {
             <dd className="text-sm">{me?.profile?.job_title || "—"}</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-muted-foreground">Perfil de acesso</dt>
+            <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+              Perfil de acesso
+            </dt>
             <dd className="text-sm">{roleLabel}</dd>
           </div>
         </dl>
@@ -121,7 +125,13 @@ function PerfilPage() {
         <form onSubmit={onSubmit} className="max-w-md space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="pf-current">Senha atual</Label>
-            <Input id="pf-current" name="current" type="password" autoComplete="current-password" required />
+            <Input
+              id="pf-current"
+              name="current"
+              type="password"
+              autoComplete="current-password"
+              required
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="pf-pass">Nova senha</Label>

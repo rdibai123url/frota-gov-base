@@ -13,7 +13,10 @@ export const Route = createFileRoute("/redefinir-senha")({
   head: () => ({
     meta: [
       { title: "Redefinir senha — FrotaGov" },
-      { name: "description", content: "Defina uma nova senha de acesso ao FrotaGov com segurança." },
+      {
+        name: "description",
+        content: "Defina uma nova senha de acesso ao FrotaGov com segurança.",
+      },
       { property: "og:title", content: "Redefinir senha — FrotaGov" },
       { property: "og:description", content: "Página segura de redefinição de senha do FrotaGov." },
       { property: "og:type", content: "website" },
@@ -43,7 +46,8 @@ function ResetPasswordPage() {
       const hash = new URLSearchParams(url.hash.replace(/^#/, ""));
       const tokenHash = url.searchParams.get("token_hash");
       const code = url.searchParams.get("code");
-      const errorDescription = hash.get("error_description") ?? url.searchParams.get("error_description");
+      const errorDescription =
+        hash.get("error_description") ?? url.searchParams.get("error_description");
 
       if (errorDescription) {
         if (active) setState("invalido");
@@ -51,7 +55,10 @@ function ResetPasswordPage() {
       }
 
       if (tokenHash) {
-        const { error } = await supabase.auth.verifyOtp({ type: "recovery", token_hash: tokenHash });
+        const { error } = await supabase.auth.verifyOtp({
+          type: "recovery",
+          token_hash: tokenHash,
+        });
         if (!active) return;
         setState(error ? "invalido" : "pronto");
         return;
@@ -134,7 +141,8 @@ function ResetPasswordPage() {
           {state === "invalido" && (
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                O link de recuperação é inválido ou já expirou. Solicite um novo link na tela de acesso.
+                O link de recuperação é inválido ou já expirou. Solicite um novo link na tela de
+                acesso.
               </p>
               <Button asChild className="w-full">
                 <Link to="/auth">Voltar ao login</Link>

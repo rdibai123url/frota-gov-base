@@ -15,13 +15,15 @@ import { PageHeader } from "@/components/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   CONTRACT_MODALITIES,
   CONTRACT_STATUS,
@@ -126,8 +128,8 @@ function Fornecedores() {
               <TableRow>
                 <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
                   <Building2 className="mx-auto mb-2 size-6 opacity-50" />
-                  Nenhuma empresa com contrato vigente de fornecimento. Cadastre o contrato em Contratos e vincule a
-                  empresa do cadastro mestre.
+                  Nenhuma empresa com contrato vigente de fornecimento. Cadastre o contrato em
+                  Contratos e vincule a empresa do cadastro mestre.
                 </TableCell>
               </TableRow>
             )}
@@ -135,7 +137,9 @@ function Fornecedores() {
               <TableRow key={c.key}>
                 <TableCell className="font-medium">
                   {c.name}
-                  {c.tradeName ? <span className="block text-xs text-muted-foreground">{c.tradeName}</span> : null}
+                  {c.tradeName ? (
+                    <span className="block text-xs text-muted-foreground">{c.tradeName}</span>
+                  ) : null}
                 </TableCell>
                 <TableCell>{formatCNPJ(c.document) || "—"}</TableCell>
                 <TableCell>{[c.city, c.state].filter(Boolean).join(" / ") || "—"}</TableCell>
@@ -191,8 +195,9 @@ export function CompanyDialog({
               </p>
               <p className="sm:col-span-2">
                 <MapPin className="mr-1 inline size-3 text-muted-foreground" />
-                {[company.address, company.district, company.city, company.state].filter(Boolean).join(", ") ||
-                  "Endereço não informado"}
+                {[company.address, company.district, company.city, company.state]
+                  .filter(Boolean)
+                  .join(", ") || "Endereço não informado"}
               </p>
               <p>
                 <span className="text-muted-foreground">Contato: </span>
@@ -222,7 +227,8 @@ export function CompanyDialog({
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Vigência {dateBR(c.valid_from)} a {dateBR(c.valid_to)} · Valor atual {brl(Number(c.current_value ?? 0))}
+                  Vigência {dateBR(c.valid_from)} a {dateBR(c.valid_to)} · Valor atual{" "}
+                  {brl(Number(c.current_value ?? 0))}
                 </p>
 
                 {(c.items ?? []).filter((i) => i.active).length > 0 && (
@@ -250,9 +256,15 @@ export function CompanyDialog({
                                 <TableCell>{i.item_number ?? "—"}</TableCell>
                                 <TableCell>{i.description}</TableCell>
                                 <TableCell>{i.measure_unit}</TableCell>
-                                <TableCell className="text-right">{b.quantity.toLocaleString("pt-BR")}</TableCell>
-                                <TableCell className="text-right">{b.reserved.toLocaleString("pt-BR")}</TableCell>
-                                <TableCell className="text-right">{b.consumed.toLocaleString("pt-BR")}</TableCell>
+                                <TableCell className="text-right">
+                                  {b.quantity.toLocaleString("pt-BR")}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  {b.reserved.toLocaleString("pt-BR")}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  {b.consumed.toLocaleString("pt-BR")}
+                                </TableCell>
                                 <TableCell className="text-right font-medium">
                                   {b.available.toLocaleString("pt-BR")}
                                 </TableCell>

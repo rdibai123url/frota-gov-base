@@ -9,12 +9,31 @@ import { PageHeader } from "@/components/app-shell";
 import { MoneyInput } from "@/components/form-fields";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import {
   ACCIDENT_KINDS,
@@ -52,7 +71,10 @@ export const Route = createFileRoute("/_authenticated/sinistros")({
           "Registro de acidentes e sinistros da frota pública: boletim de ocorrência, terceiros, vítimas, seguradora, franquia e reparos.",
       },
       { property: "og:title", content: "Acidentes e Sinistros — FrotaGov" },
-      { property: "og:description", content: "Apuração de sinistros com indisponibilidade e vínculo a manutenções." },
+      {
+        property: "og:description",
+        content: "Apuração de sinistros com indisponibilidade e vínculo a manutenções.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -109,7 +131,11 @@ function Sinistros() {
   const [blocksUse, setBlocksUse] = useState(true);
   const [hasVictims, setHasVictims] = useState(false);
   const [needsTow, setNeedsTow] = useState(false);
-  const [suggestion, setSuggestion] = useState<{ driverId: string; usageId: string; text: string } | null>(null);
+  const [suggestion, setSuggestion] = useState<{
+    driverId: string;
+    usageId: string;
+    text: string;
+  } | null>(null);
   const [saving, setSaving] = useState(false);
 
   const [fStatus, setFStatus] = useState(ALL);
@@ -135,7 +161,9 @@ function Sinistros() {
   const filtered = useMemo(
     () =>
       accidents.filter(
-        (a) => (fStatus === ALL || a.status === fStatus) && (fVehicle === ALL || a.vehicle_id === fVehicle),
+        (a) =>
+          (fStatus === ALL || a.status === fStatus) &&
+          (fVehicle === ALL || a.vehicle_id === fVehicle),
       ),
     [accidents, fStatus, fVehicle],
   );
@@ -233,8 +261,13 @@ function Sinistros() {
         attachment_paths: [...(editing?.attachment_paths ?? []), ...uploaded],
       };
       const { error } = editing
-        ? await supabase.from("accidents").update({ ...payload, updated_by: userId }).eq("id", editing.id)
-        : await supabase.from("accidents").insert({ ...payload, organization_id: orgId!, created_by: userId });
+        ? await supabase
+            .from("accidents")
+            .update({ ...payload, updated_by: userId })
+            .eq("id", editing.id)
+        : await supabase
+            .from("accidents")
+            .insert({ ...payload, organization_id: orgId!, created_by: userId });
       if (error) throw error;
       toast.success(
         editing
@@ -311,7 +344,7 @@ function Sinistros() {
               <SelectItem value={ALL}>Todos</SelectItem>
               {vehicles.map((v) => (
                 <SelectItem key={v.id} value={v.id}>
-                  {(v.plate ?? v.asset_code)}
+                  {v.plate ?? v.asset_code}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -353,7 +386,7 @@ function Sinistros() {
               <TableRow key={a.id}>
                 <TableCell className="font-medium">{a.code ?? "—"}</TableCell>
                 <TableCell>
-                  {(a.vehicle?.plate ?? a.vehicle?.asset_code ?? "—")}
+                  {a.vehicle?.plate ?? a.vehicle?.asset_code ?? "—"}
                   {a.blocks_use && a.status !== "encerrado" && (
                     <span className="block text-xs text-destructive">Indisponível</span>
                   )}
@@ -387,7 +420,12 @@ function Sinistros() {
                       </Button>
                     )}
                     {canRegister && (a.status !== "encerrado" || canManageFleet) && (
-                      <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => openEdit(a)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Editar"
+                        onClick={() => openEdit(a)}
+                      >
                         <Pencil className="size-4" />
                       </Button>
                     )}
@@ -403,7 +441,9 @@ function Sinistros() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing ? `Sinistro ${editing.code ?? ""}` : "Novo sinistro"}</DialogTitle>
+            <DialogTitle>
+              {editing ? `Sinistro ${editing.code ?? ""}` : "Novo sinistro"}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-3">
@@ -417,7 +457,7 @@ function Sinistros() {
                     <SelectItem value={NONE}>Selecione</SelectItem>
                     {vehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        {(v.plate ?? v.asset_code)} — {v.brand ?? ""} {v.model ?? ""}
+                        {v.plate ?? v.asset_code} — {v.brand ?? ""} {v.model ?? ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -488,7 +528,13 @@ function Sinistros() {
 
             <div>
               <Label htmlFor="description">Descrição do ocorrido *</Label>
-              <Textarea id="description" name="description" rows={2} defaultValue={editing?.description ?? ""} required />
+              <Textarea
+                id="description"
+                name="description"
+                rows={2}
+                defaultValue={editing?.description ?? ""}
+                required
+              />
             </div>
 
             {suggestion && driverId === NONE && (
@@ -596,19 +642,35 @@ function Sinistros() {
               </div>
               <div>
                 <Label htmlFor="deductible_value">Franquia (R$)</Label>
-                <MoneyInput id="deductible_value" name="deductible_value" defaultValue={editing?.deductible_value ?? ""} />
+                <MoneyInput
+                  id="deductible_value"
+                  name="deductible_value"
+                  defaultValue={editing?.deductible_value ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="expenses_value">Despesas (R$)</Label>
-                <MoneyInput id="expenses_value" name="expenses_value" defaultValue={editing?.expenses_value ?? ""} />
+                <MoneyInput
+                  id="expenses_value"
+                  name="expenses_value"
+                  defaultValue={editing?.expenses_value ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="reporter_name">Comunicante</Label>
-                <Input id="reporter_name" name="reporter_name" defaultValue={editing?.reporter_name ?? ""} />
+                <Input
+                  id="reporter_name"
+                  name="reporter_name"
+                  defaultValue={editing?.reporter_name ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="investigator_name">Responsável pela apuração</Label>
-                <Input id="investigator_name" name="investigator_name" defaultValue={editing?.investigator_name ?? ""} />
+                <Input
+                  id="investigator_name"
+                  name="investigator_name"
+                  defaultValue={editing?.investigator_name ?? ""}
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label htmlFor="files" className="flex items-center gap-1">
@@ -621,15 +683,30 @@ function Sinistros() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="third_parties">Terceiros envolvidos</Label>
-                <Textarea id="third_parties" name="third_parties" rows={2} defaultValue={editing?.third_parties ?? ""} />
+                <Textarea
+                  id="third_parties"
+                  name="third_parties"
+                  rows={2}
+                  defaultValue={editing?.third_parties ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="damages">Danos apurados</Label>
-                <Textarea id="damages" name="damages" rows={2} defaultValue={editing?.damages ?? ""} />
+                <Textarea
+                  id="damages"
+                  name="damages"
+                  rows={2}
+                  defaultValue={editing?.damages ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="victims_notes">Vítimas</Label>
-                <Textarea id="victims_notes" name="victims_notes" rows={2} defaultValue={editing?.victims_notes ?? ""} />
+                <Textarea
+                  id="victims_notes"
+                  name="victims_notes"
+                  rows={2}
+                  defaultValue={editing?.victims_notes ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="notes">Observações</Label>

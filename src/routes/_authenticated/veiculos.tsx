@@ -25,7 +25,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   FUEL_TYPES,
@@ -57,7 +64,10 @@ export const Route = createFileRoute("/_authenticated/veiculos")({
           "Cadastro e consulta dos veículos e equipamentos da frota do órgão, com vínculo à secretaria responsável.",
       },
       { property: "og:title", content: "Veículos da frota — FrotaGov" },
-      { property: "og:description", content: "Gerencie os veículos e equipamentos da frota pública." },
+      {
+        property: "og:description",
+        content: "Gerencie os veículos e equipamentos da frota pública.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -236,8 +246,10 @@ function Veiculos() {
       invoice_number: acquisitionKind === "aquisicao" ? d.invoice_number || null : null,
       acquisition_date: acquisitionKind === "aquisicao" ? d.acquisition_date || null : null,
       acquisition_value: acquisitionKind === "aquisicao" ? num(d.acquisition_value) : null,
-      acquisition_entity_id: acquisitionKind === "aquisicao" && acquisitionEntity !== NONE ? acquisitionEntity : null,
-      lease_contract_id: acquisitionKind === "locado" && leaseContract !== NONE ? leaseContract : null,
+      acquisition_entity_id:
+        acquisitionKind === "aquisicao" && acquisitionEntity !== NONE ? acquisitionEntity : null,
+      lease_contract_id:
+        acquisitionKind === "locado" && leaseContract !== NONE ? leaseContract : null,
       brand: d.brand || null,
       model: d.model || null,
       year_manufacture: num(d.year_manufacture),
@@ -338,7 +350,13 @@ function Veiculos() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={ownershipFilter} onValueChange={(v) => { setOwnershipFilter(v); setPage(0); }}>
+        <Select
+          value={ownershipFilter}
+          onValueChange={(v) => {
+            setOwnershipFilter(v);
+            setPage(0);
+          }}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Propriedade" />
           </SelectTrigger>
@@ -436,7 +454,12 @@ function Veiculos() {
                       </Link>
                     </Button>
                     {canWrite && (
-                      <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => openEdit(v)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Editar"
+                        onClick={() => openEdit(v)}
+                      >
                         <Pencil className="size-4" />
                       </Button>
                     )}
@@ -497,7 +520,10 @@ function Veiculos() {
               </div>
               <div className="space-y-1.5">
                 <Label>Forma de incorporação</Label>
-                <Select value={acquisitionKind} onValueChange={(v) => setAcquisitionKind(v as "aquisicao" | "locado")}>
+                <Select
+                  value={acquisitionKind}
+                  onValueChange={(v) => setAcquisitionKind(v as "aquisicao" | "locado")}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -509,7 +535,10 @@ function Veiculos() {
               </div>
               <div className="space-y-1.5">
                 <Label>Estado do veículo</Label>
-                <Select value={conditionState} onValueChange={(v) => setConditionState(v as "novo" | "usado")}>
+                <Select
+                  value={conditionState}
+                  onValueChange={(v) => setConditionState(v as "novo" | "usado")}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -523,7 +552,11 @@ function Veiculos() {
                 <>
                   <div className="space-y-1.5">
                     <Label htmlFor="invoice_number">N° da nota fiscal</Label>
-                    <Input id="invoice_number" name="invoice_number" defaultValue={editing?.invoice_number ?? ""} />
+                    <Input
+                      id="invoice_number"
+                      name="invoice_number"
+                      defaultValue={editing?.invoice_number ?? ""}
+                    />
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="acquisition_date">Data da aquisição</Label>
@@ -581,7 +614,8 @@ function Veiculos() {
                   {leaseInfo ? (
                     <p className="text-xs text-muted-foreground">
                       Empresa contratada: {leaseInfo.company} · Vigência {dateBR(leaseInfo.from)} a{" "}
-                      {dateBR(leaseInfo.to)}. O valor da locação vem do contrato e não é digitado aqui.
+                      {dateBR(leaseInfo.to)}. O valor da locação vem do contrato e não é digitado
+                      aqui.
                     </p>
                   ) : null}
                 </div>
@@ -693,8 +727,8 @@ function Veiculos() {
                 </Select>
                 {editing && (
                   <p className="text-xs text-muted-foreground">
-                    A troca de secretaria/unidade é feita em Frota → Movimentação patrimonial, para preservar o
-                    histórico do bem.
+                    A troca de secretaria/unidade é feita em Frota → Movimentação patrimonial, para
+                    preservar o histórico do bem.
                   </p>
                 )}
               </div>
@@ -725,8 +759,9 @@ function Veiculos() {
                     Veículo particular de servidor com cota de combustível
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    O abastecimento passa a exigir cota vigente do servidor, cadastrada em Abastecimento → Cotas de
-                    servidor, e é bloqueado quando a cota do ciclo se esgota.
+                    O abastecimento passa a exigir cota vigente do servidor, cadastrada em
+                    Abastecimento → Cotas de servidor, e é bloqueado quando a cota do ciclo se
+                    esgota.
                   </p>
                 </div>
               </div>

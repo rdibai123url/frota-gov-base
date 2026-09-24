@@ -16,7 +16,13 @@ import {
   type DeviationClass,
 } from "@/lib/inteligencia";
 import { ArrowLeft, Truck } from "lucide-react";
-import { CHECKLIST_ANSWER_LABEL, CHECKLIST_ITEMS, checklistProblems, parseChecklistResponses, useVehicleChecklists } from "@/lib/checklists";
+import {
+  CHECKLIST_ANSWER_LABEL,
+  CHECKLIST_ITEMS,
+  checklistProblems,
+  parseChecklistResponses,
+  useVehicleChecklists,
+} from "@/lib/checklists";
 
 import { PageHeader } from "@/components/app-shell";
 import { ValorDeMercado } from "@/components/valor-mercado";
@@ -26,8 +32,21 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ACCIDENT_KINDS,
@@ -63,7 +82,6 @@ import {
   CLEANING_STATUS,
 } from "@/lib/frotagov";
 
-
 export const Route = createFileRoute("/_authenticated/veiculo/$id")({
   head: () => ({
     meta: [
@@ -74,7 +92,10 @@ export const Route = createFileRoute("/_authenticated/veiculo/$id")({
           "Histórico completo do veículo: utilizações, abastecimentos, autorizações, manutenções, peças, pneus e mudanças de situação.",
       },
       { property: "og:title", content: "Histórico do veículo — FrotaGov" },
-      { property: "og:description", content: "Linha do tempo completa do veículo na frota pública." },
+      {
+        property: "og:description",
+        content: "Linha do tempo completa do veículo na frota pública.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -105,7 +126,10 @@ function HistoricoVeiculo() {
   const vFuelings = useMemo(() => fuelings.filter((f) => f.vehicle_id === id), [fuelings, id]);
   const vAuths = useMemo(() => auths.filter((a) => a.vehicle_id === id), [auths, id]);
   const vRecords = useMemo(() => records.filter((r) => r.vehicle_id === id), [records, id]);
-  const vParts = useMemo(() => vRecords.flatMap((r) => (r.parts ?? []).map((p) => ({ ...p, code: r.code }))), [vRecords]);
+  const vParts = useMemo(
+    () => vRecords.flatMap((r) => (r.parts ?? []).map((p) => ({ ...p, code: r.code }))),
+    [vRecords],
+  );
   /** Custo de manutenção acumulado (12 e 24 meses) para comparar com o valor de mercado. */
   const maintCost12m = useMemo(() => {
     const limit = Date.now() - 365 * 86400000;
@@ -122,7 +146,10 @@ function HistoricoVeiculo() {
   const vTires = useMemo(() => tires.filter((t) => t.vehicle_id === id), [tires, id]);
   const vFines = useMemo(() => fines.filter((f) => f.vehicle_id === id), [fines, id]);
   const vAccidents = useMemo(() => accidents.filter((a) => a.vehicle_id === id), [accidents, id]);
-  const vObligations = useMemo(() => obligations.filter((o) => o.vehicle_id === id), [obligations, id]);
+  const vObligations = useMemo(
+    () => obligations.filter((o) => o.vehicle_id === id),
+    [obligations, id],
+  );
   const vMovements = useMemo(() => movements.filter((m) => m.vehicle_id === id), [movements, id]);
   const vDiaries = useMemo(() => diaries.filter((d) => d.vehicle_id === id), [diaries, id]);
   const vPolicies = useMemo(
@@ -135,7 +162,14 @@ function HistoricoVeiculo() {
   const [to, setTo] = useState("");
 
   const timeline = useMemo(() => {
-    const items: { at: string; cat: string; catLabel: string; title: string; detail: string; value: string }[] = [];
+    const items: {
+      at: string;
+      cat: string;
+      catLabel: string;
+      title: string;
+      detail: string;
+      value: string;
+    }[] = [];
     const push = (
       at: string | null | undefined,
       c: string,
@@ -153,9 +187,13 @@ function HistoricoVeiculo() {
         "patrimonio",
         "Patrimônio",
         `${m.code ?? "MOV"} · ${label(ASSET_MOVEMENT_KINDS, m.kind)}`,
-        [m.from_unit?.acronym ?? m.from_unit?.name, m.unit?.acronym ?? m.unit?.name ?? m.entity?.name]
+        [
+          m.from_unit?.acronym ?? m.from_unit?.name,
+          m.unit?.acronym ?? m.unit?.name ?? m.entity?.name,
+        ]
           .filter(Boolean)
-          .join(" → ") || (m.reason ?? "—"),
+          .join(" → ") ||
+          (m.reason ?? "—"),
         m.book_value !== null ? brl(Number(m.book_value)) : "",
       ),
     );
@@ -185,7 +223,9 @@ function HistoricoVeiculo() {
         "checklist",
         "Checklist",
         `Checklist de ${checklist.stage}`,
-        problems.length ? `${problems.length} item(ns) com problema: ${problems.map((item) => item.label).join(", ")}` : "Todos os itens conferidos sem problema.",
+        problems.length
+          ? `${problems.length} item(ns) com problema: ${problems.map((item) => item.label).join(", ")}`
+          : "Todos os itens conferidos sem problema.",
         checklist.odometer_km != null ? `${num(Number(checklist.odometer_km), 0)} km` : "",
       );
     });
@@ -200,7 +240,13 @@ function HistoricoVeiculo() {
       ),
     );
     vAuths.forEach((a) =>
-      push(a.valid_from, "autorizacao", "Autorização", `${a.code ?? "AUT"} · ${a.status}`, a.purpose ?? "—"),
+      push(
+        a.valid_from,
+        "autorizacao",
+        "Autorização",
+        `${a.code ?? "AUT"} · ${a.status}`,
+        a.purpose ?? "—",
+      ),
     );
     cleanings.forEach((c) =>
       push(
@@ -309,6 +355,7 @@ function HistoricoVeiculo() {
     vFines,
     vPolicies,
     vObligations,
+    cleanings,
     statusHistory,
     cat,
     from,
@@ -326,7 +373,11 @@ function HistoricoVeiculo() {
     return d.toISOString().slice(0, 10);
   }, [from]);
   const intelTo = to || new Date().toISOString().slice(0, 10);
-  const { data: intelSegments = [] } = useConsumptionSegments({ from: intelFrom, to: intelTo, vehicleId: id });
+  const { data: intelSegments = [] } = useConsumptionSegments({
+    from: intelFrom,
+    to: intelTo,
+    vehicleId: id,
+  });
   const { data: intelCosts = [] } = useCostRows({ from: intelFrom, to: intelTo, vehicleId: id });
   const { data: intelDowntime = [] } = useDowntime(intelFrom, intelTo);
   const { data: intelParams = [] } = useConsumptionParameters();
@@ -348,7 +399,10 @@ function HistoricoVeiculo() {
           metric,
         )
       : null;
-    const dev = classifyDeviation(metric === "km_l" ? (agg?.kmL ?? null) : (agg?.lH ?? null), param);
+    const dev = classifyDeviation(
+      metric === "km_l" ? (agg?.kmL ?? null) : (agg?.lH ?? null),
+      param,
+    );
     const devMap = new Map<string, DeviationClass>();
     if (agg?.vehicleId) devMap.set(agg.key, dev.klass);
     const econRow = costs.length
@@ -366,8 +420,12 @@ function HistoricoVeiculo() {
 
   const totals = useMemo(
     () => ({
-      manutencao: vRecords.filter((r) => r.status === "concluida").reduce((s, r) => s + maintenanceTotal(r), 0),
-      combustivel: vFuelings.filter((f) => f.status === "valido").reduce((s, f) => s + Number(f.total_value ?? 0), 0),
+      manutencao: vRecords
+        .filter((r) => r.status === "concluida")
+        .reduce((s, r) => s + maintenanceTotal(r), 0),
+      combustivel: vFuelings
+        .filter((f) => f.status === "valido")
+        .reduce((s, f) => s + Number(f.total_value ?? 0), 0),
       litros: onlyFuelRows(
         vFuelings.filter((f) => f.status === "valido"),
         fuelProducts,
@@ -379,7 +437,7 @@ function HistoricoVeiculo() {
   return (
     <>
       <PageHeader
-        title={vehicle ? `Veículo ${(vehicle.plate ?? vehicle.asset_code)}` : "Veículo"}
+        title={vehicle ? `Veículo ${vehicle.plate ?? vehicle.asset_code}` : "Veículo"}
         description={
           vehicle
             ? `${vehicle.brand ?? ""} ${vehicle.model ?? ""} · ${num(Number(vehicle.current_km ?? 0), 0)} km · ${label(
@@ -411,7 +469,10 @@ function HistoricoVeiculo() {
               { label: "Custo de manutenção", value: brl(totals.manutencao) },
               { label: "Gasto com combustível", value: brl(totals.combustivel) },
               { label: "Volume abastecido", value: num(totals.litros, 4) },
-              { label: "Pneus instalados", value: String(vTires.filter((t) => t.status === "instalado").length) },
+              {
+                label: "Pneus instalados",
+                value: String(vTires.filter((t) => t.status === "instalado").length),
+              },
             ].map((c) => (
               <div key={c.label} className="rounded-lg border bg-card p-5 shadow-card">
                 <p className="text-sm text-muted-foreground">{c.label}</p>
@@ -431,7 +492,9 @@ function HistoricoVeiculo() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <div>
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">Média de consumo</p>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Média de consumo
+                </p>
                 <p className="mt-1 text-lg font-semibold">
                   {intel.agg?.kmL != null
                     ? `${num(intel.agg.kmL, 2)} km/L`
@@ -440,11 +503,15 @@ function HistoricoVeiculo() {
                       : "—"}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {intel.param ? `Esperado: ${num(Number(intel.param.expected_value), 2)}` : "Sem parâmetro definido"}
+                  {intel.param
+                    ? `Esperado: ${num(Number(intel.param.expected_value), 2)}`
+                    : "Sem parâmetro definido"}
                 </p>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">Classificação do consumo</p>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Classificação do consumo
+                </p>
                 <p className="mt-1">
                   <Badge
                     variant={
@@ -459,11 +526,15 @@ function HistoricoVeiculo() {
                   </Badge>
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {intel.dev.deviationPct != null ? `Desvio de ${intel.dev.deviationPct.toFixed(1)}%` : "—"}
+                  {intel.dev.deviationPct != null
+                    ? `Desvio de ${intel.dev.deviationPct.toFixed(1)}%`
+                    : "—"}
                 </p>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">Custo total (TCO) no período</p>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Custo total (TCO) no período
+                </p>
                 <p className="mt-1 text-lg font-semibold">{brl(intel.cost?.totals.total ?? 0)}</p>
                 <p className="text-xs text-muted-foreground">
                   {intel.econRow?.costPerKm != null
@@ -474,7 +545,9 @@ function HistoricoVeiculo() {
                 </p>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">Economicidade</p>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Economicidade
+                </p>
                 <p className="mt-1">
                   {intel.econRow ? (
                     <Badge
@@ -498,7 +571,9 @@ function HistoricoVeiculo() {
               </div>
             </div>
             {intel.econRow?.reasons.length ? (
-              <p className="mt-3 text-xs text-muted-foreground">{intel.econRow.reasons.join(" ")}</p>
+              <p className="mt-3 text-xs text-muted-foreground">
+                {intel.econRow.reasons.join(" ")}
+              </p>
             ) : null}
           </div>
 
@@ -557,7 +632,12 @@ function HistoricoVeiculo() {
                 </div>
                 <div>
                   <Label htmlFor="from">De</Label>
-                  <Input id="from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+                  <Input
+                    id="from"
+                    type="date"
+                    value={from}
+                    onChange={(e) => setFrom(e.target.value)}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="to">Até</Label>
@@ -567,7 +647,14 @@ function HistoricoVeiculo() {
               <HistTable
                 head={["Data", "Categoria", "Evento", "Detalhe", "Valor", ""]}
                 empty="Nenhum evento no período selecionado."
-                rows={timeline.map((i) => [dateTimeBR(i.at), i.catLabel, i.title, i.detail, i.value, ""])}
+                rows={timeline.map((i) => [
+                  dateTimeBR(i.at),
+                  i.catLabel,
+                  i.title,
+                  i.detail,
+                  i.value,
+                  "",
+                ])}
               />
             </TabsContent>
 
@@ -689,7 +776,14 @@ function HistoricoVeiculo() {
 
             <TabsContent value="pneus">
               <HistTable
-                head={["Código", "Marca / medida", "Posição", "Instalação", "KM acumulado", "Situação"]}
+                head={[
+                  "Código",
+                  "Marca / medida",
+                  "Posição",
+                  "Instalação",
+                  "KM acumulado",
+                  "Situação",
+                ]}
                 empty="Nenhum pneu vinculado."
                 rows={vTires.map((t) => [
                   t.code,
@@ -723,14 +817,20 @@ function HistoricoVeiculo() {
                 empty="Nenhum checklist registrado."
                 rows={checklists.map((checklist) => {
                   const responses = parseChecklistResponses(checklist.responses);
-                  const problems = CHECKLIST_ITEMS.filter((item) => responses[item.key] === "problema");
+                  const problems = CHECKLIST_ITEMS.filter(
+                    (item) => responses[item.key] === "problema",
+                  );
                   const answered = CHECKLIST_ITEMS.filter((item) => responses[item.key]).length;
                   return [
                     dateTimeBR(checklist.completed_at),
                     checklist.stage === "saida" ? "Saída" : "Retorno",
                     checklist.completed_by_name ?? "—",
-                    checklist.odometer_km != null ? `${num(Number(checklist.odometer_km), 0)} km` : "—",
-                    problems.length ? `${problems.length} problema(s): ${problems.map((item) => item.label).join(", ")}` : `${answered} itens: ${CHECKLIST_ANSWER_LABEL.ok}`,
+                    checklist.odometer_km != null
+                      ? `${num(Number(checklist.odometer_km), 0)} km`
+                      : "—",
+                    problems.length
+                      ? `${problems.length} problema(s): ${problems.map((item) => item.label).join(", ")}`
+                      : `${answered} itens: ${CHECKLIST_ANSWER_LABEL.ok}`,
                     checklist.observations ?? "—",
                   ];
                 })}
@@ -769,7 +869,15 @@ function HistoricoVeiculo() {
 
             <TabsContent value="diarias">
               <HistTable
-                head={["Código", "Beneficiário", "Destino", "Saída", "Retorno", "Valor total", "Situação"]}
+                head={[
+                  "Código",
+                  "Beneficiário",
+                  "Destino",
+                  "Saída",
+                  "Retorno",
+                  "Valor total",
+                  "Situação",
+                ]}
                 empty="Nenhuma diária vinculada a este veículo."
                 rows={vDiaries.map((d) => [
                   d.code ?? "—",

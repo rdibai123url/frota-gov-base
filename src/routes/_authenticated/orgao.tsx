@@ -43,7 +43,10 @@ export const Route = createFileRoute("/_authenticated/orgao")({
           "Cadastro institucional do órgão: identificação, endereço, contatos, brasão e autoridade responsável.",
       },
       { property: "og:title", content: "Dados do Órgão — FrotaGov" },
-      { property: "og:description", content: "Mantenha atualizados os dados institucionais do órgão." },
+      {
+        property: "og:description",
+        content: "Mantenha atualizados os dados institucionais do órgão.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -201,8 +204,8 @@ function Orgao() {
       <>
         <PageHeader title="Dados do Órgão" />
         <div className="rounded-lg border bg-card p-8 text-center text-sm text-muted-foreground shadow-card">
-          Nenhum órgão vinculado ao seu usuário. Solicite ao administrador da plataforma a vinculação
-          da sua conta a um órgão.
+          Nenhum órgão vinculado ao seu usuário. Solicite ao administrador da plataforma a
+          vinculação da sua conta a um órgão.
         </div>
       </>
     );
@@ -364,14 +367,23 @@ function Orgao() {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="authority_cpf">CPF da autoridade (opcional)</Label>
-              <CpfInput id="authority_cpf" name="authority_cpf" defaultValue={org.authority_cpf ?? ""} />
+              <CpfInput
+                id="authority_cpf"
+                name="authority_cpf"
+                defaultValue={org.authority_cpf ?? ""}
+              />
               <p className="text-xs text-muted-foreground">
                 Dado restrito (LGPD): não é exibido em telas públicas nem em relatórios comuns.
               </p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="term_start">Início da gestão</Label>
-              <Input id="term_start" name="term_start" type="date" defaultValue={org.term_start ?? ""} />
+              <Input
+                id="term_start"
+                name="term_start"
+                type="date"
+                defaultValue={org.term_start ?? ""}
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="term_end">Término previsto</Label>

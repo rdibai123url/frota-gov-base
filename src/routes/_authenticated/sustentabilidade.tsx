@@ -33,9 +33,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-import { supabase, useCostCenters, useInvalidate, useOrganization, usePerms, useUnits } from "@/lib/frotagov";
+import {
+  supabase,
+  useCostCenters,
+  useInvalidate,
+  useOrganization,
+  usePerms,
+  useUnits,
+} from "@/lib/frotagov";
 import { formatNumberBR } from "@/lib/format";
 import { exportReportCsv, exportXlsx, printReport } from "@/lib/reports";
 import {
@@ -83,13 +97,21 @@ type FuelingEsgRow = {
   vehicles: { asset_class: string } | null;
 };
 
-function useEsgFuelings(from: string, to: string, unitId: string, costCenterId: string, assetClass: string) {
+function useEsgFuelings(
+  from: string,
+  to: string,
+  unitId: string,
+  costCenterId: string,
+  assetClass: string,
+) {
   return useQuery({
     queryKey: ["esg-fuelings", from, to, unitId, costCenterId, assetClass],
     queryFn: async () => {
       let q = supabase
         .from("fuelings")
-        .select("fueled_at, quantity, unit_id, cost_center_id, fuel_types(name, category), vehicles(asset_class)")
+        .select(
+          "fueled_at, quantity, unit_id, cost_center_id, fuel_types(name, category), vehicles(asset_class)",
+        )
         .eq("status", "valido")
         .gte("fueled_at", `${from}T00:00:00`)
         .lte("fueled_at", `${to}T23:59:59`)
@@ -126,12 +148,23 @@ function Sustentabilidade() {
 
   /** Período imediatamente anterior, de mesma duração, para comparação. */
   const previous = useMemo(() => {
-    const days = Math.max(1, Math.round((new Date(to).getTime() - new Date(from).getTime()) / 86400000));
+    const days = Math.max(
+      1,
+      Math.round((new Date(to).getTime() - new Date(from).getTime()) / 86400000),
+    );
     const prevTo = new Date(new Date(from).getTime() - 86400000).toISOString().slice(0, 10);
-    const prevFrom = new Date(new Date(prevTo).getTime() - days * 86400000).toISOString().slice(0, 10);
+    const prevFrom = new Date(new Date(prevTo).getTime() - days * 86400000)
+      .toISOString()
+      .slice(0, 10);
     return { prevFrom, prevTo };
   }, [from, to]);
-  const { data: prevRows = [] } = useEsgFuelings(previous.prevFrom, previous.prevTo, unitId, costCenterId, assetClass);
+  const { data: prevRows = [] } = useEsgFuelings(
+    previous.prevFrom,
+    previous.prevTo,
+    unitId,
+    costCenterId,
+    assetClass,
+  );
 
   const toInput = (r: FuelingEsgRow): EsgInput => ({
     fueledAt: r.fueled_at,
@@ -142,12 +175,14 @@ function Sustentabilidade() {
   const esg = useMemo(() => computeEsg(rows.map(toInput), factors), [rows, factors]);
   const esgPrev = useMemo(() => computeEsg(prevRows.map(toInput), factors), [prevRows, factors]);
 
-  const variation = esgPrev.totalCo2e > 0 ? ((esg.totalCo2e - esgPrev.totalCo2e) / esgPrev.totalCo2e) * 100 : null;
+  const variation =
+    esgPrev.totalCo2e > 0 ? ((esg.totalCo2e - esgPrev.totalCo2e) / esgPrev.totalCo2e) * 100 : null;
 
   const meta = {
     title: "Sustentabilidade da Frota — estimativa de emissões",
     organization: org?.legal_name ?? null,
-    subtitle: "Estimativa de CO2e calculada a partir dos litros abastecidos e dos fatores de emissão do órgão.",
+    subtitle:
+      "Estimativa de CO2e calculada a partir dos litros abastecidos e dos fatores de emissão do órgão.",
     unit: unitId === "todas" ? "Todas" : (units.find((u) => u.id === unitId)?.name ?? null),
     period: `${new Date(from).toLocaleDateString("pt-BR")} a ${new Date(to).toLocaleDateString("pt-BR")}`,
     issuedBy: userName,
@@ -240,8 +275,8 @@ function Sustentabilidade() {
 
           {esg.missingFactors.length > 0 && (
             <p className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
-              Sem fator de emissão vigente para: {esg.missingFactors.join(", ")}. Os litros entram nos totais,
-              mas não geram estimativa de CO2e enquanto o fator não for cadastrado.
+              Sem fator de emissão vigente para: {esg.missingFactors.join(", ")}. Os litros entram
+              nos totais, mas não geram estimativa de CO2e enquanto o fator não for cadastrado.
             </p>
           )}
 
@@ -256,7 +291,10 @@ function Sustentabilidade() {
                   : `${variation >= 0 ? "+" : ""}${formatNumberBR(variation, 1)}% vs. período anterior`
               }
             />
-            <Kpi title="Participação de renováveis" value={`${formatNumberBR(esg.renewablePct, 1)} %`} />
+            <Kpi
+              title="Participação de renováveis"
+              value={`${formatNumberBR(esg.renewablePct, 1)} %`}
+            />
             <Kpi
               title="Abastecimentos considerados"
               value={String(rows.length)}
@@ -270,13 +308,25 @@ function Sustentabilidade() {
                 <Leaf className="size-4" /> Consumo e emissões por combustível
               </CardTitle>
               <div className="flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => exportReportCsv("sustentabilidade", columns, reportRows, meta)}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => exportReportCsv("sustentabilidade", columns, reportRows, meta)}
+                >
                   <Download className="size-4" /> CSV
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => exportXlsx("sustentabilidade", columns, reportRows, "ESG", meta)}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => exportXlsx("sustentabilidade", columns, reportRows, "ESG", meta)}
+                >
                   <FileSpreadsheet className="size-4" /> XLSX
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => printReport(meta, columns, reportRows)}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => printReport(meta, columns, reportRows)}
+                >
                   <Printer className="size-4" /> PDF
                 </Button>
               </div>
@@ -418,7 +468,9 @@ function FactorsPanel({
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     const payload = {
-      fuel_key: String(form.get("fuel_key") ?? "").trim().toLowerCase(),
+      fuel_key: String(form.get("fuel_key") ?? "")
+        .trim()
+        .toLowerCase(),
       label: String(form.get("label") ?? "").trim(),
       factor_kg_co2e_per_unit: Number(String(form.get("factor") ?? "0").replace(",", ".")),
       unit: String(form.get("unit") ?? "L"),
@@ -456,8 +508,8 @@ function FactorsPanel({
         <div>
           <CardTitle className="text-base">Fatores de emissão</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Parametrizáveis por órgão, com fonte, versão e vigência. Alterar um fator não reescreve o passado:
-            cada abastecimento usa o fator vigente na data em que ocorreu.
+            Parametrizáveis por órgão, com fonte, versão e vigência. Alterar um fator não reescreve
+            o passado: cada abastecimento usa o fator vigente na data em que ocorreu.
           </p>
         </div>
         <Button size="sm" onClick={openNew} disabled={!canEdit}>
@@ -491,13 +543,23 @@ function FactorsPanel({
                   <TableCell>{f.version}</TableCell>
                   <TableCell>
                     {new Date(f.valid_from).toLocaleDateString("pt-BR", { timeZone: "UTC" })}
-                    {f.valid_to ? ` a ${new Date(f.valid_to).toLocaleDateString("pt-BR", { timeZone: "UTC" })}` : ""}
+                    {f.valid_to
+                      ? ` a ${new Date(f.valid_to).toLocaleDateString("pt-BR", { timeZone: "UTC" })}`
+                      : ""}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={f.active ? "default" : "secondary"}>{f.active ? "Vigente" : "Inativo"}</Badge>
+                    <Badge variant={f.active ? "default" : "secondary"}>
+                      {f.active ? "Vigente" : "Inativo"}
+                    </Badge>
                   </TableCell>
                   <TableCell>
-                    <Button size="icon" variant="ghost" onClick={() => openEdit(f)} disabled={!canEdit} aria-label="Editar">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => openEdit(f)}
+                      disabled={!canEdit}
+                      aria-label="Editar"
+                    >
                       <Pencil className="size-4" />
                     </Button>
                   </TableCell>
@@ -511,13 +573,21 @@ function FactorsPanel({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-xl">
           <DialogHeader>
-            <DialogTitle>{editing ? "Editar fator de emissão" : "Novo fator de emissão"}</DialogTitle>
+            <DialogTitle>
+              {editing ? "Editar fator de emissão" : "Novo fator de emissão"}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="fuel_key">Chave do combustível *</Label>
-                <Input id="fuel_key" name="fuel_key" placeholder="gasolina" defaultValue={editing?.fuel_key ?? ""} required />
+                <Input
+                  id="fuel_key"
+                  name="fuel_key"
+                  placeholder="gasolina"
+                  defaultValue={editing?.fuel_key ?? ""}
+                  required
+                />
               </div>
               <div>
                 <Label htmlFor="label">Descrição *</Label>
@@ -525,7 +595,12 @@ function FactorsPanel({
               </div>
               <div>
                 <Label htmlFor="factor">Fator (kg CO2e por unidade) *</Label>
-                <Input id="factor" name="factor" defaultValue={String(editing?.factor_kg_co2e_per_unit ?? "")} required />
+                <Input
+                  id="factor"
+                  name="factor"
+                  defaultValue={String(editing?.factor_kg_co2e_per_unit ?? "")}
+                  required
+                />
               </div>
               <div>
                 <Label htmlFor="unit">Unidade</Label>
@@ -533,7 +608,11 @@ function FactorsPanel({
               </div>
               <div>
                 <Label htmlFor="renewable">Participação renovável (%)</Label>
-                <Input id="renewable" name="renewable" defaultValue={String(editing?.renewable_share_pct ?? 0)} />
+                <Input
+                  id="renewable"
+                  name="renewable"
+                  defaultValue={String(editing?.renewable_share_pct ?? 0)}
+                />
               </div>
               <div>
                 <Label htmlFor="version">Versão</Label>
@@ -549,11 +628,22 @@ function FactorsPanel({
               </div>
               <div>
                 <Label htmlFor="valid_from">Vigente de *</Label>
-                <Input id="valid_from" name="valid_from" type="date" defaultValue={editing?.valid_from ?? today()} required />
+                <Input
+                  id="valid_from"
+                  name="valid_from"
+                  type="date"
+                  defaultValue={editing?.valid_from ?? today()}
+                  required
+                />
               </div>
               <div>
                 <Label htmlFor="valid_to">Vigente até</Label>
-                <Input id="valid_to" name="valid_to" type="date" defaultValue={editing?.valid_to ?? ""} />
+                <Input
+                  id="valid_to"
+                  name="valid_to"
+                  type="date"
+                  defaultValue={editing?.valid_to ?? ""}
+                />
               </div>
             </div>
             <div className="flex items-center gap-3">

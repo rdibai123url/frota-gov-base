@@ -12,8 +12,21 @@ import { DecimalInput, IntegerInput, MoneyInput } from "@/components/form-fields
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { formatBRL } from "@/lib/format";
 import {
@@ -141,7 +154,12 @@ export function PropostaFields({
             </div>
             <div>
               <Label>Total da mão de obra</Label>
-              <Input readOnly tabIndex={-1} value={formatBRL(totals.laborValue)} className="bg-muted/50" />
+              <Input
+                readOnly
+                tabIndex={-1}
+                value={formatBRL(totals.laborValue)}
+                className="bg-muted/50"
+              />
             </div>
             <div>
               <Label htmlFor="servicesValue">Valor global dos demais serviços (R$)</Label>
@@ -176,7 +194,10 @@ export function PropostaFields({
               <TableBody>
                 {draft.items.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={lockItems ? 6 : 8} className="py-6 text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={lockItems ? 6 : 8}
+                      className="py-6 text-center text-muted-foreground"
+                    >
                       Nenhum item na proposta.
                     </TableCell>
                   </TableRow>
@@ -198,7 +219,9 @@ export function PropostaFields({
                       <TableCell>
                         <Select
                           value={i.quotationItemId ?? NO_LINK}
-                          onValueChange={(v) => setItem(i.key, { quotationItemId: v === NO_LINK ? null : v })}
+                          onValueChange={(v) =>
+                            setItem(i.key, { quotationItemId: v === NO_LINK ? null : v })
+                          }
                           disabled={!!disabled}
                         >
                           <SelectTrigger>
@@ -216,7 +239,11 @@ export function PropostaFields({
                       </TableCell>
                     )}
                     <TableCell>
-                      <Input value={i.brand} onChange={(e) => setItem(i.key, { brand: e.target.value })} disabled={disabled} />
+                      <Input
+                        value={i.brand}
+                        onChange={(e) => setItem(i.key, { brand: e.target.value })}
+                        disabled={disabled}
+                      />
                     </TableCell>
                     <TableCell>
                       <Input
@@ -227,7 +254,13 @@ export function PropostaFields({
                     </TableCell>
                     <TableCell>
                       {i.lockedQuantity ? (
-                        <Input readOnly tabIndex={-1} value={i.quantity} className="bg-muted/50" aria-label="Quantidade solicitada" />
+                        <Input
+                          readOnly
+                          tabIndex={-1}
+                          value={i.quantity}
+                          className="bg-muted/50"
+                          aria-label="Quantidade solicitada"
+                        />
                       ) : (
                         <DecimalInput
                           decimals={2}
@@ -238,9 +271,15 @@ export function PropostaFields({
                       )}
                     </TableCell>
                     <TableCell>
-                      <MoneyInput value={i.unitValue} onValueChange={(v) => setItem(i.key, { unitValue: v })} disabled={disabled} />
+                      <MoneyInput
+                        value={i.unitValue}
+                        onValueChange={(v) => setItem(i.key, { unitValue: v })}
+                        disabled={disabled}
+                      />
                     </TableCell>
-                    <TableCell className="text-right text-sm font-medium">{formatBRL(itemTotal(i))}</TableCell>
+                    <TableCell className="text-right text-sm font-medium">
+                      {formatBRL(itemTotal(i))}
+                    </TableCell>
                     {!lockItems && (
                       <TableCell>
                         {!disabled && (
@@ -249,7 +288,9 @@ export function PropostaFields({
                             variant="ghost"
                             size="icon"
                             aria-label="Remover item"
-                            onClick={() => onChange({ items: draft.items.filter((x) => x.key !== i.key) })}
+                            onClick={() =>
+                              onChange({ items: draft.items.filter((x) => x.key !== i.key) })
+                            }
                           >
                             <Trash2 className="size-4" />
                           </Button>
@@ -263,8 +304,8 @@ export function PropostaFields({
           </div>
           {lockItems ? (
             <p className="text-xs text-muted-foreground">
-              Os itens e as quantidades foram definidos pelo órgão e não podem ser alterados. Informe marca, nº/código e
-              valor unitário de cada item.
+              Os itens e as quantidades foram definidos pelo órgão e não podem ser alterados.
+              Informe marca, nº/código e valor unitário de cada item.
             </p>
           ) : (
             !disabled && (
@@ -311,7 +352,12 @@ export function PropostaFields({
         </div>
         <div>
           <Label>Valor do desconto</Label>
-          <Input readOnly tabIndex={-1} value={formatBRL(totals.discount)} className="bg-background" />
+          <Input
+            readOnly
+            tabIndex={-1}
+            value={formatBRL(totals.discount)}
+            className="bg-background"
+          />
         </div>
 
         <dl className="grid gap-1 text-sm sm:col-span-3 sm:grid-cols-2">

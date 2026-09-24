@@ -37,11 +37,20 @@ function isoMonthsAgo(months: number) {
  */
 export function useVehicleConsumption(
   vehicleId: string | null | undefined,
-  hints?: { assetClass?: string | null; category?: string | null; brand?: string | null; model?: string | null },
+  hints?: {
+    assetClass?: string | null;
+    category?: string | null;
+    brand?: string | null;
+    model?: string | null;
+  },
 ): ConsumptionEstimate {
   const enabled = Boolean(vehicleId);
   const { data: segments = [] } = useConsumptionSegments(
-    { from: isoMonthsAgo(HISTORY_MONTHS), to: new Date().toISOString().slice(0, 10), vehicleId: vehicleId ?? null },
+    {
+      from: isoMonthsAgo(HISTORY_MONTHS),
+      to: new Date().toISOString().slice(0, 10),
+      vehicleId: vehicleId ?? null,
+    },
     enabled,
   );
   const { data: params = [] } = useConsumptionParameters();

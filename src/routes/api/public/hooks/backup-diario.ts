@@ -21,9 +21,14 @@ export const Route = createFileRoute("/api/public/hooks/backup-diario")({
         if (unauthorized) {
           const token = /^Bearer ([^\s,]+)$/.exec(request.headers.get("authorization") ?? "")?.[1];
           const { data: secret } = token
-            ? await supabaseAdmin.from("cron_secrets").select("token_hash").eq("name", "backup_diario").maybeSingle()
+            ? await supabaseAdmin
+                .from("cron_secrets")
+                .select("token_hash")
+                .eq("name", "backup_diario")
+                .maybeSingle()
             : { data: null };
-          if (!token || !secret || (await sha256Hex(token)) !== secret.token_hash) return unauthorized;
+          if (!token || !secret || (await sha256Hex(token)) !== secret.token_hash)
+            return unauthorized;
         }
 
         const { data: due, error } = await supabaseAdmin.rpc("backup_due_organizations");
@@ -48,7 +53,12 @@ export const Route = createFileRoute("/api/public/hooks/backup-diario")({
         }
 
         return new Response(
-          JSON.stringify({ ok: true, processed: results.length, pending: Math.max((due ?? []).length - batch.length, 0), results }),
+          JSON.stringify({
+            ok: true,
+            processed: results.length,
+            pending: Math.max((due ?? []).length - batch.length, 0),
+            results,
+          }),
           { headers: { "Content-Type": "application/json" } },
         );
       },

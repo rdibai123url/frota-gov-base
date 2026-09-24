@@ -9,11 +9,30 @@ import { PageHeader } from "@/components/app-shell";
 import { MoneyInput } from "@/components/form-fields";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import {
   FINE_LIABILITY,
@@ -50,7 +69,10 @@ export const Route = createFileRoute("/_authenticated/multas")({
           "Controle de autos de infração da frota pública: órgão autuador, enquadramento, valores, defesa, responsabilidade e anexos.",
       },
       { property: "og:title", content: "Multas e Infrações — FrotaGov" },
-      { property: "og:description", content: "Gestão de multas de trânsito dos veículos do órgão." },
+      {
+        property: "og:description",
+        content: "Gestão de multas de trânsito dos veículos do órgão.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -102,7 +124,11 @@ function Multas() {
   const [status, setStatus] = useState<FineStatus>("recebida");
   const [liability, setLiability] = useState("nao_definida");
   const [occurredAt, setOccurredAt] = useState("");
-  const [suggestion, setSuggestion] = useState<{ driverId: string; usageId: string; text: string } | null>(null);
+  const [suggestion, setSuggestion] = useState<{
+    driverId: string;
+    usageId: string;
+    text: string;
+  } | null>(null);
   const [saving, setSaving] = useState(false);
 
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -140,7 +166,7 @@ function Multas() {
         const q = search.trim().toLowerCase();
         return (
           !q ||
-          `${f.code ?? ""} ${f.notice_number} ${f.issuing_authority} ${f.description} ${(f.vehicle?.plate ?? f.vehicle?.asset_code ?? "")}`
+          `${f.code ?? ""} ${f.notice_number} ${f.issuing_authority} ${f.description} ${f.vehicle?.plate ?? f.vehicle?.asset_code ?? ""}`
             .toLowerCase()
             .includes(q)
         );
@@ -235,8 +261,13 @@ function Multas() {
         ...(paths["payment"] ? { payment_path: paths["payment"] } : {}),
       };
       const { error } = editing
-        ? await supabase.from("traffic_fines").update({ ...payload, updated_by: userId }).eq("id", editing.id)
-        : await supabase.from("traffic_fines").insert({ ...payload, organization_id: orgId!, created_by: userId });
+        ? await supabase
+            .from("traffic_fines")
+            .update({ ...payload, updated_by: userId })
+            .eq("id", editing.id)
+        : await supabase
+            .from("traffic_fines")
+            .insert({ ...payload, organization_id: orgId!, created_by: userId });
       if (error) throw error;
 
       if (editing) {
@@ -260,7 +291,9 @@ function Multas() {
         await supabase.storage.from("frota").remove(uploadedPaths);
       }
       const e2 = err as { code?: string };
-      toast.error(e2.code === "23505" ? "Já existe multa com esse número de auto." : dbMessage(err));
+      toast.error(
+        e2.code === "23505" ? "Já existe multa com esse número de auto." : dbMessage(err),
+      );
     } finally {
       setSaving(false);
     }
@@ -319,7 +352,11 @@ function Multas() {
       <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <div>
           <Label>Buscar</Label>
-          <Input placeholder="Auto, órgão, placa" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input
+            placeholder="Auto, órgão, placa"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
         <div>
           <Label>Situação</Label>
@@ -347,7 +384,7 @@ function Multas() {
               <SelectItem value={ALL}>Todos</SelectItem>
               {vehicles.map((v) => (
                 <SelectItem key={v.id} value={v.id}>
-                  {(v.plate ?? v.asset_code)}
+                  {v.plate ?? v.asset_code}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -400,8 +437,10 @@ function Multas() {
                     <span className="block text-xs text-muted-foreground">{f.notice_number}</span>
                   </TableCell>
                   <TableCell>
-                    {(f.vehicle?.plate ?? f.vehicle?.asset_code ?? "—")}
-                    <span className="block text-xs text-muted-foreground">{f.unit?.acronym ?? ""}</span>
+                    {f.vehicle?.plate ?? f.vehicle?.asset_code ?? "—"}
+                    <span className="block text-xs text-muted-foreground">
+                      {f.unit?.acronym ?? ""}
+                    </span>
                   </TableCell>
                   <TableCell className="max-w-[260px]">
                     <span className="block truncate text-sm">{f.description}</span>
@@ -411,7 +450,9 @@ function Multas() {
                   </TableCell>
                   <TableCell className="text-sm">
                     {f.driver?.full_name ?? "Não identificado"}
-                    <span className="block text-xs text-muted-foreground">{label(FINE_LIABILITY, f.liability)}</span>
+                    <span className="block text-xs text-muted-foreground">
+                      {label(FINE_LIABILITY, f.liability)}
+                    </span>
                   </TableCell>
                   <TableCell className="text-right">{brl(Number(f.amount ?? 0))}</TableCell>
                   <TableCell className="whitespace-nowrap text-sm">
@@ -423,7 +464,15 @@ function Multas() {
                     )}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={f.status === "cancelada" ? "outline" : f.status === "paga" ? "secondary" : "default"}>
+                    <Badge
+                      variant={
+                        f.status === "cancelada"
+                          ? "outline"
+                          : f.status === "paga"
+                            ? "secondary"
+                            : "default"
+                      }
+                    >
                       {label(FINE_STATUS, f.status)}
                     </Badge>
                   </TableCell>
@@ -440,7 +489,12 @@ function Multas() {
                         </Button>
                       )}
                       {canRegister && f.status !== "cancelada" && (
-                        <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => openEdit(f)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Editar"
+                          onClick={() => openEdit(f)}
+                        >
                           <Pencil className="size-4" />
                         </Button>
                       )}
@@ -470,7 +524,9 @@ function Multas() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing ? `Editar multa ${editing.code ?? ""}` : "Nova multa"}</DialogTitle>
+            <DialogTitle>
+              {editing ? `Editar multa ${editing.code ?? ""}` : "Nova multa"}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-3">
@@ -484,7 +540,7 @@ function Multas() {
                     <SelectItem value={NONE}>Selecione</SelectItem>
                     {vehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        {(v.plate ?? v.asset_code)} — {v.brand ?? ""} {v.model ?? ""}
+                        {v.plate ?? v.asset_code} — {v.brand ?? ""} {v.model ?? ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -507,7 +563,12 @@ function Multas() {
               </div>
               <div>
                 <Label htmlFor="notice_number">Número do auto *</Label>
-                <Input id="notice_number" name="notice_number" defaultValue={editing?.notice_number ?? ""} required />
+                <Input
+                  id="notice_number"
+                  name="notice_number"
+                  defaultValue={editing?.notice_number ?? ""}
+                  required
+                />
               </div>
               <div>
                 <Label htmlFor="issuing_authority">Órgão autuador *</Label>
@@ -521,13 +582,23 @@ function Multas() {
               </div>
               <div>
                 <Label htmlFor="infraction_code">Código / enquadramento</Label>
-                <Input id="infraction_code" name="infraction_code" defaultValue={editing?.infraction_code ?? ""} />
+                <Input
+                  id="infraction_code"
+                  name="infraction_code"
+                  defaultValue={editing?.infraction_code ?? ""}
+                />
               </div>
             </div>
 
             <div>
               <Label htmlFor="description">Descrição da infração *</Label>
-              <Textarea id="description" name="description" rows={2} defaultValue={editing?.description ?? ""} required />
+              <Textarea
+                id="description"
+                name="description"
+                rows={2}
+                defaultValue={editing?.description ?? ""}
+                required
+              />
             </div>
 
             {suggestion && driverId === NONE && (
@@ -608,11 +679,20 @@ function Multas() {
               </div>
               <div>
                 <Label htmlFor="discount_amount">Valor com desconto (R$)</Label>
-                <MoneyInput id="discount_amount" name="discount_amount" defaultValue={editing?.discount_amount ?? ""} />
+                <MoneyInput
+                  id="discount_amount"
+                  name="discount_amount"
+                  defaultValue={editing?.discount_amount ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="due_date">Vencimento</Label>
-                <Input id="due_date" name="due_date" type="date" defaultValue={editing?.due_date ?? ""} />
+                <Input
+                  id="due_date"
+                  name="due_date"
+                  type="date"
+                  defaultValue={editing?.due_date ?? ""}
+                />
               </div>
               <div>
                 <Label>Situação</Label>
@@ -646,15 +726,28 @@ function Multas() {
               </div>
               <div>
                 <Label htmlFor="points">Pontos na CNH</Label>
-                <Input id="points" name="points" inputMode="numeric" defaultValue={editing?.points ?? ""} />
+                <Input
+                  id="points"
+                  name="points"
+                  inputMode="numeric"
+                  defaultValue={editing?.points ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="defense_protocol">Protocolo de defesa/recurso</Label>
-                <Input id="defense_protocol" name="defense_protocol" defaultValue={editing?.defense_protocol ?? ""} />
+                <Input
+                  id="defense_protocol"
+                  name="defense_protocol"
+                  defaultValue={editing?.defense_protocol ?? ""}
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label htmlFor="responsible_name">Responsável pela apuração</Label>
-                <Input id="responsible_name" name="responsible_name" defaultValue={editing?.responsible_name ?? ""} />
+                <Input
+                  id="responsible_name"
+                  name="responsible_name"
+                  defaultValue={editing?.responsible_name ?? ""}
+                />
               </div>
             </div>
 

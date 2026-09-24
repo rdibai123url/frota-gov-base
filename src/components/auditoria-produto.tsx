@@ -5,8 +5,21 @@ import { Download, Printer } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   CLASSIFICATIONS,
   DECISIONS,
@@ -56,8 +69,8 @@ export function AuditTab({ organization }: { organization?: string | null }) {
       <section className="rounded-lg border bg-card p-5 shadow-card">
         <h3 className="gov-title text-base">{LAUNCH_NAME}</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          Auditoria funcional e de experiência: nenhuma informação ou histórico foi apagado. As decisões
-          registradas são de manter, mover, consolidar, ocultar ou simplificar.
+          Auditoria funcional e de experiência: nenhuma informação ou histórico foi apagado. As
+          decisões registradas são de manter, mover, consolidar, ocultar ou simplificar.
         </p>
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
           {LAUNCH_REPORT.map((s) => (
@@ -77,11 +90,15 @@ export function AuditTab({ organization }: { organization?: string | null }) {
         <div className="space-y-1.5">
           <Label>Classificação</Label>
           <Select value={classification} onValueChange={setClassification}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="todas">Todas</SelectItem>
               {CLASSIFICATIONS.map((c) => (
-                <SelectItem key={c} value={c}>{c}</SelectItem>
+                <SelectItem key={c} value={c}>
+                  {c}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -89,11 +106,15 @@ export function AuditTab({ organization }: { organization?: string | null }) {
         <div className="space-y-1.5">
           <Label>Decisão</Label>
           <Select value={decision} onValueChange={setDecision}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="todas">Todas</SelectItem>
               {DECISIONS.map((d) => (
-                <SelectItem key={d} value={d}>{d}</SelectItem>
+                <SelectItem key={d} value={d}>
+                  {d}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -105,10 +126,24 @@ export function AuditTab({ organization }: { organization?: string | null }) {
           {rows.length} de {PRODUCT_AUDIT.length} registros
         </p>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => { exportReportCsv("auditoria-produto-frotagov", COLUMNS, rows); void log("CSV"); }}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              exportReportCsv("auditoria-produto-frotagov", COLUMNS, rows);
+              void log("CSV");
+            }}
+          >
             <Download className="size-4" /> CSV
           </Button>
-          <Button variant="outline" size="sm" onClick={() => { exportXlsx("auditoria-produto-frotagov", COLUMNS, rows, "Auditoria"); void log("XLSX"); }}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              exportXlsx("auditoria-produto-frotagov", COLUMNS, rows, "Auditoria");
+              void log("XLSX");
+            }}
+          >
             <Download className="size-4" /> Excel (.xlsx)
           </Button>
           <Button
@@ -121,7 +156,10 @@ export function AuditTab({ organization }: { organization?: string | null }) {
                   organization: organization || "FrotaGov",
                   subtitle: "Simplificação sem perda de aderência, controle ou auditoria",
                   filters: [
-                    { label: "Classificação", value: classification === "todas" ? "Todas" : classification },
+                    {
+                      label: "Classificação",
+                      value: classification === "todas" ? "Todas" : classification,
+                    },
                     { label: "Decisão", value: decision === "todas" ? "Todas" : decision },
                   ],
                 },
@@ -165,7 +203,9 @@ export function AuditTab({ organization }: { organization?: string | null }) {
                     {r.classification}
                   </Badge>
                 </TableCell>
-                <TableCell><Badge variant="outline">{r.decision}</Badge></TableCell>
+                <TableCell>
+                  <Badge variant="outline">{r.decision}</Badge>
+                </TableCell>
                 <TableCell className="text-sm text-muted-foreground">{r.before}</TableCell>
                 <TableCell className="text-sm text-muted-foreground">{r.after}</TableCell>
               </TableRow>

@@ -9,11 +9,30 @@ import { MoneyInput } from "@/components/form-fields";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { formatCNPJ, parseBRNumber } from "@/lib/format";
 import {
@@ -57,7 +76,10 @@ export const Route = createFileRoute("/_authenticated/ordens-servico")({
           "Ordens de serviço eletrônicas emitidas aos prestadores cadastrados pelo próprio órgão, com peças aprovadas, prazos, garantias, origem do recurso e controle de execução.",
       },
       { property: "og:title", content: "Ordens de Serviço — FrotaGov" },
-      { property: "og:description", content: "Emissão e acompanhamento de ordens de serviço da frota pública." },
+      {
+        property: "og:description",
+        content: "Emissão e acompanhamento de ordens de serviço da frota pública.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -97,11 +119,14 @@ function OrdensServico() {
   const current = useMemo(() => orders.find((o) => o.id === detail?.id) ?? null, [orders, detail]);
 
   const approved = quotations.filter(
-    (q) => q.selected_proposal_id && !orders.some((o) => o.quotation_id === q.id && o.status !== "cancelada"),
+    (q) =>
+      q.selected_proposal_id &&
+      !orders.some((o) => o.quotation_id === q.id && o.status !== "cancelada"),
   );
   const chosenQuotation = approved.find((q) => q.id === quotationId) ?? null;
   const { data: chosenProposals = [] } = useQuotationProposals(quotationId || null);
-  const chosenProposal = chosenProposals.find((p) => p.id === chosenQuotation?.selected_proposal_id) ?? null;
+  const chosenProposal =
+    chosenProposals.find((p) => p.id === chosenQuotation?.selected_proposal_id) ?? null;
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -109,7 +134,7 @@ function OrdensServico() {
       (o) =>
         (fStatus === ALL || o.status === fStatus) &&
         (!q ||
-          `${o.code ?? ""} ${(o.vehicle?.plate ?? o.vehicle?.asset_code ?? "")} ${o.workshop?.legal_name ?? ""} ${o.services}`
+          `${o.code ?? ""} ${o.vehicle?.plate ?? o.vehicle?.asset_code ?? ""} ${o.workshop?.legal_name ?? ""} ${o.services}`
             .toLowerCase()
             .includes(q)),
     );
@@ -126,7 +151,9 @@ function OrdensServico() {
       return;
     }
     if (!chosenQuotation.vehicle_id) {
-      toast.error("A cotação não tem veículo vinculado (compra para estoque). Use o módulo de Almoxarifado / OFP.");
+      toast.error(
+        "A cotação não tem veículo vinculado (compra para estoque). Use o módulo de Almoxarifado / OFP.",
+      );
       return;
     }
     const fd = new FormData(e.currentTarget);
@@ -140,9 +167,7 @@ function OrdensServico() {
       unit_id: unitId === NONE ? chosenQuotation.unit_id : unitId,
       workshop_id: chosenProposal.workshop_id,
       services: String(fd.get("services") ?? chosenQuotation.description),
-      approved_value: Number(
-        chosenProposal.net_value ?? chosenProposal.total_value
-      ),
+      approved_value: Number(chosenProposal.net_value ?? chosenProposal.total_value),
       execution_days: chosenProposal.execution_days,
       deadline_at: (fd.get("deadline_at") as string) || null,
       warranty_days: chosenProposal.warranty_days,
@@ -198,7 +223,11 @@ function OrdensServico() {
       <div className="mb-4 grid gap-3 sm:grid-cols-2">
         <div>
           <Label>Buscar</Label>
-          <Input placeholder="Código, veículo, oficina" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input
+            placeholder="Código, veículo, oficina"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
         <div>
           <Label>Situação</Label>
@@ -252,9 +281,11 @@ function OrdensServico() {
               <TableRow key={o.id}>
                 <TableCell className="font-medium">
                   {o.code || "—"}
-                  <span className="block text-xs text-muted-foreground">{o.quotation?.code || "sem cotação"}</span>
+                  <span className="block text-xs text-muted-foreground">
+                    {o.quotation?.code || "sem cotação"}
+                  </span>
                 </TableCell>
-                <TableCell>{(o.vehicle?.plate ?? o.vehicle?.asset_code ?? "—")}</TableCell>
+                <TableCell>{o.vehicle?.plate ?? o.vehicle?.asset_code ?? "—"}</TableCell>
                 <TableCell>{o.workshop?.trade_name || o.workshop?.legal_name}</TableCell>
                 <TableCell className="text-sm">
                   {o.deadline_at ? dateBR(o.deadline_at) : "—"}
@@ -301,26 +332,29 @@ function OrdensServico() {
                   <SelectContent>
                     {approved.map((q) => (
                       <SelectItem key={q.id} value={q.id}>
-                        {q.code} — {(q.vehicle?.plate ?? q.vehicle?.asset_code ?? "")} — {q.description.slice(0, 40)}
+                        {q.code} — {q.vehicle?.plate ?? q.vehicle?.asset_code ?? ""} —{" "}
+                        {q.description.slice(0, 40)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 {approved.length === 0 && (
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Nenhuma cotação com proposta aprovada disponível. A execução formal só ocorre após a emissão da OS.
+                    Nenhuma cotação com proposta aprovada disponível. A execução formal só ocorre
+                    após a emissão da OS.
                   </p>
                 )}
               </div>
               {chosenProposal && (
                 <div className="sm:col-span-2 rounded-md border bg-muted/30 p-3 text-sm">
                   <p>
-                    Oficina: {chosenProposal.workshop?.trade_name || chosenProposal.workshop?.legal_name} — Valor
-                    aprovado {brl(Number(chosenProposal.total_value))}
+                    Oficina:{" "}
+                    {chosenProposal.workshop?.trade_name || chosenProposal.workshop?.legal_name} —
+                    Valor aprovado {brl(Number(chosenProposal.total_value))}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Prazo {chosenProposal.execution_days ?? "—"} dia(s) · Garantia {chosenProposal.warranty_days ?? "—"}{" "}
-                    dia(s)
+                    Prazo {chosenProposal.execution_days ?? "—"} dia(s) · Garantia{" "}
+                    {chosenProposal.warranty_days ?? "—"} dia(s)
                   </p>
                 </div>
               )}
@@ -389,7 +423,11 @@ function OrdensServico() {
                   </div>
                   <div>
                     <Label>Item contratual *</Label>
-                    <Select value={contractItem} onValueChange={setContractItem} disabled={contract === NONE}>
+                    <Select
+                      value={contractItem}
+                      onValueChange={setContractItem}
+                      disabled={contract === NONE}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione o item" />
                       </SelectTrigger>
@@ -409,8 +447,8 @@ function OrdensServico() {
                 </>
               ) : (
                 <p className="sm:col-span-2 text-xs text-muted-foreground">
-                  Compra direta / pronto pagamento: contrato não é exigido e a oficina da proposta aprovada pode não ser
-                  contratada ou credenciada.
+                  Compra direta / pronto pagamento: contrato não é exigido e a oficina da proposta
+                  aprovada pode não ser contratada ou credenciada.
                 </p>
               )}
               <div className="sm:col-span-2">
@@ -442,7 +480,14 @@ function OrdensServico() {
 
       <Dialog open={!!current} onOpenChange={(v) => !v && setDetail(null)}>
         <DialogContent className="max-h-[92vh] max-w-4xl overflow-y-auto">
-          {current && <ServiceOrderDetail order={current} canManage={canManageFleet} userId={userId} orgId={orgId} />}
+          {current && (
+            <ServiceOrderDetail
+              order={current}
+              canManage={canManageFleet}
+              userId={userId}
+              orgId={orgId}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </>
@@ -597,7 +642,8 @@ function ServiceOrderDetail({
           `<tr><td>${i.description}</td><td>${i.brand ?? "—"}</td><td style="text-align:right">${num(Number(i.quantity), 2)}</td><td style="text-align:right">${brl(Number(i.unit_value))}</td><td style="text-align:right">${brl(Number(i.total_value))}</td></tr>`,
       )
       .join("");
-    w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${order.code}</title>
+    w.document
+      .write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${order.code}</title>
       <style>body{font-family:Arial,Helvetica,sans-serif;padding:32px;color:#111}h1{font-size:18px;margin:0}
       table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px}td,th{border:1px solid #ccc;padding:6px}
       .hdr{display:flex;gap:16px;align-items:center;border-bottom:2px solid #123;padding-bottom:12px}
@@ -606,7 +652,7 @@ function ServiceOrderDetail({
       <p>${[org?.city, org?.state].filter(Boolean).join(" / ")} — CNPJ ${formatCNPJ(org?.cnpj)}</p></div></div>
       <h2 style="font-size:16px">Ordem de Serviço ${order.code ?? ""}</h2>
       <p><b>Emitida em:</b> ${dateTimeBR(order.issued_at)}</p>
-      <p><b>Veículo:</b> ${(order.vehicle?.plate ?? order.vehicle?.asset_code ?? "")} — ${order.vehicle?.brand ?? ""} ${order.vehicle?.model ?? ""}</p>
+      <p><b>Veículo:</b> ${order.vehicle?.plate ?? order.vehicle?.asset_code ?? ""} — ${order.vehicle?.brand ?? ""} ${order.vehicle?.model ?? ""}</p>
       <p><b>Oficina:</b> ${order.workshop?.legal_name ?? ""} — CNPJ ${formatCNPJ(order.workshop?.cnpj)}</p>
       <p><b>Processo de cotação:</b> ${order.quotation?.code ?? "—"}</p>
       <p><b>Serviços:</b> ${order.services}</p>
@@ -634,7 +680,8 @@ function ServiceOrderDetail({
 
       <div className="grid gap-2 rounded-md border bg-muted/30 p-3 text-sm sm:grid-cols-3">
         <p>
-          <span className="text-muted-foreground">Veículo:</span> {(order.vehicle?.plate ?? order.vehicle?.asset_code ?? "—")}
+          <span className="text-muted-foreground">Veículo:</span>{" "}
+          {order.vehicle?.plate ?? order.vehicle?.asset_code ?? "—"}
         </p>
         <p>
           <span className="text-muted-foreground">Oficina:</span>{" "}
@@ -644,20 +691,24 @@ function ServiceOrderDetail({
           <span className="text-muted-foreground">Cotação:</span> {order.quotation?.code ?? "—"}
         </p>
         <p>
-          <span className="text-muted-foreground">Aprovado:</span> {brl(Number(order.approved_value))}
+          <span className="text-muted-foreground">Aprovado:</span>{" "}
+          {brl(Number(order.approved_value))}
         </p>
         <p>
-          <span className="text-muted-foreground">Reservado:</span> {brl(Number(order.reserved_value))}
+          <span className="text-muted-foreground">Reservado:</span>{" "}
+          {brl(Number(order.reserved_value))}
         </p>
         <p>
-          <span className="text-muted-foreground">Consumido:</span> {brl(Number(order.consumed_value))}
+          <span className="text-muted-foreground">Consumido:</span>{" "}
+          {brl(Number(order.consumed_value))}
         </p>
         <p className="sm:col-span-3">
           <span className="text-muted-foreground">Serviços:</span> {order.services}
         </p>
         <p className="sm:col-span-3 text-xs text-muted-foreground">
           Emitida em {dateTimeBR(order.issued_at)} por {order.authorizer_name ?? "—"} · Prazo{" "}
-          {order.deadline_at ? dateBR(order.deadline_at) : "—"} · Garantia {order.warranty_days ?? "—"} dia(s)
+          {order.deadline_at ? dateBR(order.deadline_at) : "—"} · Garantia{" "}
+          {order.warranty_days ?? "—"} dia(s)
           {order.cancel_reason ? ` · Cancelamento: ${order.cancel_reason}` : ""}
         </p>
       </div>
@@ -679,11 +730,21 @@ function ServiceOrderDetail({
               </Button>
             )}
             {order.status === "em_execucao" && (
-              <Button size="sm" variant="outline" onClick={() => setStatus("aguardando_peca")} disabled={busy}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setStatus("aguardando_peca")}
+                disabled={busy}
+              >
                 Aguardando peça
               </Button>
             )}
-            <Button size="sm" variant="outline" onClick={() => setStatus("cancelada")} disabled={busy}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setStatus("cancelada")}
+              disabled={busy}
+            >
               Cancelar OS
             </Button>
           </>
@@ -734,7 +795,9 @@ function ServiceOrderDetail({
                           type="button"
                           className="ml-1 text-primary underline"
                           onClick={() =>
-                            openMaintenanceFile(i.return_attachment_path!).catch((e) => toast.error(dbMessage(e)))
+                            openMaintenanceFile(i.return_attachment_path!).catch((e) =>
+                              toast.error(dbMessage(e)),
+                            )
                           }
                         >
                           comprovante
@@ -753,19 +816,27 @@ function ServiceOrderDetail({
             ))}
           </TableBody>
         </Table>
-        <p className="mt-1 text-right text-sm text-muted-foreground">Total dos itens: {brl(itemsTotal)}</p>
+        <p className="mt-1 text-right text-sm text-muted-foreground">
+          Total dos itens: {brl(itemsTotal)}
+        </p>
       </div>
 
       {canManage && !closed && (
         <>
-          <form onSubmit={addItem} className="grid items-end gap-2 rounded-md border p-3 sm:grid-cols-6">
+          <form
+            onSubmit={addItem}
+            className="grid items-end gap-2 rounded-md border p-3 sm:grid-cols-6"
+          >
             <div className="sm:col-span-2">
               <Label>Descrição</Label>
               <Input name="description" />
             </div>
             <div>
               <Label>Tipo</Label>
-              <select name="kind" className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm">
+              <select
+                name="kind"
+                className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+              >
                 <option value="peca">Peça</option>
                 <option value="servico">Serviço</option>
               </select>
@@ -828,7 +899,11 @@ function ServiceOrderDetail({
               <Label htmlFor="ret-file" className="flex items-center gap-2">
                 <Upload className="size-4" /> Comprovante de devolução
               </Label>
-              <Input id="ret-file" type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+              <Input
+                id="ret-file"
+                type="file"
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              />
             </div>
             <Button onClick={() => setStatus("concluida")} disabled={busy}>
               Concluir OS

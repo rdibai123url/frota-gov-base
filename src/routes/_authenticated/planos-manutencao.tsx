@@ -7,12 +7,31 @@ import { z } from "zod";
 import { PageHeader } from "@/components/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { ServiceTypeSelect } from "@/components/cadastro-rapido";
 
@@ -44,7 +63,10 @@ export const Route = createFileRoute("/_authenticated/planos-manutencao")({
           "Planos preventivos por veículo ou tipo de veículo, com periodicidade por quilometragem, horímetro e meses, tolerâncias e situação de vencimento.",
       },
       { property: "og:title", content: "Planos de manutenção preventiva — FrotaGov" },
-      { property: "og:description", content: "Periodicidade preventiva da frota por KM, horímetro e prazo." },
+      {
+        property: "og:description",
+        content: "Periodicidade preventiva da frota por KM, horímetro e prazo.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -116,7 +138,12 @@ function Planos() {
       rows.filter((r) => {
         if (fState !== ALL && r.due.state !== fState) return false;
         const q = search.trim().toLowerCase();
-        return !q || `${r.plan.name} ${(r.vehicle?.plate ?? r.vehicle?.asset_code ?? "")} ${r.plan.service_type ?? ""}`.toLowerCase().includes(q);
+        return (
+          !q ||
+          `${r.plan.name} ${r.vehicle?.plate ?? r.vehicle?.asset_code ?? ""} ${r.plan.service_type ?? ""}`
+            .toLowerCase()
+            .includes(q)
+        );
       }),
     [rows, fState, search],
   );
@@ -183,8 +210,13 @@ function Planos() {
       notes: d.notes || null,
     };
     const { error } = editing
-      ? await supabase.from("maintenance_plans").update({ ...payload, updated_by: userId }).eq("id", editing.id)
-      : await supabase.from("maintenance_plans").insert({ ...payload, organization_id: orgId!, created_by: userId });
+      ? await supabase
+          .from("maintenance_plans")
+          .update({ ...payload, updated_by: userId })
+          .eq("id", editing.id)
+      : await supabase
+          .from("maintenance_plans")
+          .insert({ ...payload, organization_id: orgId!, created_by: userId });
     setSaving(false);
     if (error) {
       toast.error(dbMessage(error));
@@ -197,7 +229,10 @@ function Planos() {
 
   async function removePlan(p: MaintenancePlanRow) {
     if (!confirm(`Inativar o plano "${p.name}"?`)) return;
-    const { error } = await supabase.from("maintenance_plans").update({ active: false }).eq("id", p.id);
+    const { error } = await supabase
+      .from("maintenance_plans")
+      .update({ active: false })
+      .eq("id", p.id);
     if (error) {
       toast.error(dbMessage(error));
       return;
@@ -237,7 +272,11 @@ function Planos() {
       <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <Label>Buscar</Label>
-          <Input placeholder="Plano, placa ou serviço" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input
+            placeholder="Plano, placa ou serviço"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
         <div>
           <Label>Situação</Label>
@@ -289,12 +328,18 @@ function Planos() {
               <TableRow key={`${r.plan.id}-${r.vehicle?.id ?? "sem"}`}>
                 <TableCell className="font-medium">
                   {r.plan.name}
-                  <span className="block text-xs text-muted-foreground">{r.plan.service_type ?? "—"}</span>
+                  <span className="block text-xs text-muted-foreground">
+                    {r.plan.service_type ?? "—"}
+                  </span>
                 </TableCell>
                 <TableCell>
-                  {r.vehicle ? `${r.vehicle.plate} — ${r.vehicle.brand ?? ""} ${r.vehicle.model ?? ""}` : "Sem veículo aplicável"}
+                  {r.vehicle
+                    ? `${r.vehicle.plate} — ${r.vehicle.brand ?? ""} ${r.vehicle.model ?? ""}`
+                    : "Sem veículo aplicável"}
                   <span className="block text-xs text-muted-foreground">
-                    {r.plan.vehicle_id ? "Plano do veículo" : r.plan.vehicle_type ?? "Todos os tipos"}
+                    {r.plan.vehicle_id
+                      ? "Plano do veículo"
+                      : (r.plan.vehicle_type ?? "Todos os tipos")}
                   </span>
                 </TableCell>
                 <TableCell className="text-sm">
@@ -319,7 +364,12 @@ function Planos() {
                 <TableCell>
                   {canManageFleet && (
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => openEdit(r.plan)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Editar"
+                        onClick={() => openEdit(r.plan)}
+                      >
                         <Pencil className="size-4" />
                       </Button>
                       <Button
@@ -331,7 +381,12 @@ function Planos() {
                         <ListChecks className="size-4" />
                       </Button>
                       {r.plan.active && (
-                        <Button variant="ghost" size="icon" aria-label="Inativar" onClick={() => removePlan(r.plan)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Inativar"
+                          onClick={() => removePlan(r.plan)}
+                        >
                           <Trash2 className="size-4" />
                         </Button>
                       )}
@@ -347,7 +402,12 @@ function Planos() {
       <Dialog open={!!itemsPlan} onOpenChange={(v) => !v && setItemsPlan(null)}>
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           {itemsPlan && (
-            <PlanItemsEditor plan={itemsPlan} canManage={canManageFleet} orgId={orgId} userId={userId} />
+            <PlanItemsEditor
+              plan={itemsPlan}
+              canManage={canManageFleet}
+              orgId={orgId}
+              userId={userId}
+            />
           )}
         </DialogContent>
       </Dialog>
@@ -355,7 +415,9 @@ function Planos() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing ? `Editar plano ${editing.name}` : "Novo plano preventivo"}</DialogTitle>
+            <DialogTitle>
+              {editing ? `Editar plano ${editing.name}` : "Novo plano preventivo"}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-3">
@@ -377,7 +439,7 @@ function Planos() {
                     <SelectItem value={NONE}>Por tipo de veículo</SelectItem>
                     {vehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        {(v.plate ?? v.asset_code)} — {v.model ?? ""}
+                        {v.plate ?? v.asset_code} — {v.model ?? ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -385,7 +447,11 @@ function Planos() {
               </div>
               <div>
                 <Label>Tipo de veículo</Label>
-                <Select value={vehicleType} onValueChange={setVehicleType} disabled={vehicleId !== NONE}>
+                <Select
+                  value={vehicleType}
+                  onValueChange={setVehicleType}
+                  disabled={vehicleId !== NONE}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -405,7 +471,12 @@ function Planos() {
               </div>
               <div>
                 <Label htmlFor="interval_km">A cada (KM)</Label>
-                <Input id="interval_km" name="interval_km" inputMode="numeric" defaultValue={editing?.interval_km ?? ""} />
+                <Input
+                  id="interval_km"
+                  name="interval_km"
+                  inputMode="numeric"
+                  defaultValue={editing?.interval_km ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="interval_hours">A cada (horímetro)</Label>
@@ -427,7 +498,12 @@ function Planos() {
               </div>
               <div>
                 <Label htmlFor="tolerance_km">Tolerância (KM)</Label>
-                <Input id="tolerance_km" name="tolerance_km" inputMode="numeric" defaultValue={editing?.tolerance_km ?? 0} />
+                <Input
+                  id="tolerance_km"
+                  name="tolerance_km"
+                  inputMode="numeric"
+                  defaultValue={editing?.tolerance_km ?? 0}
+                />
               </div>
               <div>
                 <Label htmlFor="tolerance_hours">Tolerância (horas)</Label>
@@ -449,15 +525,30 @@ function Planos() {
               </div>
               <div>
                 <Label htmlFor="last_done_at">Última execução (data)</Label>
-                <Input id="last_done_at" name="last_done_at" type="date" defaultValue={editing?.last_done_at ?? ""} />
+                <Input
+                  id="last_done_at"
+                  name="last_done_at"
+                  type="date"
+                  defaultValue={editing?.last_done_at ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="last_done_km">Última execução (KM)</Label>
-                <Input id="last_done_km" name="last_done_km" inputMode="numeric" defaultValue={editing?.last_done_km ?? ""} />
+                <Input
+                  id="last_done_km"
+                  name="last_done_km"
+                  inputMode="numeric"
+                  defaultValue={editing?.last_done_km ?? ""}
+                />
               </div>
               <div className="sm:col-span-3">
                 <Label htmlFor="description">Descrição</Label>
-                <Textarea id="description" name="description" rows={2} defaultValue={editing?.description ?? ""} />
+                <Textarea
+                  id="description"
+                  name="description"
+                  rows={2}
+                  defaultValue={editing?.description ?? ""}
+                />
               </div>
               <div className="sm:col-span-3">
                 <Label htmlFor="notes">Observações</Label>
@@ -556,7 +647,12 @@ function PlanItemsEditor({
               <TableCell>{i.service_type || "—"}</TableCell>
               <TableCell>
                 {canManage && (
-                  <Button variant="ghost" size="icon" aria-label="Remover item" onClick={() => remove(i.id)}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Remover item"
+                    onClick={() => remove(i.id)}
+                  >
                     <Trash2 className="size-4" />
                   </Button>
                 )}

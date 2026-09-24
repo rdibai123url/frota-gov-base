@@ -13,7 +13,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import { supabase, useInvalidate, usePerms } from "@/lib/frotagov";
 import { formatBRL, formatPercent } from "@/lib/format";
@@ -22,7 +29,8 @@ import { fipeQuoteVehicle } from "@/lib/fipe.functions";
 import { LinkDialog } from "@/components/integracao-fipe";
 import { aplicarDadosOficiais, consultarSerpro } from "@/lib/serpro.functions";
 
-const brDate = (v?: string | null) => (v ? new Date(v).toLocaleDateString("pt-BR", { timeZone: "UTC" }) : "—");
+const brDate = (v?: string | null) =>
+  v ? new Date(v).toLocaleDateString("pt-BR", { timeZone: "UTC" }) : "—";
 const dt = (v?: string | null) => (v ? new Date(v).toLocaleString("pt-BR") : "—");
 
 function useVehicleFipe(vehicleId: string) {
@@ -65,7 +73,9 @@ export function VeiculoFipe({ vehicleId }: { vehicleId: string }) {
         },
       });
       (r.ok ? toast.success : toast.error)(
-        r.ok ? `Valor atualizado: ${formatBRL(r.value ?? 0)} (${r.referenceLabel ?? "referência atual"}).` : r.message,
+        r.ok
+          ? `Valor atualizado: ${formatBRL(r.value ?? 0)} (${r.referenceLabel ?? "referência atual"}).`
+          : r.message,
       );
       invalidate(["vehicles", "asset_market_values"]);
     } catch (e) {
@@ -100,15 +110,23 @@ export function VeiculoFipe({ vehicleId }: { vehicleId: string }) {
       <CardContent className="space-y-4">
         {!v?.fipe_year_code ? (
           <p className="text-sm text-muted-foreground">
-            Este bem ainda não está vinculado à tabela. O cadastro segue normal e o vínculo pode ser feito a qualquer
-            momento.
+            Este bem ainda não está vinculado à tabela. O cadastro segue normal e o vínculo pode ser
+            feito a qualquer momento.
           </p>
         ) : (
           <div className="grid gap-3 sm:grid-cols-4">
             <Info label="Modelo na tabela" value={v.fipe_model_name ?? v.fipe_model_code ?? "—"} />
             <Info label="Código" value={v.fipe_code ?? "—"} />
-            <Info label="Valor de mercado" value={v.fipe_value ? formatBRL(v.fipe_value) : "—"} hint={v.fipe_reference_label ?? undefined} />
-            <Info label="Depreciação" value={dep === null ? "—" : formatPercent(dep * 100)} hint="Sobre o valor de aquisição" />
+            <Info
+              label="Valor de mercado"
+              value={v.fipe_value ? formatBRL(v.fipe_value) : "—"}
+              hint={v.fipe_reference_label ?? undefined}
+            />
+            <Info
+              label="Depreciação"
+              value={dep === null ? "—" : formatPercent(dep * 100)}
+              hint="Sobre o valor de aquisição"
+            />
           </div>
         )}
 
@@ -179,9 +197,12 @@ export function VeiculoDadosOficiais({ vehicleId }: { vehicleId: string }) {
   const consultar = useServerFn(consultarSerpro);
   const aplicar = useServerFn(aplicarDadosOficiais);
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<{ ok: boolean; available: boolean; message: string; divergences: Divergence[] } | null>(
-    null,
-  );
+  const [result, setResult] = useState<{
+    ok: boolean;
+    available: boolean;
+    message: string;
+    divergences: Divergence[];
+  } | null>(null);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
 
   async function run() {
@@ -224,8 +245,8 @@ export function VeiculoDadosOficiais({ vehicleId }: { vehicleId: string }) {
         <div>
           <CardTitle>Dados oficiais (SERPRO / SENATRAN)</CardTitle>
           <p className="mt-1 text-sm text-muted-foreground">
-            Consulta à base nacional pela placa, apenas com credenciais próprias do órgão. Nada é obtido de fontes não
-            autorizadas e nenhum dado é alterado sem a sua confirmação.
+            Consulta à base nacional pela placa, apenas com credenciais próprias do órgão. Nada é
+            obtido de fontes não autorizadas e nenhum dado é alterado sem a sua confirmação.
           </p>
         </div>
         {canManageFleet && (
@@ -236,8 +257,12 @@ export function VeiculoDadosOficiais({ vehicleId }: { vehicleId: string }) {
         )}
       </CardHeader>
       <CardContent className="space-y-3">
-        {!result && <p className="text-sm text-muted-foreground">Nenhuma consulta realizada nesta sessão.</p>}
-        {result && !result.available && <p className="text-sm text-muted-foreground">{result.message}</p>}
+        {!result && (
+          <p className="text-sm text-muted-foreground">Nenhuma consulta realizada nesta sessão.</p>
+        )}
+        {result && !result.available && (
+          <p className="text-sm text-muted-foreground">{result.message}</p>
+        )}
         {result?.ok && result.divergences.length === 0 && (
           <p className="text-sm">O cadastro do bem confere com a base nacional.</p>
         )}
@@ -258,7 +283,9 @@ export function VeiculoDadosOficiais({ vehicleId }: { vehicleId: string }) {
                     <TableCell>
                       <Checkbox
                         checked={Boolean(checked[d.field])}
-                        onCheckedChange={(v) => setChecked((c) => ({ ...c, [d.field]: Boolean(v) }))}
+                        onCheckedChange={(v) =>
+                          setChecked((c) => ({ ...c, [d.field]: Boolean(v) }))
+                        }
                       />
                     </TableCell>
                     <TableCell>{d.label}</TableCell>
@@ -268,7 +295,9 @@ export function VeiculoDadosOficiais({ vehicleId }: { vehicleId: string }) {
                 ))}
               </TableBody>
             </Table>
-            {canManageFleet && <Button onClick={() => void apply()}>Atualizar dados marcados</Button>}
+            {canManageFleet && (
+              <Button onClick={() => void apply()}>Atualizar dados marcados</Button>
+            )}
           </>
         )}
       </CardContent>

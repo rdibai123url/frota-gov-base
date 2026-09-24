@@ -45,11 +45,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { HelpButton } from "@/components/help-button";
 import { cn } from "@/lib/utils";
-import { supabase, useBrasaoUrl, useOpenAlertCount, useOrganization, useProfile, ROLE_LABELS } from "@/lib/frotagov";
+import {
+  supabase,
+  useBrasaoUrl,
+  useOpenAlertCount,
+  useOrganization,
+  useProfile,
+  ROLE_LABELS,
+} from "@/lib/frotagov";
 import { useIsSuperAdmin, usePlatformSession, usePlatformContextActions } from "@/lib/platform";
 import { moduleForPath, useModuleMap } from "@/lib/modulos";
-
-
 
 type NavLeaf = { to: string; label: string };
 type NavGroup = { id: string; label: string; icon: typeof Truck; to?: string; items?: NavLeaf[] };
@@ -170,7 +175,6 @@ const PLATFORM_NAV: NavGroup = {
   to: "/plataforma",
 };
 
-
 const EXTRA_MATCHES: Record<string, string[]> = {
   frota: ["/veiculo/"],
   rede: ["/cotacao/", "/ordem-servico/"],
@@ -184,7 +188,6 @@ function groupForPath(pathname: string) {
   }
   return null;
 }
-
 
 /** Preferência de menu compacto — fica no navegador do usuário, por dispositivo. */
 const COLLAPSE_KEY = "frotagov:menu-compacto";
@@ -253,9 +256,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   const currentModule = moduleForPath(pathname);
   const blocked = !modulesLoading && !!currentModule && modules[currentModule.key] === false;
 
-
-
-
   async function handleSignOut() {
     await queryClient.cancelQueries();
     queryClient.clear();
@@ -270,7 +270,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   /** Todas as telas visíveis, em lista plana, para a busca rápida. */
   const searchTargets = navGroups.flatMap((g) =>
-    g.to ? [{ to: g.to, label: g.label, group: g.label }] : (g.items ?? []).map((i) => ({ ...i, group: g.label })),
+    g.to
+      ? [{ to: g.to, label: g.label, group: g.label }]
+      : (g.items ?? []).map((i) => ({ ...i, group: g.label })),
   );
 
   /**
@@ -411,8 +413,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         })}
       </nav>
 
-
-
       {compact ? (
         <div className="border-t border-sidebar-border p-2">
           <Tooltip>
@@ -460,211 +460,217 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <TooltipProvider delayDuration={200}>
-    <div className="flex min-h-screen bg-background">
-
-      <aside className={cn("hidden shrink-0 lg:block", collapsed ? "w-16" : "w-64")}>
-        <div className={cn("fixed inset-y-0", collapsed ? "w-16" : "w-64")}>
-          {renderSidebar(collapsed)}
-        </div>
-      </aside>
-
-      {open && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-foreground/40" onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 left-0 w-72">{renderSidebar(false)}</div>
-          <Button
-            variant="secondary"
-            size="icon"
-            className="absolute right-4 top-4"
-            onClick={() => setOpen(false)}
-          >
-            <X className="size-4" />
-          </Button>
-        </div>
-      )}
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-card px-4 sm:px-6">
-          <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setOpen(true)}>
-            <Menu className="size-5" />
-          </Button>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="hidden lg:inline-flex"
-                aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
-                onClick={toggleCollapsed}
-              >
-                {collapsed ? <PanelLeftOpen className="size-5" /> : <PanelLeftClose className="size-5" />}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{collapsed ? "Expandir menu" : "Recolher menu"}</TooltipContent>
-          </Tooltip>
-
-          {brasao ? (
-            <img src={brasao} alt="Brasão do órgão" className="size-8 rounded-sm object-contain" />
-          ) : (
-            <div className="flex size-8 items-center justify-center rounded-sm bg-muted text-muted-foreground">
-              <Landmark className="size-[18px]" />
-            </div>
-          )}
-          <div className="min-w-0 leading-tight">
-            <p className="gov-title truncate text-[14.5px]">
-              {org?.legal_name ?? "Órgão não configurado"}
-            </p>
-            <p className="truncate text-[12px] text-muted-foreground">
-              {[org?.short_name, org?.city, org?.state].filter(Boolean).join(" · ") ||
-                "Complete os dados do órgão"}
-            </p>
+      <div className="flex min-h-screen bg-background">
+        <aside className={cn("hidden shrink-0 lg:block", collapsed ? "w-16" : "w-64")}>
+          <div className={cn("fixed inset-y-0", collapsed ? "w-16" : "w-64")}>
+            {renderSidebar(collapsed)}
           </div>
+        </aside>
 
-          <div className="ml-auto flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => setSearchOpen(true)}
-              className="hidden h-8 items-center gap-2 rounded-md border border-border bg-surface px-2.5 text-[12.5px] text-muted-foreground transition-colors hover:bg-muted md:flex"
-            >
-              <Search className="size-3.5" />
-              <span>Buscar tela…</span>
-              <kbd className="rounded border border-border bg-card px-1 text-[10px]">Ctrl K</kbd>
-            </button>
+        {open && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <div className="absolute inset-0 bg-foreground/40" onClick={() => setOpen(false)} />
+            <div className="absolute inset-y-0 left-0 w-72">{renderSidebar(false)}</div>
             <Button
-              variant="ghost"
+              variant="secondary"
               size="icon"
-              className="md:hidden"
-              aria-label="Buscar tela"
-              onClick={() => setSearchOpen(true)}
+              className="absolute right-4 top-4"
+              onClick={() => setOpen(false)}
             >
-              <Search className="size-5" />
+              <X className="size-4" />
             </Button>
+          </div>
+        )}
 
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-card px-4 sm:px-6">
+            <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setOpen(true)}>
+              <Menu className="size-5" />
+            </Button>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  aria-label="Alertas e inconsistências"
-                  onClick={() => navigate({ to: "/alertas" })}
+                  className="hidden lg:inline-flex"
+                  aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
+                  onClick={toggleCollapsed}
                 >
-                  <BellRing className="size-5" />
+                  {collapsed ? (
+                    <PanelLeftOpen className="size-5" />
+                  ) : (
+                    <PanelLeftClose className="size-5" />
+                  )}
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Alertas e inconsistências</TooltipContent>
+              <TooltipContent>{collapsed ? "Expandir menu" : "Recolher menu"}</TooltipContent>
             </Tooltip>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Sua conta">
-                  <UserRound className="size-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-60">
-                <DropdownMenuLabel className="truncate">
-                  {me?.profile?.full_name || me?.email}
-                  <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
-                    {primaryRoleLabel}
-                  </span>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => navigate({ to: "/perfil" })}>
-                  <UserRound className="size-4" /> Perfil e segurança
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => void handleSignOut()}>
-                  <LogOut className="size-4" /> Sair
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </header>
-
-        <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
-          <CommandInput placeholder="Buscar tela do FrotaGov…" />
-          <CommandList>
-            <CommandEmpty>Nenhuma tela encontrada.</CommandEmpty>
-            <CommandGroup heading="Telas disponíveis para este órgão">
-              {searchTargets.map((t) => (
-                <CommandItem
-                  key={t.to}
-                  value={`${t.label} ${t.group}`}
-                  onSelect={() => {
-                    setSearchOpen(false);
-                    navigate({ to: t.to });
-                  }}
-                >
-                  <span>{t.label}</span>
-                  <span className="ml-auto text-[11px] text-muted-foreground">{t.group}</span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </CommandDialog>
-
-        {isDemoOrg && (
-          <div className="flex items-center gap-2.5 border-b border-warning/25 bg-warning/8 px-4 py-2 text-[13px] text-foreground sm:px-6">
-            <Info className="size-4 shrink-0 text-warning" />
-            <p className="min-w-0">
-              <span className="font-semibold">Ambiente de demonstração.</span> Os dados exibidos são
-              fictícios, destinados a apresentação e treinamento. Não utilize para operação real.
-            </p>
-          </div>
-        )}
-
-
-
-        {isSuperAdmin && platformSession?.organization_id && (
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b bg-accent/15 px-4 py-2.5 text-sm sm:px-6">
-            <p className="font-medium">
-              Visualizando órgão: {platformSession.organization?.legal_name ?? org?.legal_name ?? "—"}
-            </p>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={async () => {
-                await exitOrg();
-                navigate({ to: "/plataforma" });
-              }}
-            >
-              Sair do órgão
-            </Button>
-          </div>
-        )}
-        {isSuperAdmin && !platformSession?.organization_id && (
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-warning/40 bg-warning/20 px-4 py-2.5 text-sm sm:px-6">
-            <p>
-              <strong>Nenhum órgão em contexto.</strong> As ações de cadastro das telas do órgão
-              ficam ocultas até você acessar um órgão.
-            </p>
-            <Button size="sm" onClick={() => navigate({ to: "/plataforma" })}>
-              Acessar um órgão
-            </Button>
-          </div>
-        )}
-
-
-        <main className="flex-1 px-4 py-5 sm:px-6 lg:px-7">
-          <div className="mx-auto w-full max-w-[1500px]">
-            {blocked ? (
-              <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-8 text-center">
-                <h1 className="gov-title text-xl">Módulo indisponível para este órgão</h1>
-                <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
-                  O módulo <strong>{currentModule?.label}</strong> não está habilitado na implantação deste órgão. Os
-                  dados já registrados permanecem preservados e voltam a ficar acessíveis assim que a Administração da
-                  Plataforma habilitar o módulo novamente.
-                </p>
-                <Button className="mt-5" onClick={() => navigate({ to: "/painel" })}>
-                  Voltar ao painel
-                </Button>
-              </div>
+            {brasao ? (
+              <img
+                src={brasao}
+                alt="Brasão do órgão"
+                className="size-8 rounded-sm object-contain"
+              />
             ) : (
-              children
+              <div className="flex size-8 items-center justify-center rounded-sm bg-muted text-muted-foreground">
+                <Landmark className="size-[18px]" />
+              </div>
             )}
-          </div>
-        </main>
+            <div className="min-w-0 leading-tight">
+              <p className="gov-title truncate text-[14.5px]">
+                {org?.legal_name ?? "Órgão não configurado"}
+              </p>
+              <p className="truncate text-[12px] text-muted-foreground">
+                {[org?.short_name, org?.city, org?.state].filter(Boolean).join(" · ") ||
+                  "Complete os dados do órgão"}
+              </p>
+            </div>
 
+            <div className="ml-auto flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setSearchOpen(true)}
+                className="hidden h-8 items-center gap-2 rounded-md border border-border bg-surface px-2.5 text-[12.5px] text-muted-foreground transition-colors hover:bg-muted md:flex"
+              >
+                <Search className="size-3.5" />
+                <span>Buscar tela…</span>
+                <kbd className="rounded border border-border bg-card px-1 text-[10px]">Ctrl K</kbd>
+              </button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden"
+                aria-label="Buscar tela"
+                onClick={() => setSearchOpen(true)}
+              >
+                <Search className="size-5" />
+              </Button>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Alertas e inconsistências"
+                    onClick={() => navigate({ to: "/alertas" })}
+                  >
+                    <BellRing className="size-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Alertas e inconsistências</TooltipContent>
+              </Tooltip>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" aria-label="Sua conta">
+                    <UserRound className="size-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-60">
+                  <DropdownMenuLabel className="truncate">
+                    {me?.profile?.full_name || me?.email}
+                    <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+                      {primaryRoleLabel}
+                    </span>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => navigate({ to: "/perfil" })}>
+                    <UserRound className="size-4" /> Perfil e segurança
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => void handleSignOut()}>
+                    <LogOut className="size-4" /> Sair
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </header>
+
+          <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
+            <CommandInput placeholder="Buscar tela do FrotaGov…" />
+            <CommandList>
+              <CommandEmpty>Nenhuma tela encontrada.</CommandEmpty>
+              <CommandGroup heading="Telas disponíveis para este órgão">
+                {searchTargets.map((t) => (
+                  <CommandItem
+                    key={t.to}
+                    value={`${t.label} ${t.group}`}
+                    onSelect={() => {
+                      setSearchOpen(false);
+                      navigate({ to: t.to });
+                    }}
+                  >
+                    <span>{t.label}</span>
+                    <span className="ml-auto text-[11px] text-muted-foreground">{t.group}</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </CommandDialog>
+
+          {isDemoOrg && (
+            <div className="flex items-center gap-2.5 border-b border-warning/25 bg-warning/8 px-4 py-2 text-[13px] text-foreground sm:px-6">
+              <Info className="size-4 shrink-0 text-warning" />
+              <p className="min-w-0">
+                <span className="font-semibold">Ambiente de demonstração.</span> Os dados exibidos
+                são fictícios, destinados a apresentação e treinamento. Não utilize para operação
+                real.
+              </p>
+            </div>
+          )}
+
+          {isSuperAdmin && platformSession?.organization_id && (
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b bg-accent/15 px-4 py-2.5 text-sm sm:px-6">
+              <p className="font-medium">
+                Visualizando órgão:{" "}
+                {platformSession.organization?.legal_name ?? org?.legal_name ?? "—"}
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={async () => {
+                  await exitOrg();
+                  navigate({ to: "/plataforma" });
+                }}
+              >
+                Sair do órgão
+              </Button>
+            </div>
+          )}
+          {isSuperAdmin && !platformSession?.organization_id && (
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-warning/40 bg-warning/20 px-4 py-2.5 text-sm sm:px-6">
+              <p>
+                <strong>Nenhum órgão em contexto.</strong> As ações de cadastro das telas do órgão
+                ficam ocultas até você acessar um órgão.
+              </p>
+              <Button size="sm" onClick={() => navigate({ to: "/plataforma" })}>
+                Acessar um órgão
+              </Button>
+            </div>
+          )}
+
+          <main className="flex-1 px-4 py-5 sm:px-6 lg:px-7">
+            <div className="mx-auto w-full max-w-[1500px]">
+              {blocked ? (
+                <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-8 text-center">
+                  <h1 className="gov-title text-xl">Módulo indisponível para este órgão</h1>
+                  <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
+                    O módulo <strong>{currentModule?.label}</strong> não está habilitado na
+                    implantação deste órgão. Os dados já registrados permanecem preservados e voltam
+                    a ficar acessíveis assim que a Administração da Plataforma habilitar o módulo
+                    novamente.
+                  </p>
+                  <Button className="mt-5" onClick={() => navigate({ to: "/painel" })}>
+                    Voltar ao painel
+                  </Button>
+                </div>
+              ) : (
+                children
+              )}
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
     </TooltipProvider>
   );
 }
@@ -726,4 +732,3 @@ export function PageHeader({
     </div>
   );
 }
-

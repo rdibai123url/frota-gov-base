@@ -37,8 +37,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   supabase,
@@ -55,7 +68,13 @@ import {
 } from "@/lib/frotagov";
 import { formatMoney, formatNumberBR, parseBRNumber } from "@/lib/format";
 import { logEvent } from "@/lib/platform";
-import { exportReportCsv, exportXlsx, printReport, type ReportColumn, type ReportMeta } from "@/lib/reports";
+import {
+  exportReportCsv,
+  exportXlsx,
+  printReport,
+  type ReportColumn,
+  type ReportMeta,
+} from "@/lib/reports";
 import {
   COST_CATEGORIES,
   DEVIATION_LABEL,
@@ -182,8 +201,14 @@ function Inteligencia() {
 
   /* ------------------------------ consumo ------------------------------ */
   const byAsset = useMemo(() => aggregateConsumption(segments, "ativo"), [segments]);
-  const byDimension = useMemo(() => aggregateConsumption(segments, dimension), [segments, dimension]);
-  const anomalies = useMemo(() => detectAnomalies(segments, settings ?? null), [segments, settings]);
+  const byDimension = useMemo(
+    () => aggregateConsumption(segments, dimension),
+    [segments, dimension],
+  );
+  const anomalies = useMemo(
+    () => detectAnomalies(segments, settings ?? null),
+    [segments, settings],
+  );
 
   const deviations = useMemo(() => {
     const map = new Map<string, DeviationClass>();
@@ -214,8 +239,14 @@ function Inteligencia() {
   const monthly = useMemo(() => costsByMonth(costRows), [costRows]);
   const byUnitCost = useMemo(() => costsByGroup(costRows, "unidade"), [costRows]);
   const byCcCost = useMemo(() => costsByGroup(costRows, "centro_custo"), [costRows]);
-  const prevTotal = useMemo(() => prevCostRows.reduce((s, r) => s + Number(r.value ?? 0), 0), [prevCostRows]);
-  const totalCost = useMemo(() => costRows.reduce((s, r) => s + Number(r.value ?? 0), 0), [costRows]);
+  const prevTotal = useMemo(
+    () => prevCostRows.reduce((s, r) => s + Number(r.value ?? 0), 0),
+    [prevCostRows],
+  );
+  const totalCost = useMemo(
+    () => costRows.reduce((s, r) => s + Number(r.value ?? 0), 0),
+    [costRows],
+  );
 
   const econ = useMemo(
     () =>
@@ -241,7 +272,9 @@ function Inteligencia() {
     () =>
       COST_CATEGORIES.map((c) => ({
         name: c.label,
-        value: costRows.filter((r) => r.category === c.value).reduce((s, r) => s + Number(r.value ?? 0), 0),
+        value: costRows
+          .filter((r) => r.category === c.value)
+          .reduce((s, r) => s + Number(r.value ?? 0), 0),
       })).filter((c) => c.value > 0),
     [costRows],
   );
@@ -249,7 +282,10 @@ function Inteligencia() {
   const monthChart = useMemo(
     () =>
       monthly.map((m) => {
-        const row: Record<string, string | number> = { competencia: monthLabel(m.competencia), total: m.totals.total };
+        const row: Record<string, string | number> = {
+          competencia: monthLabel(m.competencia),
+          total: m.totals.total,
+        };
         for (const c of COST_CATEGORIES) row[c.value] = catValue(m.totals, c.value);
         return row;
       }),
@@ -283,11 +319,15 @@ function Inteligencia() {
         },
         {
           label: "Centro de custo",
-          value: costCenterId === ALL ? "Todos" : (costCenters.find((c) => c.id === costCenterId)?.name ?? "—"),
+          value:
+            costCenterId === ALL
+              ? "Todos"
+              : (costCenters.find((c) => c.id === costCenterId)?.name ?? "—"),
         },
         {
           label: "Condutor",
-          value: driverId === ALL ? "Todos" : (drivers.find((d) => d.id === driverId)?.full_name ?? "—"),
+          value:
+            driverId === ALL ? "Todos" : (drivers.find((d) => d.id === driverId)?.full_name ?? "—"),
         },
         {
           label: "Combustível",
@@ -331,13 +371,28 @@ function Inteligencia() {
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-muted-foreground">{rows.length} linha(s)</p>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" disabled={!rows.length} onClick={() => exportBlock("csv", title, columns, rows)}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!rows.length}
+            onClick={() => exportBlock("csv", title, columns, rows)}
+          >
             <Download className="size-4" /> CSV
           </Button>
-          <Button variant="outline" size="sm" disabled={!rows.length} onClick={() => exportBlock("xlsx", title, columns, rows)}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!rows.length}
+            onClick={() => exportBlock("xlsx", title, columns, rows)}
+          >
             <Download className="size-4" /> Excel
           </Button>
-          <Button variant="outline" size="sm" disabled={!rows.length} onClick={() => exportBlock("pdf", title, columns, rows)}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!rows.length}
+            onClick={() => exportBlock("pdf", title, columns, rows)}
+          >
             <Printer className="size-4" /> Imprimir / PDF
           </Button>
         </div>
@@ -375,7 +430,7 @@ function Inteligencia() {
       ativo: a.label,
       tipo: a.assetClass === "equipamento" ? "Equipamento" : "Veículo",
       indicador: a.kmL != null ? "km/L" : "L/h",
-      media: formatNumberBR((a.kmL ?? a.lH) ?? 0, 2),
+      media: formatNumberBR(a.kmL ?? a.lH ?? 0, 2),
       esperado:
         deviations.detail.get(a.key)?.expected != null
           ? formatNumberBR(deviations.detail.get(a.key)!.expected!, 2)
@@ -463,7 +518,12 @@ function Inteligencia() {
     aquisicao: e.acquisitionValue ? formatMoney(e.acquisitionValue) : "—",
     custo: formatMoney(e.periodCost),
     manutencao: formatMoney(e.maintenanceCost),
-    custo_unit: e.costPerKm != null ? formatMoney(e.costPerKm) : e.costPerHour != null ? formatMoney(e.costPerHour) : "—",
+    custo_unit:
+      e.costPerKm != null
+        ? formatMoney(e.costPerKm)
+        : e.costPerHour != null
+          ? formatMoney(e.costPerHour)
+          : "—",
     indisponibilidade: formatNumberBR(e.downtimeDays, 1),
     consumo: DEVIATION_LABEL[e.deviation],
     pontuacao: formatNumberBR(e.score, 0),
@@ -471,11 +531,16 @@ function Inteligencia() {
     motivos: e.reasons.join(" ") || "Sem fatores relevantes.",
   }));
 
-  const bestKmL = [...byAsset.filter((a) => a.kmL != null)].sort((a, b) => (b.kmL ?? 0) - (a.kmL ?? 0));
+  const bestKmL = [...byAsset.filter((a) => a.kmL != null)].sort(
+    (a, b) => (b.kmL ?? 0) - (a.kmL ?? 0),
+  );
   const worstKmL = [...bestKmL].reverse();
   const topFuel = [...byAsset].sort((a, b) => b.value - a.value).slice(0, 10);
   const topMaint = [...assetCosts]
-    .map((a) => ({ label: a.label, value: catValue(a.totals, "manutencao") + catValue(a.totals, "pecas") }))
+    .map((a) => ({
+      label: a.label,
+      value: catValue(a.totals, "manutencao") + catValue(a.totals, "pecas"),
+    }))
     .filter((a) => a.value > 0)
     .sort((a, b) => b.value - a.value)
     .slice(0, 10);
@@ -512,27 +577,41 @@ function Inteligencia() {
         <div className="space-y-1.5">
           <Label>Secretaria / unidade</Label>
           <Select value={unitId} onValueChange={setUnitId}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Todas</SelectItem>
-              {units.map((u) => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}
+              {units.map((u) => (
+                <SelectItem key={u.id} value={u.id}>
+                  {u.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-1.5">
           <Label>Centro de custo</Label>
           <Select value={costCenterId} onValueChange={setCostCenterId}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Todos</SelectItem>
-              {costCenters.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+              {costCenters.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-1.5">
           <Label>Tipo de ativo</Label>
           <Select value={assetClass} onValueChange={setAssetClass}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Todos</SelectItem>
               <SelectItem value="veiculo">Veículos</SelectItem>
@@ -543,11 +622,15 @@ function Inteligencia() {
         <div className="space-y-1.5">
           <Label>Ativo</Label>
           <Select value={vehicleId} onValueChange={setVehicleId}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Todos</SelectItem>
               {vehicles.map((v) => (
-                <SelectItem key={v.id} value={v.id}>{v.plate ?? v.asset_code ?? v.id}</SelectItem>
+                <SelectItem key={v.id} value={v.id}>
+                  {v.plate ?? v.asset_code ?? v.id}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -555,20 +638,32 @@ function Inteligencia() {
         <div className="space-y-1.5">
           <Label>Condutor / operador</Label>
           <Select value={driverId} onValueChange={setDriverId}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Todos</SelectItem>
-              {drivers.map((d) => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}
+              {drivers.map((d) => (
+                <SelectItem key={d.id} value={d.id}>
+                  {d.full_name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-1.5">
           <Label>Combustível</Label>
           <Select value={fuelId} onValueChange={setFuelId}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Todos</SelectItem>
-              {fuelTypes.map((f) => <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>)}
+              {fuelTypes.map((f) => (
+                <SelectItem key={f.id} value={f.id}>
+                  {f.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -607,7 +702,9 @@ function Inteligencia() {
         />
       </div>
 
-      {loading ? <p className="mb-3 text-sm text-muted-foreground">Carregando indicadores...</p> : null}
+      {loading ? (
+        <p className="mb-3 text-sm text-muted-foreground">Carregando indicadores...</p>
+      ) : null}
 
       <Tabs defaultValue="consumo">
         <TabsList className="flex h-auto flex-wrap justify-start">
@@ -625,9 +722,15 @@ function Inteligencia() {
           <div className="mb-3 max-w-sm space-y-1.5">
             <Label>Agrupar por</Label>
             <Select value={dimension} onValueChange={(v) => setDimension(v as Dimension)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                {DIMENSIONS.map((d) => <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>)}
+                {DIMENSIONS.map((d) => (
+                  <SelectItem key={d.value} value={d.value}>
+                    {d.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -635,12 +738,19 @@ function Inteligencia() {
           <div className="overflow-x-auto rounded-lg border bg-card shadow-card">
             <Table>
               <TableHeader>
-                <TableRow>{consumoCols.map((c) => <TableHead key={c.key}>{c.label}</TableHead>)}</TableRow>
+                <TableRow>
+                  {consumoCols.map((c) => (
+                    <TableHead key={c.key}>{c.label}</TableHead>
+                  ))}
+                </TableRow>
               </TableHeader>
               <TableBody>
                 {consumoRows.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={consumoCols.length} className="py-10 text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={consumoCols.length}
+                      className="py-10 text-center text-muted-foreground"
+                    >
                       Nenhum abastecimento com medidor apurável no período selecionado.
                     </TableCell>
                   </TableRow>
@@ -648,7 +758,9 @@ function Inteligencia() {
                 {consumoRows.map((r, i) => (
                   <TableRow key={i}>
                     {consumoCols.map((c) => (
-                      <TableCell key={c.key} className="text-sm">{String(r[c.key as keyof typeof r] ?? "—")}</TableCell>
+                      <TableCell key={c.key} className="text-sm">
+                        {String(r[c.key as keyof typeof r] ?? "—")}
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))}
@@ -664,7 +776,8 @@ function Inteligencia() {
               <RefreshCw className="size-4" /> Analisar e gerar alertas
             </Button>
             <p className="text-xs text-muted-foreground">
-              Os alertas gerados ficam na tela "Alertas e inconsistências", uma vez por ativo e competência.
+              Os alertas gerados ficam na tela "Alertas e inconsistências", uma vez por ativo e
+              competência.
             </p>
           </div>
 
@@ -700,9 +813,13 @@ function Inteligencia() {
                             ? `${formatNumberBR(a.lH, 2)} L/h`
                             : "—"}
                       </TableCell>
-                      <TableCell>{d?.expected != null ? formatNumberBR(d.expected, 2) : "—"}</TableCell>
+                      <TableCell>
+                        {d?.expected != null ? formatNumberBR(d.expected, 2) : "—"}
+                      </TableCell>
                       <TableCell>{d?.pct != null ? `${d.pct.toFixed(1)}%` : "—"}</TableCell>
-                      <TableCell><Badge variant={devVariant(k)}>{DEVIATION_LABEL[k]}</Badge></TableCell>
+                      <TableCell>
+                        <Badge variant={devVariant(k)}>{DEVIATION_LABEL[k]}</Badge>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -715,12 +832,19 @@ function Inteligencia() {
           <div className="overflow-x-auto rounded-lg border bg-card shadow-card">
             <Table>
               <TableHeader>
-                <TableRow>{anomaliaCols.map((c) => <TableHead key={c.key}>{c.label}</TableHead>)}</TableRow>
+                <TableRow>
+                  {anomaliaCols.map((c) => (
+                    <TableHead key={c.key}>{c.label}</TableHead>
+                  ))}
+                </TableRow>
               </TableHeader>
               <TableBody>
                 {anomaliaRows.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={anomaliaCols.length} className="py-10 text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={anomaliaCols.length}
+                      className="py-10 text-center text-muted-foreground"
+                    >
                       Nenhuma anomalia identificada no período.
                     </TableCell>
                   </TableRow>
@@ -728,7 +852,9 @@ function Inteligencia() {
                 {anomaliaRows.map((r, i) => (
                   <TableRow key={i}>
                     {anomaliaCols.map((c) => (
-                      <TableCell key={c.key} className="text-sm">{String(r[c.key as keyof typeof r] ?? "—")}</TableCell>
+                      <TableCell key={c.key} className="text-sm">
+                        {String(r[c.key as keyof typeof r] ?? "—")}
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))}
@@ -741,14 +867,30 @@ function Inteligencia() {
         <TabsContent value="rankings" className="pt-5">
           <ExportBar title="Ranking de consumo" columns={rankingCols} rows={rankingRows} />
           <div className="grid gap-4 lg:grid-cols-2">
-            <RankChart title="Maior eficiência (km/L)" data={bestKmL.slice(0, 10).map((a) => ({ label: a.label, value: a.kmL ?? 0 }))} suffix=" km/L" />
-            <RankChart title="Menor eficiência (km/L)" data={worstKmL.slice(0, 10).map((a) => ({ label: a.label, value: a.kmL ?? 0 }))} suffix=" km/L" />
-            <RankChart title="Maior gasto com combustível" data={topFuel.map((a) => ({ label: a.label, value: a.value }))} money />
+            <RankChart
+              title="Maior eficiência (km/L)"
+              data={bestKmL.slice(0, 10).map((a) => ({ label: a.label, value: a.kmL ?? 0 }))}
+              suffix=" km/L"
+            />
+            <RankChart
+              title="Menor eficiência (km/L)"
+              data={worstKmL.slice(0, 10).map((a) => ({ label: a.label, value: a.kmL ?? 0 }))}
+              suffix=" km/L"
+            />
+            <RankChart
+              title="Maior gasto com combustível"
+              data={topFuel.map((a) => ({ label: a.label, value: a.value }))}
+              money
+            />
             <RankChart title="Maior custo de manutenção e peças" data={topMaint} money />
             <RankChart title="Maior custo total" data={topTotal} money />
             <RankChart
               title="Consumo por hora (L/h) — equipamentos"
-              data={byAsset.filter((a) => a.lH != null).sort((a, b) => (b.lH ?? 0) - (a.lH ?? 0)).slice(0, 10).map((a) => ({ label: a.label, value: a.lH ?? 0 }))}
+              data={byAsset
+                .filter((a) => a.lH != null)
+                .sort((a, b) => (b.lH ?? 0) - (a.lH ?? 0))
+                .slice(0, 10)
+                .map((a) => ({ label: a.label, value: a.lH ?? 0 }))}
               suffix=" L/h"
             />
           </div>
@@ -768,9 +910,23 @@ function Inteligencia() {
                   <ReTooltip formatter={(v: number) => formatMoney(v)} />
                   <Legend />
                   {COST_CATEGORIES.map((c, i) => (
-                    <Line key={c.value} type="monotone" dataKey={c.value} name={c.label} stroke={CHART_COLORS[i % CHART_COLORS.length]} dot={false} />
+                    <Line
+                      key={c.value}
+                      type="monotone"
+                      dataKey={c.value}
+                      name={c.label}
+                      stroke={CHART_COLORS[i % CHART_COLORS.length]}
+                      dot={false}
+                    />
                   ))}
-                  <Line type="monotone" dataKey="total" name="Total" stroke="hsl(var(--foreground))" strokeWidth={2} dot={false} />
+                  <Line
+                    type="monotone"
+                    dataKey="total"
+                    name="Total"
+                    stroke="hsl(var(--foreground))"
+                    strokeWidth={2}
+                    dot={false}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -779,12 +935,19 @@ function Inteligencia() {
           <div className="mb-4 overflow-x-auto rounded-lg border bg-card shadow-card">
             <Table>
               <TableHeader>
-                <TableRow>{despesaCols.map((c) => <TableHead key={c.key}>{c.label}</TableHead>)}</TableRow>
+                <TableRow>
+                  {despesaCols.map((c) => (
+                    <TableHead key={c.key}>{c.label}</TableHead>
+                  ))}
+                </TableRow>
               </TableHeader>
               <TableBody>
                 {despesaRows.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={despesaCols.length} className="py-10 text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={despesaCols.length}
+                      className="py-10 text-center text-muted-foreground"
+                    >
                       Nenhuma despesa lançada no período.
                     </TableCell>
                   </TableRow>
@@ -792,7 +955,9 @@ function Inteligencia() {
                 {despesaRows.map((r, i) => (
                   <TableRow key={i}>
                     {despesaCols.map((c) => (
-                      <TableCell key={c.key} className="text-sm">{String(r[c.key] ?? "—")}</TableCell>
+                      <TableCell key={c.key} className="text-sm">
+                        {String(r[c.key] ?? "—")}
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))}
@@ -831,12 +996,19 @@ function Inteligencia() {
           <div className="overflow-x-auto rounded-lg border bg-card shadow-card">
             <Table>
               <TableHeader>
-                <TableRow>{tcoCols.map((c) => <TableHead key={c.key}>{c.label}</TableHead>)}</TableRow>
+                <TableRow>
+                  {tcoCols.map((c) => (
+                    <TableHead key={c.key}>{c.label}</TableHead>
+                  ))}
+                </TableRow>
               </TableHeader>
               <TableBody>
                 {tcoRows.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={tcoCols.length} className="py-10 text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={tcoCols.length}
+                      className="py-10 text-center text-muted-foreground"
+                    >
                       Nenhum custo apurado no período.
                     </TableCell>
                   </TableRow>
@@ -844,7 +1016,9 @@ function Inteligencia() {
                 {tcoRows.map((r, i) => (
                   <TableRow key={i}>
                     {tcoCols.map((c) => (
-                      <TableCell key={c.key} className="text-sm">{String(r[c.key] ?? "—")}</TableCell>
+                      <TableCell key={c.key} className="text-sm">
+                        {String(r[c.key] ?? "—")}
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))}
@@ -856,22 +1030,30 @@ function Inteligencia() {
         {/* --------------------------- economicidade ------------------------ */}
         <TabsContent value="economicidade" className="pt-5">
           <div className="mb-3 rounded-lg border bg-muted/40 p-3 text-xs text-muted-foreground">
-            Indicador de apoio à gestão, sem decisão automática de alienação ou substituição. Pontuação de 0 a 100
-            (quanto maior, maior o custo relativo): 30 pontos para custo por km/hora frente à mediana de ativos
-            comparáveis, 25 para custo acumulado frente ao valor de aquisição, 20 para participação da manutenção,
-            15 para idade do ativo, 10 para indisponibilidade e até 10 pontos adicionais pelo desvio de consumo.
-            Valor de mercado (FIPE) ainda não integrado.
+            Indicador de apoio à gestão, sem decisão automática de alienação ou substituição.
+            Pontuação de 0 a 100 (quanto maior, maior o custo relativo): 30 pontos para custo por
+            km/hora frente à mediana de ativos comparáveis, 25 para custo acumulado frente ao valor
+            de aquisição, 20 para participação da manutenção, 15 para idade do ativo, 10 para
+            indisponibilidade e até 10 pontos adicionais pelo desvio de consumo. Valor de mercado
+            (FIPE) ainda não integrado.
           </div>
           <ExportBar title="Economicidade do ativo" columns={econCols} rows={econRows} />
           <div className="overflow-x-auto rounded-lg border bg-card shadow-card">
             <Table>
               <TableHeader>
-                <TableRow>{econCols.map((c) => <TableHead key={c.key}>{c.label}</TableHead>)}</TableRow>
+                <TableRow>
+                  {econCols.map((c) => (
+                    <TableHead key={c.key}>{c.label}</TableHead>
+                  ))}
+                </TableRow>
               </TableHeader>
               <TableBody>
                 {econRows.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={econCols.length} className="py-10 text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={econCols.length}
+                      className="py-10 text-center text-muted-foreground"
+                    >
                       Sem custos apurados para avaliar economicidade no período.
                     </TableCell>
                   </TableRow>
@@ -879,18 +1061,34 @@ function Inteligencia() {
                 {econ.map((e) => (
                   <TableRow key={e.vehicleId}>
                     <TableCell className="font-medium">{e.label}</TableCell>
-                    <TableCell>{e.ageYears != null ? formatNumberBR(e.ageYears, 1) : "—"}</TableCell>
-                    <TableCell>{e.acquisitionValue ? formatMoney(e.acquisitionValue) : "—"}</TableCell>
+                    <TableCell>
+                      {e.ageYears != null ? formatNumberBR(e.ageYears, 1) : "—"}
+                    </TableCell>
+                    <TableCell>
+                      {e.acquisitionValue ? formatMoney(e.acquisitionValue) : "—"}
+                    </TableCell>
                     <TableCell>{formatMoney(e.periodCost)}</TableCell>
                     <TableCell>{formatMoney(e.maintenanceCost)}</TableCell>
                     <TableCell>
-                      {e.costPerKm != null ? formatMoney(e.costPerKm) : e.costPerHour != null ? formatMoney(e.costPerHour) : "—"}
+                      {e.costPerKm != null
+                        ? formatMoney(e.costPerKm)
+                        : e.costPerHour != null
+                          ? formatMoney(e.costPerHour)
+                          : "—"}
                     </TableCell>
                     <TableCell>{formatNumberBR(e.downtimeDays, 1)}</TableCell>
                     <TableCell>{DEVIATION_LABEL[e.deviation]}</TableCell>
                     <TableCell>{formatNumberBR(e.score, 0)}</TableCell>
                     <TableCell>
-                      <Badge variant={e.klass === "custo_elevado" ? "destructive" : e.klass === "atencao" ? "secondary" : "outline"}>
+                      <Badge
+                        variant={
+                          e.klass === "custo_elevado"
+                            ? "destructive"
+                            : e.klass === "atencao"
+                              ? "secondary"
+                              : "outline"
+                        }
+                      >
                         {ECONOMICITY_LABEL[e.klass]}
                       </Badge>
                     </TableCell>
@@ -938,7 +1136,11 @@ function RankChart({
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis type="number" fontSize={12} />
               <YAxis type="category" dataKey="label" width={110} fontSize={12} />
-              <ReTooltip formatter={(v: number) => (money ? formatMoney(v) : `${formatNumberBR(v, 2)}${suffix}`)} />
+              <ReTooltip
+                formatter={(v: number) =>
+                  money ? formatMoney(v) : `${formatNumberBR(v, 2)}${suffix}`
+                }
+              />
               <Bar dataKey="value" fill="hsl(var(--chart-1))" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -948,7 +1150,13 @@ function RankChart({
   );
 }
 
-function GroupTable({ title, rows }: { title: string; rows: { label: string; totals: { total: number; values: Record<string, number> } }[] }) {
+function GroupTable({
+  title,
+  rows,
+}: {
+  title: string;
+  rows: { label: string; totals: { total: number; values: Record<string, number> } }[];
+}) {
   return (
     <div className="overflow-x-auto rounded-lg border bg-card p-4 shadow-card">
       <p className="mb-2 text-sm font-semibold">{title}</p>
@@ -956,14 +1164,19 @@ function GroupTable({ title, rows }: { title: string; rows: { label: string; tot
         <TableHeader>
           <TableRow>
             <TableHead>Grupo</TableHead>
-            {COST_CATEGORIES.map((c) => <TableHead key={c.value}>{c.label}</TableHead>)}
+            {COST_CATEGORIES.map((c) => (
+              <TableHead key={c.value}>{c.label}</TableHead>
+            ))}
             <TableHead>Total</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {rows.length === 0 && (
             <TableRow>
-              <TableCell colSpan={COST_CATEGORIES.length + 2} className="py-8 text-center text-muted-foreground">
+              <TableCell
+                colSpan={COST_CATEGORIES.length + 2}
+                className="py-8 text-center text-muted-foreground"
+              >
                 Sem despesas no período.
               </TableCell>
             </TableRow>
@@ -972,7 +1185,9 @@ function GroupTable({ title, rows }: { title: string; rows: { label: string; tot
             <TableRow key={r.label}>
               <TableCell className="font-medium">{r.label}</TableCell>
               {COST_CATEGORIES.map((c) => (
-                <TableCell key={c.value} className="text-sm">{formatMoney(r.totals.values[c.value] ?? 0)}</TableCell>
+                <TableCell key={c.value} className="text-sm">
+                  {formatMoney(r.totals.values[c.value] ?? 0)}
+                </TableCell>
               ))}
               <TableCell className="text-sm font-semibold">{formatMoney(r.totals.total)}</TableCell>
             </TableRow>
@@ -1093,11 +1308,18 @@ function ParametersTab({
       "cost_deviation_pct",
       "min_segments_for_alert",
     ];
-    const payload: Record<string, unknown> = { organization_id: orgId, updated_by: userId, created_by: userId };
+    const payload: Record<string, unknown> = {
+      organization_id: orgId,
+      updated_by: userId,
+      created_by: userId,
+    };
     for (const key of numeric) payload[key] = parseBRNumber(String(cfgValue(key, 0))) ?? 0;
     payload["alerts_enabled"] = String(cfgValue("alerts_enabled", true)) !== "false";
     const { error } = settings
-      ? await supabase.from("intelligence_settings").update(payload as never).eq("id", settings.id)
+      ? await supabase
+          .from("intelligence_settings")
+          .update(payload as never)
+          .eq("id", settings.id)
       : await supabase.from("intelligence_settings").insert(payload as never);
     if (error) {
       toast.error(error.message);
@@ -1112,19 +1334,19 @@ function ParametersTab({
       toast.error("Informe o ativo e a justificativa.");
       return;
     }
-  
+
     if (!meter.occurred_at) {
       toast.error("Informe a data e hora da correção.");
       return;
     }
-  
+
     const newValue = parseBRNumber(meter.new_value);
-  
+
     if (newValue === null || newValue < 0) {
       toast.error("Informe um novo valor de medidor válido.");
       return;
     }
-  
+
     const { error } = await supabase.from("meter_corrections").insert({
       organization_id: orgId,
       vehicle_id: meter.vehicle_id,
@@ -1135,27 +1357,72 @@ function ParametersTab({
       created_by: userId,
       updated_by: userId,
     });
-  
+
     if (error) {
       toast.error(error.message);
       return;
     }
-  
+
     toast.success("Correção de medidor registrada. Os trechos afetados saem das médias.");
     setMeterOpen(false);
     await invalidate(["meter-corrections", "intel-segments", "vehicles"]);
   }
 
   const numericFields: { key: string; label: string; hint: string; fallback: number }[] = [
-    { key: "default_tolerance_pct", label: "Tolerância padrão (%)", hint: "Faixa de atenção quando não há tolerância no parâmetro.", fallback: 10 },
-    { key: "critical_pct", label: "Faixa crítica (%)", hint: "Desvio a partir do qual o consumo é crítico.", fallback: 25 },
-    { key: "max_km_segment", label: "Variação máxima de hodômetro (km)", hint: "Acima disso o trecho é descartado das médias.", fallback: 3000 },
-    { key: "max_hours_segment", label: "Variação máxima de horímetro (h)", hint: "Acima disso o trecho é descartado das médias.", fallback: 500 },
-    { key: "min_minutes_between_fuelings", label: "Intervalo mínimo entre abastecimentos (min)", hint: "Abaixo disso gera ocorrência de abastecimentos próximos.", fallback: 60 },
-    { key: "efficiency_drop_pct", label: "Queda de eficiência relevante (%)", hint: "Desvio do trecho contra a média do próprio ativo.", fallback: 20 },
-    { key: "maintenance_cost_alert", label: "Custo de manutenção que gera alerta (R$/mês)", hint: "Soma de manutenção e peças por ativo no mês.", fallback: 10000 },
-    { key: "cost_deviation_pct", label: "Desvio de custo relevante (%)", hint: "Referência de custo anormal frente a ativos comparáveis.", fallback: 80 },
-    { key: "min_segments_for_alert", label: "Mínimo de trechos para alertar", hint: "Evita falso positivo com poucos abastecimentos.", fallback: 3 },
+    {
+      key: "default_tolerance_pct",
+      label: "Tolerância padrão (%)",
+      hint: "Faixa de atenção quando não há tolerância no parâmetro.",
+      fallback: 10,
+    },
+    {
+      key: "critical_pct",
+      label: "Faixa crítica (%)",
+      hint: "Desvio a partir do qual o consumo é crítico.",
+      fallback: 25,
+    },
+    {
+      key: "max_km_segment",
+      label: "Variação máxima de hodômetro (km)",
+      hint: "Acima disso o trecho é descartado das médias.",
+      fallback: 3000,
+    },
+    {
+      key: "max_hours_segment",
+      label: "Variação máxima de horímetro (h)",
+      hint: "Acima disso o trecho é descartado das médias.",
+      fallback: 500,
+    },
+    {
+      key: "min_minutes_between_fuelings",
+      label: "Intervalo mínimo entre abastecimentos (min)",
+      hint: "Abaixo disso gera ocorrência de abastecimentos próximos.",
+      fallback: 60,
+    },
+    {
+      key: "efficiency_drop_pct",
+      label: "Queda de eficiência relevante (%)",
+      hint: "Desvio do trecho contra a média do próprio ativo.",
+      fallback: 20,
+    },
+    {
+      key: "maintenance_cost_alert",
+      label: "Custo de manutenção que gera alerta (R$/mês)",
+      hint: "Soma de manutenção e peças por ativo no mês.",
+      fallback: 10000,
+    },
+    {
+      key: "cost_deviation_pct",
+      label: "Desvio de custo relevante (%)",
+      hint: "Referência de custo anormal frente a ativos comparáveis.",
+      fallback: 80,
+    },
+    {
+      key: "min_segments_for_alert",
+      label: "Mínimo de trechos para alertar",
+      hint: "Evita falso positivo com poucos abastecimentos.",
+      fallback: 3,
+    },
   ];
 
   return (
@@ -1165,7 +1432,8 @@ function ParametersTab({
           <div>
             <p className="text-sm font-semibold">Parâmetros de consumo esperado</p>
             <p className="text-xs text-muted-foreground">
-              O parâmetro mais específico prevalece: ativo, depois modelo, depois categoria e por último o órgão.
+              O parâmetro mais específico prevalece: ativo, depois modelo, depois categoria e por
+              último o órgão.
             </p>
           </div>
           <Button size="sm" disabled={!canManage} onClick={() => setOpen(true)}>
@@ -1213,7 +1481,8 @@ function ParametersTab({
                   <TableCell>{p.metric === "km_l" ? "km/L" : "L/h"}</TableCell>
                   <TableCell>{formatNumberBR(Number(p.expected_value), 2)}</TableCell>
                   <TableCell>
-                    {formatNumberBR(Number(p.tolerance_pct), 0)}% / {formatNumberBR(Number(p.critical_pct), 0)}%
+                    {formatNumberBR(Number(p.tolerance_pct), 0)}% /{" "}
+                    {formatNumberBR(Number(p.critical_pct), 0)}%
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
@@ -1222,7 +1491,9 @@ function ParametersTab({
                         disabled={!canManage}
                         onCheckedChange={(v) => toggleParameter(p.id, v)}
                       />
-                      <span className="text-xs text-muted-foreground">{p.active ? "Ativo" : "Inativo"}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {p.active ? "Ativo" : "Inativo"}
+                      </span>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -1271,7 +1542,12 @@ function ParametersTab({
               Os trechos que cruzam uma correção saem das médias, preservando a série histórica.
             </p>
           </div>
-          <Button size="sm" variant="outline" disabled={!canManage} onClick={() => setMeterOpen(true)}>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={!canManage}
+            onClick={() => setMeterOpen(true)}
+          >
             <Gauge className="size-4" /> Registrar correção
           </Button>
         </div>
@@ -1300,9 +1576,13 @@ function ParametersTab({
                   <TableCell>{new Date(c.occurred_at).toLocaleString("pt-BR")}</TableCell>
                   <TableCell>{c.vehicle?.plate ?? c.vehicle?.asset_code ?? "—"}</TableCell>
                   <TableCell className="capitalize">{c.meter}</TableCell>
-                  <TableCell>{c.previous_value != null ? formatNumberBR(Number(c.previous_value), 0) : "—"}</TableCell>
+                  <TableCell>
+                    {c.previous_value != null ? formatNumberBR(Number(c.previous_value), 0) : "—"}
+                  </TableCell>
                   <TableCell>{formatNumberBR(Number(c.new_value), 0)}</TableCell>
-                  <TableCell className="max-w-sm text-xs text-muted-foreground">{c.reason}</TableCell>
+                  <TableCell className="max-w-sm text-xs text-muted-foreground">
+                    {c.reason}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -1318,8 +1598,13 @@ function ParametersTab({
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label>Abrangência</Label>
-              <Select value={form.scope} onValueChange={(v) => setForm((f) => ({ ...f, scope: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={form.scope}
+                onValueChange={(v) => setForm((f) => ({ ...f, scope: v }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="orgao">Órgão (padrão geral)</SelectItem>
                   <SelectItem value="categoria">Categoria / tipo de ativo</SelectItem>
@@ -1330,8 +1615,13 @@ function ParametersTab({
             </div>
             <div className="space-y-1.5">
               <Label>Classe do ativo</Label>
-              <Select value={form.asset_class} onValueChange={(v) => setForm((f) => ({ ...f, asset_class: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={form.asset_class}
+                onValueChange={(v) => setForm((f) => ({ ...f, asset_class: v }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="veiculo">Veículos</SelectItem>
                   <SelectItem value="equipamento">Máquinas e equipamentos</SelectItem>
@@ -1341,29 +1631,45 @@ function ParametersTab({
             {form.scope === "categoria" && (
               <div className="space-y-1.5">
                 <Label>Categoria / tipo</Label>
-                <Input value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))} />
+                <Input
+                  value={form.category}
+                  onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+                />
               </div>
             )}
             {form.scope === "modelo" && (
               <>
                 <div className="space-y-1.5">
                   <Label>Marca</Label>
-                  <Input value={form.brand} onChange={(e) => setForm((f) => ({ ...f, brand: e.target.value }))} />
+                  <Input
+                    value={form.brand}
+                    onChange={(e) => setForm((f) => ({ ...f, brand: e.target.value }))}
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label>Modelo</Label>
-                  <Input value={form.model} onChange={(e) => setForm((f) => ({ ...f, model: e.target.value }))} />
+                  <Input
+                    value={form.model}
+                    onChange={(e) => setForm((f) => ({ ...f, model: e.target.value }))}
+                  />
                 </div>
               </>
             )}
             {form.scope === "ativo" && (
               <div className="space-y-1.5">
                 <Label>Ativo</Label>
-                <Select value={form.vehicle_id} onValueChange={(v) => setForm((f) => ({ ...f, vehicle_id: v }))}>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <Select
+                  value={form.vehicle_id}
+                  onValueChange={(v) => setForm((f) => ({ ...f, vehicle_id: v }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
                   <SelectContent>
                     {vehicles.map((v) => (
-                      <SelectItem key={v.id} value={v.id}>{v.plate ?? v.asset_code ?? v.id}</SelectItem>
+                      <SelectItem key={v.id} value={v.id}>
+                        {v.plate ?? v.asset_code ?? v.id}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -1371,8 +1677,13 @@ function ParametersTab({
             )}
             <div className="space-y-1.5">
               <Label>Indicador</Label>
-              <Select value={form.metric} onValueChange={(v) => setForm((f) => ({ ...f, metric: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={form.metric}
+                onValueChange={(v) => setForm((f) => ({ ...f, metric: v }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="km_l">km/L (hodômetro)</SelectItem>
                   <SelectItem value="l_h">L/h (horímetro)</SelectItem>
@@ -1381,34 +1692,62 @@ function ParametersTab({
             </div>
             <div className="space-y-1.5">
               <Label>Consumo esperado</Label>
-              <Input value={form.expected_value} onChange={(e) => setForm((f) => ({ ...f, expected_value: e.target.value }))} placeholder="Ex.: 9,5" />
+              <Input
+                value={form.expected_value}
+                onChange={(e) => setForm((f) => ({ ...f, expected_value: e.target.value }))}
+                placeholder="Ex.: 9,5"
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Tolerância de atenção (%)</Label>
-              <Input value={form.tolerance_pct} onChange={(e) => setForm((f) => ({ ...f, tolerance_pct: e.target.value }))} />
+              <Input
+                value={form.tolerance_pct}
+                onChange={(e) => setForm((f) => ({ ...f, tolerance_pct: e.target.value }))}
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Faixa crítica (%)</Label>
-              <Input value={form.critical_pct} onChange={(e) => setForm((f) => ({ ...f, critical_pct: e.target.value }))} />
+              <Input
+                value={form.critical_pct}
+                onChange={(e) => setForm((f) => ({ ...f, critical_pct: e.target.value }))}
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Combustível (opcional)</Label>
-              <Select value={form.fuel_type_id || "__none__"} onValueChange={(v) => setForm((f) => ({ ...f, fuel_type_id: v === "__none__" ? "" : v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={form.fuel_type_id || "__none__"}
+                onValueChange={(v) =>
+                  setForm((f) => ({ ...f, fuel_type_id: v === "__none__" ? "" : v }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__none__">Qualquer combustível</SelectItem>
-                  {fuelTypes.map((f) => <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>)}
+                  {fuelTypes.map((f) => (
+                    <SelectItem key={f.id} value={f.id}>
+                      {f.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <Label>Observações</Label>
-              <Textarea value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} />
+              <Textarea
+                value={form.notes}
+                onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+              />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button onClick={saveParameter} disabled={saving}>Salvar</Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={saveParameter} disabled={saving}>
+              Salvar
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1421,19 +1760,31 @@ function ParametersTab({
           <div className="grid gap-3">
             <div className="space-y-1.5">
               <Label>Ativo</Label>
-              <Select value={meter.vehicle_id} onValueChange={(v) => setMeter((m) => ({ ...m, vehicle_id: v }))}>
-                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <Select
+                value={meter.vehicle_id}
+                onValueChange={(v) => setMeter((m) => ({ ...m, vehicle_id: v }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
                 <SelectContent>
                   {vehicles.map((v) => (
-                    <SelectItem key={v.id} value={v.id}>{v.plate ?? v.asset_code ?? v.id}</SelectItem>
+                    <SelectItem key={v.id} value={v.id}>
+                      {v.plate ?? v.asset_code ?? v.id}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
               <Label>Medidor</Label>
-              <Select value={meter.meter} onValueChange={(v) => setMeter((m) => ({ ...m, meter: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={meter.meter}
+                onValueChange={(v) => setMeter((m) => ({ ...m, meter: v }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="hodometro">Hodômetro</SelectItem>
                   <SelectItem value="horimetro">Horímetro</SelectItem>
@@ -1442,7 +1793,11 @@ function ParametersTab({
             </div>
             <div className="space-y-1.5">
               <Label>Data e hora</Label>
-              <Input type="datetime-local" value={meter.occurred_at} onChange={(e) => setMeter((m) => ({ ...m, occurred_at: e.target.value }))} />
+              <Input
+                type="datetime-local"
+                value={meter.occurred_at}
+                onChange={(e) => setMeter((m) => ({ ...m, occurred_at: e.target.value }))}
+              />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
@@ -1468,16 +1823,24 @@ function ParametersTab({
               </div>
               <div className="space-y-1.5">
                 <Label>Novo valor</Label>
-                <Input value={meter.new_value} onChange={(e) => setMeter((m) => ({ ...m, new_value: e.target.value }))} />
+                <Input
+                  value={meter.new_value}
+                  onChange={(e) => setMeter((m) => ({ ...m, new_value: e.target.value }))}
+                />
               </div>
             </div>
             <div className="space-y-1.5">
               <Label>Justificativa</Label>
-              <Textarea value={meter.reason} onChange={(e) => setMeter((m) => ({ ...m, reason: e.target.value }))} />
+              <Textarea
+                value={meter.reason}
+                onChange={(e) => setMeter((m) => ({ ...m, reason: e.target.value }))}
+              />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setMeterOpen(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setMeterOpen(false)}>
+              Cancelar
+            </Button>
             <Button onClick={saveMeterCorrection}>Registrar</Button>
           </DialogFooter>
         </DialogContent>

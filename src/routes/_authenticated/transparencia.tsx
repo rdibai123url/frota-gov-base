@@ -1,15 +1,36 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, CheckCircle2, ExternalLink, History, Lock, Send, ShieldAlert } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ExternalLink,
+  History,
+  Lock,
+  Send,
+  ShieldAlert,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -51,7 +72,10 @@ export const Route = createFileRoute("/_authenticated/transparencia")({
           "Fechamento mensal por competência, publicação versionada, chamados de reabertura e integração com o portal municipal.",
       },
       { property: "og:title", content: "Portal da Transparência — FrotaGov" },
-      { property: "og:description", content: "Publicação mensal auditável de dados agregados da frota pública." },
+      {
+        property: "og:description",
+        content: "Publicação mensal auditável de dados agregados da frota pública.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -67,6 +91,12 @@ const DATASETS = [
   { key: "contratos", label: "Contratos (número, objeto e vigência)" },
 ];
 
+type SnapshotSummary = {
+  frota?: { total?: number };
+  abastecimento?: { registros?: number };
+  manutencao?: { registros?: number };
+};
+
 const slugify = (v: string) =>
   v
     .normalize("NFD")
@@ -80,7 +110,9 @@ const dt = (v?: string | null) => (v ? new Date(v).toLocaleString("pt-BR") : "�
 
 function StatusBadge({ status }: { status: PeriodStatus }) {
   return (
-    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_TONE[status]}`}>
+    <span
+      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_TONE[status]}`}
+    >
       {STATUS_LABELS[status]}
     </span>
   );
@@ -102,8 +134,8 @@ function Transparencia() {
         <div className="mb-4 flex items-start gap-3 rounded-lg border bg-muted/40 p-4 text-sm text-muted-foreground">
           <ShieldAlert className="mt-0.5 size-4 shrink-0" />
           <p>
-            Somente o Administrador do Órgão pode conferir, fechar competências e alterar a publicação de dados
-            abertos. Os demais perfis têm acesso apenas para consulta.
+            Somente o Administrador do Órgão pode conferir, fechar competências e alterar a
+            publicação de dados abertos. Os demais perfis têm acesso apenas para consulta.
           </p>
         </div>
       )}
@@ -155,7 +187,7 @@ function PublicacaoMensal({ canManage }: { canManage: boolean }) {
   const [notes, setNotes] = useState("");
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [preview, setPreview] = useState<Record<string, any> | null>(null);
+  const [preview, setPreview] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     setChecklist(((period?.checklist as Checklist) ?? {}) as Checklist);
@@ -171,7 +203,7 @@ function PublicacaoMensal({ canManage }: { canManage: boolean }) {
       _year: year,
       _month: month,
     });
-    if (!error) setPreview(data as Record<string, any>);
+    if (!error) setPreview(data as Record<string, unknown>);
   }
 
   function setEntry(key: string, patch: Partial<Checklist[string]>) {
@@ -232,10 +264,15 @@ function PublicacaoMensal({ canManage }: { canManage: boolean }) {
         <div className="space-y-1.5">
           <Label>Competência</Label>
           <Select value={sel} onValueChange={setSel}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               {competences.map((c) => (
-                <SelectItem key={`${c.year}-${c.month}`} value={`${c.year}-${String(c.month).padStart(2, "0")}`}>
+                <SelectItem
+                  key={`${c.year}-${c.month}`}
+                  value={`${c.year}-${String(c.month).padStart(2, "0")}`}
+                >
                   {competenceLabel(c.year, c.month)}
                 </SelectItem>
               ))}
@@ -244,12 +281,16 @@ function PublicacaoMensal({ canManage }: { canManage: boolean }) {
         </div>
         <div className="space-y-1.5">
           <Label>Situação</Label>
-          <div className="pt-2"><StatusBadge status={status} /></div>
+          <div className="pt-2">
+            <StatusBadge status={status} />
+          </div>
         </div>
         <div className="space-y-1.5">
           <Label>Versão publicada</Label>
           <p className="pt-2 text-sm">
-            {period?.current_version ? `Versão ${period.current_version} — ${dt(period.closed_at)}` : "Nenhuma"}
+            {period?.current_version
+              ? `Versão ${period.current_version} — ${dt(period.closed_at)}`
+              : "Nenhuma"}
           </p>
         </div>
       </div>
@@ -268,8 +309,8 @@ function PublicacaoMensal({ canManage }: { canManage: boolean }) {
       <div className="rounded-lg border bg-card p-5 shadow-card">
         <h2 className="gov-title text-base">Checklist obrigatório da competência</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Marque cada item como conferido ou como “Não se aplica” com justificativa. O fechamento só é liberado com
-          todos os itens resolvidos.
+          Marque cada item como conferido ou como “Não se aplica” com justificativa. O fechamento só
+          é liberado com todos os itens resolvidos.
         </p>
 
         <div className="mt-4 space-y-3">
@@ -281,10 +322,14 @@ function PublicacaoMensal({ canManage }: { canManage: boolean }) {
                   <span className="text-sm">{item.label}</span>
                   <Select
                     value={entry.status}
-                    onValueChange={(v) => setEntry(item.key, { status: v as "ok" | "na" | "pendente" })}
+                    onValueChange={(v) =>
+                      setEntry(item.key, { status: v as "ok" | "na" | "pendente" })
+                    }
                     disabled={!canManage || locked}
                   >
-                    <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="w-48">
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="pendente">Pendente</SelectItem>
                       <SelectItem value="ok">Conferido</SelectItem>
@@ -309,7 +354,12 @@ function PublicacaoMensal({ canManage }: { canManage: boolean }) {
 
         <div className="mt-4 space-y-1.5">
           <Label>Observações do responsável</Label>
-          <Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} disabled={!canManage || locked} />
+          <Textarea
+            rows={2}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            disabled={!canManage || locked}
+          />
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -337,7 +387,8 @@ function PublicacaoMensal({ canManage }: { canManage: boolean }) {
           <DialogHeader>
             <DialogTitle>Fechar a competência {competenceLabel(year, month)}?</DialogTitle>
             <DialogDescription>
-              Confira o que será bloqueado e publicado. Esta ação não pode ser desfeita por usuários do órgão.
+              Confira o que será bloqueado e publicado. Esta ação não pode ser desfeita por usuários
+              do órgão.
             </DialogDescription>
           </DialogHeader>
 
@@ -345,48 +396,55 @@ function PublicacaoMensal({ canManage }: { canManage: boolean }) {
             <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-amber-900">
               <p className="font-medium">Será bloqueado neste mês</p>
               <p className="mt-1">
-                Inclusão, alteração, cancelamento e exclusão de abastecimentos, manutenções, utilizações, multas,
-                sinistros, obrigações legais e movimentações patrimoniais com data dentro da competência.
+                Inclusão, alteração, cancelamento e exclusão de abastecimentos, manutenções,
+                utilizações, multas, sinistros, obrigações legais e movimentações patrimoniais com
+                data dentro da competência.
               </p>
             </div>
             <div className="rounded-md border p-3">
               <p className="font-medium">Será publicado (dados agregados, sem dados pessoais)</p>
               {preview ? (
                 <ul className="mt-2 space-y-1 text-muted-foreground">
-                  <li>Frota: {preview['frota']?.total ?? 0} veículo(s)</li>
+                  <li>Frota: {preview["frota"]?.total ?? 0} veículo(s)</li>
                   <li>
-                    Abastecimentos: {preview['abastecimento']?.registros ?? 0} registro(s) ·{" "}
-                    {formatLiters(preview['abastecimento']?.litros)} L · R${" "}
-                    {formatMoney(preview['abastecimento']?.valor_total)}
+                    Abastecimentos: {preview["abastecimento"]?.registros ?? 0} registro(s) ·{" "}
+                    {formatLiters(preview["abastecimento"]?.litros)} L · R${" "}
+                    {formatMoney(preview["abastecimento"]?.valor_total)}
                   </li>
                   <li>
-                    Manutenções: {preview['manutencao']?.registros ?? 0} registro(s) · R${" "}
-                    {formatMoney(preview['manutencao']?.valor_total)}
+                    Manutenções: {preview["manutencao"]?.registros ?? 0} registro(s) · R${" "}
+                    {formatMoney(preview["manutencao"]?.valor_total)}
                   </li>
-                  <li>Utilizações: {preview['utilizacao']?.registros ?? 0}</li>
+                  <li>Utilizações: {preview["utilizacao"]?.registros ?? 0}</li>
                   <li>
-                    Contratos vigentes: {preview['contratos']?.vigentes ?? 0} · R${" "}
-                    {formatMoney(preview['contratos']?.valor_total)}
+                    Contratos vigentes: {preview["contratos"]?.vigentes ?? 0} · R${" "}
+                    {formatMoney(preview["contratos"]?.valor_total)}
                   </li>
                   <li>
-                    Multas: {preview['multas']?.registros ?? 0} · Sinistros: {preview['sinistros']?.registros ?? 0} ·
-                    Obrigações: {preview['obrigacoes']?.registros ?? 0}
+                    Multas: {preview["multas"]?.registros ?? 0} · Sinistros:{" "}
+                    {preview["sinistros"]?.registros ?? 0} · Obrigações:{" "}
+                    {preview["obrigacoes"]?.registros ?? 0}
                   </li>
-                  <li>Movimentações patrimoniais: {preview['patrimonio']?.movimentacoes ?? 0}</li>
+                  <li>Movimentações patrimoniais: {preview["patrimonio"]?.movimentacoes ?? 0}</li>
                 </ul>
               ) : (
                 <p className="mt-2 text-muted-foreground">Calculando resumo...</p>
               )}
             </div>
             <p className="text-muted-foreground">
-              A publicação gera a versão {(period?.current_version ?? 0) + 1}. Versões anteriores são preservadas para
-              auditoria. Reabertura somente por chamado formal ao suporte da plataforma.
+              A publicação gera a versão {(period?.current_version ?? 0) + 1}. Versões anteriores
+              são preservadas para auditoria. Reabertura somente por chamado formal ao suporte da
+              plataforma.
             </p>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirm(false)}>Cancelar</Button>
-            <Button onClick={closePeriod} disabled={busy}>Confirmar fechamento e publicar</Button>
+            <Button variant="outline" onClick={() => setConfirm(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={closePeriod} disabled={busy}>
+              Confirmar fechamento e publicar
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -405,7 +463,9 @@ function Historico() {
       <div className="overflow-x-auto rounded-lg border bg-card shadow-card">
         <div className="flex items-center gap-2 border-b p-4">
           <History className="size-4 text-muted-foreground" />
-          <h2 className="gov-title text-base">Publicações por competência (todas as versões preservadas)</h2>
+          <h2 className="gov-title text-base">
+            Publicações por competência (todas as versões preservadas)
+          </h2>
         </div>
         <Table>
           <TableHeader>
@@ -426,16 +486,20 @@ function Historico() {
                 </TableCell>
               </TableRow>
             )}
-            {publications.map((p: any) => {
-              const s = p.snapshot ?? {};
+            {publications.map((p) => {
+              const s = (p.snapshot ?? {}) as SnapshotSummary;
               return (
                 <TableRow key={p.id}>
-                  <TableCell>{p.period ? competenceLabel(p.period.year, p.period.month) : "—"}</TableCell>
+                  <TableCell>
+                    {p.period ? competenceLabel(p.period.year, p.period.month) : "—"}
+                  </TableCell>
                   <TableCell>Versão {p.version}</TableCell>
                   <TableCell>{dt(p.published_at)}</TableCell>
                   <TableCell>
                     {p.superseded_at ? (
-                      <span className="text-xs text-muted-foreground">Substituída em {dt(p.superseded_at)}</span>
+                      <span className="text-xs text-muted-foreground">
+                        Substituída em {dt(p.superseded_at)}
+                      </span>
                     ) : (
                       <span className="text-xs font-medium text-emerald-700">Vigente</span>
                     )}
@@ -470,8 +534,8 @@ function Historico() {
             {attempts.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
-                  Nenhuma tentativa registrada. Com a integração desativada, a publicação ocorre apenas no Portal
-                  FrotaGov.
+                  Nenhuma tentativa registrada. Com a integração desativada, a publicação ocorre
+                  apenas no Portal FrotaGov.
                 </TableCell>
               </TableRow>
             )}
@@ -481,7 +545,9 @@ function Historico() {
                 <TableCell>{a.mode}</TableCell>
                 <TableCell className="max-w-xs truncate text-xs">{a.endpoint ?? "—"}</TableCell>
                 <TableCell>{a.status}</TableCell>
-                <TableCell className="max-w-md truncate text-xs text-muted-foreground">{a.message ?? "—"}</TableCell>
+                <TableCell className="max-w-md truncate text-xs text-muted-foreground">
+                  {a.message ?? "—"}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -497,7 +563,9 @@ function Reaberturas({ canManage, isSupport }: { canManage: boolean; isSupport: 
   const invalidate = useInvalidate();
   const { data: periods = [] } = usePeriods();
   const { data: requests = [] } = useReopenRequests();
-  const closedPeriods = periods.filter((p) => p.status === "fechada" || p.status === "erro_integracao");
+  const closedPeriods = periods.filter(
+    (p) => p.status === "fechada" || p.status === "erro_integracao",
+  );
 
   const [open, setOpen] = useState(false);
   const [periodSel, setPeriodSel] = useState("");
@@ -538,8 +606,8 @@ function Reaberturas({ canManage, isSupport }: { canManage: boolean; isSupport: 
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
-          A reabertura de competência fechada depende de chamado formal e autorização do suporte da plataforma.
-          Usuários do órgão não podem reabrir, desfazer ou excluir um fechamento.
+          A reabertura de competência fechada depende de chamado formal e autorização do suporte da
+          plataforma. Usuários do órgão não podem reabrir, desfazer ou excluir um fechamento.
         </p>
         <Button onClick={() => setOpen(true)} disabled={!canManage || closedPeriods.length === 0}>
           Solicitar reabertura
@@ -566,10 +634,12 @@ function Reaberturas({ canManage, isSupport }: { canManage: boolean; isSupport: 
                 </TableCell>
               </TableRow>
             )}
-            {requests.map((r: any) => (
+            {requests.map((r) => (
               <TableRow key={r.id}>
                 <TableCell>{r.protocol ?? "—"}</TableCell>
-                <TableCell>{r.period ? competenceLabel(r.period.year, r.period.month) : "—"}</TableCell>
+                <TableCell>
+                  {r.period ? competenceLabel(r.period.year, r.period.month) : "—"}
+                </TableCell>
                 <TableCell className="max-w-xs truncate">{r.reason}</TableCell>
                 <TableCell>{dt(r.requested_at)}</TableCell>
                 <TableCell>{REQUEST_LABELS[r.status as keyof typeof REQUEST_LABELS]}</TableCell>
@@ -584,8 +654,8 @@ function Reaberturas({ canManage, isSupport }: { canManage: boolean; isSupport: 
 
       {isSupport && (
         <p className="text-xs text-muted-foreground">
-          Como suporte da plataforma, a análise e a efetivação das reaberturas de todos os órgãos ficam em
-          Administração da Plataforma → Reaberturas.
+          Como suporte da plataforma, a análise e a efetivação das reaberturas de todos os órgãos
+          ficam em Administração da Plataforma → Reaberturas.
         </p>
       )}
 
@@ -594,24 +664,33 @@ function Reaberturas({ canManage, isSupport }: { canManage: boolean; isSupport: 
           <DialogHeader>
             <DialogTitle>Solicitar reabertura de competência</DialogTitle>
             <DialogDescription>
-              O chamado é analisado pelo suporte da plataforma. Todo o trâmite fica registrado em auditoria.
+              O chamado é analisado pelo suporte da plataforma. Todo o trâmite fica registrado em
+              auditoria.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1.5">
               <Label>Competência fechada</Label>
               <Select value={periodSel} onValueChange={setPeriodSel}>
-                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
                 <SelectContent>
                   {closedPeriods.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>{competenceLabel(p.year, p.month)}</SelectItem>
+                    <SelectItem key={p.id} value={p.id}>
+                      {competenceLabel(p.year, p.month)}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
               <Label>Motivo *</Label>
-              <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Ex.: lançamento incorreto de abastecimento" />
+              <Input
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Ex.: lançamento incorreto de abastecimento"
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Descrição detalhada *</Label>
@@ -619,8 +698,12 @@ function Reaberturas({ canManage, isSupport }: { canManage: boolean; isSupport: 
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button onClick={submit} disabled={busy}>Enviar chamado</Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={submit} disabled={busy}>
+              Enviar chamado
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -648,7 +731,7 @@ function Integracao({ canManage }: { canManage: boolean }) {
 
   useEffect(() => {
     if (!settings) return;
-    const s = settings as any;
+    const s = settings;
     setEnabled(s.enabled);
     setSlug(s.slug ?? "");
     setHeadline(s.headline ?? "");
@@ -695,7 +778,7 @@ function Integracao({ canManage }: { canManage: boolean }) {
     invalidate(["transparency-settings"]);
   }
 
-  const s = settings as any;
+  const s = settings;
 
   return (
     <div className="max-w-3xl space-y-4">
@@ -714,10 +797,18 @@ function Integracao({ canManage }: { canManage: boolean }) {
         <div className="space-y-1.5">
           <Label htmlFor="slug">Endereço público</Label>
           <div className="flex gap-2">
-            <Input id="slug" value={slug} onChange={(e) => setSlug(slugify(e.target.value))} placeholder="prefeitura-exemplo" disabled={!canManage} />
+            <Input
+              id="slug"
+              value={slug}
+              onChange={(e) => setSlug(slugify(e.target.value))}
+              placeholder="prefeitura-exemplo"
+              disabled={!canManage}
+            />
             {slug && (
               <Button asChild variant="outline" size="icon">
-                <a href={`/transparencia/${slug}`} target="_blank" rel="noreferrer"><ExternalLink className="size-4" /></a>
+                <a href={`/transparencia/${slug}`} target="_blank" rel="noreferrer">
+                  <ExternalLink className="size-4" />
+                </a>
               </Button>
             )}
           </div>
@@ -726,7 +817,13 @@ function Integracao({ canManage }: { canManage: boolean }) {
 
         <div className="space-y-1.5">
           <Label htmlFor="headline">Texto de apresentação</Label>
-          <Textarea id="headline" rows={3} value={headline} onChange={(e) => setHeadline(e.target.value)} disabled={!canManage} />
+          <Textarea
+            id="headline"
+            rows={3}
+            value={headline}
+            onChange={(e) => setHeadline(e.target.value)}
+            disabled={!canManage}
+          />
         </div>
 
         <div className="space-y-2">
@@ -742,8 +839,8 @@ function Integracao({ canManage }: { canManage: boolean }) {
             </div>
           ))}
           <p className="text-xs text-muted-foreground">
-            Apenas números agregados são publicados. Placas, nomes de condutores, CPF, CNH e demais dados pessoais
-            nunca são expostos.
+            Apenas números agregados são publicados. Placas, nomes de condutores, CPF, CNH e demais
+            dados pessoais nunca são expostos.
           </p>
         </div>
       </div>
@@ -751,17 +848,25 @@ function Integracao({ canManage }: { canManage: boolean }) {
       <div className="space-y-4 rounded-lg border bg-card p-5 shadow-card">
         <h2 className="gov-title text-base">Envio ao Portal da Transparência do município</h2>
         <p className="text-sm text-muted-foreground">
-          Configuração por órgão. Com a integração desativada ou não configurada, o fechamento continua publicando
-          normalmente no Portal FrotaGov.
+          Configuração por órgão. Com a integração desativada ou não configurada, o fechamento
+          continua publicando normalmente no Portal FrotaGov.
         </p>
 
         <div className="space-y-1.5">
           <Label>Modo de integração</Label>
-          <Select value={mode} onValueChange={(v) => setMode(v as IntegrationMode)} disabled={!canManage}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+          <Select
+            value={mode}
+            onValueChange={(v) => setMode(v as IntegrationMode)}
+            disabled={!canManage}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               {Object.entries(MODE_LABELS).map(([k, v]) => (
-                <SelectItem key={k} value={k}>{v}</SelectItem>
+                <SelectItem key={k} value={k}>
+                  {v}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -771,25 +876,45 @@ function Integracao({ canManage }: { canManage: boolean }) {
           <>
             <div className="space-y-1.5">
               <Label>Endereço (URL) de destino</Label>
-              <Input value={endpoint} onChange={(e) => setEndpoint(e.target.value)} placeholder="https://transparencia.municipio.gov.br/api/frota" disabled={!canManage} />
+              <Input
+                value={endpoint}
+                onChange={(e) => setEndpoint(e.target.value)}
+                placeholder="https://transparencia.municipio.gov.br/api/frota"
+                disabled={!canManage}
+              />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label>Cabeçalho de autenticação</Label>
-                <Input value={authHeader} onChange={(e) => setAuthHeader(e.target.value)} placeholder="Authorization" disabled={!canManage} />
+                <Input
+                  value={authHeader}
+                  onChange={(e) => setAuthHeader(e.target.value)}
+                  placeholder="Authorization"
+                  disabled={!canManage}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>Nome do segredo (credencial)</Label>
-                <Input value={secretName} onChange={(e) => setSecretName(e.target.value)} placeholder="PORTAL_MUNICIPIO_TOKEN" disabled={!canManage} />
+                <Input
+                  value={secretName}
+                  onChange={(e) => setSecretName(e.target.value)}
+                  placeholder="PORTAL_MUNICIPIO_TOKEN"
+                  disabled={!canManage}
+                />
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              A credencial em si nunca é gravada aqui nem exibida no sistema: informe apenas o nome do segredo, que é
-              cadastrado com segurança pelo suporte da plataforma.
+              A credencial em si nunca é gravada aqui nem exibida no sistema: informe apenas o nome
+              do segredo, que é cadastrado com segurança pelo suporte da plataforma.
             </p>
             <div className="space-y-1.5">
               <Label>Observações do padrão exigido pelo município</Label>
-              <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} disabled={!canManage} />
+              <Textarea
+                rows={3}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                disabled={!canManage}
+              />
             </div>
           </>
         )}
@@ -797,12 +922,15 @@ function Integracao({ canManage }: { canManage: boolean }) {
         <div className="rounded-md border p-3 text-sm">
           <p className="font-medium">Status de sincronização</p>
           <p className="mt-1 text-muted-foreground">
-            Última tentativa: {dt(s?.last_sync_at)} · Situação: {s?.last_sync_status ?? "sem envios"}
+            Última tentativa: {dt(s?.last_sync_at)} · Situação:{" "}
+            {s?.last_sync_status ?? "sem envios"}
             {s?.last_sync_error ? ` · Erro: ${s.last_sync_error}` : ""}
           </p>
         </div>
 
-        <Button onClick={save} disabled={!canManage || saving}>Salvar configurações</Button>
+        <Button onClick={save} disabled={!canManage || saving}>
+          Salvar configurações
+        </Button>
       </div>
     </div>
   );

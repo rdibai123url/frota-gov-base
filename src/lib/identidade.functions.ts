@@ -53,12 +53,17 @@ export const testSsoProvider = createServerFn({ method: "POST" })
           ? `${String(provider.issuer ?? "").replace(/\/+$/, "")}/.well-known/openid-configuration`
           : String(provider.metadata_url ?? "");
       try {
-        const res = await timedFetch(url, { headers: { accept: "application/json, application/xml, text/xml" } });
+        const res = await timedFetch(url, {
+          headers: { accept: "application/json, application/xml, text/xml" },
+        });
         const body = await res.text();
         if (!res.ok) {
           message = `O provedor respondeu com erro (HTTP ${res.status}).`;
         } else if (provider.protocol === "oidc") {
-          const doc = JSON.parse(body) as { authorization_endpoint?: string; token_endpoint?: string };
+          const doc = JSON.parse(body) as {
+            authorization_endpoint?: string;
+            token_endpoint?: string;
+          };
           ok = Boolean(doc.authorization_endpoint && doc.token_endpoint);
           message = ok
             ? "Descoberta OIDC válida: endpoints de autorização e token localizados."
@@ -79,7 +84,13 @@ export const testSsoProvider = createServerFn({ method: "POST" })
       .update({
         last_test_at: new Date().toISOString(),
         last_result: message.slice(0, 500),
-        status: ok ? (provider.active ? "ativo" : "configurado") : provider.has_secret ? "erro" : "nao_configurado",
+        status: ok
+          ? provider.active
+            ? "ativo"
+            : "configurado"
+          : provider.has_secret
+            ? "erro"
+            : "nao_configurado",
         updated_by: userId,
       })
       .eq("id", provider.id);
@@ -142,7 +153,13 @@ export const testLdapDirectory = createServerFn({ method: "POST" })
       .update({
         last_test_at: new Date().toISOString(),
         last_result: message.slice(0, 500),
-        status: ok ? (dir.active ? "ativo" : "configurado") : dir.has_secret ? "erro" : "nao_configurado",
+        status: ok
+          ? dir.active
+            ? "ativo"
+            : "configurado"
+          : dir.has_secret
+            ? "erro"
+            : "nao_configurado",
         updated_by: userId,
       })
       .eq("id", dir.id);
@@ -165,7 +182,9 @@ export const testLdapDirectory = createServerFn({ method: "POST" })
 
 /** Registra tentativa de acesso (sem tokens nem senhas) para auditoria. */
 export const recordLoginEvent = createServerFn({ method: "POST" })
-  .inputValidator((input: { email?: string; method: string; success: boolean; reason?: string }) => input)
+  .inputValidator(
+    (input: { email?: string; method: string; success: boolean; reason?: string }) => input,
+  )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin.from("auth_login_events").insert({

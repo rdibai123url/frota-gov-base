@@ -31,7 +31,11 @@ export const SUPPLY_STATUS: { value: SupplyOrderStatus; label: string; tone: str
   { value: "cancelada", label: "Cancelada", tone: "destructive" },
 ];
 
-export const MOVEMENT_KINDS: { value: StockMovementKind; label: string; direction: "in" | "out" }[] = [
+export const MOVEMENT_KINDS: {
+  value: StockMovementKind;
+  label: string;
+  direction: "in" | "out";
+}[] = [
   { value: "saldo_inicial", label: "Saldo inicial / importação", direction: "in" },
   { value: "entrada_compra", label: "Entrada — compra/contrato", direction: "in" },
   { value: "entrada_ofp", label: "Entrada — OFP", direction: "in" },
@@ -65,10 +69,7 @@ export function supplyStatusLabel(s: SupplyOrderStatus | null | undefined) {
 }
 export function supplyStatusTone(s: SupplyOrderStatus | null | undefined) {
   return (SUPPLY_STATUS.find((i) => i.value === s)?.tone ?? "secondary") as
-    | "default"
-    | "secondary"
-    | "outline"
-    | "destructive";
+    "default" | "secondary" | "outline" | "destructive";
 }
 export function movementLabel(k: StockMovementKind | null | undefined) {
   return MOVEMENT_KINDS.find((i) => i.value === k)?.label ?? k ?? "—";
@@ -86,7 +87,10 @@ export function usePartCompatibilities(partId?: string | null) {
   return useQuery({
     queryKey: ["part-compatibilities", partId ?? "all"],
     queryFn: async () => {
-      let q = supabase.from("part_compatibilities").select("*").order("created_at", { ascending: false });
+      let q = supabase
+        .from("part_compatibilities")
+        .select("*")
+        .order("created_at", { ascending: false });
       if (partId) q = q.eq("part_id", partId);
       const { data, error } = await q;
       if (error) throw error;
@@ -218,7 +222,10 @@ export function useInventoryItems(inventoryId?: string | null) {
 /** Verifica compatibilidade peça × ativo no banco (mesma regra da baixa). */
 export async function checkCompatibility(partId: string, vehicleId: string | null) {
   if (!vehicleId) return true;
-  const { data, error } = await supabase.rpc("part_is_compatible", { _part: partId, _vehicle: vehicleId });
+  const { data, error } = await supabase.rpc("part_is_compatible", {
+    _part: partId,
+    _vehicle: vehicleId,
+  });
   if (error) throw error;
   return Boolean(data);
 }

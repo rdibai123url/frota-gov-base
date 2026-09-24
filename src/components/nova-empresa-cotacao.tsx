@@ -10,10 +10,22 @@ import { z } from "zod";
 
 import { CnpjInput, CpfInput } from "@/components/form-fields";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   WORKSHOP_SPECIALTIES,
   dbMessage,
@@ -71,7 +83,9 @@ export function NovaEmpresaCotacaoDialog({
   const invalidate = useInvalidate();
   const [kind, setKind] = React.useState("oficina");
   const [docType, setDocType] = React.useState<"cnpj" | "cpf">("cnpj");
-  const [specialty, setSpecialty] = React.useState<string>(defaultSpecialty || WORKSHOP_SPECIALTIES[0]!);
+  const [specialty, setSpecialty] = React.useState<string>(
+    defaultSpecialty || WORKSHOP_SPECIALTIES[0]!,
+  );
   const [saving, setSaving] = React.useState(false);
 
   React.useEffect(() => {
@@ -105,14 +119,20 @@ export function NovaEmpresaCotacaoDialog({
     const norm = (v: string) => v.trim().toLowerCase();
     const dupDoc = doc ? existing.find((w) => onlyDigits(w.cnpj ?? "") === doc) : undefined;
     if (dupDoc) {
-      toast.error(`Já existe empresa cadastrada com este documento: ${dupDoc.trade_name || dupDoc.legal_name}.`);
+      toast.error(
+        `Já existe empresa cadastrada com este documento: ${dupDoc.trade_name || dupDoc.legal_name}.`,
+      );
       return;
     }
     const dupName = existing.find(
-      (w) => norm(w.legal_name) === norm(d.legal_name) || (w.trade_name && norm(w.trade_name) === norm(d.legal_name)),
+      (w) =>
+        norm(w.legal_name) === norm(d.legal_name) ||
+        (w.trade_name && norm(w.trade_name) === norm(d.legal_name)),
     );
     if (dupName) {
-      toast.error(`Já existe empresa cadastrada com este nome: ${dupName.trade_name || dupName.legal_name}.`);
+      toast.error(
+        `Já existe empresa cadastrada com este nome: ${dupName.trade_name || dupName.legal_name}.`,
+      );
       return;
     }
     if (!orgId) {
@@ -157,7 +177,12 @@ export function NovaEmpresaCotacaoDialog({
         summary: `Empresa "${d.trade_name || d.legal_name}" cadastrada a partir da cotação${
           quotationId ? ` ${quotationId}` : ""
         }.`,
-        new_data: { company_kind: kind, legal_name: d.legal_name, cnpj: doc || null, quotation_id: quotationId ?? null },
+        new_data: {
+          company_kind: kind,
+          legal_name: d.legal_name,
+          cnpj: doc || null,
+          quotation_id: quotationId ?? null,
+        },
       });
 
       invalidate(["workshops"]);
@@ -178,7 +203,8 @@ export function NovaEmpresaCotacaoDialog({
           <DialogTitle>Cadastrar nova empresa</DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
-          O cadastro entra na lista de prestadores do próprio órgão e fica disponível para as demais telas.
+          O cadastro entra na lista de prestadores do próprio órgão e fica disponível para as demais
+          telas.
         </p>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">

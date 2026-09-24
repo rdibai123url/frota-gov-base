@@ -20,7 +20,13 @@ export type ModuleDef = {
   essential?: boolean;
 };
 
-const m = (key: string, label: string, group: string, extra: string[] = [], essential = false): ModuleDef => ({
+const m = (
+  key: string,
+  label: string,
+  group: string,
+  extra: string[] = [],
+  essential = false,
+): ModuleDef => ({
   key,
   label,
   group,
@@ -92,7 +98,11 @@ export function moduleForPath(pathname: string): ModuleDef | null {
   let best: ModuleDef | null = null;
   for (const mod of MODULES) {
     for (const r of mod.routes) {
-      if (pathname === r || pathname.startsWith(`${r}/`) || (r.endsWith("/") && pathname.startsWith(r))) {
+      if (
+        pathname === r ||
+        pathname.startsWith(`${r}/`) ||
+        (r.endsWith("/") && pathname.startsWith(r))
+      ) {
         if (!best || r.length > Math.max(...best.routes.map((x) => x.length))) best = mod;
       }
     }
@@ -114,7 +124,9 @@ export function useOrganizationModules(organizationId?: string | null) {
     queryKey: ["organization-modules", organizationId ?? "atual"],
     staleTime: 1000 * 60,
     queryFn: async () => {
-      let q = supabase.from("organization_modules").select("id, organization_id, module_key, enabled, updated_at");
+      let q = supabase
+        .from("organization_modules")
+        .select("id, organization_id, module_key, enabled, updated_at");
       if (organizationId) q = q.eq("organization_id", organizationId);
       const { data, error } = await q;
       if (error) throw error;

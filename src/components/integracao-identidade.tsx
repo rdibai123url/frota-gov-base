@@ -17,7 +17,14 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -26,7 +33,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { supabase, useInvalidate, usePerms } from "@/lib/frotagov";
 import { exportReportCsv } from "@/lib/reports";
@@ -106,8 +119,8 @@ export function SsoPanel() {
         <div>
           <CardTitle>Login institucional (OIDC / SAML)</CardTitle>
           <p className="mt-1 text-sm text-muted-foreground">
-            O login por e-mail e senha do FrotaGov continua sempre disponível. Sem credenciais cadastradas no servidor,
-            o provedor fica desativado: {NO_CREDENTIALS_NOTICE}
+            O login por e-mail e senha do FrotaGov continua sempre disponível. Sem credenciais
+            cadastradas no servidor, o provedor fica desativado: {NO_CREDENTIALS_NOTICE}
           </p>
         </div>
         {canManageUsers && (
@@ -146,17 +159,29 @@ export function SsoPanel() {
               <TableRow key={p.id}>
                 <TableCell>
                   <div className="font-medium">{p.display_name}</div>
-                  <div className="text-xs text-muted-foreground">{p.issuer ?? p.metadata_url ?? "—"}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {p.issuer ?? p.metadata_url ?? "—"}
+                  </div>
                 </TableCell>
                 <TableCell>{PROTOCOL_LABEL[p.protocol] ?? p.protocol}</TableCell>
-                <TableCell className="text-sm">{(p.allowed_domains ?? []).join(", ") || "Todos"}</TableCell>
+                <TableCell className="text-sm">
+                  {(p.allowed_domains ?? []).join(", ") || "Todos"}
+                </TableCell>
                 <TableCell>
                   <Badge variant={p.has_secret ? "default" : "secondary"}>
                     {p.has_secret ? p.secret_name : "Não cadastrado"}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={p.status === "ativo" ? "default" : p.status === "erro" ? "destructive" : "secondary"}>
+                  <Badge
+                    variant={
+                      p.status === "ativo"
+                        ? "default"
+                        : p.status === "erro"
+                          ? "destructive"
+                          : "secondary"
+                    }
+                  >
                     {STATUS_LABELS[p.status]}
                   </Badge>
                   <div className="text-xs text-muted-foreground">{dt(p.last_test_at)}</div>
@@ -164,7 +189,12 @@ export function SsoPanel() {
                 <TableCell className="space-x-2 text-right">
                   {canManageUsers && (
                     <>
-                      <Button size="sm" variant="outline" onClick={() => void test(p.id)} disabled={busy === p.id}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => void test(p.id)}
+                        disabled={busy === p.id}
+                      >
                         <ShieldCheck className="mr-2 h-4 w-4" />
                         Testar
                       </Button>
@@ -201,16 +231,22 @@ function SsoDialog({
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{form.id ? "Editar provedor" : "Novo provedor de login institucional"}</DialogTitle>
+          <DialogTitle>
+            {form.id ? "Editar provedor" : "Novo provedor de login institucional"}
+          </DialogTitle>
           <DialogDescription>
-            Informe apenas o nome do segredo cadastrado no servidor. A senha/segredo nunca é digitada nesta tela.
+            Informe apenas o nome do segredo cadastrado no servidor. A senha/segredo nunca é
+            digitada nesta tela.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div className="space-y-1">
             <Label>Nome exibido no login</Label>
-            <Input value={form.display_name ?? ""} onChange={(e) => set({ display_name: e.target.value })} />
+            <Input
+              value={form.display_name ?? ""}
+              onChange={(e) => set({ display_name: e.target.value })}
+            />
           </div>
           <div className="space-y-1">
             <Label>Protocolo</Label>
@@ -227,17 +263,26 @@ function SsoDialog({
           {form.protocol === "saml" ? (
             <div className="space-y-1">
               <Label>URL de metadados do provedor</Label>
-              <Input value={form.metadata_url ?? ""} onChange={(e) => set({ metadata_url: e.target.value })} />
+              <Input
+                value={form.metadata_url ?? ""}
+                onChange={(e) => set({ metadata_url: e.target.value })}
+              />
             </div>
           ) : (
             <>
               <div className="space-y-1">
                 <Label>Issuer (URL base de descoberta)</Label>
-                <Input value={form.issuer ?? ""} onChange={(e) => set({ issuer: e.target.value })} />
+                <Input
+                  value={form.issuer ?? ""}
+                  onChange={(e) => set({ issuer: e.target.value })}
+                />
               </div>
               <div className="space-y-1">
                 <Label>Client ID</Label>
-                <Input value={form.client_id ?? ""} onChange={(e) => set({ client_id: e.target.value })} />
+                <Input
+                  value={form.client_id ?? ""}
+                  onChange={(e) => set({ client_id: e.target.value })}
+                />
               </div>
             </>
           )}
@@ -266,20 +311,31 @@ function SsoDialog({
           <div className="flex items-center justify-between rounded-lg border p-3">
             <div>
               <div className="text-sm font-medium">Criar usuário no primeiro acesso</div>
-              <div className="text-xs text-muted-foreground">Perfil inicial: operador, ajustável depois.</div>
+              <div className="text-xs text-muted-foreground">
+                Perfil inicial: operador, ajustável depois.
+              </div>
             </div>
-            <Switch checked={form.jit_provisioning ?? true} onCheckedChange={(v) => set({ jit_provisioning: v })} />
+            <Switch
+              checked={form.jit_provisioning ?? true}
+              onCheckedChange={(v) => set({ jit_provisioning: v })}
+            />
           </div>
           <div className="flex items-center justify-between rounded-lg border p-3">
             <div>
               <div className="text-sm font-medium">Ativo no login</div>
-              <div className="text-xs text-muted-foreground">Só ative após um teste bem-sucedido.</div>
+              <div className="text-xs text-muted-foreground">
+                Só ative após um teste bem-sucedido.
+              </div>
             </div>
             <Switch checked={form.active ?? false} onCheckedChange={(v) => set({ active: v })} />
           </div>
           <div className="space-y-1">
             <Label>Observações</Label>
-            <Textarea rows={2} value={form.notes ?? ""} onChange={(e) => set({ notes: e.target.value })} />
+            <Textarea
+              rows={2}
+              value={form.notes ?? ""}
+              onChange={(e) => set({ notes: e.target.value })}
+            />
           </div>
         </div>
 
@@ -361,8 +417,8 @@ export function LdapPanel() {
         <div>
           <CardTitle>Diretório corporativo (LDAP / Active Directory)</CardTitle>
           <p className="mt-1 text-sm text-muted-foreground">
-            O acesso ao diretório é feito por um gateway seguro publicado pelo órgão. Sem credencial cadastrada no
-            servidor, o diretório permanece desativado: {NO_CREDENTIALS_NOTICE}
+            O acesso ao diretório é feito por um gateway seguro publicado pelo órgão. Sem credencial
+            cadastrada no servidor, o diretório permanece desativado: {NO_CREDENTIALS_NOTICE}
           </p>
         </div>
         {canManageUsers && (
@@ -408,7 +464,15 @@ export function LdapPanel() {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={d.status === "ativo" ? "default" : d.status === "erro" ? "destructive" : "secondary"}>
+                  <Badge
+                    variant={
+                      d.status === "ativo"
+                        ? "default"
+                        : d.status === "erro"
+                          ? "destructive"
+                          : "secondary"
+                    }
+                  >
                     {STATUS_LABELS[d.status]}
                   </Badge>
                   <div className="text-xs text-muted-foreground">{dt(d.last_test_at)}</div>
@@ -416,7 +480,12 @@ export function LdapPanel() {
                 <TableCell className="space-x-2 text-right">
                   {canManageUsers && (
                     <>
-                      <Button size="sm" variant="outline" onClick={() => void test(d.id)} disabled={busy === d.id}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => void test(d.id)}
+                        disabled={busy === d.id}
+                      >
                         <ShieldCheck className="mr-2 h-4 w-4" />
                         Testar
                       </Button>
@@ -455,14 +524,18 @@ function LdapDialog({
         <DialogHeader>
           <DialogTitle>{form.id ? "Editar diretório" : "Novo diretório corporativo"}</DialogTitle>
           <DialogDescription>
-            Informe apenas o nome do segredo cadastrado no servidor; a senha nunca é digitada nesta tela.
+            Informe apenas o nome do segredo cadastrado no servidor; a senha nunca é digitada nesta
+            tela.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div className="space-y-1">
             <Label>Nome</Label>
-            <Input value={form.display_name ?? ""} onChange={(e) => set({ display_name: e.target.value })} />
+            <Input
+              value={form.display_name ?? ""}
+              onChange={(e) => set({ display_name: e.target.value })}
+            />
           </div>
           <div className="space-y-1">
             <Label>Endereço do gateway seguro</Label>
@@ -475,11 +548,17 @@ function LdapDialog({
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1">
               <Label>Base DN</Label>
-              <Input value={form.base_dn ?? ""} onChange={(e) => set({ base_dn: e.target.value })} />
+              <Input
+                value={form.base_dn ?? ""}
+                onChange={(e) => set({ base_dn: e.target.value })}
+              />
             </div>
             <div className="space-y-1">
               <Label>Usuário de leitura (bind DN)</Label>
-              <Input value={form.bind_dn ?? ""} onChange={(e) => set({ bind_dn: e.target.value })} />
+              <Input
+                value={form.bind_dn ?? ""}
+                onChange={(e) => set({ bind_dn: e.target.value })}
+              />
             </div>
           </div>
           <div className="space-y-1">
@@ -500,7 +579,10 @@ function LdapDialog({
             </div>
             <div className="space-y-1">
               <Label>Atributo de e-mail</Label>
-              <Input value={form.email_attribute ?? "mail"} onChange={(e) => set({ email_attribute: e.target.value })} />
+              <Input
+                value={form.email_attribute ?? "mail"}
+                onChange={(e) => set({ email_attribute: e.target.value })}
+              />
             </div>
           </div>
           <div className="flex items-center justify-between rounded-lg border p-3">
@@ -592,7 +674,9 @@ export function LoginEventsPanel() {
                 <TableCell>{e.email ?? "—"}</TableCell>
                 <TableCell>{LOGIN_METHOD_LABEL[e.method] ?? e.method}</TableCell>
                 <TableCell>
-                  <Badge variant={e.success ? "default" : "destructive"}>{e.success ? "Sucesso" : "Recusado"}</Badge>
+                  <Badge variant={e.success ? "default" : "destructive"}>
+                    {e.success ? "Sucesso" : "Recusado"}
+                  </Badge>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">{e.reason ?? "—"}</TableCell>
               </TableRow>

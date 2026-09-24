@@ -20,7 +20,10 @@ export function usePaged<T>(items: T[], size: number = LIST_PAGE_SIZE): PagedSta
   useEffect(() => {
     setPage(0);
   }, [total]);
-  const rows = useMemo(() => items.slice(current * size, current * size + size), [items, current, size]);
+  const rows = useMemo(
+    () => items.slice(current * size, current * size + size),
+    [items, current, size],
+  );
   return { rows, page: current, pageCount, total, setPage };
 }
 

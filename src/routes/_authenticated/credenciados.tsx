@@ -11,11 +11,30 @@ import { ListPagination, usePaged } from "@/components/list-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { isValidCNPJ, onlyDigits } from "@/lib/format";
@@ -60,7 +79,8 @@ export const Route = createFileRoute("/_authenticated/credenciados")({
       { property: "og:title", content: "Credenciados e cartão virtual — FrotaGov" },
       {
         property: "og:description",
-        content: "Portal do credenciado, cartão virtual do ativo e captura eletrônica de abastecimento e manutenção.",
+        content:
+          "Portal do credenciado, cartão virtual do ativo e captura eletrônica de abastecimento e manutenção.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -192,7 +212,12 @@ function Credenciados() {
       updated_by: userId,
     };
     const { data: saved, error } = form.id
-      ? await supabase.from("accredited_partners").update(payload).eq("id", form.id).select("id").maybeSingle()
+      ? await supabase
+          .from("accredited_partners")
+          .update(payload)
+          .eq("id", form.id)
+          .select("id")
+          .maybeSingle()
       : await supabase
           .from("accredited_partners")
           .insert({ ...payload, created_by: userId })
@@ -208,7 +233,9 @@ function Credenciados() {
     setForm(null);
     invalidate(["accredited-partners"]);
     if (!payload.latitude || !payload.longitude) {
-      void autoGeocode("accredited_partners", savedId, payload).then(() => invalidate(["accredited-partners"]));
+      void autoGeocode("accredited_partners", savedId, payload).then(() =>
+        invalidate(["accredited-partners"]),
+      );
     }
   }
 
@@ -365,18 +392,28 @@ function Credenciados() {
                 {pagedCaptures.rows.map((c) => (
                   <TableRow key={c.id}>
                     <TableCell>{dateTimeBR(c.captured_at)}</TableCell>
-                    <TableCell>{(c.partner_id ? partnerLabel.get(c.partner_id) : null) ?? "—"}</TableCell>
+                    <TableCell>
+                      {(c.partner_id ? partnerLabel.get(c.partner_id) : null) ?? "—"}
+                    </TableCell>
                     <TableCell>{c.kind}</TableCell>
-                    <TableCell>{c.vehicle_id ? (vehicleLabel.get(c.vehicle_id) ?? "—") : "—"}</TableCell>
-                    <TableCell className="text-right">
-                      {c.authorized_quantity != null ? num(c.authorized_quantity, 4) : brl(c.authorized_value)}
+                    <TableCell>
+                      {c.vehicle_id ? (vehicleLabel.get(c.vehicle_id) ?? "—") : "—"}
                     </TableCell>
                     <TableCell className="text-right">
-                      {c.captured_quantity != null ? num(c.captured_quantity, 4) : brl(c.captured_value)}
+                      {c.authorized_quantity != null
+                        ? num(c.authorized_quantity, 4)
+                        : brl(c.authorized_value)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {c.captured_quantity != null
+                        ? num(c.captured_quantity, 4)
+                        : brl(c.captured_value)}
                     </TableCell>
                     <TableCell>{c.document_number ?? "—"}</TableCell>
                     <TableCell>
-                      <Badge variant={c.status === "rejeitada" ? "destructive" : "secondary"}>{c.status}</Badge>
+                      <Badge variant={c.status === "rejeitada" ? "destructive" : "secondary"}>
+                        {c.status}
+                      </Badge>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -396,15 +433,24 @@ function Credenciados() {
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <Label>Razão social *</Label>
-                <Input value={form.legal_name} onChange={(e) => setForm({ ...form, legal_name: e.target.value })} />
+                <Input
+                  value={form.legal_name}
+                  onChange={(e) => setForm({ ...form, legal_name: e.target.value })}
+                />
               </div>
               <div>
                 <Label>Nome fantasia</Label>
-                <Input value={form.trade_name} onChange={(e) => setForm({ ...form, trade_name: e.target.value })} />
+                <Input
+                  value={form.trade_name}
+                  onChange={(e) => setForm({ ...form, trade_name: e.target.value })}
+                />
               </div>
               <div>
                 <Label>CNPJ</Label>
-                <Input value={form.cnpj} onChange={(e) => setForm({ ...form, cnpj: e.target.value })} />
+                <Input
+                  value={form.cnpj}
+                  onChange={(e) => setForm({ ...form, cnpj: e.target.value })}
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label>Habilitado para</Label>
@@ -416,7 +462,9 @@ function Credenciados() {
                         onCheckedChange={(v) =>
                           setForm({
                             ...form,
-                            kinds: v ? [...form.kinds, k.value] : form.kinds.filter((i) => i !== k.value),
+                            kinds: v
+                              ? [...form.kinds, k.value]
+                              : form.kinds.filter((i) => i !== k.value),
                           })
                         }
                       />
@@ -442,7 +490,10 @@ function Credenciados() {
               </div>
               <div>
                 <Label>Fornecedor / posto vinculado</Label>
-                <Select value={form.supplier_id} onValueChange={(v) => setForm({ ...form, supplier_id: v })}>
+                <Select
+                  value={form.supplier_id}
+                  onValueChange={(v) => setForm({ ...form, supplier_id: v })}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -458,7 +509,10 @@ function Credenciados() {
               </div>
               <div>
                 <Label>Oficina vinculada</Label>
-                <Select value={form.workshop_id} onValueChange={(v) => setForm({ ...form, workshop_id: v })}>
+                <Select
+                  value={form.workshop_id}
+                  onValueChange={(v) => setForm({ ...form, workshop_id: v })}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -474,35 +528,60 @@ function Credenciados() {
               </div>
               <div>
                 <Label>Contato</Label>
-                <Input value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} />
+                <Input
+                  value={form.contact_name}
+                  onChange={(e) => setForm({ ...form, contact_name: e.target.value })}
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label>Endereço</Label>
-                <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+                <Input
+                  value={form.address}
+                  onChange={(e) => setForm({ ...form, address: e.target.value })}
+                />
               </div>
               <div>
                 <Label>Município</Label>
-                <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+                <Input
+                  value={form.city}
+                  onChange={(e) => setForm({ ...form, city: e.target.value })}
+                />
               </div>
               <div>
                 <Label>UF</Label>
-                <Input maxLength={2} value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
+                <Input
+                  maxLength={2}
+                  value={form.state}
+                  onChange={(e) => setForm({ ...form, state: e.target.value })}
+                />
               </div>
               <div>
                 <Label>Latitude (opcional)</Label>
-                <Input value={form.latitude} onChange={(e) => setForm({ ...form, latitude: e.target.value })} />
+                <Input
+                  value={form.latitude}
+                  onChange={(e) => setForm({ ...form, latitude: e.target.value })}
+                />
               </div>
               <div>
                 <Label>Longitude (opcional)</Label>
-                <Input value={form.longitude} onChange={(e) => setForm({ ...form, longitude: e.target.value })} />
+                <Input
+                  value={form.longitude}
+                  onChange={(e) => setForm({ ...form, longitude: e.target.value })}
+                />
               </div>
               <div>
                 <Label>Telefone</Label>
-                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                <Input
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                />
               </div>
               <div>
                 <Label>E-mail</Label>
-                <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                <Input
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label>Área de abrangência</Label>
@@ -574,7 +653,9 @@ function PartnerUsersPanel({
       toast.error(dbMessage(error));
       return;
     }
-    toast.success("Usuário do credenciado cadastrado. O acesso é liberado no primeiro login com este e-mail.");
+    toast.success(
+      "Usuário do credenciado cadastrado. O acesso é liberado no primeiro login com este e-mail.",
+    );
     setOpen(false);
     setForm({ partner_id: "", full_name: "", email: "", phone: "", role: "operador" });
     invalidate(["partner-users"]);
@@ -682,7 +763,10 @@ function PartnerUsersPanel({
           <div className="grid gap-3">
             <div>
               <Label>Credenciado *</Label>
-              <Select value={form.partner_id} onValueChange={(v) => setForm({ ...form, partner_id: v })}>
+              <Select
+                value={form.partner_id}
+                onValueChange={(v) => setForm({ ...form, partner_id: v })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
@@ -697,15 +781,24 @@ function PartnerUsersPanel({
             </div>
             <div>
               <Label>Nome *</Label>
-              <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
+              <Input
+                value={form.full_name}
+                onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+              />
             </div>
             <div>
               <Label>E-mail *</Label>
-              <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              <Input
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
             </div>
             <div>
               <Label>Telefone</Label>
-              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              <Input
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              />
             </div>
             <div>
               <Label>Perfil</Label>
@@ -771,7 +864,10 @@ function CardsPanel({
   async function revoke(id: string) {
     const reason = window.prompt("Motivo da invalidação:");
     if (!reason?.trim()) return;
-    const { error } = await supabase.rpc("asset_card_revoke", { _card: id, _reason: reason.trim() });
+    const { error } = await supabase.rpc("asset_card_revoke", {
+      _card: id,
+      _reason: reason.trim(),
+    });
     if (error) {
       toast.error(dbMessage(error));
       return;
@@ -785,8 +881,9 @@ function CardsPanel({
   return (
     <div className="space-y-4">
       <div className="gov-card p-4 text-sm text-muted-foreground">
-        O cartão virtual identifica o ativo junto aos credenciados do órgão (órgão, ativo, placa ou patrimônio, situação,
-        combustível e autorizações abertas). Não expõe dados pessoais e não é meio de pagamento.
+        O cartão virtual identifica o ativo junto aos credenciados do órgão (órgão, ativo, placa ou
+        patrimônio, situação, combustível e autorizações abertas). Não expõe dados pessoais e não é
+        meio de pagamento.
       </div>
       {canManageFleet && (
         <div className="flex flex-wrap items-end gap-3">
@@ -838,7 +935,9 @@ function CardsPanel({
                 <TableCell>{dateTimeBR(c.issued_at)}</TableCell>
                 <TableCell>{c.uses_count}</TableCell>
                 <TableCell>
-                  <Badge variant={c.status === "ativo" ? "default" : "destructive"}>{c.status}</Badge>
+                  <Badge variant={c.status === "ativo" ? "default" : "destructive"}>
+                    {c.status}
+                  </Badge>
                 </TableCell>
                 <TableCell className="space-x-2 text-right">
                   <Button variant="outline" size="sm" onClick={() => setShow(c.id)}>

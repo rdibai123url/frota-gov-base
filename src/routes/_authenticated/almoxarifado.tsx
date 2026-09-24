@@ -1,6 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowLeftRight, Boxes, ClipboardCheck, Plus, Warehouse as WarehouseIcon } from "lucide-react";
+import {
+  ArrowLeftRight,
+  Boxes,
+  ClipboardCheck,
+  Plus,
+  Warehouse as WarehouseIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/app-shell";
@@ -8,11 +14,30 @@ import { ReceiveOfpButton } from "@/components/ofp-panel";
 import { ListPagination, usePaged } from "@/components/list-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HelpInlineButton } from "@/components/help-button";
 import { Textarea } from "@/components/ui/textarea";
@@ -55,7 +80,10 @@ export const Route = createFileRoute("/_authenticated/almoxarifado")({
           "Controle de depósitos, saldos, entradas, saídas, transferências, reservas e inventário de peças e materiais da frota pública.",
       },
       { property: "og:title", content: "Almoxarifado — FrotaGov" },
-      { property: "og:description", content: "Posição de estoque, movimentações e inventário de peças e materiais." },
+      {
+        property: "og:description",
+        content: "Posição de estoque, movimentações e inventário de peças e materiais.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -79,14 +107,22 @@ function Almoxarifado() {
 
   const [tab, setTab] = useState("posicao");
   const [whOpen, setWhOpen] = useState(false);
-  const [wh, setWh] = useState({ name: "", code: "", unit_id: NONE, address: "", responsible_name: "" });
+  const [wh, setWh] = useState({
+    name: "",
+    code: "",
+    unit_id: NONE,
+    address: "",
+    responsible_name: "",
+  });
   const [moveOpen, setMoveOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [reserveOpen, setReserveOpen] = useState(false);
 
   const partLabel = useMemo(() => {
     const map = new Map<string, string>();
-    parts.forEach((p) => map.set(p.id, `${p.internal_code ? p.internal_code + " — " : ""}${p.description}`));
+    parts.forEach((p) =>
+      map.set(p.id, `${p.internal_code ? p.internal_code + " — " : ""}${p.description}`),
+    );
     return map;
   }, [parts]);
   const whLabel = useMemo(() => {
@@ -107,9 +143,13 @@ function Almoxarifado() {
     () => ({
       itens: balances.length,
       quantidade: balances.reduce((s, b) => s + Number(b.quantity ?? 0), 0),
-      valor: balances.reduce((s, b) => s + Number(b.quantity ?? 0) * Number(b.average_cost ?? 0), 0),
-      abaixoMinimo: balances.filter((b) => b.min_quantity != null && Number(b.quantity) < Number(b.min_quantity))
-        .length,
+      valor: balances.reduce(
+        (s, b) => s + Number(b.quantity ?? 0) * Number(b.average_cost ?? 0),
+        0,
+      ),
+      abaixoMinimo: balances.filter(
+        (b) => b.min_quantity != null && Number(b.quantity) < Number(b.min_quantity),
+      ).length,
     }),
     [balances],
   );
@@ -286,7 +326,9 @@ function Almoxarifado() {
                     </TableCell>
                     <TableCell>{partLabel.get(m.part_id) ?? "—"}</TableCell>
                     <TableCell>{whLabel.get(m.warehouse_id) ?? "—"}</TableCell>
-                    <TableCell>{m.vehicle_id ? (vehicleLabel.get(m.vehicle_id) ?? "—") : "—"}</TableCell>
+                    <TableCell>
+                      {m.vehicle_id ? (vehicleLabel.get(m.vehicle_id) ?? "—") : "—"}
+                    </TableCell>
                     <TableCell className="text-right">
                       {movementDirection(m.kind) === "in" ? "+" : "−"}
                       {num(m.quantity, 4)}
@@ -333,7 +375,9 @@ function Almoxarifado() {
                     <TableCell className="text-right">{num(r.consumed_quantity, 4)}</TableCell>
                     <TableCell className="text-right">{num(r.released_quantity, 4)}</TableCell>
                     <TableCell>
-                      <Badge variant={r.status === "ativa" ? "default" : "secondary"}>{r.status}</Badge>
+                      <Badge variant={r.status === "ativa" ? "default" : "secondary"}>
+                        {r.status}
+                      </Badge>
                     </TableCell>
                     <TableCell className="space-x-2 text-right">
                       {canManageFleet && r.status === "ativa" && (
@@ -357,20 +401,30 @@ function Almoxarifado() {
                                 Number(r.released_quantity);
 
                               if (q > pending + 0.00005) {
-                                toast.error(`A quantidade não pode ser maior que o saldo reservado (${num(pending, 4)}).`);
+                                toast.error(
+                                  `A quantidade não pode ser maior que o saldo reservado (${num(pending, 4)}).`,
+                                );
                                 return;
                               }
 
                               const { error } = await supabase.rpc(
                                 "stock_reservation_settle",
-                                rpcArgs({ _reservation: r.id, _consume: q, _reason: "Consumo de reserva" }),
+                                rpcArgs({
+                                  _reservation: r.id,
+                                  _consume: q,
+                                  _reason: "Consumo de reserva",
+                                }),
                               );
                               if (error) {
                                 toast.error(dbMessage(error));
                                 return;
                               }
                               toast.success("Consumo registrado");
-                              invalidate(["stock-reservations", "stock-balances", "stock-movements"]);
+                              invalidate([
+                                "stock-reservations",
+                                "stock-balances",
+                                "stock-movements",
+                              ]);
                             }}
                           >
                             Consumir
@@ -394,13 +448,19 @@ function Almoxarifado() {
                                 Number(r.released_quantity);
 
                               if (q > pending + 0.00005) {
-                                toast.error(`A quantidade não pode ser maior que o saldo reservado (${num(pending, 4)}).`);
+                                toast.error(
+                                  `A quantidade não pode ser maior que o saldo reservado (${num(pending, 4)}).`,
+                                );
                                 return;
                               }
 
                               const { error } = await supabase.rpc(
                                 "stock_reservation_settle",
-                                rpcArgs({ _reservation: r.id, _release: q, _reason: "Liberação de reserva" }),
+                                rpcArgs({
+                                  _reservation: r.id,
+                                  _release: q,
+                                  _reason: "Liberação de reserva",
+                                }),
                               );
                               if (error) {
                                 toast.error(dbMessage(error));
@@ -423,7 +483,10 @@ function Almoxarifado() {
         </TabsContent>
 
         <TabsContent value="inventario">
-          <InventoryPanel warehouses={warehouses.map((w) => ({ id: w.id, name: w.name }))} partLabel={partLabel} />
+          <InventoryPanel
+            warehouses={warehouses.map((w) => ({ id: w.id, name: w.name }))}
+            partLabel={partLabel}
+          />
         </TabsContent>
 
         <TabsContent value="depositos">
@@ -453,7 +516,9 @@ function Almoxarifado() {
                     <TableCell>{units.find((u) => u.id === w.unit_id)?.name ?? "—"}</TableCell>
                     <TableCell>{w.responsible_name ?? "—"}</TableCell>
                     <TableCell>
-                      <Badge variant={w.active ? "default" : "secondary"}>{w.active ? "Ativo" : "Inativo"}</Badge>
+                      <Badge variant={w.active ? "default" : "secondary"}>
+                        {w.active ? "Ativo" : "Inativo"}
+                      </Badge>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -496,7 +561,10 @@ function Almoxarifado() {
             </div>
             <div>
               <Label>Endereço</Label>
-              <Input value={wh.address} onChange={(e) => setWh({ ...wh, address: e.target.value })} />
+              <Input
+                value={wh.address}
+                onChange={(e) => setWh({ ...wh, address: e.target.value })}
+              />
             </div>
             <div>
               <Label>Responsável</Label>
@@ -606,7 +674,12 @@ function MovementDialog({
     }
     toast.success("Movimentação registrada");
     onClose();
-    invalidate(["stock-balances", "stock-movements", "maintenance-parts", "compatibility-overrides"]);
+    invalidate([
+      "stock-balances",
+      "stock-movements",
+      "maintenance-parts",
+      "compatibility-overrides",
+    ]);
   }
 
   return (
@@ -618,7 +691,10 @@ function MovementDialog({
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <Label>Tipo *</Label>
-            <Select value={f.kind} onValueChange={(v) => setF({ ...f, kind: v as StockMovementKind })}>
+            <Select
+              value={f.kind}
+              onValueChange={(v) => setF({ ...f, kind: v as StockMovementKind })}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -667,7 +743,10 @@ function MovementDialog({
           </div>
           <div>
             <Label>Valor unitário</Label>
-            <Input value={f.unit_value} onChange={(e) => setF({ ...f, unit_value: e.target.value })} />
+            <Input
+              value={f.unit_value}
+              onChange={(e) => setF({ ...f, unit_value: e.target.value })}
+            />
           </div>
           <div>
             <Label>Lote</Label>
@@ -675,7 +754,10 @@ function MovementDialog({
           </div>
           <div>
             <Label>Origem do custeio</Label>
-            <Select value={f.origin} onValueChange={(v) => setF({ ...f, origin: v as ExpenseOrigin })}>
+            <Select
+              value={f.origin}
+              onValueChange={(v) => setF({ ...f, origin: v as ExpenseOrigin })}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -708,15 +790,24 @@ function MovementDialog({
               </div>
               <div>
                 <Label>Hodômetro</Label>
-                <Input value={f.odometer} onChange={(e) => setF({ ...f, odometer: e.target.value })} />
+                <Input
+                  value={f.odometer}
+                  onChange={(e) => setF({ ...f, odometer: e.target.value })}
+                />
               </div>
               <div>
                 <Label>Horímetro</Label>
-                <Input value={f.hour_meter} onChange={(e) => setF({ ...f, hour_meter: e.target.value })} />
+                <Input
+                  value={f.hour_meter}
+                  onChange={(e) => setF({ ...f, hour_meter: e.target.value })}
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label>Justificativa para peça incompatível (somente se necessário)</Label>
-                <Input value={f.override} onChange={(e) => setF({ ...f, override: e.target.value })} />
+                <Input
+                  value={f.override}
+                  onChange={(e) => setF({ ...f, override: e.target.value })}
+                />
               </div>
             </>
           )}
@@ -726,7 +817,11 @@ function MovementDialog({
           </div>
           <div className="sm:col-span-2">
             <Label>Observações</Label>
-            <Textarea rows={2} value={f.reason} onChange={(e) => setF({ ...f, reason: e.target.value })} />
+            <Textarea
+              rows={2}
+              value={f.reason}
+              onChange={(e) => setF({ ...f, reason: e.target.value })}
+            />
           </div>
         </div>
         <DialogFooter>
@@ -884,7 +979,11 @@ function TransferDialog({
                   value={r.quantity}
                   onChange={(e) => update(r.key, { quantity: e.target.value })}
                 />
-                <Input placeholder="Lote" value={r.lot} onChange={(e) => update(r.key, { lot: e.target.value })} />
+                <Input
+                  placeholder="Lote"
+                  value={r.lot}
+                  onChange={(e) => update(r.key, { lot: e.target.value })}
+                />
                 <Button
                   variant="ghost"
                   size="icon"
@@ -900,7 +999,10 @@ function TransferDialog({
               variant="outline"
               size="sm"
               onClick={() =>
-                setRows((cur) => [...cur, { key: crypto.randomUUID(), part: "", quantity: "", lot: "" }])
+                setRows((cur) => [
+                  ...cur,
+                  { key: crypto.randomUUID(), part: "", quantity: "", lot: "" },
+                ])
               }
             >
               Incluir item
@@ -1074,12 +1176,12 @@ function InventoryPanel({
   async function saveCount(id: string, counted: string, justification: string) {
     const raw = counted.trim();
     const q = raw === "" ? null : parseBRNumber(raw);
-  
+
     if (q !== null && (q === undefined || q < 0)) {
       toast.error("A quantidade contada não pode ser negativa.");
       return;
     }
-  
+
     const { error } = await supabase
       .from("inventory_items")
       .update({
@@ -1150,10 +1252,14 @@ function InventoryPanel({
             {inventories.map((i) => (
               <TableRow key={i.id}>
                 <TableCell className="font-mono">{i.code}</TableCell>
-                <TableCell>{warehouses.find((w) => w.id === i.warehouse_id)?.name ?? "—"}</TableCell>
+                <TableCell>
+                  {warehouses.find((w) => w.id === i.warehouse_id)?.name ?? "—"}
+                </TableCell>
                 <TableCell>{dateTimeBR(i.opened_at)}</TableCell>
                 <TableCell>
-                  <Badge variant={i.status === "finalizado" ? "secondary" : "default"}>{i.status}</Badge>
+                  <Badge variant={i.status === "finalizado" ? "secondary" : "default"}>
+                    {i.status}
+                  </Badge>
                 </TableCell>
                 <TableCell className="text-right">
                   <Button size="sm" variant="outline" onClick={() => setSelected(i.id)}>
@@ -1200,7 +1306,9 @@ function InventoryRow({
   partLabel: Map<string, string>;
   onSave: (id: string, counted: string, justification: string) => void;
 }) {
-  const [counted, setCounted] = useState(item.counted_quantity != null ? String(item.counted_quantity) : "");
+  const [counted, setCounted] = useState(
+    item.counted_quantity != null ? String(item.counted_quantity) : "",
+  );
   const [justification, setJustification] = useState(item.justification ?? "");
   return (
     <TableRow>

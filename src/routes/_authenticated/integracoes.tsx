@@ -46,7 +46,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import { supabase, useInvalidate, useOrganization, usePerms } from "@/lib/frotagov";
 import { exportReportCsv } from "@/lib/reports";
@@ -159,7 +166,7 @@ function Integracoes() {
     const { error } = await supabase
       .from("integration_connectors")
       .update({
-        environment: (String(form.get("environment") ?? "homologacao") as Connector["environment"]),
+        environment: String(form.get("environment") ?? "homologacao") as Connector["environment"],
         provider: String(form.get("provider") ?? "").trim() || null,
         base_url: baseUrl || null,
         documentation_url: String(form.get("documentation_url") ?? "").trim() || null,
@@ -230,7 +237,6 @@ function Integracoes() {
           <LoginEventsPanel />
         </TabsContent>
 
-
         {/* --------------------------- conectores --------------------------- */}
         <TabsContent value="conectores">
           {isLoading && <p className="text-muted-foreground">Carregando…</p>}
@@ -267,17 +273,26 @@ function Integracoes() {
                       </span>
                     </div>
                     {c.last_result && (
-                      <p className="rounded-md bg-muted p-2 text-xs text-muted-foreground">{c.last_result}</p>
+                      <p className="rounded-md bg-muted p-2 text-xs text-muted-foreground">
+                        {c.last_result}
+                      </p>
                     )}
                     <div className="flex flex-wrap gap-2 pt-1">
-                      <Button size="sm" variant="outline" disabled={readOnly} onClick={() => setEditing(c)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={readOnly}
+                        onClick={() => setEditing(c)}
+                      >
                         <Pencil className="size-4" /> Configurar
                       </Button>
                       {meta.testable && (
                         <Button
                           size="sm"
                           variant="secondary"
-                          disabled={readOnly || c.status === "nao_configurado" || testingId === c.id}
+                          disabled={
+                            readOnly || c.status === "nao_configurado" || testingId === c.id
+                          }
                           onClick={() => onTest(c)}
                         >
                           <RefreshCw className="size-4" />
@@ -338,8 +353,8 @@ function Integracoes() {
               <DialogHeader>
                 <DialogTitle>Configurar {CONNECTOR_META[editing.kind].label}</DialogTitle>
                 <DialogDescription>
-                  Informe apenas o <strong>nome</strong> do segredo cadastrado no servidor. O FrotaGov nunca
-                  armazena nem exibe o valor do segredo.
+                  Informe apenas o <strong>nome</strong> do segredo cadastrado no servidor. O
+                  FrotaGov nunca armazena nem exibe o valor do segredo.
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={onSaveConnector} className="space-y-4">
@@ -377,7 +392,9 @@ function Integracoes() {
                         id={`cfg_${f.key}`}
                         name={`cfg_${f.key}`}
                         placeholder={f.placeholder}
-                        defaultValue={String((editing.config as Record<string, unknown>)?.[f.key] ?? "")}
+                        defaultValue={String(
+                          (editing.config as Record<string, unknown>)?.[f.key] ?? "",
+                        )}
                       />
                     </div>
                   ))}
@@ -568,8 +585,12 @@ function SiaficPanel({
       return;
     }
     setBusy(true);
-    let q = supabase.from(src.table as never).select("*").limit(20000);
-    if (m.incremental && m.last_exported_at) q = (q as never as typeof q).gte(src.changed, m.last_exported_at);
+    let q = supabase
+      .from(src.table as never)
+      .select("*")
+      .limit(20000);
+    if (m.incremental && m.last_exported_at)
+      q = (q as never as typeof q).gte(src.changed, m.last_exported_at);
     const { data, error } = await q;
     if (error) {
       setBusy(false);
@@ -587,7 +608,9 @@ function SiaficPanel({
       return;
     }
     const rows = (data ?? []) as Record<string, unknown>[];
-    const map = Array.isArray(m.field_map) ? (m.field_map as { origem: string; destino: string }[]) : [];
+    const map = Array.isArray(m.field_map)
+      ? (m.field_map as { origem: string; destino: string }[])
+      : [];
     const columns = map.length
       ? map.map((f) => ({ key: f.origem, label: f.destino || f.origem }))
       : Object.keys(rows[0] ?? { id: "" }).map((k) => ({ key: k, label: k }));
@@ -605,7 +628,10 @@ function SiaficPanel({
         title: `Remessa SIAFIC — ${m.entity}`,
         organization: orgName,
         issuedBy: userName,
-        period: m.incremental && m.last_exported_at ? `Alterados desde ${dt(m.last_exported_at)}` : "Base completa",
+        period:
+          m.incremental && m.last_exported_at
+            ? `Alterados desde ${dt(m.last_exported_at)}`
+            : "Base completa",
       });
     }
 
@@ -634,8 +660,8 @@ function SiaficPanel({
         <div>
           <CardTitle className="text-base">Layouts e remessas contábeis</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Layouts configuráveis por entidade e formato, com exportação incremental (“alterados desde”) e
-            registro de cada remessa. Independente de fornecedor.
+            Layouts configuráveis por entidade e formato, com exportação incremental (“alterados
+            desde”) e registro de cada remessa. Independente de fornecedor.
           </p>
         </div>
         <Button size="sm" onClick={openNew} disabled={readOnly}>
@@ -669,11 +695,19 @@ function SiaficPanel({
                   <TableCell className="font-medium">{m.name}</TableCell>
                   <TableCell>{m.entity}</TableCell>
                   <TableCell className="uppercase">{m.format}</TableCell>
-                  <TableCell>{m.direction === "importacao" ? "Importação" : "Exportação"}</TableCell>
+                  <TableCell>
+                    {m.direction === "importacao" ? "Importação" : "Exportação"}
+                  </TableCell>
                   <TableCell>{m.incremental ? "Sim" : "Não"}</TableCell>
                   <TableCell>{dt(m.last_exported_at)}</TableCell>
                   <TableCell className="flex gap-1">
-                    <Button size="icon" variant="ghost" onClick={() => openEdit(m)} disabled={readOnly} aria-label="Editar">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => openEdit(m)}
+                      disabled={readOnly}
+                      aria-label="Editar"
+                    >
                       <Pencil className="size-4" />
                     </Button>
                     <Button
@@ -746,7 +780,12 @@ function SiaficPanel({
               </div>
               <div>
                 <Label htmlFor="delimiter">Delimitador (CSV)</Label>
-                <Input id="delimiter" name="delimiter" maxLength={1} defaultValue={editing?.delimiter ?? ";"} />
+                <Input
+                  id="delimiter"
+                  name="delimiter"
+                  maxLength={1}
+                  defaultValue={editing?.delimiter ?? ";"}
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label htmlFor="field_map">Mapeamento de campos (JSON)</Label>
@@ -765,7 +804,9 @@ function SiaficPanel({
             </div>
             <div className="flex items-center gap-3">
               <Switch id="incremental" checked={incremental} onCheckedChange={setIncremental} />
-              <Label htmlFor="incremental">Exportar somente registros alterados desde a última remessa</Label>
+              <Label htmlFor="incremental">
+                Exportar somente registros alterados desde a última remessa
+              </Label>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
@@ -880,8 +921,8 @@ function WebhooksPanel({
           <div>
             <CardTitle className="text-base">Endpoints do órgão</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Cada entrega é assinada com HMAC-SHA256 no cabeçalho <code>x-frotagov-signature</code>. Endpoints
-              podem ser desativados sem apagar o histórico.
+              Cada entrega é assinada com HMAC-SHA256 no cabeçalho <code>x-frotagov-signature</code>
+              . Endpoints podem ser desativados sem apagar o histórico.
             </p>
           </div>
           <Button size="sm" onClick={openNew} disabled={readOnly}>
@@ -917,11 +958,19 @@ function WebhooksPanel({
                     <TableCell>{w.events?.length ?? 0}</TableCell>
                     <TableCell>{w.has_secret ? "Cadastrado (oculto)" : "—"}</TableCell>
                     <TableCell>
-                      <Badge variant={w.active ? "default" : "secondary"}>{w.active ? "Ativo" : "Inativo"}</Badge>
+                      <Badge variant={w.active ? "default" : "secondary"}>
+                        {w.active ? "Ativo" : "Inativo"}
+                      </Badge>
                     </TableCell>
                     <TableCell>{dt(w.last_delivery_at)}</TableCell>
                     <TableCell className="flex gap-1">
-                      <Button size="icon" variant="ghost" onClick={() => openEdit(w)} disabled={readOnly} aria-label="Editar">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => openEdit(w)}
+                        disabled={readOnly}
+                        aria-label="Editar"
+                      >
                         <Pencil className="size-4" />
                       </Button>
                       <Button
@@ -977,12 +1026,22 @@ function WebhooksPanel({
                       <TableCell>{d.event}</TableCell>
                       <TableCell>{d.attempt}</TableCell>
                       <TableCell>
-                        <Badge variant={d.status === "entregue" ? "default" : d.status === "pendente" ? "outline" : "destructive"}>
+                        <Badge
+                          variant={
+                            d.status === "entregue"
+                              ? "default"
+                              : d.status === "pendente"
+                                ? "outline"
+                                : "destructive"
+                          }
+                        >
                           {d.status}
                         </Badge>
                       </TableCell>
                       <TableCell>{d.response_status ?? "—"}</TableCell>
-                      <TableCell className="max-w-72 truncate">{d.error_message ?? d.response_body ?? "—"}</TableCell>
+                      <TableCell className="max-w-72 truncate">
+                        {d.error_message ?? d.response_body ?? "—"}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -997,8 +1056,8 @@ function WebhooksPanel({
           <DialogHeader>
             <DialogTitle>{editing ? "Editar endpoint" : "Novo endpoint de webhook"}</DialogTitle>
             <DialogDescription>
-              Informe o nome do segredo cadastrado no servidor; o valor nunca é exibido nem trafega para o
-              navegador.
+              Informe o nome do segredo cadastrado no servidor; o valor nunca é exibido nem trafega
+              para o navegador.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
@@ -1024,11 +1083,21 @@ function WebhooksPanel({
               </div>
               <div className="sm:col-span-2">
                 <Label htmlFor="secret_name">Nome do segredo (HMAC)</Label>
-                <Input id="secret_name" name="secret_name" defaultValue={editing?.secret_name ?? ""} placeholder="WEBHOOK_ORGAO_SECRET" />
+                <Input
+                  id="secret_name"
+                  name="secret_name"
+                  defaultValue={editing?.secret_name ?? ""}
+                  placeholder="WEBHOOK_ORGAO_SECRET"
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label htmlFor="description">Descrição</Label>
-                <Textarea id="description" name="description" rows={2} defaultValue={editing?.description ?? ""} />
+                <Textarea
+                  id="description"
+                  name="description"
+                  rows={2}
+                  defaultValue={editing?.description ?? ""}
+                />
               </div>
             </div>
             <div>
@@ -1039,7 +1108,9 @@ function WebhooksPanel({
                     <Checkbox
                       checked={events.includes(ev.value)}
                       onCheckedChange={(c) =>
-                        setEvents((prev) => (c ? [...prev, ev.value] : prev.filter((x) => x !== ev.value)))
+                        setEvents((prev) =>
+                          c ? [...prev, ev.value] : prev.filter((x) => x !== ev.value),
+                        )
                       }
                     />
                     {ev.label}
@@ -1070,7 +1141,9 @@ function WebhooksPanel({
 
 function LogsPanel() {
   const [kind, setKind] = useState<string>("todos");
-  const { data: logs = [] } = useIntegrationLogs(kind === "todos" ? null : (kind as IntegrationKind));
+  const { data: logs = [] } = useIntegrationLogs(
+    kind === "todos" ? null : (kind as IntegrationKind),
+  );
   const kinds = useMemo(() => Object.keys(CONNECTOR_META) as IntegrationKind[], []);
 
   return (
@@ -1118,7 +1191,15 @@ function LogsPanel() {
                   <TableCell>{CONNECTOR_META[l.kind]?.label ?? l.kind}</TableCell>
                   <TableCell>{l.operation}</TableCell>
                   <TableCell>
-                    <Badge variant={l.status === "sucesso" ? "default" : l.status === "parcial" ? "outline" : "destructive"}>
+                    <Badge
+                      variant={
+                        l.status === "sucesso"
+                          ? "default"
+                          : l.status === "parcial"
+                            ? "outline"
+                            : "destructive"
+                      }
+                    >
                       {l.status}
                     </Badge>
                   </TableCell>

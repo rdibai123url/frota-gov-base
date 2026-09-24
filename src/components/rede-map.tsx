@@ -5,7 +5,15 @@
  * atribuição exigida pela licença. Carregado apenas no navegador.
  */
 import { useEffect, useMemo } from "react";
-import { Circle, CircleMarker, MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import {
+  Circle,
+  CircleMarker,
+  MapContainer,
+  Marker,
+  Popup,
+  TileLayer,
+  useMap,
+} from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -41,7 +49,13 @@ const referenceIcon = L.divIcon({
   iconAnchor: [9, 9],
 });
 
-function FitBounds({ points, origin }: { points: MapPoint[]; origin: { lat: number; lon: number } | null }) {
+function FitBounds({
+  points,
+  origin,
+}: {
+  points: MapPoint[];
+  origin: { lat: number; lon: number } | null;
+}) {
   const map = useMap();
   useEffect(() => {
     const coords: [number, number][] = points.map((p) => [p.latitude, p.longitude]);

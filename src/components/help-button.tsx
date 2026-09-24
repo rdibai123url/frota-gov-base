@@ -64,7 +64,10 @@ export function HelpContent({ topic }: { topic: HelpTopic }) {
                     <Badge
                       key={tag}
                       variant="outline"
-                      className={cn("rounded-full px-2 py-0 text-[10px] font-medium", TAG_STYLE[tag])}
+                      className={cn(
+                        "rounded-full px-2 py-0 text-[10px] font-medium",
+                        TAG_STYLE[tag],
+                      )}
                     >
                       {tag}
                     </Badge>

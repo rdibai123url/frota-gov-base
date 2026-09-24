@@ -8,10 +8,23 @@ import { PageHeader } from "@/components/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { supabase, useInvalidate, usePerms } from "@/lib/frotagov";
 import { issueApiKey } from "@/lib/platform.functions";
 import { useApiKeys } from "@/lib/platform";
@@ -26,7 +39,10 @@ export const Route = createFileRoute("/_authenticated/chaves-api")({
           "Emita e revogue chaves de integração por órgão para consumir a API versionada do FrotaGov com escopos de leitura controlados.",
       },
       { property: "og:title", content: "Chaves de API — FrotaGov" },
-      { property: "og:description", content: "Integrações seguras com chaves por órgão e escopos controlados." },
+      {
+        property: "og:description",
+        content: "Integrações seguras com chaves por órgão e escopos controlados.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -36,12 +52,24 @@ export const Route = createFileRoute("/_authenticated/chaves-api")({
 
 const SCOPES = [
   { value: "frota:read", label: "Frota", description: "Veículos, equipamentos e condutores." },
-  { value: "abastecimento:read", label: "Abastecimento", description: "Abastecimentos e autorizações." },
+  {
+    value: "abastecimento:read",
+    label: "Abastecimento",
+    description: "Abastecimentos e autorizações.",
+  },
   { value: "contratos:read", label: "Contratos", description: "Contratos, itens e empenhos." },
   { value: "manutencao:read", label: "Manutenção", description: "Manutenções, OS, peças e pneus." },
   { value: "almoxarifado:read", label: "Almoxarifado", description: "OFP e saldos de estoque." },
-  { value: "legal:read", label: "Legal / obrigações", description: "Multas, sinistros, seguros e obrigações." },
-  { value: "*", label: "Todos os recursos", description: "Leitura de todos os recursos publicados pela API." },
+  {
+    value: "legal:read",
+    label: "Legal / obrigações",
+    description: "Multas, sinistros, seguros e obrigações.",
+  },
+  {
+    value: "*",
+    label: "Todos os recursos",
+    description: "Leitura de todos os recursos publicados pela API.",
+  },
 ] as const;
 
 const scopeLabel = (value: string) => SCOPES.find((scope) => scope.value === value)?.label ?? value;
@@ -51,7 +79,8 @@ function ChavesApi() {
   const perms = usePerms();
   const invalidate = useInvalidate();
   const canManage =
-    Boolean(perms.orgId) && (perms.roles.includes("org_admin") || perms.roles.includes("super_admin"));
+    Boolean(perms.orgId) &&
+    (perms.roles.includes("org_admin") || perms.roles.includes("super_admin"));
 
   const [open, setOpen] = useState(false);
   const [scopes, setScopes] = useState<string[]>(["frota:read"]);
@@ -180,7 +209,9 @@ function ChavesApi() {
                   </div>
                 </TableCell>
                 <TableCell className="text-sm">
-                  {k.expires_at ? new Date(k.expires_at).toLocaleDateString("pt-BR") : "Indeterminada"}
+                  {k.expires_at
+                    ? new Date(k.expires_at).toLocaleDateString("pt-BR")
+                    : "Indeterminada"}
                 </TableCell>
                 <TableCell>
                   <Badge variant={k.revoked_at ? "outline" : "default"}>
@@ -204,8 +235,8 @@ function ChavesApi() {
       <p className="mt-4 text-xs text-muted-foreground">
         Use o cabeçalho <span className="font-mono">x-api-key</span> nas requisições a{" "}
         <span className="font-mono">/api/public/v1/frota</span> ou{" "}
-        <span className="font-mono">/api/public/v1/recursos/&lt;recurso&gt;</span>. A chave completa é exibida uma
-        única vez no momento da emissão.
+        <span className="font-mono">/api/public/v1/recursos/&lt;recurso&gt;</span>. A chave completa
+        é exibida uma única vez no momento da emissão.
       </p>
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -217,7 +248,13 @@ function ChavesApi() {
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="name">Nome / finalidade *</Label>
-              <Input id="name" name="name" required maxLength={120} placeholder="Integração Portal do Município" />
+              <Input
+                id="name"
+                name="name"
+                required
+                maxLength={120}
+                placeholder="Integração Portal do Município"
+              />
             </div>
 
             <div className="space-y-2">
@@ -236,12 +273,14 @@ function ChavesApi() {
                         onCheckedChange={(value) => toggleScope(scope.value, value === true)}
                       />
                       <div className="grid gap-0.5">
-                        <Label htmlFor={`scope-${scope.value}`} className="cursor-pointer font-medium">
+                        <Label
+                          htmlFor={`scope-${scope.value}`}
+                          className="cursor-pointer font-medium"
+                        >
                           {scope.label}
                         </Label>
                         <p className="text-xs text-muted-foreground">
-                          {scope.description}{" "}
-                          <span className="font-mono">({scope.value})</span>
+                          {scope.description} <span className="font-mono">({scope.value})</span>
                         </p>
                       </div>
                     </div>
@@ -249,13 +288,19 @@ function ChavesApi() {
                 })}
               </div>
               <p className="text-xs text-muted-foreground">
-                Conceda somente os módulos necessários à integração. “Todos os recursos” substitui os demais escopos.
+                Conceda somente os módulos necessários à integração. “Todos os recursos” substitui
+                os demais escopos.
               </p>
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="expires_at">Validade</Label>
-              <Input id="expires_at" name="expires_at" type="date" min={new Date().toISOString().slice(0, 10)} />
+              <Input
+                id="expires_at"
+                name="expires_at"
+                type="date"
+                min={new Date().toISOString().slice(0, 10)}
+              />
             </div>
 
             <DialogFooter>

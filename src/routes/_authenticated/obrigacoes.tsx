@@ -9,12 +9,31 @@ import { PageHeader } from "@/components/app-shell";
 import { MoneyInput } from "@/components/form-fields";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import {
   OBLIGATION_STATUS,
@@ -46,7 +65,10 @@ export const Route = createFileRoute("/_authenticated/obrigacoes")({
           "Licenciamento, IPVA, inspeções, tacógrafo, ANTT e demais obrigações legais dos veículos, com vencimentos, valores e anexos.",
       },
       { property: "og:title", content: "Obrigações Legais do Veículo — FrotaGov" },
-      { property: "og:description", content: "Documentos e obrigações legais da frota com alertas de vencimento." },
+      {
+        property: "og:description",
+        content: "Documentos e obrigações legais da frota com alertas de vencimento.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -94,7 +116,9 @@ function Obrigacoes() {
   const filtered = useMemo(
     () =>
       obligations.filter(
-        (o) => (fVehicle === ALL || o.vehicle_id === fVehicle) && (fStatus === ALL || o.status === fStatus),
+        (o) =>
+          (fVehicle === ALL || o.vehicle_id === fVehicle) &&
+          (fStatus === ALL || o.status === fStatus),
       ),
     [obligations, fVehicle, fStatus],
   );
@@ -108,7 +132,9 @@ function Obrigacoes() {
         return o.status === "pendente" && d !== null && d >= 0 && d <= 30;
       }).length,
       pendentes: ativos.filter((o) => o.status === "pendente").length,
-      valor: ativos.filter((o) => o.status !== "quitada").reduce((s, o) => s + Number(o.amount ?? 0), 0),
+      valor: ativos
+        .filter((o) => o.status !== "quitada")
+        .reduce((s, o) => s + Number(o.amount ?? 0), 0),
     };
   }, [obligations]);
 
@@ -171,8 +197,13 @@ function Obrigacoes() {
         ...(path ? { attachment_path: path } : {}),
       };
       const { error } = editing
-        ? await supabase.from("vehicle_obligations").update({ ...payload, updated_by: userId }).eq("id", editing.id)
-        : await supabase.from("vehicle_obligations").insert({ ...payload, organization_id: orgId!, created_by: userId });
+        ? await supabase
+            .from("vehicle_obligations")
+            .update({ ...payload, updated_by: userId })
+            .eq("id", editing.id)
+        : await supabase
+            .from("vehicle_obligations")
+            .insert({ ...payload, organization_id: orgId!, created_by: userId });
       if (error) throw error;
 
       if (
@@ -236,7 +267,7 @@ function Obrigacoes() {
               <SelectItem value={ALL}>Todos</SelectItem>
               {vehicles.map((v) => (
                 <SelectItem key={v.id} value={v.id}>
-                  {(v.plate ?? v.asset_code)}
+                  {v.plate ?? v.asset_code}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -295,7 +326,7 @@ function Obrigacoes() {
               return (
                 <TableRow key={o.id}>
                   <TableCell className="font-medium">{o.obligation_type}</TableCell>
-                  <TableCell>{(o.vehicle?.plate ?? o.vehicle?.asset_code ?? "—")}</TableCell>
+                  <TableCell>{o.vehicle?.plate ?? o.vehicle?.asset_code ?? "—"}</TableCell>
                   <TableCell>{o.exercise ?? "—"}</TableCell>
                   <TableCell className="text-sm">{o.document_number ?? "—"}</TableCell>
                   <TableCell className="whitespace-nowrap text-sm">
@@ -308,7 +339,11 @@ function Obrigacoes() {
                   <TableCell>
                     <Badge
                       variant={
-                        o.status === "vencida" ? "destructive" : o.status === "quitada" ? "secondary" : "outline"
+                        o.status === "vencida"
+                          ? "destructive"
+                          : o.status === "quitada"
+                            ? "secondary"
+                            : "outline"
                       }
                     >
                       {label(OBLIGATION_STATUS, o.status)}
@@ -327,7 +362,12 @@ function Obrigacoes() {
                         </Button>
                       )}
                       {canRegister && o.status !== "cancelada" && (
-                        <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => openEdit(o)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Editar"
+                          onClick={() => openEdit(o)}
+                        >
                           <Pencil className="size-4" />
                         </Button>
                       )}
@@ -358,7 +398,7 @@ function Obrigacoes() {
                     <SelectItem value={NONE}>Selecione</SelectItem>
                     {vehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        {(v.plate ?? v.asset_code)}
+                        {v.plate ?? v.asset_code}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -382,7 +422,11 @@ function Obrigacoes() {
               {type === "Outra obrigação" && (
                 <div>
                   <Label htmlFor="custom">Descreva a obrigação</Label>
-                  <Input id="custom" value={customType} onChange={(e) => setCustomType(e.target.value)} />
+                  <Input
+                    id="custom"
+                    value={customType}
+                    onChange={(e) => setCustomType(e.target.value)}
+                  />
                 </div>
               )}
               <div>
@@ -396,11 +440,20 @@ function Obrigacoes() {
               </div>
               <div>
                 <Label htmlFor="document_number">Documento / número</Label>
-                <Input id="document_number" name="document_number" defaultValue={editing?.document_number ?? ""} />
+                <Input
+                  id="document_number"
+                  name="document_number"
+                  defaultValue={editing?.document_number ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="due_date">Vencimento</Label>
-                <Input id="due_date" name="due_date" type="date" defaultValue={editing?.due_date ?? ""} />
+                <Input
+                  id="due_date"
+                  name="due_date"
+                  type="date"
+                  defaultValue={editing?.due_date ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="amount">Valor (R$)</Label>
@@ -408,11 +461,20 @@ function Obrigacoes() {
               </div>
               <div>
                 <Label htmlFor="paid_amount">Valor pago (R$)</Label>
-                <MoneyInput id="paid_amount" name="paid_amount" defaultValue={editing?.paid_amount ?? ""} />
+                <MoneyInput
+                  id="paid_amount"
+                  name="paid_amount"
+                  defaultValue={editing?.paid_amount ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="paid_at">Data do pagamento</Label>
-                <Input id="paid_at" name="paid_at" type="date" defaultValue={editing?.paid_at ?? ""} />
+                <Input
+                  id="paid_at"
+                  name="paid_at"
+                  type="date"
+                  defaultValue={editing?.paid_at ?? ""}
+                />
               </div>
               <div>
                 <Label>Situação</Label>
@@ -442,7 +504,11 @@ function Obrigacoes() {
             </div>
 
             <div className="flex items-center gap-3">
-              <Switch id="not_applicable" checked={notApplicable} onCheckedChange={setNotApplicable} />
+              <Switch
+                id="not_applicable"
+                checked={notApplicable}
+                onCheckedChange={setNotApplicable}
+              />
               <Label htmlFor="not_applicable">Não aplicável a este veículo</Label>
             </div>
 

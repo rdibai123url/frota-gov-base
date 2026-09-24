@@ -9,8 +9,21 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { parseBRNumber } from "@/lib/format";
@@ -19,7 +32,12 @@ import { parseBRNumber } from "@/lib/format";
 const rpcArgs = (o: Record<string, unknown>) =>
   Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) as never;
 import { kindsLabel, parseQrToken, useCaptures, useMyPartner } from "@/lib/credenciados";
-import { supplyStatusLabel, supplyStatusTone, useSupplyOrderItems, useSupplyOrders } from "@/lib/almoxarifado";
+import {
+  supplyStatusLabel,
+  supplyStatusTone,
+  useSupplyOrderItems,
+  useSupplyOrders,
+} from "@/lib/almoxarifado";
 import { brl, dateBR, dateTimeBR, dbMessage, num, supabase, useInvalidate } from "@/lib/frotagov";
 
 export const Route = createFileRoute("/_authenticated/portal-credenciado")({
@@ -34,7 +52,8 @@ export const Route = createFileRoute("/_authenticated/portal-credenciado")({
       { property: "og:title", content: "Portal do credenciado — FrotaGov" },
       {
         property: "og:description",
-        content: "Captura eletrônica de abastecimento, manutenção e fornecimento pelas empresas credenciadas pelo órgão.",
+        content:
+          "Captura eletrônica de abastecimento, manutenção e fornecimento pelas empresas credenciadas pelo órgão.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -86,10 +105,13 @@ function PortalCredenciado() {
   if (!me?.partner) {
     return (
       <div>
-        <PageHeader title="Portal do credenciado" description="Área exclusiva das empresas cadastradas ou convidadas pelo órgão. Não há catálogo público de prestadores." />
+        <PageHeader
+          title="Portal do credenciado"
+          description="Área exclusiva das empresas cadastradas ou convidadas pelo órgão. Não há catálogo público de prestadores."
+        />
         <div className="gov-card p-6 text-sm text-muted-foreground">
-          Seu usuário não está vinculado a um credenciado ativo. Solicite ao órgão o cadastro do seu e-mail em
-          Credenciados → Usuários do credenciado.
+          Seu usuário não está vinculado a um credenciado ativo. Solicite ao órgão o cadastro do seu
+          e-mail em Credenciados → Usuários do credenciado.
         </div>
       </div>
     );
@@ -172,14 +194,20 @@ function PortalCredenciado() {
                     <TableCell>{dateTimeBR(c.captured_at)}</TableCell>
                     <TableCell>{c.kind}</TableCell>
                     <TableCell className="text-right">
-                      {c.authorized_quantity != null ? num(c.authorized_quantity, 4) : brl(c.authorized_value)}
+                      {c.authorized_quantity != null
+                        ? num(c.authorized_quantity, 4)
+                        : brl(c.authorized_value)}
                     </TableCell>
                     <TableCell className="text-right">
-                      {c.captured_quantity != null ? num(c.captured_quantity, 4) : brl(c.captured_value)}
+                      {c.captured_quantity != null
+                        ? num(c.captured_quantity, 4)
+                        : brl(c.captured_value)}
                     </TableCell>
                     <TableCell>{c.document_number ?? "—"}</TableCell>
                     <TableCell>
-                      <Badge variant={c.status === "rejeitada" ? "destructive" : "secondary"}>{c.status}</Badge>
+                      <Badge variant={c.status === "rejeitada" ? "destructive" : "secondary"}>
+                        {c.status}
+                      </Badge>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -224,11 +252,14 @@ function FuelCapture() {
       return;
     }
     setBusy(true);
-    const { data, error } = await supabase.rpc("asset_card_resolve", rpcArgs({
-      _qr: token ?? undefined,
-      _identifier: identifier.trim() || undefined,
-      _security: security.trim() || undefined,
-    }));
+    const { data, error } = await supabase.rpc(
+      "asset_card_resolve",
+      rpcArgs({
+        _qr: token ?? undefined,
+        _identifier: identifier.trim() || undefined,
+        _security: security.trim() || undefined,
+      }),
+    );
     setBusy(false);
     if (error) {
       toast.error(dbMessage(error));
@@ -240,7 +271,9 @@ function FuelCapture() {
       return;
     }
     setAsset(found);
-    const { data: list, error: e2 } = await supabase.rpc("partner_authorizations", { _vehicle: found.vehicle_id });
+    const { data: list, error: e2 } = await supabase.rpc("partner_authorizations", {
+      _vehicle: found.vehicle_id,
+    });
     if (e2) {
       toast.error(dbMessage(e2));
       return;
@@ -267,23 +300,35 @@ function FuelCapture() {
       return;
     }
     setBusy(true);
-    const { error } = await supabase.rpc("partner_capture_fueling", rpcArgs({
-      _authorization: auth.id,
-      _quantity: quantity,
-      _unit_price: price,
-      _odometer: parseBRNumber(form.odometer) ?? undefined,
-      _hour_meter: parseBRNumber(form.hour_meter) ?? undefined,
-      _document: form.document.trim() || undefined,
-      _notes: form.notes.trim() || undefined,
-      _user_agent: typeof navigator === "undefined" ? undefined : navigator.userAgent,
-    }));
+    const { error } = await supabase.rpc(
+      "partner_capture_fueling",
+      rpcArgs({
+        _authorization: auth.id,
+        _quantity: quantity,
+        _unit_price: price,
+        _odometer: parseBRNumber(form.odometer) ?? undefined,
+        _hour_meter: parseBRNumber(form.hour_meter) ?? undefined,
+        _document: form.document.trim() || undefined,
+        _notes: form.notes.trim() || undefined,
+        _user_agent: typeof navigator === "undefined" ? undefined : navigator.userAgent,
+      }),
+    );
     setBusy(false);
     if (error) {
       toast.error(dbMessage(error));
       return;
     }
-    toast.success("Abastecimento capturado. A diferença entre o reservado e o realizado foi devolvida ao saldo.");
-    setForm({ quantity: "", unit_price: "", odometer: "", hour_meter: "", document: "", notes: "" });
+    toast.success(
+      "Abastecimento capturado. A diferença entre o reservado e o realizado foi devolvida ao saldo.",
+    );
+    setForm({
+      quantity: "",
+      unit_price: "",
+      odometer: "",
+      hour_meter: "",
+      document: "",
+      notes: "",
+    });
     invalidate(["partner-captures", "fuelings", "authorizations"]);
     void locate();
   }
@@ -294,15 +339,27 @@ function FuelCapture() {
         <div className="grid gap-3 sm:grid-cols-3">
           <div>
             <Label>QR Code do cartão virtual</Label>
-            <Input value={qr} onChange={(e) => setQr(e.target.value)} placeholder="Conteúdo lido do QR" />
+            <Input
+              value={qr}
+              onChange={(e) => setQr(e.target.value)}
+              placeholder="Conteúdo lido do QR"
+            />
           </div>
           <div>
             <Label>Ou placa / patrimônio</Label>
-            <Input value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="ABC1D23" />
+            <Input
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              placeholder="ABC1D23"
+            />
           </div>
           <div>
             <Label>Código de segurança</Label>
-            <Input value={security} onChange={(e) => setSecurity(e.target.value)} placeholder="6 caracteres" />
+            <Input
+              value={security}
+              onChange={(e) => setSecurity(e.target.value)}
+              placeholder="6 caracteres"
+            />
           </div>
         </div>
         <Button onClick={locate} disabled={busy}>
@@ -316,7 +373,8 @@ function FuelCapture() {
             <span className="text-muted-foreground">Órgão:</span> {asset.org_name}
           </div>
           <div>
-            <span className="text-muted-foreground">Ativo:</span> {asset.asset_label} ({asset.asset_class})
+            <span className="text-muted-foreground">Ativo:</span> {asset.asset_label} (
+            {asset.asset_class})
           </div>
           <div>
             <span className="text-muted-foreground">Situação:</span> {asset.vehicle_status}
@@ -328,7 +386,8 @@ function FuelCapture() {
             <span className="text-muted-foreground">Medidor:</span> {asset.meter_kind}
           </div>
           <div>
-            <span className="text-muted-foreground">Autorizações abertas:</span> {asset.open_authorizations}
+            <span className="text-muted-foreground">Autorizações abertas:</span>{" "}
+            {asset.open_authorizations}
           </div>
         </div>
       )}
@@ -368,17 +427,25 @@ function FuelCapture() {
           <div className="grid gap-3 sm:grid-cols-3">
             <div>
               <Label>Litros efetivos *</Label>
-              <Input value={form.quantity} onChange={(e) => setForm({ ...form, quantity: e.target.value })} />
+              <Input
+                value={form.quantity}
+                onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+              />
             </div>
             <div>
               <Label>Preço unitário *</Label>
-              <Input value={form.unit_price} onChange={(e) => setForm({ ...form, unit_price: e.target.value })} />
+              <Input
+                value={form.unit_price}
+                onChange={(e) => setForm({ ...form, unit_price: e.target.value })}
+              />
             </div>
             <div>
               <Label>Valor total</Label>
               <Input
                 readOnly
-                value={brl((parseBRNumber(form.quantity) ?? 0) * (parseBRNumber(form.unit_price) ?? 0))}
+                value={brl(
+                  (parseBRNumber(form.quantity) ?? 0) * (parseBRNumber(form.unit_price) ?? 0),
+                )}
               />
             </div>
             <div>
@@ -399,11 +466,18 @@ function FuelCapture() {
             </div>
             <div>
               <Label>Nº do cupom / nota fiscal</Label>
-              <Input value={form.document} onChange={(e) => setForm({ ...form, document: e.target.value })} />
+              <Input
+                value={form.document}
+                onChange={(e) => setForm({ ...form, document: e.target.value })}
+              />
             </div>
             <div className="sm:col-span-3">
               <Label>Observações</Label>
-              <Textarea rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+              <Textarea
+                rows={2}
+                value={form.notes}
+                onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              />
             </div>
           </div>
           <Button onClick={capture} disabled={busy || !auth}>
@@ -457,32 +531,37 @@ function ServiceCapture() {
 
     const approvedValue = Number(order.approved_value ?? 0);
     if (executedValue > approvedValue) {
-      toast.error(
-        `O valor executado não pode ultrapassar o autorizado (${brl(approvedValue)}).`,
-      );
+      toast.error(`O valor executado não pode ultrapassar o autorizado (${brl(approvedValue)}).`);
       return;
     }
 
     setBusy(true);
     const now = new Date().toISOString();
-    const { error } = await supabase.rpc("partner_capture_service", rpcArgs({
-      _service_order: selected,
-      _started_at: now,
-      _finished_at: form.finish === "final" ? now : undefined,
-      _executed_value: executedValue,
-      _odometer: parseBRNumber(form.odometer) ?? undefined,
-      _hour_meter: parseBRNumber(form.hour_meter) ?? undefined,
-      _document: form.document.trim() || undefined,
-      _notes: form.notes.trim() || undefined,
-      _finish: form.finish === "final",
-      _user_agent: typeof navigator === "undefined" ? undefined : navigator.userAgent,
-    }));
+    const { error } = await supabase.rpc(
+      "partner_capture_service",
+      rpcArgs({
+        _service_order: selected,
+        _started_at: now,
+        _finished_at: form.finish === "final" ? now : undefined,
+        _executed_value: executedValue,
+        _odometer: parseBRNumber(form.odometer) ?? undefined,
+        _hour_meter: parseBRNumber(form.hour_meter) ?? undefined,
+        _document: form.document.trim() || undefined,
+        _notes: form.notes.trim() || undefined,
+        _finish: form.finish === "final",
+        _user_agent: typeof navigator === "undefined" ? undefined : navigator.userAgent,
+      }),
+    );
     setBusy(false);
     if (error) {
       toast.error(dbMessage(error));
       return;
     }
-    toast.success(form.finish === "final" ? "Execução finalizada e enviada para conferência" : "Execução parcial registrada");
+    toast.success(
+      form.finish === "final"
+        ? "Execução finalizada e enviada para conferência"
+        : "Execução parcial registrada",
+    );
     invalidate(["partner-captures", "partner-service-orders", "service-orders"]);
   }
 
@@ -503,7 +582,9 @@ function ServiceCapture() {
           </SelectContent>
         </Select>
         {orders.length === 0 && (
-          <p className="mt-2 text-sm text-muted-foreground">Nenhuma ordem de serviço disponível para o seu cadastro.</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Nenhuma ordem de serviço disponível para o seu cadastro.
+          </p>
         )}
       </div>
       {order && (
@@ -517,20 +598,30 @@ function ServiceCapture() {
               aria-describedby="service-executed-value-help"
             />
             <p id="service-executed-value-help" className="mt-1 text-xs text-muted-foreground">
-              Autorizado: {brl(order.approved_value)}. O valor executado não pode ultrapassar este limite.
+              Autorizado: {brl(order.approved_value)}. O valor executado não pode ultrapassar este
+              limite.
             </p>
           </div>
           <div>
             <Label>Hodômetro (km)</Label>
-            <Input value={form.odometer} onChange={(e) => setForm({ ...form, odometer: e.target.value })} />
+            <Input
+              value={form.odometer}
+              onChange={(e) => setForm({ ...form, odometer: e.target.value })}
+            />
           </div>
           <div>
             <Label>Horímetro (h)</Label>
-            <Input value={form.hour_meter} onChange={(e) => setForm({ ...form, hour_meter: e.target.value })} />
+            <Input
+              value={form.hour_meter}
+              onChange={(e) => setForm({ ...form, hour_meter: e.target.value })}
+            />
           </div>
           <div>
             <Label>Nº / data da NF</Label>
-            <Input value={form.document} onChange={(e) => setForm({ ...form, document: e.target.value })} />
+            <Input
+              value={form.document}
+              onChange={(e) => setForm({ ...form, document: e.target.value })}
+            />
           </div>
           <div>
             <Label>Etapa</Label>
@@ -546,7 +637,11 @@ function ServiceCapture() {
           </div>
           <div className="sm:col-span-3">
             <Label>Serviços executados / peças aplicadas</Label>
-            <Textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+            <Textarea
+              rows={3}
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            />
           </div>
         </div>
       )}
@@ -574,11 +669,14 @@ function PartnerSupplyOrders({ partnerId }: { partnerId: string }) {
       toast.error("Informe a quantidade entregue");
       return;
     }
-    const { error } = await supabase.rpc("supply_order_deliver", rpcArgs({
-      _item: itemId,
-      _quantity: q,
-      _document: doc.trim() || undefined,
-    }));
+    const { error } = await supabase.rpc(
+      "supply_order_deliver",
+      rpcArgs({
+        _item: itemId,
+        _quantity: q,
+        _document: doc.trim() || undefined,
+      }),
+    );
     if (error) {
       toast.error(dbMessage(error));
       return;

@@ -15,7 +15,11 @@ export const NO_PUBLIC_BASE_MESSAGE =
 
 /** Endereços que jamais podem virar link de fornecedor. */
 export function isInternalHost(host: string): boolean {
-  const h = (host || "").toLowerCase().replace(/^\[|\]$/g, "").split(":")[0] ?? "";
+  const h =
+    (host || "")
+      .toLowerCase()
+      .replace(/^\[|\]$/g, "")
+      .split(":")[0] ?? "";
   if (!h) return true;
   if (h === "localhost" || h.endsWith(".localhost")) return true;
   if (h === "::1" || h === "0.0.0.0") return true;
@@ -59,7 +63,6 @@ export function publicBase(value: string | null | undefined): string {
   // Endereço externo sempre em https (link de fornecedor nunca sai em http).
   return `https://${host}`;
 }
-
 
 /** Confere o link final (usado antes de escrever na área de transferência). */
 export function isPublicInviteLink(link: string | null | undefined): boolean {

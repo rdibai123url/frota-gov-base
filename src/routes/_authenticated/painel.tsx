@@ -78,7 +78,6 @@ import {
   useFuelTypes,
 } from "@/lib/frotagov";
 
-
 export const Route = createFileRoute("/_authenticated/painel")({
   head: () => ({
     meta: [
@@ -129,25 +128,105 @@ function StatCard({
 }
 
 const SHORTCUTS = [
-  { to: "/abastecimentos", label: "Abastecimentos", text: "Registrar e consultar abastecimentos", icon: Fuel },
+  {
+    to: "/abastecimentos",
+    label: "Abastecimentos",
+    text: "Registrar e consultar abastecimentos",
+    icon: Fuel,
+  },
   { to: "/veiculos", label: "Veículos", text: "Cadastrar e consultar a frota", icon: Truck },
-  { to: "/condutores", label: "Condutores", text: "Habilitação e vínculo dos condutores", icon: IdCard },
-  { to: "/utilizacao", label: "Utilização e reservas", text: "Reservas, saídas e retornos de veículos", icon: CalendarClock },
-  { to: "/autorizacoes", label: "Autorizações", text: "Autorizar abastecimentos antes da compra", icon: Ticket },
-  { to: "/contratos", label: "Contratos", text: "Contratos, itens e saldos contratuais", icon: FileText },
+  {
+    to: "/condutores",
+    label: "Condutores",
+    text: "Habilitação e vínculo dos condutores",
+    icon: IdCard,
+  },
+  {
+    to: "/utilizacao",
+    label: "Utilização e reservas",
+    text: "Reservas, saídas e retornos de veículos",
+    icon: CalendarClock,
+  },
+  {
+    to: "/autorizacoes",
+    label: "Autorizações",
+    text: "Autorizar abastecimentos antes da compra",
+    icon: Ticket,
+  },
+  {
+    to: "/contratos",
+    label: "Contratos",
+    text: "Contratos, itens e saldos contratuais",
+    icon: FileText,
+  },
   { to: "/empenhos", label: "Empenhos", text: "Empenhos e saldos orçamentários", icon: Wallet },
-  { to: "/cotas", label: "Cotas e saldos", text: "Cotas financeiras e quantitativas", icon: PiggyBank },
-  { to: "/centros-custo", label: "Centros de Custo", text: "Centros de custo do órgão e das unidades", icon: Coins },
-  { to: "/fornecedores", label: "Fornecedores / Postos", text: "Postos habilitados para o órgão", icon: Store },
-  { to: "/combustiveis", label: "Combustíveis", text: "Tipos de combustível do órgão", icon: Droplets },
-  { to: "/unidades", label: "Secretarias / Unidades", text: "Estrutura administrativa do órgão", icon: Building2 },
+  {
+    to: "/cotas",
+    label: "Cotas e saldos",
+    text: "Cotas financeiras e quantitativas",
+    icon: PiggyBank,
+  },
+  {
+    to: "/centros-custo",
+    label: "Centros de Custo",
+    text: "Centros de custo do órgão e das unidades",
+    icon: Coins,
+  },
+  {
+    to: "/fornecedores",
+    label: "Fornecedores / Postos",
+    text: "Postos habilitados para o órgão",
+    icon: Store,
+  },
+  {
+    to: "/combustiveis",
+    label: "Combustíveis",
+    text: "Tipos de combustível do órgão",
+    icon: Droplets,
+  },
+  {
+    to: "/unidades",
+    label: "Secretarias / Unidades",
+    text: "Estrutura administrativa do órgão",
+    icon: Building2,
+  },
   { to: "/usuarios", label: "Usuários", text: "Perfis e permissões de acesso", icon: Users },
-  { to: "/multas", label: "Multas e infrações", text: "Autos de infração, defesa e responsabilidade", icon: FileWarning },
-  { to: "/sinistros", label: "Acidentes e sinistros", text: "Ocorrências, seguradora e indisponibilidade", icon: AlertTriangle },
-  { to: "/seguros", label: "Seguros", text: "Apólices, vigências e veículos cobertos", icon: ShieldCheck },
-  { to: "/obrigacoes", label: "Obrigações legais", text: "Licenciamento, IPVA, inspeções e ANTT", icon: FileCheck2 },
-  { to: "/patrimonio", label: "Movimentação patrimonial", text: "Cessões, remanejamentos, baixas e leilões", icon: ArrowLeftRight },
-  { to: "/orgao", label: "Dados do Órgão", text: "Identificação institucional e brasão", icon: Landmark },
+  {
+    to: "/multas",
+    label: "Multas e infrações",
+    text: "Autos de infração, defesa e responsabilidade",
+    icon: FileWarning,
+  },
+  {
+    to: "/sinistros",
+    label: "Acidentes e sinistros",
+    text: "Ocorrências, seguradora e indisponibilidade",
+    icon: AlertTriangle,
+  },
+  {
+    to: "/seguros",
+    label: "Seguros",
+    text: "Apólices, vigências e veículos cobertos",
+    icon: ShieldCheck,
+  },
+  {
+    to: "/obrigacoes",
+    label: "Obrigações legais",
+    text: "Licenciamento, IPVA, inspeções e ANTT",
+    icon: FileCheck2,
+  },
+  {
+    to: "/patrimonio",
+    label: "Movimentação patrimonial",
+    text: "Cessões, remanejamentos, baixas e leilões",
+    icon: ArrowLeftRight,
+  },
+  {
+    to: "/orgao",
+    label: "Dados do Órgão",
+    text: "Identificação institucional e brasão",
+    icon: Landmark,
+  },
 ] as const;
 
 function Painel() {
@@ -208,12 +287,15 @@ function Painel() {
   const cnhVencidas = drivers.filter((d) => cnhState(d.license_expiry) === "vencida").length;
   const cnhAVencer = drivers.filter((d) => cnhState(d.license_expiry) === "a_vencer").length;
   const autAbertas = auths.filter(
-    (a) => ["autorizada", "pendente", "utilizada_parcial"].includes(a.status) && authorizationBalance(a) > 0,
+    (a) =>
+      ["autorizada", "pendente", "utilizada_parcial"].includes(a.status) &&
+      authorizationBalance(a) > 0,
   ).length;
   const autUsadasMes = useMemo(() => {
     const start = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     return auths.filter(
-      (a) => ["utilizada", "utilizada_parcial"].includes(a.status) && new Date(a.updated_at) >= start,
+      (a) =>
+        ["utilizada", "utilizada_parcial"].includes(a.status) && new Date(a.updated_at) >= start,
     ).length;
   }, [auths]);
 
@@ -259,7 +341,8 @@ function Painel() {
     return {
       vencidas: dues.filter((d) => d === "vencido").length,
       proximas: dues.filter((d) => d === "proximo").length,
-      solicitacoesAbertas: mRequests.filter((r) => !["concluida", "cancelada"].includes(r.status)).length,
+      solicitacoesAbertas: mRequests.filter((r) => !["concluida", "cancelada"].includes(r.status))
+        .length,
       emOficina: mRequests.filter((r) => r.status === "em_manutencao").length,
       custoMes,
       pneusInstalados: tires.filter((t) => t.status === "instalado").length,
@@ -269,12 +352,17 @@ function Painel() {
 
   const rede = useMemo(() => {
     const now = new Date();
-    const emExecucao = orders.filter((o) => ["veiculo_recebido", "em_execucao", "aguardando_peca"].includes(o.status));
+    const emExecucao = orders.filter((o) =>
+      ["veiculo_recebido", "em_execucao", "aguardando_peca"].includes(o.status),
+    );
     return {
       cotacoesAbertas: quotations.filter((q) => ["aberta", "em_analise"].includes(q.status)).length,
-      aguardandoPropostas: quotations.filter((q) => q.status === "aberta" && q.proposals_count === 0).length,
+      aguardandoPropostas: quotations.filter(
+        (q) => q.status === "aberta" && q.proposals_count === 0,
+      ).length,
       poucasPropostas: quotations.filter(
-        (q) => ["aberta", "em_analise"].includes(q.status) && q.valid_proposals_count < MIN_PROPOSALS,
+        (q) =>
+          ["aberta", "em_analise"].includes(q.status) && q.valid_proposals_count < MIN_PROPOSALS,
       ).length,
       osAbertas: orders.filter((o) => !["concluida", "cancelada"].includes(o.status)).length,
       osEmExecucao: emExecucao.length,
@@ -287,7 +375,11 @@ function Painel() {
       valorMes: orders
         .filter((o) => {
           const d = new Date(o.finished_at ?? o.issued_at);
-          return o.status === "concluida" && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+          return (
+            o.status === "concluida" &&
+            d.getMonth() === now.getMonth() &&
+            d.getFullYear() === now.getFullYear()
+          );
         })
         .reduce((s2, o) => s2 + Number(o.executed_value ?? 0), 0),
       oficinasAtivas: workshops.filter((w) => w.status === "ativo").length,
@@ -315,7 +407,9 @@ function Painel() {
         return d !== null && d >= 0 && d <= 60;
       }).length,
       sinistrosAbertos: sinistrosAbertos.length,
-      veiculosPorSinistro: new Set(sinistrosAbertos.filter((a) => a.blocks_use).map((a) => a.vehicle_id)).size,
+      veiculosPorSinistro: new Set(
+        sinistrosAbertos.filter((a) => a.blocks_use).map((a) => a.vehicle_id),
+      ).size,
       movimentacoesMes: movements.filter((m) => {
         const d = new Date(`${m.moved_on}T12:00:00`);
         return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
@@ -364,170 +458,310 @@ function Painel() {
         </TabsList>
 
         <TabsContent value="geral" className="pt-5">
-      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5">
-        <StatCard label="Total de veículos" value={isLoading ? "—" : vehicles.length} icon={Truck} to="/veiculos" />
-        <StatCard label="Veículos ativos" value={ativos} icon={CircleCheck} tone="success" to="/veiculos" />
-        <StatCard label="Em manutenção" value={manutencao} icon={Wrench} tone="warning" to="/veiculos" />
-        <StatCard label="Secretarias / Unidades" value={units.length} icon={Building2} to="/unidades" />
-        <StatCard label="Usuários" value={users.length} icon={Users} to="/usuarios" />
-      </div>
+          <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5">
+            <StatCard
+              label="Total de veículos"
+              value={isLoading ? "—" : vehicles.length}
+              icon={Truck}
+              to="/veiculos"
+            />
+            <StatCard
+              label="Veículos ativos"
+              value={ativos}
+              icon={CircleCheck}
+              tone="success"
+              to="/veiculos"
+            />
+            <StatCard
+              label="Em manutenção"
+              value={manutencao}
+              icon={Wrench}
+              tone="warning"
+              to="/veiculos"
+            />
+            <StatCard
+              label="Secretarias / Unidades"
+              value={units.length}
+              icon={Building2}
+              to="/unidades"
+            />
+            <StatCard label="Usuários" value={users.length} icon={Users} to="/usuarios" />
+          </div>
         </TabsContent>
 
         <TabsContent value="abastecimento" className="pt-5">
-      <h2 className="gov-label mb-2.5">Abastecimento no mês</h2>
-      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5">
-        <StatCard label="Abastecimentos no mês" value={mes.count} icon={Fuel} to="/abastecimentos" />
-        <StatCard label="Quantidade abastecida" value={num(mes.quantity, 2)} icon={Droplets} />
-        <StatCard label="Valor gasto no mês" value={brl(mes.total)} icon={Banknote} />
-        <StatCard label="Veículos abastecidos" value={mes.vehicles} icon={Truck} />
-        <StatCard label="Alertas em aberto" value={abertos} icon={BellRing} to="/alertas" tone={abertos > 0 ? "warning" : "default"} />
-      </div>
+          <h2 className="gov-label mb-2.5">Abastecimento no mês</h2>
+          <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5">
+            <StatCard
+              label="Abastecimentos no mês"
+              value={mes.count}
+              icon={Fuel}
+              to="/abastecimentos"
+            />
+            <StatCard label="Quantidade abastecida" value={num(mes.quantity, 2)} icon={Droplets} />
+            <StatCard label="Valor gasto no mês" value={brl(mes.total)} icon={Banknote} />
+            <StatCard label="Veículos abastecidos" value={mes.vehicles} icon={Truck} />
+            <StatCard
+              label="Alertas em aberto"
+              value={abertos}
+              icon={BellRing}
+              to="/alertas"
+              tone={abertos > 0 ? "warning" : "default"}
+            />
+          </div>
 
-      <h2 className="gov-label mb-2.5 mt-7">Condutores e autorizações</h2>
-      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5">
-        <StatCard label="Condutores ativos" value={condutoresAtivos} icon={IdCard} to="/condutores" />
-        <StatCard label="CNHs vencidas" value={cnhVencidas} icon={IdCard} to="/condutores" tone={cnhVencidas > 0 ? "warning" : "default"} />
-        <StatCard label="CNHs a vencer (30 dias)" value={cnhAVencer} icon={IdCard} tone={cnhAVencer > 0 ? "warning" : "default"} />
-        <StatCard label="Autorizações abertas" value={autAbertas} icon={Ticket} to="/autorizacoes" />
-        <StatCard label="Autorizações utilizadas no mês" value={autUsadasMes} icon={Ticket} tone="success" />
-      </div>
+          <h2 className="gov-label mb-2.5 mt-7">Condutores e autorizações</h2>
+          <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5">
+            <StatCard
+              label="Condutores ativos"
+              value={condutoresAtivos}
+              icon={IdCard}
+              to="/condutores"
+            />
+            <StatCard
+              label="CNHs vencidas"
+              value={cnhVencidas}
+              icon={IdCard}
+              to="/condutores"
+              tone={cnhVencidas > 0 ? "warning" : "default"}
+            />
+            <StatCard
+              label="CNHs a vencer (30 dias)"
+              value={cnhAVencer}
+              icon={IdCard}
+              tone={cnhAVencer > 0 ? "warning" : "default"}
+            />
+            <StatCard
+              label="Autorizações abertas"
+              value={autAbertas}
+              icon={Ticket}
+              to="/autorizacoes"
+            />
+            <StatCard
+              label="Autorizações utilizadas no mês"
+              value={autUsadasMes}
+              icon={Ticket}
+              tone="success"
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="manutencao" className="pt-5">
-      <h2 className="gov-label mb-2.5">Manutenção, peças e pneus</h2>
+          <h2 className="gov-label mb-2.5">Manutenção, peças e pneus</h2>
 
-      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-6">
-        <StatCard
-          label="Preventivas vencidas"
-          value={manut.vencidas}
-          icon={ClipboardList}
-          tone={manut.vencidas > 0 ? "warning" : "default"}
-        />
-        <StatCard
-          label="Preventivas a vencer"
-          value={manut.proximas}
-          icon={ClipboardList}
-          tone={manut.proximas > 0 ? "warning" : "default"}
-        />
-        <StatCard label="Solicitações em aberto" value={manut.solicitacoesAbertas} icon={Wrench} to="/manutencoes" />
-        <StatCard label="Veículos em oficina" value={manut.emOficina} icon={Wrench} tone={manut.emOficina > 0 ? "warning" : "default"} />
-        <StatCard label="Custo de manutenção no mês" value={brl(manut.custoMes)} icon={Cog} />
-        <StatCard label="Pneus instalados / estoque" value={`${manut.pneusInstalados} / ${manut.pneusEstoque}`} icon={CircleDot} />
-      </div>
+          <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-6">
+            <StatCard
+              label="Preventivas vencidas"
+              value={manut.vencidas}
+              icon={ClipboardList}
+              tone={manut.vencidas > 0 ? "warning" : "default"}
+            />
+            <StatCard
+              label="Preventivas a vencer"
+              value={manut.proximas}
+              icon={ClipboardList}
+              tone={manut.proximas > 0 ? "warning" : "default"}
+            />
+            <StatCard
+              label="Solicitações em aberto"
+              value={manut.solicitacoesAbertas}
+              icon={Wrench}
+              to="/manutencoes"
+            />
+            <StatCard
+              label="Veículos em oficina"
+              value={manut.emOficina}
+              icon={Wrench}
+              tone={manut.emOficina > 0 ? "warning" : "default"}
+            />
+            <StatCard label="Custo de manutenção no mês" value={brl(manut.custoMes)} icon={Cog} />
+            <StatCard
+              label="Pneus instalados / estoque"
+              value={`${manut.pneusInstalados} / ${manut.pneusEstoque}`}
+              icon={CircleDot}
+            />
+          </div>
 
-      <h2 className="gov-label mb-2.5 mt-7">Limpeza da frota</h2>
-      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3">
-        <StatCard label="Limpezas no mês" value={limpeza.mes} icon={Droplets} to="/limpeza" />
-        <StatCard label="Gasto com limpeza no mês" value={brl(limpeza.valorMes)} icon={Banknote} />
-        <StatCard label="Limpezas agendadas" value={limpeza.agendadas} icon={Droplets} tone={limpeza.agendadas > 0 ? "warning" : "default"} />
-      </div>
+          <h2 className="gov-label mb-2.5 mt-7">Limpeza da frota</h2>
+          <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3">
+            <StatCard label="Limpezas no mês" value={limpeza.mes} icon={Droplets} to="/limpeza" />
+            <StatCard
+              label="Gasto com limpeza no mês"
+              value={brl(limpeza.valorMes)}
+              icon={Banknote}
+            />
+            <StatCard
+              label="Limpezas agendadas"
+              value={limpeza.agendadas}
+              icon={Droplets}
+              tone={limpeza.agendadas > 0 ? "warning" : "default"}
+            />
+          </div>
 
-      <h2 className="gov-label mb-2.5 mt-7">Prestadores do órgão, cotações e ordens de serviço</h2>
-      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-4">
-        <StatCard label="Cotações abertas" value={rede.cotacoesAbertas} icon={FileSearch} to="/cotacoes" />
-        <StatCard label="Aguardando propostas" value={rede.aguardandoPropostas} icon={FileSearch} />
-        <StatCard
-          label={`Processos com menos de ${MIN_PROPOSALS} propostas`}
-          value={rede.poucasPropostas}
-          icon={FileSearch}
-          tone={rede.poucasPropostas > 0 ? "warning" : "default"}
-        />
-        <StatCard label="Oficinas credenciadas ativas" value={rede.oficinasAtivas} icon={Building} />
-        <StatCard label="OS em aberto" value={rede.osAbertas} icon={FileCheck2} to="/ordens-servico" />
-        <StatCard label="OS em execução" value={rede.osEmExecucao} icon={FileCheck2} />
-        <StatCard
-          label="OS atrasadas"
-          value={rede.osAtrasadas}
-          icon={FileCheck2}
-          tone={rede.osAtrasadas > 0 ? "warning" : "default"}
-        />
-        <StatCard label="Valor em manutenção no mês" value={brl(rede.valorMes)} icon={Banknote} />
-      </div>
-
+          <h2 className="gov-label mb-2.5 mt-7">
+            Prestadores do órgão, cotações e ordens de serviço
+          </h2>
+          <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-4">
+            <StatCard
+              label="Cotações abertas"
+              value={rede.cotacoesAbertas}
+              icon={FileSearch}
+              to="/cotacoes"
+            />
+            <StatCard
+              label="Aguardando propostas"
+              value={rede.aguardandoPropostas}
+              icon={FileSearch}
+            />
+            <StatCard
+              label={`Processos com menos de ${MIN_PROPOSALS} propostas`}
+              value={rede.poucasPropostas}
+              icon={FileSearch}
+              tone={rede.poucasPropostas > 0 ? "warning" : "default"}
+            />
+            <StatCard
+              label="Oficinas credenciadas ativas"
+              value={rede.oficinasAtivas}
+              icon={Building}
+            />
+            <StatCard
+              label="OS em aberto"
+              value={rede.osAbertas}
+              icon={FileCheck2}
+              to="/ordens-servico"
+            />
+            <StatCard label="OS em execução" value={rede.osEmExecucao} icon={FileCheck2} />
+            <StatCard
+              label="OS atrasadas"
+              value={rede.osAtrasadas}
+              icon={FileCheck2}
+              tone={rede.osAtrasadas > 0 ? "warning" : "default"}
+            />
+            <StatCard
+              label="Valor em manutenção no mês"
+              value={brl(rede.valorMes)}
+              icon={Banknote}
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="financeiro" className="pt-5">
-      <h2 className="gov-label mb-2.5">Execução orçamentária</h2>
+          <h2 className="gov-label mb-2.5">Execução orçamentária</h2>
 
-      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-6">
-        <StatCard label="Contratos vigentes" value={financeiro.contratosVigentes} icon={FileText} to="/contratos" />
-        <StatCard label="Saldo contratual" value={brl(financeiro.saldoContratual)} icon={FileText} tone="success" />
-        <StatCard label="Empenhos ativos" value={financeiro.empenhosAtivos} icon={Wallet} to="/empenhos" />
-        <StatCard label="Saldo de empenhos" value={brl(financeiro.saldoEmpenhos)} icon={Wallet} tone="success" />
-        <StatCard
-          label="Cotas com saldo crítico"
-          value={financeiro.cotasCriticas}
-          icon={PiggyBank}
-          tone={financeiro.cotasCriticas > 0 ? "warning" : "default"}
-        />
-        <StatCard
-          label="Contratos a vencer (60 dias)"
-          value={financeiro.contratosAVencer}
-          icon={Coins}
-          tone={financeiro.contratosAVencer > 0 ? "warning" : "default"}
-        />
-      </div>
-
+          <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-6">
+            <StatCard
+              label="Contratos vigentes"
+              value={financeiro.contratosVigentes}
+              icon={FileText}
+              to="/contratos"
+            />
+            <StatCard
+              label="Saldo contratual"
+              value={brl(financeiro.saldoContratual)}
+              icon={FileText}
+              tone="success"
+            />
+            <StatCard
+              label="Empenhos ativos"
+              value={financeiro.empenhosAtivos}
+              icon={Wallet}
+              to="/empenhos"
+            />
+            <StatCard
+              label="Saldo de empenhos"
+              value={brl(financeiro.saldoEmpenhos)}
+              icon={Wallet}
+              tone="success"
+            />
+            <StatCard
+              label="Cotas com saldo crítico"
+              value={financeiro.cotasCriticas}
+              icon={PiggyBank}
+              tone={financeiro.cotasCriticas > 0 ? "warning" : "default"}
+            />
+            <StatCard
+              label="Contratos a vencer (60 dias)"
+              value={financeiro.contratosAVencer}
+              icon={Coins}
+              tone={financeiro.contratosAVencer > 0 ? "warning" : "default"}
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="administrativo" className="pt-5">
-      <h2 className="gov-label mb-2.5">Gestão administrativa, legal e patrimonial</h2>
+          <h2 className="gov-label mb-2.5">Gestão administrativa, legal e patrimonial</h2>
 
-      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-4">
-        <StatCard
-          label="Multas em aberto"
-          value={admin.multasAbertas}
-          icon={FileWarning}
-          tone={admin.multasAbertas > 0 ? "warning" : "default"}
-        />
-        <StatCard label="Valor de multas em aberto" value={brl(admin.multasValor)} icon={Banknote} />
-        <StatCard
-          label="Obrigações legais vencidas"
-          value={admin.obrigacoesVencidas}
-          icon={FileCheck2}
-          tone={admin.obrigacoesVencidas > 0 ? "warning" : "default"}
-        />
-        <StatCard
-          label="Seguros a vencer (60 dias)"
-          value={admin.segurosAVencer}
-          icon={ShieldCheck}
-          tone={admin.segurosAVencer > 0 ? "warning" : "default"}
-        />
-        <StatCard
-          label="Sinistros em aberto"
-          value={admin.sinistrosAbertos}
-          icon={AlertTriangle}
-          tone={admin.sinistrosAbertos > 0 ? "warning" : "default"}
-        />
-        <StatCard
-          label="Veículos indisponíveis por sinistro"
-          value={admin.veiculosPorSinistro}
-          icon={Truck}
-          tone={admin.veiculosPorSinistro > 0 ? "warning" : "default"}
-        />
-        <StatCard label="Movimentações patrimoniais no mês" value={admin.movimentacoesMes} icon={ArrowLeftRight} />
-        <StatCard label="Baixas e alienações acumuladas" value={admin.baixas} icon={Landmark} />
-      </div>
+          <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-4">
+            <StatCard
+              label="Multas em aberto"
+              value={admin.multasAbertas}
+              icon={FileWarning}
+              tone={admin.multasAbertas > 0 ? "warning" : "default"}
+            />
+            <StatCard
+              label="Valor de multas em aberto"
+              value={brl(admin.multasValor)}
+              icon={Banknote}
+            />
+            <StatCard
+              label="Obrigações legais vencidas"
+              value={admin.obrigacoesVencidas}
+              icon={FileCheck2}
+              tone={admin.obrigacoesVencidas > 0 ? "warning" : "default"}
+            />
+            <StatCard
+              label="Seguros a vencer (60 dias)"
+              value={admin.segurosAVencer}
+              icon={ShieldCheck}
+              tone={admin.segurosAVencer > 0 ? "warning" : "default"}
+            />
+            <StatCard
+              label="Sinistros em aberto"
+              value={admin.sinistrosAbertos}
+              icon={AlertTriangle}
+              tone={admin.sinistrosAbertos > 0 ? "warning" : "default"}
+            />
+            <StatCard
+              label="Veículos indisponíveis por sinistro"
+              value={admin.veiculosPorSinistro}
+              icon={Truck}
+              tone={admin.veiculosPorSinistro > 0 ? "warning" : "default"}
+            />
+            <StatCard
+              label="Movimentações patrimoniais no mês"
+              value={admin.movimentacoesMes}
+              icon={ArrowLeftRight}
+            />
+            <StatCard label="Baixas e alienações acumuladas" value={admin.baixas} icon={Landmark} />
+          </div>
 
-      <h2 className="gov-label mb-2.5 mt-7">Diárias</h2>
-      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5">
-        <StatCard label="Solicitadas no mês" value={diariasKpi.requestedMonth} icon={Plane} />
-        <StatCard label="Autorizadas" value={diariasKpi.authorized} icon={FileCheck2} tone="success" />
-        <StatCard
-          label="Aguardando comprovação"
-          value={diariasKpi.awaitingProof}
-          icon={FileWarning}
-          tone={diariasKpi.awaitingProof > 0 ? "warning" : "default"}
-        />
-        <StatCard
-          label="Comprovações vencidas"
-          value={diariasKpi.overdue}
-          icon={AlertTriangle}
-          tone={diariasKpi.overdue > 0 ? "warning" : "default"}
-        />
-        <StatCard label="Valor de diárias no mês" value={brl(diariasKpi.totalValue)} icon={Banknote} />
-      </div>
-
+          <h2 className="gov-label mb-2.5 mt-7">Diárias</h2>
+          <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5">
+            <StatCard label="Solicitadas no mês" value={diariasKpi.requestedMonth} icon={Plane} />
+            <StatCard
+              label="Autorizadas"
+              value={diariasKpi.authorized}
+              icon={FileCheck2}
+              tone="success"
+            />
+            <StatCard
+              label="Aguardando comprovação"
+              value={diariasKpi.awaitingProof}
+              icon={FileWarning}
+              tone={diariasKpi.awaitingProof > 0 ? "warning" : "default"}
+            />
+            <StatCard
+              label="Comprovações vencidas"
+              value={diariasKpi.overdue}
+              icon={AlertTriangle}
+              tone={diariasKpi.overdue > 0 ? "warning" : "default"}
+            />
+            <StatCard
+              label="Valor de diárias no mês"
+              value={brl(diariasKpi.totalValue)}
+              icon={Banknote}
+            />
+          </div>
         </TabsContent>
       </Tabs>
 

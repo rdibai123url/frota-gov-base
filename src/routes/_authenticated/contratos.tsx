@@ -1,7 +1,17 @@
 import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Pencil, FileText, Package, Upload, ExternalLink, GitBranch, Ban, RotateCcw } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  FileText,
+  Package,
+  Upload,
+  ExternalLink,
+  GitBranch,
+  Ban,
+  RotateCcw,
+} from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -14,9 +24,28 @@ import { Label } from "@/components/ui/label";
 import { HelpInlineButton } from "@/components/help-button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   CONTRACT_MODALITIES,
@@ -69,7 +98,10 @@ export const Route = createFileRoute("/_authenticated/contratos")({
           "Contratos administrativos de combustíveis e materiais da frota: vigência, valores, itens contratados, saldo e execução.",
       },
       { property: "og:title", content: "Contratos — FrotaGov" },
-      { property: "og:description", content: "Gestão de contratos e saldos contratuais da frota pública." },
+      {
+        property: "og:description",
+        content: "Gestão de contratos e saldos contratuais da frota pública.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -118,7 +150,13 @@ const money = (v: string | undefined) => parseBRNumber(v);
 
 function StatusBadge({ status }: { status: ContractRow["status"] }) {
   const tone =
-    status === "vigente" ? "default" : status === "rascunho" ? "secondary" : status === "suspenso" ? "outline" : "destructive";
+    status === "vigente"
+      ? "default"
+      : status === "rascunho"
+        ? "secondary"
+        : status === "suspenso"
+          ? "outline"
+          : "destructive";
   return <Badge variant={tone}>{label(CONTRACT_STATUS, status)}</Badge>;
 }
 
@@ -308,14 +346,18 @@ function Contratos() {
 
     const { error } = editing
       ? await supabase.from("contracts").update(payload).eq("id", editing.id)
-      : await supabase.from("contracts").insert({ ...payload, organization_id: orgId!, created_by: userId });
+      : await supabase
+          .from("contracts")
+          .insert({ ...payload, organization_id: orgId!, created_by: userId });
     setSaving(false);
     if (error) {
       if (uploadedAttachment) {
         await supabase.storage.from("contratos").remove([uploadedAttachment]);
       }
       toast.error(
-        error.code === "23505" ? "Já existe um contrato com esse número." : "Não foi possível salvar o contrato.",
+        error.code === "23505"
+          ? "Já existe um contrato com esse número."
+          : "Não foi possível salvar o contrato.",
       );
       return;
     }
@@ -368,7 +410,9 @@ function Contratos() {
     if (editingItem) {
       const used = Number(editingItem.consumed_quantity) + Number(editingItem.reserved_quantity);
       if (qty < used) {
-        toast.error(`A quantidade não pode ser menor que o já reservado/consumido (${formatLiters(used)}).`);
+        toast.error(
+          `A quantidade não pode ser menor que o já reservado/consumido (${formatLiters(used)}).`,
+        );
         return;
       }
     }
@@ -408,7 +452,9 @@ function Contratos() {
       toast.error("Não foi possível alterar a situação do item.");
       return;
     }
-    toast.success(next ? "Item reativado." : "Item inativado. O histórico de execução foi preservado.");
+    toast.success(
+      next ? "Item reativado." : "Item inativado. O histórico de execução foi preservado.",
+    );
     invalidate(["contracts", "contract-items"]);
   }
 
@@ -446,7 +492,11 @@ function Contratos() {
       <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <Label>Buscar</Label>
-          <Input placeholder="Número, processo ou objeto" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input
+            placeholder="Número, processo ou objeto"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
         <div>
           <Label>Situação</Label>
@@ -521,17 +571,23 @@ function Contratos() {
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">{c.object}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {companyName(c) || "Sem empresa informada"} ·{" "}
-                    Processo {c.process_number || "—"} · Vigência {dateBR(c.valid_from)} a {dateBR(c.valid_to)}
+                    {companyName(c) || "Sem empresa informada"} · Processo {c.process_number || "—"}{" "}
+                    · Vigência {dateBR(c.valid_from)} a {dateBR(c.valid_to)}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Fiscal: {employeeName(c.fiscal_employee_id)} · Gestor: {employeeName(c.manager_employee_id)}
+                    Fiscal: {employeeName(c.fiscal_employee_id)} · Gestor:{" "}
+                    {employeeName(c.manager_employee_id)}
                     {c.srp ? " · Registro de preços (SRP)" : ""}
                   </p>
                 </div>
                 <div className="flex gap-2">
                   {c.attachment_path && (
-                    <Button variant="outline" size="sm" className="gap-2" onClick={() => openAttachment(c.attachment_path!)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      onClick={() => openAttachment(c.attachment_path!)}
+                    >
                       <ExternalLink className="size-4" /> PDF
                     </Button>
                   )}
@@ -551,10 +607,20 @@ function Contratos() {
                       >
                         <Package className="size-4" /> Novo item
                       </Button>
-                      <Button variant="outline" size="sm" className="gap-2" onClick={() => setAmendFor(c)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                        onClick={() => setAmendFor(c)}
+                      >
                         <GitBranch className="size-4" /> Novo aditivo
                       </Button>
-                      <Button variant="ghost" size="icon" aria-label="Editar contrato" onClick={() => openEdit(c)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Editar contrato"
+                        onClick={() => openEdit(c)}
+                      >
                         <Pencil className="size-4" />
                       </Button>
                     </>
@@ -593,10 +659,10 @@ function Contratos() {
               </div>
 
               <ContractPeriodsPanel
-                  contract={c}
-                  periods={periods.filter((p) => p.contract_id === c.id)}
-                  amendments={amendments.filter((a) => a.contract_id === c.id)}
-                />
+                contract={c}
+                periods={periods.filter((p) => p.contract_id === c.id)}
+                amendments={amendments.filter((a) => a.contract_id === c.id)}
+              />
 
               <div className="overflow-x-auto">
                 <Table>
@@ -617,7 +683,10 @@ function Contratos() {
                   <TableBody>
                     {(c.items ?? []).length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={10} className="py-6 text-center text-sm text-muted-foreground">
+                        <TableCell
+                          colSpan={10}
+                          className="py-6 text-center text-sm text-muted-foreground"
+                        >
                           Nenhum item cadastrado neste contrato.
                         </TableCell>
                       </TableRow>
@@ -625,65 +694,81 @@ function Contratos() {
                     {[...(c.items ?? [])]
                       .sort((a, b2) => (a.item_number ?? 0) - (b2.item_number ?? 0))
                       .map((i) => {
-                      const b = itemBalance(i);
-                      const inactive = i.active === false;
-                      return (
-                        <TableRow key={i.id} className={inactive ? "opacity-60" : undefined}>
-                          <TableCell className="text-sm text-muted-foreground">{i.item_number ?? "—"}</TableCell>
-                          <TableCell className="font-medium">
-                            {i.item_code ? `${i.item_code} — ` : ""}
-                            {i.description}
-                            {inactive && (
-                              <Badge variant="outline" className="ml-2">
-                                Inativo
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>{MATERIAL_KIND_LABELS[i.material_kind] ?? i.material_kind}</TableCell>
-                          <TableCell className="text-right">
-                            {formatLiters(Number(i.quantity))} {i.measure_unit}
-                          </TableCell>
-                          <TableCell className="text-right">{brl(Number(i.unit_price))}</TableCell>
-                          <TableCell className="text-right">
-                            {formatLiters(Number(i.reserved_quantity))}
-                            <span className="block text-xs text-muted-foreground">{brl(Number(i.reserved_value))}</span>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {formatLiters(Number(i.consumed_quantity))}
-                            <span className="block text-xs text-muted-foreground">{brl(Number(i.consumed_value))}</span>
-                          </TableCell>
-                          <TableCell className="text-right font-medium">{formatLiters(b.quantity)}</TableCell>
-                          <TableCell className="text-right font-medium">{brl(b.value)}</TableCell>
-                          <TableCell>
-                            {canManageFinance && (
-                              <div className="flex justify-end gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  aria-label="Editar item"
-                                  onClick={() => openEditItem(c, i)}
-                                >
-                                  <Pencil className="size-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  aria-label={inactive ? "Reativar item" : "Inativar item"}
-                                  title={
-                                    inactive
-                                      ? "Reativar item"
-                                      : "Inativar item (itens com movimentação não podem ser excluídos)"
-                                  }
-                                  onClick={() => toggleItem(i)}
-                                >
-                                  {inactive ? <RotateCcw className="size-4" /> : <Ban className="size-4" />}
-                                </Button>
-                              </div>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
+                        const b = itemBalance(i);
+                        const inactive = i.active === false;
+                        return (
+                          <TableRow key={i.id} className={inactive ? "opacity-60" : undefined}>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {i.item_number ?? "—"}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {i.item_code ? `${i.item_code} — ` : ""}
+                              {i.description}
+                              {inactive && (
+                                <Badge variant="outline" className="ml-2">
+                                  Inativo
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {MATERIAL_KIND_LABELS[i.material_kind] ?? i.material_kind}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {formatLiters(Number(i.quantity))} {i.measure_unit}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {brl(Number(i.unit_price))}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {formatLiters(Number(i.reserved_quantity))}
+                              <span className="block text-xs text-muted-foreground">
+                                {brl(Number(i.reserved_value))}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {formatLiters(Number(i.consumed_quantity))}
+                              <span className="block text-xs text-muted-foreground">
+                                {brl(Number(i.consumed_value))}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-right font-medium">
+                              {formatLiters(b.quantity)}
+                            </TableCell>
+                            <TableCell className="text-right font-medium">{brl(b.value)}</TableCell>
+                            <TableCell>
+                              {canManageFinance && (
+                                <div className="flex justify-end gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label="Editar item"
+                                    onClick={() => openEditItem(c, i)}
+                                  >
+                                    <Pencil className="size-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label={inactive ? "Reativar item" : "Inativar item"}
+                                    title={
+                                      inactive
+                                        ? "Reativar item"
+                                        : "Inativar item (itens com movimentação não podem ser excluídos)"
+                                    }
+                                    onClick={() => toggleItem(i)}
+                                  >
+                                    {inactive ? (
+                                      <RotateCcw className="size-4" />
+                                    ) : (
+                                      <Ban className="size-4" />
+                                    )}
+                                  </Button>
+                                </div>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                   </TableBody>
                 </Table>
               </div>
@@ -699,17 +784,29 @@ function Contratos() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing ? `Editar contrato ${editing.number}` : "Novo contrato"}</DialogTitle>
+            <DialogTitle>
+              {editing ? `Editar contrato ${editing.number}` : "Novo contrato"}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-3">
               <div>
                 <Label htmlFor="number">Número do contrato *</Label>
-                <Input id="number" name="number" defaultValue={editing?.number ?? ""} required maxLength={40} />
+                <Input
+                  id="number"
+                  name="number"
+                  defaultValue={editing?.number ?? ""}
+                  required
+                  maxLength={40}
+                />
               </div>
               <div>
                 <Label htmlFor="process_number">Processo administrativo</Label>
-                <Input id="process_number" name="process_number" defaultValue={editing?.process_number ?? ""} />
+                <Input
+                  id="process_number"
+                  name="process_number"
+                  defaultValue={editing?.process_number ?? ""}
+                />
               </div>
               <div>
                 <Label>Modalidade</Label>
@@ -727,7 +824,9 @@ function Contratos() {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="procedure_number">{PROCEDURE_LABELS[modality] ?? "Número do procedimento"}</Label>
+                <Label htmlFor="procedure_number">
+                  {PROCEDURE_LABELS[modality] ?? "Número do procedimento"}
+                </Label>
                 <Input
                   id="procedure_number"
                   name="procedure_number"
@@ -766,7 +865,13 @@ function Contratos() {
               </div>
               <div className="sm:col-span-3">
                 <Label htmlFor="object">Descrição do objeto *</Label>
-                <Textarea id="object" name="object" defaultValue={editing?.object ?? ""} rows={2} required />
+                <Textarea
+                  id="object"
+                  name="object"
+                  defaultValue={editing?.object ?? ""}
+                  rows={2}
+                  required
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label>Empresa contratada (cadastro mestre)</Label>
@@ -784,12 +889,15 @@ function Contratos() {
                     .map((e) => ({
                       value: e.id,
                       label: e.trade_name || e.name,
-                      description: [e.document ? maskCNPJ(e.document) : null, e.city].filter(Boolean).join(" · "),
+                      description: [e.document ? maskCNPJ(e.document) : null, e.city]
+                        .filter(Boolean)
+                        .join(" · "),
                       keywords: [e.name, e.trade_name, e.document],
                     }))}
                 />
                 <p className="mt-1 text-xs text-muted-foreground">
-                  A empresa vem do cadastro único de pessoas e empresas externas — não é preciso duplicar o cadastro.
+                  A empresa vem do cadastro único de pessoas e empresas externas — não é preciso
+                  duplicar o cadastro.
                 </p>
               </div>
               <div>
@@ -849,11 +957,7 @@ function Contratos() {
               </div>
               <div>
                 <Label htmlFor="cnpj">CNPJ</Label>
-                <CnpjInput
-                  id="cnpj"
-                  name="cnpj"
-                  defaultValue={editing?.cnpj ?? ""}
-                />
+                <CnpjInput id="cnpj" name="cnpj" defaultValue={editing?.cnpj ?? ""} />
               </div>
               <div>
                 <Label>Situação</Label>
@@ -881,7 +985,9 @@ function Contratos() {
                 />
               </div>
               <div>
-                <Label htmlFor="valid_from">Início da vigência{status === "vigente" ? " *" : ""}</Label>
+                <Label htmlFor="valid_from">
+                  Início da vigência{status === "vigente" ? " *" : ""}
+                </Label>
                 <Input
                   id="valid_from"
                   name="valid_from"
@@ -909,7 +1015,9 @@ function Contratos() {
                 />
               </div>
               <div>
-                <Label htmlFor="current_value">Valor atual (R$){status === "vigente" ? " *" : ""}</Label>
+                <Label htmlFor="current_value">
+                  Valor atual (R$){status === "vigente" ? " *" : ""}
+                </Label>
                 <MoneyInput
                   id="current_value"
                   name="current_value"
@@ -928,8 +1036,8 @@ function Contratos() {
                     Contrato itemizado — o valor atual é a soma dos itens
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    Com a opção marcada, o valor atual do contrato passa a ser calculado automaticamente pela soma de
-                    quantidade × valor unitário dos itens ativos.
+                    Com a opção marcada, o valor atual do contrato passa a ser calculado
+                    automaticamente pela soma de quantidade × valor unitário dos itens ativos.
                   </p>
                 </div>
               </div>
@@ -953,8 +1061,8 @@ function Contratos() {
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              Prorrogações e aditivos serão registrados em módulo próprio; o contrato já mantém contador de aditivos e
-              valor atual separado do valor inicial.
+              Prorrogações e aditivos serão registrados em módulo próprio; o contrato já mantém
+              contador de aditivos e valor atual separado do valor inicial.
             </p>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
@@ -972,17 +1080,29 @@ function Contratos() {
       <Dialog open={itemOpen} onOpenChange={setItemOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{editingItem ? "Editar item contratual" : "Novo item contratual"}</DialogTitle>
+            <DialogTitle>
+              {editingItem ? "Editar item contratual" : "Novo item contratual"}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmitItem} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-3">
               <div>
                 <Label htmlFor="item_code">Código / item</Label>
-                <Input id="item_code" name="item_code" defaultValue={editingItem?.item_code ?? ""} maxLength={20} />
+                <Input
+                  id="item_code"
+                  name="item_code"
+                  defaultValue={editingItem?.item_code ?? ""}
+                  maxLength={20}
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label htmlFor="description">Descrição *</Label>
-                <Input id="description" name="description" defaultValue={editingItem?.description ?? ""} required />
+                <Input
+                  id="description"
+                  name="description"
+                  defaultValue={editingItem?.description ?? ""}
+                  required
+                />
               </div>
               <div>
                 <Label>Natureza</Label>
@@ -1068,7 +1188,6 @@ function Contratos() {
   );
 }
 
-
 /* ---------------------- vigências e aditivos ---------------------- */
 
 function ContractPeriodsPanel({
@@ -1125,7 +1244,8 @@ function ContractPeriodsPanel({
 
       <details className="rounded-md border bg-muted/20 p-3">
         <summary className="cursor-pointer text-sm font-medium">
-          Histórico de vigências e aditivos ({ordered.length} vigência(s), {amendments.length} aditivo(s))
+          Histórico de vigências e aditivos ({ordered.length} vigência(s), {amendments.length}{" "}
+          aditivo(s))
         </summary>
         <div className="mt-3 overflow-x-auto">
           <Table>
@@ -1183,11 +1303,19 @@ function ContractPeriodsPanel({
                       <TableCell>{AMENDMENT_KIND_LABELS[a.kind] ?? a.kind}</TableCell>
                       <TableCell>{dateBR(a.signed_at)}</TableCell>
                       <TableCell>
-                        {a.new_valid_from ? `${dateBR(a.new_valid_from)} a ${dateBR(a.new_valid_to)}` : "—"}
+                        {a.new_valid_from
+                          ? `${dateBR(a.new_valid_from)} a ${dateBR(a.new_valid_to)}`
+                          : "—"}
                       </TableCell>
-                      <TableCell className="text-right">{brl(Number(a.previous_contract_value ?? 0))}</TableCell>
-                      <TableCell className="text-right">{brl(Number(a.new_contract_value ?? 0))}</TableCell>
-                      <TableCell className="max-w-[240px] truncate">{a.justification || "—"}</TableCell>
+                      <TableCell className="text-right">
+                        {brl(Number(a.previous_contract_value ?? 0))}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {brl(Number(a.new_contract_value ?? 0))}
+                      </TableCell>
+                      <TableCell className="max-w-[240px] truncate">
+                        {a.justification || "—"}
+                      </TableCell>
                     </TableRow>
                   ))}
               </TableBody>
@@ -1210,7 +1338,13 @@ type AmendmentItemRow = {
   unit_price: string;
 };
 
-function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; onClose: () => void }) {
+function AmendmentDialog({
+  contract,
+  onClose,
+}: {
+  contract: ContractRow | null;
+  onClose: () => void;
+}) {
   const { orgId, userId } = usePerms();
   const invalidate = useInvalidate();
   const [kind, setKind] = useState<ContractAmendmentKind>("prorrogacao");
@@ -1226,7 +1360,11 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
 
   /** Impacto financeiro da planilha do aditivo (acréscimos menos supressões). */
   const rowsDelta = rows.reduce(
-    (sum, r) => sum + (r.operation === "supressao" ? -1 : 1) * parseBRNumber(r.quantity) * parseBRNumber(r.unit_price),
+    (sum, r) =>
+      sum +
+      (r.operation === "supressao" ? -1 : 1) *
+        parseBRNumber(r.quantity) *
+        parseBRNumber(r.unit_price),
     0,
   );
 
@@ -1283,12 +1421,11 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
       }
     }
 
-
     setSaving(true);
     let attachment: string | null = null;
     let uploadedAmendmentAttachment: string | null = null;
     if (file && orgId) {
-      const path = `${orgId}/aditivos/${Date.now()}-${file.name.replace(/[^\w.\-]+/g, "_")}`;
+      const path = `${orgId}/aditivos/${Date.now()}-${file.name.replace(/[^\w.-]+/g, "_")}`;
       const up = await supabase.storage.from("contratos").upload(path, file);
       if (up.error) {
         setSaving(false);
@@ -1300,23 +1437,26 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
     }
 
     const periodValue = parseBRNumber(get("period_value"));
-    const { data: amendment, error } = await supabase.from("contract_amendments").insert({
-      organization_id: orgId!,
-      contract_id: contract.id,
-      number: get("number"),
-      kind,
-      signed_at: get("signed_at") || new Date().toISOString().slice(0, 10),
-      effect_date: get("effect_date") || get("signed_at") || new Date().toISOString().slice(0, 10),
-      new_valid_from: createsPeriod ? get("new_valid_from") : null,
-      new_valid_to: createsPeriod ? get("new_valid_to") : null,
-      delta_value: changesValue && delta ? delta : null,
-      percent: changesValue && percent ? percent : null,
-      period_value: createsPeriod && periodValue ? periodValue : null,
-      index_name: get("index_name") || null,
-      justification: get("justification"),
-      attachment_path: attachment,
-      created_by: userId,
-    })
+    const { data: amendment, error } = await supabase
+      .from("contract_amendments")
+      .insert({
+        organization_id: orgId!,
+        contract_id: contract.id,
+        number: get("number"),
+        kind,
+        signed_at: get("signed_at") || new Date().toISOString().slice(0, 10),
+        effect_date:
+          get("effect_date") || get("signed_at") || new Date().toISOString().slice(0, 10),
+        new_valid_from: createsPeriod ? get("new_valid_from") : null,
+        new_valid_to: createsPeriod ? get("new_valid_to") : null,
+        delta_value: changesValue && delta ? delta : null,
+        percent: changesValue && percent ? percent : null,
+        period_value: createsPeriod && periodValue ? periodValue : null,
+        index_name: get("index_name") || null,
+        justification: get("justification"),
+        attachment_path: attachment,
+        created_by: userId,
+      })
       .select("id")
       .maybeSingle();
     if (error || !amendment) {
@@ -1344,7 +1484,10 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
       );
       if (itemsError) {
         setSaving(false);
-        toast.error(itemsError.message || "O aditivo foi registrado, mas a planilha de itens não pôde ser aplicada.");
+        toast.error(
+          itemsError.message ||
+            "O aditivo foi registrado, mas a planilha de itens não pôde ser aplicada.",
+        );
         invalidate(["contracts", "contract-periods", "contract-amendments", "contract-items"]);
         return;
       }
@@ -1389,7 +1532,12 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
             </div>
             <div>
               <Label htmlFor="signed_at">Data de assinatura</Label>
-              <Input id="signed_at" name="signed_at" type="date" defaultValue={new Date().toISOString().slice(0, 10)} />
+              <Input
+                id="signed_at"
+                name="signed_at"
+                type="date"
+                defaultValue={new Date().toISOString().slice(0, 10)}
+              />
             </div>
             <div>
               <Label htmlFor="effect_date">Data de efeito</Label>
@@ -1412,9 +1560,9 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
                 <MoneyInput id="period_value" name="period_value" />
               </div>
               <p className="text-xs text-muted-foreground sm:col-span-3">
-                A nova vigência inicia com o valor informado (ou, em prorrogação simples, com o valor-base do
-                contrato). O saldo não utilizado da vigência anterior <strong>não</strong> é transportado e permanece
-                registrado no histórico.
+                A nova vigência inicia com o valor informado (ou, em prorrogação simples, com o
+                valor-base do contrato). O saldo não utilizado da vigência anterior{" "}
+                <strong>não</strong> é transportado e permanece registrado no histórico.
               </p>
             </div>
           )}
@@ -1434,8 +1582,9 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
                 <Input id="index_name" name="index_name" placeholder="IPCA, INPC, IGP-M…" />
               </div>
               <p className="text-xs text-muted-foreground sm:col-span-3">
-                Valor atual do contrato: <strong>{brl(Number(contract?.current_value ?? 0))}</strong>. O valor original
-                é preservado e o histórico registra valor anterior e posterior.
+                Valor atual do contrato:{" "}
+                <strong>{brl(Number(contract?.current_value ?? 0))}</strong>. O valor original é
+                preservado e o histórico registra valor anterior e posterior.
               </p>
             </div>
           )}
@@ -1446,8 +1595,8 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
                 <div>
                   <Label>Planilha de itens do aditivo</Label>
                   <p className="text-xs text-muted-foreground">
-                    Acrescente ou suprima quantidade de itens já contratados, ou inclua itens novos. Fora do aditivo, a
-                    planilha do contrato assinado fica bloqueada.
+                    Acrescente ou suprima quantidade de itens já contratados, ou inclua itens novos.
+                    Fora do aditivo, a planilha do contrato assinado fica bloqueada.
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -1467,11 +1616,16 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
               </div>
 
               {rows.length === 0 ? (
-                <p className="text-xs text-muted-foreground">Nenhum item incluído nesta planilha.</p>
+                <p className="text-xs text-muted-foreground">
+                  Nenhum item incluído nesta planilha.
+                </p>
               ) : (
                 <div className="space-y-3">
                   {rows.map((r) => (
-                    <div key={r.key} className="grid gap-2 rounded-md border bg-card p-3 sm:grid-cols-6">
+                    <div
+                      key={r.key}
+                      className="grid gap-2 rounded-md border bg-card p-3 sm:grid-cols-6"
+                    >
                       <div className="sm:col-span-2">
                         <Label className="text-xs">Item</Label>
                         {r.contract_item_id ? (
@@ -1510,7 +1664,9 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
                         <Label className="text-xs">Operação</Label>
                         <Select
                           value={r.operation}
-                          onValueChange={(v) => updateRow(r.key, { operation: v as AmendmentItemRow["operation"] })}
+                          onValueChange={(v) =>
+                            updateRow(r.key, { operation: v as AmendmentItemRow["operation"] })
+                          }
                         >
                           <SelectTrigger>
                             <SelectValue />
@@ -1544,7 +1700,10 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
                       </div>
                       <div>
                         <Label className="text-xs">Quantidade</Label>
-                        <LitersInput value={r.quantity} onValueChange={(v) => updateRow(r.key, { quantity: v })} />
+                        <LitersInput
+                          value={r.quantity}
+                          onValueChange={(v) => updateRow(r.key, { quantity: v })}
+                        />
                       </div>
                       <div className="flex items-end gap-2">
                         <div className="flex-1">
@@ -1567,8 +1726,8 @@ function AmendmentDialog({ contract, onClose }: { contract: ContractRow | null; 
                     </div>
                   ))}
                   <p className="text-xs text-muted-foreground">
-                    Impacto da planilha: <strong>{brl(rowsDelta)}</strong>. Informe também o valor do aditivo acima para
-                    atualizar o valor global do contrato.
+                    Impacto da planilha: <strong>{brl(rowsDelta)}</strong>. Informe também o valor
+                    do aditivo acima para atualizar o valor global do contrato.
                   </p>
                 </div>
               )}

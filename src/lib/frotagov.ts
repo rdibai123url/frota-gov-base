@@ -78,8 +78,33 @@ export const FUEL_TYPES = [
 ];
 
 export const UF_LIST = [
-  "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR",
-  "PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO",
+  "AC",
+  "AL",
+  "AP",
+  "AM",
+  "BA",
+  "CE",
+  "DF",
+  "ES",
+  "GO",
+  "MA",
+  "MT",
+  "MS",
+  "MG",
+  "PA",
+  "PB",
+  "PR",
+  "PE",
+  "PI",
+  "RJ",
+  "RN",
+  "RS",
+  "RO",
+  "RR",
+  "SC",
+  "SP",
+  "SE",
+  "TO",
 ];
 
 export const ROLE_LABELS: Record<AppRole, string> = {
@@ -156,7 +181,6 @@ export function useOrganization() {
     },
   });
 }
-
 
 export function useBrasaoUrl(path: string | null | undefined) {
   return useQuery({
@@ -249,7 +273,6 @@ export function useEquipmentTypes() {
   });
 }
 
-
 export function useOrgUsers() {
   return useQuery({
     queryKey: ["org-users"],
@@ -280,20 +303,32 @@ export type Fueling = Database["public"]["Tables"]["fuelings"]["Row"];
 export type FuelingAlert = Database["public"]["Tables"]["fueling_alerts"]["Row"];
 
 export type FuelingRow = Fueling & {
-  vehicle: Pick<Vehicle, "id" | "plate" | "asset_code" | "fuel_type" | "tank_capacity" | "status"> | null;
+  vehicle: Pick<
+    Vehicle,
+    "id" | "plate" | "asset_code" | "fuel_type" | "tank_capacity" | "status"
+  > | null;
   unit: Pick<Unit, "id" | "name" | "acronym"> | null;
   supplier: Pick<Supplier, "id" | "legal_name" | "trade_name"> | null;
   fuel: Pick<FuelType, "id" | "name" | "measure_unit"> | null;
   driver: { id: string; full_name: string } | null;
-  authorization: { id: string; code: string | null; max_quantity: number; consumed_quantity: number } | null;
+  authorization: {
+    id: string;
+    code: string | null;
+    max_quantity: number;
+    consumed_quantity: number;
+  } | null;
   contract: { id: string; number: string } | null;
   contract_item: { id: string; description: string; measure_unit: string } | null;
   commitment: { id: string; number: string; exercise: number } | null;
   cost_center: { id: string; code: string; name: string } | null;
   quota: { id: string; name: string } | null;
-  usage: { id: string; code: string | null; planned_departure: string; destination: string | null } | null;
+  usage: {
+    id: string;
+    code: string | null;
+    planned_departure: string;
+    destination: string | null;
+  } | null;
 };
-
 
 export const MEASURE_UNITS = ["litro", "m³", "kWh", "kg", "outra"];
 
@@ -324,18 +359,22 @@ export function usePerms() {
     canWrite: inOrg && roles.some((r) => WRITE_ROLES.includes(r)),
     canRegister: inOrg && roles.some((r) => REGISTER_ROLES.includes(r)),
     canCancel: inOrg && roles.some((r) => CANCEL_ROLES.includes(r)),
-    canManageFleet: inOrg && roles.some((r) => (["super_admin", "org_admin", "fleet_manager"] as AppRole[]).includes(r)),
-    canManageFinance: inOrg && roles.some((r) => (["super_admin", "org_admin", "fleet_manager"] as AppRole[]).includes(r)),
+    canManageFleet:
+      inOrg &&
+      roles.some((r) => (["super_admin", "org_admin", "fleet_manager"] as AppRole[]).includes(r)),
+    canManageFinance:
+      inOrg &&
+      roles.some((r) => (["super_admin", "org_admin", "fleet_manager"] as AppRole[]).includes(r)),
     // Integrações, conectores, webhooks e chaves: administração do órgão.
-    canManageUsers: inOrg && roles.some((r) => (["super_admin", "org_admin"] as AppRole[]).includes(r)),
+    canManageUsers:
+      inOrg && roles.some((r) => (["super_admin", "org_admin"] as AppRole[]).includes(r)),
     isAuditor: roles.length > 0 && roles.every((r) => r === "auditor"),
     // Exportação integral de dados: gestão máxima do órgão e controladoria.
     canExportData:
-      inOrg && roles.some((r) => (["super_admin", "org_admin", "auditor"] as AppRole[]).includes(r)),
+      inOrg &&
+      roles.some((r) => (["super_admin", "org_admin", "auditor"] as AppRole[]).includes(r)),
   };
-
 }
-
 
 /* ------------------------------ máscaras ------------------------------ */
 /** Padrão global de formatação — implementação única em src/lib/format.ts. */
@@ -364,7 +403,10 @@ export {
 import { formatBRL, formatNumberBR as _num } from "@/lib/format";
 
 export function maskPlate(v: string) {
-  return v.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 7);
+  return v
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+    .slice(0, 7);
 }
 
 /** Moeda com símbolo (R$ 1.234.567,80). */
@@ -403,7 +445,6 @@ export function useSuppliers() {
 const FUELING_SELECT =
   "*, vehicle:vehicles(id, plate, asset_code, fuel_type, tank_capacity, status), unit:units(id, name, acronym), supplier:suppliers(id, legal_name, trade_name), fuel:fuel_types(id, name, measure_unit), driver:drivers(id, full_name), authorization:fuel_authorizations(id, code, max_quantity, consumed_quantity), contract:contracts(id, number), contract_item:contract_items(id, description, measure_unit), commitment:commitments(id, number, exercise), cost_center:cost_centers(id, code, name), quota:quotas(id, name), usage:vehicle_usages(id, code, planned_departure, destination)";
 
-
 export function useFuelings() {
   return useQuery({
     queryKey: ["fuelings"],
@@ -425,7 +466,9 @@ export function useFuelingAlerts() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("fueling_alerts")
-        .select("*, vehicle:vehicles(id, plate,asset_code), fueling:fuelings(id, fueled_at, status)")
+        .select(
+          "*, vehicle:vehicles(id, plate,asset_code), fueling:fuelings(id, fueled_at, status)",
+        )
         .order("created_at", { ascending: false })
         .limit(500);
       if (error) throw error;
@@ -489,7 +532,6 @@ export const ALERT_TYPE_LABELS: Record<string, string> = {
   excesso_limite: "Excesso de limite diário/mensal",
 };
 
-
 /** Normaliza nomes de combustível para comparação (Diesel S10 x diesel s10). */
 function normalizeFuel(v: string | null | undefined) {
   return (v ?? "")
@@ -547,16 +589,32 @@ export function evaluateFueling(draft: FuelingDraft, history: FuelingRow[]): Rul
   }
 
   if (!draft.fuel) {
-    issues.push({ level: "erro", type: "combustivel_obrigatorio", message: "Selecione o combustível." });
+    issues.push({
+      level: "erro",
+      type: "combustivel_obrigatorio",
+      message: "Selecione o combustível.",
+    });
   } else if (!draft.fuel.active) {
-    issues.push({ level: "erro", type: "combustivel_inativo", message: "O combustível selecionado está inativo." });
+    issues.push({
+      level: "erro",
+      type: "combustivel_inativo",
+      message: "O combustível selecionado está inativo.",
+    });
   }
 
   if (draft.supplier && !draft.supplier.active) {
-    issues.push({ level: "erro", type: "fornecedor_inativo", message: "O fornecedor/posto selecionado está inativo." });
+    issues.push({
+      level: "erro",
+      type: "fornecedor_inativo",
+      message: "O fornecedor/posto selecionado está inativo.",
+    });
   }
   if (!draft.supplier) {
-    issues.push({ level: "info", type: "fornecedor_ausente", message: "Nenhum fornecedor informado neste registro." });
+    issues.push({
+      level: "info",
+      type: "fornecedor_ausente",
+      message: "Nenhum fornecedor informado neste registro.",
+    });
   }
 
   if (v && draft.fuel && !fuelCompatible(v.fuel_type, draft.fuel.name)) {
@@ -568,10 +626,18 @@ export function evaluateFueling(draft: FuelingDraft, history: FuelingRow[]): Rul
   }
 
   if (!(draft.quantity > 0)) {
-    issues.push({ level: "erro", type: "quantidade_invalida", message: "A quantidade deve ser maior que zero." });
+    issues.push({
+      level: "erro",
+      type: "quantidade_invalida",
+      message: "A quantidade deve ser maior que zero.",
+    });
   }
   if (!(draft.unitPrice > 0)) {
-    issues.push({ level: "erro", type: "preco_invalido", message: "O preço unitário deve ser maior que zero." });
+    issues.push({
+      level: "erro",
+      type: "preco_invalido",
+      message: "O preço unitário deve ser maior que zero.",
+    });
   }
 
   const vehicleHistory = history.filter((f) => f.vehicle_id === v?.id && f.status === "valido");
@@ -648,7 +714,6 @@ export function evaluateFueling(draft: FuelingDraft, history: FuelingRow[]): Rul
 
 export { useMutation, supabase };
 
-
 /* ===================== FASE 3 — CONDUTORES / UTILIZAÇÃO / AUTORIZAÇÃO ===================== */
 
 export type Driver = Database["public"]["Tables"]["drivers"]["Row"];
@@ -713,11 +778,11 @@ export const CNH_CATEGORIES = ["ACC", "A", "B", "C", "D", "E"];
 /** Regra mínima sugerida por tipo de veículo (arquitetura preparada, ainda não bloqueante). */
 export const VEHICLE_CATEGORY_HINT: Record<string, string[]> = {
   Motocicleta: ["A"],
-  "Automóvel": ["B", "C", "D", "E"],
+  Automóvel: ["B", "C", "D", "E"],
   Caminhonete: ["B", "C", "D", "E"],
   "Van / Micro-ônibus": ["D", "E"],
-  "Ônibus": ["D", "E"],
-  "Caminhão": ["C", "D", "E"],
+  Ônibus: ["D", "E"],
+  Caminhão: ["C", "D", "E"],
   Ambulância: ["B", "C", "D", "E"],
   "Máquina / Equipamento": ["C", "D", "E"],
   Trator: ["C", "D", "E"],
@@ -754,7 +819,9 @@ export function driverEligible(d: Pick<Driver, "active" | "license_expiry">) {
   return d.active && cnhState(d.license_expiry) !== "vencida";
 }
 
-export function authorizationBalance(a: Pick<FuelAuthorization, "max_quantity" | "consumed_quantity">) {
+export function authorizationBalance(
+  a: Pick<FuelAuthorization, "max_quantity" | "consumed_quantity">,
+) {
   return Number(a.max_quantity ?? 0) - Number(a.consumed_quantity ?? 0);
 }
 
@@ -834,12 +901,13 @@ export function findDriverAt(usages: UsageRow[], vehicleId: string, at: Date) {
     usages.find((u) => {
       if (u.vehicle_id !== vehicleId || u.status === "cancelada") return false;
       const ini = new Date(u.actual_departure ?? u.planned_departure).getTime();
-      const fim = new Date(u.actual_return ?? u.planned_return ?? u.actual_departure ?? u.planned_departure).getTime();
+      const fim = new Date(
+        u.actual_return ?? u.planned_return ?? u.actual_departure ?? u.planned_departure,
+      ).getTime();
       return t >= ini && t <= Math.max(fim, ini);
     }) ?? null
   );
 }
-
 
 /* ===================== FASE 4 — CONTRATOS / EMPENHOS / CENTROS DE CUSTO / COTAS ===================== */
 
@@ -1019,7 +1087,6 @@ export const FINANCE_ALERT_LABELS: Record<string, string> = {
   perda_total_sem_baixa: "Perda total sem movimentação patrimonial",
 };
 
-
 export function alertLabel(type: string) {
   return (
     ALERT_TYPE_LABELS[type] ??
@@ -1039,7 +1106,12 @@ export const daysUntil = (iso: string | null | undefined) =>
 /** Extrai a mensagem amigável de um erro do banco. */
 export function dbMessage(e: unknown) {
   const m = (e as { message?: string } | null)?.message ?? "";
-  return m.replace(/^.*?(?=Saldo|Limite|Autoriza|Contrato|Empenho|Cota|Item|Ve[íi]culo|Condutor)/s, "") || m;
+  return (
+    m.replace(
+      /^.*?(?=Saldo|Limite|Autoriza|Contrato|Empenho|Cota|Item|Ve[íi]culo|Condutor)/s,
+      "",
+    ) || m
+  );
 }
 
 /** Registra alerta de bloqueio por saldo insuficiente. */
@@ -1089,7 +1161,9 @@ export function useContractItems() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("contract_items")
-        .select("*, contract:contracts(id, number, status, valid_to), fuel:fuel_types(id, name, measure_unit)")
+        .select(
+          "*, contract:contracts(id, number, status, valid_to), fuel:fuel_types(id, name, measure_unit)",
+        )
         .order("description");
       if (error) throw error;
       return (data ?? []) as unknown as ContractItemRow[];
@@ -1149,7 +1223,11 @@ export function useBudgetMovements(authorizationId?: string | null) {
   return useQuery({
     queryKey: ["budget-movements", authorizationId ?? "all"],
     queryFn: async () => {
-      let q = supabase.from("budget_movements").select("*").order("created_at", { ascending: false }).limit(300);
+      let q = supabase
+        .from("budget_movements")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(300);
       if (authorizationId) q = q.eq("authorization_id", authorizationId);
       const { data, error } = await q;
       if (error) throw error;
@@ -1319,7 +1397,8 @@ export function serverQuotaUsage(
     balance: Math.max(total - used, 0),
     percent,
     exhausted: total > 0 && used >= total - 0.001,
-    nearLimit: total > 0 && percent >= Number(quota.alert_threshold_percent ?? 80) && used < total - 0.001,
+    nearLimit:
+      total > 0 && percent >= Number(quota.alert_threshold_percent ?? 80) && used < total - 0.001,
   };
 }
 
@@ -1357,8 +1436,10 @@ export function contractTotals(c: ContractRow) {
 
 export function itemBalance(i: ContractItem) {
   return {
-    quantity: Number(i.quantity ?? 0) - Number(i.reserved_quantity ?? 0) - Number(i.consumed_quantity ?? 0),
-    value: Number(i.total_value ?? 0) - Number(i.reserved_value ?? 0) - Number(i.consumed_value ?? 0),
+    quantity:
+      Number(i.quantity ?? 0) - Number(i.reserved_quantity ?? 0) - Number(i.consumed_quantity ?? 0),
+    value:
+      Number(i.total_value ?? 0) - Number(i.reserved_value ?? 0) - Number(i.consumed_value ?? 0),
   };
 }
 
@@ -1388,7 +1469,10 @@ export type MaintenanceRequestStatus = Database["public"]["Enums"]["maintenance_
 export type MaintenanceRecordStatus = Database["public"]["Enums"]["maintenance_record_status"];
 export type TireStatus = Database["public"]["Enums"]["tire_status"];
 
-type VehicleRef = Pick<Vehicle, "id" | "plate" | "asset_code" | "brand" | "model" | "current_km" | "hour_meter" | "status">;
+type VehicleRef = Pick<
+  Vehicle,
+  "id" | "plate" | "asset_code" | "brand" | "model" | "current_km" | "hour_meter" | "status"
+>;
 type UnitRef = Pick<Unit, "id" | "name" | "acronym">;
 
 export type MaintenancePlanRow = MaintenancePlan & {
@@ -1410,7 +1494,10 @@ export type MaintenanceRecordRow = MaintenanceRecord & {
   commitment: Pick<Commitment, "id" | "number"> | null;
   quota: Pick<Quota, "id" | "name"> | null;
   contract: Pick<Contract, "id" | "number"> | null;
-  contract_item: Pick<ContractItem, "id" | "item_number" | "description" | "measure_unit" | "unit_price"> | null;
+  contract_item: Pick<
+    ContractItem,
+    "id" | "item_number" | "description" | "measure_unit" | "unit_price"
+  > | null;
 };
 
 export type TireRow = Tire & {
@@ -1464,7 +1551,16 @@ export const TIRE_POSITIONS = [
   "Estepe",
 ];
 
-export const PART_CATEGORIES = ["Motor", "Freios", "Suspensão", "Elétrica", "Filtros", "Lubrificantes", "Carroceria", "Outros"];
+export const PART_CATEGORIES = [
+  "Motor",
+  "Freios",
+  "Suspensão",
+  "Elétrica",
+  "Filtros",
+  "Lubrificantes",
+  "Carroceria",
+  "Outros",
+];
 
 /** Lista de apoio (fallback). Os tipos oficiais ficam em maintenance_service_types, por órgão. */
 export const MAINTENANCE_SERVICE_TYPES = [
@@ -1479,7 +1575,8 @@ export const MAINTENANCE_SERVICE_TYPES = [
   "Outros",
 ];
 
-export type MaintenanceServiceType = Database["public"]["Tables"]["maintenance_service_types"]["Row"];
+export type MaintenanceServiceType =
+  Database["public"]["Tables"]["maintenance_service_types"]["Row"];
 
 /** Bloco 5.7 — tipos de serviço cadastrados pelo próprio órgão. */
 export function useMaintenanceServiceTypes() {
@@ -1528,9 +1625,12 @@ export function contractItemBalance(item: {
   reserved_quantity?: number | null;
   consumed_quantity?: number | null;
 }) {
-  return Number(item.quantity ?? 0) - Number(item.reserved_quantity ?? 0) - Number(item.consumed_quantity ?? 0);
+  return (
+    Number(item.quantity ?? 0) -
+    Number(item.reserved_quantity ?? 0) -
+    Number(item.consumed_quantity ?? 0)
+  );
 }
-
 
 /* ------------------------- regras de vencimento ------------------------- */
 
@@ -1567,26 +1667,44 @@ export function planDue(
   if (plan.interval_km) {
     const target = baseKm + Number(plan.interval_km);
     const rest = target - km;
-    worse(km >= target + Number(plan.tolerance_km ?? 0) ? "vencido" : rest <= lead.km ? "proximo" : "ok");
+    worse(
+      km >= target + Number(plan.tolerance_km ?? 0)
+        ? "vencido"
+        : rest <= lead.km
+          ? "proximo"
+          : "ok",
+    );
     details.push(`${num(Math.abs(rest), 0)} km ${rest >= 0 ? "restantes" : "excedidos"}`);
   }
   if (plan.interval_hours) {
     const target = baseH + Number(plan.interval_hours);
     const rest = target - hm;
-    worse(hm >= target + Number(plan.tolerance_hours ?? 0) ? "vencido" : rest <= lead.hours ? "proximo" : "ok");
+    worse(
+      hm >= target + Number(plan.tolerance_hours ?? 0)
+        ? "vencido"
+        : rest <= lead.hours
+          ? "proximo"
+          : "ok",
+    );
     details.push(`${num(Math.abs(rest), 1)} h ${rest >= 0 ? "restantes" : "excedidas"}`);
   }
   if (plan.interval_months) {
     const target = new Date(baseDate);
     target.setMonth(target.getMonth() + Number(plan.interval_months));
     const rest = Math.ceil((target.getTime() - Date.now()) / 86400000);
-    worse(rest < -Number(plan.tolerance_days ?? 0) ? "vencido" : rest <= lead.days ? "proximo" : "ok");
-    details.push(`${Math.abs(rest)} dia(s) ${rest >= 0 ? "restantes" : "em atraso"} · vence em ${dateBR(target.toISOString())}`);
+    worse(
+      rest < -Number(plan.tolerance_days ?? 0) ? "vencido" : rest <= lead.days ? "proximo" : "ok",
+    );
+    details.push(
+      `${Math.abs(rest)} dia(s) ${rest >= 0 ? "restantes" : "em atraso"} · vence em ${dateBR(target.toISOString())}`,
+    );
   }
   return { state, detail: details.join(" · ") || "Informe KM, horímetro ou meses" };
 }
 
-export function maintenanceTotal(m: Pick<MaintenanceRecord, "labor_value" | "parts_value" | "other_value">) {
+export function maintenanceTotal(
+  m: Pick<MaintenanceRecord, "labor_value" | "parts_value" | "other_value">,
+) {
   return Number(m.labor_value ?? 0) + Number(m.parts_value ?? 0) + Number(m.other_value ?? 0);
 }
 
@@ -1829,7 +1947,10 @@ export const WORKSHOP_SPECIALTIES = [
 /** Meta legal de propostas por processo de cotação. */
 export const MIN_PROPOSALS = 3;
 
-export function labelOf<T extends string>(list: { value: T; label: string }[], v: T | null | undefined) {
+export function labelOf<T extends string>(
+  list: { value: T; label: string }[],
+  v: T | null | undefined,
+) {
   return list.find((i) => i.value === v)?.label ?? "—";
 }
 
@@ -1973,7 +2094,7 @@ export function useMaintenancePlanItems(planId: string | null) {
 
 /** Upload de anexo privado no bucket de manutenção (pasta por órgão). */
 export async function uploadMaintenanceFile(orgId: string, file: File, folder: string) {
-  const safe = file.name.replace(/[^\w.\-]+/g, "_");
+  const safe = file.name.replace(/[^\w.-]+/g, "_");
   const path = `${orgId}/${folder}/${Date.now()}-${safe}`;
   const { error } = await supabase.storage.from("manutencao").upload(path, file, { upsert: false });
   if (error) throw error;
@@ -2024,7 +2145,10 @@ export type InsuranceStatus = Database["public"]["Enums"]["insurance_status"];
 export type ObligationStatus = Database["public"]["Enums"]["obligation_status"];
 export type AssetMovementKind = Database["public"]["Enums"]["asset_movement_kind"];
 
-type PlateRef = Pick<Vehicle, "id" | "plate" | "asset_code" | "brand" | "model" | "status" | "current_km" | "unit_id">;
+type PlateRef = Pick<
+  Vehicle,
+  "id" | "plate" | "asset_code" | "brand" | "model" | "status" | "current_km" | "unit_id"
+>;
 
 export type TrafficFineRow = TrafficFine & {
   vehicle: PlateRef | null;
@@ -2139,7 +2263,13 @@ export const ASSET_MOVEMENT_KINDS: { value: AssetMovementKind; label: string }[]
 ];
 
 /** Movimentações que encerram a vida útil do bem no órgão. */
-export const DISPOSAL_KINDS: AssetMovementKind[] = ["doacao", "leilao", "alienado", "desativado", "perda_total"];
+export const DISPOSAL_KINDS: AssetMovementKind[] = [
+  "doacao",
+  "leilao",
+  "alienado",
+  "desativado",
+  "perda_total",
+];
 /** Movimentações que envolvem entidade externa. */
 export const EXTERNAL_KINDS: AssetMovementKind[] = [
   "cedido_ao_orgao",
@@ -2274,7 +2404,7 @@ export function dueState(date: string | null | undefined, lead = 30): DueState {
 
 /** Upload de anexo privado da frota (pasta por órgão). */
 export async function uploadFleetFile(orgId: string, file: File, folder: string) {
-  const safe = file.name.replace(/[^\w.\-]+/g, "_");
+  const safe = file.name.replace(/[^\w.-]+/g, "_");
   const path = `${orgId}/${folder}/${Date.now()}-${safe}`;
   const { error } = await supabase.storage.from("frota").upload(path, file, { upsert: false });
   if (error) throw error;
@@ -2307,7 +2437,11 @@ export const PRODUCT_CATEGORIES: { value: string; label: string; units: string[]
   { value: "lubrificante", label: "Óleo lubrificante", units: ["litro", "unidade", "kg"] },
   { value: "fluido", label: "Fluido", units: ["litro", "unidade", "kg"] },
   { value: "aditivo", label: "Aditivo automotivo", units: ["litro", "unidade", "kg"] },
-  { value: "outro", label: "Outro produto automotivo", units: ["litro", "unidade", "kg", "m³", "outra"] },
+  {
+    value: "outro",
+    label: "Outro produto automotivo",
+    units: ["litro", "unidade", "kg", "m³", "outra"],
+  },
 ];
 
 export const PRODUCT_CATEGORY_LABELS: Record<string, string> = Object.fromEntries(
@@ -2344,7 +2478,11 @@ export const DOCUMENT_KIND_LABELS: Record<string, string> = Object.fromEntries(
   DOCUMENT_KINDS.map((d) => [d.value, d.label]),
 );
 
-export const CONTRACT_AMENDMENT_KINDS: { value: ContractAmendmentKind; label: string; help: string }[] = [
+export const CONTRACT_AMENDMENT_KINDS: {
+  value: ContractAmendmentKind;
+  label: string;
+  help: string;
+}[] = [
   {
     value: "prorrogacao",
     label: "Prorrogação de vigência (sem alteração do valor-base)",
@@ -2402,7 +2540,14 @@ export const AMENDMENT_CHANGES_VALUE: ContractAmendmentKind[] = [
 export type SupplierContractRow = SupplierContract & {
   contract: Pick<
     Contract,
-    "id" | "number" | "object" | "valid_from" | "valid_to" | "status" | "current_value" | "initial_value"
+    | "id"
+    | "number"
+    | "object"
+    | "valid_from"
+    | "valid_to"
+    | "status"
+    | "current_value"
+    | "initial_value"
   > | null;
   supplier: Pick<Supplier, "id" | "legal_name" | "cnpj"> | null;
 };
@@ -2470,8 +2615,12 @@ export function useCommitmentMovements() {
 /** Consolidado financeiro do empenho, incluindo reforços e reduções. */
 export function commitmentTotals(e: Commitment, movements: CommitmentMovement[] = []) {
   const mine = movements.filter((m) => m.commitment_id === e.id);
-  const reinforced = mine.filter((m) => m.kind === "reforco").reduce((s, m) => s + Number(m.value ?? 0), 0);
-  const reduced = mine.filter((m) => m.kind === "reducao").reduce((s, m) => s + Number(m.value ?? 0), 0);
+  const reinforced = mine
+    .filter((m) => m.kind === "reforco")
+    .reduce((s, m) => s + Number(m.value ?? 0), 0);
+  const reduced = mine
+    .filter((m) => m.kind === "reducao")
+    .reduce((s, m) => s + Number(m.value ?? 0), 0);
   const committed = Number(e.committed_value ?? 0);
   const cancelled = Number(e.cancelled_value ?? 0);
   const reserved = Number(e.reserved_value ?? 0);
@@ -2502,7 +2651,9 @@ export function periodAt(periods: ContractPeriod[], contractId: string, at: Date
 }
 
 export function periodBalance(p: ContractPeriod) {
-  return Number(p.period_value ?? 0) - Number(p.reserved_value ?? 0) - Number(p.consumed_value ?? 0);
+  return (
+    Number(p.period_value ?? 0) - Number(p.reserved_value ?? 0) - Number(p.consumed_value ?? 0)
+  );
 }
 
 /* ======================================================================== */
@@ -2549,7 +2700,10 @@ export function useVehicleCleanings(vehicleId?: string) {
   return useQuery({
     queryKey: ["vehicle-cleanings", vehicleId ?? "todas"],
     queryFn: async () => {
-      let q = supabase.from("vehicle_cleanings").select(CLEANING_SELECT).order("performed_at", { ascending: false });
+      let q = supabase
+        .from("vehicle_cleanings")
+        .select(CLEANING_SELECT)
+        .order("performed_at", { ascending: false });
       if (vehicleId) q = q.eq("vehicle_id", vehicleId);
       const { data, error } = await q;
       if (error) throw error;

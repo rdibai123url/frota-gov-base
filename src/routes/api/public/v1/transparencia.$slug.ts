@@ -8,7 +8,10 @@ import { createFileRoute } from "@tanstack/react-router";
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=300" },
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "public, max-age=300",
+    },
   });
 
 const csv = (filename: string, columns: string[], rows: (string | number)[][]) => {
@@ -66,14 +69,18 @@ export const Route = createFileRoute("/api/public/v1/transparencia/$slug")({
         // Competências fechadas e publicadas (fechamento mensal)
         const { data: pubs } = await supabaseAdmin
           .from("transparency_publications")
-          .select("version, published_at, snapshot, superseded_at, period:transparency_periods(year, month)")
+          .select(
+            "version, published_at, snapshot, superseded_at, period:transparency_periods(year, month)",
+          )
           .eq("organization_id", orgId)
           .is("superseded_at", null)
           .order("published_at", { ascending: false });
 
-        const competencias = (pubs ?? [])
-          .filter((p: any) => p.period)
-          .map((p: any) => ({
+        const publications = (pubs ?? []) as PublicationWithPeriod[];
+
+        const competencias = publications
+          .filter((p) => p.period)
+          .map((p) => ({
             competencia: `${String(p.period.month).padStart(2, "0")}/${p.period.year}`,
             chave: `${p.period.year}-${String(p.period.month).padStart(2, "0")}`,
             versao: p.version,
@@ -82,10 +89,13 @@ export const Route = createFileRoute("/api/public/v1/transparencia/$slug")({
 
         const compParam = url.searchParams.get("competencia");
         if (compParam) {
-          if (!/^\d{4}-\d{2}$/.test(compParam)) return json({ error: "Competência inválida. Use AAAA-MM." }, 400);
-          const found = (pubs ?? []).find(
-            (p: any) => p.period && `${p.period.year}-${String(p.period.month).padStart(2, "0")}` === compParam,
-          ) as any;
+          if (!/^\d{4}-\d{2}$/.test(compParam))
+            return json({ error: "Competência inválida. Use AAAA-MM." }, 400);
+          const found = publications.find(
+            (p) =>
+              p.period &&
+              `${p.period.year}-${String(p.period.month).padStart(2, "0")}` === compParam,
+          );
           if (!found) return json({ error: "Competência não publicada." }, 404);
           return json({
             orgao: org ?? null,
@@ -110,7 +120,11 @@ export const Route = createFileRoute("/api/public/v1/transparencia/$slug")({
             const cat = v.vehicle_type ?? "não informado";
             porCategoria[cat] = (porCategoria[cat] ?? 0) + 1;
           }
-          return { total: data?.length ?? 0, por_situacao: porSituacao, por_categoria: porCategoria };
+          return {
+            total: data?.length ?? 0,
+            por_situacao: porSituacao,
+            por_categoria: porCategoria,
+          };
         }
 
         async function loadFuelings() {
@@ -135,7 +149,9 @@ export const Route = createFileRoute("/api/public/v1/transparencia/$slug")({
             registros: valid.length,
             litros: valid.reduce((s, f) => s + Number(f.quantity ?? 0), 0),
             valor_total: valid.reduce((s, f) => s + Number(f.total_value ?? 0), 0),
-            por_mes: Array.from(porMes, ([mes, v]) => ({ mes, ...v })).sort((a, b) => a.mes.localeCompare(b.mes)),
+            por_mes: Array.from(porMes, ([mes, v]) => ({ mes, ...v })).sort((a, b) =>
+              a.mes.localeCompare(b.mes),
+            ),
           };
         }
 
@@ -159,7 +175,9 @@ export const Route = createFileRoute("/api/public/v1/transparencia/$slug")({
           return {
             registros: valid.length,
             valor_total: valid.reduce((s, m) => s + Number(m.total_value ?? 0), 0),
-            por_mes: Array.from(porMes, ([mes, v]) => ({ mes, ...v })).sort((a, b) => a.mes.localeCompare(b.mes)),
+            por_mes: Array.from(porMes, ([mes, v]) => ({ mes, ...v })).sort((a, b) =>
+              a.mes.localeCompare(b.mes),
+            ),
           };
         }
 
@@ -183,7 +201,9 @@ export const Route = createFileRoute("/api/public/v1/transparencia/$slug")({
           return {
             registros: valid.length,
             valor_total: valid.reduce((s, c) => s + Number(c.total_value ?? 0), 0),
-            por_mes: Array.from(porMes, ([mes, v]) => ({ mes, ...v })).sort((a, b) => a.mes.localeCompare(b.mes)),
+            por_mes: Array.from(porMes, ([mes, v]) => ({ mes, ...v })).sort((a, b) =>
+              a.mes.localeCompare(b.mes),
+            ),
           };
         }
 
@@ -204,8 +224,12 @@ export const Route = createFileRoute("/api/public/v1/transparencia/$slug")({
           if (dataset === "frota" && datasets["frota"]) {
             const f = await loadVehicles();
             const rows: (string | number)[][] = [
-              ...Object.entries(f.por_situacao).map(([k, v]) => ["situacao", k, v] as (string | number)[]),
-              ...Object.entries(f.por_categoria).map(([k, v]) => ["categoria", k, v] as (string | number)[]),
+              ...Object.entries(f.por_situacao).map(
+                ([k, v]) => ["situacao", k, v] as (string | number)[],
+              ),
+              ...Object.entries(f.por_categoria).map(
+                ([k, v]) => ["categoria", k, v] as (string | number)[],
+              ),
             ];
             return csv(base, ["agrupamento", "valor", "quantidade_veiculos"], rows);
           }
@@ -237,7 +261,15 @@ export const Route = createFileRoute("/api/public/v1/transparencia/$slug")({
             const c = await loadContracts();
             return csv(
               base,
-              ["numero", "objeto", "modalidade", "vigencia_inicio", "vigencia_fim", "situacao", "valor_atual"],
+              [
+                "numero",
+                "objeto",
+                "modalidade",
+                "vigencia_inicio",
+                "vigencia_fim",
+                "situacao",
+                "valor_atual",
+              ],
               c.map((r) => [
                 r.number ?? "",
                 r.object ?? "",
@@ -274,3 +306,10 @@ export const Route = createFileRoute("/api/public/v1/transparencia/$slug")({
     },
   },
 });
+type PublicationWithPeriod = {
+  version: number;
+  published_at: string;
+  snapshot: unknown;
+  superseded_at: string | null;
+  period: { year: number; month: number } | null;
+};

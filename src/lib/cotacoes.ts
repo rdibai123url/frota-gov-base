@@ -28,7 +28,8 @@ export const hasServices = (kind: string | null | undefined) => asQuotationKind(
 export const hasParts = (kind: string | null | undefined) => asQuotationKind(kind) !== "servicos";
 
 export type ProposalSource = "manual" | "link";
-export const proposalSourceLabel = (s: string | null | undefined) => (s === "link" ? "Link" : "Manual");
+export const proposalSourceLabel = (s: string | null | undefined) =>
+  s === "link" ? "Link" : "Manual";
 
 export type DiscountMode = "amount" | "percent";
 
@@ -57,15 +58,27 @@ export type Totals = {
 export function computeTotals(input: TotalsInput): Totals {
   const hours = Math.max(0, input.laborHours || 0);
   const rate = Math.max(0, input.laborHourValue || 0);
-  const laborValue = hours > 0 && rate > 0 ? round2(hours * rate) : round2(Math.max(0, input.laborValueOverride ?? 0));
+  const laborValue =
+    hours > 0 && rate > 0
+      ? round2(hours * rate)
+      : round2(Math.max(0, input.laborValueOverride ?? 0));
   const services = round2(Math.max(0, input.servicesValue || 0));
   const parts = round2(Math.max(0, input.partsValue || 0));
   const servicesSubtotal = round2(laborValue + services);
   const gross = round2(servicesSubtotal + parts);
   const raw = Math.max(0, input.discountInput || 0);
   const discount =
-    input.discountMode === "percent" ? round2((gross * Math.min(raw, 100)) / 100) : round2(Math.min(raw, gross));
-  return { laborValue, servicesSubtotal, partsSubtotal: parts, gross, discount, net: round2(gross - discount) };
+    input.discountMode === "percent"
+      ? round2((gross * Math.min(raw, 100)) / 100)
+      : round2(Math.min(raw, gross));
+  return {
+    laborValue,
+    servicesSubtotal,
+    partsSubtotal: parts,
+    gross,
+    discount,
+    net: round2(gross - discount),
+  };
 }
 
 /** Mensagem de bloqueio do desconto, ou `null` quando estiver válido. */
@@ -108,9 +121,7 @@ export type ProposalDraft = {
   items: ProposalItemDraft[];
 };
 
-export const newItemDraft = (
-  seed: Partial<ProposalItemDraft> = {},
-): ProposalItemDraft => ({
+export const newItemDraft = (seed: Partial<ProposalItemDraft> = {}): ProposalItemDraft => ({
   key: Math.random().toString(36).slice(2),
   quotationItemId: null,
   description: "",

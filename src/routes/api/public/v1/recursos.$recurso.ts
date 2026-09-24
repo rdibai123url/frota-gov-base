@@ -15,15 +15,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 async function sha256(value: string) {
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(value),
-  );
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
 
-  return Array.from(
-    new Uint8Array(digest),
-    (b) => b.toString(16).padStart(2, "0"),
-  ).join("");
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 const json = (body: unknown, status = 200) =>
@@ -148,8 +142,7 @@ const RESOURCES: Record<
   pecas: {
     table: "parts_catalog",
     scope: "manutencao:read",
-    columns:
-      "id, internal_code, description, brand, reference, measure_unit, category, active",
+    columns: "id, internal_code, description, brand, reference, measure_unit, category, active",
     order: "internal_code",
     dateColumn: "updated_at",
   },
@@ -157,8 +150,7 @@ const RESOURCES: Record<
   pneus: {
     table: "tires",
     scope: "manutencao:read",
-    columns:
-      "id, code, brand, model, size, status, vehicle_id, position, dot",
+    columns: "id, code, brand, model, size, status, vehicle_id, position, dot",
     order: "code",
     dateColumn: "updated_at",
   },
@@ -175,8 +167,7 @@ const RESOURCES: Record<
   estoque: {
     table: "stock_balances",
     scope: "almoxarifado:read",
-    columns:
-      "id, warehouse_id, part_id, quantity, reserved_quantity, min_quantity, average_cost",
+    columns: "id, warehouse_id, part_id, quantity, reserved_quantity, min_quantity, average_cost",
     order: "part_id",
     dateColumn: "updated_at",
   },
@@ -221,20 +212,14 @@ const RESOURCES: Record<
 const maskCpf = (v: unknown) => {
   const digits = String(v ?? "").replace(/\D/g, "");
 
-  return digits.length === 11
-    ? `***.${digits.slice(3, 6)}.${digits.slice(6, 9)}-**`
-    : null;
+  return digits.length === 11 ? `***.${digits.slice(3, 6)}.${digits.slice(6, 9)}-**` : null;
 };
 
-export const Route = createFileRoute(
-  "/api/public/v1/recursos/$recurso",
-)({
+export const Route = createFileRoute("/api/public/v1/recursos/$recurso")({
   server: {
     handlers: {
       GET: async ({ request, params }) => {
-        const recurso = String(
-          (params as { recurso: string }).recurso ?? "",
-        );
+        const recurso = String((params as { recurso: string }).recurso ?? "");
 
         const def = RESOURCES[recurso];
 
@@ -265,17 +250,13 @@ export const Route = createFileRoute(
           );
         }
 
-        const { supabaseAdmin } = await import(
-          "@/integrations/supabase/client.server"
-        );
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
         const prefix = apiKey.split(".")[0] ?? "";
 
         const { data: key } = await supabaseAdmin
           .from("org_api_keys")
-          .select(
-            "id, organization_id, key_hash, scopes, expires_at, revoked_at",
-          )
+          .select("id, organization_id, key_hash, scopes, expires_at, revoked_at")
           .eq("prefix", prefix)
           .maybeSingle();
 
@@ -288,10 +269,7 @@ export const Route = createFileRoute(
           );
         }
 
-        if (
-          key.expires_at &&
-          new Date(key.expires_at) < new Date()
-        ) {
+        if (key.expires_at && new Date(key.expires_at) < new Date()) {
           return json(
             {
               error: "Chave expirada.",
@@ -317,11 +295,7 @@ export const Route = createFileRoute(
 
         const scopes = (key.scopes as string[] | null) ?? [];
 
-        if (
-          scopes.length &&
-          !scopes.includes(def.scope) &&
-          !scopes.includes("*")
-        ) {
+        if (scopes.length && !scopes.includes(def.scope) && !scopes.includes("*")) {
           return json(
             {
               error: `Chave sem o escopo ${def.scope}.`,
@@ -336,9 +310,7 @@ export const Route = createFileRoute(
          * -------------------------------------------------------
          */
 
-        const since = new Date(
-          Date.now() - 60_000,
-        ).toISOString();
+        const since = new Date(Date.now() - 60_000).toISOString();
 
         const { count: recent } = await supabaseAdmin
           .from("integration_logs")
@@ -353,8 +325,7 @@ export const Route = createFileRoute(
         if ((recent ?? 0) >= RATE_LIMIT_PER_MINUTE) {
           return json(
             {
-              error:
-                "Limite de requisições por minuto excedido.",
+              error: "Limite de requisições por minuto excedido.",
             },
             429,
           );
@@ -370,11 +341,7 @@ export const Route = createFileRoute(
 
         const page = Math.max(
           1,
-          Number(
-            url.searchParams.get("pagina") ??
-              url.searchParams.get("page") ??
-              1,
-          ) || 1,
+          Number(url.searchParams.get("pagina") ?? url.searchParams.get("page") ?? 1) || 1,
         );
 
         const requested = Number(
@@ -383,27 +350,17 @@ export const Route = createFileRoute(
             DEFAULT_PAGE_SIZE,
         );
 
-        const pageSize = Math.min(
-          MAX_PAGE_SIZE,
-          Math.max(
-            1,
-            requested || DEFAULT_PAGE_SIZE,
-          ),
-        );
+        const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, requested || DEFAULT_PAGE_SIZE));
 
         const fromIndex = (page - 1) * pageSize;
 
-        const status =
-          url.searchParams.get("situacao");
+        const status = url.searchParams.get("situacao");
 
-        const de =
-          url.searchParams.get("de");
+        const de = url.searchParams.get("de");
 
-        const ate =
-          url.searchParams.get("ate");
+        const ate = url.searchParams.get("ate");
 
-        const alteradosDesde =
-          url.searchParams.get("alterados_desde");
+        const alteradosDesde = url.searchParams.get("alterados_desde");
 
         /*
          * -------------------------------------------------------
@@ -419,24 +376,15 @@ export const Route = createFileRoute(
           .select(def.columns, {
             count: "exact",
           })
-          .eq(
-            "organization_id",
-            key.organization_id,
-          )
-          .range(
-            fromIndex,
-            fromIndex + pageSize - 1,
-          );
+          .eq("organization_id", key.organization_id)
+          .range(fromIndex, fromIndex + pageSize - 1);
 
         if (def.order) {
           q = q.order(def.order);
         }
 
         if (status) {
-          q = q.eq(
-            "status",
-            status as never,
-          );
+          q = q.eq("status", status as never);
         }
 
         /*
@@ -446,17 +394,11 @@ export const Route = createFileRoute(
          */
 
         if (recurso === "equipamentos") {
-          q = q.eq(
-            "asset_class",
-            "equipamento",
-          );
+          q = q.eq("asset_class", "equipamento");
         }
 
         if (recurso === "veiculos") {
-          q = q.eq(
-            "asset_class",
-            "veiculo",
-          );
+          q = q.eq("asset_class", "veiculo");
         }
 
         /*
@@ -464,17 +406,11 @@ export const Route = createFileRoute(
          */
 
         if (de && def.dateColumn) {
-          q = q.gte(
-            def.dateColumn,
-            de,
-          );
+          q = q.gte(def.dateColumn, de);
         }
 
         if (ate && def.dateColumn) {
-          q = q.lte(
-            def.dateColumn,
-            `${ate}T23:59:59`,
-          );
+          q = q.lte(def.dateColumn, `${ate}T23:59:59`);
         }
 
         /*
@@ -483,28 +419,17 @@ export const Route = createFileRoute(
          */
 
         if (alteradosDesde) {
-          q = q.gte(
-            "updated_at",
-            alteradosDesde,
-          );
+          q = q.gte("updated_at", alteradosDesde);
         }
 
-        const {
-          data,
-          count,
-          error,
-        } = await q;
+        const { data, count, error } = await q;
 
         if (error) {
-          console.error(
-            `[public-api] recurso=${recurso}:`,
-            error.message,
-          );
+          console.error(`[public-api] recurso=${recurso}:`, error.message);
 
           return json(
             {
-              error:
-                "Não foi possível consultar o recurso.",
+              error: "Não foi possível consultar o recurso.",
             },
             500,
           );
@@ -516,20 +441,12 @@ export const Route = createFileRoute(
          * -------------------------------------------------------
          */
 
-        const rows =
-          (data ?? []) as unknown as Record<
-            string,
-            unknown
-          >[];
+        const rows = (data ?? []) as unknown as Record<string, unknown>[];
 
         for (const row of rows) {
-          for (
-            const col of def.maskCpf ?? []
-          ) {
+          for (const col of def.maskCpf ?? []) {
             if (col in row) {
-              row[col] = maskCpf(
-                row[col],
-              );
+              row[col] = maskCpf(row[col]);
             }
           }
         }
@@ -543,28 +460,20 @@ export const Route = createFileRoute(
         await supabaseAdmin
           .from("org_api_keys")
           .update({
-            last_used_at:
-              new Date().toISOString(),
+            last_used_at: new Date().toISOString(),
           })
           .eq("id", key.id);
 
-        await supabaseAdmin
-          .from("integration_logs")
-          .insert({
-            organization_id:
-              key.organization_id,
-            kind: "api",
-            operation:
-              `GET /v1/recursos/${recurso}`,
-            direction: "saida",
-            status: "sucesso",
-            message:
-              `Consulta autenticada pela chave ${prefix}.`,
-            records_total:
-              rows.length,
-            records_ok:
-              rows.length,
-          });
+        await supabaseAdmin.from("integration_logs").insert({
+          organization_id: key.organization_id,
+          kind: "api",
+          operation: `GET /v1/recursos/${recurso}`,
+          direction: "saida",
+          status: "sucesso",
+          message: `Consulta autenticada pela chave ${prefix}.`,
+          records_total: rows.length,
+          records_ok: rows.length,
+        });
 
         /*
          * -------------------------------------------------------
@@ -572,39 +481,24 @@ export const Route = createFileRoute(
          * -------------------------------------------------------
          */
 
-        const total =
-          count ?? rows.length;
+        const total = count ?? rows.length;
 
         return json({
           version: "v1",
           resource: recurso,
-          generated_at:
-            new Date().toISOString(),
+          generated_at: new Date().toISOString(),
 
           pagination: {
             page,
-            page_size:
-              pageSize,
+            page_size: pageSize,
             total,
-            total_pages:
-              Math.max(
-                1,
-                Math.ceil(
-                  total /
-                    pageSize,
-                ),
-              ),
-            has_next:
-              fromIndex +
-                rows.length <
-              total,
+            total_pages: Math.max(1, Math.ceil(total / pageSize)),
+            has_next: fromIndex + rows.length < total,
           },
 
-          count:
-            rows.length,
+          count: rows.length,
 
-          data:
-            rows,
+          data: rows,
         });
       },
     },

@@ -84,7 +84,11 @@ export async function geocodeRecord(
 export function addressChanged(before: AddressParts | null | undefined, after: AddressParts) {
   const key = (p?: AddressParts | null) =>
     [p?.address, p?.district, p?.city, p?.state, p?.zip_code]
-      .map((v) => String(v ?? "").trim().toLowerCase())
+      .map((v) =>
+        String(v ?? "")
+          .trim()
+          .toLowerCase(),
+      )
       .join("|");
   return key(before) !== key(after);
 }
@@ -126,8 +130,12 @@ export async function autoGeocode(
   if (r.status === "geocodificado") {
     toast.success("Endereço localizado automaticamente no mapa da rede.");
   } else if (r.status === "nao_encontrado") {
-    toast.warning("Endereço não localizado pelo mapa. Você pode informar as coordenadas manualmente.");
+    toast.warning(
+      "Endereço não localizado pelo mapa. Você pode informar as coordenadas manualmente.",
+    );
   } else if (r.status === "falhou") {
-    toast.message("Cadastro salvo. O mapa está indisponível agora — coordenadas ficaram pendentes.");
+    toast.message(
+      "Cadastro salvo. O mapa está indisponível agora — coordenadas ficaram pendentes.",
+    );
   }
 }

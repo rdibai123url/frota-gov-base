@@ -26,21 +26,54 @@ export const Route = createFileRoute("/transparencia/$slug")({
   component: PortalTransparencia,
 });
 
+type PublishedSnapshot = {
+  frota?: { total?: number };
+  abastecimento?: { registros?: number; litros?: number; valor_total?: number };
+  manutencao?: { registros?: number; valor_total?: number };
+  utilizacao?: { registros?: number };
+  contratos?: { vigentes?: number; valor_total?: number };
+  multas?: { registros?: number };
+  sinistros?: { registros?: number };
+  obrigacoes?: { registros?: number };
+  patrimonio?: { movimentacoes?: number };
+};
+
 type Payload = {
-  orgao?: { legal_name: string; short_name: string | null; city: string | null; state: string | null } | null;
+  orgao?: {
+    legal_name: string;
+    short_name: string | null;
+    city: string | null;
+    state: string | null;
+  } | null;
   apresentacao?: string | null;
   atualizado_em?: string;
   conjuntos_disponiveis?: string[];
-  competencias_publicadas?: { competencia: string; chave: string; versao: number; publicado_em: string }[];
-  frota?: { total: number; por_situacao: Record<string, number>; por_categoria: Record<string, number> };
+  competencias_publicadas?: {
+    competencia: string;
+    chave: string;
+    versao: number;
+    publicado_em: string;
+  }[];
+  frota?: {
+    total: number;
+    por_situacao: Record<string, number>;
+    por_categoria: Record<string, number>;
+  };
   abastecimento?: { registros: number; litros: number; valor_total: number };
   manutencao?: { registros: number; valor_total: number };
   limpeza?: { registros: number; valor_total: number };
   competencia?: string;
   versao?: number;
   publicado_em?: string;
-  dados?: Record<string, any>;
-  contratos?: { number: string; object: string | null; valid_from: string | null; valid_to: string | null; status: string; current_value: number | null }[];
+  dados?: PublishedSnapshot;
+  contratos?: {
+    number: string;
+    object: string | null;
+    valid_from: string | null;
+    valid_to: string | null;
+    status: string;
+    current_value: number | null;
+  }[];
   error?: string;
 };
 
@@ -69,17 +102,19 @@ function PortalTransparencia() {
     },
   });
 
-
   const { data: fechamento } = useQuery({
     queryKey: ["transparencia-competencia", slug, competencia],
     enabled: !!competencia,
     queryFn: async (): Promise<Payload> => {
-      const response = await fetch(`/api/public/v1/transparencia/${slug}?competencia=${competencia}`);
+      const response = await fetch(
+        `/api/public/v1/transparencia/${slug}?competencia=${competencia}`,
+      );
       return (await response.json()) as Payload;
     },
   });
 
-  if (isLoading) return <p className="p-10 text-center text-muted-foreground">Carregando dados abertos...</p>;
+  if (isLoading)
+    return <p className="p-10 text-center text-muted-foreground">Carregando dados abertos...</p>;
 
   if (!data || data.error) {
     return (
@@ -115,8 +150,8 @@ function PortalTransparencia() {
         <section className="rounded-lg border bg-card p-5 shadow-card">
           <h2 className="gov-title text-lg">Fechamento mensal publicado</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Consulte os dados consolidados e conferidos pelo órgão em cada competência (mês/ano). Nenhum dado pessoal
-            é publicado.
+            Consulte os dados consolidados e conferidos pelo órgão em cada competência (mês/ano).
+            Nenhum dado pessoal é publicado.
           </p>
           {(data.competencias_publicadas ?? []).length === 0 ? (
             <p className="mt-4 text-sm text-muted-foreground">
@@ -146,30 +181,35 @@ function PortalTransparencia() {
                   <p className="font-medium">Competência {fechamento.competencia}</p>
                   <p className="text-xs text-muted-foreground">
                     Versão {fechamento.versao} · Publicada em{" "}
-                    {fechamento.publicado_em ? new Date(fechamento.publicado_em).toLocaleString("pt-BR") : "—"}
+                    {fechamento.publicado_em
+                      ? new Date(fechamento.publicado_em).toLocaleString("pt-BR")
+                      : "—"}
                   </p>
                   <ul className="mt-3 space-y-1 text-muted-foreground">
-                    <li>Frota: {fechamento.dados['frota']?.total ?? 0} veículo(s)</li>
+                    <li>Frota: {fechamento.dados["frota"]?.total ?? 0} veículo(s)</li>
                     <li>
-                      Abastecimentos: {fechamento.dados['abastecimento']?.registros ?? 0} registro(s) ·{" "}
-                      {formatLiters(fechamento.dados['abastecimento']?.litros)} L · R${" "}
-                      {formatMoney(fechamento.dados['abastecimento']?.valor_total)}
+                      Abastecimentos: {fechamento.dados["abastecimento"]?.registros ?? 0}{" "}
+                      registro(s) · {formatLiters(fechamento.dados["abastecimento"]?.litros)} L · R${" "}
+                      {formatMoney(fechamento.dados["abastecimento"]?.valor_total)}
                     </li>
                     <li>
-                      Manutenções: {fechamento.dados['manutencao']?.registros ?? 0} registro(s) · R${" "}
-                      {formatMoney(fechamento.dados['manutencao']?.valor_total)}
+                      Manutenções: {fechamento.dados["manutencao"]?.registros ?? 0} registro(s) · R${" "}
+                      {formatMoney(fechamento.dados["manutencao"]?.valor_total)}
                     </li>
-                    <li>Utilizações: {fechamento.dados['utilizacao']?.registros ?? 0}</li>
+                    <li>Utilizações: {fechamento.dados["utilizacao"]?.registros ?? 0}</li>
                     <li>
-                      Contratos vigentes: {fechamento.dados['contratos']?.vigentes ?? 0} · R${" "}
-                      {formatMoney(fechamento.dados['contratos']?.valor_total)}
+                      Contratos vigentes: {fechamento.dados["contratos"]?.vigentes ?? 0} · R${" "}
+                      {formatMoney(fechamento.dados["contratos"]?.valor_total)}
                     </li>
                     <li>
-                      Multas: {fechamento.dados['multas']?.registros ?? 0} · Sinistros:{" "}
-                      {fechamento.dados['sinistros']?.registros ?? 0} · Obrigações:{" "}
-                      {fechamento.dados['obrigacoes']?.registros ?? 0}
+                      Multas: {fechamento.dados["multas"]?.registros ?? 0} · Sinistros:{" "}
+                      {fechamento.dados["sinistros"]?.registros ?? 0} · Obrigações:{" "}
+                      {fechamento.dados["obrigacoes"]?.registros ?? 0}
                     </li>
-                    <li>Movimentações patrimoniais: {fechamento.dados['patrimonio']?.movimentacoes ?? 0}</li>
+                    <li>
+                      Movimentações patrimoniais:{" "}
+                      {fechamento.dados["patrimonio"]?.movimentacoes ?? 0}
+                    </li>
                   </ul>
                 </div>
               )}
@@ -222,8 +262,6 @@ function PortalTransparencia() {
           </div>
         </section>
 
-
-
         {data.frota && (
           <section className="rounded-lg border bg-card p-5 shadow-card">
             <h2 className="gov-title text-lg">Frota</h2>
@@ -246,7 +284,10 @@ function PortalTransparencia() {
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
               <Metric label="Registros" value={String(data.abastecimento.registros)} />
               <Metric label="Litros" value={formatLiters(data.abastecimento.litros)} />
-              <Metric label="Valor total" value={`R$ ${formatMoney(data.abastecimento.valor_total)}`} />
+              <Metric
+                label="Valor total"
+                value={`R$ ${formatMoney(data.abastecimento.valor_total)}`}
+              />
             </div>
           </section>
         )}
@@ -256,7 +297,10 @@ function PortalTransparencia() {
             <h2 className="gov-title text-lg">Manutenção</h2>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               <Metric label="Registros" value={String(data.manutencao.registros)} />
-              <Metric label="Valor total" value={`R$ ${formatMoney(data.manutencao.valor_total)}`} />
+              <Metric
+                label="Valor total"
+                value={`R$ ${formatMoney(data.manutencao.valor_total)}`}
+              />
             </div>
           </section>
         )}

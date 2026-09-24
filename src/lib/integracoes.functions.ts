@@ -53,7 +53,8 @@ export const testConnector = createServerFn({ method: "POST" })
 
     const started = Date.now();
     let status: "sucesso" | "erro" = "erro";
-    let message = "Integração não configurada: informe o endereço do serviço e o segredo de acesso.";
+    let message =
+      "Integração não configurada: informe o endereço do serviço e o segredo de acesso.";
     let httpStatus: number | null = null;
 
     if (connector.base_url) {
@@ -176,8 +177,7 @@ export const sendWebhookTest = createServerFn({ method: "POST" })
           response_body: responseBody || null,
           error_message: errorMessage,
           delivered_at: status === "entregue" ? new Date().toISOString() : null,
-          next_retry_at:
-            status === "falha" ? new Date(Date.now() + 60_000).toISOString() : null,
+          next_retry_at: status === "falha" ? new Date(Date.now() + 60_000).toISOString() : null,
         })
         .eq("id", delivery.id);
     }
@@ -192,6 +192,9 @@ export const sendWebhookTest = createServerFn({ method: "POST" })
       responseStatus,
       errorMessage,
       signed: Boolean(signature),
-      warning: endpoint.secret_name && !signature ? "O segredo informado não está cadastrado no servidor; o envio saiu sem assinatura HMAC." : null,
+      warning:
+        endpoint.secret_name && !signature
+          ? "O segredo informado não está cadastrado no servidor; o envio saiu sem assinatura HMAC."
+          : null,
     };
   });

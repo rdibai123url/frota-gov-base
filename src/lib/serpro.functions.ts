@@ -56,7 +56,12 @@ export const consultarSerpro = createServerFn({ method: "POST" })
         available: false as const,
         message:
           "Integração disponível mediante contratação/credenciais do órgão junto ao SERPRO/SENATRAN. Nenhuma consulta foi realizada.",
-        divergences: [] as { field: string; label: string; current: string | null; official: string | null }[],
+        divergences: [] as {
+          field: string;
+          label: string;
+          current: string | null;
+          official: string | null;
+        }[],
       };
     }
 
@@ -108,7 +113,12 @@ export const consultarSerpro = createServerFn({ method: "POST" })
       clearTimeout(timer);
     }
 
-    const divergences: { field: string; label: string; current: string | null; official: string | null }[] = [];
+    const divergences: {
+      field: string;
+      label: string;
+      current: string | null;
+      official: string | null;
+    }[] = [];
     if (payload) {
       for (const f of FIELD_MAP) {
         const official = pick(payload, f.source);
@@ -161,7 +171,10 @@ export const aplicarDadosOficiais = createServerFn({ method: "POST" })
       if (!allowed.has(k)) continue;
       update[k] = k.startsWith("year_") ? Number(v) || null : v;
     }
-    const { error } = await supabase.from("vehicles").update(update as never).eq("id", data.vehicleId);
+    const { error } = await supabase
+      .from("vehicles")
+      .update(update as never)
+      .eq("id", data.vehicleId);
     if (error) throw new Error(error.message);
     return { ok: true, applied: Object.keys(update).filter((k) => k !== "updated_by") };
   });

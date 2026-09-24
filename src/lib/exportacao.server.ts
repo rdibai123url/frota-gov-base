@@ -80,7 +80,11 @@ export const EXPORT_MODULES: ModuleDef[] = [
   { folder: "02_frota", file: "veiculos", table: "vehicles", json: true },
   { folder: "02_frota", file: "maquinas_e_equipamentos_tipos", table: "equipment_types" },
   { folder: "02_frota", file: "condutores_motoristas", table: "drivers" },
-  { folder: "02_frota", file: "historico_veiculos_e_equipamentos", table: "vehicle_status_history" },
+  {
+    folder: "02_frota",
+    file: "historico_veiculos_e_equipamentos",
+    table: "vehicle_status_history",
+  },
   { folder: "02_frota", file: "utilizacoes_reservas", table: "vehicle_usages" },
   { folder: "02_frota", file: "obrigacoes_legais", table: "vehicle_obligations" },
   { folder: "02_frota", file: "higienizacoes", table: "vehicle_cleanings" },
@@ -92,7 +96,12 @@ export const EXPORT_MODULES: ModuleDef[] = [
   { folder: "03_abastecimento", file: "combustiveis_produtos", table: "fuel_types" },
   { folder: "03_abastecimento", file: "fornecedores_postos", table: "suppliers" },
   { folder: "03_abastecimento", file: "fornecedores_contratos", table: "supplier_contracts" },
-  { folder: "03_abastecimento", file: "autorizacoes_abastecimento", table: "fuel_authorizations", json: true },
+  {
+    folder: "03_abastecimento",
+    file: "autorizacoes_abastecimento",
+    table: "fuel_authorizations",
+    json: true,
+  },
   { folder: "03_abastecimento", file: "abastecimentos", table: "fuelings", json: true },
   { folder: "03_abastecimento", file: "limites_abastecimento", table: "fuel_limits" },
   { folder: "03_abastecimento", file: "cotas_servidor", table: "server_fuel_quotas" },
@@ -103,10 +112,19 @@ export const EXPORT_MODULES: ModuleDef[] = [
   { folder: "04_contratos_orcamento", file: "contratos_periodos", table: "contract_periods" },
   { folder: "04_contratos_orcamento", file: "contratos_aditivos", table: "contract_amendments" },
   { folder: "04_contratos_orcamento", file: "empenhos", table: "commitments" },
-  { folder: "04_contratos_orcamento", file: "empenhos_movimentacoes", table: "commitment_movements" },
+  {
+    folder: "04_contratos_orcamento",
+    file: "empenhos_movimentacoes",
+    table: "commitment_movements",
+  },
   { folder: "04_contratos_orcamento", file: "cotas", table: "quotas" },
   { folder: "04_contratos_orcamento", file: "cotas_suplementacoes", table: "quota_supplements" },
-  { folder: "04_contratos_orcamento", file: "movimentacoes_orcamentarias", table: "budget_movements", json: true },
+  {
+    folder: "04_contratos_orcamento",
+    file: "movimentacoes_orcamentarias",
+    table: "budget_movements",
+    json: true,
+  },
   { folder: "04_contratos_orcamento", file: "saldos_iniciais", table: "opening_balances" },
 
   { folder: "05_manutencao", file: "manutencoes", table: "maintenance_records", json: true },
@@ -128,7 +146,11 @@ export const EXPORT_MODULES: ModuleDef[] = [
   { folder: "07_legal_patrimonial", file: "multas_infracoes", table: "traffic_fines" },
   { folder: "07_legal_patrimonial", file: "acidentes_sinistros", table: "accidents" },
   { folder: "07_legal_patrimonial", file: "seguros_apolices", table: "insurance_policies" },
-  { folder: "07_legal_patrimonial", file: "seguros_coberturas_veiculos", table: "insurance_vehicles" },
+  {
+    folder: "07_legal_patrimonial",
+    file: "seguros_coberturas_veiculos",
+    table: "insurance_vehicles",
+  },
   { folder: "07_legal_patrimonial", file: "entidades_externas", table: "external_entities" },
 
   { folder: "08_diarias", file: "diarias", table: "diaries", json: true },
@@ -136,33 +158,81 @@ export const EXPORT_MODULES: ModuleDef[] = [
 
   { folder: "09_credenciados", file: "rede_credenciada", table: "accredited_partners" },
   { folder: "09_credenciados", file: "usuarios_credenciados", table: "partner_users" },
-  { folder: "09_credenciados", file: "capturas_operacionais", table: "partner_captures", json: true },
+  {
+    folder: "09_credenciados",
+    file: "capturas_operacionais",
+    table: "partner_captures",
+    json: true,
+  },
   { folder: "09_credenciados", file: "cartoes_virtuais", table: "asset_cards" },
   { folder: "09_credenciados", file: "cartoes_virtuais_usos", table: "asset_card_uses" },
 
   { folder: "10_pecas_almoxarifado", file: "pecas_acessorios", table: "parts_catalog" },
   { folder: "10_pecas_almoxarifado", file: "compatibilidade_pecas", table: "part_compatibilities" },
-  { folder: "10_pecas_almoxarifado", file: "compatibilidade_excecoes", table: "compatibility_overrides" },
-  { folder: "10_pecas_almoxarifado", file: "ordens_de_fornecimento", table: "supply_orders", json: true },
-  { folder: "10_pecas_almoxarifado", file: "ordens_de_fornecimento_itens", table: "supply_order_items" },
+  {
+    folder: "10_pecas_almoxarifado",
+    file: "compatibilidade_excecoes",
+    table: "compatibility_overrides",
+  },
+  {
+    folder: "10_pecas_almoxarifado",
+    file: "ordens_de_fornecimento",
+    table: "supply_orders",
+    json: true,
+  },
+  {
+    folder: "10_pecas_almoxarifado",
+    file: "ordens_de_fornecimento_itens",
+    table: "supply_order_items",
+  },
   { folder: "10_pecas_almoxarifado", file: "almoxarifados", table: "warehouses" },
   { folder: "10_pecas_almoxarifado", file: "estoque_saldos", table: "stock_balances" },
-  { folder: "10_pecas_almoxarifado", file: "estoque_movimentacoes", table: "stock_movements", json: true },
+  {
+    folder: "10_pecas_almoxarifado",
+    file: "estoque_movimentacoes",
+    table: "stock_movements",
+    json: true,
+  },
   { folder: "10_pecas_almoxarifado", file: "estoque_reservas", table: "stock_reservations" },
   { folder: "10_pecas_almoxarifado", file: "inventarios", table: "inventories" },
   { folder: "10_pecas_almoxarifado", file: "inventarios_itens", table: "inventory_items" },
 
-  { folder: "11_inteligencia", file: "inteligencia_parametros_consumo", table: "consumption_parameters" },
+  {
+    folder: "11_inteligencia",
+    file: "inteligencia_parametros_consumo",
+    table: "consumption_parameters",
+  },
   { folder: "11_inteligencia", file: "inteligencia_configuracoes", table: "intelligence_settings" },
   { folder: "11_inteligencia", file: "alertas", table: "fueling_alerts" },
-  { folder: "11_inteligencia", file: "valor_de_mercado_fipe", table: "asset_market_values", json: true },
+  {
+    folder: "11_inteligencia",
+    file: "valor_de_mercado_fipe",
+    table: "asset_market_values",
+    json: true,
+  },
   { folder: "11_inteligencia", file: "fatores_de_emissao", table: "emission_factors" },
 
-  { folder: "12_transparencia", file: "transparencia_configuracoes", table: "transparency_settings" },
+  {
+    folder: "12_transparencia",
+    file: "transparencia_configuracoes",
+    table: "transparency_settings",
+  },
   { folder: "12_transparencia", file: "transparencia_periodos", table: "transparency_periods" },
-  { folder: "12_transparencia", file: "transparencia_publicacoes", table: "transparency_publications" },
-  { folder: "12_transparencia", file: "transparencia_reaberturas", table: "transparency_reopen_requests" },
-  { folder: "12_transparencia", file: "transparencia_entregas", table: "transparency_delivery_attempts" },
+  {
+    folder: "12_transparencia",
+    file: "transparencia_publicacoes",
+    table: "transparency_publications",
+  },
+  {
+    folder: "12_transparencia",
+    file: "transparencia_reaberturas",
+    table: "transparency_reopen_requests",
+  },
+  {
+    folder: "12_transparencia",
+    file: "transparencia_entregas",
+    table: "transparency_delivery_attempts",
+  },
 
   { folder: "13_administracao", file: "migracoes_import_batches", table: "import_batches" },
   { folder: "13_administracao", file: "migracoes_resultados", table: "import_rows" },
@@ -174,7 +244,12 @@ export const EXPORT_MODULES: ModuleDef[] = [
   { folder: "13_administracao", file: "logs_auditoria", table: "audit_logs" },
 
   { folder: "14_integracoes", file: "conectores", table: "integration_connectors", json: true },
-  { folder: "14_integracoes", file: "integracoes_mapeamentos", table: "integration_mappings", json: true },
+  {
+    folder: "14_integracoes",
+    file: "integracoes_mapeamentos",
+    table: "integration_mappings",
+    json: true,
+  },
   { folder: "14_integracoes", file: "integracoes_historico", table: "integration_logs" },
   { folder: "14_integracoes", file: "detran_consultas", table: "detran_snapshots", json: true },
   { folder: "14_integracoes", file: "webhooks_endpoints", table: "webhook_endpoints" },
@@ -241,8 +316,10 @@ export function toCsv(rows: Row[], columns: string[]): string {
   const sample = rows.find(Boolean) ?? {};
   for (const c of columns) {
     const v = sample[c];
-    if (typeof v === "string" && ISO_DATE.test(v)) extras.push({ name: `${c}_br`, from: c, kind: "data" });
-    if (/^(cpf|cnpj|cpf_cnpj|document)$/.test(c)) extras.push({ name: `${c}_digitos`, from: c, kind: "digitos" });
+    if (typeof v === "string" && ISO_DATE.test(v))
+      extras.push({ name: `${c}_br`, from: c, kind: "data" });
+    if (/^(cpf|cnpj|cpf_cnpj|document)$/.test(c))
+      extras.push({ name: `${c}_digitos`, from: c, kind: "digitos" });
   }
   const header = [...columns, ...extras.map((e) => e.name)];
   const lines = [header.join(CSV_DELIMITER)];
@@ -250,7 +327,9 @@ export function toCsv(rows: Row[], columns: string[]): string {
     const cells = columns.map((c) => csvCell(row[c]));
     for (const e of extras) {
       const raw = row[e.from];
-      cells.push(typeof raw === "string" && raw ? (e.kind === "data" ? brDate(raw) : onlyDigits(raw)) : "");
+      cells.push(
+        typeof raw === "string" && raw ? (e.kind === "data" ? brDate(raw) : onlyDigits(raw)) : "",
+      );
     }
     lines.push(cells.join(CSV_DELIMITER));
   }
@@ -268,8 +347,14 @@ async function fetchTable(
   const rows: Row[] = [];
   const size = 1000;
   for (let page = 0; page < 200; page++) {
-    let q = admin.from(table).select("*").range(page * size, page * size + size - 1);
-    q = table === "organizations" ? q.eq("id", organizationId) : q.eq("organization_id", organizationId);
+    let q = admin
+      .from(table)
+      .select("*")
+      .range(page * size, page * size + size - 1);
+    q =
+      table === "organizations"
+        ? q.eq("id", organizationId)
+        : q.eq("organization_id", organizationId);
     if (orderBy) q = q.order(orderBy, { ascending: true });
     const { data, error } = await q;
     if (error) return { rows, error: error.message };
@@ -323,7 +408,12 @@ export async function buildFullExport(
     .eq("id", organizationId)
     .maybeSingle();
   if (!org) throw new Error("Órgão não encontrado.");
-  const organization = org as { id: string; legal_name: string; short_name: string | null; cnpj: string | null };
+  const organization = org as {
+    id: string;
+    legal_name: string;
+    short_name: string | null;
+    cnpj: string | null;
+  };
 
   const generatedAt = new Date();
   const zipFiles: Record<string, Uint8Array> = {};
@@ -331,7 +421,12 @@ export async function buildFullExport(
   let recordCount = 0;
 
   for (const mod of EXPORT_MODULES) {
-    const { rows, error } = await fetchTable(admin, mod.table, organizationId, mod.orderBy ?? "created_at");
+    const { rows, error } = await fetchTable(
+      admin,
+      mod.table,
+      organizationId,
+      mod.orderBy ?? "created_at",
+    );
     const fallback =
       rows.length === 0 && error
         ? await fetchTable(admin, mod.table, organizationId)
@@ -413,7 +508,10 @@ export async function buildFullExport(
 
   const stamp = `${generatedAt.getFullYear()}${String(generatedAt.getMonth() + 1).padStart(2, "0")}${String(
     generatedAt.getDate(),
-  ).padStart(2, "0")}_${String(generatedAt.getHours()).padStart(2, "0")}${String(generatedAt.getMinutes()).padStart(2, "0")}`;
+  ).padStart(
+    2,
+    "0",
+  )}_${String(generatedAt.getHours()).padStart(2, "0")}${String(generatedAt.getMinutes()).padStart(2, "0")}`;
   const fileName = `FrotaGov_Exportacao_Completa_${slugify(organization.short_name ?? organization.legal_name)}_${stamp}.zip`;
 
   return {

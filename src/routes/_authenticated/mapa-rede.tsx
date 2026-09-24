@@ -35,9 +35,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-import { supabase, useActiveOrgId, useOrganization, usePerms, useUnits, useInvalidate } from "@/lib/frotagov";
+import {
+  supabase,
+  useActiveOrgId,
+  useOrganization,
+  usePerms,
+  useUnits,
+  useInvalidate,
+} from "@/lib/frotagov";
 import { formatNumberBR, parseBRNumber } from "@/lib/format";
 import { exportReportCsv } from "@/lib/reports";
 import { haversineKm } from "@/lib/integracoes";
@@ -62,7 +76,8 @@ export const Route = createFileRoute("/_authenticated/mapa-rede")({
       { property: "og:title", content: "Mapa dos prestadores do órgão — FrotaGov" },
       {
         property: "og:description",
-        content: "Localização dos prestadores cadastrados pelo próprio órgão, com distância aproximada por unidade.",
+        content:
+          "Localização dos prestadores cadastrados pelo próprio órgão, com distância aproximada por unidade.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -98,7 +113,9 @@ function enderecoDe(p: {
   city?: string | null;
   state?: string | null;
 }) {
-  return [p.address, p.district, [p.city, p.state].filter(Boolean).join(" / ")].filter(Boolean).join(" — ");
+  return [p.address, p.district, [p.city, p.state].filter(Boolean).join(" / ")]
+    .filter(Boolean)
+    .join(" — ");
 }
 
 type NetworkEntity = {
@@ -120,8 +137,10 @@ type NetworkEntity = {
 
 /** Classificação do ponto no mapa a partir do objeto do contrato. */
 function contractPointKind(objectKind: string | null, categories: string[]) {
-  if (objectKind === "combustivel_oleos" || categories.includes("posto")) return "Posto / fornecedor";
-  if (objectKind === "higienizacao" || categories.includes("lava-jato")) return "Higienização / lava-jato";
+  if (objectKind === "combustivel_oleos" || categories.includes("posto"))
+    return "Posto / fornecedor";
+  if (objectKind === "higienizacao" || categories.includes("lava-jato"))
+    return "Higienização / lava-jato";
   if (objectKind === "manutencao" || categories.includes("oficina")) return "Oficina";
   return "Credenciado";
 }
@@ -307,13 +326,17 @@ function MapaRede() {
     (u) => (u as { organization_id?: string | null }).organization_id === orgId,
   );
   const unitsWithCoords = orgUnits.filter(
-    (u) => (u as { latitude?: number | null }).latitude != null && (u as { longitude?: number | null }).longitude != null,
+    (u) =>
+      (u as { latitude?: number | null }).latitude != null &&
+      (u as { longitude?: number | null }).longitude != null,
   );
 
   const origin = useMemo(() => {
     if (unitId !== ALL) {
-      const u = orgUnits.find((x) => x.id === unitId) as { latitude?: number | null; longitude?: number | null } | undefined;
-      if (u?.latitude != null && u.longitude != null) return { lat: Number(u.latitude), lon: Number(u.longitude) };
+      const u = orgUnits.find((x) => x.id === unitId) as
+        { latitude?: number | null; longitude?: number | null } | undefined;
+      if (u?.latitude != null && u.longitude != null)
+        return { lat: Number(u.latitude), lon: Number(u.longitude) };
     }
     const la = Number(lat.replace(",", "."));
     const lo = Number(lon.replace(",", "."));
@@ -337,7 +360,8 @@ function MapaRede() {
         (p) =>
           (tipo === ALL || p.tipo === tipo) &&
           (situacao === ALL || p.situacao === situacao) &&
-          (!q || `${p.nome} ${p.cidade} ${p.endereco} ${p.especialidades}`.toLowerCase().includes(q)) &&
+          (!q ||
+            `${p.nome} ${p.cidade} ${p.endereco} ${p.especialidades}`.toLowerCase().includes(q)) &&
           (!raioKm || !Number.isFinite(raioKm) || (p.distancia !== null && p.distancia <= raioKm)),
       )
       .sort((a, b) => {
@@ -362,8 +386,11 @@ function MapaRede() {
       distancia: r.distancia,
     }));
 
-  const pendentes = points.filter((p) => (p.latitude == null || p.longitude == null) && p.address && p.city);
-  const semEndereco = points.filter((p) => p.latitude == null || p.longitude == null).length - pendentes.length;
+  const pendentes = points.filter(
+    (p) => (p.latitude == null || p.longitude == null) && p.address && p.city,
+  );
+  const semEndereco =
+    points.filter((p) => p.latitude == null || p.longitude == null).length - pendentes.length;
 
   /**
    * Localiza os pendentes usando o serviço público e gratuito de
@@ -467,7 +494,12 @@ function MapaRede() {
         <CardContent className="grid gap-3 md:grid-cols-4">
           <div className="md:col-span-2">
             <Label htmlFor="busca">Busca</Label>
-            <Input id="busca" value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Nome, município, endereço ou especialidade" />
+            <Input
+              id="busca"
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              placeholder="Nome, município, endereço ou especialidade"
+            />
           </div>
           <div>
             <Label>Tipo</Label>
@@ -517,15 +549,30 @@ function MapaRede() {
           </div>
           <div>
             <Label htmlFor="lat">Latitude de referência</Label>
-            <Input id="lat" value={lat} onChange={(e) => setLat(e.target.value)} placeholder="-23,5505" />
+            <Input
+              id="lat"
+              value={lat}
+              onChange={(e) => setLat(e.target.value)}
+              placeholder="-23,5505"
+            />
           </div>
           <div>
             <Label htmlFor="lon">Longitude de referência</Label>
-            <Input id="lon" value={lon} onChange={(e) => setLon(e.target.value)} placeholder="-46,6333" />
+            <Input
+              id="lon"
+              value={lon}
+              onChange={(e) => setLon(e.target.value)}
+              placeholder="-46,6333"
+            />
           </div>
           <div>
             <Label htmlFor="raio">Raio máximo (km)</Label>
-            <Input id="raio" value={raio} onChange={(e) => setRaio(e.target.value)} placeholder="50" />
+            <Input
+              id="raio"
+              value={raio}
+              onChange={(e) => setRaio(e.target.value)}
+              placeholder="50"
+            />
           </div>
         </CardContent>
       </Card>
@@ -547,12 +594,17 @@ function MapaRede() {
         <div className="flex flex-wrap items-center gap-4 px-2 py-2 text-xs text-muted-foreground">
           {LEGEND.map((l) => (
             <span key={l.tipo} className="inline-flex items-center gap-1">
-              <span className="inline-block size-3 rounded-full" style={{ backgroundColor: l.cor }} aria-hidden />
+              <span
+                className="inline-block size-3 rounded-full"
+                style={{ backgroundColor: l.cor }}
+                aria-hidden
+              />
               {l.tipo}
             </span>
           ))}
           <span className="inline-flex items-center gap-1">
-            <span className="inline-block size-3 rounded-full bg-destructive" aria-hidden /> Ponto de referência
+            <span className="inline-block size-3 rounded-full bg-destructive" aria-hidden /> Ponto
+            de referência
           </span>
           <span>{mapPoints.length} ponto(s) no mapa</span>
         </div>
@@ -562,13 +614,17 @@ function MapaRede() {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
           <span>
             {pendentes.length} estabelecimento(s) com endereço aguardando localização
-            {semEndereco > 0 ? ` e ${semEndereco} sem endereço suficiente para localizar` : ""}. A busca
-            automática usa serviço público gratuito e processa até 25 endereços por vez; o que não for
-            encontrado deve receber a coordenada manualmente.
+            {semEndereco > 0 ? ` e ${semEndereco} sem endereço suficiente para localizar` : ""}. A
+            busca automática usa serviço público gratuito e processa até 25 endereços por vez; o que
+            não for encontrado deve receber a coordenada manualmente.
           </span>
           {canManageFleet && pendentes.length > 0 && (
             <Button size="sm" variant="outline" onClick={geocodificarPendentes} disabled={running}>
-              {running ? <Loader2 className="size-4 animate-spin" /> : <Crosshair className="size-4" />}
+              {running ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Crosshair className="size-4" />
+              )}
               {running ? "Localizando…" : "Tentar geocodificar pendentes"}
             </Button>
           )}
@@ -607,9 +663,13 @@ function MapaRede() {
                 <TableCell className="max-w-52 truncate">{r.especialidades || "—"}</TableCell>
                 <TableCell className="max-w-64 truncate">{r.endereco || "—"}</TableCell>
                 <TableCell>
-                  <Badge variant={r.situacao === "ativo" ? "default" : "secondary"}>{r.situacao}</Badge>
+                  <Badge variant={r.situacao === "ativo" ? "default" : "secondary"}>
+                    {r.situacao}
+                  </Badge>
                 </TableCell>
-                <TableCell>{r.distancia === null ? "—" : `${formatNumberBR(r.distancia, 2)} km`}</TableCell>
+                <TableCell>
+                  {r.distancia === null ? "—" : `${formatNumberBR(r.distancia, 2)} km`}
+                </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     {r.latitude != null && r.longitude != null ? (
@@ -667,15 +727,15 @@ function ManualCoordinatesDialog({
     setSaving(true);
     try {
       const r = await geocodeRecord(
-      point.table,
-      point.recordId,
-      {
-        address: point.address,
-        district: point.district,
-        city: point.city,
-        state: point.state,
-        zip_code: point.zip_code,
-      },
+        point.table,
+        point.recordId,
+        {
+          address: point.address,
+          district: point.district,
+          city: point.city,
+          state: point.state,
+          zip_code: point.zip_code,
+        },
         { force: true },
       );
       if (r.status === "geocodificado") {
@@ -698,7 +758,14 @@ function ManualCoordinatesDialog({
   async function salvar() {
     const la = Number(lat.replace(",", "."));
     const lo = Number(lon.replace(",", "."));
-    if (!Number.isFinite(la) || !Number.isFinite(lo) || la < -90 || la > 90 || lo < -180 || lo > 180) {
+    if (
+      !Number.isFinite(la) ||
+      !Number.isFinite(lo) ||
+      la < -90 ||
+      la > 90 ||
+      lo < -180 ||
+      lo > 180
+    ) {
       toast.error("Informe latitude entre -90 e 90 e longitude entre -180 e 180.");
       return;
     }
@@ -727,11 +794,21 @@ function ManualCoordinatesDialog({
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <Label htmlFor="mlat">Latitude</Label>
-            <Input id="mlat" value={lat} onChange={(e) => setLat(e.target.value)} placeholder="-23.5505" />
+            <Input
+              id="mlat"
+              value={lat}
+              onChange={(e) => setLat(e.target.value)}
+              placeholder="-23.5505"
+            />
           </div>
           <div>
             <Label htmlFor="mlon">Longitude</Label>
-            <Input id="mlon" value={lon} onChange={(e) => setLon(e.target.value)} placeholder="-46.6333" />
+            <Input
+              id="mlon"
+              value={lon}
+              onChange={(e) => setLon(e.target.value)}
+              placeholder="-46.6333"
+            />
           </div>
         </div>
         <DialogFooter className="gap-2">

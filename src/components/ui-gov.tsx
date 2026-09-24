@@ -45,19 +45,19 @@ const STATUS_TONE: Record<string, StatusTone> = {
   // Frota
   ativo: "ok",
   disponivel: "ok",
-  "disponível": "ok",
+  disponível: "ok",
   reservado: "info",
   "em viagem": "info",
   "em uso": "info",
   autorizada: "info",
   solicitada: "warn",
   manutencao: "warn",
-  "manutenção": "warn",
+  manutenção: "warn",
   "em manutencao": "warn",
   "em manutenção": "warn",
   sinistrado: "danger",
   indisponivel: "danger",
-  "indisponível": "danger",
+  indisponível: "danger",
   bloqueado: "danger",
   inativo: "neutral",
   baixado: "neutral",
@@ -80,7 +80,7 @@ const STATUS_TONE: Record<string, StatusTone> = {
   cancelada: "neutral",
   rejeitada: "danger",
   concluida: "ok",
-  "concluída": "ok",
+  concluída: "ok",
   paga: "ok",
   pendente: "warn",
   rascunho: "neutral",
@@ -89,11 +89,7 @@ const STATUS_TONE: Record<string, StatusTone> = {
 /** Descobre o tom de um estado escrito em português; cai em neutro se não conhecer. */
 export function statusTone(value: string | null | undefined): StatusTone {
   if (!value) return "neutral";
-  const key = value
-    .toString()
-    .trim()
-    .toLowerCase()
-    .replace(/_/g, " ");
+  const key = value.toString().trim().toLowerCase().replace(/_/g, " ");
   return STATUS_TONE[key] ?? "neutral";
 }
 
@@ -159,10 +155,7 @@ export function KpiCard({
       {hint ? <p className="mt-0.5 truncate text-[11px] text-muted-foreground">{hint}</p> : null}
       <span
         aria-hidden
-        className={cn(
-          "absolute inset-x-0 bottom-0 h-[3px] rounded-b-lg",
-          TONE_BAR[tone],
-        )}
+        className={cn("absolute inset-x-0 bottom-0 h-[3px] rounded-b-lg", TONE_BAR[tone])}
       />
     </>
   );
@@ -224,7 +217,13 @@ export function FilterBar({
         {children}
         <div className="ml-auto flex flex-wrap items-center gap-2">
           {extra && onToggleExtra ? (
-            <Button type="button" variant="ghost" size="sm" className="gap-1.5" onClick={onToggleExtra}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="gap-1.5"
+              onClick={onToggleExtra}
+            >
               <Filter className="size-3.5" />
               {showExtra ? "Menos filtros" : "Mais filtros"}
             </Button>
@@ -395,7 +394,8 @@ export function ErrorState({
       </div>
       <p className="gov-title mt-3 text-base">{title}</p>
       <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-        {description ?? "Tente novamente em instantes. Se persistir, avise o administrador do órgão."}
+        {description ??
+          "Tente novamente em instantes. Se persistir, avise o administrador do órgão."}
       </p>
       {onRetry ? (
         <Button variant="outline" size="sm" className="mt-4 gap-1.5" onClick={onRetry}>

@@ -26,10 +26,8 @@ export type ConsumptionSegment =
   Database["public"]["Functions"]["fleet_consumption_segments"]["Returns"][number];
 export type CostRow = Database["public"]["Functions"]["fleet_cost_rows"]["Returns"][number];
 export type DowntimeRow = Database["public"]["Functions"]["fleet_downtime"]["Returns"][number];
-export type ConsumptionParameter =
-  Database["public"]["Tables"]["consumption_parameters"]["Row"];
-export type IntelligenceSettings =
-  Database["public"]["Tables"]["intelligence_settings"]["Row"];
+export type ConsumptionParameter = Database["public"]["Tables"]["consumption_parameters"]["Row"];
+export type IntelligenceSettings = Database["public"]["Tables"]["intelligence_settings"]["Row"];
 export type MeterCorrection = Database["public"]["Tables"]["meter_corrections"]["Row"];
 
 export type IntelFilters = {
@@ -130,7 +128,10 @@ export function useIntelligenceSettings() {
   return useQuery({
     queryKey: ["intelligence-settings"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("intelligence_settings").select("*").maybeSingle();
+      const { data, error } = await supabase
+        .from("intelligence_settings")
+        .select("*")
+        .maybeSingle();
       if (error) throw error;
       return (data ?? null) as IntelligenceSettings | null;
     },
@@ -181,13 +182,7 @@ export type ConsumptionAgg = {
 };
 
 export type Dimension =
-  | "ativo"
-  | "marca_modelo"
-  | "categoria"
-  | "unidade"
-  | "centro_custo"
-  | "condutor"
-  | "combustivel";
+  "ativo" | "marca_modelo" | "categoria" | "unidade" | "centro_custo" | "condutor" | "combustivel";
 
 export const DIMENSIONS: { value: Dimension; label: string }[] = [
   { value: "ativo", label: "Ativo (veículo / equipamento)" },
@@ -202,7 +197,10 @@ export const DIMENSIONS: { value: Dimension; label: string }[] = [
 function dimKey(s: ConsumptionSegment, d: Dimension): [string, string] {
   switch (d) {
     case "marca_modelo":
-      return [`${s.brand ?? ""}|${s.model ?? ""}`, [s.brand, s.model].filter(Boolean).join(" ") || "Sem marca/modelo"];
+      return [
+        `${s.brand ?? ""}|${s.model ?? ""}`,
+        [s.brand, s.model].filter(Boolean).join(" ") || "Sem marca/modelo",
+      ];
     case "categoria":
       return [s.category ?? "—", s.category ?? "Sem tipo"];
     case "unidade":
@@ -578,11 +576,18 @@ export function economicity(input: {
   const unitCosts: { klass: string; v: number }[] = [];
   for (const c of costs) {
     const cons = consMap.get(c.vehicleId);
-    const per = cons?.km ? c.totals.total / cons.km : cons?.hours ? c.totals.total / cons.hours : null;
+    const per = cons?.km
+      ? c.totals.total / cons.km
+      : cons?.hours
+        ? c.totals.total / cons.hours
+        : null;
     if (per != null && per > 0) unitCosts.push({ klass: c.assetClass, v: per });
   }
   const medianFor = (klass: string) => {
-    const vals = unitCosts.filter((u) => u.klass === klass).map((u) => u.v).sort((a, b) => a - b);
+    const vals = unitCosts
+      .filter((u) => u.klass === klass)
+      .map((u) => u.v)
+      .sort((a, b) => a - b);
     if (!vals.length) return null;
     return vals[Math.floor(vals.length / 2)] ?? null;
   };
@@ -603,7 +608,9 @@ export function economicity(input: {
         const pts = Math.max(0, Math.min(30, (ratio - 1) * 30));
         score += pts;
         if (ratio > 1.2)
-          reasons.push(`Custo por ${costPerKm != null ? "km" : "hora"} ${((ratio - 1) * 100).toFixed(0)}% acima da mediana dos ativos comparáveis.`);
+          reasons.push(
+            `Custo por ${costPerKm != null ? "km" : "hora"} ${((ratio - 1) * 100).toFixed(0)}% acima da mediana dos ativos comparáveis.`,
+          );
       }
 
       const acq = Number(v?.acquisition_value ?? 0);
@@ -612,14 +619,19 @@ export function economicity(input: {
         const pts = Math.min(25, share * 100);
         score += pts;
         if (share > 0.1)
-          reasons.push(`Custos do período equivalem a ${(share * 100).toFixed(1)}% do valor de aquisição.`);
+          reasons.push(
+            `Custos do período equivalem a ${(share * 100).toFixed(1)}% do valor de aquisição.`,
+          );
       }
 
       const maint = catValue(c.totals, "manutencao") + catValue(c.totals, "pecas");
       if (c.totals.total > 0) {
         const share = maint / c.totals.total;
         score += Math.min(20, share * 25);
-        if (share > 0.5) reasons.push(`Manutenção e peças representam ${(share * 100).toFixed(0)}% do custo total.`);
+        if (share > 0.5)
+          reasons.push(
+            `Manutenção e peças representam ${(share * 100).toFixed(0)}% do custo total.`,
+          );
       }
 
       let ageYears: number | null = null;
@@ -637,7 +649,8 @@ export function economicity(input: {
       if (periodDays > 0) {
         const share = down / periodDays;
         score += Math.max(0, Math.min(10, share * 40));
-        if (share > 0.1) reasons.push(`Indisponível ${down.toFixed(1)} dia(s) por manutenção no período.`);
+        if (share > 0.1)
+          reasons.push(`Indisponível ${down.toFixed(1)} dia(s) por manutenção no período.`);
       }
 
       const dev = deviations?.get(c.vehicleId) ?? "sem_parametro";

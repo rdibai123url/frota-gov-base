@@ -9,11 +9,30 @@ import { PageHeader } from "@/components/app-shell";
 import { MoneyInput } from "@/components/form-fields";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import {
   TIRE_POSITIONS,
@@ -121,7 +140,12 @@ export function Pneus({ embedded = false }: { embedded?: boolean } = {}) {
         if (fStatus !== ALL && t.status !== fStatus) return false;
         if (fVehicle !== ALL && t.vehicle_id !== fVehicle) return false;
         const q = search.trim().toLowerCase();
-        return !q || `${t.code} ${t.brand ?? ""} ${t.model ?? ""} ${t.size ?? ""} ${t.dot ?? ""}`.toLowerCase().includes(q);
+        return (
+          !q ||
+          `${t.code} ${t.brand ?? ""} ${t.model ?? ""} ${t.size ?? ""} ${t.dot ?? ""}`
+            .toLowerCase()
+            .includes(q)
+        );
       }),
     [tires, fStatus, fVehicle, search],
   );
@@ -180,8 +204,13 @@ export function Pneus({ embedded = false }: { embedded?: boolean } = {}) {
       notes: d.notes || null,
     };
     const { error } = editing
-      ? await supabase.from("tires").update({ ...payload, updated_by: userId }).eq("id", editing.id)
-      : await supabase.from("tires").insert({ ...payload, organization_id: orgId!, created_by: userId });
+      ? await supabase
+          .from("tires")
+          .update({ ...payload, updated_by: userId })
+          .eq("id", editing.id)
+      : await supabase
+          .from("tires")
+          .insert({ ...payload, organization_id: orgId!, created_by: userId });
     setSaving(false);
     if (error) {
       toast.error(error.code === "23505" ? "Já existe um pneu com esse código." : dbMessage(error));
@@ -265,7 +294,10 @@ export function Pneus({ embedded = false }: { embedded?: boolean } = {}) {
             removal_km: km,
             removal_reason: reason || null,
           };
-    const { error } = await supabase.from("tires").update({ ...payload, updated_by: userId }).eq("id", moving.id);
+    const { error } = await supabase
+      .from("tires")
+      .update({ ...payload, updated_by: userId })
+      .eq("id", moving.id);
     if (error) {
       toast.error(dbMessage(error));
       return;
@@ -309,7 +341,11 @@ export function Pneus({ embedded = false }: { embedded?: boolean } = {}) {
       <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <div>
           <Label>Buscar</Label>
-          <Input placeholder="Código, marca, medida, DOT" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input
+            placeholder="Código, marca, medida, DOT"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
         <div>
           <Label>Situação</Label>
@@ -337,7 +373,7 @@ export function Pneus({ embedded = false }: { embedded?: boolean } = {}) {
               <SelectItem value={ALL}>Todos</SelectItem>
               {vehicles.map((v) => (
                 <SelectItem key={v.id} value={v.id}>
-                  {(v.plate ?? v.asset_code)}
+                  {v.plate ?? v.asset_code}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -377,9 +413,11 @@ export function Pneus({ embedded = false }: { embedded?: boolean } = {}) {
             )}
             {paged.rows.map((t) => {
               const life = Number(t.expected_life_km ?? 0);
-              const used = Number(t.accumulated_km ?? 0) + (t.status === "instalado" && t.install_km && t.vehicle?.current_km
-                ? Math.max(0, Number(t.vehicle.current_km) - Number(t.install_km))
-                : 0);
+              const used =
+                Number(t.accumulated_km ?? 0) +
+                (t.status === "instalado" && t.install_km && t.vehicle?.current_km
+                  ? Math.max(0, Number(t.vehicle.current_km) - Number(t.install_km))
+                  : 0);
               return (
                 <TableRow key={t.id}>
                   <TableCell className="font-medium">{t.code}</TableCell>
@@ -389,7 +427,9 @@ export function Pneus({ embedded = false }: { embedded?: boolean } = {}) {
                   </TableCell>
                   <TableCell className="text-sm">
                     {t.size || "—"}
-                    <span className="block text-xs text-muted-foreground">{t.dot ? `DOT ${t.dot}` : ""}</span>
+                    <span className="block text-xs text-muted-foreground">
+                      {t.dot ? `DOT ${t.dot}` : ""}
+                    </span>
                   </TableCell>
                   <TableCell>
                     {t.vehicle ? t.vehicle.plate : "—"}
@@ -403,7 +443,9 @@ export function Pneus({ embedded = false }: { embedded?: boolean } = {}) {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={STATUS_VARIANT[t.status] ?? "secondary"}>{label(TIRE_STATUS, t.status)}</Badge>
+                    <Badge variant={STATUS_VARIANT[t.status] ?? "secondary"}>
+                      {label(TIRE_STATUS, t.status)}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
@@ -419,12 +461,22 @@ export function Pneus({ embedded = false }: { embedded?: boolean } = {}) {
                         <History className="size-4" />
                       </Button>
                       {canManageFleet && !["descartado", "baixado"].includes(t.status) && (
-                        <Button variant="ghost" size="icon" aria-label="Movimentar" onClick={() => openMove(t)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Movimentar"
+                          onClick={() => openMove(t)}
+                        >
                           <Replace className="size-4" />
                         </Button>
                       )}
                       {canManageFleet && (
-                        <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => openEdit(t)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Editar"
+                          onClick={() => openEdit(t)}
+                        >
                           <Pencil className="size-4" />
                         </Button>
                       )}
@@ -459,7 +511,12 @@ export function Pneus({ embedded = false }: { embedded?: boolean } = {}) {
               </div>
               <div>
                 <Label htmlFor="size">Medida</Label>
-                <Input id="size" name="size" placeholder="205/55 R16" defaultValue={editing?.size ?? ""} />
+                <Input
+                  id="size"
+                  name="size"
+                  placeholder="205/55 R16"
+                  defaultValue={editing?.size ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="dot">DOT</Label>
@@ -467,15 +524,28 @@ export function Pneus({ embedded = false }: { embedded?: boolean } = {}) {
               </div>
               <div>
                 <Label htmlFor="serial_number">Número de série</Label>
-                <Input id="serial_number" name="serial_number" defaultValue={editing?.serial_number ?? ""} />
+                <Input
+                  id="serial_number"
+                  name="serial_number"
+                  defaultValue={editing?.serial_number ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="purchase_date">Data de aquisição</Label>
-                <Input id="purchase_date" name="purchase_date" type="date" defaultValue={editing?.purchase_date ?? ""} />
+                <Input
+                  id="purchase_date"
+                  name="purchase_date"
+                  type="date"
+                  defaultValue={editing?.purchase_date ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="purchase_value">Valor de aquisição (R$)</Label>
-                <MoneyInput id="purchase_value" name="purchase_value" defaultValue={editing?.purchase_value ?? ""} />
+                <MoneyInput
+                  id="purchase_value"
+                  name="purchase_value"
+                  defaultValue={editing?.purchase_value ?? ""}
+                />
               </div>
               <div>
                 <Label>Fornecedor</Label>
@@ -504,7 +574,12 @@ export function Pneus({ embedded = false }: { embedded?: boolean } = {}) {
               </div>
               <div>
                 <Label htmlFor="warranty_until">Garantia até</Label>
-                <Input id="warranty_until" name="warranty_until" type="date" defaultValue={editing?.warranty_until ?? ""} />
+                <Input
+                  id="warranty_until"
+                  name="warranty_until"
+                  type="date"
+                  defaultValue={editing?.warranty_until ?? ""}
+                />
               </div>
               <div className="sm:col-span-3">
                 <Label htmlFor="notes">Observações</Label>
@@ -556,7 +631,7 @@ export function Pneus({ embedded = false }: { embedded?: boolean } = {}) {
                       <SelectItem value={NONE}>Selecione</SelectItem>
                       {vehicles.map((v) => (
                         <SelectItem key={v.id} value={v.id}>
-                          {(v.plate ?? v.asset_code)}
+                          {v.plate ?? v.asset_code}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -618,10 +693,14 @@ export function Pneus({ embedded = false }: { embedded?: boolean } = {}) {
             {histTire && (
               <p className="text-muted-foreground">
                 Aquisição: {histTire.purchase_date ? dateBR(histTire.purchase_date) : "—"} ·{" "}
-                {histTire.purchase_value ? brl(Number(histTire.purchase_value)) : "valor não informado"}
+                {histTire.purchase_value
+                  ? brl(Number(histTire.purchase_value))
+                  : "valor não informado"}
               </p>
             )}
-            {movements.length === 0 && <p className="text-muted-foreground">Nenhuma movimentação registrada.</p>}
+            {movements.length === 0 && (
+              <p className="text-muted-foreground">Nenhuma movimentação registrada.</p>
+            )}
             {movements.map((m) => (
               <div key={m.id} className="rounded-md border p-3">
                 <p className="font-medium">

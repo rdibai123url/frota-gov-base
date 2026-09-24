@@ -38,7 +38,9 @@ export const runFullExport = createServerFn({ method: "POST" })
       supabase.rpc("has_role", { _user_id: userId, _role: "auditor" }),
     ]);
     if (!isSuper && !isOrgAdmin && !isAuditor) {
-      throw new Error("Apenas Super Admin, Administrador do órgão ou Auditoria podem exportar todos os dados.");
+      throw new Error(
+        "Apenas Super Admin, Administrador do órgão ou Auditoria podem exportar todos os dados.",
+      );
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

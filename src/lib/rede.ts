@@ -16,13 +16,7 @@ import { onlyDigits, useContracts, type ContractItem, type ContractRow } from "@
 
 /** Categorias operacionais reconhecidas na rede. */
 export type NetworkCategory =
-  | "combustivel"
-  | "pecas"
-  | "pneus"
-  | "manutencao"
-  | "higienizacao"
-  | "seguros"
-  | "outro";
+  "combustivel" | "pecas" | "pneus" | "manutencao" | "higienizacao" | "seguros" | "outro";
 
 export const NETWORK_CATEGORY_LABELS: Record<NetworkCategory, string> = {
   combustivel: "Combustível e derivados",

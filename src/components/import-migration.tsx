@@ -34,7 +34,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -44,7 +50,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { ListPagination, usePaged } from "@/components/list-pagination";
 import { MoneyInput } from "@/components/form-fields";
 import { supabase } from "@/integrations/supabase/client";
@@ -91,25 +104,79 @@ function useLookups(orgId: string | null) {
     queryKey: ["import-lookups", orgId],
     enabled: Boolean(orgId),
     queryFn: async (): Promise<Lookups> => {
-      const [units, vehicles, suppliers, drivers, fuels, contracts, costCenters] = await Promise.all([
-        supabase.from("units").select("id,name,acronym").eq("organization_id", orgId!),
-        supabase.from("vehicles").select("id,plate,renavam,chassis,asset_code").eq("organization_id", orgId!),
-        supabase.from("suppliers").select("id,legal_name,trade_name,cnpj").eq("organization_id", orgId!),
-        supabase.from("drivers").select("id,full_name,cpf,license_number").eq("organization_id", orgId!),
-        supabase.from("fuel_types").select("id,name,acronym").eq("organization_id", orgId!),
-        supabase.from("contracts").select("id,number").eq("organization_id", orgId!),
-        supabase.from("cost_centers").select("id,code,name").eq("organization_id", orgId!),
-      ]);
-      const map = <T,>(rows: T[] | null, keys: (r: T) => (string | null)[], label: (r: T) => string, id: (r: T) => string): LookupItem[] =>
-        (rows ?? []).map((r) => ({ id: id(r), keys: keys(r).filter(Boolean) as string[], label: label(r) }));
+      const [units, vehicles, suppliers, drivers, fuels, contracts, costCenters] =
+        await Promise.all([
+          supabase.from("units").select("id,name,acronym").eq("organization_id", orgId!),
+          supabase
+            .from("vehicles")
+            .select("id,plate,renavam,chassis,asset_code")
+            .eq("organization_id", orgId!),
+          supabase
+            .from("suppliers")
+            .select("id,legal_name,trade_name,cnpj")
+            .eq("organization_id", orgId!),
+          supabase
+            .from("drivers")
+            .select("id,full_name,cpf,license_number")
+            .eq("organization_id", orgId!),
+          supabase.from("fuel_types").select("id,name,acronym").eq("organization_id", orgId!),
+          supabase.from("contracts").select("id,number").eq("organization_id", orgId!),
+          supabase.from("cost_centers").select("id,code,name").eq("organization_id", orgId!),
+        ]);
+      const map = <T,>(
+        rows: T[] | null,
+        keys: (r: T) => (string | null)[],
+        label: (r: T) => string,
+        id: (r: T) => string,
+      ): LookupItem[] =>
+        (rows ?? []).map((r) => ({
+          id: id(r),
+          keys: keys(r).filter(Boolean) as string[],
+          label: label(r),
+        }));
       return {
-        unit: map(units.data, (u) => [u.name, u.acronym], (u) => u.name, (u) => u.id),
-        vehicle: map(vehicles.data, (v) => [v.plate, v.renavam, v.chassis, v.asset_code], (v) => v.plate ?? v.asset_code ?? "Sem identificação", (v) => v.id),
-        supplier: map(suppliers.data, (s) => [s.cnpj, s.legal_name, s.trade_name], (s) => s.legal_name, (s) => s.id),
-        driver: map(drivers.data, (d) => [d.cpf, d.full_name, d.license_number], (d) => d.full_name, (d) => d.id),
-        fuel: map(fuels.data, (f) => [f.name, f.acronym], (f) => f.name, (f) => f.id),
-        contract: map(contracts.data, (c) => [c.number], (c) => c.number, (c) => c.id),
-        cost_center: map(costCenters.data, (c) => [c.code, c.name], (c) => c.name, (c) => c.id),
+        unit: map(
+          units.data,
+          (u) => [u.name, u.acronym],
+          (u) => u.name,
+          (u) => u.id,
+        ),
+        vehicle: map(
+          vehicles.data,
+          (v) => [v.plate, v.renavam, v.chassis, v.asset_code],
+          (v) => v.plate ?? v.asset_code ?? "Sem identificação",
+          (v) => v.id,
+        ),
+        supplier: map(
+          suppliers.data,
+          (s) => [s.cnpj, s.legal_name, s.trade_name],
+          (s) => s.legal_name,
+          (s) => s.id,
+        ),
+        driver: map(
+          drivers.data,
+          (d) => [d.cpf, d.full_name, d.license_number],
+          (d) => d.full_name,
+          (d) => d.id,
+        ),
+        fuel: map(
+          fuels.data,
+          (f) => [f.name, f.acronym],
+          (f) => f.name,
+          (f) => f.id,
+        ),
+        contract: map(
+          contracts.data,
+          (c) => [c.number],
+          (c) => c.number,
+          (c) => c.id,
+        ),
+        cost_center: map(
+          costCenters.data,
+          (c) => [c.code, c.name],
+          (c) => c.name,
+          (c) => c.id,
+        ),
       };
     },
   });
@@ -131,7 +198,10 @@ async function loadExisting(mod: ImportModule, orgId: string) {
   };
   switch (mod.id) {
     case "unidades": {
-      const { data } = await supabase.from("units").select("id,name,acronym").eq("organization_id", orgId);
+      const { data } = await supabase
+        .from("units")
+        .select("id,name,acronym")
+        .eq("organization_id", orgId);
       for (const r of data ?? []) {
         add("name", r.name, r.id);
         add("acronym", r.acronym, r.id);
@@ -139,7 +209,10 @@ async function loadExisting(mod: ImportModule, orgId: string) {
       break;
     }
     case "veiculos": {
-      const { data } = await supabase.from("vehicles").select("id,plate,renavam,chassis,asset_code").eq("organization_id", orgId);
+      const { data } = await supabase
+        .from("vehicles")
+        .select("id,plate,renavam,chassis,asset_code")
+        .eq("organization_id", orgId);
       for (const r of data ?? []) {
         add("plate", r.plate, r.id);
         add("renavam", r.renavam, r.id);
@@ -149,7 +222,10 @@ async function loadExisting(mod: ImportModule, orgId: string) {
       break;
     }
     case "condutores": {
-      const { data } = await supabase.from("drivers").select("id,cpf,license_number").eq("organization_id", orgId);
+      const { data } = await supabase
+        .from("drivers")
+        .select("id,cpf,license_number")
+        .eq("organization_id", orgId);
       for (const r of data ?? []) {
         add("cpf", r.cpf, r.id);
         add("license_number", r.license_number, r.id);
@@ -157,7 +233,10 @@ async function loadExisting(mod: ImportModule, orgId: string) {
       break;
     }
     case "fornecedores": {
-      const { data } = await supabase.from("suppliers").select("id,cnpj,legal_name").eq("organization_id", orgId);
+      const { data } = await supabase
+        .from("suppliers")
+        .select("id,cnpj,legal_name")
+        .eq("organization_id", orgId);
       for (const r of data ?? []) {
         add("cnpj", r.cnpj, r.id);
         add("legal_name", r.legal_name, r.id);
@@ -165,37 +244,58 @@ async function loadExisting(mod: ImportModule, orgId: string) {
       break;
     }
     case "produtos": {
-      const { data } = await supabase.from("fuel_types").select("id,name").eq("organization_id", orgId);
+      const { data } = await supabase
+        .from("fuel_types")
+        .select("id,name")
+        .eq("organization_id", orgId);
       for (const r of data ?? []) add("name", r.name, r.id);
       break;
     }
     case "centros_custo": {
-      const { data } = await supabase.from("cost_centers").select("id,code").eq("organization_id", orgId);
+      const { data } = await supabase
+        .from("cost_centers")
+        .select("id,code")
+        .eq("organization_id", orgId);
       for (const r of data ?? []) add("code", r.code, r.id);
       break;
     }
     case "contratos": {
-      const { data } = await supabase.from("contracts").select("id,number").eq("organization_id", orgId);
+      const { data } = await supabase
+        .from("contracts")
+        .select("id,number")
+        .eq("organization_id", orgId);
       for (const r of data ?? []) add("number", r.number, r.id);
       break;
     }
     case "empenhos": {
-      const { data } = await supabase.from("commitments").select("id,number").eq("organization_id", orgId);
+      const { data } = await supabase
+        .from("commitments")
+        .select("id,number")
+        .eq("organization_id", orgId);
       for (const r of data ?? []) add("number", r.number, r.id);
       break;
     }
     case "multas": {
-      const { data } = await supabase.from("traffic_fines").select("id,notice_number").eq("organization_id", orgId);
+      const { data } = await supabase
+        .from("traffic_fines")
+        .select("id,notice_number")
+        .eq("organization_id", orgId);
       for (const r of data ?? []) add("notice_number", r.notice_number, r.id);
       break;
     }
     case "seguros": {
-      const { data } = await supabase.from("insurance_policies").select("id,policy_number").eq("organization_id", orgId);
+      const { data } = await supabase
+        .from("insurance_policies")
+        .select("id,policy_number")
+        .eq("organization_id", orgId);
       for (const r of data ?? []) add("policy_number", r.policy_number, r.id);
       break;
     }
     case "entidades": {
-      const { data } = await supabase.from("external_entities").select("id,name,document").eq("organization_id", orgId);
+      const { data } = await supabase
+        .from("external_entities")
+        .select("id,name,document")
+        .eq("organization_id", orgId);
       for (const r of data ?? []) {
         add("name", r.name, r.id);
         add("document", r.document, r.id);
@@ -218,7 +318,8 @@ export function ImportMigrationTab() {
       <div className="flex items-start gap-3 rounded-lg border border-warning/40 bg-warning/10 p-4 text-sm">
         <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
         <p>
-          Acesse um órgão na aba <strong>Órgãos</strong> para executar a importação e a migração de dados daquele órgão.
+          Acesse um órgão na aba <strong>Órgãos</strong> para executar a importação e a migração de
+          dados daquele órgão.
         </p>
       </div>
     );
@@ -256,8 +357,9 @@ function OrderTab() {
       <div className="flex items-start gap-3 rounded-lg border bg-muted/40 p-4 text-sm text-muted-foreground">
         <ListOrdered className="mt-0.5 size-4 shrink-0" />
         <p>
-          Siga esta ordem para que cada arquivo encontre os cadastros que ele referencia. Um registro que aponte para
-          um cadastro inexistente é bloqueado com a mensagem indicando qual módulo precisa ser importado antes.
+          Siga esta ordem para que cada arquivo encontre os cadastros que ele referencia. Um
+          registro que aponte para um cadastro inexistente é bloqueado com a mensagem indicando qual
+          módulo precisa ser importado antes.
         </p>
       </div>
       <div className="overflow-x-auto rounded-lg border bg-card shadow-card">
@@ -281,7 +383,9 @@ function OrderTab() {
                     <p className="text-xs text-muted-foreground">{m.description}</p>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {m.depends.length ? m.depends.map((d) => moduleById(d)?.label ?? d).join(", ") : "—"}
+                    {m.depends.length
+                      ? m.depends.map((d) => moduleById(d)?.label ?? d).join(", ")
+                      : "—"}
                   </TableCell>
                   <TableCell>
                     <Badge variant={m.legacy ? "secondary" : "outline"}>
@@ -317,7 +421,11 @@ function ImportWizard({ orgId }: { orgId: string }) {
   const [batchId, setBatchId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [editing, setEditing] = useState<ValidatedRow | null>(null);
-  const [report, setReport] = useState<{ criados: number; atualizados: number; ignorados: number } | null>(null);
+  const [report, setReport] = useState<{
+    criados: number;
+    atualizados: number;
+    ignorados: number;
+  } | null>(null);
 
   const mod = moduleById(moduleId)!;
   const summary = validated ? summarize(validated) : null;
@@ -462,7 +570,15 @@ function ImportWizard({ orgId }: { orgId: string }) {
       const result = data as unknown as { criados: number; atualizados: number; ignorados: number };
       setReport(result);
       invalidate(["import-batches"]);
-      invalidate(["units", "vehicles", "drivers", "suppliers", "fuel-types", "contracts", "commitments"]);
+      invalidate([
+        "units",
+        "vehicles",
+        "drivers",
+        "suppliers",
+        "fuel-types",
+        "contracts",
+        "commitments",
+      ]);
       toast.success(`Importação concluída: ${result.criados + result.atualizados} registro(s).`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Falha na importação definitiva.");
@@ -475,7 +591,10 @@ function ImportWizard({ orgId }: { orgId: string }) {
     if (!batchId) return;
     const { error } = await supabase
       .from("import_batches")
-      .update({ status: "cancelado", cancel_reason: "Cancelado pelo usuário antes da importação definitiva" })
+      .update({
+        status: "cancelado",
+        cancel_reason: "Cancelado pelo usuário antes da importação definitiva",
+      })
       .eq("id", batchId);
     if (error) {
       toast.error("Não foi possível cancelar o lote.");
@@ -551,8 +670,9 @@ function ImportWizard({ orgId }: { orgId: string }) {
           <div className="mt-4 flex items-start gap-2 rounded-md border border-warning/40 bg-warning/10 p-3 text-xs">
             <Info className="mt-0.5 size-4 shrink-0 text-warning" />
             <p>
-              Migração histórica: os registros entram marcados como legado, com o sistema de origem informado, sem
-              autorização eletrônica e <strong>sem consumir saldo</strong> de contrato, empenho ou cota.
+              Migração histórica: os registros entram marcados como legado, com o sistema de origem
+              informado, sem autorização eletrônica e <strong>sem consumir saldo</strong> de
+              contrato, empenho ou cota.
             </p>
           </div>
         )}
@@ -589,7 +709,12 @@ function ImportWizard({ orgId }: { orgId: string }) {
             </div>
             <div>
               <Label htmlFor="obs">Observação</Label>
-              <Input id="obs" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Opcional" />
+              <Input
+                id="obs"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Opcional"
+              />
             </div>
           </div>
 
@@ -634,7 +759,9 @@ function ImportWizard({ orgId }: { orgId: string }) {
                         </SelectContent>
                       </Select>
                     </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{fieldHint(f) || "—"}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {fieldHint(f) || "—"}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -672,7 +799,8 @@ function ImportWizard({ orgId }: { orgId: string }) {
 
           <div className="mt-4 flex flex-wrap gap-2">
             <Button onClick={() => void runValidation()} disabled={busy} className="gap-2">
-              {busy ? <Loader2 className="size-4 animate-spin" /> : <Play className="size-4" />} Validar (simulação)
+              {busy ? <Loader2 className="size-4 animate-spin" /> : <Play className="size-4" />}{" "}
+              Validar (simulação)
             </Button>
             <Button variant="outline" onClick={() => reset()} disabled={busy}>
               Recomeçar
@@ -694,31 +822,52 @@ function ImportWizard({ orgId }: { orgId: string }) {
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button variant="outline" className="gap-2" onClick={() => downloadIssues(mod, validated)}>
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() => downloadIssues(mod, validated)}
+            >
               <Download className="size-4" /> Baixar ocorrências
             </Button>
-            <Button variant="outline" className="gap-2" onClick={() => void runValidation()} disabled={busy}>
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() => void runValidation()}
+              disabled={busy}
+            >
               <RotateCcw className="size-4" /> Revalidar
             </Button>
             {!report && (
               <Button
                 className="gap-2"
-                disabled={busy || blocking || !batchId || (strategy === "rejeitar" && summary.duplicate > 0)}
+                disabled={
+                  busy || blocking || !batchId || (strategy === "rejeitar" && summary.duplicate > 0)
+                }
                 onClick={() => void commit()}
               >
-                {busy ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />} Importar
-                definitivamente
+                {busy ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="size-4" />
+                )}{" "}
+                Importar definitivamente
               </Button>
             )}
             {!report && (
-              <Button variant="ghost" className="text-destructive" onClick={() => void cancelBatch()} disabled={busy}>
+              <Button
+                variant="ghost"
+                className="text-destructive"
+                onClick={() => void cancelBatch()}
+                disabled={busy}
+              >
                 Cancelar lote
               </Button>
             )}
           </div>
           {blocking && (
             <p className="mt-3 text-xs text-destructive">
-              Existem linhas com erro. Corrija o arquivo e reenvie, ou ajuste os campos diretamente abaixo e revalide.
+              Existem linhas com erro. Corrija o arquivo e reenvie, ou ajuste os campos diretamente
+              abaixo e revalide.
             </p>
           )}
 
@@ -767,7 +916,12 @@ function ImportWizard({ orgId }: { orgId: string }) {
                     </TableCell>
                     <TableCell>
                       {!report && (
-                        <Button variant="ghost" size="icon" aria-label="Corrigir" onClick={() => setEditing(r)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Corrigir"
+                          onClick={() => setEditing(r)}
+                        >
                           <Pencil className="size-4" />
                         </Button>
                       )}
@@ -828,7 +982,13 @@ function ImportWizard({ orgId }: { orgId: string }) {
 }
 
 function Steps({ step }: { step: WizardStep }) {
-  const labels = ["Módulo e modelo", "Arquivo e mapeamento", "Simulação", "Correções", "Importação"];
+  const labels = [
+    "Módulo e modelo",
+    "Arquivo e mapeamento",
+    "Simulação",
+    "Correções",
+    "Importação",
+  ];
   return (
     <ol className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
       {labels.map((l, i) => (
@@ -845,9 +1005,23 @@ function Steps({ step }: { step: WizardStep }) {
   );
 }
 
-function Metric({ label, value, tone }: { label: string; value: number; tone?: "success" | "warning" | "destructive" }) {
+function Metric({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone?: "success" | "warning" | "destructive";
+}) {
   const color =
-    tone === "success" ? "text-success" : tone === "warning" ? "text-warning" : tone === "destructive" ? "text-destructive" : "";
+    tone === "success"
+      ? "text-success"
+      : tone === "warning"
+        ? "text-warning"
+        : tone === "destructive"
+          ? "text-destructive"
+          : "";
   return (
     <div className="rounded-md border bg-muted/30 p-3">
       <p className="text-xs text-muted-foreground">{label}</p>
@@ -908,7 +1082,8 @@ function BatchesTab({ orgId }: { orgId: string }) {
     if (fFrom && new Date(b.created_at) < new Date(`${fFrom}T00:00:00`)) return false;
     if (fTo && new Date(b.created_at) > new Date(`${fTo}T23:59:59`)) return false;
     const t = fText.trim().toLowerCase();
-    if (t && ![b.file_name, b.source_system].filter(Boolean).join(" ").toLowerCase().includes(t)) return false;
+    if (t && ![b.file_name, b.source_system].filter(Boolean).join(" ").toLowerCase().includes(t))
+      return false;
     return true;
   });
   const paged = usePaged(filtered);
@@ -917,9 +1092,14 @@ function BatchesTab({ orgId }: { orgId: string }) {
     if (!annulling) return;
     setBusy(true);
     try {
-      const { error } = await supabase.rpc("annul_import_batch", { _batch: annulling, _reason: reason });
+      const { error } = await supabase.rpc("annul_import_batch", {
+        _batch: annulling,
+        _reason: reason,
+      });
       if (error) throw error;
-      toast.success("Lote anulado. Os registros foram cancelados/inativados e o histórico foi preservado.");
+      toast.success(
+        "Lote anulado. Os registros foram cancelados/inativados e o histórico foi preservado.",
+      );
       setAnnulling(null);
       setReason("");
       invalidate(["import-batches"]);
@@ -936,23 +1116,33 @@ function BatchesTab({ orgId }: { orgId: string }) {
         <div>
           <Label className="text-xs">Módulo</Label>
           <Select value={fModule} onValueChange={setFModule}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="__all__">Todos</SelectItem>
-              {[...IMPORT_MODULES].sort((a, b) => a.order - b.order).map((m) => (
-                <SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>
-              ))}
+              {[...IMPORT_MODULES]
+                .sort((a, b) => a.order - b.order)
+                .map((m) => (
+                  <SelectItem key={m.id} value={m.id}>
+                    {m.label}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>
         <div>
           <Label className="text-xs">Situação</Label>
           <Select value={fStatus} onValueChange={setFStatus}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="__all__">Todas</SelectItem>
               {Object.entries(BATCH_STATUS_LABELS).map(([k, v]) => (
-                <SelectItem key={k} value={k}>{v}</SelectItem>
+                <SelectItem key={k} value={k}>
+                  {v}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -1017,11 +1207,18 @@ function BatchesTab({ orgId }: { orgId: string }) {
                   <Badge variant={statusTone[b.status] ?? "outline"}>
                     {BATCH_STATUS_LABELS[b.status] ?? b.status}
                   </Badge>
-                  {b.annul_reason && <p className="mt-1 text-xs text-muted-foreground">{b.annul_reason}</p>}
+                  {b.annul_reason && (
+                    <p className="mt-1 text-xs text-muted-foreground">{b.annul_reason}</p>
+                  )}
                 </TableCell>
                 <TableCell>
                   {isSuperAdmin && b.status === "concluido" && (
-                    <Button variant="ghost" size="sm" className="text-destructive" onClick={() => setAnnulling(b.id)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive"
+                      onClick={() => setAnnulling(b.id)}
+                    >
                       Anular
                     </Button>
                   )}
@@ -1039,18 +1236,27 @@ function BatchesTab({ orgId }: { orgId: string }) {
             <DialogTitle>Anular lote concluído</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Os registros criados por este lote serão cancelados ou inativados, com registro em auditoria. Nada é
-            apagado do banco de dados.
+            Os registros criados por este lote serão cancelados ou inativados, com registro em
+            auditoria. Nada é apagado do banco de dados.
           </p>
           <div>
             <Label htmlFor="annul-reason">Justificativa *</Label>
-            <Textarea id="annul-reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} />
+            <Textarea
+              id="annul-reason"
+              rows={3}
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+            />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAnnulling(null)}>
               Voltar
             </Button>
-            <Button variant="destructive" disabled={busy || reason.trim().length < 5} onClick={() => void annul()}>
+            <Button
+              variant="destructive"
+              disabled={busy || reason.trim().length < 5}
+              onClick={() => void annul()}
+            >
               {busy ? "Anulando…" : "Anular lote"}
             </Button>
           </DialogFooter>
@@ -1123,8 +1329,9 @@ function OpeningBalancesTab({ orgId }: { orgId: string }) {
         <div className="flex items-start gap-3 rounded-lg border bg-muted/40 p-4 text-sm text-muted-foreground">
           <Info className="mt-0.5 size-4 shrink-0" />
           <p>
-            Rotina exclusiva de implantação. Registra a posição de saldos na virada de sistema, com data-base e
-            justificativa obrigatórias. Não é uma transação operacional e não substitui contratos, empenhos ou cotas.
+            Rotina exclusiva de implantação. Registra a posição de saldos na virada de sistema, com
+            data-base e justificativa obrigatórias. Não é uma transação operacional e não substitui
+            contratos, empenhos ou cotas.
           </p>
         </div>
         {canManageFinance && (
@@ -1163,14 +1370,22 @@ function OpeningBalancesTab({ orgId }: { orgId: string }) {
             )}
             {paged.rows.map((r) => (
               <TableRow key={r.id}>
-                <TableCell>{new Date(`${r.base_date}T12:00:00`).toLocaleDateString("pt-BR")}</TableCell>
-                <TableCell>{OPENING_BALANCE_KINDS.find((k) => k.value === r.kind)?.label ?? r.kind}</TableCell>
+                <TableCell>
+                  {new Date(`${r.base_date}T12:00:00`).toLocaleDateString("pt-BR")}
+                </TableCell>
+                <TableCell>
+                  {OPENING_BALANCE_KINDS.find((k) => k.value === r.kind)?.label ?? r.kind}
+                </TableCell>
                 <TableCell>{r.reference_label}</TableCell>
-                <TableCell className="text-right">{r.value === null ? "—" : formatBRL(r.value)}</TableCell>
+                <TableCell className="text-right">
+                  {r.value === null ? "—" : formatBRL(r.value)}
+                </TableCell>
                 <TableCell className="text-right">
                   {r.quantity === null ? "—" : formatNumberBR(r.quantity, 4)}
                 </TableCell>
-                <TableCell className="max-w-80 text-xs text-muted-foreground">{r.justification}</TableCell>
+                <TableCell className="max-w-80 text-xs text-muted-foreground">
+                  {r.justification}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -1201,7 +1416,11 @@ function OpeningBalancesTab({ orgId }: { orgId: string }) {
             </div>
             <div>
               <Label htmlFor="reference">Referência *</Label>
-              <Input id="reference" name="reference" placeholder="Contrato 012/2026, placa ABC1D23…" />
+              <Input
+                id="reference"
+                name="reference"
+                placeholder="Contrato 012/2026, placa ABC1D23…"
+              />
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
               <div>
@@ -1224,7 +1443,12 @@ function OpeningBalancesTab({ orgId }: { orgId: string }) {
             </div>
             <div>
               <Label htmlFor="justification">Justificativa *</Label>
-              <Textarea id="justification" name="justification" rows={3} placeholder="Fundamento da posição de abertura" />
+              <Textarea
+                id="justification"
+                name="justification"
+                rows={3}
+                placeholder="Fundamento da posição de abertura"
+              />
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>

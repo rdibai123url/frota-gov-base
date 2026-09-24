@@ -52,7 +52,11 @@ function fromHeader(s: EmailSettings) {
   return `"${name}" <${s.from_email}>`;
 }
 
-async function sendResend(s: EmailSettings, secret: string, msg: EmailMessage): Promise<string | null> {
+async function sendResend(
+  s: EmailSettings,
+  secret: string,
+  msg: EmailMessage,
+): Promise<string | null> {
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/json" },
@@ -103,9 +107,9 @@ type SmtpSocket = {
 async function openSocket(host: string, port: number, secure: boolean): Promise<SmtpSocket> {
   // `cloudflare:sockets` no runtime de produção (Workers).
   const specifier = "cloudflare:sockets";
-  const mod = (await import(/* @vite-ignore */ specifier).catch(() => null)) as
-    | { connect: (addr: string, opts?: Record<string, unknown>) => unknown }
-    | null;
+  const mod = (await import(/* @vite-ignore */ specifier).catch(() => null)) as {
+    connect: (addr: string, opts?: Record<string, unknown>) => unknown;
+  } | null;
   if (!mod?.connect) throw new Error("SMTP indisponível neste runtime.");
   const socket = mod.connect(`${host}:${port}`, secure ? { secureTransport: "starttls" } : {}) as {
     writable: WritableStream<Uint8Array>;
@@ -230,7 +234,11 @@ export type InviteEmailData = {
 };
 
 /** Template institucional responsivo + versão texto simples. */
-export function renderInviteEmail(d: InviteEmailData): { subject: string; html: string; text: string } {
+export function renderInviteEmail(d: InviteEmailData): {
+  subject: string;
+  html: string;
+  text: string;
+} {
   const subject = `Convite para cotação ${d.quotationCode} — ${d.orgName}`;
   const rows = d.items.length
     ? d.items
@@ -291,7 +299,10 @@ export function renderInviteEmail(d: InviteEmailData): { subject: string; html: 
     ``,
     `Itens / serviços:`,
     ...(d.items.length
-      ? d.items.map((i) => `  ${i.sequence}. ${i.description} — ${String(i.quantity).replace(".", ",")} ${i.measure_unit}`)
+      ? d.items.map(
+          (i) =>
+            `  ${i.sequence}. ${i.description} — ${String(i.quantity).replace(".", ",")} ${i.measure_unit}`,
+        )
       : ["  Detalhados no link da cotação."]),
     d.notes ? `\nObservações: ${d.notes}` : "",
     ``,

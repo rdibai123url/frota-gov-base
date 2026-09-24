@@ -213,7 +213,10 @@ export async function sha256Hex(data: ArrayBuffer | Uint8Array | string) {
 /** Remove qualquer valor parecido com segredo antes de gravar log técnico. */
 export function sanitizeLog(text: string) {
   return text
-    .replace(/(?:password|senha|secret|token|api[_-]?key|access[_-]?key|private[_-]?key|authorization)\s*[:=]\s*\S+/gi, "$&".replace(/[:=]\s*\S+/, ": ***"))
+    .replace(
+      /(?:password|senha|secret|token|api[_-]?key|access[_-]?key|private[_-]?key|authorization)\s*[:=]\s*\S+/gi,
+      "$&".replace(/[:=]\s*\S+/, ": ***"),
+    )
     .replace(/AKIA[0-9A-Z]{12,}/g, "***")
     .replace(/eyJ[\w-]+\.[\w-]+\.[\w-]+/g, "***")
     .replace(/sb_secret_[\w-]+/g, "***")
@@ -221,7 +224,10 @@ export function sanitizeLog(text: string) {
     .slice(0, 8000);
 }
 
-export function cycleKeyFor(settings: Pick<BackupSettingsRow, "hour" | "minute" | "timezone">, at = new Date()) {
+export function cycleKeyFor(
+  settings: Pick<BackupSettingsRow, "hour" | "minute" | "timezone">,
+  at = new Date(),
+) {
   const day = new Intl.DateTimeFormat("en-CA", {
     timeZone: settings.timezone,
     year: "numeric",
@@ -234,7 +240,10 @@ export function cycleKeyFor(settings: Pick<BackupSettingsRow, "hour" | "minute" 
 }
 
 /** Próxima execução prevista, em ISO, considerando o fuso do órgão. */
-export function nextRunAt(settings: Pick<BackupSettingsRow, "hour" | "minute" | "timezone">, at = new Date()) {
+export function nextRunAt(
+  settings: Pick<BackupSettingsRow, "hour" | "minute" | "timezone">,
+  at = new Date(),
+) {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: settings.timezone,
     hour12: false,
@@ -258,13 +267,15 @@ export function destinationPath(base: string, orgSlug: string, when: Date) {
 }
 
 export function orgSlug(name: string) {
-  return name
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 48) || "orgao";
+  return (
+    name
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 48) || "orgao"
+  );
 }
 
 /* --------------------------- credenciais (env) -------------------------- */
@@ -290,7 +301,13 @@ export function readCredentials(secretName: string | null | undefined): Credenti
 /* ------------------------------ S3 (SigV4) ------------------------------ */
 
 async function hmac(key: ArrayBuffer | Uint8Array, data: string) {
-  const cryptoKey = await crypto.subtle.importKey("raw", key as BufferSource, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    key as BufferSource,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
   return crypto.subtle.sign("HMAC", cryptoKey, enc.encode(data));
 }
 
@@ -303,7 +320,10 @@ export async function s3Request(
 ) {
   const region = settings.s3_region || creds["region"] || "us-east-1";
   const bucket = settings.s3_bucket!;
-  const endpoint = (settings.s3_endpoint || `https://s3.${region}.amazonaws.com`).replace(/\/+$/, "");
+  const endpoint = (settings.s3_endpoint || `https://s3.${region}.amazonaws.com`).replace(
+    /\/+$/,
+    "",
+  );
   const host = new URL(endpoint).host;
   const url = `${endpoint}/${bucket}/${key.replace(/^\/+/, "")}`;
 
@@ -351,7 +371,11 @@ type Collected = {
   warnings: string[];
 };
 
-async function collect(admin: Admin, settings: BackupSettingsRow, org: { id: string; legal_name: string }): Promise<Collected> {
+async function collect(
+  admin: Admin,
+  settings: BackupSettingsRow,
+  org: { id: string; legal_name: string },
+): Promise<Collected> {
   const warnings: string[] = [];
   const data: Record<string, unknown[]> = {};
   const counts: Record<string, number> = {};
@@ -392,7 +416,9 @@ async function collect(admin: Admin, settings: BackupSettingsRow, org: { id: str
       const stack = [`${org.id}`];
       while (stack.length) {
         const prefix = stack.pop()!;
-        const { data: entries, error } = await admin.storage.from(bucket).list(prefix, { limit: 1000 });
+        const { data: entries, error } = await admin.storage
+          .from(bucket)
+          .list(prefix, { limit: 1000 });
         if (error) {
           warnings.push(`Anexos ${bucket}: ${error.message}`);
           break;
@@ -405,41 +431,45 @@ async function collect(admin: Admin, settings: BackupSettingsRow, org: { id: str
           }
           const size = (entry.metadata as { size?: number } | null)?.size ?? null;
 
-let contentBase64: string | null = null;
-let fileChecksum: string | null = null;
+          let contentBase64: string | null = null;
+          let fileChecksum: string | null = null;
 
-if ((fileBytes + (size ?? 0)) <= MAX_FILE_BYTES) {
-  const { data: downloaded, error: downloadError } =
-    await admin.storage.from(bucket).download(full);
+          if (fileBytes + (size ?? 0) <= MAX_FILE_BYTES) {
+            const { data: downloaded, error: downloadError } = await admin.storage
+              .from(bucket)
+              .download(full);
 
-  if (downloadError || !downloaded) {
-    warnings.push(`Arquivo ${bucket}/${full}: não foi possível copiar o conteúdo.`);
-  } else {
-    const bytes = new Uint8Array(await downloaded.arrayBuffer());
+            if (downloadError || !downloaded) {
+              warnings.push(`Arquivo ${bucket}/${full}: não foi possível copiar o conteúdo.`);
+            } else {
+              const bytes = new Uint8Array(await downloaded.arrayBuffer());
 
-    contentBase64 = Buffer.from(bytes).toString("base64");
-    fileChecksum = await sha256Hex(bytes);
-  }
-}
+              contentBase64 = Buffer.from(bytes).toString("base64");
+              fileChecksum = await sha256Hex(bytes);
+            }
+          }
 
-files.push({
-  bucket,
-  path: full,
-  size,
-  updated_at: entry.updated_at ?? null,
-  content_base64: contentBase64,
-  checksum: fileChecksum,
-});
+          files.push({
+            bucket,
+            path: full,
+            size,
+            updated_at: entry.updated_at ?? null,
+            content_base64: contentBase64,
+            checksum: fileChecksum,
+          });
 
-fileBytes += size ?? 0;
+          fileBytes += size ?? 0;
           if (files.length >= MAX_FILES) break;
         }
         if (files.length >= MAX_FILES) break;
       }
     }
-    if (files.length >= MAX_FILES) warnings.push(`Inventário de anexos limitado a ${MAX_FILES} arquivos nesta execução.`);
+    if (files.length >= MAX_FILES)
+      warnings.push(`Inventário de anexos limitado a ${MAX_FILES} arquivos nesta execução.`);
     if (fileBytes > MAX_FILE_BYTES)
-      warnings.push("Volume de anexos acima do limite do pacote: os arquivos foram inventariados com caminho e tamanho, sem cópia binária embutida.");
+      warnings.push(
+        "Volume de anexos acima do limite do pacote: os arquivos foram inventariados com caminho e tamanho, sem cópia binária embutida.",
+      );
   }
 
   const manifest = {
@@ -486,7 +516,8 @@ export async function runBackup(
     .select("*")
     .eq("organization_id", organizationId)
     .maybeSingle();
-  if (!settings) return { runId: null, status: "falhou", message: "Órgão sem configuração de backup." };
+  if (!settings)
+    return { runId: null, status: "falhou", message: "Órgão sem configuração de backup." };
   const config = settings as BackupSettingsRow;
 
   const { data: org } = await admin
@@ -498,7 +529,9 @@ export async function runBackup(
 
   const cycleKey =
     options.cycleKey ??
-    (options.kind === "automatico" ? cycleKeyFor(config) : `${options.kind}-${new Date().toISOString()}`);
+    (options.kind === "automatico"
+      ? cycleKeyFor(config)
+      : `${options.kind}-${new Date().toISOString()}`);
 
   const startedAt = new Date();
   const { data: run, error: insertError } = await admin
@@ -552,7 +585,10 @@ export async function runBackup(
       const platformPath = `${organizationId}/${startedAt.getUTCFullYear()}/${String(startedAt.getUTCMonth() + 1).padStart(2, "0")}/${fileName}`;
       const { error } = await admin.storage
         .from("backups")
-        .upload(platformPath, collected.bundle as unknown as Blob, { contentType: "application/json", upsert: false });
+        .upload(platformPath, collected.bundle as unknown as Blob, {
+          contentType: "application/json",
+          upsert: false,
+        });
       if (error) throw new Error(`Cópia na plataforma: ${error.message}`);
       objectKey = platformPath;
       path = `backups/${platformPath}`;
@@ -562,8 +598,14 @@ export async function runBackup(
     if (config.destination_kind === "s3") {
       const creds = readCredentials(config.credentials_secret_name);
       if (!creds?.["access_key_id"] || !creds["secret_access_key"])
-        throw new Error(`Credenciais do destino S3 ausentes no segredo "${config.credentials_secret_name ?? "não informado"}".`);
-      const key = `${destinationPath(config.s3_prefix || "frotagov", slug, startedAt)}/${fileName}`.replace(/^\/+/, "");
+        throw new Error(
+          `Credenciais do destino S3 ausentes no segredo "${config.credentials_secret_name ?? "não informado"}".`,
+        );
+      const key =
+        `${destinationPath(config.s3_prefix || "frotagov", slug, startedAt)}/${fileName}`.replace(
+          /^\/+/,
+          "",
+        );
       const response = await s3Request(config, creds, "PUT", key, collected.bundle);
       if (!response.ok) throw new Error(`Destino S3 recusou o envio (HTTP ${response.status}).`);
       objectKey = key;
@@ -603,7 +645,11 @@ export async function runBackup(
       .eq("id", run.id);
     if (finalizeError) throw new Error(`Registro da execução: ${finalizeError.message}`);
 
-    return { runId: run.id, status, message: warnings.length ? warnings.join(" | ") : "Backup concluído." };
+    return {
+      runId: run.id,
+      status,
+      message: warnings.length ? warnings.join(" | ") : "Backup concluído.",
+    };
   } catch (error) {
     const finishedAt = new Date();
     const message = sanitizeLog(error instanceof Error ? error.message : "Falha desconhecida.");
@@ -623,7 +669,9 @@ export async function runBackup(
 }
 
 /** Teste de conexão com o destino, sem revelar credenciais. */
-export async function testDestination(settings: BackupSettingsRow): Promise<{ ok: boolean; message: string }> {
+export async function testDestination(
+  settings: BackupSettingsRow,
+): Promise<{ ok: boolean; message: string }> {
   if (settings.destination_kind === "plataforma") {
     return { ok: true, message: "Armazenamento privado da plataforma disponível." };
   }
@@ -645,7 +693,10 @@ export async function testDestination(settings: BackupSettingsRow): Promise<{ ok
         ? { ok: true, message: "Conexão com o destino S3 validada com gravação de teste." }
         : { ok: false, message: `Destino S3 respondeu HTTP ${response.status}.` };
     } catch (error) {
-      return { ok: false, message: sanitizeLog(error instanceof Error ? error.message : "Falha na conexão S3.") };
+      return {
+        ok: false,
+        message: sanitizeLog(error instanceof Error ? error.message : "Falha na conexão S3."),
+      };
     }
   }
   // SFTP

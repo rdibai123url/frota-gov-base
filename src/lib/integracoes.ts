@@ -36,7 +36,13 @@ export type DetranSnapshot = Database["public"]["Tables"]["detran_snapshots"]["R
 
 export const CONNECTOR_META: Record<
   IntegrationKind,
-  { label: string; description: string; fields: { key: string; label: string; placeholder?: string }[]; secretLabel?: string; testable: boolean }
+  {
+    label: string;
+    description: string;
+    fields: { key: string; label: string; placeholder?: string }[];
+    secretLabel?: string;
+    testable: boolean;
+  }
 > = {
   detran: {
     label: "DETRAN",
@@ -212,7 +218,10 @@ export function useConnectors(enabled = true) {
     queryKey: ["integration-connectors"],
     enabled,
     queryFn: async () => {
-      const { data, error } = await supabase.from("integration_connectors").select("*").order("kind");
+      const { data, error } = await supabase
+        .from("integration_connectors")
+        .select("*")
+        .order("kind");
       if (error) throw error;
       return (data ?? []) as Connector[];
     },
@@ -224,7 +233,11 @@ export function useIntegrationLogs(kind?: IntegrationKind | null, enabled = true
     queryKey: ["integration-logs", kind ?? "todos"],
     enabled,
     queryFn: async () => {
-      let q = supabase.from("integration_logs").select("*").order("created_at", { ascending: false }).limit(200);
+      let q = supabase
+        .from("integration_logs")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(200);
       if (kind) q = q.eq("kind", kind);
       const { data, error } = await q;
       if (error) throw error;
@@ -423,10 +436,7 @@ export function factorFor(
   return factors
     .filter(
       (f) =>
-        f.active &&
-        f.fuel_key === key &&
-        f.valid_from <= day &&
-        (!f.valid_to || f.valid_to >= day),
+        f.active && f.fuel_key === key && f.valid_from <= day && (!f.valid_to || f.valid_to >= day),
     )
     .sort((a, b) => (a.valid_from < b.valid_from ? 1 : -1))[0];
 }
@@ -451,7 +461,10 @@ export type EsgSummary = {
 
 /** Estimativa de CO2e a partir dos litros consumidos e dos fatores do órgão. */
 export function computeEsg(rows: EsgInput[], factors: EmissionFactor[]): EsgSummary {
-  const byFuel = new Map<string, { liters: number; co2e: number; factor: number | null; label: string; renew: number }>();
+  const byFuel = new Map<
+    string,
+    { liters: number; co2e: number; factor: number | null; label: string; renew: number }
+  >();
   const byMonth = new Map<string, { liters: number; co2e: number }>();
   const missing = new Set<string>();
   let totalLiters = 0;
@@ -493,7 +506,13 @@ export function computeEsg(rows: EsgInput[], factors: EmissionFactor[]): EsgSumm
     renewableLiters,
     renewablePct: totalLiters > 0 ? (renewableLiters / totalLiters) * 100 : 0,
     byFuel: [...byFuel.entries()]
-      .map(([key, v]) => ({ key, label: v.label, liters: v.liters, co2e: v.co2e, factor: v.factor }))
+      .map(([key, v]) => ({
+        key,
+        label: v.label,
+        liters: v.liters,
+        co2e: v.co2e,
+        factor: v.factor,
+      }))
       .sort((a, b) => b.liters - a.liters),
     byMonth: [...byMonth.entries()]
       .map(([month, v]) => ({ month, ...v }))

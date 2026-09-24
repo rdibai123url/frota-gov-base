@@ -60,10 +60,7 @@ type Props = {
 };
 
 function haystack(o: EntityOption) {
-  return [o.label, o.description, ...(o.keywords ?? [])]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
+  return [o.label, o.description, ...(o.keywords ?? [])].filter(Boolean).join(" ").toLowerCase();
 }
 
 export function EntitySelect({
@@ -97,7 +94,11 @@ export function EntitySelect({
           aria-expanded={open}
           aria-label={rest["aria-label"]}
           disabled={disabled}
-          className={cn("w-full justify-between font-normal", !selected && "text-muted-foreground", className)}
+          className={cn(
+            "w-full justify-between font-normal",
+            !selected && "text-muted-foreground",
+            className,
+          )}
         >
           <span className="truncate text-left">
             {selected ? selected.label : placeholder}
@@ -166,14 +167,23 @@ export function EntitySelect({
                         setOpen(false);
                       }}
                     >
-                      <Check className={cn("mr-2 size-4", value === o.value ? "opacity-100" : "opacity-0")} />
+                      <Check
+                        className={cn(
+                          "mr-2 size-4",
+                          value === o.value ? "opacity-100" : "opacity-0",
+                        )}
+                      />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate">
                           {o.label}
-                          {o.hint ? <span className="ml-2 text-xs text-warning-foreground">{o.hint}</span> : null}
+                          {o.hint ? (
+                            <span className="ml-2 text-xs text-warning-foreground">{o.hint}</span>
+                          ) : null}
                         </span>
                         {o.description ? (
-                          <span className="block truncate text-xs text-muted-foreground">{o.description}</span>
+                          <span className="block truncate text-xs text-muted-foreground">
+                            {o.description}
+                          </span>
                         ) : null}
                       </span>
                     </CommandItem>

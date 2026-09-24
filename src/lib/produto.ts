@@ -36,16 +36,20 @@ export const PRODUCT_AUDIT: AuditRow[] = [
     item: "Manutenção (13 itens no mesmo grupo)",
     classification: "Essencial",
     decision: "Consolidado",
-    before: "Manutenção reunia oficina, almoxarifado, prestadores do órgão, mapa, portal do credenciado, cotações e ordens de serviço.",
-    after: "Manutenção mantém apenas oficina e insumos; prestadores do órgão, mapa, credenciados, portal, cotações e ordens de serviço passaram para a área \"Prestadores e compras\".",
+    before:
+      "Manutenção reunia oficina, almoxarifado, prestadores do órgão, mapa, portal do credenciado, cotações e ordens de serviço.",
+    after:
+      'Manutenção mantém apenas oficina e insumos; prestadores do órgão, mapa, credenciados, portal, cotações e ordens de serviço passaram para a área "Prestadores e compras".',
   },
   {
     area: "Menu",
     item: "Portal do credenciado",
     classification: "Essencial",
     decision: "Movido",
-    before: "Listado no meio dos itens de manutenção do órgão, embora seja a tela usada pelo estabelecimento.",
-    after: "Agrupado com prestadores do órgão e cartão virtual, onde o gestor administra o credenciamento.",
+    before:
+      "Listado no meio dos itens de manutenção do órgão, embora seja a tela usada pelo estabelecimento.",
+    after:
+      "Agrupado com prestadores do órgão e cartão virtual, onde o gestor administra o credenciamento.",
   },
   {
     area: "Menu",
@@ -60,8 +64,9 @@ export const PRODUCT_AUDIT: AuditRow[] = [
     item: "Nomes de área do menu",
     classification: "Essencial",
     decision: "Simplificado",
-    before: "\"Relatórios e integrações\" misturava painel analítico, transparência e conectores.",
-    after: "\"Relatórios e análises\" para leitura gerencial e \"Integrações e dados abertos\" para transparência, conectores e chaves de API.",
+    before: '"Relatórios e integrações" misturava painel analítico, transparência e conectores.',
+    after:
+      '"Relatórios e análises" para leitura gerencial e "Integrações e dados abertos" para transparência, conectores e chaves de API.',
   },
   {
     area: "Cadastros",
@@ -69,7 +74,8 @@ export const PRODUCT_AUDIT: AuditRow[] = [
     classification: "Essencial",
     decision: "Simplificado",
     before: "Latitude e longitude digitadas manualmente para aparecer no mapa.",
-    after: "Coordenadas obtidas automaticamente ao salvar o endereço; digitação manual só quando o endereço não é localizado.",
+    after:
+      "Coordenadas obtidas automaticamente ao salvar o endereço; digitação manual só quando o endereço não é localizado.",
   },
   {
     area: "Frota",
@@ -77,7 +83,8 @@ export const PRODUCT_AUDIT: AuditRow[] = [
     classification: "Essencial",
     decision: "Simplificado",
     before: "Redigitação dos dados e do valor de mercado a cada avaliação.",
-    after: "Vínculo à tabela de referência preenche marca, modelo, ano e valor, com histórico mensal automático.",
+    after:
+      "Vínculo à tabela de referência preenche marca, modelo, ano e valor, com histórico mensal automático.",
   },
   {
     area: "Frota",
@@ -85,7 +92,8 @@ export const PRODUCT_AUDIT: AuditRow[] = [
     classification: "Obrigatória por controle/edital",
     decision: "Mantido",
     before: "Conferência manual de chassi, RENAVAM e características.",
-    after: "Consulta oficial com comparação campo a campo e aplicação assistida; permanece desabilitada sem convênio.",
+    after:
+      "Consulta oficial com comparação campo a campo e aplicação assistida; permanece desabilitada sem convênio.",
   },
   {
     area: "Abastecimento",
@@ -93,7 +101,8 @@ export const PRODUCT_AUDIT: AuditRow[] = [
     classification: "Essencial",
     decision: "Simplificado",
     before: "Listas longas sem busca e dados repetidos entre autorização e abastecimento.",
-    after: "Seleção pesquisável que reaproveita o cadastro e transporta os dados da autorização para o abastecimento.",
+    after:
+      "Seleção pesquisável que reaproveita o cadastro e transporta os dados da autorização para o abastecimento.",
   },
   {
     area: "Abastecimento",
@@ -101,7 +110,8 @@ export const PRODUCT_AUDIT: AuditRow[] = [
     classification: "Baixa utilidade",
     decision: "Mantido",
     before: "Ausente do produto.",
-    after: "Permanece fora do núcleo e declarado como tal na matriz; o cartão virtual do bem cumpre a identificação sem processar pagamento.",
+    after:
+      "Permanece fora do núcleo e declarado como tal na matriz; o cartão virtual do bem cumpre a identificação sem processar pagamento.",
   },
   {
     area: "Manutenção",
@@ -109,7 +119,8 @@ export const PRODUCT_AUDIT: AuditRow[] = [
     classification: "Essencial",
     decision: "Consolidado",
     before: "Catálogo de peças e itens do almoxarifado tratados como cadastros separados.",
-    after: "Catálogo único de peças, com compatibilidade e saldo de estoque exibidos no mesmo registro.",
+    after:
+      "Catálogo único de peças, com compatibilidade e saldo de estoque exibidos no mesmo registro.",
   },
   {
     area: "Relatórios",
@@ -117,23 +128,28 @@ export const PRODUCT_AUDIT: AuditRow[] = [
     classification: "Avançada",
     decision: "Mantido",
     before: "Duas telas com sobreposição parcial de indicadores.",
-    after: "Inteligência concentra consumo, custo e economicidade; relatórios avançados concentram emissão documental e exportação. A sobreposição fica registrada como ponto de fusão futura.",
+    after:
+      "Inteligência concentra consumo, custo e economicidade; relatórios avançados concentram emissão documental e exportação. A sobreposição fica registrada como ponto de fusão futura.",
   },
   {
     area: "Relatórios",
     item: "Matriz de funcionalidades",
     classification: "Obrigatória por controle/edital",
     decision: "Simplificado",
-    before: "Três situações (Sim, Parcial, Não), sem distinguir o que depende de credencial do órgão.",
-    after: "Cinco situações, separando \"depende de credencial\" e \"fora do núcleo\", com contagem e exportação por situação.",
+    before:
+      "Três situações (Sim, Parcial, Não), sem distinguir o que depende de credencial do órgão.",
+    after:
+      'Cinco situações, separando "depende de credencial" e "fora do núcleo", com contagem e exportação por situação.',
   },
   {
     area: "Painel",
     item: "Cartões do painel executivo",
     classification: "Essencial",
     decision: "Mantido",
-    before: "Indicadores de frota, custo, consumo, disponibilidade, contratos, orçamento, manutenção, conformidade e transparência.",
-    after: "Mantidos: todos possuem ação correspondente (abrir lista filtrada ou alerta). Nenhum cartão puramente informativo foi acrescentado.",
+    before:
+      "Indicadores de frota, custo, consumo, disponibilidade, contratos, orçamento, manutenção, conformidade e transparência.",
+    after:
+      "Mantidos: todos possuem ação correspondente (abrir lista filtrada ou alerta). Nenhum cartão puramente informativo foi acrescentado.",
   },
   {
     area: "Integrações",
@@ -141,7 +157,8 @@ export const PRODUCT_AUDIT: AuditRow[] = [
     classification: "Obrigatória por controle/edital",
     decision: "Mantido",
     before: "Risco de exibir conector externo como ativo antes do convênio.",
-    after: "Conector sem credencial permanece \"não configurado\", com ação desabilitada e aviso explícito.",
+    after:
+      'Conector sem credencial permanece "não configurado", com ação desabilitada e aviso explícito.',
   },
   {
     area: "Segurança",
@@ -149,7 +166,8 @@ export const PRODUCT_AUDIT: AuditRow[] = [
     classification: "Obrigatória por controle/edital",
     decision: "Mantido",
     before: "Administração da plataforma, chaves de API, backup, exportação integral e importação.",
-    after: "Continuam restritas a Super Admin, Administrador do órgão e Auditoria, conforme o caso, tanto no menu quanto no banco de dados.",
+    after:
+      "Continuam restritas a Super Admin, Administrador do órgão e Auditoria, conforme o caso, tanto no menu quanto no banco de dados.",
   },
   {
     area: "Exportação",
@@ -157,7 +175,8 @@ export const PRODUCT_AUDIT: AuditRow[] = [
     classification: "Obrigatória por controle/edital",
     decision: "Mantido",
     before: "Conjuntos das Fases 1 a 10.",
-    after: "Acrescidos valor de mercado, geocodificação, integrações, identidade institucional e histórico de acessos, sempre sem senhas, tokens, certificados ou segredos.",
+    after:
+      "Acrescidos valor de mercado, geocodificação, integrações, identidade institucional e histórico de acessos, sempre sem senhas, tokens, certificados ou segredos.",
   },
 ];
 

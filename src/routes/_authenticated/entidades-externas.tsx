@@ -19,12 +19,31 @@ import { CnpjInput, CpfInput } from "@/components/form-fields";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { ENTITY_CATEGORIES, entityCategoryLabel, toggleValue } from "@/lib/pessoas";
 import {
@@ -56,7 +75,8 @@ export const Route = createFileRoute("/_authenticated/entidades-externas")({
       { property: "og:title", content: "Pessoas e Empresas Externas — FrotaGov" },
       {
         property: "og:description",
-        content: "Cadastro único de pessoas e empresas externas, com categorias reutilizáveis e sem duplicidade.",
+        content:
+          "Cadastro único de pessoas e empresas externas, com categorias reutilizáveis e sem duplicidade.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -101,7 +121,9 @@ function Entidades() {
     return entities.filter((e) => {
       if (fCategory !== ALL && !(e.categories ?? []).includes(fCategory)) return false;
       if (!q) return true;
-      return `${e.name} ${e.trade_name ?? ""} ${e.document ?? ""} ${e.city ?? ""}`.toLowerCase().includes(q);
+      return `${e.name} ${e.trade_name ?? ""} ${e.document ?? ""} ${e.city ?? ""}`
+        .toLowerCase()
+        .includes(q);
     });
   }, [entities, search, fCategory]);
 
@@ -160,7 +182,12 @@ function Entidades() {
         active,
       };
       const before = editing
-        ? { address: editing.address, city: editing.city, state: editing.state, zip_code: editing.zip_code }
+        ? {
+            address: editing.address,
+            city: editing.city,
+            state: editing.state,
+            zip_code: editing.zip_code,
+          }
         : null;
       const { data: saved, error } = editing
         ? await supabase
@@ -264,13 +291,23 @@ function Entidades() {
               <TableRow key={e.id}>
                 <TableCell className="font-medium">
                   {e.name}
-                  {e.trade_name && <span className="block text-xs text-muted-foreground">{e.trade_name}</span>}
+                  {e.trade_name && (
+                    <span className="block text-xs text-muted-foreground">{e.trade_name}</span>
+                  )}
                 </TableCell>
                 <TableCell>{label(ENTITY_KINDS, e.kind)}</TableCell>
-                <TableCell>{e.document ? (e.kind === "pj" ? maskCNPJ(e.document) : maskCPF(e.document)) : "—"}</TableCell>
+                <TableCell>
+                  {e.document
+                    ? e.kind === "pj"
+                      ? maskCNPJ(e.document)
+                      : maskCPF(e.document)
+                    : "—"}
+                </TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
-                    {(e.categories ?? []).length === 0 && <span className="text-sm text-muted-foreground">—</span>}
+                    {(e.categories ?? []).length === 0 && (
+                      <span className="text-sm text-muted-foreground">—</span>
+                    )}
                     {(e.categories ?? []).map((c) => (
                       <Badge key={c} variant="secondary">
                         {entityCategoryLabel(c)}
@@ -283,11 +320,18 @@ function Entidades() {
                   {[e.contact_name, e.phone, e.email].filter(Boolean).join(" · ") || "—"}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={e.active ? "default" : "outline"}>{e.active ? "Ativa" : "Inativa"}</Badge>
+                  <Badge variant={e.active ? "default" : "outline"}>
+                    {e.active ? "Ativa" : "Inativa"}
+                  </Badge>
                 </TableCell>
                 <TableCell>
                   {canRegister && (
-                    <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => openEdit(e)}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Editar"
+                      onClick={() => openEdit(e)}
+                    >
                       <Pencil className="size-4" />
                     </Button>
                   )}
@@ -302,7 +346,9 @@ function Entidades() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing ? "Editar cadastro" : "Nova pessoa ou empresa externa"}</DialogTitle>
+            <DialogTitle>
+              {editing ? "Editar cadastro" : "Nova pessoa ou empresa externa"}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
@@ -336,7 +382,11 @@ function Entidades() {
               {kind === "pj" && (
                 <div className="sm:col-span-2">
                   <Label htmlFor="trade_name">Nome fantasia</Label>
-                  <Input id="trade_name" name="trade_name" defaultValue={editing?.trade_name ?? ""} />
+                  <Input
+                    id="trade_name"
+                    name="trade_name"
+                    defaultValue={editing?.trade_name ?? ""}
+                  />
                 </div>
               )}
               <div className="sm:col-span-2">
@@ -353,7 +403,8 @@ function Entidades() {
                   ))}
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Marque todas as categorias aplicáveis. A mesma empresa pode ser, por exemplo, fornecedor e oficina.
+                  Marque todas as categorias aplicáveis. A mesma empresa pode ser, por exemplo,
+                  fornecedor e oficina.
                 </p>
               </div>
               <div className="sm:col-span-2">
@@ -378,7 +429,11 @@ function Entidades() {
               </div>
               <div>
                 <Label htmlFor="contact_name">Responsável</Label>
-                <Input id="contact_name" name="contact_name" defaultValue={editing?.contact_name ?? ""} />
+                <Input
+                  id="contact_name"
+                  name="contact_name"
+                  defaultValue={editing?.contact_name ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="phone">Telefone</Label>

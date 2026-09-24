@@ -58,7 +58,9 @@ export const Route = createFileRoute("/api/public/v1/frota")({
           Number(url.searchParams.get("pagina") ?? url.searchParams.get("page") ?? 1) || 1,
         );
         const requested = Number(
-          url.searchParams.get("por_pagina") ?? url.searchParams.get("page_size") ?? DEFAULT_PAGE_SIZE,
+          url.searchParams.get("por_pagina") ??
+            url.searchParams.get("page_size") ??
+            DEFAULT_PAGE_SIZE,
         );
         const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, requested || DEFAULT_PAGE_SIZE));
         const status = url.searchParams.get("situacao");
@@ -66,7 +68,9 @@ export const Route = createFileRoute("/api/public/v1/frota")({
 
         let q = supabaseAdmin
           .from("vehicles")
-          .select("id, asset_code, vehicle_type, brand, model, year_model, status, fuel_type", { count: "exact" })
+          .select("id, asset_code, vehicle_type, brand, model, year_model, status, fuel_type", {
+            count: "exact",
+          })
           .eq("organization_id", key.organization_id)
           .order("asset_code")
           .range(fromIndex, fromIndex + pageSize - 1);

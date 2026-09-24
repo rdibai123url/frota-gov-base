@@ -9,7 +9,8 @@ import type { Database } from "@/integrations/supabase/types";
 import { useActiveOrgId } from "@/lib/frotagov";
 
 export type TransparencyPeriod = Database["public"]["Tables"]["transparency_periods"]["Row"];
-export type TransparencyPublication = Database["public"]["Tables"]["transparency_publications"]["Row"];
+export type TransparencyPublication =
+  Database["public"]["Tables"]["transparency_publications"]["Row"];
 export type ReopenRequest = Database["public"]["Tables"]["transparency_reopen_requests"]["Row"];
 export type DeliveryAttempt = Database["public"]["Tables"]["transparency_delivery_attempts"]["Row"];
 export type PeriodStatus = Database["public"]["Enums"]["transparency_period_status"];
@@ -26,7 +27,11 @@ export const CHECKLIST_ITEMS = [
   { key: "validacao", label: "Validação final do responsável pelo órgão" },
 ] as const;
 
-export type ChecklistEntry = { status: "ok" | "na" | "pendente"; justification?: string; at?: string };
+export type ChecklistEntry = {
+  status: "ok" | "na" | "pendente";
+  justification?: string;
+  at?: string;
+};
 export type Checklist = Record<string, ChecklistEntry>;
 
 export const STATUS_LABELS: Record<PeriodStatus, string> = {
@@ -47,13 +52,14 @@ export const STATUS_TONE: Record<PeriodStatus, string> = {
   erro_integracao: "bg-destructive/15 text-destructive",
 };
 
-export const REQUEST_LABELS: Record<Database["public"]["Enums"]["reopen_request_status"], string> = {
-  aberto: "Aberto",
-  em_analise: "Em análise",
-  aprovado: "Aprovado",
-  rejeitado: "Rejeitado",
-  executado: "Executado",
-};
+export const REQUEST_LABELS: Record<Database["public"]["Enums"]["reopen_request_status"], string> =
+  {
+    aberto: "Aberto",
+    em_analise: "Em análise",
+    aprovado: "Aprovado",
+    rejeitado: "Rejeitado",
+    executado: "Executado",
+  };
 
 export const MODE_LABELS: Record<IntegrationMode, string> = {
   desativada: "Desativada (publica apenas no Portal FrotaGov)",

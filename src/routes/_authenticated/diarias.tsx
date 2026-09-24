@@ -24,7 +24,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { ListPagination, usePaged } from "@/components/list-pagination";
 import { CpfInput, DecimalInput, MoneyInput } from "@/components/form-fields";
 import {
@@ -40,7 +47,14 @@ import {
 } from "@/lib/frotagov";
 import { useCostCenters, useCommitments } from "@/lib/frotagov";
 import { useEmployees, useLegalProvisions } from "@/lib/pessoas";
-import { formatCPF, formatMoney, formatNumberBR, onlyDigits, parseBRNumber, isValidCPF } from "@/lib/format";
+import {
+  formatCPF,
+  formatMoney,
+  formatNumberBR,
+  onlyDigits,
+  parseBRNumber,
+  isValidCPF,
+} from "@/lib/format";
 import {
   DIARY_PROOF_STATUS,
   DIARY_STATUS,
@@ -61,7 +75,10 @@ export const Route = createFileRoute("/_authenticated/diarias")({
           "Requisição de Diária (RD) e Comprovação de Diária (CD) de servidores em viagem oficial, com autorização, valor por extenso e prestação de contas.",
       },
       { property: "og:title", content: "Diárias — FrotaGov" },
-      { property: "og:description", content: "Controle de diárias e prestação de contas da frota pública." },
+      {
+        property: "og:description",
+        content: "Controle de diárias e prestação de contas da frota pública.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -73,7 +90,10 @@ const ALL = "__all__";
 const NONE = "__none__";
 
 const esc = (v: unknown) =>
-  String(v ?? "—").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c] as string);
+  String(v ?? "—").replace(
+    /[&<>"]/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c] as string,
+  );
 
 const dt = (v: string | null | undefined) => (v ? new Date(v).toLocaleString("pt-BR") : "—");
 const toLocalInput = (iso: string | null | undefined) => {
@@ -105,7 +125,10 @@ function Diarias() {
   const [openProvisions, setOpenProvisions] = useState(false);
   const [detail, setDetail] = useState<DiaryRow | null>(null);
   const [proofOf, setProofOf] = useState<DiaryRow | null>(null);
-  const [reasonOf, setReasonOf] = useState<{ row: DiaryRow; kind: "rejeitada" | "cancelada" } | null>(null);
+  const [reasonOf, setReasonOf] = useState<{
+    row: DiaryRow;
+    kind: "rejeitada" | "cancelada";
+  } | null>(null);
   const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -115,7 +138,13 @@ function Diarias() {
       if (fStatus !== ALL && d.status !== fStatus) return false;
       if (fUnit !== ALL && d.unit_id !== fUnit) return false;
       if (t) {
-        const hay = [d.code, d.beneficiary_name, d.destination_city, d.purpose, (d.vehicle?.plate ?? d.vehicle?.asset_code ?? "")]
+        const hay = [
+          d.code,
+          d.beneficiary_name,
+          d.destination_city,
+          d.purpose,
+          d.vehicle?.plate ?? d.vehicle?.asset_code ?? "",
+        ]
           .filter(Boolean)
           .join(" ")
           .toLowerCase();
@@ -127,22 +156,33 @@ function Diarias() {
 
   const paged = usePaged(filtered);
 
-  async function setStatus(row: DiaryRow, status: DiaryStatus, extra: Record<string, unknown> = {}) {
+  async function setStatus(
+    row: DiaryRow,
+    status: DiaryStatus,
+    extra: Record<string, unknown> = {},
+  ) {
     const patch = { status, updated_by: perms.userId, ...extra } as Record<string, unknown>;
-    if (status === "solicitada" && !row.requested_at) patch['requested_at'] = new Date().toISOString();
+    if (status === "solicitada" && !row.requested_at)
+      patch["requested_at"] = new Date().toISOString();
     if (status === "autorizada") {
-      patch['authorized_at'] = new Date().toISOString();
-      patch['authorized_by'] = perms.userId;
-      patch['authorized_by_name'] = perms.userName;
+      patch["authorized_at"] = new Date().toISOString();
+      patch["authorized_by"] = perms.userId;
+      patch["authorized_by_name"] = perms.userName;
     }
-    if (status === "paga") patch['paid_at'] = new Date().toISOString();
+    if (status === "paga") patch["paid_at"] = new Date().toISOString();
     if (status === "comprovada") {
-      patch['closed_at'] = new Date().toISOString();
-      patch['closed_by'] = perms.userId;
-      patch['closed_by_name'] = perms.userName;
+      patch["closed_at"] = new Date().toISOString();
+      patch["closed_by"] = perms.userId;
+      patch["closed_by_name"] = perms.userName;
     }
-    const { error } = await supabase.from("diaries").update(patch as never).eq("id", row.id);
-    if (error) { toast.error(error.message); return; }
+    const { error } = await supabase
+      .from("diaries")
+      .update(patch as never)
+      .eq("id", row.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success(`Diária ${row.code} — ${DIARY_STATUS[status]}.`);
     invalidate(["diaries"]);
     setDetail(null);
@@ -177,7 +217,7 @@ ${line("Solicitante", d.requester_name)}${line("Situação", DIARY_STATUS[d.stat
 ${line("Origem", [d.origin_city, d.origin_state].filter(Boolean).join("/"))}
 ${line("Destino", [d.destination_city, d.destination_state].filter(Boolean).join("/"))}
 ${line("Saída", dt(d.departure_at))}${line("Retorno", dt(d.return_at))}
-${line("Veículo", (d.vehicle?.plate ?? d.vehicle?.asset_code ?? ""))}${line("Utilização vinculada", d.usage?.code)}
+${line("Veículo", d.vehicle?.plate ?? d.vehicle?.asset_code ?? "")}${line("Utilização vinculada", d.usage?.code)}
 ${line("Evento / atividade", d.event_name)}${line("Local do evento", d.event_location)}
 <div class="full">${line("Finalidade / motivo", d.purpose)}</div></div></section>
 <section><div class="t">Valores</div><div class="g">
@@ -192,7 +232,10 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
 <footer>Documento gerado eletronicamente pelo FrotaGov em ${esc(new Date().toLocaleString("pt-BR"))}. Autorização registrada por ${esc(d.authorized_by_name || "—")} em ${esc(dt(d.authorized_at))}.</footer>
 <script>window.onload=function(){setTimeout(function(){window.print()},350)}</script></body></html>`;
     const w = window.open("", "_blank", "width=1000,height=800");
-    if (!w) { toast.error("Permita janelas pop-up para imprimir a RD."); return; }
+    if (!w) {
+      toast.error("Permita janelas pop-up para imprimir a RD.");
+      return;
+    }
     w.document.open();
     w.document.write(html);
     w.document.close();
@@ -202,11 +245,20 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
     const fd = new FormData(form);
     const get = (k: string) => String(fd.get(k) ?? "").trim();
     const cpf = onlyDigits(get("beneficiary_cpf"));
-    if (cpf && !isValidCPF(cpf)) { toast.error("CPF do beneficiário inválido."); return; }
+    if (cpf && !isValidCPF(cpf)) {
+      toast.error("CPF do beneficiário inválido.");
+      return;
+    }
     const departure = get("departure_at");
-    if (!departure) { toast.error("Informe a data/hora de saída."); return; }
+    if (!departure) {
+      toast.error("Informe a data/hora de saída.");
+      return;
+    }
     const ret = get("return_at");
-    if (ret && new Date(ret) < new Date(departure)) { toast.error("O retorno não pode ser anterior à saída."); return; }
+    if (ret && new Date(ret) < new Date(departure)) {
+      toast.error("O retorno não pode ser anterior à saída.");
+      return;
+    }
 
     const driverId = get("beneficiary_driver_id");
     const driver = drivers.find((d) => d.id === driverId);
@@ -214,10 +266,14 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
     const { error } = await supabase.from("diaries").insert({
       organization_id: perms.orgId!,
       unit_id: get("unit_id") === NONE ? null : get("unit_id") || null,
-      requester_employee_id: get("requester_employee_id") === NONE ? null : get("requester_employee_id") || null,
-      beneficiary_employee_id: get("beneficiary_employee_id") === NONE ? null : get("beneficiary_employee_id") || null,
-      approver_employee_id: get("approver_employee_id") === NONE ? null : get("approver_employee_id") || null,
-      legal_provision_id: get("legal_provision_id") === NONE ? null : get("legal_provision_id") || null,
+      requester_employee_id:
+        get("requester_employee_id") === NONE ? null : get("requester_employee_id") || null,
+      beneficiary_employee_id:
+        get("beneficiary_employee_id") === NONE ? null : get("beneficiary_employee_id") || null,
+      approver_employee_id:
+        get("approver_employee_id") === NONE ? null : get("approver_employee_id") || null,
+      legal_provision_id:
+        get("legal_provision_id") === NONE ? null : get("legal_provision_id") || null,
       requester_name: get("requester_name") || perms.userName,
       requester_id: perms.userId,
       beneficiary_driver_id: driverId === NONE ? null : driverId || null,
@@ -247,7 +303,10 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
       created_by: perms.userId,
     });
     setSaving(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Requisição de diária registrada.");
     setOpenNew(false);
     invalidate(["diaries"]);
@@ -279,17 +338,26 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
           <Label className="text-xs">Buscar</Label>
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input className="pl-8" placeholder="Código, beneficiário, destino…" value={q} onChange={(e) => setQ(e.target.value)} />
+            <Input
+              className="pl-8"
+              placeholder="Código, beneficiário, destino…"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
           </div>
         </div>
         <div className="w-56">
           <Label className="text-xs">Situação</Label>
           <Select value={fStatus} onValueChange={setFStatus}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Todas</SelectItem>
               {Object.entries(DIARY_STATUS).map(([k, v]) => (
-                <SelectItem key={k} value={k}>{v}</SelectItem>
+                <SelectItem key={k} value={k}>
+                  {v}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -297,11 +365,15 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
         <div className="w-64">
           <Label className="text-xs">Secretaria / Unidade</Label>
           <Select value={fUnit} onValueChange={setFUnit}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Todas</SelectItem>
               {units.map((u) => (
-                <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                <SelectItem key={u.id} value={u.id}>
+                  {u.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -327,35 +399,62 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
           </TableHeader>
           <TableBody>
             {isLoading && (
-              <TableRow><TableCell colSpan={9}>Carregando…</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={9}>Carregando…</TableCell>
+              </TableRow>
             )}
             {!isLoading && paged.rows.length === 0 && (
-              <TableRow><TableCell colSpan={9}>Nenhuma diária encontrada.</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={9}>Nenhuma diária encontrada.</TableCell>
+              </TableRow>
             )}
             {paged.rows.map((d) => (
               <TableRow key={d.id}>
                 <TableCell className="font-medium">{d.code}</TableCell>
                 <TableCell>
                   {d.beneficiary_name}
-                  <div className="text-xs text-muted-foreground">{d.beneficiary_cpf ? formatCPF(d.beneficiary_cpf) : "—"}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {d.beneficiary_cpf ? formatCPF(d.beneficiary_cpf) : "—"}
+                  </div>
                 </TableCell>
                 <TableCell>{d.unit?.acronym || d.unit?.name || "—"}</TableCell>
-                <TableCell>{[d.destination_city, d.destination_state].filter(Boolean).join("/")}</TableCell>
+                <TableCell>
+                  {[d.destination_city, d.destination_state].filter(Boolean).join("/")}
+                </TableCell>
                 <TableCell>{dt(d.departure_at)}</TableCell>
                 <TableCell className="text-right">{formatNumberBR(d.quantity, 2)}</TableCell>
                 <TableCell className="text-right">{formatMoney(d.total_value)}</TableCell>
-                <TableCell><Badge className={DIARY_STATUS_STYLE[d.status]}>{DIARY_STATUS[d.status]}</Badge></TableCell>
+                <TableCell>
+                  <Badge className={DIARY_STATUS_STYLE[d.status]}>{DIARY_STATUS[d.status]}</Badge>
+                </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
-                    <Button size="icon" variant="ghost" title="Detalhes" onClick={() => setDetail(d)}>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title="Detalhes"
+                      onClick={() => setDetail(d)}
+                    >
                       <Eye className="h-4 w-4" />
                     </Button>
-                    <Button size="icon" variant="ghost" title="Imprimir RD" onClick={() => printRD(d)}>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title="Imprimir RD"
+                      onClick={() => printRD(d)}
+                    >
                       <Printer className="h-4 w-4" />
                     </Button>
                     {perms.canWrite &&
-                      ["viagem_realizada", "aguardando_comprovacao", "comprovada"].includes(d.status) && (
-                        <Button size="icon" variant="ghost" title="Comprovação (CD)" onClick={() => setProofOf(d)}>
+                      ["viagem_realizada", "aguardando_comprovacao", "comprovada"].includes(
+                        d.status,
+                      ) && (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          title="Comprovação (CD)"
+                          onClick={() => setProofOf(d)}
+                        >
                           <FileCheck2 className="h-4 w-4" />
                         </Button>
                       )}
@@ -373,7 +472,9 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nova Requisição de Diária</DialogTitle>
-            <DialogDescription>O código RD e o exercício são gerados automaticamente.</DialogDescription>
+            <DialogDescription>
+              O código RD e o exercício são gerados automaticamente.
+            </DialogDescription>
           </DialogHeader>
           <form
             id="rd-form"
@@ -386,20 +487,32 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
             <div>
               <Label>Unidade requisitante</Label>
               <Select name="unit_id" defaultValue={perms.unitId ?? NONE}>
-                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Não informada</SelectItem>
-                  {units.map((u) => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}
+                  {units.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Solicitante (cadastro de pessoas)</Label>
               <Select name="requester_employee_id" defaultValue={NONE}>
-                <SelectTrigger><SelectValue placeholder="Não vincular" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Não vincular" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Não vincular</SelectItem>
-                  {activeEmployees.map((e) => <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>)}
+                  {activeEmployees.map((e) => (
+                    <SelectItem key={e.id} value={e.id}>
+                      {e.full_name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -410,30 +523,48 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
             <div>
               <Label>Beneficiário (cadastro de pessoas)</Label>
               <Select name="beneficiary_employee_id" defaultValue={NONE}>
-                <SelectTrigger><SelectValue placeholder="Não vincular" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Não vincular" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Não vincular</SelectItem>
-                  {activeEmployees.map((e) => <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>)}
+                  {activeEmployees.map((e) => (
+                    <SelectItem key={e.id} value={e.id}>
+                      {e.full_name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Autoridade concedente (cadastro de pessoas)</Label>
               <Select name="approver_employee_id" defaultValue={NONE}>
-                <SelectTrigger><SelectValue placeholder="Não vincular" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Não vincular" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Não vincular</SelectItem>
-                  {activeEmployees.map((e) => <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>)}
+                  {activeEmployees.map((e) => (
+                    <SelectItem key={e.id} value={e.id}>
+                      {e.full_name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Beneficiário — condutor cadastrado</Label>
               <Select name="beneficiary_driver_id" defaultValue={NONE}>
-                <SelectTrigger><SelectValue placeholder="Outro servidor" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Outro servidor" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Outro servidor (informar abaixo)</SelectItem>
-                  {drivers.map((d) => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}
+                  {drivers.map((d) => (
+                    <SelectItem key={d.id} value={d.id}>
+                      {d.full_name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -452,42 +583,85 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
             <div>
               <Label>Veículo vinculado</Label>
               <Select name="vehicle_id" defaultValue={NONE}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Sem veículo</SelectItem>
-                  {vehicles.map((v) => <SelectItem key={v.id} value={v.id}>{(v.plate ?? v.asset_code)}</SelectItem>)}
+                  {vehicles.map((v) => (
+                    <SelectItem key={v.id} value={v.id}>
+                      {v.plate ?? v.asset_code}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Utilização / reserva vinculada</Label>
               <Select name="usage_id" defaultValue={NONE}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Sem vínculo</SelectItem>
                   {linkedUsages.map((u) => (
                     <SelectItem key={u.id} value={u.id}>
-                      {u.code} — {(u.vehicle?.plate ?? u.vehicle?.asset_code ?? "")} — {u.destination}
+                      {u.code} — {u.vehicle?.plate ?? u.vehicle?.asset_code ?? ""} — {u.destination}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div><Label>Cidade de origem</Label><Input name="origin_city" /></div>
-            <div><Label>UF de origem</Label><Input name="origin_state" maxLength={2} /></div>
-            <div><Label>Cidade de destino *</Label><Input name="destination_city" required /></div>
-            <div><Label>UF de destino</Label><Input name="destination_state" maxLength={2} /></div>
-            <div><Label>Data/hora de saída *</Label><Input type="datetime-local" name="departure_at" required /></div>
-            <div><Label>Data/hora de retorno</Label><Input type="datetime-local" name="return_at" /></div>
-            <div><Label>Quantidade de diárias</Label><DecimalInput decimals={2} name="quantity" defaultValue={1} /></div>
-            <div><Label>Valor unitário (R$)</Label><MoneyInput name="unit_value" /></div>
-            <div className="sm:col-span-2"><Label>Finalidade / motivo *</Label><Textarea name="purpose" required rows={2} /></div>
-            <div><Label>Evento / atividade</Label><Input name="event_name" /></div>
-            <div><Label>Local do evento</Label><Input name="event_location" /></div>
+            <div>
+              <Label>Cidade de origem</Label>
+              <Input name="origin_city" />
+            </div>
+            <div>
+              <Label>UF de origem</Label>
+              <Input name="origin_state" maxLength={2} />
+            </div>
+            <div>
+              <Label>Cidade de destino *</Label>
+              <Input name="destination_city" required />
+            </div>
+            <div>
+              <Label>UF de destino</Label>
+              <Input name="destination_state" maxLength={2} />
+            </div>
+            <div>
+              <Label>Data/hora de saída *</Label>
+              <Input type="datetime-local" name="departure_at" required />
+            </div>
+            <div>
+              <Label>Data/hora de retorno</Label>
+              <Input type="datetime-local" name="return_at" />
+            </div>
+            <div>
+              <Label>Quantidade de diárias</Label>
+              <DecimalInput decimals={2} name="quantity" defaultValue={1} />
+            </div>
+            <div>
+              <Label>Valor unitário (R$)</Label>
+              <MoneyInput name="unit_value" />
+            </div>
+            <div className="sm:col-span-2">
+              <Label>Finalidade / motivo *</Label>
+              <Textarea name="purpose" required rows={2} />
+            </div>
+            <div>
+              <Label>Evento / atividade</Label>
+              <Input name="event_name" />
+            </div>
+            <div>
+              <Label>Local do evento</Label>
+              <Input name="event_location" />
+            </div>
             <div>
               <Label>Dispositivo legal / norma (cadastro)</Label>
               <Select name="legal_provision_id" defaultValue={NONE}>
-                <SelectTrigger><SelectValue placeholder="Selecione a norma cadastrada" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a norma cadastrada" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Não vincular</SelectItem>
                   {provisions
@@ -501,33 +675,58 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
                 </SelectContent>
               </Select>
             </div>
-            <div><Label>Dispositivo legal (texto livre)</Label><Input name="legal_basis" placeholder="Ex.: Decreto Municipal nº 000/0000" /></div>
-            <div><Label>Prazo / período de aplicação</Label><Input name="application_period" /></div>
+            <div>
+              <Label>Dispositivo legal (texto livre)</Label>
+              <Input name="legal_basis" placeholder="Ex.: Decreto Municipal nº 000/0000" />
+            </div>
+            <div>
+              <Label>Prazo / período de aplicação</Label>
+              <Input name="application_period" />
+            </div>
             <div>
               <Label>Centro de custo</Label>
               <Select name="cost_center_id" defaultValue={NONE}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Sem vínculo</SelectItem>
-                  {costCenters.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                  {costCenters.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Empenho</Label>
               <Select name="commitment_id" defaultValue={NONE}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Sem vínculo</SelectItem>
-                  {commitments.map((c) => <SelectItem key={c.id} value={c.id}>{c.number}</SelectItem>)}
+                  {commitments.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.number}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="sm:col-span-2"><Label>Observações</Label><Textarea name="notes" rows={2} /></div>
+            <div className="sm:col-span-2">
+              <Label>Observações</Label>
+              <Textarea name="notes" rows={2} />
+            </div>
           </form>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenNew(false)}>Cancelar</Button>
-            <Button type="submit" form="rd-form" disabled={saving}>Registrar RD</Button>
+            <Button variant="outline" onClick={() => setOpenNew(false)}>
+              Cancelar
+            </Button>
+            <Button type="submit" form="rd-form" disabled={saving}>
+              Registrar RD
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -545,35 +744,56 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
               </DialogHeader>
               <dl className="grid grid-cols-2 gap-2 text-sm">
                 <Field l="Beneficiário" v={detail.beneficiary_name} />
-                <Field l="CPF" v={detail.beneficiary_cpf ? formatCPF(detail.beneficiary_cpf) : "—"} />
+                <Field
+                  l="CPF"
+                  v={detail.beneficiary_cpf ? formatCPF(detail.beneficiary_cpf) : "—"}
+                />
                 <Field l="Cargo / função" v={detail.beneficiary_role} />
                 <Field l="Unidade" v={detail.unit?.name} />
-                <Field l="Destino" v={[detail.destination_city, detail.destination_state].filter(Boolean).join("/")} />
-                <Field l="Veículo" v={(detail.vehicle?.plate ?? detail.vehicle?.asset_code ?? "")} />
+                <Field
+                  l="Destino"
+                  v={[detail.destination_city, detail.destination_state].filter(Boolean).join("/")}
+                />
+                <Field l="Veículo" v={detail.vehicle?.plate ?? detail.vehicle?.asset_code ?? ""} />
                 <Field l="Utilização vinculada" v={detail.usage?.code} />
                 <Field l="Saída" v={dt(detail.departure_at)} />
                 <Field l="Retorno" v={dt(detail.return_at)} />
                 <Field l="Quantidade" v={formatNumberBR(detail.quantity, 2)} />
                 <Field l="Valor unitário" v={formatMoney(detail.unit_value)} />
-                <Field l="Valor total" v={`${formatMoney(detail.total_value)} (${moneyInWords(Number(detail.total_value))})`} />
+                <Field
+                  l="Valor total"
+                  v={`${formatMoney(detail.total_value)} (${moneyInWords(Number(detail.total_value))})`}
+                />
                 <Field l="Autorizado por" v={detail.authorized_by_name} />
                 <Field l="Autorizado em" v={dt(detail.authorized_at)} />
                 <Field l="Encerrado por" v={detail.closed_by_name} />
                 <Field l="Encerrado em" v={dt(detail.closed_at)} />
                 {detail.reject_reason && <Field l="Motivo da rejeição" v={detail.reject_reason} />}
-                {detail.cancel_reason && <Field l="Motivo do cancelamento" v={detail.cancel_reason} />}
+                {detail.cancel_reason && (
+                  <Field l="Motivo do cancelamento" v={detail.cancel_reason} />
+                )}
               </dl>
 
               {detail.proofs.length > 0 && (
                 <div className="rounded-md border p-3 text-sm">
                   <p className="mb-2 font-medium">Comprovações (CD)</p>
                   {detail.proofs.map((p) => (
-                    <div key={p.id} className="flex flex-wrap justify-between gap-2 border-b py-1 last:border-0">
+                    <div
+                      key={p.id}
+                      className="flex flex-wrap justify-between gap-2 border-b py-1 last:border-0"
+                    >
                       <span>{p.code}</span>
-                      <span>Recebido {formatMoney(p.received_total)} · Utilizado {formatMoney(p.used_total)}</span>
+                      <span>
+                        Recebido {formatMoney(p.received_total)} · Utilizado{" "}
+                        {formatMoney(p.used_total)}
+                      </span>
                       <span>
                         Saldo {formatMoney(Math.abs(Number(p.balance_value)))}{" "}
-                        {Number(p.balance_value) > 0 ? "a restituir" : Number(p.balance_value) < 0 ? "a receber" : ""}
+                        {Number(p.balance_value) > 0
+                          ? "a restituir"
+                          : Number(p.balance_value) < 0
+                            ? "a receber"
+                            : ""}
                       </span>
                       <Badge variant="outline">{DIARY_PROOF_STATUS[p.status]}</Badge>
                     </div>
@@ -589,29 +809,49 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
                   <Button onClick={() => void setStatus(detail, "solicitada")}>Solicitar</Button>
                 )}
                 {perms.canWrite && detail.status === "solicitada" && (
-                  <Button onClick={() => void setStatus(detail, "em_analise")}>Enviar para análise</Button>
+                  <Button onClick={() => void setStatus(detail, "em_analise")}>
+                    Enviar para análise
+                  </Button>
                 )}
                 {perms.canManageFleet && ["solicitada", "em_analise"].includes(detail.status) && (
                   <>
                     <Button onClick={() => void setStatus(detail, "autorizada")}>
                       <CheckCircle2 className="mr-2 h-4 w-4" /> Autorizar
                     </Button>
-                    <Button variant="destructive" onClick={() => { setReason(""); setReasonOf({ row: detail, kind: "rejeitada" }); }}>
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        setReason("");
+                        setReasonOf({ row: detail, kind: "rejeitada" });
+                      }}
+                    >
                       Rejeitar
                     </Button>
                   </>
                 )}
                 {perms.canManageFleet && detail.status === "autorizada" && (
-                  <Button onClick={() => void setStatus(detail, "paga")}>Registrar pagamento</Button>
+                  <Button onClick={() => void setStatus(detail, "paga")}>
+                    Registrar pagamento
+                  </Button>
                 )}
                 {perms.canWrite && detail.status === "paga" && (
-                  <Button onClick={() => void setStatus(detail, "viagem_realizada")}>Viagem realizada</Button>
+                  <Button onClick={() => void setStatus(detail, "viagem_realizada")}>
+                    Viagem realizada
+                  </Button>
                 )}
                 {perms.canWrite && detail.status === "viagem_realizada" && (
-                  <Button onClick={() => void setStatus(detail, "aguardando_comprovacao")}>Aguardar comprovação</Button>
+                  <Button onClick={() => void setStatus(detail, "aguardando_comprovacao")}>
+                    Aguardar comprovação
+                  </Button>
                 )}
                 {perms.canCancel && !["cancelada", "comprovada"].includes(detail.status) && (
-                  <Button variant="outline" onClick={() => { setReason(""); setReasonOf({ row: detail, kind: "cancelada" }); }}>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setReason("");
+                      setReasonOf({ row: detail, kind: "cancelada" });
+                    }}
+                  >
                     <Ban className="mr-2 h-4 w-4" /> Cancelar
                   </Button>
                 )}
@@ -625,20 +865,36 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
       <Dialog open={!!reasonOf} onOpenChange={(o) => !o && setReasonOf(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{reasonOf?.kind === "rejeitada" ? "Rejeitar diária" : "Cancelar diária"}</DialogTitle>
-            <DialogDescription>O motivo é obrigatório e fica registrado na auditoria.</DialogDescription>
+            <DialogTitle>
+              {reasonOf?.kind === "rejeitada" ? "Rejeitar diária" : "Cancelar diária"}
+            </DialogTitle>
+            <DialogDescription>
+              O motivo é obrigatório e fica registrado na auditoria.
+            </DialogDescription>
           </DialogHeader>
-          <Textarea rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Descreva o motivo" />
+          <Textarea
+            rows={3}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Descreva o motivo"
+          />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setReasonOf(null)}>Voltar</Button>
+            <Button variant="outline" onClick={() => setReasonOf(null)}>
+              Voltar
+            </Button>
             <Button
               onClick={() => {
                 if (!reasonOf) return;
-                if (reason.trim().length < 5) { toast.error("Informe o motivo (mínimo 5 caracteres)."); return; }
+                if (reason.trim().length < 5) {
+                  toast.error("Informe o motivo (mínimo 5 caracteres).");
+                  return;
+                }
                 void setStatus(
                   reasonOf.row,
                   reasonOf.kind,
-                  reasonOf.kind === "rejeitada" ? { reject_reason: reason.trim() } : { cancel_reason: reason.trim() },
+                  reasonOf.kind === "rejeitada"
+                    ? { reject_reason: reason.trim() }
+                    : { cancel_reason: reason.trim() },
                 );
                 setReasonOf(null);
               }}
@@ -670,8 +926,12 @@ function ProofDialog({ diary, onClose }: { diary: DiaryRow; onClose: () => void 
   const invalidate = useInvalidate();
   const existing = diary.proofs[0] ?? null;
 
-  const [receivedQty, setReceivedQty] = useState(String(existing?.received_quantity ?? diary.quantity));
-  const [receivedUnit, setReceivedUnit] = useState(String(existing?.received_unit_value ?? diary.unit_value));
+  const [receivedQty, setReceivedQty] = useState(
+    String(existing?.received_quantity ?? diary.quantity),
+  );
+  const [receivedUnit, setReceivedUnit] = useState(
+    String(existing?.received_unit_value ?? diary.unit_value),
+  );
   const [usedQty, setUsedQty] = useState(String(existing?.used_quantity ?? ""));
   const [report, setReport] = useState(existing?.activity_report ?? "");
   const [resolved, setResolved] = useState(existing?.restitution_resolved ?? false);
@@ -688,13 +948,21 @@ function ProofDialog({ diary, onClose }: { diary: DiaryRow; onClose: () => void 
     const fd = new FormData(form);
     const get = (k: string) => String(fd.get(k) ?? "").trim();
     if (finalize && report.trim().length < 10) {
-      { toast.error("O relatório de atividades é obrigatório para encerrar a comprovação."); return; }
+      {
+        toast.error("O relatório de atividades é obrigatório para encerrar a comprovação.");
+        return;
+      }
     }
     if (finalize && balance > 0 && !resolved) {
-      { toast.error("Existe saldo a restituir. Confirme a devolução antes de encerrar."); return; }
+      {
+        toast.error("Existe saldo a restituir. Confirme a devolução antes de encerrar.");
+        return;
+      }
     }
     if (finalize && diary.status !== "aguardando_comprovacao") {
-      toast.error('Coloque a diária em "Aguardando comprovação" antes de encerrar a prestação de contas.');
+      toast.error(
+        'Coloque a diária em "Aguardando comprovação" antes de encerrar a prestação de contas.',
+      );
       return;
     }
     const payload = {
@@ -703,8 +971,12 @@ function ProofDialog({ diary, onClose }: { diary: DiaryRow; onClose: () => void 
       beneficiary_name: diary.beneficiary_name,
       beneficiary_role: diary.beneficiary_role,
       beneficiary_cpf: diary.beneficiary_cpf,
-      actual_departure_at: get("actual_departure_at") ? new Date(get("actual_departure_at")).toISOString() : null,
-      actual_return_at: get("actual_return_at") ? new Date(get("actual_return_at")).toISOString() : null,
+      actual_departure_at: get("actual_departure_at")
+        ? new Date(get("actual_departure_at")).toISOString()
+        : null,
+      actual_return_at: get("actual_return_at")
+        ? new Date(get("actual_return_at")).toISOString()
+        : null,
       received_quantity: rq,
       received_unit_value: ru,
       used_quantity: uq,
@@ -727,7 +999,10 @@ function ProofDialog({ diary, onClose }: { diary: DiaryRow; onClose: () => void 
       ? await supabase.from("diary_proofs").update(payload).eq("id", existing.id)
       : await supabase.from("diary_proofs").insert({ ...payload, created_by: perms.userId });
     setSaving(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success(finalize ? "Comprovação encerrada." : "Comprovação salva.");
     invalidate(["diaries"]);
     onClose();
@@ -739,25 +1014,51 @@ function ProofDialog({ diary, onClose }: { diary: DiaryRow; onClose: () => void 
         <DialogHeader>
           <DialogTitle>Comprovação de Diária — RD {diary.code}</DialogTitle>
           <DialogDescription>
-            {diary.beneficiary_name} · {diary.beneficiary_cpf ? formatCPF(diary.beneficiary_cpf) : "CPF não informado"} ·
+            {diary.beneficiary_name} ·{" "}
+            {diary.beneficiary_cpf ? formatCPF(diary.beneficiary_cpf) : "CPF não informado"} ·
             Exercício {diary.exercise}
           </DialogDescription>
         </DialogHeader>
-        <form id="cd-form" className="grid gap-3 sm:grid-cols-2" onSubmit={(e) => e.preventDefault()}>
+        <form
+          id="cd-form"
+          className="grid gap-3 sm:grid-cols-2"
+          onSubmit={(e) => e.preventDefault()}
+        >
           <div>
             <Label>Partida efetiva</Label>
-            <Input type="datetime-local" name="actual_departure_at" defaultValue={toLocalInput(existing?.actual_departure_at ?? diary.departure_at)} />
+            <Input
+              type="datetime-local"
+              name="actual_departure_at"
+              defaultValue={toLocalInput(existing?.actual_departure_at ?? diary.departure_at)}
+            />
           </div>
           <div>
             <Label>Retorno efetivo</Label>
-            <Input type="datetime-local" name="actual_return_at" defaultValue={toLocalInput(existing?.actual_return_at ?? diary.return_at)} />
+            <Input
+              type="datetime-local"
+              name="actual_return_at"
+              defaultValue={toLocalInput(existing?.actual_return_at ?? diary.return_at)}
+            />
           </div>
-          <div><Label>Diárias recebidas (qtde)</Label><DecimalInput decimals={2} value={receivedQty} onValueChange={setReceivedQty} /></div>
-          <div><Label>Valor unitário recebido</Label><MoneyInput value={receivedUnit} onValueChange={setReceivedUnit} /></div>
-          <div><Label>Diárias utilizadas (qtde)</Label><DecimalInput decimals={2} value={usedQty} onValueChange={setUsedQty} /></div>
+          <div>
+            <Label>Diárias recebidas (qtde)</Label>
+            <DecimalInput decimals={2} value={receivedQty} onValueChange={setReceivedQty} />
+          </div>
+          <div>
+            <Label>Valor unitário recebido</Label>
+            <MoneyInput value={receivedUnit} onValueChange={setReceivedUnit} />
+          </div>
+          <div>
+            <Label>Diárias utilizadas (qtde)</Label>
+            <DecimalInput decimals={2} value={usedQty} onValueChange={setUsedQty} />
+          </div>
           <div className="rounded-md bg-muted/40 p-3 text-sm">
-            <p>Total recebido: <strong>{formatMoney(receivedTotal)}</strong></p>
-            <p>Total utilizado: <strong>{formatMoney(usedTotal)}</strong></p>
+            <p>
+              Total recebido: <strong>{formatMoney(receivedTotal)}</strong>
+            </p>
+            <p>
+              Total utilizado: <strong>{formatMoney(usedTotal)}</strong>
+            </p>
             <p>
               Saldo:{" "}
               <strong>
@@ -770,29 +1071,64 @@ function ProofDialog({ diary, onClose }: { diary: DiaryRow; onClose: () => void 
             <Label>Motivo herdado da RD</Label>
             <Input value={diary.purpose} readOnly />
           </div>
-          <div className="sm:col-span-2"><Label>Complemento justificado do motivo</Label><Textarea name="purpose_complement" rows={2} defaultValue={existing?.purpose_complement ?? ""} /></div>
+          <div className="sm:col-span-2">
+            <Label>Complemento justificado do motivo</Label>
+            <Textarea
+              name="purpose_complement"
+              rows={2}
+              defaultValue={existing?.purpose_complement ?? ""}
+            />
+          </div>
           <div className="sm:col-span-2">
             <Label>Relatório de atividades *</Label>
-            <Textarea rows={4} value={report} onChange={(e) => setReport(e.target.value)} placeholder="Descreva as atividades realizadas na viagem" />
+            <Textarea
+              rows={4}
+              value={report}
+              onChange={(e) => setReport(e.target.value)}
+              placeholder="Descreva as atividades realizadas na viagem"
+            />
           </div>
-          <div><Label>Data da prestação de contas</Label><Input type="date" name="settlement_date" defaultValue={existing?.settlement_date ?? ""} /></div>
-          <div><Label>Conferente / aprovador</Label><Input name="reviewer_name" defaultValue={existing?.reviewer_name ?? perms.userName} /></div>
+          <div>
+            <Label>Data da prestação de contas</Label>
+            <Input
+              type="date"
+              name="settlement_date"
+              defaultValue={existing?.settlement_date ?? ""}
+            />
+          </div>
+          <div>
+            <Label>Conferente / aprovador</Label>
+            <Input name="reviewer_name" defaultValue={existing?.reviewer_name ?? perms.userName} />
+          </div>
           {balance > 0 && (
             <>
               <div className="flex items-center gap-2 sm:col-span-2">
-                <input id="resolved" type="checkbox" checked={resolved} onChange={(e) => setResolved(e.target.checked)} />
-                <Label htmlFor="resolved">Saldo a restituir devidamente resolvido / devolvido</Label>
+                <input
+                  id="resolved"
+                  type="checkbox"
+                  checked={resolved}
+                  onChange={(e) => setResolved(e.target.checked)}
+                />
+                <Label htmlFor="resolved">
+                  Saldo a restituir devidamente resolvido / devolvido
+                </Label>
               </div>
-              <div className="sm:col-span-2"><Label>Observação da restituição</Label><Input name="restitution_note" defaultValue={existing?.restitution_note ?? ""} /></div>
+              <div className="sm:col-span-2">
+                <Label>Observação da restituição</Label>
+                <Input name="restitution_note" defaultValue={existing?.restitution_note ?? ""} />
+              </div>
             </>
           )}
           <div className="sm:col-span-2 text-xs text-muted-foreground">
             <Paperclip className="mr-1 inline h-3 w-3" />
-            Anexos de comprovação podem ser adicionados ao registro da diária pelo módulo de documentos do órgão.
+            Anexos de comprovação podem ser adicionados ao registro da diária pelo módulo de
+            documentos do órgão.
           </div>
         </form>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Fechar</Button>
+          <Button variant="outline" onClick={onClose}>
+            Fechar
+          </Button>
           <Button
             variant="secondary"
             disabled={saving}
@@ -859,11 +1195,19 @@ function LegalProvisionsDialog({ onClose }: { onClose: () => void }) {
         <div className="grid gap-3 sm:grid-cols-[140px_1fr]">
           <div>
             <Label>Código</Label>
-            <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Ex.: DEC 123/2025" />
+            <Input
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="Ex.: DEC 123/2025"
+            />
           </div>
           <div>
             <Label>Norma *</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Decreto Municipal nº 123/2025" />
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Decreto Municipal nº 123/2025"
+            />
           </div>
           <div className="sm:col-span-2">
             <Label>Descrição</Label>

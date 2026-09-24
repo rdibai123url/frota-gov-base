@@ -25,10 +25,26 @@ export const Route = createFileRoute("/")({
 });
 
 const FEATURES = [
-  { icon: Building2, title: "Estrutura administrativa", text: "Órgão, secretarias, departamentos e unidades organizados hierarquicamente." },
-  { icon: Truck, title: "Frota cadastrada", text: "Veículos, máquinas e equipamentos com dados técnicos e situação operacional." },
-  { icon: Users, title: "Perfis e permissões", text: "Administrador, gestor de frota, responsável de unidade, operador e controladoria." },
-  { icon: Lock, title: "Isolamento por órgão", text: "Cada organização acessa exclusivamente os próprios dados, com trilha de auditoria." },
+  {
+    icon: Building2,
+    title: "Estrutura administrativa",
+    text: "Órgão, secretarias, departamentos e unidades organizados hierarquicamente.",
+  },
+  {
+    icon: Truck,
+    title: "Frota cadastrada",
+    text: "Veículos, máquinas e equipamentos com dados técnicos e situação operacional.",
+  },
+  {
+    icon: Users,
+    title: "Perfis e permissões",
+    text: "Administrador, gestor de frota, responsável de unidade, operador e controladoria.",
+  },
+  {
+    icon: Lock,
+    title: "Isolamento por órgão",
+    text: "Cada organização acessa exclusivamente os próprios dados, com trilha de auditoria.",
+  },
 ];
 
 function Landing() {

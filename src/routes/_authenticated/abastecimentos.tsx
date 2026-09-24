@@ -36,7 +36,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   ALERT_TYPE_LABELS,
   EXPENSE_ORIGINS,
@@ -85,7 +92,10 @@ export const Route = createFileRoute("/_authenticated/abastecimentos")({
           "Registro e histórico de abastecimentos da frota pública, com validações automáticas, alertas e cancelamento auditado.",
       },
       { property: "og:title", content: "Abastecimentos — FrotaGov" },
-      { property: "og:description", content: "Controle diário de abastecimentos da frota do órgão." },
+      {
+        property: "og:description",
+        content: "Controle diário de abastecimentos da frota do órgão.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -114,7 +124,10 @@ function IssueList({ issues }: { issues: RuleIssue[] }) {
               : "border-border bg-muted text-muted-foreground";
         const Icon = i.level === "erro" ? CircleAlert : i.level === "alerta" ? AlertTriangle : Info;
         return (
-          <div key={`${i.type}-${idx}`} className={`flex gap-2 rounded-md border p-3 text-sm ${style}`}>
+          <div
+            key={`${i.type}-${idx}`}
+            className={`flex gap-2 rounded-md border p-3 text-sm ${style}`}
+          >
             <Icon className="mt-0.5 size-4 shrink-0" />
             <span>
               <strong className="uppercase">{i.level}:</strong> {i.message}
@@ -163,7 +176,7 @@ function Abastecimentos() {
       if (to && new Date(f.fueled_at) > new Date(`${to}T23:59:59`)) return false;
       if (t) {
         const hay = [
-          (f.vehicle?.plate ?? f.vehicle?.asset_code ?? ""),
+          f.vehicle?.plate ?? f.vehicle?.asset_code ?? "",
           f.vehicle?.asset_code,
           f.invoice_number,
           f.authorization_number,
@@ -200,7 +213,12 @@ function Abastecimentos() {
           <Label className="text-xs">Busca (placa, patrimônio, nota ou autorização)</Label>
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" placeholder="Buscar…" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              className="pl-9"
+              placeholder="Buscar…"
+            />
           </div>
         </div>
         <div>
@@ -214,11 +232,15 @@ function Abastecimentos() {
         <div>
           <Label className="text-xs">Veículo</Label>
           <Select value={fVehicle} onValueChange={setFVehicle}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Todos</SelectItem>
               {vehicles.map((v) => (
-                <SelectItem key={v.id} value={v.id}>{(v.plate ?? v.asset_code)}</SelectItem>
+                <SelectItem key={v.id} value={v.id}>
+                  {v.plate ?? v.asset_code}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -226,11 +248,15 @@ function Abastecimentos() {
         <div>
           <Label className="text-xs">Unidade</Label>
           <Select value={fUnit} onValueChange={setFUnit}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Todas</SelectItem>
               {units.map((u) => (
-                <SelectItem key={u.id} value={u.id}>{u.acronym || u.name}</SelectItem>
+                <SelectItem key={u.id} value={u.id}>
+                  {u.acronym || u.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -238,11 +264,15 @@ function Abastecimentos() {
         <div>
           <Label className="text-xs">Fornecedor</Label>
           <Select value={fSupplier} onValueChange={setFSupplier}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Todos</SelectItem>
               {suppliers.map((s) => (
-                <SelectItem key={s.id} value={s.id}>{s.trade_name || s.legal_name}</SelectItem>
+                <SelectItem key={s.id} value={s.id}>
+                  {s.trade_name || s.legal_name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -250,11 +280,15 @@ function Abastecimentos() {
         <div>
           <Label className="text-xs">Combustível</Label>
           <Select value={fFuel} onValueChange={setFFuel}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Todos</SelectItem>
               {fuels.map((f) => (
-                <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+                <SelectItem key={f.id} value={f.id}>
+                  {f.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -262,7 +296,9 @@ function Abastecimentos() {
         <div>
           <Label className="text-xs">Situação</Label>
           <Select value={fStatus} onValueChange={setFStatus}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Todas</SelectItem>
               <SelectItem value="valido">Válido</SelectItem>
@@ -293,7 +329,11 @@ function Abastecimentos() {
           </TableHeader>
           <TableBody>
             {isLoading && (
-              <TableRow><TableCell colSpan={12} className="py-8 text-center text-muted-foreground">Carregando…</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={12} className="py-8 text-center text-muted-foreground">
+                  Carregando…
+                </TableCell>
+              </TableRow>
             )}
             {!isLoading && rows.length === 0 && (
               <TableRow>
@@ -305,7 +345,9 @@ function Abastecimentos() {
             {rows.map((f) => (
               <TableRow key={f.id} className={f.status === "cancelado" ? "opacity-60" : undefined}>
                 <TableCell className="whitespace-nowrap">{dateTimeBR(f.fueled_at)}</TableCell>
-                <TableCell className="font-medium">{(f.vehicle?.plate ?? f.vehicle?.asset_code ?? "—")}</TableCell>
+                <TableCell className="font-medium">
+                  {f.vehicle?.plate ?? f.vehicle?.asset_code ?? "—"}
+                </TableCell>
                 <TableCell>{f.unit?.acronym || f.unit?.name || "—"}</TableCell>
                 <TableCell>{f.fuel?.name ?? "—"}</TableCell>
                 <TableCell className="text-right">
@@ -321,7 +363,9 @@ function Abastecimentos() {
                   )}
                 </TableCell>
                 <TableCell className="text-right">{brl(Number(f.unit_price))}</TableCell>
-                <TableCell className="text-right font-medium">{brl(Number(f.total_value))}</TableCell>
+                <TableCell className="text-right font-medium">
+                  {brl(Number(f.total_value))}
+                </TableCell>
                 <TableCell className="text-right">
                   {f.odometer_km != null ? `${num(Number(f.odometer_km), 0)} km` : ""}
                   {f.hour_meter != null ? ` ${num(Number(f.hour_meter), 1)} h` : ""}
@@ -340,11 +384,21 @@ function Abastecimentos() {
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" aria-label="Detalhes" onClick={() => setDetail(f)}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Detalhes"
+                      onClick={() => setDetail(f)}
+                    >
                       <Eye className="size-4" />
                     </Button>
                     {perms.canCancel && f.status === "valido" && (
-                      <Button variant="ghost" size="icon" aria-label="Cancelar" onClick={() => setCancelling(f)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Cancelar"
+                        onClick={() => setCancelling(f)}
+                      >
                         <Ban className="size-4" />
                       </Button>
                     )}
@@ -362,10 +416,20 @@ function Abastecimentos() {
             {filtered.length} registro(s) · página {current} de {pages}
           </span>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={current <= 1} onClick={() => setPage(current - 1)}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={current <= 1}
+              onClick={() => setPage(current - 1)}
+            >
               Anterior
             </Button>
-            <Button variant="outline" size="sm" disabled={current >= pages} onClick={() => setPage(current + 1)}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={current >= pages}
+              onClick={() => setPage(current + 1)}
+            >
               Próxima
             </Button>
           </div>
@@ -556,10 +620,7 @@ function NewFuelingDialog({
     });
   }
 
-  const minKm = Math.max(
-    Number(vehicle?.current_km ?? 0),
-    Number(selectedAuth?.odometer_km ?? 0),
-  );
+  const minKm = Math.max(Number(vehicle?.current_km ?? 0), Number(selectedAuth?.odometer_km ?? 0));
   const informedKm = odometer === "" ? null : Number(odometer.replace(",", "."));
   if (informedKm != null && minKm > 0 && informedKm < minKm)
     authIssues.push({
@@ -588,7 +649,9 @@ function NewFuelingDialog({
       return;
     }
     if (needsJustification && !perms.canWrite) {
-      toast.error("Este abastecimento exige justificativa de usuário autorizado (gestor ou administrador).");
+      toast.error(
+        "Este abastecimento exige justificativa de usuário autorizado (gestor ou administrador).",
+      );
       return;
     }
     if (needsJustification && justification.trim().length < 10) {
@@ -716,21 +779,28 @@ function NewFuelingDialog({
           <div className="rounded-lg border bg-muted/30 p-4">
             <Label>Autorização de abastecimento</Label>
             <Select value={authId} onValueChange={setAuthId}>
-              <SelectTrigger className="mt-1"><SelectValue placeholder="Selecione a autorização" /></SelectTrigger>
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder="Selecione a autorização" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE}>Sem autorização prévia (exige justificativa)</SelectItem>
                 {usableAuths.map((a) => (
                   <SelectItem key={a.id} value={a.id}>
-                    {a.code} — {(a.vehicle?.plate ?? a.vehicle?.asset_code ?? "")} · saldo {formatLiters(authorizationBalance(a))} {a.fuel?.measure_unit ?? "L"}
+                    {a.code} — {a.vehicle?.plate ?? a.vehicle?.asset_code ?? ""} · saldo{" "}
+                    {formatLiters(authorizationBalance(a))} {a.fuel?.measure_unit ?? "L"}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {selectedAuth && (
               <p className="mt-2 text-xs text-muted-foreground">
-                Saldo disponível: <strong>{formatLiters(authorizationBalance(selectedAuth))}</strong> ·
-                {selectedAuth.max_unit_price ? ` preço máx. ${brl(selectedAuth.max_unit_price)} ·` : ""}
-                {selectedAuth.max_value ? ` valor máx. ${brl(selectedAuth.max_value)} ·` : ""} válida até {dateTimeBR(selectedAuth.valid_until)}
+                Saldo disponível:{" "}
+                <strong>{formatLiters(authorizationBalance(selectedAuth))}</strong> ·
+                {selectedAuth.max_unit_price
+                  ? ` preço máx. ${brl(selectedAuth.max_unit_price)} ·`
+                  : ""}
+                {selectedAuth.max_value ? ` valor máx. ${brl(selectedAuth.max_value)} ·` : ""}{" "}
+                válida até {dateTimeBR(selectedAuth.valid_until)}
               </p>
             )}
             {selectedAuth && (
@@ -741,13 +811,13 @@ function NewFuelingDialog({
                 {(
                   [
                     ["Autorização", selectedAuth.code ?? "—"],
-                    ["Veículo / placa", (selectedAuth.vehicle?.plate ?? selectedAuth.vehicle?.asset_code ?? "—")],
+                    [
+                      "Veículo / placa",
+                      selectedAuth.vehicle?.plate ?? selectedAuth.vehicle?.asset_code ?? "—",
+                    ],
                     ["Unidade / secretaria", selectedAuth.unit?.name ?? unit?.name ?? "—"],
                     ["Condutor", selectedAuth.driver?.full_name ?? "—"],
-                    [
-                      "KM autorizado / último válido",
-                      minKm > 0 ? `${num(minKm, 0)} km` : "—",
-                    ],
+                    ["KM autorizado / último válido", minKm > 0 ? `${num(minKm, 0)} km` : "—"],
                     ["Combustível / produto", selectedAuth.fuel?.name ?? "—"],
                     [
                       "Fornecedor / posto",
@@ -759,7 +829,8 @@ function NewFuelingDialog({
                     ],
                     [
                       "Item do contrato",
-                      contractItems.find((i) => i.id === selectedAuth.contract_item_id)?.description ?? "—",
+                      contractItems.find((i) => i.id === selectedAuth.contract_item_id)
+                        ?.description ?? "—",
                     ],
                     [
                       "Empenho",
@@ -816,7 +887,12 @@ function NewFuelingDialog({
             {needsAuthReason && (
               <div className="mt-3">
                 <Label htmlFor="noauth">Justificativa da ausência de autorização *</Label>
-                <Textarea id="noauth" rows={2} value={noAuthReason} onChange={(e) => setNoAuthReason(e.target.value)} />
+                <Textarea
+                  id="noauth"
+                  rows={2}
+                  value={noAuthReason}
+                  onChange={(e) => setNoAuthReason(e.target.value)}
+                />
               </div>
             )}
           </div>
@@ -824,12 +900,15 @@ function NewFuelingDialog({
             <div>
               <Label>Veículo / equipamento *</Label>
               <Select value={vehicleId} onValueChange={setVehicleId} disabled={!!selectedAuth}>
-                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Selecione</SelectItem>
                   {vehicles.map((v) => (
                     <SelectItem key={v.id} value={v.id}>
-                      {(v.plate ?? v.asset_code)} — {[v.brand, v.model].filter(Boolean).join(" ") || "sem modelo"}
+                      {v.plate ?? v.asset_code} —{" "}
+                      {[v.brand, v.model].filter(Boolean).join(" ") || "sem modelo"}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -841,8 +920,14 @@ function NewFuelingDialog({
             </div>
             <div>
               <Label>Fornecedor / posto</Label>
-              <Select value={supplierId} onValueChange={setSupplierId} disabled={!!selectedAuth?.supplier_id}>
-                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <Select
+                value={supplierId}
+                onValueChange={setSupplierId}
+                disabled={!!selectedAuth?.supplier_id}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Não informado</SelectItem>
                   {suppliers.map((s) => (
@@ -856,8 +941,14 @@ function NewFuelingDialog({
             </div>
             <div>
               <Label>Combustível *</Label>
-              <Select value={fuelId} onValueChange={setFuelId} disabled={!!selectedAuth?.fuel_type_id}>
-                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <Select
+                value={fuelId}
+                onValueChange={setFuelId}
+                disabled={!!selectedAuth?.fuel_type_id}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Selecione</SelectItem>
                   {fuels.map((f) => (
@@ -887,7 +978,9 @@ function NewFuelingDialog({
                   if (emp) setOperator(emp.full_name);
                 }}
               >
-                <SelectTrigger><SelectValue placeholder="Selecione no cadastro de pessoas" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione no cadastro de pessoas" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Não vincular</SelectItem>
                   {employees
@@ -911,12 +1004,15 @@ function NewFuelingDialog({
             <div>
               <Label>Condutor</Label>
               <Select value={driverId} onValueChange={setDriverId}>
-                <SelectTrigger><SelectValue placeholder="Selecione o condutor" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o condutor" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Não informado</SelectItem>
                   {drivers.map((d) => (
                     <SelectItem key={d.id} value={d.id} disabled={!d.active}>
-                      {d.full_name}{d.active ? "" : " (inativo)"}
+                      {d.full_name}
+                      {d.active ? "" : " (inativo)"}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -929,7 +1025,9 @@ function NewFuelingDialog({
                 inputMode="decimal"
                 value={odometer}
                 onChange={(e) => setOdometer(e.target.value)}
-                placeholder={vehicle?.current_km != null ? `Atual: ${num(Number(vehicle.current_km), 0)}` : ""}
+                placeholder={
+                  vehicle?.current_km != null ? `Atual: ${num(Number(vehicle.current_km), 0)}` : ""
+                }
               />
             </div>
             <div>
@@ -939,7 +1037,9 @@ function NewFuelingDialog({
                 inputMode="decimal"
                 value={hourMeter}
                 onChange={(e) => setHourMeter(e.target.value)}
-                placeholder={vehicle?.hour_meter != null ? `Atual: ${num(Number(vehicle.hour_meter), 1)}` : ""}
+                placeholder={
+                  vehicle?.hour_meter != null ? `Atual: ${num(Number(vehicle.hour_meter), 1)}` : ""
+                }
               />
             </div>
             <div>
@@ -957,10 +1057,14 @@ function NewFuelingDialog({
             <div>
               <Label>Tipo de documento fiscal</Label>
               <Select value={documentKind} onValueChange={setDocumentKind}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {DOCUMENT_KINDS.map((d) => (
-                    <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                    <SelectItem key={d.value} value={d.value}>
+                      {d.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -981,7 +1085,11 @@ function NewFuelingDialog({
             </div>
             <div>
               <Label htmlFor="auth">Número da autorização</Label>
-              <Input id="auth" value={authorization} onChange={(e) => setAuthorization(e.target.value)} />
+              <Input
+                id="auth"
+                value={authorization}
+                onChange={(e) => setAuthorization(e.target.value)}
+              />
             </div>
             <div>
               <Label htmlFor="file">Comprovante (JPG, PNG, WEBP ou PDF · até 10 MB)</Label>
@@ -994,7 +1102,11 @@ function NewFuelingDialog({
             </div>
             <div className="sm:col-span-2">
               <Label>Viagem / utilização vinculada</Label>
-              <Select value={usageId} onValueChange={setUsageId} disabled={usageOptions.length === 0}>
+              <Select
+                value={usageId}
+                onValueChange={setUsageId}
+                disabled={usageOptions.length === 0}
+              >
                 <SelectTrigger className="mt-1">
                   <SelectValue
                     placeholder={
@@ -1008,7 +1120,7 @@ function NewFuelingDialog({
                   <SelectItem value={NONE}>Não vincular a uma viagem</SelectItem>
                   {usageOptions.map((u) => (
                     <SelectItem key={u.id} value={u.id}>
-                      {(u.code ?? "Utilização")} — {dateTimeBR(u.planned_departure)}
+                      {u.code ?? "Utilização"} — {dateTimeBR(u.planned_departure)}
                       {u.destination ? ` · ${u.destination}` : ""}
                     </SelectItem>
                   ))}
@@ -1022,21 +1134,31 @@ function NewFuelingDialog({
             </div>
             <div className="sm:col-span-2 rounded-md border bg-muted/30 p-3">
               <div className="flex items-start gap-2">
-                <Checkbox id="fulltank" checked={fullTank} onCheckedChange={(v) => setFullTank(v === true)} />
+                <Checkbox
+                  id="fulltank"
+                  checked={fullTank}
+                  onCheckedChange={(v) => setFullTank(v === true)}
+                />
                 <div>
                   <Label htmlFor="fulltank" className="cursor-pointer">
                     Tanque cheio
                   </Label>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Marque quando o abastecimento completou efetivamente o tanque. Essa informação é usada
-                    no cálculo confiável do consumo efetivo (km/l) entre dois abastecimentos completos.
+                    Marque quando o abastecimento completou efetivamente o tanque. Essa informação é
+                    usada no cálculo confiável do consumo efetivo (km/l) entre dois abastecimentos
+                    completos.
                   </p>
                 </div>
               </div>
             </div>
             <div className="sm:col-span-2">
               <Label htmlFor="notes">Observações</Label>
-              <Textarea id="notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
+              <Textarea
+                id="notes"
+                rows={2}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
             </div>
           </div>
 
@@ -1092,19 +1214,33 @@ function DetailDialog({ fueling, onClose }: { fueling: FuelingRow | null; onClos
     <Dialog open onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-h-[92vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Abastecimento — {(fueling.vehicle?.plate ?? fueling.vehicle?.asset_code ?? "")}</DialogTitle>
+          <DialogTitle>
+            Abastecimento — {fueling.vehicle?.plate ?? fueling.vehicle?.asset_code ?? ""}
+          </DialogTitle>
           <DialogDescription>{dateTimeBR(fueling.fueled_at)}</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 sm:grid-cols-3">
           <Row label="Situação" value={fueling.status === "cancelado" ? "Cancelado" : "Válido"} />
           <Row label="Unidade" value={fueling.unit?.name} />
-          <Row label="Fornecedor" value={fueling.supplier?.trade_name || fueling.supplier?.legal_name} />
+          <Row
+            label="Fornecedor"
+            value={fueling.supplier?.trade_name || fueling.supplier?.legal_name}
+          />
           <Row label="Combustível" value={fueling.fuel?.name} />
-          <Row label="Quantidade" value={`${formatLiters(Number(fueling.quantity))} ${fueling.fuel?.measure_unit ?? ""}`} />
+          <Row
+            label="Quantidade"
+            value={`${formatLiters(Number(fueling.quantity))} ${fueling.fuel?.measure_unit ?? ""}`}
+          />
           <Row label="Preço unitário" value={brl(Number(fueling.unit_price))} />
           <Row label="Valor total" value={brl(Number(fueling.total_value))} />
-          <Row label="KM registrado" value={fueling.odometer_km != null ? num(Number(fueling.odometer_km), 0) : null} />
-          <Row label="Horímetro" value={fueling.hour_meter != null ? num(Number(fueling.hour_meter), 1) : null} />
+          <Row
+            label="KM registrado"
+            value={fueling.odometer_km != null ? num(Number(fueling.odometer_km), 0) : null}
+          />
+          <Row
+            label="Horímetro"
+            value={fueling.hour_meter != null ? num(Number(fueling.hour_meter), 1) : null}
+          />
           <Row
             label="Tanque cheio"
             value={
@@ -1127,12 +1263,17 @@ function DetailDialog({ fueling, onClose }: { fueling: FuelingRow | null; onClos
             label="Condutor"
             value={
               fueling.driver?.full_name ??
-              (fueling.driver_name ? `${fueling.driver_name} (condutor histórico não vinculado)` : "—")
+              (fueling.driver_name
+                ? `${fueling.driver_name} (condutor histórico não vinculado)`
+                : "—")
             }
           />
           <Row
             label="Autorização"
-            value={fueling.authorization?.code ?? (fueling.without_authorization_reason ? "Sem autorização prévia" : "—")}
+            value={
+              fueling.authorization?.code ??
+              (fueling.without_authorization_reason ? "Sem autorização prévia" : "—")
+            }
           />
           {fueling.authorization_id && (
             <>
@@ -1141,7 +1282,9 @@ function DetailDialog({ fueling, onClose }: { fueling: FuelingRow | null; onClos
                 value={
                   fueling.reserved_quantity_before != null
                     ? `${formatLiters(Number(fueling.reserved_quantity_before))} ${fueling.fuel?.measure_unit ?? ""}${
-                        fueling.reserved_value_before != null ? ` · ${brl(Number(fueling.reserved_value_before))}` : ""
+                        fueling.reserved_value_before != null
+                          ? ` · ${brl(Number(fueling.reserved_value_before))}`
+                          : ""
                       }`
                     : "—"
                 }
@@ -1149,7 +1292,8 @@ function DetailDialog({ fueling, onClose }: { fueling: FuelingRow | null; onClos
               <Row
                 label="Devolvido ao saldo"
                 value={
-                  Number(fueling.released_quantity ?? 0) > 0 || Number(fueling.released_value ?? 0) > 0
+                  Number(fueling.released_quantity ?? 0) > 0 ||
+                  Number(fueling.released_value ?? 0) > 0
                     ? `${formatLiters(Number(fueling.released_quantity ?? 0))} ${fueling.fuel?.measure_unit ?? ""} · ${brl(Number(fueling.released_value ?? 0))}`
                     : fueling.closes_authorization
                       ? "Sem diferença a devolver"
@@ -1163,7 +1307,10 @@ function DetailDialog({ fueling, onClose }: { fueling: FuelingRow | null; onClos
             value={`${DOCUMENT_KIND_LABELS[fueling.document_kind ?? ""] ?? "—"}${fueling.invoice_number ? ` nº ${fueling.invoice_number}` : ""}`}
           />
           <Row label="Chave do documento" value={fueling.document_key ?? "—"} />
-          <Row label="Justificativa (sem autorização)" value={fueling.without_authorization_reason ?? "—"} />
+          <Row
+            label="Justificativa (sem autorização)"
+            value={fueling.without_authorization_reason ?? "—"}
+          />
           <Row label="Registrado por" value={fueling.operator_name} />
           <Row label="Nota fiscal" value={fueling.invoice_number} />
           <Row label="Autorização" value={fueling.authorization_number} />
@@ -1171,11 +1318,31 @@ function DetailDialog({ fueling, onClose }: { fueling: FuelingRow | null; onClos
           <div className="sm:col-span-3 border-t pt-3">
             <p className="gov-title text-sm">Origem do recurso</p>
           </div>
-          <Row label="Origem da despesa" value={EXPENSE_ORIGINS.find((o) => o.value === fueling.expense_origin)?.label ?? fueling.expense_origin} />
+          <Row
+            label="Origem da despesa"
+            value={
+              EXPENSE_ORIGINS.find((o) => o.value === fueling.expense_origin)?.label ??
+              fueling.expense_origin
+            }
+          />
           <Row label="Contrato" value={fueling.contract?.number ?? "—"} />
           <Row label="Item contratual" value={fueling.contract_item?.description ?? "—"} />
-          <Row label="Empenho" value={fueling.commitment ? `${fueling.commitment.number}/${fueling.commitment.exercise}` : "—"} />
-          <Row label="Centro de custo" value={fueling.cost_center ? `${fueling.cost_center.code} — ${fueling.cost_center.name}` : "—"} />
+          <Row
+            label="Empenho"
+            value={
+              fueling.commitment
+                ? `${fueling.commitment.number}/${fueling.commitment.exercise}`
+                : "—"
+            }
+          />
+          <Row
+            label="Centro de custo"
+            value={
+              fueling.cost_center
+                ? `${fueling.cost_center.code} — ${fueling.cost_center.name}`
+                : "—"
+            }
+          />
           <Row label="Cota" value={fueling.quota?.name ?? "—"} />
           <Row label="Registrado em" value={dateTimeBR(fueling.created_at)} />
           <div className="sm:col-span-3">
@@ -1183,7 +1350,9 @@ function DetailDialog({ fueling, onClose }: { fueling: FuelingRow | null; onClos
           </div>
           {(fueling.alert_flags ?? []).length > 0 && (
             <div className="sm:col-span-3 space-y-2">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Alertas gerados</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                Alertas gerados
+              </p>
               <div className="flex flex-wrap gap-2">
                 {fueling.alert_flags.map((a) => (
                   <Badge key={a} className="bg-warning text-warning-foreground">
@@ -1200,8 +1369,12 @@ function DetailDialog({ fueling, onClose }: { fueling: FuelingRow | null; onClos
           )}
           {fueling.status === "cancelado" && (
             <div className="sm:col-span-3 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">
-              <p><strong>Cancelado em:</strong> {dateTimeBR(fueling.cancelled_at)}</p>
-              <p><strong>Motivo:</strong> {fueling.cancel_reason}</p>
+              <p>
+                <strong>Cancelado em:</strong> {dateTimeBR(fueling.cancelled_at)}
+              </p>
+              <p>
+                <strong>Motivo:</strong> {fueling.cancel_reason}
+              </p>
             </div>
           )}
           <div className="sm:col-span-3">
@@ -1272,13 +1445,18 @@ function CancelDialog({
         <DialogHeader>
           <DialogTitle>Cancelar abastecimento</DialogTitle>
           <DialogDescription>
-            O registro não é excluído: permanece no histórico com situação CANCELADO e trilha de auditoria.
-            O KM/horímetro já aplicado ao veículo não é revertido.
+            O registro não é excluído: permanece no histórico com situação CANCELADO e trilha de
+            auditoria. O KM/horímetro já aplicado ao veículo não é revertido.
           </DialogDescription>
         </DialogHeader>
         <div>
           <Label htmlFor="reason">Motivo do cancelamento *</Label>
-          <Textarea id="reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} />
+          <Textarea
+            id="reason"
+            rows={3}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+          />
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>

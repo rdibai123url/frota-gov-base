@@ -1,6 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Search, CarFront, LogOut, LogIn, Ban, Eye, Route as RouteIcon, Loader2 } from "lucide-react";
+import {
+  Plus,
+  Search,
+  CarFront,
+  LogOut,
+  LogIn,
+  Ban,
+  Eye,
+  Route as RouteIcon,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/app-shell";
@@ -24,7 +34,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   USAGE_STATUS,
   VEHICLE_CATEGORY_HINT,
@@ -125,7 +142,13 @@ function Utilizacao() {
     return usages.filter((u) => {
       if (fStatus !== ALL && u.status !== fStatus) return false;
       if (t) {
-        const hay = [u.code, (u.vehicle?.plate ?? u.vehicle?.asset_code ?? ""), u.driver?.full_name, u.destination, u.purpose]
+        const hay = [
+          u.code,
+          u.vehicle?.plate ?? u.vehicle?.asset_code ?? "",
+          u.driver?.full_name,
+          u.destination,
+          u.purpose,
+        ]
           .filter(Boolean)
           .join(" ")
           .toLowerCase();
@@ -146,7 +169,7 @@ function Utilizacao() {
       .eq("id", u.id);
     if (error) toast.error(error.message);
     else {
-      toast.success(`Saída registrada para ${(u.vehicle?.plate ?? u.vehicle?.asset_code ?? "")}.`);
+      toast.success(`Saída registrada para ${u.vehicle?.plate ?? u.vehicle?.asset_code ?? ""}.`);
       invalidate(["vehicle-usages"]);
     }
   }
@@ -170,17 +193,26 @@ function Utilizacao() {
           <Label className="text-xs">Busca (nº, placa, condutor, destino)</Label>
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" placeholder="Buscar…" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              className="pl-9"
+              placeholder="Buscar…"
+            />
           </div>
         </div>
         <div>
           <Label className="text-xs">Situação</Label>
           <Select value={fStatus} onValueChange={setFStatus}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Todas</SelectItem>
               {USAGE_STATUS.map((s) => (
-                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                <SelectItem key={s.value} value={s.value}>
+                  {s.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -193,21 +225,32 @@ function Utilizacao() {
         </p>
         <div className="grid gap-3 sm:grid-cols-3">
           <Select value={lookVehicle} onValueChange={setLookVehicle}>
-            <SelectTrigger><SelectValue placeholder="Veículo" /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue placeholder="Veículo" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value={NONE}>Selecione o veículo</SelectItem>
               {vehicles.map((v) => (
-                <SelectItem key={v.id} value={v.id}>{(v.plate ?? v.asset_code)}</SelectItem>
+                <SelectItem key={v.id} value={v.id}>
+                  {v.plate ?? v.asset_code}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Input type="datetime-local" value={lookAt} onChange={(e) => setLookAt(e.target.value)} />
           <div className="flex items-center text-sm">
-            {lookupResult === undefined && <span className="text-muted-foreground">Informe veículo e data/hora.</span>}
-            {lookupResult === null && <span className="text-muted-foreground">Nenhuma utilização registrada nesse momento.</span>}
+            {lookupResult === undefined && (
+              <span className="text-muted-foreground">Informe veículo e data/hora.</span>
+            )}
+            {lookupResult === null && (
+              <span className="text-muted-foreground">
+                Nenhuma utilização registrada nesse momento.
+              </span>
+            )}
             {lookupResult && (
               <span>
-                <strong>{lookupResult.driver?.full_name ?? "Condutor não informado"}</strong> — {lookupResult.code} ({label(USAGE_STATUS, lookupResult.status)})
+                <strong>{lookupResult.driver?.full_name ?? "Condutor não informado"}</strong> —{" "}
+                {lookupResult.code} ({label(USAGE_STATUS, lookupResult.status)})
               </span>
             )}
           </div>
@@ -230,7 +273,11 @@ function Utilizacao() {
           </TableHeader>
           <TableBody>
             {isLoading && (
-              <TableRow><TableCell colSpan={8} className="py-8 text-center text-muted-foreground">Carregando…</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
+                  Carregando…
+                </TableCell>
+              </TableRow>
             )}
             {!isLoading && rows.length === 0 && (
               <TableRow>
@@ -242,31 +289,56 @@ function Utilizacao() {
             {rows.map((u) => (
               <TableRow key={u.id}>
                 <TableCell className="font-mono text-xs">{u.code}</TableCell>
-                <TableCell className="font-medium">{(u.vehicle?.plate ?? u.vehicle?.asset_code ?? "—")}</TableCell>
+                <TableCell className="font-medium">
+                  {u.vehicle?.plate ?? u.vehicle?.asset_code ?? "—"}
+                </TableCell>
                 <TableCell>{u.driver?.full_name ?? "—"}</TableCell>
                 <TableCell>{dateTimeBR(u.planned_departure)}</TableCell>
                 <TableCell>{dateTimeBR(u.planned_return)}</TableCell>
                 <TableCell className="max-w-40 truncate">{u.destination ?? "—"}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={STATUS_STYLE[u.status]}>{label(USAGE_STATUS, u.status)}</Badge>
+                  <Badge variant="outline" className={STATUS_STYLE[u.status]}>
+                    {label(USAGE_STATUS, u.status)}
+                  </Badge>
                 </TableCell>
                 <TableCell>
                   <div className="flex justify-end gap-1">
-                    <Button variant="ghost" size="icon" aria-label="Detalhes" onClick={() => setDetail(u)}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Detalhes"
+                      onClick={() => setDetail(u)}
+                    >
                       <Eye className="size-4" />
                     </Button>
-                    {perms.canRegister && (u.status === "solicitada" || u.status === "autorizada") && (
-                      <Button variant="ghost" size="icon" aria-label="Registrar saída" onClick={() => startTrip(u)}>
-                        <LogOut className="size-4" />
-                      </Button>
-                    )}
+                    {perms.canRegister &&
+                      (u.status === "solicitada" || u.status === "autorizada") && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Registrar saída"
+                          onClick={() => startTrip(u)}
+                        >
+                          <LogOut className="size-4" />
+                        </Button>
+                      )}
                     {perms.canRegister && u.status === "em_uso" && (
-                      <Button variant="ghost" size="icon" aria-label="Registrar retorno" onClick={() => setClosing(u)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Registrar retorno"
+                        onClick={() => setClosing(u)}
+                      >
                         <LogIn className="size-4" />
                       </Button>
                     )}
                     {perms.canCancel && u.status !== "cancelada" && u.status !== "concluida" && (
-                      <Button variant="ghost" size="icon" aria-label="Cancelar" onClick={() => setCancelling(u)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Cancelar"
+                        onClick={() => setCancelling(u)}
+                      >
                         <Ban className="size-4 text-destructive" />
                       </Button>
                     )}
@@ -280,21 +352,50 @@ function Utilizacao() {
 
       {pages > 1 && (
         <div className="mt-4 flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">{filtered.length} registro(s) · página {current} de {pages}</span>
+          <span className="text-muted-foreground">
+            {filtered.length} registro(s) · página {current} de {pages}
+          </span>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={current <= 1} onClick={() => setPage(current - 1)}>Anterior</Button>
-            <Button variant="outline" size="sm" disabled={current >= pages} onClick={() => setPage(current + 1)}>Próxima</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={current <= 1}
+              onClick={() => setPage(current - 1)}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={current >= pages}
+              onClick={() => setPage(current + 1)}
+            >
+              Próxima
+            </Button>
           </div>
         </div>
       )}
 
-      {openNew && <NewUsageDialog onClose={() => setOpenNew(false)} onSaved={() => invalidate(["vehicle-usages", "vehicles"])} />}
+      {openNew && (
+        <NewUsageDialog
+          onClose={() => setOpenNew(false)}
+          onSaved={() => invalidate(["vehicle-usages", "vehicles"])}
+        />
+      )}
       {detail && <UsageDetail usage={detail} onClose={() => setDetail(null)} />}
       {closing && (
-        <CloseUsageDialog usage={closing} onClose={() => setClosing(null)} onSaved={() => invalidate(["vehicle-usages", "vehicles"])} />
+        <CloseUsageDialog
+          usage={closing}
+          onClose={() => setClosing(null)}
+          onSaved={() => invalidate(["vehicle-usages", "vehicles"])}
+        />
       )}
       {cancelling && (
-        <CancelUsageDialog usage={cancelling} onClose={() => setCancelling(null)} onSaved={() => invalidate(["vehicle-usages"])} />
+        <CancelUsageDialog
+          usage={cancelling}
+          onClose={() => setCancelling(null)}
+          onSaved={() => invalidate(["vehicle-usages"])}
+        />
       )}
     </>
   );
@@ -334,7 +435,9 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
   const [routeKm, setRouteKm] = useState<number | null>(null);
   const [routeMin, setRouteMin] = useState<number | null>(null);
   const [routeGeometry, setRouteGeometry] = useState<unknown>(null);
-  const [distanceSource, setDistanceSource] = useState<"nao_calculada" | "rota" | "manual">("nao_calculada");
+  const [distanceSource, setDistanceSource] = useState<"nao_calculada" | "rota" | "manual">(
+    "nao_calculada",
+  );
   const [manualKm, setManualKm] = useState("");
   const [fuelPrice, setFuelPrice] = useState("");
   const [routing, setRouting] = useState(false);
@@ -401,11 +504,18 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
   const issues: { level: "erro" | "alerta" | "info"; message: string }[] = [];
   if (!vehicle) issues.push({ level: "erro", message: "Selecione o veículo." });
   if (vehicle && BLOCKED_VEHICLE.includes(vehicle.status))
-    issues.push({ level: "erro", message: `Veículo ${(vehicle.plate ?? vehicle.asset_code)} está ${vehicle.status} e não pode ser utilizado.` });
+    issues.push({
+      level: "erro",
+      message: `Veículo ${vehicle.plate ?? vehicle.asset_code} está ${vehicle.status} e não pode ser utilizado.`,
+    });
   if (vehicle?.status === "manutencao")
-    issues.push({ level: "alerta", message: "Veículo em manutenção: é obrigatório justificar a liberação." });
+    issues.push({
+      level: "alerta",
+      message: "Veículo em manutenção: é obrigatório justificar a liberação.",
+    });
   if (!driver) issues.push({ level: "erro", message: "Selecione o condutor." });
-  if (driver && !driver.active) issues.push({ level: "erro", message: "Condutor inativo não pode ser designado." });
+  if (driver && !driver.active)
+    issues.push({ level: "erro", message: "Condutor inativo não pode ser designado." });
   if (driver && cnhState(driver.license_expiry) === "vencida")
     issues.push({ level: "erro", message: `CNH de ${driver.full_name} está vencida.` });
   if (driver && cnhState(driver.license_expiry) === "a_vencer")
@@ -414,7 +524,9 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
     vehicle?.vehicle_type &&
     driver?.license_categories?.length &&
     VEHICLE_CATEGORY_HINT[vehicle.vehicle_type] &&
-    !VEHICLE_CATEGORY_HINT[vehicle.vehicle_type]!.some((c) => driver.license_categories!.includes(c))
+    !VEHICLE_CATEGORY_HINT[vehicle.vehicle_type]!.some((c) =>
+      driver.license_categories!.includes(c),
+    )
   )
     issues.push({
       level: "alerta",
@@ -422,11 +534,18 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
     });
   if (perms.roles.includes("unit_manager") && !perms.canManageFleet) {
     if (vehicle && vehicle.unit_id !== perms.unitId)
-      issues.push({ level: "erro", message: "Você só pode operar veículos da sua própria unidade." });
+      issues.push({
+        level: "erro",
+        message: "Você só pode operar veículos da sua própria unidade.",
+      });
     if (driver && driver.unit_id !== perms.unitId)
-      issues.push({ level: "erro", message: "Você só pode designar condutores da sua própria unidade." });
+      issues.push({
+        level: "erro",
+        message: "Você só pode designar condutores da sua própria unidade.",
+      });
   }
-  if (!plannedOut) issues.push({ level: "erro", message: "Informe a data/hora prevista de saída." });
+  if (!plannedOut)
+    issues.push({ level: "erro", message: "Informe a data/hora prevista de saída." });
   if (plannedOut && plannedBack && new Date(plannedBack) <= new Date(plannedOut))
     issues.push({ level: "erro", message: "O retorno previsto deve ser posterior à saída." });
 
@@ -516,8 +635,8 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
         <DialogHeader>
           <DialogTitle>Nova utilização / reserva</DialogTitle>
           <DialogDescription>
-            O número da requisição é gerado automaticamente. Conflitos de agenda e restrições de condutor são
-            verificados no servidor.
+            O número da requisição é gerado automaticamente. Conflitos de agenda e restrições de
+            condutor são verificados no servidor.
           </DialogDescription>
         </DialogHeader>
 
@@ -525,12 +644,14 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
           <div>
             <Label>Veículo *</Label>
             <Select value={vehicleId} onValueChange={setVehicleId}>
-              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE}>Selecione</SelectItem>
                 {vehicles.map((v) => (
                   <SelectItem key={v.id} value={v.id} disabled={BLOCKED_VEHICLE.includes(v.status)}>
-                    {(v.plate ?? v.asset_code)} — {v.model ?? v.brand ?? "veículo"}
+                    {v.plate ?? v.asset_code} — {v.model ?? v.brand ?? "veículo"}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -543,7 +664,9 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
           <div>
             <Label>Condutor *</Label>
             <Select value={driverId} onValueChange={setDriverId}>
-              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE}>Selecione</SelectItem>
                 {drivers.map((d) => (
@@ -565,7 +688,9 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
                 if (emp) setRequester(emp.full_name);
               }}
             >
-              <SelectTrigger><SelectValue placeholder="Selecione no cadastro de pessoas" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione no cadastro de pessoas" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE}>Não vincular</SelectItem>
                 {employees
@@ -589,7 +714,9 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
                 setAuthorizer(emp ? emp.full_name : "");
               }}
             >
-              <SelectTrigger><SelectValue placeholder="Selecione no cadastro de pessoas" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione no cadastro de pessoas" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE}>Não vincular</SelectItem>
                 {employees
@@ -615,15 +742,31 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
           </div>
           <div>
             <Label htmlFor="km">KM inicial</Label>
-            <Input id="km" type="number" value={startKm} onChange={(e) => setStartKm(e.target.value)} placeholder={vehicle?.current_km ? String(vehicle.current_km) : ""} />
+            <Input
+              id="km"
+              type="number"
+              value={startKm}
+              onChange={(e) => setStartKm(e.target.value)}
+              placeholder={vehicle?.current_km ? String(vehicle.current_km) : ""}
+            />
           </div>
           <div>
             <Label htmlFor="po">Saída prevista *</Label>
-            <Input id="po" type="datetime-local" value={plannedOut} onChange={(e) => setPlannedOut(e.target.value)} />
+            <Input
+              id="po"
+              type="datetime-local"
+              value={plannedOut}
+              onChange={(e) => setPlannedOut(e.target.value)}
+            />
           </div>
           <div>
             <Label htmlFor="pb">Retorno previsto</Label>
-            <Input id="pb" type="datetime-local" value={plannedBack} onChange={(e) => setPlannedBack(e.target.value)} />
+            <Input
+              id="pb"
+              type="datetime-local"
+              value={plannedBack}
+              onChange={(e) => setPlannedBack(e.target.value)}
+            />
           </div>
           <div>
             <Label htmlFor="ori">Origem (local)</Label>
@@ -637,11 +780,15 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
             <div>
               <Label>UF</Label>
               <Select value={originState} onValueChange={setOriginState}>
-                <SelectTrigger><SelectValue placeholder="UF" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="UF" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>—</SelectItem>
                   {UF_LIST.map((uf) => (
-                    <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                    <SelectItem key={uf} value={uf}>
+                      {uf}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -654,16 +801,24 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
           <div className="grid grid-cols-[1fr_100px] gap-2">
             <div>
               <Label htmlFor="dstc">Cidade de destino</Label>
-              <Input id="dstc" value={destinationCity} onChange={(e) => setDestinationCity(e.target.value)} />
+              <Input
+                id="dstc"
+                value={destinationCity}
+                onChange={(e) => setDestinationCity(e.target.value)}
+              />
             </div>
             <div>
               <Label>UF</Label>
               <Select value={destinationState} onValueChange={setDestinationState}>
-                <SelectTrigger><SelectValue placeholder="UF" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="UF" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>—</SelectItem>
                   {UF_LIST.map((uf) => (
-                    <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                    <SelectItem key={uf} value={uf}>
+                      {uf}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -680,8 +835,18 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
                   <Switch checked={roundTrip} onCheckedChange={setRoundTrip} />
                   Ida e volta
                 </label>
-                <Button type="button" variant="outline" size="sm" onClick={calcularRota} disabled={routing}>
-                  {routing ? <Loader2 className="size-4 animate-spin" /> : <RouteIcon className="size-4" />}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={calcularRota}
+                  disabled={routing}
+                >
+                  {routing ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <RouteIcon className="size-4" />
+                  )}
                   {routing ? "Calculando…" : "Calcular rota"}
                 </Button>
               </div>
@@ -693,7 +858,9 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
                 <Input
                   id="kmman"
                   inputMode="decimal"
-                  value={distanceSource === "manual" ? manualKm : routeKm != null ? String(routeKm) : ""}
+                  value={
+                    distanceSource === "manual" ? manualKm : routeKm != null ? String(routeKm) : ""
+                  }
                   onChange={(e) => {
                     setManualKm(e.target.value);
                     setDistanceSource(e.target.value ? "manual" : "nao_calculada");
@@ -713,7 +880,9 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
                   onChange={(e) => setFuelPrice(e.target.value)}
                   placeholder="Ex.: 6,29"
                 />
-                <p className="mt-1 text-[11px] text-muted-foreground">Usado apenas para estimar o custo.</p>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  Usado apenas para estimar o custo.
+                </p>
               </div>
               <div>
                 <Label>Consumo considerado</Label>
@@ -723,7 +892,9 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
                   value={consumption.kmpl ? `${num(consumption.kmpl, 2)} km/l` : "—"}
                 />
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  {consumption.source ? CONSUMPTION_SOURCE_LABEL[consumption.source] : consumption.note}
+                  {consumption.source
+                    ? CONSUMPTION_SOURCE_LABEL[consumption.source]
+                    : consumption.note}
                 </p>
               </div>
             </div>
@@ -731,15 +902,21 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
             <div className="mt-3 grid gap-2 text-sm sm:grid-cols-4">
               <div>
                 <p className="gov-label">Distância total</p>
-                <p className="tabular-nums">{trip.totalKm != null ? `${num(trip.totalKm, 1)} km` : "—"}</p>
+                <p className="tabular-nums">
+                  {trip.totalKm != null ? `${num(trip.totalKm, 1)} km` : "—"}
+                </p>
               </div>
               <div>
                 <p className="gov-label">Duração estimada</p>
-                <p className="tabular-nums">{durationLabel(roundTrip && routeMin ? routeMin * 2 : routeMin)}</p>
+                <p className="tabular-nums">
+                  {durationLabel(roundTrip && routeMin ? routeMin * 2 : routeMin)}
+                </p>
               </div>
               <div>
                 <p className="gov-label">Combustível estimado</p>
-                <p className="tabular-nums">{trip.liters != null ? `${num(trip.liters, 1)} L` : "—"}</p>
+                <p className="tabular-nums">
+                  {trip.liters != null ? `${num(trip.liters, 1)} L` : "—"}
+                </p>
               </div>
               <div>
                 <p className="gov-label">Custo estimado</p>
@@ -748,7 +925,8 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
             </div>
 
             <p className="mt-2 text-[11px] text-muted-foreground">
-              {routeNote || "Valores estimados para planejamento. A quilometragem oficial continua sendo a registrada na saída e no retorno."}
+              {routeNote ||
+                "Valores estimados para planejamento. A quilometragem oficial continua sendo a registrada na saída e no retorno."}
             </p>
           </div>
 
@@ -767,7 +945,12 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
           {needsJustification && (
             <div className="sm:col-span-2">
               <Label htmlFor="just">Justificativa (veículo em manutenção) *</Label>
-              <Textarea id="just" rows={2} value={justification} onChange={(e) => setJustification(e.target.value)} />
+              <Textarea
+                id="just"
+                rows={2}
+                value={justification}
+                onChange={(e) => setJustification(e.target.value)}
+              />
             </div>
           )}
         </div>
@@ -778,7 +961,11 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
               <li
                 key={idx}
                 className={
-                  i.level === "erro" ? "text-destructive" : i.level === "alerta" ? "text-warning-foreground" : "text-muted-foreground"
+                  i.level === "erro"
+                    ? "text-destructive"
+                    : i.level === "alerta"
+                      ? "text-warning-foreground"
+                      : "text-muted-foreground"
                 }
               >
                 • {i.message}
@@ -788,8 +975,12 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
         )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button onClick={submit} disabled={saving || blocked}>{saving ? "Salvando…" : "Registrar utilização"}</Button>
+          <Button variant="outline" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button onClick={submit} disabled={saving || blocked}>
+            {saving ? "Salvando…" : "Registrar utilização"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -859,8 +1050,14 @@ function TripResultBlock({ usage }: { usage: UsageRow }) {
       </div>
 
       <dl className="grid gap-3 sm:grid-cols-3">
-        {cell("Distância planejada", result.plannedKm != null ? `${num(result.plannedKm, 1)} km` : "—")}
-        {cell("KM realizado (odômetro)", result.realKm != null ? `${num(result.realKm, 1)} km` : "—")}
+        {cell(
+          "Distância planejada",
+          result.plannedKm != null ? `${num(result.plannedKm, 1)} km` : "—",
+        )}
+        {cell(
+          "KM realizado (odômetro)",
+          result.realKm != null ? `${num(result.realKm, 1)} km` : "—",
+        )}
         {cell(
           "Diferença",
           result.diffKm != null
@@ -870,10 +1067,16 @@ function TripResultBlock({ usage }: { usage: UsageRow }) {
         {cell("Odômetro de saída", usage.start_km != null ? num(usage.start_km, 0) : "—")}
         {cell("Odômetro de retorno", usage.end_km != null ? num(usage.end_km, 0) : "—")}
         {cell("Abastecimentos vinculados", String(result.fuelingCount))}
-        {cell("Litros abastecidos na viagem", result.liters != null ? `${num(result.liters, 2)} L` : "—")}
+        {cell(
+          "Litros abastecidos na viagem",
+          result.liters != null ? `${num(result.liters, 2)} L` : "—",
+        )}
         {cell("Valor abastecido na viagem", result.value != null ? brl(result.value) : "—")}
         {cell("Preço médio por litro", result.avgPrice != null ? brl(result.avgPrice) : "—")}
-        {cell("Litros estimados", usage.estimated_liters != null ? `${num(usage.estimated_liters, 1)} L` : "—")}
+        {cell(
+          "Litros estimados",
+          usage.estimated_liters != null ? `${num(usage.estimated_liters, 1)} L` : "—",
+        )}
         {cell("Custo estimado", usage.estimated_cost != null ? brl(usage.estimated_cost) : "—")}
         {cell(
           "Consumo de referência",
@@ -898,7 +1101,9 @@ function TripResultBlock({ usage }: { usage: UsageRow }) {
 
       {linked.length > 0 && (
         <div>
-          <p className="mb-1 text-xs uppercase tracking-wide text-muted-foreground">Abastecimentos da viagem</p>
+          <p className="mb-1 text-xs uppercase tracking-wide text-muted-foreground">
+            Abastecimentos da viagem
+          </p>
           <ul className="space-y-1 text-sm">
             {linked.map((f) => (
               <li key={f.id} className="flex flex-wrap gap-2 rounded-md bg-card px-3 py-2">
@@ -919,7 +1124,10 @@ function TripResultBlock({ usage }: { usage: UsageRow }) {
           </p>
           <ul className="space-y-1 text-sm">
             {candidates.map((f) => (
-              <li key={f.id} className="flex flex-wrap items-center gap-2 rounded-md bg-card px-3 py-2">
+              <li
+                key={f.id}
+                className="flex flex-wrap items-center gap-2 rounded-md bg-card px-3 py-2"
+              >
                 <span>{dateTimeBR(f.fueled_at)}</span>
                 <span>{num(f.quantity ?? 0, 2)} L</span>
                 <span>{brl(f.total_value ?? 0)}</span>
@@ -945,7 +1153,7 @@ function UsageDetail({ usage, onClose }: { usage: UsageRow; onClose: () => void 
   const items: [string, string][] = [
     ["Número", usage.code ?? "—"],
     ["Situação", label(USAGE_STATUS, usage.status)],
-    ["Veículo", (usage.vehicle?.plate ?? usage.vehicle?.asset_code ?? "—")],
+    ["Veículo", usage.vehicle?.plate ?? usage.vehicle?.asset_code ?? "—"],
     ["Unidade", usage.unit?.name ?? "—"],
     ["Condutor", usage.driver?.full_name ?? "—"],
     ["Solicitante", usage.requester_name ?? "—"],
@@ -982,7 +1190,9 @@ function UsageDetail({ usage, onClose }: { usage: UsageRow; onClose: () => void 
       <DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Utilização {usage.code}</DialogTitle>
-          <DialogDescription>Registro completo do deslocamento para fins de auditoria.</DialogDescription>
+          <DialogDescription>
+            Registro completo do deslocamento para fins de auditoria.
+          </DialogDescription>
         </DialogHeader>
         <dl className="grid gap-3 sm:grid-cols-2">
           {items.map(([k, v]) => (
@@ -999,7 +1209,15 @@ function UsageDetail({ usage, onClose }: { usage: UsageRow; onClose: () => void 
   );
 }
 
-function CloseUsageDialog({ usage, onClose, onSaved }: { usage: UsageRow; onClose: () => void; onSaved: () => void }) {
+function CloseUsageDialog({
+  usage,
+  onClose,
+  onSaved,
+}: {
+  usage: UsageRow;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
   const [endKm, setEndKm] = useState(usage.end_km != null ? String(usage.end_km) : "");
   const [notes, setNotes] = useState(usage.notes ?? "");
   const [saving, setSaving] = useState(false);
@@ -1034,15 +1252,25 @@ function CloseUsageDialog({ usage, onClose, onSaved }: { usage: UsageRow; onClos
         <DialogHeader>
           <DialogTitle>Registrar retorno — {usage.code}</DialogTitle>
           <DialogDescription>
-            KM inicial registrado: {usage.start_km != null ? num(usage.start_km, 0) : "não informado"}.
+            KM inicial registrado:{" "}
+            {usage.start_km != null ? num(usage.start_km, 0) : "não informado"}.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4">
           <VehicleChecklistPanel usage={usage} compact />
           <div>
             <Label htmlFor="ekm">KM final</Label>
-            <Input id="ekm" type="number" value={endKm} onChange={(e) => setEndKm(e.target.value)} />
-            {invalid && <p className="mt-1 text-sm text-destructive">O KM final não pode ser inferior ao inicial.</p>}
+            <Input
+              id="ekm"
+              type="number"
+              value={endKm}
+              onChange={(e) => setEndKm(e.target.value)}
+            />
+            {invalid && (
+              <p className="mt-1 text-sm text-destructive">
+                O KM final não pode ser inferior ao inicial.
+              </p>
+            )}
           </div>
           <div>
             <Label htmlFor="cobs">Observações / eventos do trajeto</Label>
@@ -1050,15 +1278,27 @@ function CloseUsageDialog({ usage, onClose, onSaved }: { usage: UsageRow; onClos
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Voltar</Button>
-          <Button onClick={submit} disabled={saving || invalid}>{saving ? "Salvando…" : "Concluir utilização"}</Button>
+          <Button variant="outline" onClick={onClose}>
+            Voltar
+          </Button>
+          <Button onClick={submit} disabled={saving || invalid}>
+            {saving ? "Salvando…" : "Concluir utilização"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-function CancelUsageDialog({ usage, onClose, onSaved }: { usage: UsageRow; onClose: () => void; onSaved: () => void }) {
+function CancelUsageDialog({
+  usage,
+  onClose,
+  onSaved,
+}: {
+  usage: UsageRow;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
   const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -1087,12 +1327,23 @@ function CancelUsageDialog({ usage, onClose, onSaved }: { usage: UsageRow; onClo
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Cancelar utilização {usage.code}</DialogTitle>
-          <DialogDescription>O registro não é excluído: fica mantido com o motivo informado.</DialogDescription>
+          <DialogDescription>
+            O registro não é excluído: fica mantido com o motivo informado.
+          </DialogDescription>
         </DialogHeader>
-        <Textarea rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Motivo do cancelamento" />
+        <Textarea
+          rows={3}
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="Motivo do cancelamento"
+        />
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Voltar</Button>
-          <Button variant="destructive" onClick={submit} disabled={saving}>Confirmar cancelamento</Button>
+          <Button variant="outline" onClick={onClose}>
+            Voltar
+          </Button>
+          <Button variant="destructive" onClick={submit} disabled={saving}>
+            Confirmar cancelamento
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

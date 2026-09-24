@@ -63,11 +63,23 @@ export function ForcePasswordChange({ children }: { children: ReactNode }) {
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="password">Nova senha</Label>
-            <Input id="password" name="password" type="password" autoComplete="new-password" required />
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              required
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="confirm">Confirmar nova senha</Label>
-            <Input id="confirm" name="confirm" type="password" autoComplete="new-password" required />
+            <Input
+              id="confirm"
+              name="confirm"
+              type="password"
+              autoComplete="new-password"
+              required
+            />
           </div>
           <Button type="submit" className="w-full" disabled={saving}>
             Salvar nova senha

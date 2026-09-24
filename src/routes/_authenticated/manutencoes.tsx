@@ -9,11 +9,30 @@ import { PageHeader } from "@/components/app-shell";
 import { MoneyInput } from "@/components/form-fields";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HelpInlineButton } from "@/components/help-button";
 import { Textarea } from "@/components/ui/textarea";
@@ -65,7 +84,10 @@ export const Route = createFileRoute("/_authenticated/manutencoes")({
           "Solicitações e registros de manutenção preventiva e corretiva da frota, com oficina, peças, valores, garantia e origem do recurso.",
       },
       { property: "og:title", content: "Manutenções — FrotaGov" },
-      { property: "og:description", content: "Controle de manutenções, custos e indisponibilidade de veículos." },
+      {
+        property: "og:description",
+        content: "Controle de manutenções, custos e indisponibilidade de veículos.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -182,7 +204,12 @@ function Manutencoes() {
         if (fStatus !== ALL && r.status !== fStatus) return false;
         if (fVehicle !== ALL && r.vehicle_id !== fVehicle) return false;
         const q = search.trim().toLowerCase();
-        return !q || `${r.code ?? ""} ${r.description} ${(r.vehicle?.plate ?? r.vehicle?.asset_code ?? "")}`.toLowerCase().includes(q);
+        return (
+          !q ||
+          `${r.code ?? ""} ${r.description} ${r.vehicle?.plate ?? r.vehicle?.asset_code ?? ""}`
+            .toLowerCase()
+            .includes(q)
+        );
       }),
     [requests, fStatus, fVehicle, search],
   );
@@ -192,7 +219,12 @@ function Manutencoes() {
       records.filter((r) => {
         if (fVehicle !== ALL && r.vehicle_id !== fVehicle) return false;
         const q = search.trim().toLowerCase();
-        return !q || `${r.code ?? ""} ${r.services} ${(r.vehicle?.plate ?? r.vehicle?.asset_code ?? "")}`.toLowerCase().includes(q);
+        return (
+          !q ||
+          `${r.code ?? ""} ${r.services} ${r.vehicle?.plate ?? r.vehicle?.asset_code ?? ""}`
+            .toLowerCase()
+            .includes(q)
+        );
       }),
     [records, fVehicle, search],
   );
@@ -214,7 +246,8 @@ function Manutencoes() {
     return plans.filter(
       (p) =>
         p.active !== false &&
-        (p.vehicle_id === vehicleId || (!p.vehicle_id && (!p.vehicle_type || p.vehicle_type === vehicle?.vehicle_type))),
+        (p.vehicle_id === vehicleId ||
+          (!p.vehicle_id && (!p.vehicle_type || p.vehicle_type === vehicle?.vehicle_type))),
     );
   }
 
@@ -293,7 +326,10 @@ function Manutencoes() {
       ...(reqAttachment ? { attachment_path: reqAttachment } : {}),
     };
     const { error } = editingReq
-      ? await supabase.from("maintenance_requests").update({ ...payload, updated_by: userId }).eq("id", editingReq.id)
+      ? await supabase
+          .from("maintenance_requests")
+          .update({ ...payload, updated_by: userId })
+          .eq("id", editingReq.id)
       : await supabase.from("maintenance_requests").insert({
           ...payload,
           organization_id: orgId!,
@@ -346,7 +382,8 @@ function Manutencoes() {
   }
 
   /** Solicitação vinculada ao registro em edição/criação (Bloco 5.2). */
-  const selectedRequest = recRequest === NONE ? null : requests.find((r) => r.id === recRequest) ?? null;
+  const selectedRequest =
+    recRequest === NONE ? null : (requests.find((r) => r.id === recRequest) ?? null);
 
   /** Bloco 5.2 — aproveita todos os dados já registrados na solicitação. */
   function pickRequest(id: string) {
@@ -365,8 +402,9 @@ function Manutencoes() {
       ? []
       : (contracts.find((c) => c.id === contractId)?.items ?? []).filter((i) => i.active !== false);
   const selectedItem = itemsOfContract(recContract).find((i) => i.id === recItem) ?? null;
-  const selectedPartItem =
-    partsTarget?.contract_id ? itemsOfContract(partsTarget.contract_id).find((i) => i.id === partItem) ?? null : null;
+  const selectedPartItem = partsTarget?.contract_id
+    ? (itemsOfContract(partsTarget.contract_id).find((i) => i.id === partItem) ?? null)
+    : null;
   const laborUnitPrice = Number(selectedItem?.unit_price ?? 0);
   const laborQty = parseBRNumber(recLaborQty || "0") || 0;
   const laborTotal = laborUnitPrice * laborQty;
@@ -425,13 +463,16 @@ function Manutencoes() {
         toast.error("Informe a quantidade de horas/serviços executados.");
         return;
       }
-      if (selectedItem && laborQty > contractItemBalance(selectedItem) + Number(editingRec?.labor_quantity ?? 0)) {
+      if (
+        selectedItem &&
+        laborQty > contractItemBalance(selectedItem) + Number(editingRec?.labor_quantity ?? 0)
+      ) {
         toast.error("Quantidade acima do saldo disponível no item do contrato.");
         return;
       }
     }
     const d = parsed.data;
-    const req = recRequest === NONE ? null : requests.find((r) => r.id === recRequest) ?? null;
+    const req = recRequest === NONE ? null : (requests.find((r) => r.id === recRequest) ?? null);
     if (req && req.vehicle_id !== recVehicle) {
       toast.error("A solicitação selecionada é de outro veículo.");
       return;
@@ -461,7 +502,7 @@ function Manutencoes() {
       services: d.services,
       odometer_km: numOrNull(d.odometer_km ?? null),
       hour_meter: numOrNull(d.hour_meter ?? null),
-      labor_value: recOrigin === "contrato" ? laborTotal : numOrNull(d.labor_value ?? null) ?? 0,
+      labor_value: recOrigin === "contrato" ? laborTotal : (numOrNull(d.labor_value ?? null) ?? 0),
       contract_id: recOrigin === "contrato" && recContract !== NONE ? recContract : null,
       contract_item_id: recOrigin === "contrato" && recItem !== NONE ? recItem : null,
       labor_quantity: recOrigin === "contrato" ? laborQty : null,
@@ -478,8 +519,13 @@ function Manutencoes() {
       ...(recAttachment ? { attachment_path: recAttachment } : {}),
     };
     const { error } = editingRec
-      ? await supabase.from("maintenance_records").update({ ...payload, updated_by: userId }).eq("id", editingRec.id)
-      : await supabase.from("maintenance_records").insert({ ...payload, organization_id: orgId!, created_by: userId });
+      ? await supabase
+          .from("maintenance_records")
+          .update({ ...payload, updated_by: userId })
+          .eq("id", editingRec.id)
+      : await supabase
+          .from("maintenance_records")
+          .insert({ ...payload, organization_id: orgId!, created_by: userId });
     setSavingRec(false);
     if (error) {
       if (uploadedRecAttachment) {
@@ -499,7 +545,13 @@ function Manutencoes() {
 
     toast.success(editingRec ? "Manutenção atualizada." : "Manutenção registrada.");
     setRecFile(null);
-    invalidate(["maintenance-records", "maintenance-requests", "vehicles", "contracts", "contract-items"]);
+    invalidate([
+      "maintenance-records",
+      "maintenance-requests",
+      "vehicles",
+      "contracts",
+      "contract-items",
+    ]);
     setRecOpen(false);
   }
 
@@ -518,15 +570,20 @@ function Manutencoes() {
       return;
     }
     if (r.request_id) {
-      await supabase.from("maintenance_requests").update({ status: "concluida" }).eq("id", r.request_id);
+      await supabase
+        .from("maintenance_requests")
+        .update({ status: "concluida" })
+        .eq("id", r.request_id);
     }
     const plan = r.plan_id ? plans.find((p) => p.id === r.plan_id) : null;
     if (plan) {
       /* Bloco 5.6 — o histórico do plano é atualizado pelo próprio banco na transição para concluída
          (sem duplicar em reabertura/edição). Aqui apenas informamos a próxima ocorrência calculada. */
       const parts: string[] = [];
-      if (plan.interval_km && r.odometer_km) parts.push(`${num(Number(r.odometer_km) + Number(plan.interval_km), 0)} km`);
-      if (plan.interval_hours && r.hour_meter) parts.push(`${num(Number(r.hour_meter) + Number(plan.interval_hours), 1)} h`);
+      if (plan.interval_km && r.odometer_km)
+        parts.push(`${num(Number(r.odometer_km) + Number(plan.interval_km), 0)} km`);
+      if (plan.interval_hours && r.hour_meter)
+        parts.push(`${num(Number(r.hour_meter) + Number(plan.interval_hours), 1)} h`);
       if (plan.interval_months) {
         const d = new Date();
         d.setMonth(d.getMonth() + Number(plan.interval_months));
@@ -540,7 +597,14 @@ function Manutencoes() {
     } else {
       toast.success("Manutenção concluída.");
     }
-    invalidate(["maintenance-records", "maintenance-requests", "vehicles", "commitments", "quotas", "maintenance-plans"]);
+    invalidate([
+      "maintenance-records",
+      "maintenance-requests",
+      "vehicles",
+      "commitments",
+      "quotas",
+      "maintenance-plans",
+    ]);
   }
 
   async function confirmCancelRec(e: React.FormEvent<HTMLFormElement>) {
@@ -577,9 +641,13 @@ function Manutencoes() {
       ? selectedPartItem!.description
       : partId === NONE
         ? String(form.get("description") ?? "").trim()
-        : catalog.find((c) => c.id === partId)?.description ?? "";
-    const quantity = byContract ? parseBRNumber(partQty || "0") || 0 : numOrNull(form.get("quantity")) ?? 0;
-    const unitValue = byContract ? Number(selectedPartItem!.unit_price) : numOrNull(form.get("unit_value")) ?? 0;
+        : (catalog.find((c) => c.id === partId)?.description ?? "");
+    const quantity = byContract
+      ? parseBRNumber(partQty || "0") || 0
+      : (numOrNull(form.get("quantity")) ?? 0);
+    const unitValue = byContract
+      ? Number(selectedPartItem!.unit_price)
+      : (numOrNull(form.get("unit_value")) ?? 0);
     if (byContract && quantity > contractItemBalance(selectedPartItem!)) {
       toast.error("Quantidade acima do saldo disponível no item do contrato.");
       return;
@@ -660,7 +728,11 @@ function Manutencoes() {
       <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <div>
           <Label>Buscar</Label>
-          <Input placeholder="Código, placa ou descrição" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input
+            placeholder="Código, placa ou descrição"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
         <div>
           <Label>Situação da solicitação</Label>
@@ -688,7 +760,7 @@ function Manutencoes() {
               <SelectItem value={ALL}>Todos</SelectItem>
               {vehicles.map((v) => (
                 <SelectItem key={v.id} value={v.id}>
-                  {(v.plate ?? v.asset_code)}
+                  {v.plate ?? v.asset_code}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -740,10 +812,12 @@ function Manutencoes() {
                   <TableRow key={r.id}>
                     <TableCell className="font-medium">
                       {r.code}
-                      <span className="block text-xs text-muted-foreground">{dateTimeBR(r.requested_at)}</span>
+                      <span className="block text-xs text-muted-foreground">
+                        {dateTimeBR(r.requested_at)}
+                      </span>
                     </TableCell>
                     <TableCell>
-                      {(r.vehicle?.plate ?? r.vehicle?.asset_code ?? "—")}
+                      {r.vehicle?.plate ?? r.vehicle?.asset_code ?? "—"}
                       <span className="block text-xs text-muted-foreground">
                         {r.odometer_km ? `${num(Number(r.odometer_km), 0)} km` : ""}
                       </span>
@@ -754,20 +828,31 @@ function Manutencoes() {
                         {label(MAINTENANCE_PRIORITIES, r.priority)}
                       </span>
                     </TableCell>
-                    <TableCell className="max-w-[260px] truncate text-sm">{r.description}</TableCell>
-                    <TableCell className="text-sm">{r.unit?.acronym ?? r.unit?.name ?? "—"}</TableCell>
+                    <TableCell className="max-w-[260px] truncate text-sm">
+                      {r.description}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {r.unit?.acronym ?? r.unit?.name ?? "—"}
+                    </TableCell>
                     <TableCell>
                       <Badge variant={REQ_VARIANT[r.status] ?? "secondary"}>
                         {label(MAINTENANCE_REQUEST_STATUS, r.status)}
                       </Badge>
                       {r.cancel_reason && (
-                        <span className="mt-1 block text-xs text-muted-foreground">{r.cancel_reason}</span>
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                          {r.cancel_reason}
+                        </span>
                       )}
                     </TableCell>
                     <TableCell>
                       {canWrite && !["concluida", "cancelada"].includes(r.status) && (
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => openEditReq(r)}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Editar"
+                            onClick={() => openEditReq(r)}
+                          >
                             <Pencil className="size-4" />
                           </Button>
                           {canManageFleet && (
@@ -831,10 +916,12 @@ function Manutencoes() {
                   <TableRow key={r.id}>
                     <TableCell className="font-medium">
                       {r.code}
-                      <span className="block text-xs text-muted-foreground">{label(MAINTENANCE_KINDS, r.kind)}</span>
+                      <span className="block text-xs text-muted-foreground">
+                        {label(MAINTENANCE_KINDS, r.kind)}
+                      </span>
                     </TableCell>
                     <TableCell>
-                      {(r.vehicle?.plate ?? r.vehicle?.asset_code ?? "—")}
+                      {r.vehicle?.plate ?? r.vehicle?.asset_code ?? "—"}
                       <span className="block text-xs text-muted-foreground">
                         {r.odometer_km ? `${num(Number(r.odometer_km), 0)} km` : ""}
                       </span>
@@ -856,11 +943,23 @@ function Manutencoes() {
                     <TableCell className="text-right font-medium">
                       {brl(maintenanceTotal(r))}
                       <span className="block text-xs text-muted-foreground">
-                        {r.commitment ? `Empenho ${r.commitment.number}` : r.quota ? `Cota ${r.quota.name}` : ""}
+                        {r.commitment
+                          ? `Empenho ${r.commitment.number}`
+                          : r.quota
+                            ? `Cota ${r.quota.name}`
+                            : ""}
                       </span>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={r.status === "concluida" ? "secondary" : r.status === "cancelada" ? "destructive" : "default"}>
+                      <Badge
+                        variant={
+                          r.status === "concluida"
+                            ? "secondary"
+                            : r.status === "cancelada"
+                              ? "destructive"
+                              : "default"
+                        }
+                      >
                         {label(MAINTENANCE_RECORD_STATUS, r.status)}
                       </Badge>
                       <span className="mt-1 block text-xs text-muted-foreground">
@@ -884,10 +983,20 @@ function Manutencoes() {
                               >
                                 <Cog className="size-4" />
                               </Button>
-                              <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => openEditRec(r)}>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label="Editar"
+                                onClick={() => openEditRec(r)}
+                              >
                                 <Pencil className="size-4" />
                               </Button>
-                              <Button variant="ghost" size="icon" aria-label="Concluir" onClick={() => concludeRec(r)}>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label="Concluir"
+                                onClick={() => concludeRec(r)}
+                              >
                                 <CheckCircle2 className="size-4" />
                               </Button>
                             </>
@@ -921,7 +1030,11 @@ function Manutencoes() {
       <Dialog open={reqOpen} onOpenChange={setReqOpen}>
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingReq ? `Editar solicitação ${editingReq.code}` : "Nova solicitação de manutenção"}</DialogTitle>
+            <DialogTitle>
+              {editingReq
+                ? `Editar solicitação ${editingReq.code}`
+                : "Nova solicitação de manutenção"}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={submitReq} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-3">
@@ -935,7 +1048,7 @@ function Manutencoes() {
                     <SelectItem value={NONE}>Selecione</SelectItem>
                     {vehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        {(v.plate ?? v.asset_code)} — {v.model ?? ""}
+                        {v.plate ?? v.asset_code} — {v.model ?? ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -958,7 +1071,10 @@ function Manutencoes() {
               </div>
               <div>
                 <Label>Prioridade</Label>
-                <Select value={reqPriority} onValueChange={(v) => setReqPriority(v as MaintenancePriority)}>
+                <Select
+                  value={reqPriority}
+                  onValueChange={(v) => setReqPriority(v as MaintenancePriority)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -991,7 +1107,11 @@ function Manutencoes() {
               </div>
               <div>
                 <Label>Unidade solicitante</Label>
-                <Select value={reqUnit} onValueChange={setReqUnit} disabled={!canManageFleet && reqEmployee !== NONE}>
+                <Select
+                  value={reqUnit}
+                  onValueChange={setReqUnit}
+                  disabled={!canManageFleet && reqEmployee !== NONE}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -1024,40 +1144,65 @@ function Manutencoes() {
                   </SelectContent>
                 </Select>
                 {reqVehicle === NONE ? (
-                  <p className="mt-1 text-xs text-muted-foreground">Selecione o veículo para ver os planos do bem.</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Selecione o veículo para ver os planos do bem.
+                  </p>
                 ) : plansForVehicle(reqVehicle).length === 0 ? (
-                  <p className="mt-1 text-xs text-muted-foreground">Nenhum plano cadastrado para este bem.</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Nenhum plano cadastrado para este bem.
+                  </p>
                 ) : null}
               </div>
 
               <div>
                 <Label htmlFor="odometer_km">KM atual</Label>
-                <Input id="odometer_km" name="odometer_km" inputMode="numeric" defaultValue={editingReq?.odometer_km ?? ""} />
+                <Input
+                  id="odometer_km"
+                  name="odometer_km"
+                  inputMode="numeric"
+                  defaultValue={editingReq?.odometer_km ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="hour_meter">Horímetro</Label>
-                <Input id="hour_meter" name="hour_meter" inputMode="numeric" defaultValue={editingReq?.hour_meter ?? ""} />
+                <Input
+                  id="hour_meter"
+                  name="hour_meter"
+                  inputMode="numeric"
+                  defaultValue={editingReq?.hour_meter ?? ""}
+                />
               </div>
               {editingReq && (
                 <div>
                   <Label>Situação</Label>
-                  <Select value={reqStatus} onValueChange={(v) => setReqStatus(v as MaintenanceRequestStatus)}>
+                  <Select
+                    value={reqStatus}
+                    onValueChange={(v) => setReqStatus(v as MaintenanceRequestStatus)}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {MAINTENANCE_REQUEST_STATUS.filter((s) => s.value !== "cancelada").map((s) => (
-                        <SelectItem key={s.value} value={s.value}>
-                          {s.label}
-                        </SelectItem>
-                      ))}
+                      {MAINTENANCE_REQUEST_STATUS.filter((s) => s.value !== "cancelada").map(
+                        (s) => (
+                          <SelectItem key={s.value} value={s.value}>
+                            {s.label}
+                          </SelectItem>
+                        ),
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
               )}
               <div className="sm:col-span-3">
                 <Label htmlFor="description">Descrição do problema / serviço *</Label>
-                <Textarea id="description" name="description" rows={3} defaultValue={editingReq?.description ?? ""} required />
+                <Textarea
+                  id="description"
+                  name="description"
+                  rows={3}
+                  defaultValue={editingReq?.description ?? ""}
+                  required
+                />
               </div>
               <div className="sm:col-span-3">
                 <Label htmlFor="notes">Observações</Label>
@@ -1122,9 +1267,15 @@ function Manutencoes() {
       <Dialog open={recOpen} onOpenChange={setRecOpen}>
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingRec ? `Editar manutenção ${editingRec.code}` : "Registrar manutenção"}</DialogTitle>
+            <DialogTitle>
+              {editingRec ? `Editar manutenção ${editingRec.code}` : "Registrar manutenção"}
+            </DialogTitle>
           </DialogHeader>
-          <form key={`${editingRec?.id ?? "novo"}-${recRequest}`} onSubmit={submitRec} className="space-y-4">
+          <form
+            key={`${editingRec?.id ?? "novo"}-${recRequest}`}
+            onSubmit={submitRec}
+            className="space-y-4"
+          >
             {!editingRec && (
               <div className="rounded-lg border bg-muted/30 p-3">
                 <Label>Como deseja registrar?</Label>
@@ -1163,14 +1314,15 @@ function Manutencoes() {
                       <SelectItem value={NONE}>Selecione</SelectItem>
                       {openRequests.map((r) => (
                         <SelectItem key={r.id} value={r.id}>
-                          {r.code} — {(r.vehicle?.plate ?? r.vehicle?.asset_code ?? "")} — {r.description.slice(0, 40)}
+                          {r.code} — {r.vehicle?.plate ?? r.vehicle?.asset_code ?? ""} —{" "}
+                          {r.description.slice(0, 40)}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Os dados já registrados na solicitação são aproveitados automaticamente: bem, unidade, tipo, plano
-                    preventivo, descrição, medições e observações.
+                    Os dados já registrados na solicitação são aproveitados automaticamente: bem,
+                    unidade, tipo, plano preventivo, descrição, medições e observações.
                   </p>
                 </div>
               )}
@@ -1184,7 +1336,7 @@ function Manutencoes() {
                     <SelectItem value={NONE}>Selecione</SelectItem>
                     {vehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        {(v.plate ?? v.asset_code)} — {v.model ?? ""}
+                        {v.plate ?? v.asset_code} — {v.model ?? ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1261,15 +1413,28 @@ function Manutencoes() {
               </div>
               <div>
                 <Label htmlFor="invoice_number">Nota fiscal</Label>
-                <Input id="invoice_number" name="invoice_number" defaultValue={editingRec?.invoice_number ?? ""} />
+                <Input
+                  id="invoice_number"
+                  name="invoice_number"
+                  defaultValue={editingRec?.invoice_number ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="warranty_days">Garantia (dias)</Label>
-                <Input id="warranty_days" name="warranty_days" inputMode="numeric" defaultValue={editingRec?.warranty_days ?? ""} />
+                <Input
+                  id="warranty_days"
+                  name="warranty_days"
+                  inputMode="numeric"
+                  defaultValue={editingRec?.warranty_days ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="other_value">Outros valores (R$)</Label>
-                <MoneyInput id="other_value" name="other_value" defaultValue={editingRec?.other_value ?? ""} />
+                <MoneyInput
+                  id="other_value"
+                  name="other_value"
+                  defaultValue={editingRec?.other_value ?? ""}
+                />
               </div>
 
               {/* Bloco 5.3 — mão de obra por contrato ou compra direta */}
@@ -1316,7 +1481,11 @@ function Manutencoes() {
                           <SelectItem value={NONE}>Selecione</SelectItem>
                           {contractsForMaintenance.map((c) => (
                             <SelectItem key={c.id} value={c.id}>
-                              {c.number} — {c.supplier?.trade_name ?? c.supplier?.legal_name ?? c.entity?.name ?? ""}
+                              {c.number} —{" "}
+                              {c.supplier?.trade_name ??
+                                c.supplier?.legal_name ??
+                                c.entity?.name ??
+                                ""}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -1324,7 +1493,11 @@ function Manutencoes() {
                     </div>
                     <div>
                       <Label>Item de mão de obra / serviço *</Label>
-                      <Select value={recItem} onValueChange={setRecItem} disabled={recContract === NONE}>
+                      <Select
+                        value={recItem}
+                        onValueChange={setRecItem}
+                        disabled={recContract === NONE}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione o item do contrato" />
                         </SelectTrigger>
@@ -1340,7 +1513,9 @@ function Manutencoes() {
                       </Select>
                     </div>
                     <div>
-                      <Label htmlFor="labor_quantity">Quantidade executada (horas/serviços) *</Label>
+                      <Label htmlFor="labor_quantity">
+                        Quantidade executada (horas/serviços) *
+                      </Label>
                       <Input
                         id="labor_quantity"
                         inputMode="decimal"
@@ -1359,14 +1534,20 @@ function Manutencoes() {
                           Saldo disponível do item: {num(contractItemBalance(selectedItem), 2)}{" "}
                           {selectedItem.measure_unit ?? "un"}
                         </p>
-                        <p className="gov-title mt-1 text-lg">Total da mão de obra: {brl(laborTotal)}</p>
+                        <p className="gov-title mt-1 text-lg">
+                          Total da mão de obra: {brl(laborTotal)}
+                        </p>
                       </div>
                     )}
                   </div>
                 ) : (
                   <div className="mt-3 max-w-xs">
                     <Label htmlFor="labor_value">Mão de obra (R$)</Label>
-                    <MoneyInput id="labor_value" name="labor_value" defaultValue={editingRec?.labor_value ?? ""} />
+                    <MoneyInput
+                      id="labor_value"
+                      name="labor_value"
+                      defaultValue={editingRec?.labor_value ?? ""}
+                    />
                   </div>
                 )}
               </div>
@@ -1383,7 +1564,12 @@ function Manutencoes() {
               </div>
               <div className="sm:col-span-3">
                 <Label htmlFor="notes">Observações</Label>
-                <Textarea id="notes" name="notes" rows={2} defaultValue={editingRec?.notes ?? selectedRequest?.notes ?? ""} />
+                <Textarea
+                  id="notes"
+                  name="notes"
+                  rows={2}
+                  defaultValue={editingRec?.notes ?? selectedRequest?.notes ?? ""}
+                />
               </div>
               <div className="sm:col-span-3">
                 <Label htmlFor="rec-file">Nota fiscal ou documento (opcional)</Label>
@@ -1406,9 +1592,10 @@ function Manutencoes() {
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              As peças são lançadas após salvar, pelo botão de peças na lista, e o valor é somado automaticamente ao total.
-              Quando a execução é por contrato, o preço vem do item contratual e o consumo do saldo é registrado de forma
-              auditável; centro de custo, empenho e cota são derivados da origem e não precisam ser digitados aqui.
+              As peças são lançadas após salvar, pelo botão de peças na lista, e o valor é somado
+              automaticamente ao total. Quando a execução é por contrato, o preço vem do item
+              contratual e o consumo do saldo é registrado de forma auditável; centro de custo,
+              empenho e cota são derivados da origem e não precisam ser digitados aqui.
             </p>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setRecOpen(false)}>
@@ -1477,8 +1664,9 @@ function Manutencoes() {
                           <SelectItem key={i.id} value={i.id}>
                             {i.item_number ? `Item ${i.item_number} — ` : ""}
                             {i.description}
-                            {i.item_code ? ` · ref. ${i.item_code}` : ""} — saldo {num(contractItemBalance(i), 2)}{" "}
-                            {i.measure_unit ?? "un"} — {brl(Number(i.unit_price))}
+                            {i.item_code ? ` · ref. ${i.item_code}` : ""} — saldo{" "}
+                            {num(contractItemBalance(i), 2)} {i.measure_unit ?? "un"} —{" "}
+                            {brl(Number(i.unit_price))}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -1496,12 +1684,19 @@ function Manutencoes() {
                   </div>
                   <div>
                     <Label>Valor unitário contratual</Label>
-                    <Input value={brl(Number(selectedPartItem?.unit_price ?? 0))} readOnly disabled />
+                    <Input
+                      value={brl(Number(selectedPartItem?.unit_price ?? 0))}
+                      readOnly
+                      disabled
+                    />
                   </div>
                   <div>
                     <Label>Total da linha</Label>
                     <Input
-                      value={brl(Number(selectedPartItem?.unit_price ?? 0) * (parseBRNumber(partQty || "0") || 0))}
+                      value={brl(
+                        Number(selectedPartItem?.unit_price ?? 0) *
+                          (parseBRNumber(partQty || "0") || 0),
+                      )}
                       readOnly
                       disabled
                     />
@@ -1509,8 +1704,8 @@ function Manutencoes() {
                   {selectedPartItem && (
                     <p className="sm:col-span-3 text-xs text-muted-foreground">
                       Unidade {selectedPartItem.measure_unit ?? "un"} · saldo disponível{" "}
-                      {num(contractItemBalance(selectedPartItem), 2)}. O consumo é registrado no item contratual de forma
-                      auditável e não pode ultrapassar o saldo.
+                      {num(contractItemBalance(selectedPartItem), 2)}. O consumo é registrado no
+                      item contratual de forma auditável e não pode ultrapassar o saldo.
                     </p>
                   )}
                 </>
@@ -1576,7 +1771,6 @@ function Manutencoes() {
                 </Button>
               </div>
             </form>
-
           </div>
         </DialogContent>
       </Dialog>

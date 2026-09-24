@@ -13,7 +13,10 @@ export const Route = createFileRoute("/_authenticated/migracao")({
           "Importação de dados legados por tipo individual: cadastros básicos, contratos e orçamento, operação e registros legais e patrimoniais.",
       },
       { property: "og:title", content: "Migração de dados — FrotaGov" },
-      { property: "og:description", content: "Implantação e migração de dados por tipo individual no FrotaGov." },
+      {
+        property: "og:description",
+        content: "Implantação e migração de dados por tipo individual no FrotaGov.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

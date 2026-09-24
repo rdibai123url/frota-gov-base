@@ -76,20 +76,33 @@ export function ItemHistoryInput({
   const skip = React.useRef(false);
 
   React.useEffect(() => {
-    if (skip.current) { skip.current = false; return; }
+    if (skip.current) {
+      skip.current = false;
+      return;
+    }
     const q = value.trim();
-    if (q.length < MIN_CHARS) { setItems([]); setLoading(false); return; }
+    if (q.length < MIN_CHARS) {
+      setItems([]);
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
     setLoading(true);
     const timer = window.setTimeout(async () => {
       const { data, error } = await supabase.rpc("search_item_history", { _q: q, _limit: limit });
       if (cancelled) return;
       setLoading(false);
-      if (error) { setItems([]); return; }
+      if (error) {
+        setItems([]);
+        return;
+      }
       setItems((data ?? []) as ItemHistorySuggestion[]);
       setActive(0);
     }, 250);
-    return () => { cancelled = true; window.clearTimeout(timer); };
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, [value, limit]);
 
   React.useEffect(() => {
@@ -123,16 +136,28 @@ export function ItemHistoryInput({
         placeholder={placeholder}
         disabled={disabled}
         required={required}
-        onChange={(e) => { setOpen(true); onChange(e.target.value); }}
+        onChange={(e) => {
+          setOpen(true);
+          onChange(e.target.value);
+        }}
         onFocus={() => setOpen(true)}
         onKeyDown={(e) => {
           if (!visible || items.length === 0) return;
-          if (e.key === "ArrowDown") { e.preventDefault(); setActive((i) => (i + 1) % items.length); }
-          else if (e.key === "ArrowUp") { e.preventDefault(); setActive((i) => (i - 1 + items.length) % items.length); }
-          else if (e.key === "Enter") {
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            setActive((i) => (i + 1) % items.length);
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            setActive((i) => (i - 1 + items.length) % items.length);
+          } else if (e.key === "Enter") {
             const item = items[active];
-            if (item) { e.preventDefault(); pick(item); }
-          } else if (e.key === "Escape") { setOpen(false); }
+            if (item) {
+              e.preventDefault();
+              pick(item);
+            }
+          } else if (e.key === "Escape") {
+            setOpen(false);
+          }
         }}
       />
       {visible && (
@@ -171,7 +196,9 @@ export function ItemHistoryInput({
                         `${s.uses} ${s.uses === 1 ? "uso" : "usos"}`,
                         rel,
                         s.sources?.length ? s.sources.slice(0, 2).join(", ") : null,
-                      ].filter(Boolean).join(" · ")}
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </span>
                   </span>
                 </button>

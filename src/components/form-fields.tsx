@@ -45,9 +45,12 @@ export function DecimalInput({
   onValueChange,
   ...props
 }: BaseProps & { decimals?: number }) {
-  const fmt = (v: string) => (v === "" ? "" : toMaskedNumber(v, decimals) || maskDecimalBR(v, decimals));
+  const fmt = (v: string) =>
+    v === "" ? "" : toMaskedNumber(v, decimals) || maskDecimalBR(v, decimals);
   const [text, setText] = useMasked(
-    defaultValue === null || defaultValue === undefined || defaultValue === "" ? "" : fmt(String(defaultValue)),
+    defaultValue === null || defaultValue === undefined || defaultValue === ""
+      ? ""
+      : fmt(String(defaultValue)),
     (v) => v,
     value === null || value === undefined ? value : fmt(String(value)),
   );
@@ -147,7 +150,13 @@ export function KmInput({ defaultValue, value, onValueChange, ...props }: BasePr
 }
 
 /** Inteiro técnico (ano, processo, sequencial, eixos) — sem casas decimais. */
-export function IntegerInput({ defaultValue, value, onValueChange, maxDigits = 12, ...props }: BaseProps & { maxDigits?: number }) {
+export function IntegerInput({
+  defaultValue,
+  value,
+  onValueChange,
+  maxDigits = 12,
+  ...props
+}: BaseProps & { maxDigits?: number }) {
   const mask = (v: string) => maskInteger(v, maxDigits);
   const [text, setText] = useMasked(defaultValue, mask, value);
   return (

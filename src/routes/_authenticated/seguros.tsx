@@ -9,11 +9,30 @@ import { MoneyInput } from "@/components/form-fields";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import {
   INSURANCE_STATUS,
@@ -46,7 +65,10 @@ export const Route = createFileRoute("/_authenticated/seguros")({
           "Apólices de seguro da frota pública: seguradora, vigência, prêmio, franquias, coberturas, veículos cobertos e renovações.",
       },
       { property: "og:title", content: "Seguros da Frota — FrotaGov" },
-      { property: "og:description", content: "Controle de apólices e alertas de vencimento de seguro." },
+      {
+        property: "og:description",
+        content: "Controle de apólices e alertas de vencimento de seguro.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -269,7 +291,9 @@ function Seguros() {
                 <TableRow key={p.id}>
                   <TableCell className="font-medium">
                     {p.policy_number}
-                    {p.renewed_from_id && <span className="block text-xs text-muted-foreground">Renovação</span>}
+                    {p.renewed_from_id && (
+                      <span className="block text-xs text-muted-foreground">Renovação</span>
+                    )}
                   </TableCell>
                   <TableCell>{p.insurer_name}</TableCell>
                   <TableCell className="whitespace-nowrap text-sm">
@@ -279,10 +303,20 @@ function Seguros() {
                     )}
                   </TableCell>
                   <TableCell className="text-right">{brl(Number(p.premium_value ?? 0))}</TableCell>
-                  <TableCell className="text-right">{brl(Number(p.deductible_value ?? 0))}</TableCell>
+                  <TableCell className="text-right">
+                    {brl(Number(p.deductible_value ?? 0))}
+                  </TableCell>
                   <TableCell>{(p.vehicles ?? []).length}</TableCell>
                   <TableCell>
-                    <Badge variant={p.status === "vencida" ? "destructive" : p.status === "cancelada" ? "outline" : "default"}>
+                    <Badge
+                      variant={
+                        p.status === "vencida"
+                          ? "destructive"
+                          : p.status === "cancelada"
+                            ? "outline"
+                            : "default"
+                      }
+                    >
                       {label(INSURANCE_STATUS, p.status)}
                     </Badge>
                   </TableCell>
@@ -300,7 +334,12 @@ function Seguros() {
                       )}
                       {canManageFleet && (
                         <>
-                          <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => openEdit(p)}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Editar"
+                            onClick={() => openEdit(p)}
+                          >
                             <Pencil className="size-4" />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => openNew(p)}>
@@ -321,7 +360,11 @@ function Seguros() {
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editing ? `Apólice ${editing.policy_number}` : renewFrom ? `Renovar apólice ${renewFrom.policy_number}` : "Nova apólice"}
+              {editing
+                ? `Apólice ${editing.policy_number}`
+                : renewFrom
+                  ? `Renovar apólice ${renewFrom.policy_number}`
+                  : "Nova apólice"}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
@@ -337,7 +380,12 @@ function Seguros() {
               </div>
               <div>
                 <Label htmlFor="policy_number">Número da apólice *</Label>
-                <Input id="policy_number" name="policy_number" defaultValue={editing?.policy_number ?? ""} required />
+                <Input
+                  id="policy_number"
+                  name="policy_number"
+                  defaultValue={editing?.policy_number ?? ""}
+                  required
+                />
               </div>
               <div>
                 <Label>Fornecedor cadastrado</Label>
@@ -388,11 +436,23 @@ function Seguros() {
               </div>
               <div>
                 <Label htmlFor="valid_from">Início da vigência *</Label>
-                <Input id="valid_from" name="valid_from" type="date" defaultValue={editing?.valid_from ?? ""} required />
+                <Input
+                  id="valid_from"
+                  name="valid_from"
+                  type="date"
+                  defaultValue={editing?.valid_from ?? ""}
+                  required
+                />
               </div>
               <div>
                 <Label htmlFor="valid_to">Fim da vigência *</Label>
-                <Input id="valid_to" name="valid_to" type="date" defaultValue={editing?.valid_to ?? ""} required />
+                <Input
+                  id="valid_to"
+                  name="valid_to"
+                  type="date"
+                  defaultValue={editing?.valid_to ?? ""}
+                  required
+                />
               </div>
               <div>
                 <Label htmlFor="premium_value">Prêmio (R$)</Label>
@@ -421,11 +481,21 @@ function Seguros() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="coverages">Coberturas</Label>
-                <Textarea id="coverages" name="coverages" rows={3} defaultValue={editing?.coverages ?? renewFrom?.coverages ?? ""} />
+                <Textarea
+                  id="coverages"
+                  name="coverages"
+                  rows={3}
+                  defaultValue={editing?.coverages ?? renewFrom?.coverages ?? ""}
+                />
               </div>
               <div>
                 <Label htmlFor="limits_notes">Limites</Label>
-                <Textarea id="limits_notes" name="limits_notes" rows={3} defaultValue={editing?.limits_notes ?? ""} />
+                <Textarea
+                  id="limits_notes"
+                  name="limits_notes"
+                  rows={3}
+                  defaultValue={editing?.limits_notes ?? ""}
+                />
               </div>
             </div>
 
@@ -437,10 +507,12 @@ function Seguros() {
                     <Checkbox
                       checked={covered.includes(v.id)}
                       onCheckedChange={(c) =>
-                        setCovered((prev) => (c ? [...prev, v.id] : prev.filter((id) => id !== v.id)))
+                        setCovered((prev) =>
+                          c ? [...prev, v.id] : prev.filter((id) => id !== v.id),
+                        )
                       }
                     />
-                    {(v.plate ?? v.asset_code)}
+                    {v.plate ?? v.asset_code}
                   </label>
                 ))}
               </div>

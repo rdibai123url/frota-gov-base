@@ -6,7 +6,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { CloudUpload, Download, Lock, LockOpen, Play, RefreshCw, RotateCcw, ShieldCheck } from "lucide-react";
+import {
+  CloudUpload,
+  Download,
+  Lock,
+  LockOpen,
+  Play,
+  RefreshCw,
+  RotateCcw,
+  ShieldCheck,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,9 +24,28 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { supabase } from "@/lib/frotagov";
 import { useAllOrganizations } from "@/lib/platform";
 import {
@@ -30,7 +58,14 @@ import {
   restoreBackup,
 } from "@/lib/backup.functions";
 
-const TIMEZONES = ["America/Sao_Paulo", "America/Manaus", "America/Belem", "America/Cuiaba", "America/Rio_Branco", "UTC"];
+const TIMEZONES = [
+  "America/Sao_Paulo",
+  "America/Manaus",
+  "America/Belem",
+  "America/Cuiaba",
+  "America/Rio_Branco",
+  "UTC",
+];
 
 export const BACKUP_STATUS_LABELS: Record<string, string> = {
   agendado: "Agendado",
@@ -143,7 +178,11 @@ export function BackupTab() {
     queryKey: ["backup-settings", orgId],
     enabled: !!orgId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("backup_settings").select("*").eq("organization_id", orgId).maybeSingle();
+      const { data, error } = await supabase
+        .from("backup_settings")
+        .select("*")
+        .eq("organization_id", orgId)
+        .maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -166,7 +205,14 @@ export function BackupTab() {
 
   useEffect(() => {
     const s = settingsQuery.data as Partial<SettingsState> | null | undefined;
-    setForm(s ? ({ ...EMPTY, ...Object.fromEntries(Object.entries(s).filter(([, v]) => v !== null)) } as SettingsState) : EMPTY);
+    setForm(
+      s
+        ? ({
+            ...EMPTY,
+            ...Object.fromEntries(Object.entries(s).filter(([, v]) => v !== null)),
+          } as SettingsState)
+        : EMPTY,
+    );
   }, [settingsQuery.data]);
 
   const nextRun = useMemo(() => {
@@ -174,7 +220,9 @@ export function BackupTab() {
     return `Todo dia às ${String(form.hour).padStart(2, "0")}:${String(form.minute).padStart(2, "0")} (${form.timezone})`;
   }, [form.enabled, form.hour, form.minute, form.timezone]);
 
-  const lastOk = (runsQuery.data ?? []).find((r) => r.status === "concluido" || r.status === "concluido_com_aviso");
+  const lastOk = (runsQuery.data ?? []).find(
+    (r) => r.status === "concluido" || r.status === "concluido_com_aviso",
+  );
 
   function set<K extends keyof SettingsState>(key: K, value: SettingsState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -204,10 +252,14 @@ export function BackupTab() {
         <div className="min-w-64 space-y-1.5">
           <Label>Órgão</Label>
           <Select value={orgId} onValueChange={setOrgId}>
-            <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione" />
+            </SelectTrigger>
             <SelectContent>
               {orgs.map((o) => (
-                <SelectItem key={o.id} value={o.id}>{o.legal_name}</SelectItem>
+                <SelectItem key={o.id} value={o.id}>
+                  {o.legal_name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -232,17 +284,29 @@ export function BackupTab() {
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Agendamento</CardTitle></CardHeader>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Agendamento</CardTitle>
+          </CardHeader>
           <CardContent className="text-sm">{nextRun}</CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Último backup com sucesso</CardTitle></CardHeader>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Último backup com sucesso
+            </CardTitle>
+          </CardHeader>
           <CardContent className="text-sm">
-            {lastOk ? `${formatDateTime(lastOk.finished_at)} · ${formatBytes(lastOk.total_bytes)}` : "Nenhum registro."}
+            {lastOk
+              ? `${formatDateTime(lastOk.finished_at)} · ${formatBytes(lastOk.total_bytes)}`
+              : "Nenhum registro."}
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Teste de conexão</CardTitle></CardHeader>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Teste de conexão
+            </CardTitle>
+          </CardHeader>
           <CardContent className="text-sm">
             {settingsQuery.data?.last_test_at
               ? `${settingsQuery.data.last_test_ok ? "OK" : "Falhou"} em ${formatDateTime(settingsQuery.data.last_test_at)}`
@@ -252,12 +316,16 @@ export function BackupTab() {
       </div>
 
       <Card>
-        <CardHeader><CardTitle className="text-base">Configuração do backup externo</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle className="text-base">Configuração do backup externo</CardTitle>
+        </CardHeader>
         <CardContent className="space-y-5">
           <div className="flex items-center justify-between rounded-lg border p-3">
             <div>
               <p className="text-sm font-medium">Backup diário automático</p>
-              <p className="text-xs text-muted-foreground">Quando ativo, a rotina roda sozinha no horário definido.</p>
+              <p className="text-xs text-muted-foreground">
+                Quando ativo, a rotina roda sozinha no horário definido.
+              </p>
             </div>
             <Switch checked={form.enabled} onCheckedChange={(v) => set("enabled", v)} />
           </div>
@@ -265,28 +333,54 @@ export function BackupTab() {
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
               <Label>Hora</Label>
-              <Input type="number" min={0} max={23} value={form.hour} onChange={(e) => set("hour", Number(e.target.value))} />
+              <Input
+                type="number"
+                min={0}
+                max={23}
+                value={form.hour}
+                onChange={(e) => set("hour", Number(e.target.value))}
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Minuto</Label>
-              <Input type="number" min={0} max={59} value={form.minute} onChange={(e) => set("minute", Number(e.target.value))} />
+              <Input
+                type="number"
+                min={0}
+                max={59}
+                value={form.minute}
+                onChange={(e) => set("minute", Number(e.target.value))}
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Fuso horário</Label>
               <Select value={form.timezone} onValueChange={(v) => set("timezone", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{TIMEZONES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TIMEZONES.map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {t}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="flex items-center gap-3 rounded-lg border p-3 text-sm">
-              <Switch checked={form.include_database} onCheckedChange={(v) => set("include_database", v)} />
+              <Switch
+                checked={form.include_database}
+                onCheckedChange={(v) => set("include_database", v)}
+              />
               Incluir dados do banco (todos os módulos do órgão)
             </label>
             <label className="flex items-center gap-3 rounded-lg border p-3 text-sm">
-              <Switch checked={form.include_storage} onCheckedChange={(v) => set("include_storage", v)} />
+              <Switch
+                checked={form.include_storage}
+                onCheckedChange={(v) => set("include_storage", v)}
+              />
               Incluir anexos e arquivos privados do órgão
             </label>
           </div>
@@ -294,23 +388,48 @@ export function BackupTab() {
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
               <Label>Manter diários</Label>
-              <Input type="number" min={0} max={60} value={form.retention_daily} onChange={(e) => set("retention_daily", Number(e.target.value))} />
+              <Input
+                type="number"
+                min={0}
+                max={60}
+                value={form.retention_daily}
+                onChange={(e) => set("retention_daily", Number(e.target.value))}
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Manter semanais</Label>
-              <Input type="number" min={0} max={52} value={form.retention_weekly} onChange={(e) => set("retention_weekly", Number(e.target.value))} />
+              <Input
+                type="number"
+                min={0}
+                max={52}
+                value={form.retention_weekly}
+                onChange={(e) => set("retention_weekly", Number(e.target.value))}
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Manter mensais</Label>
-              <Input type="number" min={0} max={120} value={form.retention_monthly} onChange={(e) => set("retention_monthly", Number(e.target.value))} />
+              <Input
+                type="number"
+                min={0}
+                max={120}
+                value={form.retention_monthly}
+                onChange={(e) => set("retention_monthly", Number(e.target.value))}
+              />
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label>Destino</Label>
-              <Select value={form.destination_kind} onValueChange={(v) => set("destination_kind", v as SettingsState["destination_kind"])}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={form.destination_kind}
+                onValueChange={(v) =>
+                  set("destination_kind", v as SettingsState["destination_kind"])
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="plataforma">Armazenamento privado da plataforma</SelectItem>
                   <SelectItem value="s3">Armazenamento compatível com S3</SelectItem>
@@ -319,29 +438,68 @@ export function BackupTab() {
               </Select>
             </div>
             <label className="flex items-center gap-3 rounded-lg border p-3 text-sm">
-              <Switch checked={form.platform_copy} onCheckedChange={(v) => set("platform_copy", v)} />
+              <Switch
+                checked={form.platform_copy}
+                onCheckedChange={(v) => set("platform_copy", v)}
+              />
               Manter também uma cópia na plataforma
             </label>
           </div>
 
           {form.destination_kind === "s3" && (
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5"><Label>Endpoint</Label><Input value={form.s3_endpoint} onChange={(e) => set("s3_endpoint", e.target.value)} placeholder="https://s3.sa-east-1.amazonaws.com" /></div>
-              <div className="space-y-1.5"><Label>Região</Label><Input value={form.s3_region} onChange={(e) => set("s3_region", e.target.value)} /></div>
-              <div className="space-y-1.5"><Label>Bucket</Label><Input value={form.s3_bucket} onChange={(e) => set("s3_bucket", e.target.value)} /></div>
-              <div className="space-y-1.5"><Label>Pasta base</Label><Input value={form.s3_prefix} onChange={(e) => set("s3_prefix", e.target.value)} /></div>
+              <div className="space-y-1.5">
+                <Label>Endpoint</Label>
+                <Input
+                  value={form.s3_endpoint}
+                  onChange={(e) => set("s3_endpoint", e.target.value)}
+                  placeholder="https://s3.sa-east-1.amazonaws.com"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Região</Label>
+                <Input value={form.s3_region} onChange={(e) => set("s3_region", e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Bucket</Label>
+                <Input value={form.s3_bucket} onChange={(e) => set("s3_bucket", e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Pasta base</Label>
+                <Input value={form.s3_prefix} onChange={(e) => set("s3_prefix", e.target.value)} />
+              </div>
             </div>
           )}
 
           {form.destination_kind === "sftp" && (
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5"><Label>Host</Label><Input value={form.sftp_host} onChange={(e) => set("sftp_host", e.target.value)} /></div>
-              <div className="space-y-1.5"><Label>Porta</Label><Input type="number" value={form.sftp_port} onChange={(e) => set("sftp_port", Number(e.target.value))} /></div>
-              <div className="space-y-1.5"><Label>Usuário</Label><Input value={form.sftp_user} onChange={(e) => set("sftp_user", e.target.value)} /></div>
-              <div className="space-y-1.5"><Label>Pasta base</Label><Input value={form.sftp_base_path} onChange={(e) => set("sftp_base_path", e.target.value)} /></div>
+              <div className="space-y-1.5">
+                <Label>Host</Label>
+                <Input value={form.sftp_host} onChange={(e) => set("sftp_host", e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Porta</Label>
+                <Input
+                  type="number"
+                  value={form.sftp_port}
+                  onChange={(e) => set("sftp_port", Number(e.target.value))}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Usuário</Label>
+                <Input value={form.sftp_user} onChange={(e) => set("sftp_user", e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Pasta base</Label>
+                <Input
+                  value={form.sftp_base_path}
+                  onChange={(e) => set("sftp_base_path", e.target.value)}
+                />
+              </div>
               <p className="sm:col-span-2 rounded-md bg-muted/50 p-3 text-xs text-muted-foreground">
-                O servidor da aplicação não abre conexões SSH. Com destino SFTP, o pacote é gerado e mantido na plataforma
-                para coleta pelo agente instalado no servidor do órgão, e a execução é registrada como "concluída com aviso".
+                O servidor da aplicação não abre conexões SSH. Com destino SFTP, o pacote é gerado e
+                mantido na plataforma para coleta pelo agente instalado no servidor do órgão, e a
+                execução é registrada como "concluída com aviso".
               </p>
             </div>
           )}
@@ -354,8 +512,8 @@ export function BackupTab() {
               placeholder="BACKUP_CREDENCIAIS_PREFEITURA"
             />
             <p className="text-xs text-muted-foreground">
-              As credenciais ficam apenas nos segredos do projeto, em formato JSON. O sistema guarda somente o nome do segredo
-              e nunca exibe seu conteúdo.
+              As credenciais ficam apenas nos segredos do projeto, em formato JSON. O sistema guarda
+              somente o nome do segredo e nunca exibe seu conteúdo.
             </p>
           </div>
 
@@ -396,7 +554,9 @@ export function BackupTab() {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle className="text-base">Histórico de execuções</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle className="text-base">Histórico de execuções</CardTitle>
+        </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -413,57 +573,121 @@ export function BackupTab() {
             </TableHeader>
             <TableBody>
               {(runsQuery.data ?? []).length === 0 && (
-                <TableRow><TableCell colSpan={8} className="text-muted-foreground">Nenhuma execução registrada.</TableCell></TableRow>
+                <TableRow>
+                  <TableCell colSpan={8} className="text-muted-foreground">
+                    Nenhuma execução registrada.
+                  </TableCell>
+                </TableRow>
               )}
               {(runsQuery.data ?? []).map((run) => (
                 <TableRow key={run.id}>
-                  <TableCell className="whitespace-nowrap">{formatDateTime(run.started_at ?? run.created_at)}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {formatDateTime(run.started_at ?? run.created_at)}
+                  </TableCell>
                   <TableCell>{KIND_LABELS[run.kind] ?? run.kind}</TableCell>
                   <TableCell>
-                    <Badge variant={STATUS_VARIANT[run.status] ?? "outline"}>{BACKUP_STATUS_LABELS[run.status] ?? run.status}</Badge>
-                    {run.error_summary && <p className="mt-1 max-w-80 text-xs text-muted-foreground">{run.error_summary}</p>}
+                    <Badge variant={STATUS_VARIANT[run.status] ?? "outline"}>
+                      {BACKUP_STATUS_LABELS[run.status] ?? run.status}
+                    </Badge>
+                    {run.error_summary && (
+                      <p className="mt-1 max-w-80 text-xs text-muted-foreground">
+                        {run.error_summary}
+                      </p>
+                    )}
                   </TableCell>
                   <TableCell>{formatDuration(run.duration_ms)}</TableCell>
                   <TableCell>{formatBytes(run.total_bytes)}</TableCell>
                   <TableCell>{run.record_count?.toLocaleString("pt-BR") ?? "—"}</TableCell>
                   <TableCell>
-                    {run.integrity_valid === null ? "—" : run.integrity_valid ? "Verificada" : "Divergente"}
-                    {run.is_protected && <Badge variant="outline" className="ml-2">Protegido</Badge>}
+                    {run.integrity_valid === null
+                      ? "—"
+                      : run.integrity_valid
+                        ? "Verificada"
+                        : "Divergente"}
+                    {run.is_protected && (
+                      <Badge variant="outline" className="ml-2">
+                        Protegido
+                      </Badge>
+                    )}
                   </TableCell>
                   <TableCell className="space-x-1 text-right whitespace-nowrap">
-                    <Button size="sm" variant="ghost" title="Verificar integridade" disabled={busy !== null}
-                      onClick={() => withBusy(run.id, async () => {
-                        const result = await verifyBackupIntegrity({ data: { runId: run.id } });
-                        if (result.ok) toast.success(result.message); else toast.error(result.message);
-                        refresh();
-                      })}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      title="Verificar integridade"
+                      disabled={busy !== null}
+                      onClick={() =>
+                        withBusy(run.id, async () => {
+                          const result = await verifyBackupIntegrity({ data: { runId: run.id } });
+                          if (result.ok) toast.success(result.message);
+                          else toast.error(result.message);
+                          refresh();
+                        })
+                      }
+                    >
                       <ShieldCheck className="size-4" />
                     </Button>
-                    <Button size="sm" variant="ghost" title="Baixar cópia" disabled={busy !== null}
-                      onClick={() => withBusy(run.id, async () => {
-                        const result = await downloadBackupLink({ data: { runId: run.id } });
-                        if (!result.url) { toast.error(result.message); return; }
-                        window.open(result.url, "_blank", "noopener");
-                      })}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      title="Baixar cópia"
+                      disabled={busy !== null}
+                      onClick={() =>
+                        withBusy(run.id, async () => {
+                          const result = await downloadBackupLink({ data: { runId: run.id } });
+                          if (!result.url) {
+                            toast.error(result.message);
+                            return;
+                          }
+                          window.open(result.url, "_blank", "noopener");
+                        })
+                      }
+                    >
                       <Download className="size-4" />
                     </Button>
-                    <Button size="sm" variant="ghost" title={run.is_protected ? "Retirar proteção" : "Proteger contra expurgo"} disabled={busy !== null}
-                      onClick={() => withBusy(run.id, async () => {
-                        if (run.is_protected) {
-                          await setBackupProtection({ data: { runId: run.id, protect: false } });
-                          toast.success("Proteção retirada.");
-                        } else {
-                          const reason = window.prompt("Motivo da proteção (mínimo de 10 caracteres):") ?? "";
-                          if (reason.trim().length < 10) { toast.error("Motivo obrigatório."); return; }
-                          await setBackupProtection({ data: { runId: run.id, protect: true, reason } });
-                          toast.success("Backup protegido contra expurgo.");
-                        }
-                        refresh();
-                      })}>
-                      {run.is_protected ? <Lock className="size-4" /> : <LockOpen className="size-4" />}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      title={run.is_protected ? "Retirar proteção" : "Proteger contra expurgo"}
+                      disabled={busy !== null}
+                      onClick={() =>
+                        withBusy(run.id, async () => {
+                          if (run.is_protected) {
+                            await setBackupProtection({ data: { runId: run.id, protect: false } });
+                            toast.success("Proteção retirada.");
+                          } else {
+                            const reason =
+                              window.prompt("Motivo da proteção (mínimo de 10 caracteres):") ?? "";
+                            if (reason.trim().length < 10) {
+                              toast.error("Motivo obrigatório.");
+                              return;
+                            }
+                            await setBackupProtection({
+                              data: { runId: run.id, protect: true, reason },
+                            });
+                            toast.success("Backup protegido contra expurgo.");
+                          }
+                          refresh();
+                        })
+                      }
+                    >
+                      {run.is_protected ? (
+                        <Lock className="size-4" />
+                      ) : (
+                        <LockOpen className="size-4" />
+                      )}
                     </Button>
-                    <Button size="sm" variant="ghost" title="Restaurar" disabled={busy !== null || !run.object_key}
-                      onClick={() => { setRestoreRun(run.id); setJustification(""); setConfirmation(""); }}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      title="Restaurar"
+                      disabled={busy !== null || !run.object_key}
+                      onClick={() => {
+                        setRestoreRun(run.id);
+                        setJustification("");
+                        setConfirmation("");
+                      }}
+                    >
                       <RotateCcw className="size-4" />
                     </Button>
                   </TableCell>
@@ -476,15 +700,22 @@ export function BackupTab() {
 
       <Dialog open={!!restoreRun} onOpenChange={(open) => !open && setRestoreRun(null)}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Restauração assistida</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Restauração assistida</DialogTitle>
+          </DialogHeader>
           <div className="space-y-4 text-sm">
             <p className="rounded-md bg-muted/50 p-3 text-muted-foreground">
-              A restauração reaplica os dados do pacote sobre o órgão selecionado. Antes de qualquer gravação o sistema gera
-              automaticamente um backup de segurança da situação atual. A ação fica registrada com responsável e justificativa.
+              A restauração reaplica os dados do pacote sobre o órgão selecionado. Antes de qualquer
+              gravação o sistema gera automaticamente um backup de segurança da situação atual. A
+              ação fica registrada com responsável e justificativa.
             </p>
             <div className="space-y-1.5">
               <Label>Justificativa (mínimo de 15 caracteres)</Label>
-              <Textarea value={justification} onChange={(e) => setJustification(e.target.value)} rows={3} />
+              <Textarea
+                value={justification}
+                onChange={(e) => setJustification(e.target.value)}
+                rows={3}
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Digite RESTAURAR para confirmar</Label>
@@ -492,13 +723,17 @@ export function BackupTab() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRestoreRun(null)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setRestoreRun(null)}>
+              Cancelar
+            </Button>
             <Button
               variant="destructive"
               disabled={busy !== null}
               onClick={() =>
                 withBusy("restore", async () => {
-                  const result = await restoreBackup({ data: { runId: restoreRun!, justification, confirmation } });
+                  const result = await restoreBackup({
+                    data: { runId: restoreRun!, justification, confirmation },
+                  });
                   toast.success(result.message);
                   setRestoreRun(null);
                   refresh();

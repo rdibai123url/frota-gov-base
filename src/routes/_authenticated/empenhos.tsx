@@ -11,9 +11,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { BudgetReferenceSelect } from "@/components/cadastro-rapido";
 import { SummaryCards } from "@/components/summary-cards";
 import { MoneyInput } from "@/components/form-fields";
@@ -49,7 +68,10 @@ export const Route = createFileRoute("/_authenticated/empenhos")({
           "Empenhos orçamentários da frota: dotação, fonte de recurso, elemento de despesa, valor empenhado, consumido e saldo disponível.",
       },
       { property: "og:title", content: "Empenhos — FrotaGov" },
-      { property: "og:description", content: "Controle de empenhos e saldos orçamentários do órgão." },
+      {
+        property: "og:description",
+        content: "Controle de empenhos e saldos orçamentários do órgão.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -104,7 +126,10 @@ function Empenhos() {
   const [search, setSearch] = useState("");
 
   const exercises = useMemo(
-    () => Array.from(new Set(commitments.map((c) => String(c.exercise)))).sort().reverse(),
+    () =>
+      Array.from(new Set(commitments.map((c) => String(c.exercise))))
+        .sort()
+        .reverse(),
     [commitments],
   );
 
@@ -116,7 +141,12 @@ function Empenhos() {
         if (fUnit !== ALL && (c.unit_id ?? NONE) !== fUnit) return false;
         if (fCenter !== ALL && (c.cost_center_id ?? NONE) !== fCenter) return false;
         const q = search.trim().toLowerCase();
-        return !q || `${c.number} ${c.budget_allocation ?? ""} ${c.resource_source ?? ""}`.toLowerCase().includes(q);
+        return (
+          !q ||
+          `${c.number} ${c.budget_allocation ?? ""} ${c.resource_source ?? ""}`
+            .toLowerCase()
+            .includes(q)
+        );
       }),
     [commitments, fExercise, fStatus, fUnit, fCenter, search],
   );
@@ -177,7 +207,9 @@ function Empenhos() {
     if (editing) {
       const used = Number(editing.consumed_value) + Number(editing.reserved_value);
       if (committed - cancelled < used) {
-        toast.error(`O valor líquido não pode ficar abaixo do já reservado/consumido (${brl(used)}).`);
+        toast.error(
+          `O valor líquido não pode ficar abaixo do já reservado/consumido (${brl(used)}).`,
+        );
         return;
       }
     }
@@ -201,7 +233,9 @@ function Empenhos() {
     };
     const { error } = editing
       ? await supabase.from("commitments").update(payload).eq("id", editing.id)
-      : await supabase.from("commitments").insert({ ...payload, organization_id: orgId!, created_by: userId });
+      : await supabase
+          .from("commitments")
+          .insert({ ...payload, organization_id: orgId!, created_by: userId });
     setSaving(false);
     if (error) {
       toast.error(
@@ -244,7 +278,11 @@ function Empenhos() {
       <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <div>
           <Label>Buscar</Label>
-          <Input placeholder="Número, dotação ou fonte" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input
+            placeholder="Número, dotação ou fonte"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
         <div>
           <Label>Exercício</Label>
@@ -351,11 +389,15 @@ function Empenhos() {
                 <TableRow key={c.id}>
                   <TableCell className="font-medium">
                     {c.number}
-                    <span className="block text-xs text-muted-foreground">{label(COMMITMENT_KINDS, c.kind)}</span>
+                    <span className="block text-xs text-muted-foreground">
+                      {label(COMMITMENT_KINDS, c.kind)}
+                    </span>
                   </TableCell>
                   <TableCell>
                     {c.exercise}
-                    <span className="block text-xs text-muted-foreground">{dateBR(c.issued_at)}</span>
+                    <span className="block text-xs text-muted-foreground">
+                      {dateBR(c.issued_at)}
+                    </span>
                   </TableCell>
                   <TableCell>
                     {c.contract ? `Contrato ${c.contract.number}` : "Sem contrato"}
@@ -378,7 +420,9 @@ function Empenhos() {
                       <Badge variant={c.status === "ativo" ? "default" : "secondary"}>
                         {label(COMMITMENT_STATUS, c.status)}
                       </Badge>
-                      {baixo && <AlertTriangle className="size-4 text-warning" aria-label="Saldo baixo" />}
+                      {baixo && (
+                        <AlertTriangle className="size-4 text-warning" aria-label="Saldo baixo" />
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -392,7 +436,12 @@ function Empenhos() {
                         <Scale className="size-4" />
                       </Button>
                       {canManageFinance && (
-                        <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => openEdit(c)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Editar"
+                          onClick={() => openEdit(c)}
+                        >
                           <Pencil className="size-4" />
                         </Button>
                       )}
@@ -411,7 +460,9 @@ function Empenhos() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing ? `Editar empenho ${editing.number}` : "Novo empenho"}</DialogTitle>
+            <DialogTitle>
+              {editing ? `Editar empenho ${editing.number}` : "Novo empenho"}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-3">
@@ -540,11 +591,19 @@ function Empenhos() {
               </div>
               <div>
                 <Label>Fonte de recurso</Label>
-                <BudgetReferenceSelect kind="fonte" value={resourceSource} onChange={setResourceSource} />
+                <BudgetReferenceSelect
+                  kind="fonte"
+                  value={resourceSource}
+                  onChange={setResourceSource}
+                />
               </div>
               <div>
                 <Label>Elemento de despesa</Label>
-                <BudgetReferenceSelect kind="elemento" value={expenseElement} onChange={setExpenseElement} />
+                <BudgetReferenceSelect
+                  kind="elemento"
+                  value={expenseElement}
+                  onChange={setExpenseElement}
+                />
               </div>
               <div>
                 <Label htmlFor="committed_value">Valor empenhado (R$) *</Label>
@@ -590,7 +649,6 @@ function Empenhos() {
     </>
   );
 }
-
 
 /* ------------------- reforço e redução/anulação de empenho ------------------- */
 
@@ -730,7 +788,11 @@ function CommitmentDetailDialog({
               </p>
             )}
             <Button type="submit" disabled={saving}>
-              {saving ? "Registrando…" : kind === "reforco" ? "Registrar reforço" : "Registrar redução/anulação"}
+              {saving
+                ? "Registrando…"
+                : kind === "reforco"
+                  ? "Registrar reforço"
+                  : "Registrar redução/anulação"}
             </Button>
           </form>
         )}
