@@ -55,6 +55,7 @@ import {
 } from "@/lib/frotagov";
 import { useIsSuperAdmin, usePlatformSession, usePlatformContextActions } from "@/lib/platform";
 import { moduleForPath, useModuleMap } from "@/lib/modulos";
+import { roleCanOpen } from "@/lib/permissoes";
 
 type NavLeaf = { to: string; label: string };
 type NavGroup = { id: string; label: string; icon: typeof Truck; to?: string; items?: NavLeaf[] };
@@ -104,8 +105,7 @@ const NAV: NavGroup[] = [
       { to: "/garantias", label: "Garantias" },
       { to: "/pesquisa-precos", label: "Pesquisa de preços" },
       { to: "/regras-manutencao", label: "Regras de manutenção" },
-      { to: "/pecas", label: "Peças e acessórios" },
-      { to: "/almoxarifado", label: "Almoxarifado" },
+      { to: "/pneus", label: "Controle de pneus" },
     ],
   },
   {
@@ -114,8 +114,6 @@ const NAV: NavGroup[] = [
     icon: ClipboardList,
     items: [
       { to: "/rede-credenciada", label: "Oficinas e prestadores do órgão" },
-      { to: "/credenciados", label: "Credenciados do órgão e cartão virtual" },
-      { to: "/portal-credenciado", label: "Portal do credenciado" },
       { to: "/mapa-rede", label: "Mapa dos prestadores do órgão" },
       { to: "/cotacoes", label: "Cotações" },
       { to: "/ordens-servico", label: "Ordens de Serviço" },
@@ -252,7 +250,9 @@ export function AppShell({ children }: { children: ReactNode }) {
     }
     const items = (group.items ?? []).filter((leaf) => {
       const mod = moduleForPath(leaf.to);
-      return !mod || modules[mod.key] !== false;
+      if (!mod) return true;
+      if (modules[mod.key] === false) return false;
+      return isSuperAdmin || roleCanOpen(mod.key, me?.roles ?? []);
     });
     return items.length ? { ...group, items } : null;
   }).filter((g): g is NavGroup => g !== null);
@@ -261,6 +261,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const currentModule = moduleForPath(pathname);
   const blocked = !modulesLoading && !!currentModule && modules[currentModule.key] === false;
+  const noAccess =
+    !!me && !!currentModule && !isSuperAdmin && !roleCanOpen(currentModule.key, me.roles ?? []);
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -657,7 +659,19 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <main className="flex-1 px-4 py-5 sm:px-6 lg:px-7">
             <div className="mx-auto w-full max-w-[1500px]">
-              {blocked ? (
+              {noAccess ? (
+                <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-8 text-center">
+                  <h1 className="gov-title text-xl">Você não tem acesso a esta tela</h1>
+                  <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
+                    O seu perfil ({primaryRoleLabel}) não inclui a tela{" "}
+                    <strong>{currentModule?.label}</strong>. Se você precisa dela, peça ao
+                    administrador do órgão para ajustar o seu perfil.
+                  </p>
+                  <Button className="mt-5" onClick={() => navigate({ to: "/painel" })}>
+                    Voltar ao Dashboard
+                  </Button>
+                </div>
+              ) : blocked ? (
                 <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-8 text-center">
                   <h1 className="gov-title text-xl">Módulo indisponível para este órgão</h1>
                   <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">

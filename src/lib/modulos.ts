@@ -58,15 +58,11 @@ export const MODULES: ModuleDef[] = [
   m("garantias", "Garantias", "Manutenção"),
   m("pesquisa-precos", "Pesquisa de preços", "Manutenção"),
   m("regras-manutencao", "Regras de manutenção", "Manutenção"),
-  m("pecas", "Peças e acessórios", "Manutenção"),
-  m("almoxarifado", "Almoxarifado", "Manutenção"),
+  m("pneus", "Controle de pneus", "Manutenção"),
   m("rede-credenciada", "Oficinas e prestadores do órgão", "Prestadores e compras"),
-  m("credenciados", "Credenciados do órgão e cartão virtual", "Prestadores e compras"),
-  m("portal-credenciado", "Portal do credenciado", "Prestadores e compras"),
   m("mapa-rede", "Mapa dos prestadores do órgão", "Prestadores e compras"),
   m("cotacoes", "Cotações", "Prestadores e compras", ["/cotacao/"]),
   m("ordens-servico", "Ordens de Serviço", "Prestadores e compras", ["/ordem-servico/"]),
-  m("ofp", "Ordens de fornecimento (OFP)", "Prestadores e compras"),
   m("contratos", "Contratos", "Contratos e Orçamento"),
   m("rastreamento", "Rastreamento", "Frota"),
   m("faturamento", "Faturamento", "Contratos e Orçamento"),
@@ -91,8 +87,16 @@ export const MODULES: ModuleDef[] = [
   m("alertas", "Alertas e inconsistências", "Alertas"),
 ];
 
-/** Módulos que nascem DESABILITADOS para órgãos novos (Bloco 6.1). */
-export const DEFAULT_DISABLED = ["credenciados", "portal-credenciado"];
+/** Módulos que nascem DESABILITADOS: o Super Admin ativa por órgão quando o órgão precisar. */
+export const DEFAULT_DISABLED = [
+  "equipamentos",
+  "regras-manutencao",
+  "faturamento",
+  "gestao-contrato",
+  "rastreamento",
+  "integracoes",
+  "chaves-api",
+];
 
 export const MODULE_GROUPS = Array.from(new Set(MODULES.map((x) => x.group)));
 

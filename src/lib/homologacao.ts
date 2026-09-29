@@ -191,7 +191,6 @@ export const ACTIVE_MODULES: ModuleInfo[] = [
   { module: "Autorização de abastecimento", route: "/autorizacoes", status: "ativo" },
   { module: "Abastecimentos", route: "/abastecimentos", status: "ativo" },
   { module: "Manutenção preventiva e corretiva", route: "/manutencoes", status: "ativo" },
-  { module: "Peças e pneus", route: "/pecas", status: "ativo" },
   { module: "Rede credenciada", route: "/rede-credenciada", status: "ativo" },
   { module: "Cotações", route: "/cotacoes", status: "ativo" },
   { module: "Ordens de serviço", route: "/ordens-servico", status: "ativo" },
@@ -236,13 +235,6 @@ export const ACTIVE_MODULES: ModuleInfo[] = [
     note: "Bens sem placa, com horímetro e identificação patrimonial.",
   },
   { module: "Inteligência de consumo e custos", route: "/inteligencia", status: "ativo" },
-  {
-    module: "Rede credenciada digital",
-    route: "/credenciados",
-    status: "ativo",
-    note: "Portal do credenciado, cartão virtual do bem e captura operacional.",
-  },
-  { module: "Peças, almoxarifado e OFP", route: "/almoxarifado", status: "ativo" },
   {
     module: "Exportação integral de dados",
     route: "/exportacao",
