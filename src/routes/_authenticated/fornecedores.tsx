@@ -7,6 +7,7 @@
  * O cadastro de empresas continua em Pessoas e Empresas Externas.
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { TerceirosHub } from "@/components/hubs";
 import { useMemo, useState } from "react";
 import { Building2, FileText, MapPin, Search } from "lucide-react";
 
@@ -58,12 +59,12 @@ export const Route = createFileRoute("/_authenticated/fornecedores")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Fornecedores,
+  component: FornecedoresRoute,
 });
 
 const CATS: NetworkCategory[] = ["combustivel", "pecas", "pneus", "outro"];
 
-function Fornecedores() {
+export function FornecedoresPanel() {
   const { companies, isLoading } = useNetworkCompanies(CATS);
   const [q, setQ] = useState("");
   const [detail, setDetail] = useState<NetworkCompany | null>(null);
@@ -283,4 +284,9 @@ export function CompanyDialog({
       </DialogContent>
     </Dialog>
   );
+}
+
+/** Esta tela agora aparece dentro de uma tela com abas. */
+function FornecedoresRoute() {
+  return <TerceirosHub initial="fornecedores" />;
 }

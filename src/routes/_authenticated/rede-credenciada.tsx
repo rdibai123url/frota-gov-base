@@ -1,4 +1,5 @@
 import { ListPagination, usePaged } from "@/components/list-pagination";
+import { TerceirosHub } from "@/components/hubs";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Building2, FileText, Pencil, Upload } from "lucide-react";
@@ -78,7 +79,7 @@ export const Route = createFileRoute("/_authenticated/rede-credenciada")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: RedeCredenciada,
+  component: RedeCredenciadaRoute,
 });
 
 const ALL = "__all__";
@@ -102,7 +103,7 @@ const schema = z.object({
   longitude: z.string().trim().max(24).optional(),
 });
 
-function RedeCredenciada() {
+export function RedeCredenciadaPanel() {
   const { data: workshops = [], isLoading } = useWorkshops();
   const { canManageFleet, orgId, userId } = usePerms();
   const invalidate = useInvalidate();
@@ -699,4 +700,9 @@ function NetworkFromContracts() {
       <CompanyDialog company={detail} onClose={() => setDetail(null)} />
     </>
   );
+}
+
+/** Esta tela agora aparece dentro de uma tela com abas. */
+function RedeCredenciadaRoute() {
+  return <TerceirosHub />;
 }

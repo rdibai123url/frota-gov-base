@@ -56,6 +56,7 @@ import {
 import { useIsSuperAdmin, usePlatformSession, usePlatformContextActions } from "@/lib/platform";
 import { moduleForPath, useAccessOverrides, useModuleMap } from "@/lib/modulos";
 import { roleCanOpen } from "@/lib/permissoes";
+import { useEmbedded } from "@/components/embedded";
 import { setReportBranding } from "@/lib/reports";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -92,8 +93,6 @@ const NAV: NavGroup[] = [
       { to: "/autorizacoes", label: "Autorizações" },
       { to: "/abastecimentos", label: "Abastecimentos" },
       { to: "/combustiveis", label: "Combustíveis" },
-      { to: "/cotas-servidor", label: "Cotas de servidor" },
-      { to: "/fornecedores", label: "Fornecedores / Postos" },
     ],
   },
   {
@@ -104,9 +103,7 @@ const NAV: NavGroup[] = [
       { to: "/manutencoes", label: "Manutenções" },
       { to: "/planos-manutencao", label: "Planos preventivos" },
       { to: "/limpeza", label: "Limpeza da frota" },
-      { to: "/garantias", label: "Garantias" },
-      { to: "/pesquisa-precos", label: "Pesquisa de preços" },
-      { to: "/regras-manutencao", label: "Regras de manutenção" },
+      { to: "/garantias", label: "Garantias, preços e regras" },
       { to: "/pneus", label: "Controle de pneus" },
     ],
   },
@@ -115,7 +112,7 @@ const NAV: NavGroup[] = [
     label: "Prestadores e compras",
     icon: ClipboardList,
     items: [
-      { to: "/rede-credenciada", label: "Oficinas e prestadores do órgão" },
+      { to: "/rede-credenciada", label: "Oficinas e fornecedores" },
       { to: "/mapa-rede", label: "Mapa dos prestadores do órgão" },
       { to: "/cotacoes", label: "Cotações" },
       { to: "/ordens-servico", label: "Ordens de Serviço" },
@@ -746,6 +743,20 @@ export function PageHeader({
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const trail = useBreadcrumb(pathname);
+  const embedded = useEmbedded();
+
+  if (embedded) {
+    return (
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        {description ? (
+          <p className="max-w-3xl text-[13.5px] text-muted-foreground">{description}</p>
+        ) : (
+          <span />
+        )}
+        {action && <div className="flex flex-wrap items-center gap-2">{action}</div>}
+      </div>
+    );
+  }
 
   return (
     <div className="mb-5 border-b border-border pb-4">

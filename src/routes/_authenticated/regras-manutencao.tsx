@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { ManutencaoApoioHub } from "@/components/hubs";
 import { useState, type ReactNode } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -70,7 +71,7 @@ export const Route = createFileRoute("/_authenticated/regras-manutencao")({
       },
     ],
   }),
-  component: RegrasManutencao,
+  component: RegrasManutencaoRoute,
 });
 
 const ALL = "__all__";
@@ -900,7 +901,7 @@ function Lavagem({ canEdit }: { canEdit: boolean }) {
 
 /* ---------------------------------- página --------------------------------- */
 
-function RegrasManutencao() {
+export function RegrasManutencaoPanel() {
   const { canManageFleet, orgId } = usePerms();
   const canEdit = canManageFleet && Boolean(orgId);
 
@@ -936,4 +937,9 @@ function RegrasManutencao() {
       </Tabs>
     </div>
   );
+}
+
+/** Esta tela agora aparece dentro de uma tela com abas. */
+function RegrasManutencaoRoute() {
+  return <ManutencaoApoioHub initial="regras" />;
 }

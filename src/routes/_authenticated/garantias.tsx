@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { ManutencaoApoioHub } from "@/components/hubs";
 import { useMemo, useState } from "react";
 import { ShieldAlert, ShieldCheck, ShieldX } from "lucide-react";
 
@@ -34,7 +35,7 @@ export const Route = createFileRoute("/_authenticated/garantias")({
       },
     ],
   }),
-  component: Garantias,
+  component: GarantiasRoute,
 });
 
 const ALL = "__all__";
@@ -50,7 +51,7 @@ const STATUS_LABEL: Record<Status, string> = {
   vencida: "Vencida há pouco",
 };
 
-function Garantias() {
+export function GarantiasPanel() {
   const { data: rows = [], isLoading } = useWarranties();
   const [status, setStatus] = useState<string>(ALL);
   const [kind, setKind] = useState<string>(ALL);
@@ -184,4 +185,9 @@ function Garantias() {
       </div>
     </div>
   );
+}
+
+/** Esta tela agora aparece dentro de uma tela com abas. */
+function GarantiasRoute() {
+  return <ManutencaoApoioHub />;
 }

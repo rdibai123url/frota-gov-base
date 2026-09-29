@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { ManutencaoApoioHub } from "@/components/hubs";
 import { useState } from "react";
 import { Search } from "lucide-react";
 
@@ -27,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/pesquisa-precos")({
       },
     ],
   }),
-  component: PesquisaPrecos,
+  component: PesquisaPrecosRoute,
 });
 
 type PartHit = {
@@ -71,7 +72,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function PesquisaPrecos() {
+export function PesquisaPrecosPanel() {
   const [input, setInput] = useState("");
   const [term, setTerm] = useState("");
 
@@ -250,4 +251,9 @@ function PesquisaPrecos() {
       )}
     </div>
   );
+}
+
+/** Esta tela agora aparece dentro de uma tela com abas. */
+function PesquisaPrecosRoute() {
+  return <ManutencaoApoioHub initial="precos" />;
 }
