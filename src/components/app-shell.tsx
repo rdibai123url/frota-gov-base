@@ -56,6 +56,8 @@ import {
 import { useIsSuperAdmin, usePlatformSession, usePlatformContextActions } from "@/lib/platform";
 import { moduleForPath, useAccessOverrides, useModuleMap } from "@/lib/modulos";
 import { roleCanOpen } from "@/lib/permissoes";
+import { setReportBranding } from "@/lib/reports";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type NavLeaf = { to: string; label: string };
 type NavGroup = { id: string; label: string; icon: typeof Truck; to?: string; items?: NavLeaf[] };
@@ -239,6 +241,23 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { data: me } = useProfile();
   const { data: brasao } = useBrasaoUrl(org?.logo_url);
   const { isSuperAdmin } = useIsSuperAdmin();
+  // O cabeçalho de todos os relatórios usa nome, CNPJ, endereço e logotipo do órgão/empresa.
+  useEffect(() => {
+    if (!org) return;
+    setReportBranding({
+      name: org.legal_name,
+      cnpj: org.cnpj,
+      address: [
+        org.address,
+        org.city && org.state ? `${org.city}/${org.state}` : (org.city ?? org.state),
+      ]
+        .filter(Boolean)
+        .join(", "),
+      phone: org.phone,
+      email: org.email,
+      logoUrl: brasao ?? null,
+    });
+  }, [org, brasao]);
   const { data: platformSession } = usePlatformSession();
   const { exitOrg } = usePlatformContextActions();
   const { map: modules, isLoading: modulesLoading } = useModuleMap();
@@ -575,6 +594,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </TooltipTrigger>
                 <TooltipContent>Alertas e inconsistências</TooltipContent>
               </Tooltip>
+
+              <ThemeToggle />
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

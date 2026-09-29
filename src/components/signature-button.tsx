@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PasswordInput } from "@/components/password-input";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { PenLine, ShieldAlert, ShieldCheck } from "lucide-react";
@@ -119,9 +120,8 @@ export function SignatureButton({
           {!alreadySigned && (
             <form onSubmit={submit} className="space-y-2 border-t pt-3">
               <Label htmlFor="sig-pass">Confirme a sua senha para assinar</Label>
-              <Input
+              <PasswordInput
                 id="sig-pass"
-                type="password"
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

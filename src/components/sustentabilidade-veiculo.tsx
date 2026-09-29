@@ -207,11 +207,11 @@ export function SustentabilidadeVeiculo({
               <h3 className="mb-2 text-sm font-semibold">Emissão estimada por mês (kg CO2e)</h3>
               <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={monthly}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#d6e0ee" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="month" fontSize={12} />
                   <YAxis fontSize={12} />
                   <Tooltip formatter={(v) => `${formatNumberBR(Number(v), 1)} kg`} />
-                  <Bar dataKey="co2e" name="CO2e" fill="#0b2545" />
+                  <Bar dataKey="co2e" name="CO2e" fill="var(--chart-1)" />
                 </BarChart>
               </ResponsiveContainer>
             </div>

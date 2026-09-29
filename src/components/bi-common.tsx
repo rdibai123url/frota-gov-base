@@ -6,9 +6,9 @@ import { formatNumberBR } from "@/lib/format";
 import { brl } from "@/lib/frotagov";
 
 export const BI_COLORS = {
-  navy: "#0b2545",
-  blue: "#3b82f6",
-  royal: "#1d4ed8",
+  navy: "var(--chart-1)",
+  blue: "var(--chart-2)",
+  royal: "var(--chart-3)",
   sky: "#93c5fd",
   amber: "#b7791f",
   slate: "#64748b",
@@ -23,7 +23,7 @@ export const BI_PIE = [
   BI_COLORS.amber,
   BI_COLORS.slate,
 ];
-export const GRID = "#d6e0ee";
+export const GRID = "var(--border)";
 
 export const money = (v: unknown) => brl(Number(v));
 

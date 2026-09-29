@@ -29,6 +29,35 @@ export type ReportMeta = {
   filters?: { label: string; value: string }[];
 };
 
+/** Identidade do órgão/empresa que aparece no cabeçalho de todos os relatórios. */
+export type ReportBranding = {
+  name?: string | null;
+  cnpj?: string | null;
+  address?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  logoUrl?: string | null;
+};
+
+let branding: ReportBranding = {};
+
+/** Definido uma vez pelo aplicativo (a partir de "Dados do Órgão"); os relatórios usam automaticamente. */
+export function setReportBranding(b: ReportBranding) {
+  branding = b;
+}
+
+/** CNPJ, endereço e contato numa linha só, para o cabeçalho impresso. */
+function identityLine() {
+  return [
+    branding.cnpj ? `CNPJ ${branding.cnpj}` : "",
+    branding.address ?? "",
+    branding.phone ? `Tel. ${branding.phone}` : "",
+    branding.email ?? "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
 const stamp = () => new Date().toLocaleString("pt-BR");
 
 const safeName = (name: string) =>
@@ -42,7 +71,9 @@ const safeName = (name: string) =>
 /** Linhas do cabeçalho institucional usadas em CSV e XLSX. */
 export function headerLines(meta: ReportMeta, total: number): [string, string][] {
   const lines: [string, string][] = [
-    ["Órgão", meta.organization || "FrotaGov"],
+    ["Órgão", meta.organization || branding.name || "FrotaGov"],
+    ...(branding.cnpj ? ([["CNPJ", branding.cnpj]] as [string, string][]) : []),
+    ...(branding.address ? ([["Endereço", branding.address]] as [string, string][]) : []),
     ["Relatório", meta.title],
   ];
   if (meta.subtitle) lines.push(["Descrição", meta.subtitle]);
@@ -220,9 +251,10 @@ export function printReport(meta: ReportMeta, columns: ReportColumn[], rows: Rep
 </style></head><body>
 <header>
   <div class="top">
-    ${meta.logoUrl ? `<img class="brasao" src="${escapeHtml(meta.logoUrl)}" alt="Brasão do órgão" />` : ""}
+    ${meta.logoUrl || branding.logoUrl ? `<img class="brasao" src="${escapeHtml(meta.logoUrl || branding.logoUrl)}" alt="Logotipo" />` : ""}
     <div>
-      <h1>${escapeHtml(meta.organization || "FrotaGov")}</h1>
+      <h1>${escapeHtml(meta.organization || branding.name || "FrotaGov")}</h1>
+      ${identityLine() ? `<div class="meta">${escapeHtml(identityLine())}</div>` : ""}
       <h2>${escapeHtml(meta.title)}</h2>
       ${meta.subtitle ? `<div class="meta">${escapeHtml(meta.subtitle)}</div>` : ""}
     </div>
@@ -298,9 +330,10 @@ export function printDocument(meta: {
   footer { margin-top: 26px; font-size: 8pt; color: #6b7890; }
 </style></head><body>
 <header>
-  ${meta.logoUrl ? `<img class="brasao" src="${escapeHtml(meta.logoUrl)}" alt="Brasão do órgão" />` : ""}
+  ${meta.logoUrl || branding.logoUrl ? `<img class="brasao" src="${escapeHtml(meta.logoUrl || branding.logoUrl)}" alt="Logotipo" />` : ""}
   <div>
-    <h1>${escapeHtml(meta.organization || "FrotaGov")}</h1>
+    <h1>${escapeHtml(meta.organization || branding.name || "FrotaGov")}</h1>
+    ${identityLine() ? `<div style="font-size:9pt;color:#48566f">${escapeHtml(identityLine())}</div>` : ""}
     <h2>${escapeHtml(meta.title)}</h2>
     ${meta.subtitle ? `<div style="font-size:9pt;color:#48566f">${escapeHtml(meta.subtitle)}</div>` : ""}
     ${meta.code ? `<div class="code">Documento nº ${escapeHtml(meta.code)}</div>` : ""}

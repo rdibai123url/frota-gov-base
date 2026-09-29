@@ -7,6 +7,7 @@
  * servidor; nenhuma credencial de e-mail trafega para o navegador.
  */
 import { useEffect, useMemo, useState } from "react";
+import { PasswordInput } from "@/components/password-input";
 import { useQuery } from "@tanstack/react-query";
 import {
   AlertTriangle,
@@ -815,9 +816,8 @@ function ConfiguracaoEmailDialog({
               <Label htmlFor="secret">
                 {provider === "smtp" ? "Senha do usuário SMTP" : "Chave de API do provedor"}
               </Label>
-              <Input
+              <PasswordInput
                 id="secret"
-                type="password"
                 autoComplete="new-password"
                 value={secret}
                 onChange={(e) => setSecret(e.target.value)}

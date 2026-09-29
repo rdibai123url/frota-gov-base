@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { PasswordInput } from "@/components/password-input";
 import { passwordProblem } from "@/lib/validacoes";
 import { useState } from "react";
 import { KeyRound, UserRound } from "lucide-react";
@@ -127,20 +128,18 @@ function PerfilPage() {
         <form onSubmit={onSubmit} className="max-w-md space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="pf-current">Senha atual</Label>
-            <Input
+            <PasswordInput
               id="pf-current"
               name="current"
-              type="password"
               autoComplete="current-password"
               required
             />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="pf-pass">Nova senha</Label>
-            <Input
+            <PasswordInput
               id="pf-pass"
               name="password"
-              type="password"
               autoComplete="new-password"
               minLength={8}
               required
@@ -151,10 +150,9 @@ function PerfilPage() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="pf-confirm">Confirmar nova senha</Label>
-            <Input
+            <PasswordInput
               id="pf-confirm"
               name="confirm"
-              type="password"
               autoComplete="new-password"
               minLength={8}
               required

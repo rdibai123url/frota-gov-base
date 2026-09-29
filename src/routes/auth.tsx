@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { PasswordInput } from "@/components/password-input";
 import { useEffect, useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
@@ -209,10 +210,9 @@ function AuthPage() {
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="in-pass">Senha</Label>
-                    <Input
+                    <PasswordInput
                       id="in-pass"
                       name="password"
-                      type="password"
                       autoComplete="current-password"
                       required
                     />

@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { PasswordInput } from "@/components/password-input";
 import { passwordProblem } from "@/lib/validacoes";
 import { useEffect, useState } from "react";
 import { KeyRound, ShieldCheck } from "lucide-react";
@@ -167,10 +168,9 @@ function ResetPasswordPage() {
             <form onSubmit={onSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="rs-pass">Nova senha</Label>
-                <Input
+                <PasswordInput
                   id="rs-pass"
                   name="password"
-                  type="password"
                   autoComplete="new-password"
                   minLength={8}
                   required
@@ -181,10 +181,9 @@ function ResetPasswordPage() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="rs-confirm">Confirmar nova senha</Label>
-                <Input
+                <PasswordInput
                   id="rs-confirm"
                   name="confirm"
-                  type="password"
                   autoComplete="new-password"
                   minLength={8}
                   required
