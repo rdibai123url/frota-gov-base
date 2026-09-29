@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AvisoPreventiva } from "@/components/aviso-preventiva";
 import { MoneyInput } from "@/components/form-fields";
 import { useMemo, useState } from "react";
 import {
@@ -679,6 +680,7 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
               </SelectContent>
             </Select>
           </div>
+          {vehicleId !== NONE && <AvisoPreventiva vehicleId={vehicleId} />}
           <div>
             <Label>Unidade (do veículo)</Label>
             <Input value={unit?.name ?? "—"} readOnly className="bg-muted/50" />

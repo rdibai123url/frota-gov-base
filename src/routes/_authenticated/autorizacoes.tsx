@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AvisoPreventiva } from "@/components/aviso-preventiva";
 import { SignatureButton } from "@/components/signature-button";
 import { useEffect, useMemo, useState } from "react";
 import { Plus, Search, QrCode, Ban, SlidersHorizontal } from "lucide-react";
@@ -529,6 +530,7 @@ function NewAuthorizationDialog({
               </SelectContent>
             </Select>
           </div>
+          {vehicleId !== NONE && <AvisoPreventiva vehicleId={vehicleId} />}
           <div>
             <Label>Unidade (automática)</Label>
             <Input value={unit?.name ?? "—"} readOnly className="bg-muted/50" />

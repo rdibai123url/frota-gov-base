@@ -6,6 +6,8 @@
  * por exemplo) sem duplicar cadastro, e não precisa ter contrato para existir.
  */
 import { ListPagination, usePaged } from "@/components/list-pagination";
+import { useServerFn } from "@tanstack/react-start";
+import { consultarCnpj } from "@/lib/cnpj.functions";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Building, Pencil, Plus } from "lucide-react";
@@ -117,6 +119,42 @@ function Entidades() {
   const [search, setSearch] = useState("");
   const [fCategory, setFCategory] = useState(ALL);
   const [saving, setSaving] = useState(false);
+  const [lookingUp, setLookingUp] = useState(false);
+  const lookupCnpj = useServerFn(consultarCnpj);
+
+  /** Preenche os campos do formulário (não controlados) com os dados da Receita Federal. */
+  async function fillFromCnpj() {
+    const doc = (document.getElementById("document") as HTMLInputElement | null)?.value ?? "";
+    setLookingUp(true);
+    try {
+      const c = await lookupCnpj({ data: { cnpj: doc } });
+      const put = (id: string, value: string) => {
+        const el = document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement | null;
+        if (!el || !value) return;
+        const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement : HTMLInputElement;
+        Object.getOwnPropertyDescriptor(proto.prototype, "value")?.set?.call(el, value);
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+      };
+      put("name", c.razao_social);
+      put("trade_name", c.nome_fantasia);
+      put("address", [c.logradouro, c.numero, c.complemento].filter(Boolean).join(", "));
+      put("district", c.bairro);
+      put("city", c.municipio);
+      put("state", c.uf);
+      put("zip_code", c.cep);
+      put("phone", c.telefone);
+      put("email", c.email);
+      toast.success(
+        c.situacao && c.situacao.toUpperCase() !== "ATIVA"
+          ? `Dados preenchidos. Atenção: situação cadastral ${c.situacao}.`
+          : "Dados preenchidos pela Receita Federal. Confira antes de salvar.",
+      );
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível consultar o CNPJ.");
+    } finally {
+      setLookingUp(false);
+    }
+  }
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -376,7 +414,22 @@ function Entidades() {
               <div>
                 <Label htmlFor="document">{kind === "pj" ? "CNPJ" : "CPF"}</Label>
                 {kind === "pj" ? (
-                  <CnpjInput id="document" name="document" defaultValue={editing?.document ?? ""} />
+                  <div className="flex gap-2">
+                    <CnpjInput
+                      id="document"
+                      name="document"
+                      defaultValue={editing?.document ?? ""}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="shrink-0"
+                      onClick={fillFromCnpj}
+                      disabled={lookingUp}
+                    >
+                      {lookingUp ? "Buscando…" : "Buscar dados"}
+                    </Button>
+                  </div>
                 ) : (
                   <CpfInput id="document" name="document" defaultValue={editing?.document ?? ""} />
                 )}
