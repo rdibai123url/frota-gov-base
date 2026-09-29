@@ -6797,6 +6797,47 @@ export type Database = {
           },
         ];
       };
+      organization_license: {
+        Row: {
+          max_users: number | null;
+          max_vehicles: number | null;
+          notes: string | null;
+          organization_id: string;
+          plan_name: string;
+          updated_at: string;
+          updated_by: string | null;
+          valid_until: string | null;
+        };
+        Insert: {
+          max_users?: number | null;
+          max_vehicles?: number | null;
+          notes?: string | null;
+          organization_id: string;
+          plan_name?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          valid_until?: string | null;
+        };
+        Update: {
+          max_users?: number | null;
+          max_vehicles?: number | null;
+          notes?: string | null;
+          organization_id?: string;
+          plan_name?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          valid_until?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "organization_license_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       organization_modules: {
         Row: {
           created_at: string;

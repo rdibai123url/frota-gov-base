@@ -49,6 +49,7 @@ import {
   useDrivers,
   useInvalidate,
   usePerms,
+  useOrgUsers,
   useUnits,
   type DriverRow,
 } from "@/lib/frotagov";
@@ -380,6 +381,8 @@ function DriverDialog({
   const [cpf, setCpf] = useState(driver?.cpf ? maskCPF(driver.cpf) : "");
   const [registration, setRegistration] = useState(driver?.registration_number ?? "");
   const [unitId, setUnitId] = useState(driver?.unit_id ?? NONE);
+  const [userId, setUserId] = useState(driver?.user_id ?? NONE);
+  const { data: orgUsers = [] } = useOrgUsers();
   const [bond, setBond] = useState(driver?.bond_type ?? "efetivo");
   const [phone, setPhone] = useState(driver?.phone ?? "");
   const [email, setEmail] = useState(driver?.email ?? "");
@@ -418,6 +421,7 @@ function DriverDialog({
     const payload = {
       organization_id: perms.orgId,
       unit_id: unitId === NONE ? null : unitId,
+      user_id: userId === NONE ? null : userId,
       full_name: fullName.trim(),
       cpf: cpfDigits || null,
       registration_number: registration.trim() || null,
@@ -489,6 +493,22 @@ function DriverDialog({
                 {units.map((u) => (
                   <SelectItem key={u.id} value={u.id}>
                     {u.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Usuário do sistema (para a Área do motorista)</Label>
+            <Select value={userId} onValueChange={setUserId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sem acesso ao sistema" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>Sem acesso ao sistema</SelectItem>
+                {orgUsers.map((u) => (
+                  <SelectItem key={u.id} value={u.id}>
+                    {u.full_name || u.email}
                   </SelectItem>
                 ))}
               </SelectContent>

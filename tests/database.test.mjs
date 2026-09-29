@@ -42,7 +42,7 @@ before(async () => {
   const files = (await readdir(new URL("supabase/migrations/", root)))
     .filter((f) => f.endsWith(".sql"))
     .sort();
-  assert.equal(files.length, 127);
+  assert.equal(files.length, 128);
   for (const file of files) {
     if (file.startsWith("20260925") && !historicalTriggers) {
       historicalTriggers = (
@@ -68,7 +68,7 @@ after(async () => {
   await db.close();
 });
 
-test("111 migrations históricas + 11 novas aplicam sem erro", async () => {
+test("111 migrations históricas + 12 novas aplicam sem erro", async () => {
   const { rows } = await db.query(
     "SELECT count(*)::int n FROM information_schema.tables WHERE table_schema='public'",
   );
@@ -484,4 +484,20 @@ test("viagem: custos extras não podem ser negativos", async () => {
       VALUES ('${id(1020)}', '${id(1021)}', now(), -5)`),
     /vehicle_usages_trip_costs_chk/,
   );
+});
+
+test("licença: plano limita a quantidade de veículos por órgão", async () => {
+  const org = id(1030);
+  await db.exec("ALTER TABLE public.vehicles DISABLE TRIGGER ALL");
+  await db.exec("ALTER TABLE public.vehicles ENABLE TRIGGER vehicle_license_limit");
+  await db.exec("ALTER TABLE public.organization_license DISABLE TRIGGER ALL");
+  await db.exec(`INSERT INTO public.organization_license (organization_id, plan_name, max_vehicles)
+    VALUES ('${org}', 'Teste', 2)`);
+  await db.exec(`INSERT INTO public.vehicles (organization_id, plate) VALUES ('${org}', 'AAA1A11'), ('${org}', 'BBB2B22')`);
+  await assert.rejects(
+    db.exec(`INSERT INTO public.vehicles (organization_id, plate) VALUES ('${org}', 'CCC3C33')`),
+    /Limite de 2 veículo/,
+  );
+  // outro órgão, sem plano cadastrado, não tem limite
+  await db.exec(`INSERT INTO public.vehicles (organization_id, plate) VALUES ('${id(1031)}', 'DDD4D44'), ('${id(1031)}', 'EEE5E55'), ('${id(1031)}', 'FFF6F66')`);
 });

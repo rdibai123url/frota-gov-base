@@ -49,6 +49,29 @@ const COND: FieldTag[] = ["Condicional"];
 const EXT: FieldTag[] = ["Depende de integração"];
 
 export const HELP_TOPICS: Record<string, HelpTopic> = {
+  "/motorista": t(
+    "Área do motorista",
+    "Tela simples para quem dirige: mostra as suas viagens autorizadas, permite fazer o checklist do veículo com fotos e leva ao registro de abastecimento e de ocorrência.",
+    [
+      "Confira se a sua CNH está em dia (o aviso aparece no alto).",
+      "Na viagem do dia, faça o checklist de saída antes de sair e o de retorno ao voltar, tirando fotos de qualquer problema.",
+      "Use “Registrar abastecimento” depois de abastecer e “Registrar ocorrência” em caso de acidente ou defeito.",
+    ],
+    [
+      {
+        label: "Viagem",
+        description: "Veículo, trajeto e horário previsto de saída, definidos por quem autorizou.",
+        tags: AUTO,
+      },
+      {
+        label: "Checklist",
+        description:
+          "Lista de itens do veículo. Marque OK ou Com problema; fotos ajudam a comprovar o estado.",
+        tags: COND,
+      },
+    ],
+    ["Para aparecer aqui, o seu usuário precisa estar ligado ao seu cadastro em Condutores."],
+  ),
   "/painel": t(
     "Dashboard",
     "Mostra, em números e gráficos, como está a frota do órgão: quantos veículos rodam, quanto se gasta, o que está vencendo e o que precisa de atenção.",

@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { LicencaOrgao } from "@/components/licenca-orgao";
 import { dbMessage, supabase, useInvalidate } from "@/lib/frotagov";
 import { useAllOrganizations } from "@/lib/platform";
 import {
@@ -95,6 +96,8 @@ export function ModulesTab() {
           fica registrada na auditoria com autor, data e órgão.
         </p>
       </div>
+
+      {orgId && <LicencaOrgao orgId={orgId} />}
 
       {!orgId && (
         <p className="text-sm text-muted-foreground">
