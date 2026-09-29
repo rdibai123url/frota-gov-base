@@ -983,10 +983,6 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   ),
 
-
-
-
-
   "/pneus": t(
     "Pneus",
     "Gestão do ciclo de vida dos pneus: aquisição, instalação por posição, rodízio, recapagem e descarte.",
@@ -1060,8 +1056,6 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Para execução por contrato, a oficina também precisa constar como contratada no contrato vigente.",
     ],
   ),
-
-
 
   "/mapa-rede": t(
     "Mapa dos prestadores do órgão",

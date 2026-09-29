@@ -145,7 +145,9 @@ function PerfilPage() {
               minLength={8}
               required
             />
-            <p className="text-[11px] text-muted-foreground">Mínimo de 10 caracteres, com maiúscula, minúscula e número.</p>
+            <p className="text-[11px] text-muted-foreground">
+              Mínimo de 10 caracteres, com maiúscula, minúscula e número.
+            </p>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="pf-confirm">Confirmar nova senha</Label>
