@@ -20,7 +20,8 @@ async function fetchWithTimeout(url: string, init: RequestInit, ms: number) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), ms);
   try {
-    return await fetch(url, { ...init, signal: ctrl.signal });
+    const { safeFetch } = await import("./safe-fetch.server");
+    return await safeFetch(url, { ...init, signal: ctrl.signal });
   } finally {
     clearTimeout(timer);
   }

@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Plus, Pencil, Search, History } from "lucide-react";
 import { toast } from "sonner";
+import { isValidRenavam } from "@/lib/validacoes";
 import { z } from "zod";
 
 import { LitersInput } from "@/components/form-fields";
@@ -204,6 +205,17 @@ function Veiculos() {
       return;
     }
     const d = parsed.data;
+
+    if (!isValidRenavam(d.renavam)) {
+      toast.error("O Renavam deve ter de 9 a 11 números.");
+      return;
+    }
+    const yearMan = num(d.year_manufacture);
+    const yearMod = num(d.year_model);
+    if (yearMan !== null && yearMod !== null && yearMod < yearMan) {
+      toast.error("O ano do modelo não pode ser anterior ao ano de fabricação.");
+      return;
+    }
 
     if (acquisitionKind === "locado" && leaseContract === NONE) {
       toast.error("Veículo locado exige contrato de locação vinculado.");

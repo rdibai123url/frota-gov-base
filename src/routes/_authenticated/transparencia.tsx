@@ -91,6 +91,16 @@ const DATASETS = [
   { key: "contratos", label: "Contratos (número, objeto e vigência)" },
 ];
 
+type PreviewSection = {
+  total?: number;
+  registros?: number;
+  litros?: number;
+  valor_total?: number;
+  vigentes?: number;
+  movimentacoes?: number;
+};
+type PreviewData = Record<string, PreviewSection | undefined>;
+
 type SnapshotSummary = {
   frota?: { total?: number };
   abastecimento?: { registros?: number };
@@ -187,7 +197,7 @@ function PublicacaoMensal({ canManage }: { canManage: boolean }) {
   const [notes, setNotes] = useState("");
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [preview, setPreview] = useState<Record<string, unknown> | null>(null);
+  const [preview, setPreview] = useState<PreviewData | null>(null);
 
   useEffect(() => {
     setChecklist(((period?.checklist as Checklist) ?? {}) as Checklist);
@@ -203,7 +213,7 @@ function PublicacaoMensal({ canManage }: { canManage: boolean }) {
       _year: year,
       _month: month,
     });
-    if (!error) setPreview(data as Record<string, unknown>);
+    if (!error) setPreview(data as PreviewData);
   }
 
   function setEntry(key: string, patch: Partial<Checklist[string]>) {

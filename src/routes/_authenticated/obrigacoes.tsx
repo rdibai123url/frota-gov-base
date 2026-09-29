@@ -175,6 +175,24 @@ function Obrigacoes() {
       return;
     }
     const d = parsed.data;
+    if (!notApplicable && status === "quitada") {
+      if (!((numOrNull(d.paid_amount) ?? 0) > 0) || !d.paid_at) {
+        toast.error("Para marcar como quitada, informe o valor pago e a data do pagamento.");
+        return;
+      }
+    }
+    const duplicada = obligations.some(
+      (o) =>
+        o.id !== editing?.id &&
+        o.vehicle_id === vehicleId &&
+        o.obligation_type === d.obligation_type &&
+        String(o.exercise ?? "") === String(d.exercise ?? "") &&
+        o.status !== "cancelada",
+    );
+    if (duplicada) {
+      toast.error("Já existe essa obrigação para o veículo neste exercício.");
+      return;
+    }
     setSaving(true);
     let uploadedAttachment: string | null = null;
     try {

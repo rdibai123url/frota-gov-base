@@ -450,6 +450,10 @@ function Manutencoes() {
       toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos");
       return;
     }
+    if (parsed.data.exit_at && new Date(parsed.data.exit_at) < new Date(parsed.data.entry_at)) {
+      toast.error("A saída não pode ser anterior à entrada.");
+      return;
+    }
     if (recVehicle === NONE) {
       toast.error("Selecione o veículo.");
       return;

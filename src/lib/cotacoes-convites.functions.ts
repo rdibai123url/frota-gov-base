@@ -727,7 +727,7 @@ export const submitProposalByToken = createServerFn({ method: "POST" })
      * O cast é temporário até a próxima regeneração dos tipos TypeScript
      * do Supabase incluir a RPC quotation_proposal_submit_atomic.
      */
-    const callRpc = supabaseAdmin.rpc as unknown as (
+    const callRpc = supabaseAdmin.rpc.bind(supabaseAdmin) as unknown as (
       functionName: string,
       args: Record<string, unknown>,
     ) => Promise<{ data: string | null; error: { message: string } | null }>;

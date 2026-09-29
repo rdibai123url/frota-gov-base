@@ -884,7 +884,7 @@ function TransferDialog({
      * O cast é temporário até a próxima regeneração dos tipos TypeScript
      * do Supabase incluir a RPC stock_transfer_batch.
      */
-    const callRpc = supabase.rpc as unknown as (
+    const callRpc = supabase.rpc.bind(supabase) as unknown as (
       functionName: string,
       args: Record<string, unknown>,
     ) => Promise<{ data: number | null; error: { message: string } | null }>;

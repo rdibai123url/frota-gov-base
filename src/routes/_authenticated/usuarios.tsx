@@ -190,7 +190,7 @@ function Usuarios() {
      * consegue alterar papel, unidade ou situação de acesso.
      */
     if (canManage) {
-      const callRpc = supabase.rpc as unknown as (
+      const callRpc = supabase.rpc.bind(supabase) as unknown as (
         functionName: string,
         args: Record<string, unknown>,
       ) => Promise<{ data: null; error: { message: string } | null }>;

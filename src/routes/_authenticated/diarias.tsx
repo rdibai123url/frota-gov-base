@@ -262,6 +262,14 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
 
     const driverId = get("beneficiary_driver_id");
     const driver = drivers.find((d) => d.id === driverId);
+    if (!(parseBRNumber(get("unit_value")) > 0)) {
+      toast.error("Informe o valor unitário da diária (maior que zero).");
+      return;
+    }
+    if (get("quantity") && !(parseBRNumber(get("quantity")) > 0)) {
+      toast.error("A quantidade de diárias deve ser maior que zero.");
+      return;
+    }
     setSaving(true);
     const { error } = await supabase.from("diaries").insert({
       organization_id: perms.orgId!,

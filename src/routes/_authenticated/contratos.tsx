@@ -290,6 +290,10 @@ function Contratos() {
     }
 
     if (status === "vigente") {
+      if (!entityId) {
+        toast.error("Para deixar o contrato vigente, informe a empresa contratada.");
+        return;
+      }
       if (!d.signed_at) {
         toast.error("Para deixar o contrato vigente, informe a data de assinatura.");
         return;

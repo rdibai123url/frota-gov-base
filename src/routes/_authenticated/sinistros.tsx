@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Paperclip, Pencil, Plus, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { isFutureDate } from "@/lib/validacoes";
 import { z } from "zod";
 
 import { PageHeader } from "@/components/app-shell";
@@ -225,6 +226,10 @@ function Sinistros() {
       return;
     }
     const d = parsed.data;
+    if (isFutureDate(d.occurred_at)) {
+      toast.error("A data e a hora do sinistro não podem estar no futuro.");
+      return;
+    }
     setSaving(true);
     const uploaded: string[] = [];
     try {

@@ -204,6 +204,15 @@ function Empenhos() {
       toast.error("O valor empenhado deve ser maior que zero.");
       return;
     }
+    if (cancelled < 0 || cancelled > committed) {
+      toast.error("O valor anulado não pode ser negativo nem maior que o valor empenhado.");
+      return;
+    }
+    const exercise = Number(d.exercise);
+    if (!Number.isInteger(exercise) || exercise < 2000 || exercise > 2100) {
+      toast.error("Informe um exercício entre 2000 e 2100.");
+      return;
+    }
     if (editing) {
       const used = Number(editing.consumed_value) + Number(editing.reserved_value);
       if (committed - cancelled < used) {

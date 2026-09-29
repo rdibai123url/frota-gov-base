@@ -166,7 +166,7 @@ function OFP() {
      * O cast abaixo é temporário até a próxima regeneração dos tipos
      * TypeScript do Supabase incluir a RPC supply_order_create.
      */
-    const callRpc = supabase.rpc as unknown as (
+    const callRpc = supabase.rpc.bind(supabase) as unknown as (
       functionName: string,
       args: Record<string, unknown>,
     ) => Promise<{ data: string | null; error: { message: string } | null }>;

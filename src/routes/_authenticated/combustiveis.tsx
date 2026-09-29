@@ -116,6 +116,13 @@ function Combustiveis() {
       toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos");
       return;
     }
+    const nomeNormalizado = parsed.data.name.trim().toLowerCase();
+    if (
+      fuels.some((f) => f.id !== editing?.id && f.name.trim().toLowerCase() === nomeNormalizado)
+    ) {
+      toast.error("Já existe um combustível com esse nome.");
+      return;
+    }
     setSaving(true);
     const payload = {
       name: parsed.data.name,

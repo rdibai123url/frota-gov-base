@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Plus, Search, Pencil, IdCard, Plane } from "lucide-react";
 import { toast } from "sonner";
+import { isValidEmail } from "@/lib/validacoes";
 
 import { CpfInput } from "@/components/form-fields";
 import { PageHeader } from "@/components/app-shell";
@@ -402,6 +403,10 @@ function DriverDialog({
     const cpfDigits = cpf.replace(/\D/g, "");
     if (cpfDigits && !isValidCPF(cpfDigits)) {
       toast.error("CPF inválido.");
+      return;
+    }
+    if (!isValidEmail(email)) {
+      toast.error("Informe um e-mail válido.");
       return;
     }
     if (!perms.orgId) {

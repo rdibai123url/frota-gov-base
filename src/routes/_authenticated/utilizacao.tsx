@@ -565,6 +565,21 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
         level: "erro",
         message: `Conflito de reserva com a utilização ${conflict.code} (${dateTimeBR(conflict.planned_departure)}).`,
       });
+
+    const driverConflict = driver
+      ? usages.find((u) => {
+          if (u.driver_id !== driver.id) return false;
+          if (["cancelada", "concluida"].includes(u.status)) return false;
+          const a = new Date(u.planned_departure).getTime();
+          const b = new Date(u.planned_return ?? u.planned_departure).getTime();
+          return ini <= b && fim >= a;
+        })
+      : undefined;
+    if (driverConflict)
+      issues.push({
+        level: "erro",
+        message: `O condutor já está na utilização ${driverConflict.code} (${dateTimeBR(driverConflict.planned_departure)}).`,
+      });
   }
 
   const needsJustification = vehicle?.status === "manutencao";

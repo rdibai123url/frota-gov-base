@@ -14,7 +14,8 @@ async function timedFetch(url: string, init?: RequestInit) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   try {
-    return await fetch(url, { ...init, signal: ctrl.signal });
+    const { safeFetch } = await import("./safe-fetch.server");
+    return await safeFetch(url, { ...init, signal: ctrl.signal });
   } finally {
     clearTimeout(timer);
   }
@@ -180,32 +181,71 @@ export const testLdapDirectory = createServerFn({ method: "POST" })
     return { ok, message };
   });
 
+const LOGIN_METHODS = ["senha", "oidc", "saml", "ldap", "recuperacao"] as const;
+type LoginMethod = (typeof LOGIN_METHODS)[number];
+const EMAIL_SHAPE = /^[^s@]{1,100}@[^s@]{1,100}.[^s@]{2,30}$/;
+
 /** Registra tentativa de acesso (sem tokens nem senhas) para auditoria. */
 export const recordLoginEvent = createServerFn({ method: "POST" })
   .inputValidator(
-    (input: { email?: string; method: string; success: boolean; reason?: string }) => input,
+    (input: { email?: string; method: string; success: boolean; reason?: string }) => {
+      if (!LOGIN_METHODS.includes(input?.method as LoginMethod))
+        throw new Error("Método de acesso inválido.");
+      if (typeof input.success !== "boolean") throw new Error("Resultado inválido.");
+      const email = typeof input.email === "string" ? input.email.trim().slice(0, 200) : "";
+      if (email && !EMAIL_SHAPE.test(email)) throw new Error("E-mail inválido.");
+      return {
+        email,
+        method: input.method as LoginMethod,
+        success: input.success,
+        reason: typeof input.reason === "string" ? input.reason.slice(0, 300) : "",
+      };
+    },
   )
   .handler(async ({ data }) => {
+    const { getRequestHeader } = await import("@tanstack/react-start/server");
+    const { clientIp, rateLimited } = await import("./rate-limit.server");
+    const ip = clientIp((n) => getRequestHeader(n));
+    // Excesso é descartado em silêncio: o login do usuário nunca é bloqueado por isso.
+    if (rateLimited(`login-event:${ip}`, 30)) return { ok: true };
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const since = new Date(Date.now() - 60_000).toISOString();
+    const { count } = await supabaseAdmin
+      .from("auth_login_events")
+      .select("id", { count: "exact", head: true })
+      .eq("ip_address", ip)
+      .gte("created_at", since);
+    if ((count ?? 0) >= 30) return { ok: true };
+
     await supabaseAdmin.from("auth_login_events").insert({
-      email: (data.email ?? "").slice(0, 200) || null,
+      email: data.email || null,
       method: data.method,
       success: data.success,
-      reason: (data.reason ?? "").slice(0, 300) || null,
+      reason: data.reason || null,
+      ip_address: ip,
+      user_agent: (getRequestHeader("user-agent") ?? "").slice(0, 300) || null,
     });
     return { ok: true };
   });
 
 /** Lista pública (sem segredos) dos logins institucionais ativos de um domínio. */
 export const listInstitutionalLogins = createServerFn({ method: "POST" })
-  .inputValidator((input: { email?: string } | undefined) => input ?? {})
+  .inputValidator((input: { email?: string } | undefined) => ({
+    email: typeof input?.email === "string" ? input.email.slice(0, 200) : undefined,
+  }))
   .handler(async ({ data }) => {
+    const { getRequestHeader } = await import("@tanstack/react-start/server");
+    const { clientIp, rateLimited } = await import("./rate-limit.server");
+    if (rateLimited(`sso-list:${clientIp((n) => getRequestHeader(n))}`, 60)) return [];
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows } = await supabaseAdmin
       .from("sso_providers")
       .select("id, display_name, protocol, allowed_domains, active, status")
       .eq("active", true)
-      .in("status", ["ativo", "configurado"]);
+      .in("status", ["ativo", "configurado"])
+      .limit(50);
     const domain = (data.email ?? "").split("@")[1]?.toLowerCase();
     const list = (rows ?? []).filter((p) => {
       const domains = (p.allowed_domains ?? []) as string[];

@@ -358,6 +358,14 @@ export async function s3Request(
   };
   if (body) headers["content-type"] = "application/json";
 
+  if (settings.s3_endpoint) {
+    const { safeFetch } = await import("./safe-fetch.server");
+    return safeFetch(url, {
+      method,
+      headers,
+      ...(body ? { body: body as unknown as BodyInit } : {}),
+    });
+  }
   return fetch(url, { method, headers, ...(body ? { body: body as unknown as BodyInit } : {}) });
 }
 

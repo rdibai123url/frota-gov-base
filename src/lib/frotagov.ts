@@ -6,6 +6,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import { friendlyDbError } from "@/lib/validacoes";
 
 export type AppRole = Database["public"]["Enums"]["app_role"];
 export type OrgType = Database["public"]["Enums"]["org_type"];
@@ -613,7 +614,16 @@ export function evaluateFueling(draft: FuelingDraft, history: FuelingRow[]): Rul
     issues.push({
       level: "info",
       type: "fornecedor_ausente",
-      message: "Nenhum fornecedor informado neste registro.",
+      message:
+        "Nenhum fornecedor informado neste registro. Só aparecem postos com contrato vigente vinculado.",
+    });
+  }
+
+  if (draft.fueledAt && draft.fueledAt.getTime() > Date.now() + 5 * 60_000) {
+    issues.push({
+      level: "erro",
+      type: "data_futura",
+      message: "A data e a hora do abastecimento não podem estar no futuro.",
     });
   }
 
@@ -1105,7 +1115,15 @@ export const daysUntil = (iso: string | null | undefined) =>
 
 /** Extrai a mensagem amigável de um erro do banco. */
 export function dbMessage(e: unknown) {
-  const m = (e as { message?: string } | null)?.message ?? "";
+  const err = e as { code?: string; message?: string } | null;
+  const m = err?.message ?? "";
+  if (
+    err?.code === "23505" ||
+    err?.code === "23503" ||
+    err?.code === "23514" ||
+    /duplicate key value|violates (foreign key|check) constraint/i.test(m)
+  )
+    return friendlyDbError(err);
   return (
     m.replace(
       /^.*?(?=Saldo|Limite|Autoriza|Contrato|Empenho|Cota|Item|Ve[íi]culo|Condutor)/s,

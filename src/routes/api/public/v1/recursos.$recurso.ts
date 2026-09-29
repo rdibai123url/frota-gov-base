@@ -20,6 +20,15 @@ async function sha256(value: string) {
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+/** Compara hashes em tempo constante. */
+async function hashesMatch(a: string, b: string | null) {
+  if (!b) return false;
+  const { timingSafeEqual } = await import("node:crypto");
+  const x = Buffer.from(a);
+  const y = Buffer.from(b);
+  return x.length === y.length && timingSafeEqual(x, y);
+}
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -278,7 +287,7 @@ export const Route = createFileRoute("/api/public/v1/recursos/$recurso")({
           );
         }
 
-        if ((await sha256(apiKey)) !== key.key_hash) {
+        if (!(await hashesMatch(await sha256(apiKey), key.key_hash))) {
           return json(
             {
               error: "Chave inválida.",

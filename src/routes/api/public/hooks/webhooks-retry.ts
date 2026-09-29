@@ -97,7 +97,8 @@ export const Route = createFileRoute("/api/public/hooks/webhooks-retry")({
           try {
             const controller = new AbortController();
             const timer = setTimeout(() => controller.abort(), endpoint.timeout_ms ?? 10_000);
-            const res = await fetch(endpoint.url, {
+            const { safeFetch } = await import("@/lib/safe-fetch.server");
+            const res = await safeFetch(endpoint.url, {
               method: "POST",
               headers,
               body,
