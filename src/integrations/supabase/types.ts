@@ -11452,6 +11452,9 @@ export type Database = {
           updated_by: string | null;
           vehicle_id: string;
           vehicle_updated: boolean;
+          cargo_description: string | null;
+          toll_value: number;
+          other_trip_costs: number;
         };
         Insert: {
           actual_departure?: string | null;
@@ -11503,6 +11506,9 @@ export type Database = {
           updated_by?: string | null;
           vehicle_id: string;
           vehicle_updated?: boolean;
+          cargo_description?: string | null;
+          toll_value?: number;
+          other_trip_costs?: number;
         };
         Update: {
           actual_departure?: string | null;
@@ -11554,6 +11560,9 @@ export type Database = {
           updated_by?: string | null;
           vehicle_id?: string;
           vehicle_updated?: boolean;
+          cargo_description?: string | null;
+          toll_value?: number;
+          other_trip_costs?: number;
         };
         Relationships: [
           {

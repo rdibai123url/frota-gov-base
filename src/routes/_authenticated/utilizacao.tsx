@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { MoneyInput } from "@/components/form-fields";
 import { useMemo, useState } from "react";
 import {
   Plus,
@@ -73,7 +74,7 @@ import {
   useVehicleConsumption,
 } from "@/lib/viagens";
 import { Switch } from "@/components/ui/switch";
-import { brl } from "@/lib/frotagov";
+import { brl, parseBRNumber } from "@/lib/frotagov";
 import { VehicleChecklistPanel } from "@/components/vehicle-checklist";
 
 export const Route = createFileRoute("/_authenticated/utilizacao")({
@@ -426,6 +427,9 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
   const [purpose, setPurpose] = useState("");
   const [startKm, setStartKm] = useState("");
   const [passengers, setPassengers] = useState("");
+  const [cargo, setCargo] = useState("");
+  const [toll, setToll] = useState("");
+  const [otherCosts, setOtherCosts] = useState("");
   const [notes, setNotes] = useState("");
   const [justification, setJustification] = useState("");
   const [saving, setSaving] = useState(false);
@@ -617,6 +621,9 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
         .split(/[,;\n]/)
         .map((p) => p.trim())
         .filter(Boolean),
+      cargo_description: cargo.trim() || null,
+      toll_value: parseBRNumber(toll) || 0,
+      other_trip_costs: parseBRNumber(otherCosts) || 0,
       notes: notes.trim() || null,
       round_trip: roundTrip,
       estimated_distance_km: trip.totalKm,
@@ -954,6 +961,24 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
             <Input id="pas" value={passengers} onChange={(e) => setPassengers(e.target.value)} />
           </div>
           <div className="sm:col-span-2">
+            <Label htmlFor="carga">Carga ou pessoas transportadas</Label>
+            <Input
+              id="carga"
+              value={cargo}
+              maxLength={300}
+              placeholder="Ex.: merenda escolar, 3 pacientes, material de obra"
+              onChange={(e) => setCargo(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="pedagio">Pedágio (R$)</Label>
+            <MoneyInput id="pedagio" value={toll} onValueChange={setToll} />
+          </div>
+          <div>
+            <Label htmlFor="outros-custos">Outros custos da viagem (R$)</Label>
+            <MoneyInput id="outros-custos" value={otherCosts} onValueChange={setOtherCosts} />
+          </div>
+          <div className="sm:col-span-2">
             <Label htmlFor="obs">Observações / eventos</Label>
             <Textarea id="obs" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
           </div>
@@ -1087,6 +1112,18 @@ function TripResultBlock({ usage }: { usage: UsageRow }) {
           result.liters != null ? `${num(result.liters, 2)} L` : "—",
         )}
         {cell("Valor abastecido na viagem", result.value != null ? brl(result.value) : "—")}
+        {cell(
+          "Pedágio e outros custos",
+          brl(Number(usage.toll_value ?? 0) + Number(usage.other_trip_costs ?? 0)),
+        )}
+        {cell(
+          "Custo real da viagem",
+          brl(
+            (result.value ?? 0) +
+              Number(usage.toll_value ?? 0) +
+              Number(usage.other_trip_costs ?? 0),
+          ),
+        )}
         {cell("Preço médio por litro", result.avgPrice != null ? brl(result.avgPrice) : "—")}
         {cell(
           "Litros estimados",
@@ -1196,6 +1233,9 @@ function UsageDetail({ usage, onClose }: { usage: UsageRow; onClose: () => void 
     ["KM inicial", usage.start_km != null ? num(usage.start_km, 0) : "—"],
     ["KM final", usage.end_km != null ? num(usage.end_km, 0) : "—"],
     ["Passageiros", (usage.passengers ?? []).join(", ") || "—"],
+    ["Carga / pessoas transportadas", usage.cargo_description ?? "—"],
+    ["Pedágio", brl(Number(usage.toll_value ?? 0))],
+    ["Outros custos da viagem", brl(Number(usage.other_trip_costs ?? 0))],
     ["Observações", usage.notes ?? "—"],
     ["Justificativa (manutenção)", usage.maintenance_justification ?? "—"],
     ["Motivo do cancelamento", usage.cancel_reason ?? "—"],

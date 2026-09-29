@@ -42,7 +42,7 @@ before(async () => {
   const files = (await readdir(new URL("supabase/migrations/", root)))
     .filter((f) => f.endsWith(".sql"))
     .sort();
-  assert.equal(files.length, 126);
+  assert.equal(files.length, 127);
   for (const file of files) {
     if (file.startsWith("20260925") && !historicalTriggers) {
       historicalTriggers = (
@@ -68,7 +68,7 @@ after(async () => {
   await db.close();
 });
 
-test("111 migrations históricas + 10 novas aplicam sem erro", async () => {
+test("111 migrations históricas + 11 novas aplicam sem erro", async () => {
   const { rows } = await db.query(
     "SELECT count(*)::int n FROM information_schema.tables WHERE table_schema='public'",
   );
@@ -476,3 +476,12 @@ test("perfis de acesso: administrador nunca é bloqueado e cada tela/perfil é �
   );
 });
 
+
+test("viagem: custos extras não podem ser negativos", async () => {
+  await db.exec("ALTER TABLE public.vehicle_usages DISABLE TRIGGER ALL");
+  await assert.rejects(
+    db.exec(`INSERT INTO public.vehicle_usages (organization_id, vehicle_id, planned_departure, toll_value)
+      VALUES ('${id(1020)}', '${id(1021)}', now(), -5)`),
+    /vehicle_usages_trip_costs_chk/,
+  );
+});
