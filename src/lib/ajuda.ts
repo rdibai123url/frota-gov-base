@@ -50,32 +50,312 @@ const EXT: FieldTag[] = ["Depende de integração"];
 
 export const HELP_TOPICS: Record<string, HelpTopic> = {
   "/painel": t(
-    "Painel executivo",
-    "Reúne os números do momento da frota: quantidade de bens, gastos, consumo, pendências e alertas, para acompanhamento rápido pela gestão.",
+    "Dashboard",
+    "Mostra, em números e gráficos, como está a frota do órgão: quantos veículos rodam, quanto se gasta, o que está vencendo e o que precisa de atenção.",
     [
-      "Confira os cartões de indicadores no topo.",
-      "Use os filtros de período para comparar meses.",
-      "Clique em um indicador ou alerta para abrir a tela detalhada correspondente.",
+      "Escolha o período dos gráficos no alto da tela (3, 6 ou 12 meses).",
+      "Use as abas para ver cada assunto: Visão geral, Abastecimento, Manutenção, Financeiro / Contratual e Administrativo / Legal.",
+      "Clique no ícone “i” de qualquer número ou gráfico para ler o que ele significa e o que fazer.",
+      "Clique em um cartão para abrir a tela com os detalhes.",
     ],
     [
       {
-        label: "Período",
-        description: "Define o intervalo usado por todos os indicadores da tela.",
-      },
-      {
-        label: "Indicadores de custo",
-        description:
-          "Somam despesas lançadas no período (abastecimento, manutenção e demais custos).",
+        label: "Cartões com números",
+        description: "Resumo do momento; o “i” de cada um explica como o número é calculado.",
         tags: CALC,
       },
       {
-        label: "Pendências e alertas",
+        label: "Gráficos",
+        description: "Mostram a evolução dos gastos e a divisão por secretaria, veículo e tipo.",
+        tags: CALC,
+      },
+      {
+        label: "Período dos gráficos",
+        description: "Define quantos meses aparecem nos gráficos de todas as abas.",
+      },
+    ],
+    [
+      "Os números refletem apenas os dados do seu órgão.",
+      "Não é preciso preencher nada nesta tela.",
+    ],
+  ),
+  "/pneus": t(
+    "Controle de pneus",
+    "Controla cada pneu da frota: onde está instalado, quantos quilômetros já rodou, com que frequência é trocado e quando está chegando ao fim da vida útil.",
+    [
+      "Cadastre cada pneu com código, marca, medida e vida útil esperada em km.",
+      "Para colocar o pneu no veículo, use “Movimentar” e informe veículo, posição e o km do veículo.",
+      "Ao retirar, informe o km e o motivo (desgaste, furo, rodízio etc.). O sistema calcula os km rodados.",
+      "No alto da tela, acompanhe as trocas dos últimos 12 meses e os pneus perto do fim.",
+    ],
+    [
+      {
+        label: "Código do pneu",
+        description: "Número de fogo ou etiqueta; não pode repetir.",
+        tags: REQ,
+      },
+      {
+        label: "Vida útil esperada (km)",
+        description: "Quantos km o fabricante indica. É a base do aviso de fim de vida.",
+        tags: COND,
+      },
+      {
+        label: "KM na instalação / retirada",
         description:
-          "Contagem de itens que exigem ação, como documentos vencidos e inconsistências.",
+          "Hodômetro do veículo nesses dois momentos; a diferença é o quanto o pneu rodou.",
+        tags: COND,
+      },
+      {
+        label: "Posição",
+        description: "Onde o pneu está (dianteiro esquerdo, traseiro direito, estepe etc.).",
+      },
+    ],
+    ["O km da retirada não pode ser menor que o da instalação."],
+    ["Pneu com 85% ou mais da vida útil aparece em “perto do fim”."],
+  ),
+  "/sustentabilidade": t(
+    "Sustentabilidade da frota",
+    "Estima quanto a frota emite de gás de efeito estufa e quanto usa de combustível renovável, para o órgão acompanhar e reduzir o impacto ambiental.",
+    [
+      "Na aba Painel, escolha o período e veja litros, emissões e evolução mensal.",
+      "Na aba Por veículo, escolha um veículo para ver as emissões, o km/L e a comparação com a média da frota.",
+      "Na aba Fatores de emissão, confira ou ajuste os fatores de cada combustível.",
+    ],
+    [
+      {
+        label: "CO2e estimado",
+        description:
+          "Litros abastecidos vezes o fator de emissão do combustível. É estimativa, não medição.",
+        tags: CALC,
+      },
+      {
+        label: "Fator de emissão",
+        description: "Quantos kg de CO2e cada litro produz. Pode ser ajustado pelo órgão.",
+        tags: COND,
+      },
+      {
+        label: "Km por litro",
+        description: "Consumo do veículo, calculado pelos hodômetros dos abastecimentos.",
+        tags: CALC,
+      },
+    ],
+    [
+      "Para calcular o km/L e a emissão por 100 km é preciso informar o hodômetro nos abastecimentos.",
+    ],
+  ),
+  "/exportacao": t(
+    "Exportar dados",
+    "Baixa uma cópia completa dos dados do órgão em um único arquivo e permite conferir se a cópia guardada está inteira.",
+    [
+      "Clique em “Exportar todos os dados” e aguarde o arquivo ser gerado.",
+      "Anote a soma de verificação (SHA-256) mostrada na tela e guarde o arquivo em dois lugares.",
+      "Para testar uma cópia antiga, use “Conferir uma cópia já baixada”: escolha o arquivo e, se quiser, cole a soma anotada.",
+    ],
+    [
+      {
+        label: "Arquivo .zip",
+        description: "Contém planilhas (CSV), arquivos JSON, um manifesto e um LEIA-ME.",
+        tags: AUTO,
+      },
+      {
+        label: "Soma de verificação",
+        description:
+          "Código que muda se o arquivo for alterado; serve para provar que a cópia está intacta.",
         tags: AUTO,
       },
     ],
-    ["Os valores refletem apenas lançamentos do órgão em que você está conectado."],
+    [
+      "Nenhuma senha, token ou chave é incluída no arquivo.",
+      "Recomenda-se baixar e conferir a cópia todo mês.",
+    ],
+  ),
+  "/avisos": t(
+    "Avisos de vencimento",
+    "Mostra o que está vencido ou perto de vencer (CNH, seguro, contrato, revisão, licenciamento, garantia) e envia um resumo por e-mail, para ninguém perder prazo.",
+    [
+      "Veja na primeira caixa tudo o que precisa de atenção agora.",
+      "Para avisar um motorista, clique em “Avisar” e o WhatsApp abre com a mensagem pronta.",
+      "Na segunda caixa, ligue o aviso por e-mail, escreva os e-mails que recebem e escolha a frequência.",
+      "Ajuste com quantos dias de antecedência cada tipo de aviso deve aparecer e salve.",
+      "Use “Enviar resumo agora” para testar.",
+    ],
+    [
+      {
+        label: "E-mails que recebem",
+        description: "Um ou mais e-mails, separados por vírgula ou por linha.",
+        tags: COND,
+      },
+      {
+        label: "Frequência",
+        description: "Toda segunda-feira ou todos os dias. Só envia quando há algo vencendo.",
+      },
+      {
+        label: "Dias de antecedência",
+        description: "Quantos dias antes do vencimento o item passa a aparecer.",
+      },
+    ],
+    [
+      "O envio por e-mail exige que o e-mail do órgão esteja configurado pelo administrador.",
+      "O WhatsApp abre com a mensagem pronta; quem confirma o envio é você.",
+    ],
+  ),
+  "/prestacao-contas": t(
+    "Prestação de contas",
+    "Gera os dados do exercício em arquivos prontos para o Tribunal de Contas, a controladoria ou a auditoria.",
+    [
+      "Escolha o exercício (ano).",
+      "Clique em “Baixar pacote completo (ZIP)” para receber tudo, ou baixe cada conjunto em CSV, XML ou Excel.",
+      "Envie os arquivos ao órgão de controle conforme a orientação dele.",
+    ],
+    [
+      {
+        label: "Exercício",
+        description: "O ano dos dados. Empenhos usam o ano do empenho; os demais, a data do fato.",
+        tags: REQ,
+      },
+      {
+        label: "Conjuntos",
+        description: "Bens, abastecimentos, manutenções, contratos, empenhos, multas e sinistros.",
+      },
+    ],
+    [
+      "Cada Tribunal de Contas tem seu leiaute; este pacote usa o padrão do FrotaGov e pode ser mapeado quando exigido.",
+    ],
+  ),
+  "/perfis-acesso": t(
+    "Perfis de acesso",
+    "Permite ao administrador do órgão escolher quais telas cada tipo de usuário pode abrir.",
+    [
+      "Localize a tela na lista, agrupada por assunto.",
+      "Marque a caixa para liberar a tela ao perfil ou desmarque para esconder.",
+      "O ponto azul indica que aquela escolha foi mudada em relação ao padrão.",
+      "Use “Voltar ao padrão” para desfazer todas as mudanças.",
+    ],
+    [
+      {
+        label: "Perfis",
+        description:
+          "Gestor de frota, responsável de unidade, operador e fiscal/controladoria. O administrador sempre acessa tudo.",
+      },
+    ],
+    [
+      "Esconder a tela não substitui a segurança do sistema: o que cada perfil pode gravar continua limitado.",
+    ],
+  ),
+  "/rastreamento": t(
+    "Rastreamento",
+    "Mostra onde estão os veículos com rastreador, quais estão em movimento, parados ou sem sinal, e avisa sobre excesso de velocidade, bateria baixa e saída de áreas permitidas.",
+    [
+      "Em Rastreadores, vincule cada rastreador a um veículo e entregue o token ao fornecedor do rastreamento.",
+      "Em Áreas e limites, defina a velocidade máxima e as áreas permitidas (raio em metros).",
+      "Acompanhe o mapa, os alertas e o trajeto de cada veículo.",
+    ],
+    [
+      {
+        label: "Token do rastreador",
+        description:
+          "Senha do rastreador, mostrada uma única vez. Guarde e entregue ao fornecedor.",
+        tags: AUTO,
+      },
+      {
+        label: "Velocidade máxima",
+        description: "Acima dela o sistema gera um alerta.",
+        tags: COND,
+      },
+      {
+        label: "Área permitida",
+        description:
+          "Círculo com centro (latitude e longitude) e raio. O sistema avisa ao sair ou entrar.",
+        tags: COND,
+      },
+    ],
+    ["A tela só existe para órgãos em que o administrador da plataforma ligou o módulo."],
+  ),
+  "/faturamento": t(
+    "Faturamento",
+    "Fecha o mês de cada contrato de gerenciamento: reúne abastecimentos, manutenções e lavagens, aplica glosas e taxa de administração e calcula o valor a pagar.",
+    [
+      "Clique em “Nova fatura”, escolha o contrato e o mês e informe a taxa de administração (pode ser negativa).",
+      "Confira os itens; para discordar de um valor, aplique uma glosa com o motivo.",
+      "Informe a nota fiscal para marcar como conferida e, depois do pagamento, marque como paga.",
+    ],
+    [
+      {
+        label: "Taxa de administração",
+        description: "Percentual sobre o valor conferido. Pode ser negativa (desconto).",
+        tags: COND,
+      },
+      { label: "Glosa", description: "Valor não aceito, sempre com motivo.", tags: COND },
+      {
+        label: "Líquido",
+        description: "Valor conferido mais a taxa, menos retenções.",
+        tags: CALC,
+      },
+    ],
+    ["Fatura paga não pode ser alterada nem apagada.", "Uma operação só entra em uma fatura."],
+  ),
+  "/gestao-contrato": t(
+    "Gestão do contrato (IMR)",
+    "Registra a fiscalização do contrato e acompanha a nota mensal de qualidade do serviço (IMR).",
+    [
+      "Na aba Ocorrências, registre notificações, advertências e atestos, com prazo e resolução.",
+      "Na aba Indicadores, carregue o modelo, ajuste metas e pesos e lance o resultado de cada mês.",
+      "Veja a nota final do mês e a faixa (ótimo, bom, regular, insatisfatório).",
+      "Na aba Relatório final, imprima o resumo para o atesto.",
+    ],
+    [
+      {
+        label: "Meta e peso",
+        description: "A meta é o resultado esperado; o peso diz o quanto o indicador vale na nota.",
+      },
+      {
+        label: "Nota do mês",
+        description: "De 0 a 10, calculada pelos pesos dos indicadores.",
+        tags: CALC,
+      },
+    ],
+    ["Só é usada por órgãos que gerenciam contrato de gerenciamento de frota."],
+  ),
+  "/regras-manutencao": t(
+    "Regras de manutenção",
+    "Define os limites do órgão para manutenção: quem aprova até que valor, tempos padrão de serviço, teto do valor da hora de mão de obra, prazos de devolução e regras de lavagem.",
+    [
+      "Escolha a aba da regra que quer cadastrar.",
+      "Preencha os campos e salve; a regra passa a valer nas próximas manutenções.",
+    ],
+    [
+      {
+        label: "Alçada",
+        description: "Até que valor cada perfil pode aprovar uma ordem de serviço.",
+      },
+      {
+        label: "Tempo padrão",
+        description: "Horas normais de um serviço, usadas para conferir o orçamento.",
+      },
+    ],
+    ["Serve para órgãos com regras formais de aprovação."],
+  ),
+  "/garantias": t(
+    "Garantias",
+    "Lista peças e serviços que ainda estão na garantia, para o órgão exigir o reparo sem pagar de novo.",
+    [
+      "Consulte os itens em garantia por veículo.",
+      "Se o defeito voltar dentro do prazo, cobre a oficina com base nesta lista.",
+    ],
+    undefined,
+    [
+      "A garantia vem da manutenção registrada (dias de garantia) e da garantia de fábrica do veículo.",
+    ],
+  ),
+  "/pesquisa-precos": t(
+    "Pesquisa de preços",
+    "Mostra quanto o órgão já pagou por uma peça ou serviço, para comparar antes de aprovar novos orçamentos.",
+    [
+      "Digite o nome da peça ou do serviço.",
+      "Compare os valores pagos, as datas e os fornecedores.",
+    ],
+    undefined,
+    ["Os preços vêm dos registros do próprio órgão."],
   ),
 
   "/veiculos": t(
@@ -979,44 +1259,6 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
         description:
           "Documento com brasão e dados do órgão, código, bem, tipo de limpeza, prestador quando definido, solicitante, data e observações.",
         tags: AUTO,
-      },
-    ],
-  ),
-
-  "/pneus": t(
-    "Pneus",
-    "Gestão do ciclo de vida dos pneus: aquisição, instalação por posição, rodízio, recapagem e descarte.",
-    [
-      "Cadastre o pneu com número de série e medidas.",
-      "Instale no bem indicando a posição.",
-      "Registre rodízios, recapagens e o descarte final.",
-    ],
-    [
-      {
-        label: "Número de série / fogo",
-        description: "Identificação única do pneu; não se repete no órgão.",
-        tags: REQ,
-      },
-      {
-        label: "Medida e marca",
-        description: "Usadas na conferência de compatibilidade com o bem.",
-        tags: REQ,
-      },
-      {
-        label: "Bem e posição",
-        description: "Informados na instalação; a posição indica o eixo/lado ocupado.",
-        tags: COND,
-      },
-      {
-        label: "Situação",
-        description: "Estoque, instalado, em reparo, recapagem, descartado ou baixado.",
-        tags: AUTO,
-      },
-      {
-        label: "Vida útil percorrida",
-        description:
-          "Quilometragem acumulada do bem durante o período em que o pneu esteve instalado.",
-        tags: CALC,
       },
     ],
   ),
@@ -2086,39 +2328,6 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     ["A importação só grava depois da confirmação; nada é alterado durante a conferência."],
   ),
 
-  "/exportacao": t(
-    "Exportar dados",
-    "Gera um pacote completo com todos os dados do órgão, para migração, auditoria ou uso em outros sistemas.",
-    [
-      "Clique em Exportar todos os dados.",
-      "Aguarde a geração e acompanhe o progresso.",
-      "Baixe o arquivo compactado gerado.",
-    ],
-    [
-      {
-        label: "Resumo do pacote",
-        description: "Lista os conjuntos de dados e a quantidade de registros que serão incluídos.",
-        tags: AUTO,
-      },
-      {
-        label: "Progresso",
-        description: "Acompanha a geração; em bases grandes o processo pode levar alguns minutos.",
-        tags: AUTO,
-      },
-      {
-        label: "Arquivo final",
-        description:
-          "Pacote compactado com planilhas, versão em formato de dados e documento de conferência.",
-        tags: AUTO,
-      },
-    ],
-    [
-      "A exportação traz apenas dados do órgão em que você está conectado.",
-      "Senhas, chaves, certificados e credenciais nunca são incluídos no pacote.",
-      "O acesso é restrito aos perfis de administração e auditoria; cada tentativa fica registrada.",
-    ],
-  ),
-
   "/inteligencia": t(
     "Inteligência da frota",
     "Analisa consumo, custo por quilômetro, custo total de propriedade, economicidade e disponibilidade dos bens.",
@@ -2194,29 +2403,6 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Filtros desabilitados não se aplicam ao relatório selecionado.",
       "Relatórios sem resultado indicam ausência de lançamentos no filtro escolhido, não erro do sistema.",
     ],
-  ),
-
-  "/sustentabilidade": t(
-    "Sustentabilidade da Frota",
-    "Estima emissões e eficiência energética da frota a partir do consumo registrado, apoiando metas ambientais.",
-    [
-      "Escolha o período de apuração.",
-      "Confira as emissões estimadas por tipo de combustível.",
-      "Compare a evolução entre períodos.",
-    ],
-    [
-      {
-        label: "Emissão estimada",
-        description: "Consumo multiplicado pelo fator de emissão do combustível.",
-        tags: CALC,
-      },
-      {
-        label: "Fatores de emissão",
-        description: "Valores de referência utilizados no cálculo.",
-        tags: AUTO,
-      },
-    ],
-    ["Os números são estimativas de referência, não medições diretas."],
   ),
 
   "/transparencia": t(

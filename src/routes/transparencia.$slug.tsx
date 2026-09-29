@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TransparenciaGrafico } from "@/components/transparencia-grafico";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Download, Landmark } from "lucide-react";
@@ -59,9 +60,18 @@ type Payload = {
     por_situacao: Record<string, number>;
     por_categoria: Record<string, number>;
   };
-  abastecimento?: { registros: number; litros: number; valor_total: number };
-  manutencao?: { registros: number; valor_total: number };
-  limpeza?: { registros: number; valor_total: number };
+  abastecimento?: {
+    registros: number;
+    litros: number;
+    valor_total: number;
+    por_mes?: { mes: string; valor: number }[];
+  };
+  manutencao?: {
+    registros: number;
+    valor_total: number;
+    por_mes?: { mes: string; valor: number }[];
+  };
+  limpeza?: { registros: number; valor_total: number; por_mes?: { mes: string; valor: number }[] };
   competencia?: string;
   versao?: number;
   publicado_em?: string;
@@ -261,6 +271,12 @@ function PortalTransparencia() {
             ))}
           </div>
         </section>
+
+        <TransparenciaGrafico
+          abastecimento={data.abastecimento?.por_mes}
+          manutencao={data.manutencao?.por_mes}
+          limpeza={data.limpeza?.por_mes}
+        />
 
         {data.frota && (
           <section className="rounded-lg border bg-card p-5 shadow-card">

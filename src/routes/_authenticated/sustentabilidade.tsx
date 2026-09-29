@@ -6,6 +6,7 @@
  * órgão (tabela `emission_factors`) — nunca medição real.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { SustentabilidadeVeiculo } from "@/components/sustentabilidade-veiculo";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -213,6 +214,7 @@ function Sustentabilidade() {
       <Tabs defaultValue="painel" className="space-y-4">
         <TabsList>
           <TabsTrigger value="painel">Painel</TabsTrigger>
+          <TabsTrigger value="veiculo">Por veículo</TabsTrigger>
           <TabsTrigger value="fatores">Fatores de emissão</TabsTrigger>
         </TabsList>
 
@@ -405,6 +407,10 @@ function Sustentabilidade() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="veiculo">
+          <SustentabilidadeVeiculo from={from} to={to} factors={factors} />
         </TabsContent>
 
         <TabsContent value="fatores">
