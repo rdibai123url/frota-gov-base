@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { PasswordInput } from "@/components/password-input";
 import { useEffect, useState } from "react";
-import { ShieldCheck } from "lucide-react";
+import { BrandMark } from "@/components/brand-mark";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -187,20 +187,49 @@ function AuthPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-secondary/40">
+    <div className="flex min-h-screen flex-col bg-secondary/40 lg:grid lg:grid-cols-[1.15fr_1fr]">
+      <aside className="relative hidden flex-col justify-between overflow-hidden bg-[#0b2545] p-12 text-white lg:flex">
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-[radial-gradient(600px_400px_at_10%_0%,rgba(47,109,246,0.45),transparent),radial-gradient(500px_400px_at_100%_100%,rgba(47,109,246,0.25),transparent)]"
+        />
+        <div className="relative flex items-center gap-3">
+          <BrandMark className="size-11" />
+          <p className="gov-title text-2xl">Dibai Fleet</p>
+        </div>
+        <div className="relative max-w-lg space-y-6">
+          <h1 className="gov-title text-4xl leading-tight">
+            Toda a sua frota sob controle, do abastecimento à prestação de contas.
+          </h1>
+          <ul className="space-y-3 text-[15px] text-white/85">
+            {[
+              "Abastecimento, manutenção, viagens e checklist em um só lugar",
+              "Contratos, empenhos e cotas com bloqueio automático de saldo",
+              "Dashboard com custo por km, alertas de vencimento e relatórios",
+              "Portal da transparência e prestação de contas para o Tribunal de Contas",
+            ].map((t) => (
+              <li key={t} className="flex gap-3">
+                <span className="mt-2 size-1.5 shrink-0 rounded-full bg-[#7fb0ff]" />
+                {t}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <p className="relative text-xs text-white/60">
+          Dibai Soluções Integradas — tecnologia para gestão pública e privada.
+        </p>
+      </aside>
       <div className="flex flex-1 items-center justify-center px-4 py-10">
         <div className="w-full max-w-md">
-          <Link to="/" className="mb-6 flex items-center justify-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <ShieldCheck className="size-5" />
-            </div>
+          <Link to="/" className="mb-6 flex items-center justify-center gap-3 lg:hidden">
+            <BrandMark className="size-10" />
             <div>
               <p className="gov-title text-xl">Dibai Fleet</p>
               <p className="text-xs text-muted-foreground">Gestão de frotas e ativos</p>
             </div>
           </Link>
 
-          <div className="rounded-lg border bg-card p-6 shadow-panel">
+          <div className="rounded-xl border bg-card p-6 shadow-panel sm:p-8">
             {mode === "login" ? (
               <>
                 <form onSubmit={handleSignIn} className="space-y-4">

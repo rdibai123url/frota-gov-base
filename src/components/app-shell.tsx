@@ -59,6 +59,7 @@ import { roleCanOpen } from "@/lib/permissoes";
 import { useEmbedded } from "@/components/embedded";
 import { setReportBranding } from "@/lib/reports";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { BrandMark } from "@/components/brand-mark";
 
 type NavLeaf = { to: string; label: string };
 type NavGroup = { id: string; label: string; icon: typeof Truck; to?: string; items?: NavLeaf[] };
@@ -312,16 +313,14 @@ export function AppShell({ children }: { children: ReactNode }) {
    * dica ao passar o mouse). O modo compacto libera largura para as tabelas.
    */
   const renderSidebar = (compact: boolean) => (
-    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
+    <div className="sidebar-surface flex h-full flex-col text-sidebar-foreground">
       <div
         className={cn(
           "flex items-center gap-3 border-b border-sidebar-border py-4",
           compact ? "justify-center px-2" : "px-4",
         )}
       >
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-          <ShieldCheck className="size-5" />
-        </div>
+        <BrandMark className="size-9 shadow-md" />
         {!compact && (
           <div className="min-w-0 leading-tight">
             <p className="gov-title text-lg">Dibai Fleet</p>

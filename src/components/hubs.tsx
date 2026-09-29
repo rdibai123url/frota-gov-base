@@ -47,7 +47,7 @@ function TabHubReady({
   return (
     <Tabs value={current} onValueChange={setTab} className="space-y-4">
       {visible.length > 1 && (
-        <TabsList className="flex h-auto flex-wrap justify-start gap-1 bg-surface p-1">
+        <TabsList className="flex h-auto justify-start gap-1 bg-surface p-1">
           {visible.map((t) => (
             <TabsTrigger key={t.value} value={t.value}>
               {t.label}

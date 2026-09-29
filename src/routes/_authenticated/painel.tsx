@@ -363,7 +363,7 @@ function Painel() {
       </div>
 
       <Tabs defaultValue="geral">
-        <TabsList className="flex h-auto flex-wrap justify-start gap-1 bg-surface p-1">
+        <TabsList className="flex h-auto justify-start gap-1 bg-surface p-1">
           <TabsTrigger value="geral">Visão geral</TabsTrigger>
           <TabsTrigger value="abastecimento">Abastecimento</TabsTrigger>
           <TabsTrigger value="manutencao">Manutenção</TabsTrigger>
