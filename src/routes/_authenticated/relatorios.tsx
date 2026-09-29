@@ -30,6 +30,7 @@ import {
   useProfile,
   useUnits,
   useVehicles,
+  planDue,
   useContractObjectKinds,
   objectKindLabel,
   CONTRACT_OBJECT_KIND_FALLBACK,
@@ -96,6 +97,11 @@ const REPORTS = [
   { value: "patrimonio", label: "Movimentação patrimonial" },
   { value: "diarias", label: "Diárias — requisições e comprovações" },
   { value: "limpeza", label: "Limpeza da frota" },
+  { value: "prev_manutencao", label: "Manutenção — previsão e aviso de revisões preventivas" },
+  { value: "consumo_cc", label: "Abastecimento — consumo e gasto por centro de custo" },
+  { value: "abast_condutor", label: "Abastecimento — operações por condutor" },
+  { value: "abast_fornecedor", label: "Abastecimento — operações por posto / fornecedor" },
+  { value: "frota_perfil", label: "Frota — perfil por marca, modelo, ano e tipo" },
   { value: "manutencao_prazos", label: "Manutenção — tempo de reparo e cumprimento de prazo" },
   { value: "faturamento", label: "Faturamento — faturas, glosas e taxa de administração" },
   { value: "contrato_ocorrencias", label: "Gestão do contrato — ocorrências e notificações" },
@@ -127,6 +133,11 @@ const CAPS: Record<ReportKey, { date: boolean; unit: boolean; vehicle: boolean; 
     patrimonio: { date: true, unit: true, vehicle: true, driver: false },
     diarias: { date: true, unit: true, vehicle: false, driver: true },
     limpeza: { date: true, unit: true, vehicle: true, driver: false },
+    prev_manutencao: { date: false, unit: true, vehicle: true, driver: false },
+    consumo_cc: { date: true, unit: true, vehicle: true, driver: false },
+    abast_condutor: { date: true, unit: true, vehicle: true, driver: true },
+    abast_fornecedor: { date: true, unit: true, vehicle: true, driver: false },
+    frota_perfil: { date: false, unit: true, vehicle: false, driver: false },
     manutencao_prazos: { date: true, unit: true, vehicle: true, driver: false },
     faturamento: { date: true, unit: false, vehicle: false, driver: false },
     contrato_ocorrencias: { date: true, unit: false, vehicle: false, driver: false },
@@ -214,6 +225,14 @@ const LABELS: Record<string, string> = {
   reservado: "Reservado",
   itens: "Itens",
   atendido: "Quantidade atendida",
+  plano: "Plano de revisão",
+  detalhe: "Situação detalhada",
+  centro_custo: "Centro de custo",
+  operacoes: "Operações",
+  veiculos: "Veículos",
+  litros_veiculo: "Litros por veículo",
+  preco_medio: "Preço médio (R$/L)",
+  quantidade_veiculos: "Quantidade de veículos",
   dias_reparo: "Dias em reparo",
   prazo_previsto: "Devolução prometida",
   no_prazo: "Dentro do prazo",
@@ -766,6 +785,139 @@ function Relatorios() {
           nota_indicador: Number(r.score).toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
           origem: r.source,
         }));
+      }
+
+      if (report === "prev_manutencao") {
+        const [{ data: plans, error: pe }, { data: fleet, error: fe }] = await Promise.all([
+          supabase.from("maintenance_plans").select("*").eq("active", true).limit(2000),
+          (() => {
+            let vq = supabase.from("vehicles").select("*").limit(5000);
+            if (unit) vq = vq.eq("unit_id", unit);
+            if (vehicle) vq = vq.eq("id", vehicle);
+            return vq;
+          })(),
+        ]);
+        if (pe) throw pe;
+        if (fe) throw fe;
+        const order = { vencido: 0, proximo: 1, ok: 2, sem_criterio: 3 } as const;
+        const out: {
+          veiculo: string;
+          plano: string;
+          situacao: string;
+          detalhe: string;
+          rank: number;
+        }[] = [];
+        for (const p of plans ?? []) {
+          for (const v of fleet ?? []) {
+            const applies =
+              p.vehicle_id === v.id ||
+              (!p.vehicle_id && (!p.vehicle_type || p.vehicle_type === v.vehicle_type));
+            if (!applies) continue;
+            const due = planDue(p, v);
+            out.push({
+              veiculo: v.plate ?? v.asset_code ?? "—",
+              plano: p.name,
+              situacao:
+                due.state === "vencido"
+                  ? "Vencida"
+                  : due.state === "proximo"
+                    ? "Próxima do vencimento"
+                    : due.state === "ok"
+                      ? "Em dia"
+                      : "Sem critério",
+              detalhe: due.detail || "—",
+              rank: order[due.state],
+            });
+          }
+        }
+        return out
+          .sort((a, b) => a.rank - b.rank || a.veiculo.localeCompare(b.veiculo))
+          .map(({ rank: _rank, ...r }) => r);
+      }
+
+      if (report === "consumo_cc" || report === "abast_condutor" || report === "abast_fornecedor") {
+        let q = supabase
+          .from("fuelings")
+          .select(
+            "quantity, total_value, vehicle_id, driver_name, cost_center:cost_centers(code, name), driver:drivers(full_name), supplier:suppliers(trade_name, legal_name)",
+          )
+          .eq("status", "valido")
+          .gte("fueled_at", start)
+          .lte("fueled_at", end)
+          .limit(20000);
+        if (unit) q = q.eq("unit_id", unit);
+        if (vehicle) q = q.eq("vehicle_id", vehicle);
+        if (driver) q = q.eq("driver_id", driver);
+        const { data: rows, error } = await q;
+        if (error) throw error;
+        const groups = new Map<
+          string,
+          { litros: number; valor: number; ops: number; veic: Set<string> }
+        >();
+        for (const f of rows ?? []) {
+          const key =
+            report === "consumo_cc"
+              ? f.cost_center
+                ? `${f.cost_center.code} — ${f.cost_center.name}`
+                : "Sem centro de custo"
+              : report === "abast_condutor"
+                ? (f.driver?.full_name ?? f.driver_name ?? "Não informado")
+                : (f.supplier?.trade_name ?? f.supplier?.legal_name ?? "Sem fornecedor");
+          const g = groups.get(key) ?? { litros: 0, valor: 0, ops: 0, veic: new Set<string>() };
+          g.litros += Number(f.quantity ?? 0);
+          g.valor += Number(f.total_value ?? 0);
+          g.ops += 1;
+          g.veic.add(f.vehicle_id);
+          groups.set(key, g);
+        }
+        const first =
+          report === "consumo_cc"
+            ? "centro_custo"
+            : report === "abast_condutor"
+              ? "condutor"
+              : "fornecedor";
+        return [...groups.entries()]
+          .sort((a, b) => b[1].valor - a[1].valor)
+          .map(([name, g]) => ({
+            [first]: name,
+            operacoes: g.ops,
+            veiculos: g.veic.size,
+            litros: formatLiters(g.litros),
+            litros_veiculo: formatLiters(g.veic.size ? g.litros / g.veic.size : 0),
+            preco_medio: g.litros > 0 ? formatMoney(g.valor / g.litros) : "—",
+            valor: formatMoney(g.valor),
+          }));
+      }
+
+      if (report === "frota_perfil") {
+        let vq = supabase.from("vehicles").select("*").limit(5000);
+        if (unit) vq = vq.eq("unit_id", unit);
+        const { data: fleet, error } = await vq;
+        if (error) throw error;
+        const groups = new Map<string, number>();
+        for (const v of fleet ?? []) {
+          const key = [
+            v.brand ?? "—",
+            v.model ?? "—",
+            v.year_manufacture ?? "—",
+            v.vehicle_type ?? "—",
+            v.fuel_type ?? "—",
+          ].join("¦");
+          groups.set(key, (groups.get(key) ?? 0) + 1);
+        }
+        return [...groups.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .map(([key, count]) => {
+            const [marca, modelo, ano, tipo, combustivel] = key.split("¦");
+            return {
+              marca,
+              modelo,
+              ano,
+              tipo,
+              combustivel_tipo: combustivel,
+              quantidade_veiculos: count,
+            };
+          });
       }
 
       if (report === "limpeza") {
