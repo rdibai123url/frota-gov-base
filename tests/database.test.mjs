@@ -42,7 +42,7 @@ before(async () => {
   const files = (await readdir(new URL("supabase/migrations/", root)))
     .filter((f) => f.endsWith(".sql"))
     .sort();
-  assert.equal(files.length, 121);
+  assert.equal(files.length, 122);
   for (const file of files) {
     if (file.startsWith("20260925") && !historicalTriggers) {
       historicalTriggers = (
@@ -241,4 +241,108 @@ test("alçada: sem limite cadastrado não restringe; com limite aplica ao perfil
   } finally {
     await db.exec("SET session_replication_role = DEFAULT");
   }
+});
+
+test("fase 3: fatura calcula taxa de administração, glosa, líquido e respeita a situação", async () => {
+  const org = id(950);
+  const inv = id(951);
+  for (const t of ["billing_invoices", "billing_invoice_items"])
+    await db.exec(`ALTER TABLE public.${t} DISABLE TRIGGER ALL`);
+  for (const [t, g] of [
+    ["billing_invoices", "trg_billing_invoice_totals"],
+    ["billing_invoices", "trg_billing_invoice_delete_guard"],
+    ["billing_invoice_items", "trg_billing_item_guard"],
+    ["billing_invoice_items", "trg_billing_item_after"],
+  ])
+    await db.exec(`ALTER TABLE public.${t} ENABLE TRIGGER ${g}`);
+
+  await db.exec(`INSERT INTO public.billing_invoices
+    (id, organization_id, code, reference_month, period_start, period_end, admin_fee_percent, withholding_value)
+    VALUES ('${inv}', '${org}', 'FAT-T-1', '2026-09-01', '2026-09-01', '2026-09-30', 2.5, 30)`);
+  await db.exec(`INSERT INTO public.billing_invoice_items
+    (organization_id, invoice_id, source_type, description, amount, glosa_value, glosa_reason) VALUES
+    ('${org}', '${inv}', 'manutencao', 'Troca de pastilhas', 1000, 100, 'Preço acima da tabela'),
+    ('${org}', '${inv}', 'abastecimento', 'Diesel S10', 500, 0, NULL)`);
+  let r = (await db.query(`SELECT * FROM public.billing_invoices WHERE id='${inv}'`)).rows[0];
+  assert.equal(Number(r.items_total), 1500);
+  assert.equal(Number(r.glosa_total), 100);
+  assert.equal(Number(r.admin_fee_value), 35); // (1500-100) x 2,5%
+  assert.equal(Number(r.net_total), 1405); // 1400 + 35 - 30
+
+  // taxa negativa (desconto)
+  await db.exec(`UPDATE public.billing_invoices SET admin_fee_percent = -2 WHERE id='${inv}'`);
+  r = (await db.query(`SELECT * FROM public.billing_invoices WHERE id='${inv}'`)).rows[0];
+  assert.equal(Number(r.admin_fee_value), -28);
+  assert.equal(Number(r.net_total), 1342);
+
+  // glosa exige motivo e não pode passar do valor do item
+  await assert.rejects(
+    db.exec(`INSERT INTO public.billing_invoice_items (organization_id, invoice_id, source_type, description, amount, glosa_value)
+             VALUES ('${org}', '${inv}', 'outro', 'x', 100, 10)`),
+    /billing_items_glosa_reason_chk/,
+  );
+  await assert.rejects(
+    db.exec(`INSERT INTO public.billing_invoice_items (organization_id, invoice_id, source_type, description, amount, glosa_value, glosa_reason)
+             VALUES ('${org}', '${inv}', 'outro', 'x', 100, 200, 'motivo')`),
+    /billing_items_glosa_within_chk/,
+  );
+
+  // situação: conferir exige NF; pagar exige conferida e data
+  await assert.rejects(
+    db.exec(`UPDATE public.billing_invoices SET status='conferida' WHERE id='${inv}'`),
+    /nota fiscal/,
+  );
+  await db.exec(
+    `UPDATE public.billing_invoices SET status='conferida', nf_number='123', nf_value=1342 WHERE id='${inv}'`,
+  );
+  await assert.rejects(
+    db.exec(`UPDATE public.billing_invoices SET status='paga' WHERE id='${inv}'`),
+    /data do pagamento/,
+  );
+  await db.exec(
+    `UPDATE public.billing_invoices SET status='paga', paid_at='2026-10-05' WHERE id='${inv}'`,
+  );
+  await assert.rejects(
+    db.exec(`UPDATE public.billing_invoices SET withholding_value = 1 WHERE id='${inv}'`),
+    /paga ou cancelada/,
+  );
+  await assert.rejects(
+    db.exec(`DELETE FROM public.billing_invoice_items WHERE invoice_id='${inv}'`),
+    /paga ou cancelada/,
+  );
+  await assert.rejects(db.exec(`DELETE FROM public.billing_invoices WHERE id='${inv}'`), /paga/);
+});
+
+test("fase 3: nota final do IMR segue o exemplo do edital do DNIT", async () => {
+  const org = id(960);
+  const contract = id(961);
+  for (const t of ["service_level_indicators", "service_level_results"])
+    await db.exec(`ALTER TABLE public.${t} DISABLE TRIGGER ALL`);
+  await db.exec("ALTER TABLE public.service_level_results ENABLE TRIGGER trg_service_level_score");
+  const ind = (n) => id(970 + n);
+  await db.exec(`INSERT INTO public.service_level_indicators
+    (id, organization_id, contract_id, code, name, block, block_weight, weight_in_block, target_value, kind) VALUES
+    ('${ind(1)}', '${org}', '${contract}', 'I01', 'Disponibilidade da rede', 'abastecimento', 45, 100, 99, 'percent_min'),
+    ('${ind(2)}', '${org}', '${contract}', 'I02', 'Cobertura da manutenção', 'manutencao', 40, 70, 98, 'percent_min'),
+    ('${ind(3)}', '${org}', '${contract}', 'I03', 'Prazo de cotação', 'manutencao', 40, 30, 90, 'percent_min'),
+    ('${ind(4)}', '${org}', '${contract}', 'I04', 'Conformidade da lavagem', 'lavagem', 15, 100, 0, 'ocorrencias_max')`);
+  await db.exec(`INSERT INTO public.service_level_results
+    (organization_id, contract_id, indicator_id, reference_month, measured_value) VALUES
+    ('${org}', '${contract}', '${ind(1)}', '2026-09-15', 90),
+    ('${org}', '${contract}', '${ind(2)}', '2026-09-15', 98),
+    ('${org}', '${contract}', '${ind(3)}', '2026-09-15', 81),
+    ('${org}', '${contract}', '${ind(4)}', '2026-09-15', 1)`);
+  const scores = (
+    await db.query(
+      `SELECT i.code, r.score FROM public.service_level_results r JOIN public.service_level_indicators i ON i.id=r.indicator_id ORDER BY i.code`,
+    )
+  ).rows.map((x) => [x.code, Number(x.score)]);
+  assert.deepEqual(scores, [
+    ["I01", 9.09],
+    ["I02", 10],
+    ["I03", 9],
+    ["I04", 5],
+  ]);
+  const g = await db.query(`SELECT public.imr_final_grade('${contract}', '2026-09-01') g`);
+  assert.equal(Number(g.rows[0].g), 8.72);
 });

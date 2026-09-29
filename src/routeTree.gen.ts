@@ -32,9 +32,11 @@ import { Route as AuthenticatedEmpenhosRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedEntidadesExternasRouteImport } from './routes/_authenticated/entidades-externas'
 import { Route as AuthenticatedEquipamentosRouteImport } from './routes/_authenticated/equipamentos'
 import { Route as AuthenticatedExportacaoRouteImport } from './routes/_authenticated/exportacao'
+import { Route as AuthenticatedFaturamentoRouteImport } from './routes/_authenticated/faturamento'
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
 import { Route as AuthenticatedFuncionariosRouteImport } from './routes/_authenticated/funcionarios'
 import { Route as AuthenticatedGarantiasRouteImport } from './routes/_authenticated/garantias'
+import { Route as AuthenticatedGestaoContratoRouteImport } from './routes/_authenticated/gestao-contrato'
 import { Route as AuthenticatedHistoricoVeiculoRouteImport } from './routes/_authenticated/historico-veiculo'
 import { Route as AuthenticatedIntegracoesRouteImport } from './routes/_authenticated/integracoes'
 import { Route as AuthenticatedInteligenciaRouteImport } from './routes/_authenticated/inteligencia'
@@ -200,6 +202,12 @@ const AuthenticatedExportacaoRoute = AuthenticatedExportacaoRouteImport.update({
   path: '/exportacao',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedFaturamentoRoute =
+  AuthenticatedFaturamentoRouteImport.update({
+    id: '/faturamento',
+    path: '/faturamento',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedFornecedoresRoute =
   AuthenticatedFornecedoresRouteImport.update({
     id: '/fornecedores',
@@ -217,6 +225,12 @@ const AuthenticatedGarantiasRoute = AuthenticatedGarantiasRouteImport.update({
   path: '/garantias',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedGestaoContratoRoute =
+  AuthenticatedGestaoContratoRouteImport.update({
+    id: '/gestao-contrato',
+    path: '/gestao-contrato',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedHistoricoVeiculoRoute =
   AuthenticatedHistoricoVeiculoRouteImport.update({
     id: '/historico-veiculo',
@@ -457,9 +471,11 @@ export interface FileRoutesByFullPath {
   '/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
   '/equipamentos': typeof AuthenticatedEquipamentosRoute
   '/exportacao': typeof AuthenticatedExportacaoRoute
+  '/faturamento': typeof AuthenticatedFaturamentoRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/funcionarios': typeof AuthenticatedFuncionariosRoute
   '/garantias': typeof AuthenticatedGarantiasRoute
+  '/gestao-contrato': typeof AuthenticatedGestaoContratoRoute
   '/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/integracoes': typeof AuthenticatedIntegracoesRoute
   '/inteligencia': typeof AuthenticatedInteligenciaRoute
@@ -524,9 +540,11 @@ export interface FileRoutesByTo {
   '/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
   '/equipamentos': typeof AuthenticatedEquipamentosRoute
   '/exportacao': typeof AuthenticatedExportacaoRoute
+  '/faturamento': typeof AuthenticatedFaturamentoRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/funcionarios': typeof AuthenticatedFuncionariosRoute
   '/garantias': typeof AuthenticatedGarantiasRoute
+  '/gestao-contrato': typeof AuthenticatedGestaoContratoRoute
   '/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/integracoes': typeof AuthenticatedIntegracoesRoute
   '/inteligencia': typeof AuthenticatedInteligenciaRoute
@@ -593,9 +611,11 @@ export interface FileRoutesById {
   '/_authenticated/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
   '/_authenticated/equipamentos': typeof AuthenticatedEquipamentosRoute
   '/_authenticated/exportacao': typeof AuthenticatedExportacaoRoute
+  '/_authenticated/faturamento': typeof AuthenticatedFaturamentoRoute
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/_authenticated/funcionarios': typeof AuthenticatedFuncionariosRoute
   '/_authenticated/garantias': typeof AuthenticatedGarantiasRoute
+  '/_authenticated/gestao-contrato': typeof AuthenticatedGestaoContratoRoute
   '/_authenticated/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/_authenticated/integracoes': typeof AuthenticatedIntegracoesRoute
   '/_authenticated/inteligencia': typeof AuthenticatedInteligenciaRoute
@@ -662,9 +682,11 @@ export interface FileRouteTypes {
     | '/entidades-externas'
     | '/equipamentos'
     | '/exportacao'
+    | '/faturamento'
     | '/fornecedores'
     | '/funcionarios'
     | '/garantias'
+    | '/gestao-contrato'
     | '/historico-veiculo'
     | '/integracoes'
     | '/inteligencia'
@@ -729,9 +751,11 @@ export interface FileRouteTypes {
     | '/entidades-externas'
     | '/equipamentos'
     | '/exportacao'
+    | '/faturamento'
     | '/fornecedores'
     | '/funcionarios'
     | '/garantias'
+    | '/gestao-contrato'
     | '/historico-veiculo'
     | '/integracoes'
     | '/inteligencia'
@@ -797,9 +821,11 @@ export interface FileRouteTypes {
     | '/_authenticated/entidades-externas'
     | '/_authenticated/equipamentos'
     | '/_authenticated/exportacao'
+    | '/_authenticated/faturamento'
     | '/_authenticated/fornecedores'
     | '/_authenticated/funcionarios'
     | '/_authenticated/garantias'
+    | '/_authenticated/gestao-contrato'
     | '/_authenticated/historico-veiculo'
     | '/_authenticated/integracoes'
     | '/_authenticated/inteligencia'
@@ -1019,6 +1045,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedExportacaoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/faturamento': {
+      id: '/_authenticated/faturamento'
+      path: '/faturamento'
+      fullPath: '/faturamento'
+      preLoaderRoute: typeof AuthenticatedFaturamentoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/fornecedores': {
       id: '/_authenticated/fornecedores'
       path: '/fornecedores'
@@ -1038,6 +1071,13 @@ declare module '@tanstack/react-router' {
       path: '/garantias'
       fullPath: '/garantias'
       preLoaderRoute: typeof AuthenticatedGarantiasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/gestao-contrato': {
+      id: '/_authenticated/gestao-contrato'
+      path: '/gestao-contrato'
+      fullPath: '/gestao-contrato'
+      preLoaderRoute: typeof AuthenticatedGestaoContratoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/historico-veiculo': {
@@ -1343,9 +1383,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEntidadesExternasRoute: typeof AuthenticatedEntidadesExternasRoute
   AuthenticatedEquipamentosRoute: typeof AuthenticatedEquipamentosRoute
   AuthenticatedExportacaoRoute: typeof AuthenticatedExportacaoRoute
+  AuthenticatedFaturamentoRoute: typeof AuthenticatedFaturamentoRoute
   AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
   AuthenticatedFuncionariosRoute: typeof AuthenticatedFuncionariosRoute
   AuthenticatedGarantiasRoute: typeof AuthenticatedGarantiasRoute
+  AuthenticatedGestaoContratoRoute: typeof AuthenticatedGestaoContratoRoute
   AuthenticatedHistoricoVeiculoRoute: typeof AuthenticatedHistoricoVeiculoRoute
   AuthenticatedIntegracoesRoute: typeof AuthenticatedIntegracoesRoute
   AuthenticatedInteligenciaRoute: typeof AuthenticatedInteligenciaRoute
@@ -1401,9 +1443,11 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEntidadesExternasRoute: AuthenticatedEntidadesExternasRoute,
   AuthenticatedEquipamentosRoute: AuthenticatedEquipamentosRoute,
   AuthenticatedExportacaoRoute: AuthenticatedExportacaoRoute,
+  AuthenticatedFaturamentoRoute: AuthenticatedFaturamentoRoute,
   AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,
   AuthenticatedFuncionariosRoute: AuthenticatedFuncionariosRoute,
   AuthenticatedGarantiasRoute: AuthenticatedGarantiasRoute,
+  AuthenticatedGestaoContratoRoute: AuthenticatedGestaoContratoRoute,
   AuthenticatedHistoricoVeiculoRoute: AuthenticatedHistoricoVeiculoRoute,
   AuthenticatedIntegracoesRoute: AuthenticatedIntegracoesRoute,
   AuthenticatedInteligenciaRoute: AuthenticatedInteligenciaRoute,

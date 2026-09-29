@@ -1249,6 +1249,191 @@ export type Database = {
           },
         ];
       };
+      billing_invoice_items: {
+        Row: {
+          amount: number;
+          created_at: string;
+          created_by: string | null;
+          description: string;
+          glosa_reason: string | null;
+          glosa_value: number;
+          id: string;
+          invoice_id: string;
+          organization_id: string;
+          service_date: string | null;
+          source_id: string | null;
+          source_type: string;
+          updated_at: string;
+          vehicle_id: string | null;
+        };
+        Insert: {
+          amount: number;
+          created_at?: string;
+          created_by?: string | null;
+          description: string;
+          glosa_reason?: string | null;
+          glosa_value?: number;
+          id?: string;
+          invoice_id: string;
+          organization_id: string;
+          service_date?: string | null;
+          source_id?: string | null;
+          source_type: string;
+          updated_at?: string;
+          vehicle_id?: string | null;
+        };
+        Update: {
+          amount?: number;
+          created_at?: string;
+          created_by?: string | null;
+          description?: string;
+          glosa_reason?: string | null;
+          glosa_value?: number;
+          id?: string;
+          invoice_id?: string;
+          organization_id?: string;
+          service_date?: string | null;
+          source_id?: string | null;
+          source_type?: string;
+          updated_at?: string;
+          vehicle_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "billing_invoice_items_invoice_id_fkey";
+            columns: ["invoice_id"];
+            isOneToOne: false;
+            referencedRelation: "billing_invoices";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "billing_invoice_items_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "billing_invoice_items_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      billing_invoices: {
+        Row: {
+          admin_fee_percent: number;
+          admin_fee_value: number;
+          cancel_reason: string | null;
+          code: string | null;
+          contract_id: string | null;
+          created_at: string;
+          created_by: string | null;
+          due_date: string | null;
+          glosa_total: number;
+          id: string;
+          items_total: number;
+          net_total: number;
+          nf_date: string | null;
+          nf_number: string | null;
+          nf_value: number | null;
+          notes: string | null;
+          organization_id: string;
+          paid_at: string | null;
+          period_end: string;
+          period_start: string;
+          reference_month: string;
+          status: string;
+          supplier_id: string | null;
+          updated_at: string;
+          updated_by: string | null;
+          withholding_note: string | null;
+          withholding_value: number;
+        };
+        Insert: {
+          admin_fee_percent?: number;
+          admin_fee_value?: number;
+          cancel_reason?: string | null;
+          code?: string | null;
+          contract_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          due_date?: string | null;
+          glosa_total?: number;
+          id?: string;
+          items_total?: number;
+          net_total?: number;
+          nf_date?: string | null;
+          nf_number?: string | null;
+          nf_value?: number | null;
+          notes?: string | null;
+          organization_id: string;
+          paid_at?: string | null;
+          period_end: string;
+          period_start: string;
+          reference_month: string;
+          status?: string;
+          supplier_id?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+          withholding_note?: string | null;
+          withholding_value?: number;
+        };
+        Update: {
+          admin_fee_percent?: number;
+          admin_fee_value?: number;
+          cancel_reason?: string | null;
+          code?: string | null;
+          contract_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          due_date?: string | null;
+          glosa_total?: number;
+          id?: string;
+          items_total?: number;
+          net_total?: number;
+          nf_date?: string | null;
+          nf_number?: string | null;
+          nf_value?: number | null;
+          notes?: string | null;
+          organization_id?: string;
+          paid_at?: string | null;
+          period_end?: string;
+          period_start?: string;
+          reference_month?: string;
+          status?: string;
+          supplier_id?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+          withholding_note?: string | null;
+          withholding_value?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "billing_invoices_contract_id_fkey";
+            columns: ["contract_id"];
+            isOneToOne: false;
+            referencedRelation: "contracts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "billing_invoices_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "billing_invoices_supplier_id_fkey";
+            columns: ["supplier_id"];
+            isOneToOne: false;
+            referencedRelation: "suppliers";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       budget_movements: {
         Row: {
           authorization_id: string | null;
@@ -2189,6 +2374,78 @@ export type Database = {
         };
         Relationships: [];
       };
+      contract_occurrences: {
+        Row: {
+          author_role: string;
+          contract_id: string;
+          created_at: string;
+          created_by: string | null;
+          created_by_name: string | null;
+          deadline_at: string | null;
+          description: string;
+          id: string;
+          kind: string;
+          occurred_at: string;
+          organization_id: string;
+          resolution: string | null;
+          resolved_at: string | null;
+          status: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          author_role?: string;
+          contract_id: string;
+          created_at?: string;
+          created_by?: string | null;
+          created_by_name?: string | null;
+          deadline_at?: string | null;
+          description: string;
+          id?: string;
+          kind?: string;
+          occurred_at?: string;
+          organization_id: string;
+          resolution?: string | null;
+          resolved_at?: string | null;
+          status?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          author_role?: string;
+          contract_id?: string;
+          created_at?: string;
+          created_by?: string | null;
+          created_by_name?: string | null;
+          deadline_at?: string | null;
+          description?: string;
+          id?: string;
+          kind?: string;
+          occurred_at?: string;
+          organization_id?: string;
+          resolution?: string | null;
+          resolved_at?: string | null;
+          status?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "contract_occurrences_contract_id_fkey";
+            columns: ["contract_id"];
+            isOneToOne: false;
+            referencedRelation: "contracts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contract_occurrences_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       contract_periods: {
         Row: {
           balance_value: number | null;
@@ -2309,6 +2566,7 @@ export type Database = {
           valid_from: string | null;
           valid_to: string | null;
           value_from_items: boolean;
+          admin_fee_percent: number | null;
         };
         Insert: {
           allows_amendment?: boolean;
@@ -2344,6 +2602,7 @@ export type Database = {
           valid_from?: string | null;
           valid_to?: string | null;
           value_from_items?: boolean;
+          admin_fee_percent?: number | null;
         };
         Update: {
           allows_amendment?: boolean;
@@ -2379,6 +2638,7 @@ export type Database = {
           valid_from?: string | null;
           valid_to?: string | null;
           value_from_items?: boolean;
+          admin_fee_percent?: number | null;
         };
         Relationships: [
           {
@@ -7872,6 +8132,151 @@ export type Database = {
           },
         ];
       };
+      service_level_indicators: {
+        Row: {
+          active: boolean;
+          auto_metric: string;
+          block: string;
+          block_weight: number;
+          code: string;
+          contract_id: string;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          kind: string;
+          name: string;
+          notes: string | null;
+          organization_id: string;
+          target_value: number;
+          updated_at: string;
+          updated_by: string | null;
+          weight_in_block: number;
+        };
+        Insert: {
+          active?: boolean;
+          auto_metric?: string;
+          block?: string;
+          block_weight?: number;
+          code: string;
+          contract_id: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          kind?: string;
+          name: string;
+          notes?: string | null;
+          organization_id: string;
+          target_value: number;
+          updated_at?: string;
+          updated_by?: string | null;
+          weight_in_block?: number;
+        };
+        Update: {
+          active?: boolean;
+          auto_metric?: string;
+          block?: string;
+          block_weight?: number;
+          code?: string;
+          contract_id?: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          kind?: string;
+          name?: string;
+          notes?: string | null;
+          organization_id?: string;
+          target_value?: number;
+          updated_at?: string;
+          updated_by?: string | null;
+          weight_in_block?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "service_level_indicators_contract_id_fkey";
+            columns: ["contract_id"];
+            isOneToOne: false;
+            referencedRelation: "contracts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "service_level_indicators_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      service_level_results: {
+        Row: {
+          contract_id: string;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          indicator_id: string;
+          measured_value: number;
+          notes: string | null;
+          organization_id: string;
+          reference_month: string;
+          score: number;
+          source: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          contract_id: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          indicator_id: string;
+          measured_value: number;
+          notes?: string | null;
+          organization_id: string;
+          reference_month: string;
+          score?: number;
+          source?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          contract_id?: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          indicator_id?: string;
+          measured_value?: number;
+          notes?: string | null;
+          organization_id?: string;
+          reference_month?: string;
+          score?: number;
+          source?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "service_level_results_contract_id_fkey";
+            columns: ["contract_id"];
+            isOneToOne: false;
+            referencedRelation: "contracts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "service_level_results_indicator_id_fkey";
+            columns: ["indicator_id"];
+            isOneToOne: false;
+            referencedRelation: "service_level_indicators";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "service_level_results_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       service_order_items: {
         Row: {
           brand: string | null;
@@ -11272,6 +11677,8 @@ export type Database = {
         Args: { _org: string; _unit?: string; _user: string };
         Returns: number;
       };
+      imr_auto_metric: { Args: { _metric: string; _month: string }; Returns: number };
+      imr_final_grade: { Args: { _contract: string; _month: string }; Returns: number };
       reserve_checklist_photo: {
         Args: { _checklist: string; _mime: string; _size: number };
         Returns: Json;

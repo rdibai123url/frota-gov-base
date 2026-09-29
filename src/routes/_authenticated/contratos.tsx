@@ -135,6 +135,7 @@ const contractSchema = z.object({
   valid_to: z.string().optional(),
   initial_value: z.string().optional(),
   current_value: z.string().optional(),
+  admin_fee_percent: z.string().optional(),
   notes: z.string().trim().max(600).optional(),
 });
 
@@ -343,6 +344,9 @@ function Contratos() {
       valid_to: d.valid_to || null,
       initial_value: initialValue,
       current_value: currentValue,
+      admin_fee_percent: d.admin_fee_percent?.trim()
+        ? Number(d.admin_fee_percent.replace(/./g, "").replace(",", "."))
+        : null,
       status: status as ContractRow["status"],
       notes: d.notes || null,
       attachment_path: attachment,
@@ -989,6 +993,20 @@ function Contratos() {
                 />
               </div>
               <div>
+                <Label htmlFor="admin_fee_percent">Taxa de administração (%)</Label>
+                <Input
+                  id="admin_fee_percent"
+                  name="admin_fee_percent"
+                  inputMode="decimal"
+                  placeholder="Ex.: 3,5 ou -2,1"
+                  defaultValue={
+                    editing?.admin_fee_percent != null
+                      ? String(editing.admin_fee_percent).replace(".", ",")
+                      : ""
+                  }
+                />
+              </div>
+              <div>
                 <Label htmlFor="valid_from">
                   Início da vigência{status === "vigente" ? " *" : ""}
                 </Label>
@@ -1001,6 +1019,20 @@ function Contratos() {
                 />
               </div>
               <div>
+                <Label htmlFor="admin_fee_percent">Taxa de administração (%)</Label>
+                <Input
+                  id="admin_fee_percent"
+                  name="admin_fee_percent"
+                  inputMode="decimal"
+                  placeholder="Ex.: 3,5 ou -2,1"
+                  defaultValue={
+                    editing?.admin_fee_percent != null
+                      ? String(editing.admin_fee_percent).replace(".", ",")
+                      : ""
+                  }
+                />
+              </div>
+              <div>
                 <Label htmlFor="valid_to">Fim da vigência{status === "vigente" ? " *" : ""}</Label>
                 <Input
                   id="valid_to"
@@ -1008,6 +1040,20 @@ function Contratos() {
                   type="date"
                   defaultValue={editing?.valid_to ?? ""}
                   required={status === "vigente"}
+                />
+              </div>
+              <div>
+                <Label htmlFor="admin_fee_percent">Taxa de administração (%)</Label>
+                <Input
+                  id="admin_fee_percent"
+                  name="admin_fee_percent"
+                  inputMode="decimal"
+                  placeholder="Ex.: 3,5 ou -2,1"
+                  defaultValue={
+                    editing?.admin_fee_percent != null
+                      ? String(editing.admin_fee_percent).replace(".", ",")
+                      : ""
+                  }
                 />
               </div>
               <div>
@@ -1027,6 +1073,20 @@ function Contratos() {
                   name="current_value"
                   defaultValue={editing ? Number(editing.current_value) : ""}
                   required={status === "vigente"}
+                />
+              </div>
+              <div>
+                <Label htmlFor="admin_fee_percent">Taxa de administração (%)</Label>
+                <Input
+                  id="admin_fee_percent"
+                  name="admin_fee_percent"
+                  inputMode="decimal"
+                  placeholder="Ex.: 3,5 ou -2,1"
+                  defaultValue={
+                    editing?.admin_fee_percent != null
+                      ? String(editing.admin_fee_percent).replace(".", ",")
+                      : ""
+                  }
                 />
               </div>
               <div className="sm:col-span-3 flex items-start gap-2 rounded-md border p-3">

@@ -126,6 +126,8 @@ const NAV: NavGroup[] = [
     icon: FileText,
     items: [
       { to: "/contratos", label: "Contratos" },
+      { to: "/faturamento", label: "Faturamento" },
+      { to: "/gestao-contrato", label: "Gestão do contrato (IMR)" },
       { to: "/empenhos", label: "Empenhos" },
       { to: "/cotas", label: "Cotas e saldos" },
       { to: "/centros-custo", label: "Centros de Custo" },
