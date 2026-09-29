@@ -270,7 +270,7 @@ function NewInvoiceDialog({
   const [busy, setBusy] = useState(false);
 
   const supplierContracts = contracts.filter(
-    (c) => supplier !== NONE && c.supplier_id === supplier && c.status === "vigente",
+    (c) => c.status === "vigente" && (supplier === NONE || c.supplier_id === supplier),
   );
 
   function pickContract(id: string) {
@@ -281,15 +281,22 @@ function NewInvoiceDialog({
 
   async function create() {
     if (!orgId) return;
-    if (supplier === NONE) {
-      toast.error("Selecione o fornecedor.");
+    if (supplier === NONE && contract === NONE) {
+      toast.error("Selecione o contrato (ou o fornecedor).");
       return;
     }
     const start = month;
     const end = monthEnd(month);
     setBusy(true);
     try {
-      const candidates = await fetchInvoiceCandidates(supplier, start, end);
+      const candidates = await fetchInvoiceCandidates(
+        {
+          supplierId: supplier === NONE ? null : supplier,
+          contractId: contract === NONE ? null : contract,
+        },
+        start,
+        end,
+      );
       if (candidates.length === 0) {
         toast.error(
           "Não há operações a faturar deste fornecedor no mês (abastecimentos válidos, manutenções concluídas ou lavagens realizadas que ainda não estejam em fatura).",
@@ -303,7 +310,10 @@ function NewInvoiceDialog({
           reference_month: start,
           period_start: start,
           period_end: end,
-          supplier_id: supplier,
+          supplier_id:
+            supplier === NONE
+              ? (contracts.find((x) => x.id === contract)?.supplier_id ?? null)
+              : supplier,
           contract_id: contract === NONE ? null : contract,
           admin_fee_percent: parseSigned(fee),
           created_by: userId,
@@ -345,7 +355,7 @@ function NewInvoiceDialog({
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label>Fornecedor *</Label>
+            <Label>Fornecedor (opcional se escolher o contrato)</Label>
             <Select
               value={supplier}
               onValueChange={(v) => {
@@ -388,16 +398,16 @@ function NewInvoiceDialog({
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label>Contrato (opcional)</Label>
+            <Label>Contrato</Label>
             <Select value={contract} onValueChange={pickContract}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={NONE}>Sem contrato</SelectItem>
+                <SelectItem value={NONE}>Todos os contratos</SelectItem>
                 {supplierContracts.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
-                    {c.number}
+                    {c.number} — {c.object.slice(0, 32)}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -252,7 +252,7 @@ export type Candidate = {
  * abastecimentos válidos, manutenções concluídas e lavagens realizadas.
  */
 export async function fetchInvoiceCandidates(
-  supplierId: string,
+  filter: { supplierId?: string | null; contractId?: string | null },
   start: string,
   end: string,
 ): Promise<Candidate[]> {
@@ -265,7 +265,10 @@ export async function fetchInvoiceCandidates(
       .select(
         "id, fueled_at, quantity, total_value, vehicle_id, vehicle:vehicles(plate), fuel:fuel_types(name)",
       )
-      .eq("supplier_id", supplierId)
+      .eq(
+        filter.contractId ? "contract_id" : "supplier_id",
+        (filter.contractId ?? filter.supplierId) as string,
+      )
       .eq("status", "valido")
       .gte("fueled_at", startTs)
       .lte("fueled_at", endTs),
@@ -274,7 +277,10 @@ export async function fetchInvoiceCandidates(
       .select(
         "id, code, services, entry_at, exit_at, total_value, labor_value, parts_value, other_value, vehicle_id, vehicle:vehicles(plate)",
       )
-      .eq("supplier_id", supplierId)
+      .eq(
+        filter.contractId ? "contract_id" : "supplier_id",
+        (filter.contractId ?? filter.supplierId) as string,
+      )
       .eq("status", "concluida")
       .gte("entry_at", startTs)
       .lte("entry_at", endTs),
@@ -283,7 +289,10 @@ export async function fetchInvoiceCandidates(
       .select(
         "id, code, performed_at, total_value, service_types, vehicle_id, vehicle:vehicles(plate)",
       )
-      .eq("supplier_id", supplierId)
+      .eq(
+        filter.contractId ? "contract_id" : "supplier_id",
+        (filter.contractId ?? filter.supplierId) as string,
+      )
       .eq("status", "realizada")
       .gte("performed_at", startTs)
       .lte("performed_at", endTs),
