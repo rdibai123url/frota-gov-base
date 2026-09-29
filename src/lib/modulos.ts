@@ -68,6 +68,7 @@ export const MODULES: ModuleDef[] = [
   m("ordens-servico", "Ordens de Serviço", "Prestadores e compras", ["/ordem-servico/"]),
   m("ofp", "Ordens de fornecimento (OFP)", "Prestadores e compras"),
   m("contratos", "Contratos", "Contratos e Orçamento"),
+  m("rastreamento", "Rastreamento", "Frota"),
   m("faturamento", "Faturamento", "Contratos e Orçamento"),
   m("gestao-contrato", "Gestão do contrato (IMR)", "Contratos e Orçamento"),
   m("empenhos", "Empenhos", "Contratos e Orçamento"),

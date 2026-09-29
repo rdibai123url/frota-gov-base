@@ -37,7 +37,13 @@ import {
 import { formatMoney, formatLiters, formatNumberBR, formatCPF, parseBRNumber } from "@/lib/format";
 import { DIARY_STATUS } from "@/lib/diarias";
 import { logEvent } from "@/lib/platform";
-import { exportReportCsv, exportXlsx, printReport, type ReportMeta } from "@/lib/reports";
+import {
+  exportReportCsv,
+  exportReportXml,
+  exportXlsx,
+  printReport,
+  type ReportMeta,
+} from "@/lib/reports";
 import {
   COST_CATEGORIES,
   DEVIATION_LABEL,
@@ -90,6 +96,10 @@ const REPORTS = [
   { value: "patrimonio", label: "Movimentação patrimonial" },
   { value: "diarias", label: "Diárias — requisições e comprovações" },
   { value: "limpeza", label: "Limpeza da frota" },
+  { value: "manutencao_prazos", label: "Manutenção — tempo de reparo e cumprimento de prazo" },
+  { value: "faturamento", label: "Faturamento — faturas, glosas e taxa de administração" },
+  { value: "contrato_ocorrencias", label: "Gestão do contrato — ocorrências e notificações" },
+  { value: "imr_notas", label: "Indicadores de nível de serviço (IMR) — notas mensais" },
   { value: "cotas_servidor", label: "Cotas de combustível de servidor" },
   { value: "cred_capturas", label: "Credenciados — capturas operacionais" },
   { value: "cred_cartoes", label: "Credenciados — cartões virtuais e usos" },
@@ -122,6 +132,10 @@ const CAPS: Record<ReportKey, { date: boolean; unit: boolean; vehicle: boolean; 
     patrimonio: { date: true, unit: true, vehicle: true, driver: false },
     diarias: { date: true, unit: true, vehicle: false, driver: true },
     limpeza: { date: true, unit: true, vehicle: true, driver: false },
+    manutencao_prazos: { date: true, unit: true, vehicle: true, driver: false },
+    faturamento: { date: true, unit: false, vehicle: false, driver: false },
+    contrato_ocorrencias: { date: true, unit: false, vehicle: false, driver: false },
+    imr_notas: { date: true, unit: false, vehicle: false, driver: false },
     cotas_servidor: { date: true, unit: true, vehicle: true, driver: false },
     cred_capturas: { date: true, unit: false, vehicle: true, driver: false },
     cred_cartoes: { date: false, unit: true, vehicle: true, driver: false },
@@ -210,6 +224,21 @@ const LABELS: Record<string, string> = {
   reservado: "Reservado",
   itens: "Itens",
   atendido: "Quantidade atendida",
+  dias_reparo: "Dias em reparo",
+  prazo_previsto: "Devolução prometida",
+  no_prazo: "Dentro do prazo",
+  glosa: "Glosa (R$)",
+  taxa_adm: "Taxa de adm. (R$)",
+  liquido: "Líquido (R$)",
+  bruto: "Bruto (R$)",
+  prazo: "Prazo",
+  resolucao: "Resolução",
+  mes: "Mês",
+  indicador: "Indicador",
+  meta: "Meta",
+  apurado: "Apurado",
+  nota_indicador: "Nota (0 a 10)",
+  registrado_por: "Registrado como",
 };
 
 const label = (k: string) => LABELS[k] ?? k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, " ");
@@ -632,6 +661,120 @@ function Relatorios() {
           mao_obra: formatMoney(m.labor_value),
           valor: formatMoney(m.total_value),
           situacao: m.status,
+        }));
+      }
+
+      if (report === "manutencao_prazos") {
+        let q = supabase
+          .from("maintenance_records")
+          .select(
+            "id, code, kind, status, entry_at, exit_at, promised_return_at, vehicle:vehicles(plate, asset_code), unit:units(name), supplier:suppliers(trade_name, legal_name)",
+          )
+          .gte("entry_at", start)
+          .lte("entry_at", end)
+          .order("entry_at", { ascending: false });
+        if (unit) q = q.eq("unit_id", unit);
+        if (vehicle) q = q.eq("vehicle_id", vehicle);
+        if (contract) q = q.eq("contract_id", contract);
+        const { data: rows, error } = await q;
+        if (error) throw error;
+        return (rows ?? []).map((m) => {
+          const fim = m.exit_at ? new Date(m.exit_at) : new Date();
+          const dias = Math.max(
+            0,
+            Math.round((fim.getTime() - new Date(m.entry_at).getTime()) / 86400000),
+          );
+          const prazo = m.promised_return_at ? new Date(m.promised_return_at) : null;
+          return {
+            codigo: m.code ?? "—",
+            veiculo: m.vehicle?.plate ?? m.vehicle?.asset_code ?? "—",
+            unidade: m.unit?.name ?? "—",
+            fornecedor: m.supplier?.trade_name ?? m.supplier?.legal_name ?? "—",
+            entrada: day(m.entry_at),
+            prazo_previsto: prazo ? day(m.promised_return_at) : "—",
+            saida: m.exit_at ? day(m.exit_at) : "Em andamento",
+            dias_reparo: dias,
+            no_prazo: !prazo
+              ? "Sem prazo"
+              : fim.getTime() <= prazo.getTime() + 86399000
+                ? "Sim"
+                : "Não",
+            situacao: m.status,
+          };
+        });
+      }
+
+      if (report === "faturamento") {
+        let q = supabase
+          .from("billing_invoices")
+          .select(
+            "code, reference_month, status, items_total, glosa_total, admin_fee_percent, admin_fee_value, withholding_value, net_total, nf_number, paid_at, supplier:suppliers(trade_name, legal_name), contract:contracts(number)",
+          )
+          .gte("reference_month", from)
+          .lte("reference_month", to)
+          .order("reference_month", { ascending: false });
+        if (contract) q = q.eq("contract_id", contract);
+        const { data: rows, error } = await q;
+        if (error) throw error;
+        return (rows ?? []).map((i) => ({
+          codigo: i.code ?? "—",
+          mes: day(i.reference_month),
+          fornecedor: i.supplier?.trade_name ?? i.supplier?.legal_name ?? "—",
+          numero: i.contract?.number ?? "—",
+          bruto: formatMoney(i.items_total),
+          glosa: formatMoney(i.glosa_total),
+          taxa_adm: formatMoney(i.admin_fee_value),
+          liquido: formatMoney(i.net_total),
+          nota: i.nf_number ?? "—",
+          data: i.paid_at ? day(i.paid_at) : "—",
+          situacao: i.status,
+        }));
+      }
+
+      if (report === "contrato_ocorrencias") {
+        let q = supabase
+          .from("contract_occurrences")
+          .select(
+            "occurred_at, kind, author_role, description, deadline_at, status, resolution, contract:contracts(number)",
+          )
+          .gte("occurred_at", start)
+          .lte("occurred_at", end)
+          .order("occurred_at", { ascending: false });
+        if (contract) q = q.eq("contract_id", contract);
+        const { data: rows, error } = await q;
+        if (error) throw error;
+        return (rows ?? []).map((o) => ({
+          numero: o.contract?.number ?? "—",
+          data: day(o.occurred_at),
+          tipo: o.kind,
+          registrado_por: o.author_role,
+          descricao: o.description,
+          prazo: o.deadline_at ? day(o.deadline_at) : "—",
+          situacao: o.status,
+          resolucao: o.resolution ?? "—",
+        }));
+      }
+
+      if (report === "imr_notas") {
+        let q = supabase
+          .from("service_level_results")
+          .select(
+            "reference_month, measured_value, score, source, indicator:service_level_indicators(code, name, target_value), contract:contracts(number)",
+          )
+          .gte("reference_month", from)
+          .lte("reference_month", to)
+          .order("reference_month", { ascending: false });
+        if (contract) q = q.eq("contract_id", contract);
+        const { data: rows, error } = await q;
+        if (error) throw error;
+        return (rows ?? []).map((r) => ({
+          numero: r.contract?.number ?? "—",
+          mes: day(r.reference_month),
+          indicador: (r.indicator?.code ?? "") + " — " + (r.indicator?.name ?? ""),
+          meta: r.indicator?.target_value ?? "—",
+          apurado: r.measured_value,
+          nota_indicador: Number(r.score).toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
+          origem: r.source,
         }));
       }
 
@@ -1133,9 +1276,10 @@ function Relatorios() {
     filters,
   };
 
-  async function handleExport(kind: "csv" | "xlsx" | "pdf") {
+  async function handleExport(kind: "csv" | "xlsx" | "xml" | "pdf") {
     const name = `relatorio-${report}-${from}-a-${to}`;
     if (kind === "csv") exportReportCsv(name, columns, rows, meta);
+    else if (kind === "xml") exportReportXml(name, columns, rows, meta);
     else if (kind === "xlsx") exportXlsx(name, columns, rows, reportLabel.slice(0, 28), meta);
     else printReport(meta, columns, rows);
     await logEvent({
@@ -1387,6 +1531,14 @@ function Relatorios() {
             onClick={() => handleExport("xlsx")}
           >
             <Download className="size-4" /> Excel (.xlsx)
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!rows.length}
+            onClick={() => handleExport("xml")}
+          >
+            <Download className="size-4" /> XML
           </Button>
           <Button
             variant="outline"

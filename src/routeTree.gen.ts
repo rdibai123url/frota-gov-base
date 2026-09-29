@@ -58,6 +58,7 @@ import { Route as AuthenticatedPlanosManutencaoRouteImport } from './routes/_aut
 import { Route as AuthenticatedPlataformaRouteImport } from './routes/_authenticated/plataforma'
 import { Route as AuthenticatedPneusRouteImport } from './routes/_authenticated/pneus'
 import { Route as AuthenticatedPortalCredenciadoRouteImport } from './routes/_authenticated/portal-credenciado'
+import { Route as AuthenticatedRastreamentoRouteImport } from './routes/_authenticated/rastreamento'
 import { Route as AuthenticatedRedeCredenciadaRouteImport } from './routes/_authenticated/rede-credenciada'
 import { Route as AuthenticatedRegrasManutencaoRouteImport } from './routes/_authenticated/regras-manutencao'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
@@ -344,6 +345,12 @@ const AuthenticatedPortalCredenciadoRoute =
     path: '/portal-credenciado',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedRastreamentoRoute =
+  AuthenticatedRastreamentoRouteImport.update({
+    id: '/rastreamento',
+    path: '/rastreamento',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedRedeCredenciadaRoute =
   AuthenticatedRedeCredenciadaRouteImport.update({
     id: '/rede-credenciada',
@@ -497,6 +504,7 @@ export interface FileRoutesByFullPath {
   '/plataforma': typeof AuthenticatedPlataformaRoute
   '/pneus': typeof AuthenticatedPneusRoute
   '/portal-credenciado': typeof AuthenticatedPortalCredenciadoRoute
+  '/rastreamento': typeof AuthenticatedRastreamentoRoute
   '/rede-credenciada': typeof AuthenticatedRedeCredenciadaRoute
   '/regras-manutencao': typeof AuthenticatedRegrasManutencaoRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
@@ -566,6 +574,7 @@ export interface FileRoutesByTo {
   '/plataforma': typeof AuthenticatedPlataformaRoute
   '/pneus': typeof AuthenticatedPneusRoute
   '/portal-credenciado': typeof AuthenticatedPortalCredenciadoRoute
+  '/rastreamento': typeof AuthenticatedRastreamentoRoute
   '/rede-credenciada': typeof AuthenticatedRedeCredenciadaRoute
   '/regras-manutencao': typeof AuthenticatedRegrasManutencaoRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
@@ -637,6 +646,7 @@ export interface FileRoutesById {
   '/_authenticated/plataforma': typeof AuthenticatedPlataformaRoute
   '/_authenticated/pneus': typeof AuthenticatedPneusRoute
   '/_authenticated/portal-credenciado': typeof AuthenticatedPortalCredenciadoRoute
+  '/_authenticated/rastreamento': typeof AuthenticatedRastreamentoRoute
   '/_authenticated/rede-credenciada': typeof AuthenticatedRedeCredenciadaRoute
   '/_authenticated/regras-manutencao': typeof AuthenticatedRegrasManutencaoRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
@@ -708,6 +718,7 @@ export interface FileRouteTypes {
     | '/plataforma'
     | '/pneus'
     | '/portal-credenciado'
+    | '/rastreamento'
     | '/rede-credenciada'
     | '/regras-manutencao'
     | '/relatorios'
@@ -777,6 +788,7 @@ export interface FileRouteTypes {
     | '/plataforma'
     | '/pneus'
     | '/portal-credenciado'
+    | '/rastreamento'
     | '/rede-credenciada'
     | '/regras-manutencao'
     | '/relatorios'
@@ -847,6 +859,7 @@ export interface FileRouteTypes {
     | '/_authenticated/plataforma'
     | '/_authenticated/pneus'
     | '/_authenticated/portal-credenciado'
+    | '/_authenticated/rastreamento'
     | '/_authenticated/rede-credenciada'
     | '/_authenticated/regras-manutencao'
     | '/_authenticated/relatorios'
@@ -1227,6 +1240,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalCredenciadoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/rastreamento': {
+      id: '/_authenticated/rastreamento'
+      path: '/rastreamento'
+      fullPath: '/rastreamento'
+      preLoaderRoute: typeof AuthenticatedRastreamentoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/rede-credenciada': {
       id: '/_authenticated/rede-credenciada'
       path: '/rede-credenciada'
@@ -1409,6 +1429,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPlataformaRoute: typeof AuthenticatedPlataformaRoute
   AuthenticatedPneusRoute: typeof AuthenticatedPneusRoute
   AuthenticatedPortalCredenciadoRoute: typeof AuthenticatedPortalCredenciadoRoute
+  AuthenticatedRastreamentoRoute: typeof AuthenticatedRastreamentoRoute
   AuthenticatedRedeCredenciadaRoute: typeof AuthenticatedRedeCredenciadaRoute
   AuthenticatedRegrasManutencaoRoute: typeof AuthenticatedRegrasManutencaoRoute
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
@@ -1469,6 +1490,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPlataformaRoute: AuthenticatedPlataformaRoute,
   AuthenticatedPneusRoute: AuthenticatedPneusRoute,
   AuthenticatedPortalCredenciadoRoute: AuthenticatedPortalCredenciadoRoute,
+  AuthenticatedRastreamentoRoute: AuthenticatedRastreamentoRoute,
   AuthenticatedRedeCredenciadaRoute: AuthenticatedRedeCredenciadaRoute,
   AuthenticatedRegrasManutencaoRoute: AuthenticatedRegrasManutencaoRoute,
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,

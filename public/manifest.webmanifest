@@ -1,0 +1,22 @@
+{
+  "name": "FrotaGov — Gestão de frotas públicas",
+  "short_name": "FrotaGov",
+  "description": "Abastecimento, manutenção, viagens e rede credenciada da frota do órgão, no celular.",
+  "id": "/",
+  "start_url": "/painel",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "pt-BR",
+  "background_color": "#ffffff",
+  "theme_color": "#0b2545",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Rede credenciada", "url": "/rede-credenciada" },
+    { "name": "Abastecimentos", "url": "/abastecimentos" },
+    { "name": "Manutenções", "url": "/manutencoes" }
+  ]
+}

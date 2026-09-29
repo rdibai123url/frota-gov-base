@@ -42,7 +42,7 @@ before(async () => {
   const files = (await readdir(new URL("supabase/migrations/", root)))
     .filter((f) => f.endsWith(".sql"))
     .sort();
-  assert.equal(files.length, 122);
+  assert.equal(files.length, 123);
   for (const file of files) {
     if (file.startsWith("20260925") && !historicalTriggers) {
       historicalTriggers = (
@@ -68,7 +68,7 @@ after(async () => {
   await db.close();
 });
 
-test("111 migrations históricas + 6 novas aplicam sem erro", async () => {
+test("111 migrations históricas + 7 novas aplicam sem erro", async () => {
   const { rows } = await db.query(
     "SELECT count(*)::int n FROM information_schema.tables WHERE table_schema='public'",
   );
@@ -345,4 +345,60 @@ test("fase 3: nota final do IMR segue o exemplo do edital do DNIT", async () => 
   ]);
   const g = await db.query(`SELECT public.imr_final_grade('${contract}', '2026-09-01') g`);
   assert.equal(Number(g.rows[0].g), 8.72);
+});
+
+test("fase 6: rastreador envia posição, gera alertas e recusa token inválido", async () => {
+  const org = id(980);
+  const veh = id(981);
+  const dev = id(982);
+  for (const t of [
+    "tracking_devices",
+    "tracking_positions",
+    "tracking_alerts",
+    "tracking_geofences",
+  ])
+    await db.exec(`ALTER TABLE public.${t} DISABLE TRIGGER ALL`);
+  const token = "tok_teste_1234567890_abcdefghij";
+  await db.exec(`INSERT INTO public.tracking_devices (id, organization_id, vehicle_id, token_hash)
+    VALUES ('${dev}', '${org}', '${veh}', encode(sha256(convert_to('${token}', 'UTF8')), 'hex'))`);
+  await db.exec(`INSERT INTO public.tracking_geofences (organization_id, name, center_lat, center_lng, radius_m, alert_on)
+    VALUES ('${org}', 'Pátio', -23.55, -46.63, 500, 'saida')`);
+
+  await assert.rejects(
+    db.query(
+      `SELECT public.tracking_ingest('token-errado-com-mais-de-24-caracteres', '{"lat":1,"lng":1}')`,
+    ),
+    /Token inválido/,
+  );
+  await assert.rejects(
+    db.query(`SELECT public.tracking_ingest('${token}', '{"lat":95,"lng":1}')`),
+    /Coordenadas inválidas/,
+  );
+
+  // dentro do pátio, velocidade normal: sem alerta
+  let r = await db.query(
+    `SELECT public.tracking_ingest('${token}', '{"lat":-23.55,"lng":-46.63,"speed_kmh":30,"battery_v":12.6,"ignition":true,"recorded_at":"2026-09-29T10:00:00Z"}') r`,
+  );
+  assert.equal(r.rows[0].r.alerts, 0);
+
+  // saiu do pátio (~5 km), acima de 110 km/h e bateria baixa: 3 alertas
+  r = await db.query(
+    `SELECT public.tracking_ingest('${token}', '{"lat":-23.60,"lng":-46.66,"speed_kmh":130,"battery_v":10.9,"recorded_at":"2026-09-29T10:05:00Z"}') r`,
+  );
+  assert.equal(r.rows[0].r.alerts, 3);
+  const kinds = (await db.query("SELECT kind FROM public.tracking_alerts ORDER BY kind")).rows.map(
+    (x) => x.kind,
+  );
+  assert.deepEqual(kinds, ["bateria_baixa", "excesso_velocidade", "saida_geocerca"]);
+
+  // repetir o excesso dentro de 15 min não duplica o alerta
+  r = await db.query(
+    `SELECT public.tracking_ingest('${token}', '{"lat":-23.61,"lng":-46.67,"speed_kmh":135,"recorded_at":"2026-09-29T10:08:00Z"}') r`,
+  );
+  assert.equal(r.rows[0].r.alerts, 0);
+
+  const seen = await db.query("SELECT last_seen_at FROM public.tracking_devices WHERE id=$1", [
+    dev,
+  ]);
+  assert.ok(seen.rows[0].last_seen_at);
 });

@@ -9852,6 +9852,294 @@ export type Database = {
           },
         ];
       };
+      tracking_alerts: {
+        Row: {
+          acknowledged_at: string | null;
+          acknowledged_by: string | null;
+          created_at: string;
+          id: string;
+          kind: string;
+          message: string;
+          occurred_at: string;
+          organization_id: string;
+          position_id: string | null;
+          vehicle_id: string;
+        };
+        Insert: {
+          acknowledged_at?: string | null;
+          acknowledged_by?: string | null;
+          created_at?: string;
+          id?: string;
+          kind: string;
+          message: string;
+          occurred_at?: string;
+          organization_id: string;
+          position_id?: string | null;
+          vehicle_id: string;
+        };
+        Update: {
+          acknowledged_at?: string | null;
+          acknowledged_by?: string | null;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          message?: string;
+          occurred_at?: string;
+          organization_id?: string;
+          position_id?: string | null;
+          vehicle_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tracking_alerts_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tracking_alerts_position_id_fkey";
+            columns: ["position_id"];
+            isOneToOne: false;
+            referencedRelation: "tracking_positions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tracking_alerts_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tracking_devices: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          created_by: string | null;
+          device_identifier: string | null;
+          id: string;
+          last_seen_at: string | null;
+          notes: string | null;
+          organization_id: string;
+          provider: string | null;
+          token_hash: string;
+          updated_at: string;
+          updated_by: string | null;
+          vehicle_id: string;
+        };
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          device_identifier?: string | null;
+          id?: string;
+          last_seen_at?: string | null;
+          notes?: string | null;
+          organization_id: string;
+          provider?: string | null;
+          token_hash: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          vehicle_id: string;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          device_identifier?: string | null;
+          id?: string;
+          last_seen_at?: string | null;
+          notes?: string | null;
+          organization_id?: string;
+          provider?: string | null;
+          token_hash?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          vehicle_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tracking_devices_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tracking_devices_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tracking_geofences: {
+        Row: {
+          active: boolean;
+          alert_on: string;
+          center_lat: number;
+          center_lng: number;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          name: string;
+          organization_id: string;
+          radius_m: number;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          active?: boolean;
+          alert_on?: string;
+          center_lat: number;
+          center_lng: number;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          name: string;
+          organization_id: string;
+          radius_m: number;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          active?: boolean;
+          alert_on?: string;
+          center_lat?: number;
+          center_lng?: number;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          name?: string;
+          organization_id?: string;
+          radius_m?: number;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tracking_geofences_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tracking_positions: {
+        Row: {
+          battery_v: number | null;
+          created_at: string;
+          device_id: string;
+          heading: number | null;
+          id: string;
+          ignition: boolean | null;
+          latitude: number;
+          longitude: number;
+          odometer_km: number | null;
+          organization_id: string;
+          recorded_at: string;
+          speed_kmh: number | null;
+          vehicle_id: string;
+        };
+        Insert: {
+          battery_v?: number | null;
+          created_at?: string;
+          device_id: string;
+          heading?: number | null;
+          id?: string;
+          ignition?: boolean | null;
+          latitude: number;
+          longitude: number;
+          odometer_km?: number | null;
+          organization_id: string;
+          recorded_at: string;
+          speed_kmh?: number | null;
+          vehicle_id: string;
+        };
+        Update: {
+          battery_v?: number | null;
+          created_at?: string;
+          device_id?: string;
+          heading?: number | null;
+          id?: string;
+          ignition?: boolean | null;
+          latitude?: number;
+          longitude?: number;
+          odometer_km?: number | null;
+          organization_id?: string;
+          recorded_at?: string;
+          speed_kmh?: number | null;
+          vehicle_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tracking_positions_device_id_fkey";
+            columns: ["device_id"];
+            isOneToOne: false;
+            referencedRelation: "tracking_devices";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tracking_positions_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tracking_positions_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tracking_settings: {
+        Row: {
+          created_at: string;
+          id: string;
+          low_battery_v: number;
+          max_speed_kmh: number;
+          offline_minutes: number;
+          organization_id: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          low_battery_v?: number;
+          max_speed_kmh?: number;
+          offline_minutes?: number;
+          organization_id: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          low_battery_v?: number;
+          max_speed_kmh?: number;
+          offline_minutes?: number;
+          organization_id?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tracking_settings_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       traffic_fines: {
         Row: {
           amount: number;
@@ -12218,6 +12506,7 @@ export type Database = {
         Returns: undefined;
       };
       supply_order_issue: { Args: { _order: string }; Returns: undefined };
+      tracking_ingest: { Args: { _token: string; _payload: Json }; Returns: Json };
       transparency_period_is_closed: {
         Args: { _at: string; _org: string };
         Returns: boolean;

@@ -120,6 +120,60 @@ export function exportReportCsv(
   URL.revokeObjectURL(url);
 }
 
+const xmlTag = (label: string, index: number) => {
+  const base = label
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Za-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return /^[A-Za-z]/.test(base) ? base : "campo_" + (index + 1);
+};
+const xmlText = (v: unknown) =>
+  String(v ?? "")
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+/** Exporta XML (UTF-8) com o cabeçalho institucional e uma <linha> por registro. */
+export function exportReportXml(
+  filename: string,
+  columns: ReportColumn[],
+  rows: ReportRow[],
+  meta?: ReportMeta,
+) {
+  const tags = columns.map((c, i) => xmlTag(c.label, i));
+  const out: string[] = ['<?xml version="1.0" encoding="UTF-8"?>', "<relatorio>"];
+  if (meta) {
+    out.push("  <cabecalho>");
+    for (const [k, v] of headerLines(meta, rows.length)) {
+      out.push(
+        '    <item rotulo="' + xmlText(k).replace(/"/g, "&quot;") + '">' + xmlText(v) + "</item>",
+      );
+    }
+    out.push("  </cabecalho>");
+  }
+  out.push("  <linhas>");
+  for (const r of rows) {
+    out.push("    <linha>");
+    columns.forEach((c, i) => {
+      const value = r[c.key];
+      const text = typeof value === "object" && value !== null ? JSON.stringify(value) : value;
+      out.push("      <" + tags[i] + ">" + xmlText(text) + "</" + tags[i] + ">");
+    });
+    out.push("    </linha>");
+  }
+  out.push("  </linhas>", "</relatorio>");
+  const blob = new Blob([out.join("\n")], { type: "application/xml;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = safeName(filename) + ".xml";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 const escapeHtml = (v: unknown) =>
   String(v ?? "")
     .replace(/&/g, "&amp;")
