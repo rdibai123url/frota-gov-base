@@ -7461,6 +7461,7 @@ export type Database = {
       };
       route_cache: {
         Row: {
+          organization_id: string;
           cache_key: string;
           created_at: string;
           destination_lat: number;
@@ -7476,6 +7477,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          organization_id: string;
           cache_key: string;
           created_at?: string;
           destination_lat: number;
@@ -7491,6 +7493,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          organization_id?: string;
           cache_key?: string;
           created_at?: string;
           destination_lat?: number;
@@ -11007,6 +11010,13 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      reserve_checklist_photo: {
+        Args: { _checklist: string; _mime: string; _size: number };
+        Returns: Json;
+      };
+      confirm_checklist_photo: { Args: { _upload: string }; Returns: string };
+      cancel_checklist_photo_upload: { Args: { _upload: string }; Returns: boolean };
+
       active_org_id: { Args: never; Returns: string };
       active_server_quota: {
         Args: { _at: string; _vehicle: string };

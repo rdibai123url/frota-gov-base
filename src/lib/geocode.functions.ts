@@ -12,6 +12,7 @@
  * Falha de rede NUNCA bloqueia o cadastro: a resposta apenas informa
  * "falhou" e o registro fica pendente de geocodificação.
  */
+import { z } from "zod";
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -64,14 +65,14 @@ async function fetchWithTimeout(url: string) {
 export const geocodeAddress = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
-    (data: {
-      address?: string;
-      district?: string;
-      city?: string;
-      state?: string;
-      zip?: string;
-      force?: boolean;
-    }) => data,
+    z.object({
+      address: z.string().max(500).optional(),
+      district: z.string().max(200).optional(),
+      city: z.string().max(200).optional(),
+      state: z.string().max(100).optional(),
+      zip: z.string().max(30).optional(),
+      force: z.boolean().optional(),
+    }),
   )
   .handler(async ({ data, context }): Promise<GeocodeResult> => {
     const { provider, baseUrl } = providerConfig();
@@ -97,13 +98,15 @@ export const geocodeAddress = createServerFn({ method: "POST" })
     // Exige ao menos logradouro + município.
     if (!data.address?.trim() || !data.city?.trim()) return base;
 
-    const supabase = context.supabase;
+    const { requireCacheContext, trustedGeocodeKey } = await import("./cache-context.server");
+    const { supabase, organizationId } = await requireCacheContext(context.supabase);
+    const cacheQuery = trustedGeocodeKey(organizationId, provider, query);
 
     if (!data.force) {
       const { data: cached } = await supabase
         .from("geocode_cache")
         .select("latitude, longitude, display_name, precision, provider, found")
-        .eq("query", query)
+        .eq("query", cacheQuery)
         .maybeSingle();
       if (cached) {
         return cached.found
@@ -146,7 +149,15 @@ export const geocodeAddress = createServerFn({ method: "POST" })
         addresstype?: string;
         type?: string;
       }>;
-      const hit = json?.[0];
+      const candidate = Array.isArray(json) ? json[0] : undefined;
+      const hit =
+        candidate &&
+        Number.isFinite(Number(candidate.lat)) &&
+        Number.isFinite(Number(candidate.lon)) &&
+        Math.abs(Number(candidate.lat)) <= 90 &&
+        Math.abs(Number(candidate.lon)) <= 180
+          ? candidate
+          : undefined;
       const found = Boolean(hit);
       const lat = hit ? Number(hit.lat) : null;
       const lon = hit ? Number(hit.lon) : null;
@@ -154,7 +165,7 @@ export const geocodeAddress = createServerFn({ method: "POST" })
 
       await supabase.from("geocode_cache").upsert(
         {
-          query,
+          query: cacheQuery,
           latitude: lat,
           longitude: lon,
           display_name: hit?.display_name ?? null,

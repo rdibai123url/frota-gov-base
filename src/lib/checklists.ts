@@ -95,20 +95,55 @@ export function useVehicleChecklists(vehicleId: string | null) {
   });
 }
 
-export async function uploadChecklistPhoto(
-  orgId: string,
-  usageId: string,
-  stage: ChecklistStage,
-  file: File,
-) {
-  if (!file.type.startsWith("image/")) throw new Error("Selecione somente arquivos de imagem.");
-  const safe = file.name.replace(/[^\w.-]+/g, "_");
-  const path = `${orgId}/${usageId}/${stage}/${Date.now()}-${crypto.randomUUID()}-${safe}`;
-  const { error } = await supabase.storage
-    .from("checklist-frota")
-    .upload(path, file, { upsert: false });
-  if (error) throw error;
-  return path;
+/** Reserva e confirmação são serializadas no banco; uma resposta perdida não autoriza apagar evidência. */
+export async function uploadChecklistPhoto(checklistId: string, file: File) {
+  if (
+    !["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
+    file.size <= 0 ||
+    file.size > 10 * 1024 * 1024
+  ) {
+    throw new Error("Envie JPEG, PNG ou WebP de até 10 MiB.");
+  }
+  const reservation = await supabase.rpc("reserve_checklist_photo", {
+    _checklist: checklistId,
+    _mime: file.type,
+    _size: file.size,
+  });
+  if (reservation.error) throw new Error(reservation.error.message);
+  const value = reservation.data;
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value) ||
+    typeof value["id"] !== "string" ||
+    typeof value["path"] !== "string"
+  ) {
+    throw new Error("Reserva de upload inválida.");
+  }
+  const id = value["id"],
+    path = value["path"];
+  try {
+    const upload = await supabase.storage
+      .from("checklist-frota")
+      .upload(path, file, { upsert: false, contentType: file.type });
+    if (upload.error) throw new Error(upload.error.message);
+    const confirmation = await supabase.rpc("confirm_checklist_photo", { _upload: id });
+    if (confirmation.error) throw new Error(confirmation.error.message);
+    return confirmation.data;
+  } catch (error) {
+    const cancellation = await supabase.rpc("cancel_checklist_photo_upload", { _upload: id });
+    if (cancellation.error) {
+      throw new Error(
+        "Não foi possível confirmar o estado da foto. Arquivo preservado para conferência; não reenvie sem revisar o checklist.",
+      );
+    }
+    // A confirmação pode ter sido concluída mesmo se a resposta se perdeu.
+    if (cancellation.data === false) return;
+    const cleanup = await supabase.storage.from("checklist-frota").remove([path]);
+    if (cleanup.error)
+      throw new Error("Foto não anexada; limpeza pendente registrada para conferência.");
+    throw error instanceof Error ? error : new Error("Não foi possível anexar a foto.");
+  }
 }
 
 export async function openChecklistPhoto(path: string) {

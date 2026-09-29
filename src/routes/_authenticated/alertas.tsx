@@ -88,17 +88,32 @@ function Alertas() {
   const [dismissing, setDismissing] = useState<AlertLike | null>(null);
 
   useEffect(() => {
-    void Promise.all([
-      supabase.rpc("refresh_financial_alerts"),
-      supabase.rpc("refresh_maintenance_alerts"),
-      supabase.rpc("refresh_procurement_alerts"),
-      supabase.rpc("refresh_fleet_alerts"),
-      supabase.rpc("refresh_intelligence_alerts"),
-      // Fecha sozinho as inconsistências corretivas cuja causa já não existe.
-      supabase.rpc("resolve_stale_alerts"),
-    ]).then(() => invalidate(["fueling-alerts", "fueling-alerts-open-count"]));
+    if (!perms.canRegister) return;
+    let cancelled = false;
+    void (async () => {
+      const refreshes = [
+        "refresh_financial_alerts",
+        "refresh_maintenance_alerts",
+        "refresh_procurement_alerts",
+        "refresh_fleet_alerts",
+        "refresh_intelligence_alerts",
+        "resolve_stale_alerts",
+      ] as const;
+      for (const name of refreshes) {
+        if (cancelled) return;
+        const { error } = await supabase.rpc(name);
+        if (error) {
+          toast.error("Não foi possível atualizar os alertas: " + error.message);
+          return;
+        }
+      }
+      invalidate(["fueling-alerts", "fueling-alerts-open-count"]);
+    })();
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [perms.orgId, perms.canRegister]);
 
   const filtered = useMemo(
     () =>

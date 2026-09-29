@@ -13,6 +13,7 @@
  * Falha de rede NUNCA bloqueia o agendamento: a resposta apenas informa que
  * não foi possível calcular e o servidor pode digitar a distância manualmente.
  */
+import { z } from "zod";
 import { createServerFn } from "@tanstack/react-start";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
@@ -20,10 +21,10 @@ import type { Database } from "@/integrations/supabase/types";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export type RoutePoint = {
-  address?: string | null;
-  district?: string | null;
-  city?: string | null;
-  state?: string | null;
+  address?: string | null | undefined;
+  district?: string | null | undefined;
+  city?: string | null | undefined;
+  state?: string | null | undefined;
 };
 
 /** Geometria simplificada da rota (GeoJSON LineString), só para desenhar no mapa. */
@@ -86,14 +87,20 @@ function normalize(parts: (string | null | undefined)[]) {
 }
 
 /** Converte um endereço em coordenadas, reaproveitando o cache do sistema. */
-async function locate(supabase: SupabaseClient<Database>, point: RoutePoint) {
+async function locate(
+  supabase: SupabaseClient<Database>,
+  point: RoutePoint,
+  organizationId: string,
+) {
   const query = normalize([point.address, point.district, point.city, point.state, "Brasil"]);
   if (!point.city?.trim()) return null;
 
+  const { trustedGeocodeKey } = await import("./cache-context.server");
+  const cacheQuery = trustedGeocodeKey(organizationId, config().provider, query);
   const { data: cached } = await supabase
     .from("geocode_cache")
     .select("latitude, longitude, found")
-    .eq("query", query)
+    .eq("query", cacheQuery)
     .maybeSingle();
   if (cached) {
     return cached.found && cached.latitude != null
@@ -105,11 +112,19 @@ async function locate(supabase: SupabaseClient<Database>, point: RoutePoint) {
   const json = (await getJson(
     `${geocoderUrl}?format=jsonv2&limit=1&countrycodes=br&q=${encodeURIComponent(query)}`,
   )) as Array<{ lat: string; lon: string; display_name: string; addresstype?: string }> | null;
-  const hit = Array.isArray(json) ? json[0] : undefined;
+  const candidate = Array.isArray(json) ? json[0] : undefined;
+  const hit =
+    candidate &&
+    Number.isFinite(Number(candidate.lat)) &&
+    Number.isFinite(Number(candidate.lon)) &&
+    Math.abs(Number(candidate.lat)) <= 90 &&
+    Math.abs(Number(candidate.lon)) <= 180
+      ? candidate
+      : undefined;
 
   await supabase.from("geocode_cache").upsert(
     {
-      query,
+      query: cacheQuery,
       latitude: hit ? Number(hit.lat) : null,
       longitude: hit ? Number(hit.lon) : null,
       display_name: hit?.display_name ?? null,
@@ -125,7 +140,23 @@ async function locate(supabase: SupabaseClient<Database>, point: RoutePoint) {
 
 export const computeRoute = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { origin: RoutePoint; destination: RoutePoint; force?: boolean }) => data)
+  .inputValidator(
+    z.object({
+      origin: z.object({
+        address: z.string().max(500).nullish(),
+        district: z.string().max(200).nullish(),
+        city: z.string().max(200).nullish(),
+        state: z.string().max(100).nullish(),
+      }),
+      destination: z.object({
+        address: z.string().max(500).nullish(),
+        district: z.string().max(200).nullish(),
+        city: z.string().max(200).nullish(),
+        state: z.string().max(100).nullish(),
+      }),
+      force: z.boolean().optional(),
+    }),
+  )
   .handler(async ({ data, context }): Promise<RouteResult> => {
     const { provider, routerUrl } = config();
     const base: RouteResult = {
@@ -141,10 +172,11 @@ export const computeRoute = createServerFn({ method: "POST" })
       destination: null,
     };
 
-    const supabase = context.supabase as SupabaseClient<Database>;
+    const { requireCacheContext } = await import("./cache-context.server");
+    const { supabase, organizationId } = await requireCacheContext(context.supabase);
 
-    const origin = await locate(supabase, data.origin);
-    const destination = await locate(supabase, data.destination);
+    const origin = await locate(supabase, data.origin, organizationId);
+    const destination = await locate(supabase, data.destination, organizationId);
     if (!origin || !destination) {
       return {
         ...base,
@@ -167,6 +199,7 @@ export const computeRoute = createServerFn({ method: "POST" })
       const { data: hit } = await supabase
         .from("route_cache")
         .select("distance_km, duration_min, geometry, provider, found")
+        .eq("organization_id", organizationId)
         .eq("cache_key", key)
         .maybeSingle();
       if (hit?.found) {
@@ -175,7 +208,7 @@ export const computeRoute = createServerFn({ method: "POST" })
           status: "calculada",
           distanceKm: Number(hit.distance_km),
           durationMin: hit.duration_min == null ? null : Number(hit.duration_min),
-          geometry: hit.geometry ?? null,
+          geometry: (hit.geometry as RouteGeometry | null) ?? null,
           provider: hit.provider,
           cached: true,
           message: "Rota obtida do cache do sistema.",
@@ -203,13 +236,24 @@ export const computeRoute = createServerFn({ method: "POST" })
       };
     }
 
-    const route = json.routes?.[0];
+    const candidate = json.routes?.[0];
+    const route =
+      candidate &&
+      Number.isFinite(candidate.distance) &&
+      candidate.distance >= 0 &&
+      Number.isFinite(candidate.duration) &&
+      candidate.duration >= 0 &&
+      candidate.geometry?.type === "LineString" &&
+      Array.isArray(candidate.geometry.coordinates)
+        ? candidate
+        : undefined;
     const found = Boolean(route);
     const distanceKm = route ? Number((route.distance / 1000).toFixed(2)) : null;
     const durationMin = route ? Math.round(route.duration / 60) : null;
 
     await supabase.from("route_cache").upsert(
       {
+        organization_id: organizationId,
         cache_key: key,
         origin_lat: origin.lat,
         origin_lon: origin.lon,
@@ -222,7 +266,7 @@ export const computeRoute = createServerFn({ method: "POST" })
         found,
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "cache_key" },
+      { onConflict: "organization_id,cache_key" },
     );
 
     if (!found) {
