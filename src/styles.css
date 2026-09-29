@@ -187,11 +187,17 @@
     font-size: var(--fs);
     -webkit-text-size-adjust: 100%;
   }
+  html[data-tamanho="menor"] {
+    font-size: calc(var(--fs) * 0.82);
+  }
   html[data-tamanho="compacto"] {
     font-size: calc(var(--fs) * 0.9);
   }
   html[data-tamanho="grande"] {
     font-size: calc(var(--fs) * 1.12);
+  }
+  html[data-tamanho="maior"] {
+    font-size: calc(var(--fs) * 1.25);
   }
 
   body {

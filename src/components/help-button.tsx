@@ -19,7 +19,6 @@ const TAG_STYLE: Record<FieldTag, string> = {
   Automático: "border-border bg-muted text-muted-foreground",
   Calculado: "border-border bg-muted text-muted-foreground",
   Condicional: "border-border bg-muted text-muted-foreground",
-  "Depende de integração": "border-warning/40 bg-warning/15 text-foreground",
 };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {

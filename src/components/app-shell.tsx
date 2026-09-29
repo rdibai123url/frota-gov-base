@@ -3,6 +3,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard,
+  IdCard,
   Truck,
   Building2,
   Landmark,
@@ -52,10 +53,11 @@ import {
   useOrganization,
   useProfile,
   ROLE_LABELS,
+  type AppRole,
 } from "@/lib/frotagov";
 import { useIsSuperAdmin, usePlatformSession, usePlatformContextActions } from "@/lib/platform";
 import { moduleForPath, useAccessOverrides, useModuleMap, useMyModuleAccess } from "@/lib/modulos";
-import { roleCanOpen } from "@/lib/permissoes";
+import { roleCanOpen, type AccessOverrides } from "@/lib/permissoes";
 import { useEmbedded } from "@/components/embedded";
 import { setReportBranding } from "@/lib/reports";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -506,8 +508,13 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         {open && (
           <div className="fixed inset-0 z-50 lg:hidden">
-            <div className="absolute inset-0 bg-foreground/40" onClick={() => setOpen(false)} />
-            <div className="absolute inset-y-0 left-0 w-72">{renderSidebar(false)}</div>
+            <div
+              className="animate-in fade-in absolute inset-0 bg-foreground/45 backdrop-blur-[2px] duration-200"
+              onClick={() => setOpen(false)}
+            />
+            <div className="animate-in slide-in-from-left absolute inset-y-0 left-0 w-[80vw] max-w-72 shadow-2xl duration-200">
+              {renderSidebar(false)}
+            </div>
             <Button
               variant="secondary"
               size="icon"
@@ -520,7 +527,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         )}
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-card px-4 sm:px-6">
+          <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-card/85 px-4 backdrop-blur-md supports-[backdrop-filter]:bg-card/70 sm:px-6">
             <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setOpen(true)}>
               <Menu className="size-5" />
             </Button>
@@ -692,7 +699,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           )}
 
-          <main className="flex-1 px-4 py-5 sm:px-6 lg:px-7">
+          <main className="flex-1 px-4 pb-24 pt-5 sm:px-6 lg:px-7 lg:pb-5">
             <div
               key={pathname}
               className="animate-rise mx-auto w-full max-w-[96rem] min-[1900px]:max-w-[118rem]"
@@ -729,7 +736,93 @@ export function AppShell({ children }: { children: ReactNode }) {
           </main>
         </div>
       </div>
+
+      <MobileTabBar
+        modules={modules}
+        roles={me?.roles ?? []}
+        overrides={overrides ?? {}}
+        mine={myAccess ?? {}}
+        isSuperAdmin={isSuperAdmin}
+        pathname={pathname}
+        onMenu={() => setOpen(true)}
+      />
     </TooltipProvider>
+  );
+}
+
+const TAB_BAR: { to: string; label: string; icon: typeof Truck }[] = [
+  { to: "/painel", label: "Início", icon: LayoutDashboard },
+  { to: "/veiculos", label: "Veículos", icon: Truck },
+  { to: "/abastecimentos", label: "Abastecer", icon: Fuel },
+  { to: "/motorista", label: "Motorista", icon: IdCard },
+];
+
+/** Barra de atalhos no rodapé do celular: os 4 lugares mais usados e o botão "Menu". */
+function MobileTabBar({
+  modules,
+  roles,
+  overrides,
+  mine,
+  isSuperAdmin,
+  pathname,
+  onMenu,
+}: {
+  modules: Record<string, boolean>;
+  roles: AppRole[];
+  overrides: AccessOverrides;
+  mine: Record<string, boolean>;
+  isSuperAdmin: boolean;
+  pathname: string;
+  onMenu: () => void;
+}) {
+  const items = TAB_BAR.filter((i) => {
+    const mod = moduleForPath(i.to);
+    if (!mod) return true;
+    if (modules[mod.key] === false) return false;
+    return isSuperAdmin || roleCanOpen(mod.key, roles, overrides, mine);
+  });
+  return (
+    <nav
+      aria-label="Navegação rápida"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/90 pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_20px_-12px_rgb(0_0_0/0.35)] backdrop-blur-md lg:hidden"
+    >
+      <ul className="mx-auto flex max-w-lg items-stretch justify-around">
+        {items.map((i) => {
+          const active = pathname === i.to || pathname.startsWith(`${i.to}/`);
+          return (
+            <li key={i.to} className="flex-1">
+              <Link
+                to={i.to}
+                className={cn(
+                  "flex min-h-14 flex-col items-center justify-center gap-0.5 text-[0.68rem] font-medium transition-colors",
+                  active ? "text-primary" : "text-muted-foreground",
+                )}
+              >
+                <i.icon className={cn("size-5", active && "scale-110")} />
+                {i.label}
+                <span
+                  className={cn(
+                    "mt-0.5 h-0.5 w-6 rounded-full transition-colors",
+                    active ? "bg-primary" : "bg-transparent",
+                  )}
+                />
+              </Link>
+            </li>
+          );
+        })}
+        <li className="flex-1">
+          <button
+            type="button"
+            onClick={onMenu}
+            className="flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-[0.68rem] font-medium text-muted-foreground"
+          >
+            <Menu className="size-5" />
+            Menu
+            <span className="mt-0.5 h-0.5 w-6" />
+          </button>
+        </li>
+      </ul>
+    </nav>
   );
 }
 

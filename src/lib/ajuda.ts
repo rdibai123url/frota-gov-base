@@ -9,8 +9,7 @@
  * internos, sem nomes de tabelas, sem segredos, credenciais ou consultas.
  */
 
-export type FieldTag =
-  "Obrigatório" | "Automático" | "Calculado" | "Condicional" | "Depende de integração";
+export type FieldTag = "Obrigatório" | "Automático" | "Calculado" | "Condicional";
 
 export type HelpField = {
   label: string;
@@ -46,9 +45,110 @@ const REQ: FieldTag[] = ["Obrigatório"];
 const AUTO: FieldTag[] = ["Automático"];
 const CALC: FieldTag[] = ["Calculado"];
 const COND: FieldTag[] = ["Condicional"];
-const EXT: FieldTag[] = ["Depende de integração"];
 
 export const HELP_TOPICS: Record<string, HelpTopic> = {
+  "/condutores": t(
+    "Condutores / Motoristas",
+    "Cadastro dos motoristas autorizados a dirigir, com habilitação (CNH), validade e situação. Também registra os afastamentos (férias, licença, INSS e atestado).",
+    [
+      "Clique em “Novo condutor” e preencha nome, CPF, secretaria, vínculo e os dados da CNH.",
+      "Informe a categoria e a validade da CNH: o sistema avisa antes de vencer e bloqueia o condutor com CNH vencida.",
+      "Se o motorista for usar o sistema pelo celular, escolha o “Usuário do sistema” dele.",
+      "Quando um motorista se afastar, clique no ícone de calendário da linha, escolha o motivo e informe a previsão de retorno.",
+    ],
+    [
+      { label: "Nome e CPF", description: "Identificação do motorista.", tags: REQ },
+      {
+        label: "Categoria e validade da CNH",
+        description:
+          "A validade gera aviso antes do vencimento; CNH vencida impede novas viagens e autorizações.",
+        tags: REQ,
+      },
+      {
+        label: "Vínculo",
+        description: "Efetivo, comissionado, contratado, terceirizado ou outro.",
+        tags: REQ,
+      },
+      {
+        label: "Usuário do sistema",
+        description:
+          "Liga o motorista ao login dele para a Área do motorista. Deixe em branco se ele não acessa o sistema.",
+        tags: COND,
+      },
+      {
+        label: "Situação",
+        description:
+          "Somente condutores ativos aparecem nas listas de viagem, autorização e escala.",
+      },
+      {
+        label: "Afastamento",
+        description:
+          "Motivo (férias, licença, INSS ou atestado de até 15 dias), data de início e previsão de retorno. Na data de retorno o motorista volta sozinho a ficar disponível.",
+      },
+    ],
+    [
+      "Atestado tem no máximo 15 dias e exige a data de retorno.",
+      "Motorista afastado não pode ser escolhido em viagens, autorizações de abastecimento nem na escala; o banco também recusa.",
+      "Sem previsão de retorno, o motorista continua afastado até você clicar em “Registrar retorno agora”.",
+    ],
+  ),
+  "/perfis-acesso": t(
+    "Perfis de acesso",
+    "Define quais telas cada perfil e cada usuário pode abrir. Todo usuário novo começa com o acesso do perfil dele; o gestor pode liberar mais ou menos telas para uma pessoa em particular.",
+    [
+      "Na aba “Por perfil”, marque ou desmarque as telas de cada perfil (gestor de frota, responsável de unidade, operador, fiscal).",
+      "Na aba “Por usuário”, escolha a pessoa e ligue ou desligue cada tela só para ela.",
+      "O rótulo “ajustado para este usuário” mostra o que foi mudado em relação ao perfil.",
+      "Use “Voltar ao acesso do perfil” (ou “Voltar ao padrão”) para desfazer os ajustes.",
+    ],
+    [
+      { label: "Por perfil", description: "Vale para todos que têm aquele perfil." },
+      {
+        label: "Por usuário",
+        description: "Vale só para a pessoa escolhida e tem prioridade sobre o perfil.",
+      },
+    ],
+    [
+      "Dashboard, Perfis de acesso, Usuários e Dados do órgão nunca são bloqueados.",
+      "Esconder a tela não substitui a segurança do sistema: o que cada perfil pode gravar continua limitado.",
+      "Somente o administrador do órgão altera os acessos.",
+    ],
+  ),
+  "/escala": t(
+    "Escala de motoristas",
+    "Monta, mês a mês, a escala dos motoristas de cada unidade de plantão (ex.: SAMU — unidade X), com os dias de trabalho, o horário de início e a carga horária de 8, 12 ou 24 horas.",
+    [
+      "Cadastre a unidade de plantão em “Nova unidade de plantão”.",
+      "Escolha a unidade e o mês.",
+      "Na aba “Montar escala”, escolha o motorista na lista, o horário de início e a carga horária (8, 12 ou 24 horas). O término é calculado.",
+      "Marque no calendário os dias em que ele trabalha (ou use os atalhos: dias úteis, fins de semana, dia sim dia não) e clique em Salvar.",
+      "Na aba “Escala do mês”, veja todos os motoristas e imprima a escala.",
+    ],
+    [
+      {
+        label: "Unidade de plantão",
+        description: "Local ou serviço que precisa de motorista em escala.",
+        tags: REQ,
+      },
+      { label: "Horário de início", description: "Hora em que o turno começa.", tags: REQ },
+      {
+        label: "Carga horária",
+        description:
+          "8, 12 ou 24 horas. O horário de término é calculado (24 h termina no dia seguinte).",
+        tags: REQ,
+      },
+      {
+        label: "Dias de trabalho",
+        description:
+          "Dias marcados no calendário. Dias em verde já têm turno; dias riscados são de afastamento do motorista.",
+        tags: REQ,
+      },
+    ],
+    [
+      "O motorista não pode ser escalado em dia de afastamento nem em dois turnos ao mesmo tempo.",
+      "Para remover um turno, passe o mouse sobre ele na aba “Escala do mês” e clique.",
+    ],
+  ),
   "/motorista": t(
     "Área do motorista",
     "Tela simples para quem dirige: mostra as suas viagens autorizadas, permite fazer o checklist do veículo com fotos e leva ao registro de abastecimento e de ocorrência.",
@@ -245,26 +345,6 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Cada Tribunal de Contas tem seu leiaute; este pacote usa o padrão do Dibai Fleet e pode ser mapeado quando exigido.",
     ],
   ),
-  "/perfis-acesso": t(
-    "Perfis de acesso",
-    "Permite ao administrador do órgão escolher quais telas cada tipo de usuário pode abrir.",
-    [
-      "Localize a tela na lista, agrupada por assunto.",
-      "Marque a caixa para liberar a tela ao perfil ou desmarque para esconder.",
-      "O ponto azul indica que aquela escolha foi mudada em relação ao padrão.",
-      "Use “Voltar ao padrão” para desfazer todas as mudanças.",
-    ],
-    [
-      {
-        label: "Perfis",
-        description:
-          "Gestor de frota, responsável de unidade, operador e fiscal/controladoria. O administrador sempre acessa tudo.",
-      },
-    ],
-    [
-      "Esconder a tela não substitui a segurança do sistema: o que cada perfil pode gravar continua limitado.",
-    ],
-  ),
   "/rastreamento": t(
     "Rastreamento",
     "Mostra onde estão os veículos com rastreador, quais estão em movimento, parados ou sem sinal, e avisa sobre excesso de velocidade, bateria baixa e saída de áreas permitidas.",
@@ -359,7 +439,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     ["Serve para órgãos com regras formais de aprovação."],
   ),
   "/garantias": t(
-    "Garantias",
+    "Garantias, preços e regras",
     "Lista peças e serviços que ainda estão na garantia, para o órgão exigir o reparo sem pagar de novo.",
     [
       "Consulte os itens em garantia por veículo.",
@@ -394,13 +474,11 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       {
         label: "Renavam / Chassi",
         description: "Identificadores oficiais; usados na consulta de dados oficiais.",
-        tags: ["Depende de integração"],
       },
       {
         label: "Marca, modelo e ano",
         description:
           "Podem ser preenchidos automaticamente pela consulta de dados oficiais ou pela tabela de referência de preços.",
-        tags: EXT,
       },
       {
         label: "Tipo de medidor",
@@ -795,7 +873,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
   ),
 
   "/obrigacoes": t(
-    "Obrigações legais e documentos",
+    "Obrigações legais",
     "Acompanhamento de licenciamento, IPVA, vistorias, certificados e demais documentos obrigatórios da frota.",
     [
       "Cadastre a obrigação e o vencimento.",
@@ -929,7 +1007,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
   ),
 
   "/autorizacoes": t(
-    "Autorizações de abastecimento",
+    "Autorizações",
     "Emite a autorização prévia de abastecimento, reservando quantidade ou valor no contrato, empenho e cota antes do consumo.",
     [
       "Clique em Nova autorização e escolha o bem e o combustível.",
@@ -1029,7 +1107,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
   ),
 
   "/combustiveis": t(
-    "Combustíveis e produtos automotivos",
+    "Combustíveis",
     "Cadastro dos produtos abastecíveis e insumos automotivos usados nas autorizações, contratos e relatórios.",
     [
       "Cadastre o produto com nome e unidade de medida.",
@@ -1120,7 +1198,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
         label: "Latitude / longitude",
         description:
           "Buscadas automaticamente pelo endereço; corrija manualmente quando o endereço não for localizado. O sistema nunca estima coordenadas.",
-        tags: ["Automático", "Depende de integração"],
+        tags: AUTO,
       },
       {
         label: "Situação",
@@ -1238,7 +1316,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
   ),
 
   "/planos-manutencao": t(
-    "Planos de manutenção preventiva",
+    "Planos preventivos",
     "Define os intervalos de revisão por quilometragem, horas ou tempo, gerando avisos automáticos de manutenção vencida ou próxima.",
     [
       "Crie o plano e escolha os bens ou o tipo de bem.",
@@ -1287,7 +1365,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
   ),
 
   "/rede-credenciada": t(
-    "Oficinas e prestadores do órgão",
+    "Oficinas e fornecedores",
     "Para que serve: reúne as oficinas e prestadores cadastrados pelo próprio órgão, com serviços atendidos, endereço e posição no mapa. O Dibai Fleet não disponibiliza prestadores; nada aqui é compartilhado com outros órgãos.",
     [
       "Cadastre a oficina do seu órgão com CNPJ e endereço.",
@@ -1309,7 +1387,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
         label: "Endereço e localização",
         description:
           "A posição no mapa vem do endereço; pode ser corrigida manualmente quando não localizada.",
-        tags: ["Automático", "Depende de integração"],
+        tags: AUTO,
       },
       {
         label: "Situação",
@@ -1340,7 +1418,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
         label: "Pontos no mapa",
         description:
           "Alimentados automaticamente pelos cadastros, contratos e credenciamentos do próprio órgão. O sistema não traz prestadores prontos nem dados de outros órgãos.",
-        tags: ["Automático", "Depende de integração"],
+        tags: AUTO,
       },
       {
         label: "Localização pendente",
@@ -1480,7 +1558,6 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
         label: "Envio de e-mail",
         description:
           "Depende do provedor de envio configurado pelo órgão; sem configuração o sistema avisa e oferece o link.",
-        tags: EXT,
       },
       {
         label: "Copiar link",
@@ -2035,7 +2112,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
   ),
 
   "/centros-custo": t(
-    "Centros de custo",
+    "Centros de Custo",
     "Define para onde a despesa da frota é apropriada, permitindo apurar custo por área, programa ou projeto.",
     [
       "Cadastre o centro de custo com código e nome.",
@@ -2143,7 +2220,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
         label: "Endereço e coordenadas",
         description:
           "A localização é buscada pelo endereço; pode ser corrigida manualmente quando não for encontrada.",
-        tags: ["Automático", "Depende de integração"],
+        tags: AUTO,
       },
     ],
     [
@@ -2152,54 +2229,8 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   ),
 
-  "/condutores": t(
-    "Condutores / Motoristas",
-    "Cadastro dos condutores autorizados, com habilitação, categoria, validade e situação.",
-    [
-      "Cadastre o condutor com nome e documento.",
-      "Informe número, categoria e validade da habilitação.",
-      "Mantenha a situação atualizada.",
-    ],
-    [
-      {
-        label: "Pessoa",
-        description:
-          "Selecione o servidor já cadastrado em Funcionários; nome, matrícula e unidade vêm desse cadastro e não são digitados aqui.",
-        tags: ["Obrigatório", "Automático"],
-      },
-      {
-        label: "Número e categoria da habilitação",
-        description:
-          "Informe conforme o documento. A categoria precisa ser compatível com o bem que o condutor vai conduzir.",
-        tags: REQ,
-      },
-      {
-        label: "Validade da habilitação",
-        description:
-          "Gera aviso antes do vencimento; habilitação vencida bloqueia novas utilizações.",
-        tags: REQ,
-      },
-      {
-        label: "Vínculo",
-        description:
-          "Efetivo, comissionado, contratado, terceirizado ou outro; usado em relatórios e na conferência de responsabilidade.",
-        tags: REQ,
-      },
-      {
-        label: "Situação",
-        description:
-          "Somente condutores ativos aparecem nas listas de utilização, diárias e indicação de multa.",
-        tags: REQ,
-      },
-    ],
-    [
-      "O condutor precisa existir antes no cadastro de pessoas: esta tela apenas acrescenta os dados de habilitação.",
-      "O histórico de utilização do condutor alimenta a sugestão de condutor nas multas e o filtro Condutor → Veículo nos relatórios.",
-    ],
-  ),
-
   "/entidades-externas": t(
-    "Pessoas e empresas externas",
+    "Pessoas e Empresas Externas",
     "Cadastro único de quem não é servidor do órgão: empresas fornecedoras, oficinas, postos, órgãos parceiros, consórcios e pessoas físicas externas. Todas as demais telas selecionam a partir daqui.",
     [
       "Escolha se é pessoa física ou jurídica e informe CPF/CNPJ, nome ou razão social.",
@@ -2233,7 +2264,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
         label: "Endereço e coordenadas",
         description:
           "A posição no mapa é buscada pelo endereço; se não for encontrada, informe latitude e longitude manualmente.",
-        tags: ["Automático", "Depende de integração"],
+        tags: AUTO,
       },
       {
         label: "Situação",
@@ -2293,7 +2324,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
   ),
 
   "/usuarios": t(
-    "Usuários e permissões",
+    "Usuários e Permissões",
     "Gestão dos usuários do órgão e dos perfis de acesso que determinam o que cada pessoa pode ver e fazer.",
     [
       "Cadastre o usuário com nome e e-mail institucional.",
@@ -2461,7 +2492,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       {
         label: "Credenciais do provedor",
         description: "Cadastradas em área protegida; nunca são exibidas novamente nem exportadas.",
-        tags: ["Obrigatório", "Depende de integração"],
+        tags: REQ,
       },
       {
         label: "Situação da integração",
@@ -2581,7 +2612,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       {
         label: "Valor de mercado",
         description: "Referencial obtido da tabela de preços quando o bem estiver vinculado.",
-        tags: ["Automático", "Depende de integração"],
+        tags: AUTO,
       },
       { label: "Custos acumulados", description: "Somatório dos lançamentos do bem.", tags: CALC },
     ],

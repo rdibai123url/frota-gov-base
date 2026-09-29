@@ -15,12 +15,20 @@ export type ThemeMode = "claro" | "escuro" | "sistema";
 const KEY = "frota-tema";
 const SIZE_KEY = "frota-tamanho";
 
-export type SizeMode = "compacto" | "auto" | "grande";
+export type SizeMode = "menor" | "compacto" | "auto" | "grande" | "maior";
+const SIZE_STEPS: SizeMode[] = ["menor", "compacto", "auto", "grande", "maior"];
+const SIZE_LABEL: Record<SizeMode, string> = {
+  menor: "Bem pequeno",
+  compacto: "Pequeno",
+  auto: "Automático",
+  grande: "Grande",
+  maior: "Bem grande",
+};
 
 function readSize(): SizeMode {
   try {
     const v = localStorage.getItem(SIZE_KEY);
-    return v === "compacto" || v === "grande" ? v : "auto";
+    return SIZE_STEPS.includes(v as SizeMode) && v !== "auto" ? (v as SizeMode) : "auto";
   } catch {
     return "auto";
   }
@@ -109,17 +117,38 @@ export function ThemeToggle() {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuLabel>Tamanho das letras e da tela</DropdownMenuLabel>
+        <div className="flex items-center justify-between gap-2 px-2 pb-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            aria-label="Diminuir letras"
+            disabled={SIZE_STEPS.indexOf(size) === 0}
+            onClick={() =>
+              chooseSize(SIZE_STEPS[Math.max(0, SIZE_STEPS.indexOf(size) - 1)] ?? "auto")
+            }
+          >
+            <span className="text-xs font-bold">A−</span>
+          </Button>
+          <span className="text-center text-xs text-muted-foreground">{SIZE_LABEL[size]}</span>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            aria-label="Aumentar letras"
+            disabled={SIZE_STEPS.indexOf(size) === SIZE_STEPS.length - 1}
+            onClick={() =>
+              chooseSize(
+                SIZE_STEPS[Math.min(SIZE_STEPS.length - 1, SIZE_STEPS.indexOf(size) + 1)] ?? "auto",
+              )
+            }
+          >
+            <span className="text-base font-bold">A+</span>
+          </Button>
+        </div>
         <DropdownMenuItem onSelect={() => chooseSize("auto")}>
-          <Type className="size-4" /> Automático (ajusta à tela){" "}
+          <Type className="size-4" /> Voltar ao automático{" "}
           {size === "auto" && <Check className="ml-auto size-4" />}
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => chooseSize("compacto")}>
-          <Type className="size-3.5" /> Compacto{" "}
-          {size === "compacto" && <Check className="ml-auto size-4" />}
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => chooseSize("grande")}>
-          <Type className="size-5" /> Grande{" "}
-          {size === "grande" && <Check className="ml-auto size-4" />}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -127,4 +156,4 @@ export function ThemeToggle() {
 }
 
 /** Roda antes de a página aparecer, para não piscar branco quando o modo escuro está escolhido. */
-export const THEME_BOOT_SCRIPT = `try{var z=localStorage.getItem("${SIZE_KEY}");if(z==="compacto"||z==="grande"){document.documentElement.setAttribute("data-tamanho",z)}var m=localStorage.getItem("${KEY}");if(m==="escuro"||(m==="sistema"&&window.matchMedia("(prefers-color-scheme: dark)").matches)){document.documentElement.classList.add("dark")}}catch(e){}`;
+export const THEME_BOOT_SCRIPT = `try{var z=localStorage.getItem("${SIZE_KEY}");if(z==="menor"||z==="compacto"||z==="grande"||z==="maior"){document.documentElement.setAttribute("data-tamanho",z)}var m=localStorage.getItem("${KEY}");if(m==="escuro"||(m==="sistema"&&window.matchMedia("(prefers-color-scheme: dark)").matches)){document.documentElement.classList.add("dark")}}catch(e){}`;

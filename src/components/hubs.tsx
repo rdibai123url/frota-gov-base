@@ -6,15 +6,23 @@
 import { Suspense, lazy, useState, type ComponentType } from "react";
 
 import { EmbeddedContext } from "@/components/embedded";
+import { HelpInlineButton } from "@/components/help-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProfile, type AppRole } from "@/lib/frotagov";
 import { useAccessOverrides, useModuleMap, useMyModuleAccess } from "@/lib/modulos";
 import { roleCanOpen, type AccessOverrides } from "@/lib/permissoes";
 
-type HubTab = { value: string; label: string; moduleKey: string; Panel: ComponentType };
+type HubTab = {
+  value: string;
+  label: string;
+  moduleKey: string;
+  Panel: ComponentType;
+  /** Tópico de ajuda (o "i") desta aba. */
+  helpKey: string;
+};
 
 /** Espera carregar o perfil do usuário antes de decidir quais abas mostrar. */
-function TabHub(props: { tabs: HubTab[]; initial: string }) {
+function TabHub(props: { title: string; tabs: HubTab[]; initial: string }) {
   const { data: me } = useProfile();
   const { isLoading } = useModuleMap();
   const { data: overrides, isLoading: loadingAccess } = useAccessOverrides();
@@ -31,12 +39,14 @@ function TabHub(props: { tabs: HubTab[]; initial: string }) {
 }
 
 function TabHubReady({
+  title,
   tabs,
   initial,
   roles,
   overrides,
   mine,
 }: {
+  title: string;
   tabs: HubTab[];
   initial: string;
   roles: AppRole[];
@@ -55,27 +65,34 @@ function TabHubReady({
   const current = visible.some((t) => t.value === tab) ? tab : first;
 
   if (visible.length === 0) return null;
+  const active = visible.find((t) => t.value === current) ?? visible[0];
   return (
-    <Tabs value={current} onValueChange={setTab} className="space-y-4">
-      {visible.length > 1 && (
-        <TabsList className="flex h-auto justify-start gap-1 bg-surface p-1">
-          {visible.map((t) => (
-            <TabsTrigger key={t.value} value={t.value}>
-              {t.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      )}
-      {visible.map((t) => (
-        <TabsContent key={t.value} value={t.value} className="mt-0">
-          <EmbeddedContext.Provider value={visible.length > 1}>
-            <Suspense fallback={<p className="p-6 text-sm text-muted-foreground">Carregando…</p>}>
-              <t.Panel />
-            </Suspense>
-          </EmbeddedContext.Provider>
-        </TabsContent>
-      ))}
-    </Tabs>
+    <div>
+      <div className="mb-4 flex items-center gap-2 border-b border-border pb-3">
+        <h1 className="gov-page-title">{title}</h1>
+        {active && <HelpInlineButton topicKey={active.helpKey} />}
+      </div>
+      <Tabs value={current} onValueChange={setTab} className="space-y-4">
+        {visible.length > 1 && (
+          <TabsList className="flex h-auto justify-start gap-1 bg-surface p-1">
+            {visible.map((t) => (
+              <TabsTrigger key={t.value} value={t.value}>
+                {t.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        )}
+        {visible.map((t) => (
+          <TabsContent key={t.value} value={t.value} className="mt-0">
+            <EmbeddedContext.Provider value={true}>
+              <Suspense fallback={<p className="p-6 text-sm text-muted-foreground">Carregando…</p>}>
+                <t.Panel />
+              </Suspense>
+            </EmbeddedContext.Provider>
+          </TabsContent>
+        ))}
+      </Tabs>
+    </div>
   );
 }
 
@@ -110,14 +127,22 @@ const RegrasPanel = lazy(() =>
 export function CotasHub({ initial = "cotas" }: { initial?: string }) {
   return (
     <TabHub
+      title="Cotas e saldos"
       initial={initial}
       tabs={[
-        { value: "cotas", label: "Cotas e saldos", moduleKey: "cotas", Panel: CotasPanel },
+        {
+          value: "cotas",
+          label: "Cotas e saldos",
+          moduleKey: "cotas",
+          Panel: CotasPanel,
+          helpKey: "/cotas",
+        },
         {
           value: "servidor",
           label: "Cotas de servidor",
           moduleKey: "cotas-servidor",
           Panel: CotasServidorPanel,
+          helpKey: "/cotas-servidor",
         },
       ]}
     />
@@ -127,6 +152,7 @@ export function CotasHub({ initial = "cotas" }: { initial?: string }) {
 export function TerceirosHub({ initial = "oficinas" }: { initial?: string }) {
   return (
     <TabHub
+      title="Oficinas e fornecedores"
       initial={initial}
       tabs={[
         {
@@ -134,12 +160,14 @@ export function TerceirosHub({ initial = "oficinas" }: { initial?: string }) {
           label: "Oficinas e prestadores",
           moduleKey: "rede-credenciada",
           Panel: RedePanel,
+          helpKey: "/rede-credenciada",
         },
         {
           value: "fornecedores",
           label: "Fornecedores e postos",
           moduleKey: "fornecedores",
           Panel: FornecedoresPanel,
+          helpKey: "/fornecedores",
         },
       ]}
     />
@@ -149,20 +177,29 @@ export function TerceirosHub({ initial = "oficinas" }: { initial?: string }) {
 export function ManutencaoApoioHub({ initial = "garantias" }: { initial?: string }) {
   return (
     <TabHub
+      title="Garantias, preços e regras"
       initial={initial}
       tabs={[
-        { value: "garantias", label: "Garantias", moduleKey: "garantias", Panel: GarantiasPanel },
+        {
+          value: "garantias",
+          label: "Garantias",
+          moduleKey: "garantias",
+          Panel: GarantiasPanel,
+          helpKey: "/garantias",
+        },
         {
           value: "precos",
           label: "Pesquisa de preços",
           moduleKey: "pesquisa-precos",
           Panel: PrecosPanel,
+          helpKey: "/pesquisa-precos",
         },
         {
           value: "regras",
           label: "Regras de manutenção",
           moduleKey: "regras-manutencao",
           Panel: RegrasPanel,
+          helpKey: "/regras-manutencao",
         },
       ]}
     />
