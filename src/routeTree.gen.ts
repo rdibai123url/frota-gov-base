@@ -16,6 +16,7 @@ import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as AuthenticatedAbastecimentosRouteImport } from './routes/_authenticated/abastecimentos'
 import { Route as AuthenticatedAlertasRouteImport } from './routes/_authenticated/alertas'
 import { Route as AuthenticatedAutorizacoesRouteImport } from './routes/_authenticated/autorizacoes'
+import { Route as AuthenticatedAvisosRouteImport } from './routes/_authenticated/avisos'
 import { Route as AuthenticatedCentrosCustoRouteImport } from './routes/_authenticated/centros-custo'
 import { Route as AuthenticatedChavesApiRouteImport } from './routes/_authenticated/chaves-api'
 import { Route as AuthenticatedCombustiveisRouteImport } from './routes/_authenticated/combustiveis'
@@ -68,6 +69,7 @@ import { Route as AuthenticatedVeiculosRouteImport } from './routes/_authenticat
 import { Route as CotacaoTokenRouteImport } from './routes/cotacao.$token'
 import { Route as TransparenciaSlugRouteImport } from './routes/transparencia.$slug'
 import { Route as AuthenticatedVeiculoIdRouteImport } from './routes/_authenticated/veiculo.$id'
+import { Route as ApiPublicHooksAvisosDiariosRouteImport } from './routes/api/public/hooks/avisos-diarios'
 import { Route as ApiPublicHooksBackupDiarioRouteImport } from './routes/api/public/hooks/backup-diario'
 import { Route as ApiPublicHooksWebhooksRetryRouteImport } from './routes/api/public/hooks/webhooks-retry'
 import { Route as ApiPublicV1FrotaRouteImport } from './routes/api/public/v1/frota'
@@ -110,6 +112,11 @@ const AuthenticatedAutorizacoesRoute =
     path: '/autorizacoes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAvisosRoute = AuthenticatedAvisosRouteImport.update({
+  id: '/avisos',
+  path: '/avisos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCentrosCustoRoute =
   AuthenticatedCentrosCustoRouteImport.update({
     id: '/centros-custo',
@@ -392,6 +399,12 @@ const AuthenticatedVeiculoIdRoute = AuthenticatedVeiculoIdRouteImport.update({
   path: '/veiculo/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicHooksAvisosDiariosRoute =
+  ApiPublicHooksAvisosDiariosRouteImport.update({
+    id: '/api/public/hooks/avisos-diarios',
+    path: '/api/public/hooks/avisos-diarios',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksBackupDiarioRoute =
   ApiPublicHooksBackupDiarioRouteImport.update({
     id: '/api/public/hooks/backup-diario',
@@ -429,6 +442,7 @@ export interface FileRoutesByFullPath {
   '/abastecimentos': typeof AuthenticatedAbastecimentosRoute
   '/alertas': typeof AuthenticatedAlertasRoute
   '/autorizacoes': typeof AuthenticatedAutorizacoesRoute
+  '/avisos': typeof AuthenticatedAvisosRoute
   '/centros-custo': typeof AuthenticatedCentrosCustoRoute
   '/chaves-api': typeof AuthenticatedChavesApiRoute
   '/combustiveis': typeof AuthenticatedCombustiveisRoute
@@ -481,6 +495,7 @@ export interface FileRoutesByFullPath {
   '/cotacao/$token': typeof CotacaoTokenRoute
   '/transparencia/$slug': typeof TransparenciaSlugRoute
   '/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
+  '/api/public/hooks/avisos-diarios': typeof ApiPublicHooksAvisosDiariosRoute
   '/api/public/hooks/backup-diario': typeof ApiPublicHooksBackupDiarioRoute
   '/api/public/hooks/webhooks-retry': typeof ApiPublicHooksWebhooksRetryRoute
   '/api/public/v1/frota': typeof ApiPublicV1FrotaRoute
@@ -494,6 +509,7 @@ export interface FileRoutesByTo {
   '/abastecimentos': typeof AuthenticatedAbastecimentosRoute
   '/alertas': typeof AuthenticatedAlertasRoute
   '/autorizacoes': typeof AuthenticatedAutorizacoesRoute
+  '/avisos': typeof AuthenticatedAvisosRoute
   '/centros-custo': typeof AuthenticatedCentrosCustoRoute
   '/chaves-api': typeof AuthenticatedChavesApiRoute
   '/combustiveis': typeof AuthenticatedCombustiveisRoute
@@ -546,6 +562,7 @@ export interface FileRoutesByTo {
   '/cotacao/$token': typeof CotacaoTokenRoute
   '/transparencia/$slug': typeof TransparenciaSlugRoute
   '/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
+  '/api/public/hooks/avisos-diarios': typeof ApiPublicHooksAvisosDiariosRoute
   '/api/public/hooks/backup-diario': typeof ApiPublicHooksBackupDiarioRoute
   '/api/public/hooks/webhooks-retry': typeof ApiPublicHooksWebhooksRetryRoute
   '/api/public/v1/frota': typeof ApiPublicV1FrotaRoute
@@ -561,6 +578,7 @@ export interface FileRoutesById {
   '/_authenticated/abastecimentos': typeof AuthenticatedAbastecimentosRoute
   '/_authenticated/alertas': typeof AuthenticatedAlertasRoute
   '/_authenticated/autorizacoes': typeof AuthenticatedAutorizacoesRoute
+  '/_authenticated/avisos': typeof AuthenticatedAvisosRoute
   '/_authenticated/centros-custo': typeof AuthenticatedCentrosCustoRoute
   '/_authenticated/chaves-api': typeof AuthenticatedChavesApiRoute
   '/_authenticated/combustiveis': typeof AuthenticatedCombustiveisRoute
@@ -613,6 +631,7 @@ export interface FileRoutesById {
   '/cotacao/$token': typeof CotacaoTokenRoute
   '/transparencia/$slug': typeof TransparenciaSlugRoute
   '/_authenticated/veiculo/$id': typeof AuthenticatedVeiculoIdRoute
+  '/api/public/hooks/avisos-diarios': typeof ApiPublicHooksAvisosDiariosRoute
   '/api/public/hooks/backup-diario': typeof ApiPublicHooksBackupDiarioRoute
   '/api/public/hooks/webhooks-retry': typeof ApiPublicHooksWebhooksRetryRoute
   '/api/public/v1/frota': typeof ApiPublicV1FrotaRoute
@@ -628,6 +647,7 @@ export interface FileRouteTypes {
     | '/abastecimentos'
     | '/alertas'
     | '/autorizacoes'
+    | '/avisos'
     | '/centros-custo'
     | '/chaves-api'
     | '/combustiveis'
@@ -680,6 +700,7 @@ export interface FileRouteTypes {
     | '/cotacao/$token'
     | '/transparencia/$slug'
     | '/veiculo/$id'
+    | '/api/public/hooks/avisos-diarios'
     | '/api/public/hooks/backup-diario'
     | '/api/public/hooks/webhooks-retry'
     | '/api/public/v1/frota'
@@ -693,6 +714,7 @@ export interface FileRouteTypes {
     | '/abastecimentos'
     | '/alertas'
     | '/autorizacoes'
+    | '/avisos'
     | '/centros-custo'
     | '/chaves-api'
     | '/combustiveis'
@@ -745,6 +767,7 @@ export interface FileRouteTypes {
     | '/cotacao/$token'
     | '/transparencia/$slug'
     | '/veiculo/$id'
+    | '/api/public/hooks/avisos-diarios'
     | '/api/public/hooks/backup-diario'
     | '/api/public/hooks/webhooks-retry'
     | '/api/public/v1/frota'
@@ -759,6 +782,7 @@ export interface FileRouteTypes {
     | '/_authenticated/abastecimentos'
     | '/_authenticated/alertas'
     | '/_authenticated/autorizacoes'
+    | '/_authenticated/avisos'
     | '/_authenticated/centros-custo'
     | '/_authenticated/chaves-api'
     | '/_authenticated/combustiveis'
@@ -811,6 +835,7 @@ export interface FileRouteTypes {
     | '/cotacao/$token'
     | '/transparencia/$slug'
     | '/_authenticated/veiculo/$id'
+    | '/api/public/hooks/avisos-diarios'
     | '/api/public/hooks/backup-diario'
     | '/api/public/hooks/webhooks-retry'
     | '/api/public/v1/frota'
@@ -825,6 +850,7 @@ export interface RootRouteChildren {
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   CotacaoTokenRoute: typeof CotacaoTokenRoute
   TransparenciaSlugRoute: typeof TransparenciaSlugRoute
+  ApiPublicHooksAvisosDiariosRoute: typeof ApiPublicHooksAvisosDiariosRoute
   ApiPublicHooksBackupDiarioRoute: typeof ApiPublicHooksBackupDiarioRoute
   ApiPublicHooksWebhooksRetryRoute: typeof ApiPublicHooksWebhooksRetryRoute
   ApiPublicV1FrotaRoute: typeof ApiPublicV1FrotaRoute
@@ -881,6 +907,13 @@ declare module '@tanstack/react-router' {
       path: '/autorizacoes'
       fullPath: '/autorizacoes'
       preLoaderRoute: typeof AuthenticatedAutorizacoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/avisos': {
+      id: '/_authenticated/avisos'
+      path: '/avisos'
+      fullPath: '/avisos'
+      preLoaderRoute: typeof AuthenticatedAvisosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/centros-custo': {
@@ -1247,6 +1280,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVeiculoIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/hooks/avisos-diarios': {
+      id: '/api/public/hooks/avisos-diarios'
+      path: '/api/public/hooks/avisos-diarios'
+      fullPath: '/api/public/hooks/avisos-diarios'
+      preLoaderRoute: typeof ApiPublicHooksAvisosDiariosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/backup-diario': {
       id: '/api/public/hooks/backup-diario'
       path: '/api/public/hooks/backup-diario'
@@ -1289,6 +1329,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAbastecimentosRoute: typeof AuthenticatedAbastecimentosRoute
   AuthenticatedAlertasRoute: typeof AuthenticatedAlertasRoute
   AuthenticatedAutorizacoesRoute: typeof AuthenticatedAutorizacoesRoute
+  AuthenticatedAvisosRoute: typeof AuthenticatedAvisosRoute
   AuthenticatedCentrosCustoRoute: typeof AuthenticatedCentrosCustoRoute
   AuthenticatedChavesApiRoute: typeof AuthenticatedChavesApiRoute
   AuthenticatedCombustiveisRoute: typeof AuthenticatedCombustiveisRoute
@@ -1345,6 +1386,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAbastecimentosRoute: AuthenticatedAbastecimentosRoute,
   AuthenticatedAlertasRoute: AuthenticatedAlertasRoute,
   AuthenticatedAutorizacoesRoute: AuthenticatedAutorizacoesRoute,
+  AuthenticatedAvisosRoute: AuthenticatedAvisosRoute,
   AuthenticatedCentrosCustoRoute: AuthenticatedCentrosCustoRoute,
   AuthenticatedChavesApiRoute: AuthenticatedChavesApiRoute,
   AuthenticatedCombustiveisRoute: AuthenticatedCombustiveisRoute,
@@ -1407,6 +1449,7 @@ const rootRouteChildren: RootRouteChildren = {
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   CotacaoTokenRoute: CotacaoTokenRoute,
   TransparenciaSlugRoute: TransparenciaSlugRoute,
+  ApiPublicHooksAvisosDiariosRoute: ApiPublicHooksAvisosDiariosRoute,
   ApiPublicHooksBackupDiarioRoute: ApiPublicHooksBackupDiarioRoute,
   ApiPublicHooksWebhooksRetryRoute: ApiPublicHooksWebhooksRetryRoute,
   ApiPublicV1FrotaRoute: ApiPublicV1FrotaRoute,

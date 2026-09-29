@@ -42,7 +42,7 @@ before(async () => {
   const files = (await readdir(new URL("supabase/migrations/", root)))
     .filter((f) => f.endsWith(".sql"))
     .sort();
-  assert.equal(files.length, 123);
+  assert.equal(files.length, 124);
   for (const file of files) {
     if (file.startsWith("20260925") && !historicalTriggers) {
       historicalTriggers = (
@@ -68,7 +68,7 @@ after(async () => {
   await db.close();
 });
 
-test("111 migrations históricas + 7 novas aplicam sem erro", async () => {
+test("111 migrations históricas + 8 novas aplicam sem erro", async () => {
   const { rows } = await db.query(
     "SELECT count(*)::int n FROM information_schema.tables WHERE table_schema='public'",
   );
@@ -401,4 +401,30 @@ test("fase 6: rastreador envia posição, gera alertas e recusa token inválido"
     dev,
   ]);
   assert.ok(seen.rows[0].last_seen_at);
+});
+
+test("avisos de vencimento: lista CNH e seguro vencendo conforme os prazos", async () => {
+  const org = id(990);
+  for (const t of ["drivers", "insurance_policies", "notification_settings"])
+    await db.exec(`ALTER TABLE public.${t} DISABLE TRIGGER ALL`);
+  await db.exec(`INSERT INTO public.drivers (organization_id, full_name, active, license_expiry, phone) VALUES
+    ('${org}', 'Vencida Silva', true, current_date - 3, '11999990000'),
+    ('${org}', 'Vence Logo', true, current_date + 10, NULL),
+    ('${org}', 'Longe Ainda', true, current_date + 200, NULL),
+    ('${org}', 'Inativo', false, current_date - 5, NULL)`);
+  await db.exec(`INSERT INTO public.insurance_policies (organization_id, policy_number, insurer_name, valid_from, valid_to, status)
+    VALUES ('${org}', 'AP-1', 'Seguradora X', current_date - 300, current_date + 20, 'ativa')`);
+  const r = await db.query(`SELECT kind, title, detail, days FROM public.notification_items('${org}') ORDER BY kind, days`);
+  assert.deepEqual(
+    r.rows.map((x) => [x.kind, x.title, x.detail]),
+    [
+      ["cnh", "Vencida Silva", "CNH vencida"],
+      ["cnh", "Vence Logo", "CNH vence"],
+      ["seguro", "Apólice AP-1 — Seguradora X", "Seguro vence"],
+    ],
+  );
+  // prazo maior passa a incluir a CNH distante
+  await db.exec(`INSERT INTO public.notification_settings (organization_id, cnh_days) VALUES ('${org}', 250)`);
+  const r2 = await db.query(`SELECT count(*)::int n FROM public.notification_items('${org}') WHERE kind='cnh'`);
+  assert.equal(r2.rows[0].n, 3);
 });

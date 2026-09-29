@@ -315,3 +315,39 @@ export function renderInviteEmail(d: InviteEmailData): {
 
   return { subject, html, text };
 }
+
+/** Lê a configuração de e-mail do órgão e o segredo do provedor (somente servidor). */
+export async function loadOrgEmailSettings(orgId: string) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin
+    .from("org_email_settings")
+    .select(
+      "provider, enabled, from_name, from_email, reply_to, smtp_host, smtp_port, smtp_secure, smtp_user, has_secret, public_base_url",
+    )
+    .eq("organization_id", orgId)
+    .maybeSingle();
+  if (!data)
+    return {
+      settings: null as EmailSettings | null,
+      secret: "",
+      publicBaseUrl: null as string | null,
+    };
+  const { data: secretRow } = await supabaseAdmin
+    .from("org_email_secrets")
+    .select("secret")
+    .eq("organization_id", orgId)
+    .maybeSingle();
+  const publicBaseUrl = (data as { public_base_url?: string | null }).public_base_url ?? null;
+  const settings = data as EmailSettings;
+  let secret = secretRow?.secret ?? "";
+  // Chave da plataforma (painel de Integrações): usada apenas quando o órgão
+  // escolheu Resend e ainda não cadastrou uma chave própria.
+  if (!secret && settings.provider === "resend") {
+    const platform = process.env["RESEND_API_KEY"] ?? "";
+    if (platform) {
+      secret = platform;
+      settings.has_secret = true;
+    }
+  }
+  return { settings, secret, publicBaseUrl };
+}

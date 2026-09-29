@@ -6330,6 +6330,112 @@ export type Database = {
           },
         ];
       };
+      notification_log: {
+        Row: {
+          channel: string;
+          created_at: string;
+          id: string;
+          items_count: number;
+          message: string | null;
+          organization_id: string;
+          recipients_count: number;
+          status: string;
+        };
+        Insert: {
+          channel?: string;
+          created_at?: string;
+          id?: string;
+          items_count?: number;
+          message?: string | null;
+          organization_id: string;
+          recipients_count?: number;
+          status: string;
+        };
+        Update: {
+          channel?: string;
+          created_at?: string;
+          id?: string;
+          items_count?: number;
+          message?: string | null;
+          organization_id?: string;
+          recipients_count?: number;
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notification_log_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      notification_settings: {
+        Row: {
+          cnh_days: number;
+          contract_days: number;
+          created_at: string;
+          email_enabled: boolean;
+          frequency: string;
+          id: string;
+          insurance_days: number;
+          last_sent_at: string | null;
+          obligation_days: number;
+          organization_id: string;
+          preventive_days: number;
+          preventive_km: number;
+          recipients: string[];
+          updated_at: string;
+          updated_by: string | null;
+          warranty_days: number;
+        };
+        Insert: {
+          cnh_days?: number;
+          contract_days?: number;
+          created_at?: string;
+          email_enabled?: boolean;
+          frequency?: string;
+          id?: string;
+          insurance_days?: number;
+          last_sent_at?: string | null;
+          obligation_days?: number;
+          organization_id: string;
+          preventive_days?: number;
+          preventive_km?: number;
+          recipients?: string[];
+          updated_at?: string;
+          updated_by?: string | null;
+          warranty_days?: number;
+        };
+        Update: {
+          cnh_days?: number;
+          contract_days?: number;
+          created_at?: string;
+          email_enabled?: boolean;
+          frequency?: string;
+          id?: string;
+          insurance_days?: number;
+          last_sent_at?: string | null;
+          obligation_days?: number;
+          organization_id?: string;
+          preventive_days?: number;
+          preventive_km?: number;
+          recipients?: string[];
+          updated_at?: string;
+          updated_by?: string | null;
+          warranty_days?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notification_settings_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       opening_balances: {
         Row: {
           applied: boolean;
@@ -11967,6 +12073,7 @@ export type Database = {
       };
       imr_auto_metric: { Args: { _metric: string; _month: string }; Returns: number };
       imr_final_grade: { Args: { _contract: string; _month: string }; Returns: number };
+      notification_items: { Args: { _org: string }; Returns: { kind: string; title: string; detail: string; due_date: string; days: number; phone: string | null }[] };
       reserve_checklist_photo: {
         Args: { _checklist: string; _mime: string; _size: number };
         Returns: Json;
