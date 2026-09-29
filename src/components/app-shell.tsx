@@ -60,7 +60,7 @@ type NavLeaf = { to: string; label: string };
 type NavGroup = { id: string; label: string; icon: typeof Truck; to?: string; items?: NavLeaf[] };
 
 const NAV: NavGroup[] = [
-  { id: "painel", label: "Painel", icon: LayoutDashboard, to: "/painel" },
+  { id: "painel", label: "Dashboard", icon: LayoutDashboard, to: "/painel" },
   {
     id: "frota",
     label: "Frota",

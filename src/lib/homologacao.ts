@@ -180,7 +180,7 @@ export type ModuleInfo = {
 };
 
 export const ACTIVE_MODULES: ModuleInfo[] = [
-  { module: "Painel executivo", route: "/painel", status: "ativo" },
+  { module: "Dashboard", route: "/painel", status: "ativo" },
   { module: "Veículos e frota", route: "/veiculos", status: "ativo" },
   { module: "Utilização e reservas", route: "/utilizacao", status: "ativo" },
   { module: "Condutores", route: "/condutores", status: "ativo" },

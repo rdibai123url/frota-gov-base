@@ -35,7 +35,7 @@ const m = (
 });
 
 export const MODULES: ModuleDef[] = [
-  m("painel", "Painel", "Painel", [], true),
+  m("painel", "Dashboard", "Dashboard", [], true),
   m("veiculos", "Veículos", "Frota", ["/veiculo/"]),
   m("equipamentos", "Máquinas e equipamentos", "Frota"),
   m("utilizacao", "Utilização e reservas", "Frota"),

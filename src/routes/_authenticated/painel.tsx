@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { Suspense, lazy, useMemo } from "react";
 import {
   Truck,
   Wrench,
@@ -229,6 +229,8 @@ const SHORTCUTS = [
   },
 ] as const;
 
+const PainelBI = lazy(() => import("@/components/painel-bi"));
+
 function Painel() {
   const { data: vehicles = [], isLoading } = useVehicles();
   const { data: units = [] } = useUnits();
@@ -440,7 +442,7 @@ function Painel() {
   return (
     <>
       <PageHeader
-        title="Painel executivo"
+        title="Dashboard"
         description={
           org?.legal_name
             ? `Visão geral da frota de ${org.short_name || org.legal_name}.`
@@ -455,7 +457,14 @@ function Painel() {
           <TabsTrigger value="manutencao">Manutenção</TabsTrigger>
           <TabsTrigger value="financeiro">Financeiro / Contratual</TabsTrigger>
           <TabsTrigger value="administrativo">Administrativo / Legal</TabsTrigger>
+          <TabsTrigger value="bi">BI</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="bi" className="pt-5">
+          <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Carregando…</div>}>
+            <PainelBI />
+          </Suspense>
+        </TabsContent>
 
         <TabsContent value="geral" className="pt-5">
           <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5">
