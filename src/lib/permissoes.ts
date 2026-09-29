@@ -23,7 +23,7 @@ const SEM_OPERADOR: AppRole[] = [
 export const MODULE_ROLES: Record<string, AppRole[]> = {
   // implantação e integração: só administrador
   migracao: ADMIN,
-  exportacao: ADMIN,
+  exportacao: [...ADMIN, "auditor"],
   integracoes: ADMIN,
   "chaves-api": ADMIN,
   backup: ADMIN,

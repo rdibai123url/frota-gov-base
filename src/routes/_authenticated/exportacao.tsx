@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ConferirCopia } from "@/components/conferir-copia";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Database, Download, Loader2, ShieldCheck } from "lucide-react";
@@ -196,6 +197,9 @@ function Exportacao() {
               </p>
             </CardContent>
           </Card>
+          <div className="lg:col-span-3">
+            <ConferirCopia />
+          </div>
         </div>
       )}
     </div>
