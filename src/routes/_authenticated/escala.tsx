@@ -1,3 +1,4 @@
+import { useFeature } from "@/lib/modulos";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { CalendarDays, Plus, Printer, Trash2 } from "lucide-react";
@@ -70,6 +71,7 @@ const WEEK_LONG = [
 const thisMonth = () => new Date().toISOString().slice(0, 7);
 
 function Escala() {
+  const printOn = useFeature("escala.imprimir");
   const { canWrite, orgId, userId } = usePerms();
   const invalidate = useInvalidate();
   const { data: units = [] } = useDutyUnits();
@@ -385,6 +387,7 @@ function Escala() {
               className="gap-2"
               disabled={shifts.length === 0}
               onClick={() => setPrintOpen(true)}
+              hidden={!printOn}
             >
               <Printer className="size-4" /> Imprimir escala de{" "}
               {String(range.month).padStart(2, "0")}/{range.year}
@@ -633,6 +636,7 @@ function Escala() {
                   size="sm"
                   className="gap-2"
                   disabled={shifts.length === 0}
+                  hidden={!printOn}
                   onClick={() => setPrintOpen(true)}
                 >
                   <Printer className="size-4" /> Imprimir escala

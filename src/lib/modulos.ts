@@ -106,6 +106,90 @@ export const DEFAULT_DISABLED = [
 
 export const MODULE_GROUPS = Array.from(new Set(MODULES.map((x) => x.group)));
 
+/**
+ * Funções dentro das abas. O Super Admin pode desligar uma função sem desligar a aba inteira.
+ * Ficam guardadas em organization_modules com a chave `fn:<função>`; sem linha, a função está ligada.
+ */
+export type FeatureDef = { key: string; module: string; label: string; hint: string };
+
+export const FEATURES: FeatureDef[] = [
+  {
+    key: "condutores.afastamento",
+    module: "condutores",
+    label: "Afastamentos (férias, licença, INSS, atestado)",
+    hint: "Botão Afastamento e filtro “Afastados agora”",
+  },
+  {
+    key: "escala.imprimir",
+    module: "escala",
+    label: "Imprimir a escala",
+    hint: "Botão de impressão da escala em A4",
+  },
+  {
+    key: "relatorios.exportar",
+    module: "relatorios",
+    label: "Exportar relatórios (CSV, Excel, XML e PDF)",
+    hint: "Desligado, o relatório só pode ser visto na tela",
+  },
+  {
+    key: "veiculos.cadastro",
+    module: "veiculos",
+    label: "Cadastrar e editar veículos",
+    hint: "Desligado, a tela fica somente para consulta",
+  },
+];
+
+export const featureModuleKey = (key: string) => `fn:${key}`;
+
+/** Pacotes prontos: o Super Admin escolhe o que o órgão contratou com um clique. */
+export const MODULE_PRESETS: {
+  id: string;
+  label: string;
+  description: string;
+  groups: string[];
+}[] = [
+  {
+    id: "gestao-frota",
+    label: "Somente gestão de frota",
+    description:
+      "Veículos, condutores, escala, utilização e relatórios. Desliga abastecimento, manutenção, prestadores, contratos e orçamento.",
+    groups: ["Dashboard", "Frota", "Cadastros", "Relatórios e análises", "Alertas"],
+  },
+  {
+    id: "frota-abast",
+    label: "Frota + abastecimento",
+    description: "Gestão de frota mais autorizações e controle de abastecimento.",
+    groups: [
+      "Dashboard",
+      "Frota",
+      "Abastecimento",
+      "Cadastros",
+      "Relatórios e análises",
+      "Alertas",
+    ],
+  },
+  {
+    id: "frota-abast-manut",
+    label: "Frota + abastecimento + manutenção",
+    description: "Sem prestadores, contratos e orçamento.",
+    groups: [
+      "Dashboard",
+      "Frota",
+      "Abastecimento",
+      "Manutenção",
+      "Cadastros",
+      "Relatórios e análises",
+      "Alertas",
+    ],
+  },
+  {
+    id: "completo",
+    label: "Sistema completo",
+    description: "Todas as abas (as que nascem desligadas continuam desligadas).",
+    groups: MODULES.map((x) => x.group),
+  },
+];
+
 export function moduleDefault(key: string) {
   return !DEFAULT_DISABLED.includes(key);
 }
@@ -195,6 +279,16 @@ export function useMyModuleAccess() {
       return out;
     },
   });
+}
+
+/** Diz se uma função de aba está ligada (sem configuração, está ligada). */
+export function featureOn(map: Record<string, boolean>, key: string) {
+  return map[featureModuleKey(key)] !== false;
+}
+
+export function useFeature(key: string) {
+  const { map } = useModuleMap();
+  return featureOn(map, key);
 }
 
 /** Mapa de módulos habilitados para o órgão em contexto. */

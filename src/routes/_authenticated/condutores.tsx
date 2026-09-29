@@ -1,3 +1,4 @@
+import { useFeature } from "@/lib/modulos";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Plus, Search, Pencil, IdCard, Plane, CalendarOff } from "lucide-react";
@@ -90,6 +91,7 @@ function CnhBadge({ expiry }: { expiry: string | null }) {
 }
 
 function Condutores() {
+  const absenceOn = useFeature("condutores.afastamento");
   const { data: drivers = [], isLoading } = useDrivers();
   const { data: units = [] } = useUnits();
   const perms = usePerms();
@@ -215,7 +217,7 @@ function Condutores() {
               <SelectItem value="inativo">Inativos</SelectItem>
               <SelectItem value="cnh_vencida">CNH vencida</SelectItem>
               <SelectItem value="cnh_a_vencer">CNH a vencer</SelectItem>
-              <SelectItem value="afastado">Afastados agora</SelectItem>
+              {absenceOn && <SelectItem value="afastado">Afastados agora</SelectItem>}
             </SelectContent>
           </Select>
         </div>
@@ -295,16 +297,18 @@ function Condutores() {
                   </Button>
                 </TableCell>
                 <TableCell className="whitespace-nowrap">
-                  <Button
-                    variant={d.current_absence ? "default" : "outline"}
-                    size="sm"
-                    className="gap-1.5"
-                    aria-label={`Afastamento de ${d.full_name}`}
-                    title="Afastamento (férias, licença, INSS, atestado)"
-                    onClick={() => setAbsenceOf(d.id)}
-                  >
-                    <CalendarOff className="size-4" /> Afastamento
-                  </Button>
+                  {absenceOn && (
+                    <Button
+                      variant={d.current_absence ? "default" : "outline"}
+                      size="sm"
+                      className="gap-1.5"
+                      aria-label={`Afastamento de ${d.full_name}`}
+                      title="Afastamento (férias, licença, INSS, atestado)"
+                      onClick={() => setAbsenceOf(d.id)}
+                    >
+                      <CalendarOff className="size-4" /> Afastamento
+                    </Button>
+                  )}
                   {perms.canWrite && (
                     <Button
                       variant="ghost"

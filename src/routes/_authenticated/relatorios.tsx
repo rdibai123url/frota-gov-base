@@ -10,7 +10,9 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -38,6 +40,14 @@ import {
 import { formatMoney, formatLiters, formatNumberBR, formatCPF, parseBRNumber } from "@/lib/format";
 import { DIARY_STATUS } from "@/lib/diarias";
 import { logEvent } from "@/lib/platform";
+import { featureOn, useModuleMap } from "@/lib/modulos";
+import {
+  GESTAO_CAPS,
+  GESTAO_LABELS,
+  GESTAO_REPORTS,
+  runGestaoReport,
+  type GestaoKey,
+} from "@/lib/relatorios-gestao";
 import {
   exportReportCsv,
   exportReportXml,
@@ -115,13 +125,43 @@ const REPORTS = [
   { value: "int_economicidade", label: "Inteligência — economicidade do ativo" },
 ] as const;
 
-type ReportKey = (typeof REPORTS)[number]["value"];
+type ReportKey = (typeof REPORTS)[number]["value"] | GestaoKey;
+
+/** Aba (módulo) de onde vem cada relatório: sem a aba contratada, o relatório some. */
+const REPORT_MODULE: Record<string, string> = {
+  frota: "veiculos",
+  custo_veiculo: "veiculos",
+  frota_perfil: "veiculos",
+  abastecimento: "abastecimentos",
+  consumo_cc: "abastecimentos",
+  abast_condutor: "abastecimentos",
+  abast_fornecedor: "abastecimentos",
+  manutencao: "manutencoes",
+  manutencao_prazos: "manutencoes",
+  prev_manutencao: "planos-manutencao",
+  utilizacao: "utilizacao",
+  contratos: "contratos",
+  legal: "multas",
+  patrimonio: "patrimonio",
+  diarias: "diarias",
+  limpeza: "limpeza",
+  faturamento: "faturamento",
+  contrato_ocorrencias: "gestao-contrato",
+  imr_notas: "gestao-contrato",
+  cotas_servidor: "cotas-servidor",
+  int_consumo: "inteligencia",
+  int_ranking: "inteligencia",
+  int_desvios: "inteligencia",
+  int_despesas: "inteligencia",
+  int_tco: "inteligencia",
+  int_economicidade: "inteligencia",
+};
 
 /**
  * Filtros suportados por relatório. Um filtro só é habilitado quando a origem
  * de dados possui a coluna correspondente — nunca exibimos filtro que não filtra.
  */
-const CAPS: Record<ReportKey, { date: boolean; unit: boolean; vehicle: boolean; driver: boolean }> =
+const CAPS: Record<Exclude<ReportKey, GestaoKey>, { date: boolean; unit: boolean; vehicle: boolean; driver: boolean }> =
   {
     frota: { date: false, unit: true, vehicle: true, driver: false },
     abastecimento: { date: true, unit: true, vehicle: true, driver: true },
@@ -250,7 +290,8 @@ const LABELS: Record<string, string> = {
   registrado_por: "Registrado como",
 };
 
-const label = (k: string) => LABELS[k] ?? k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, " ");
+const label = (k: string) =>
+  LABELS[k] ?? GESTAO_LABELS[k] ?? k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, " ");
 
 const firstDayOfYear = () => `${new Date().getFullYear()}-01-01`;
 const today = () => new Date().toISOString().slice(0, 10);
@@ -282,7 +323,10 @@ function Relatorios() {
     ? objectKinds.map((k) => ({ value: k.code, label: k.label }))
     : CONTRACT_OBJECT_KIND_FALLBACK;
 
-  const caps = CAPS[report];
+  const caps =
+    report in GESTAO_CAPS ? GESTAO_CAPS[report as GestaoKey] : CAPS[report as keyof typeof CAPS];
+  const { map: modMap } = useModuleMap();
+  const canExport = featureOn(modMap, "relatorios.exportar");
 
   /* ===== Bloco 6.5/6.6 — filtros dependentes ===== */
   // Veículos que o condutor selecionado efetivamente utilizou no histórico (uso, abastecimento e diárias).
@@ -383,6 +427,17 @@ function Relatorios() {
       const start = `${from}T00:00:00`;
 
       const end = `${to}T23:59:59`;
+
+      if (GESTAO_REPORTS.some((r) => r.value === report)) {
+        return (await runGestaoReport(report as GestaoKey, {
+          from,
+          to,
+          unit,
+          vehicle,
+          driver,
+          has: (k) => modMap[k] !== false,
+        })) as Record<string, unknown>[];
+      }
 
       /* ===== Fase 10 / Bloco 2 — relatórios de inteligência ===== */
       if (report.startsWith("int_")) {
@@ -1224,7 +1279,8 @@ function Relatorios() {
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const pageRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const reportLabel = REPORTS.find((r) => r.value === report)?.label ?? "Relatório";
+  const reportLabel =
+    [...GESTAO_REPORTS, ...REPORTS].find((r) => r.value === report)?.label ?? "Relatório";
   const usesDate = caps.date;
 
   const unitName = unitId === "todas" ? "Todas" : (units.find((u) => u.id === unitId)?.name ?? "—");
@@ -1297,11 +1353,41 @@ function Relatorios() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {REPORTS.map((r) => (
-                <SelectItem key={r.value} value={r.value}>
-                  {r.label}
-                </SelectItem>
-              ))}
+              {[
+                "Gerenciais e resumos",
+                "Cadastros",
+                "Pessoal e escala",
+                "Frota, abastecimento e manutenção",
+                "Contratos e inteligência",
+              ].map((g) => {
+                const list = [
+                  ...GESTAO_REPORTS.map((r) => ({
+                    value: r.value as ReportKey,
+                    label: r.label,
+                    group: r.group,
+                    module: r.module as string | null,
+                  })),
+                  ...REPORTS.map((r) => ({
+                    value: r.value as ReportKey,
+                    label: r.label,
+                    group: /^(faturamento|contrato|imr|contratos|int_)/.test(r.value)
+                      ? "Contratos e inteligência"
+                      : "Frota, abastecimento e manutenção",
+                    module: REPORT_MODULE[r.value] ?? null,
+                  })),
+                ].filter((r) => r.group === g && (!r.module || modMap[r.module] !== false));
+                if (!list.length) return null;
+                return (
+                  <SelectGroup key={g}>
+                    <SelectLabel>{g}</SelectLabel>
+                    {list.map((r) => (
+                      <SelectItem key={r.value} value={r.value}>
+                        {r.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
@@ -1506,38 +1592,47 @@ function Relatorios() {
           <FileBarChart className="size-4" /> {rows.length} linha(s)
         </p>
         <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={!rows.length}
-            onClick={() => handleExport("csv")}
-          >
-            <Download className="size-4" /> CSV
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={!rows.length}
-            onClick={() => handleExport("xlsx")}
-          >
-            <Download className="size-4" /> Excel (.xlsx)
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={!rows.length}
-            onClick={() => handleExport("xml")}
-          >
-            <Download className="size-4" /> XML
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={!rows.length}
-            onClick={() => handleExport("pdf")}
-          >
-            <Printer className="size-4" /> Imprimir / PDF
-          </Button>
+          {!canExport && (
+            <span className="text-xs text-muted-foreground">
+              Exportação não disponível para este órgão.
+            </span>
+          )}
+          {canExport && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!rows.length}
+                onClick={() => handleExport("csv")}
+              >
+                <Download className="size-4" /> CSV
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!rows.length}
+                onClick={() => handleExport("xlsx")}
+              >
+                <Download className="size-4" /> Excel (.xlsx)
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!rows.length}
+                onClick={() => handleExport("xml")}
+              >
+                <Download className="size-4" /> XML
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!rows.length}
+                onClick={() => handleExport("pdf")}
+              >
+                <Printer className="size-4" /> Imprimir / PDF
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
