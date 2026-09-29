@@ -6759,6 +6759,44 @@ export type Database = {
           },
         ];
       };
+      org_role_access: {
+        Row: {
+          allowed: boolean;
+          id: string;
+          module_key: string;
+          organization_id: string;
+          role: Database["public"]["Enums"]["app_role"];
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          allowed: boolean;
+          id?: string;
+          module_key: string;
+          organization_id: string;
+          role: Database["public"]["Enums"]["app_role"];
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          allowed?: boolean;
+          id?: string;
+          module_key?: string;
+          organization_id?: string;
+          role?: Database["public"]["Enums"]["app_role"];
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "org_role_access_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       organization_modules: {
         Row: {
           created_at: string;

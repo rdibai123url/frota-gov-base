@@ -54,7 +54,7 @@ import {
   ROLE_LABELS,
 } from "@/lib/frotagov";
 import { useIsSuperAdmin, usePlatformSession, usePlatformContextActions } from "@/lib/platform";
-import { moduleForPath, useModuleMap } from "@/lib/modulos";
+import { moduleForPath, useAccessOverrides, useModuleMap } from "@/lib/modulos";
 import { roleCanOpen } from "@/lib/permissoes";
 
 type NavLeaf = { to: string; label: string };
@@ -143,6 +143,7 @@ const NAV: NavGroup[] = [
       { to: "/funcionarios", label: "Funcionários" },
       { to: "/entidades-externas", label: "Pessoas e Empresas Externas" },
       { to: "/usuarios", label: "Usuários e Permissões" },
+      { to: "/perfis-acesso", label: "Perfis de acesso" },
       { to: "/migracao", label: "Migração de dados" },
       { to: "/exportacao", label: "Exportar dados" },
     ],
@@ -240,6 +241,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { data: platformSession } = usePlatformSession();
   const { exitOrg } = usePlatformContextActions();
   const { map: modules, isLoading: modulesLoading } = useModuleMap();
+  const { data: overrides } = useAccessOverrides();
   /** Contador de alertas abertos: destaca o item do menu enquanto houver pendência. */
   const { data: openAlerts = 0 } = useOpenAlertCount();
 
@@ -253,7 +255,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       const mod = moduleForPath(leaf.to);
       if (!mod) return true;
       if (modules[mod.key] === false) return false;
-      return isSuperAdmin || roleCanOpen(mod.key, me?.roles ?? []);
+      return isSuperAdmin || roleCanOpen(mod.key, me?.roles ?? [], overrides ?? {});
     });
     return items.length ? { ...group, items } : null;
   }).filter((g): g is NavGroup => g !== null);
@@ -263,7 +265,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const currentModule = moduleForPath(pathname);
   const blocked = !modulesLoading && !!currentModule && modules[currentModule.key] === false;
   const noAccess =
-    !!me && !!currentModule && !isSuperAdmin && !roleCanOpen(currentModule.key, me.roles ?? []);
+    !!me &&
+    !!currentModule &&
+    !isSuperAdmin &&
+    !roleCanOpen(currentModule.key, me.roles ?? [], overrides ?? {});
 
   async function handleSignOut() {
     await queryClient.cancelQueries();

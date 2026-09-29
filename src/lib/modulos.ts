@@ -76,6 +76,7 @@ export const MODULES: ModuleDef[] = [
   m("funcionarios", "Funcionários", "Cadastros"),
   m("entidades-externas", "Pessoas e Empresas Externas", "Cadastros"),
   m("usuarios", "Usuários e Permissões", "Cadastros", [], true),
+  m("perfis-acesso", "Perfis de acesso", "Cadastros", [], true),
   m("migracao", "Migração de dados", "Cadastros"),
   m("exportacao", "Exportar dados", "Cadastros"),
   m("inteligencia", "Inteligência da frota", "Relatórios e análises"),
@@ -152,6 +153,23 @@ export function buildModuleMap(rows: ModuleRow[]): Record<string, boolean> {
   for (const r of rows) map[r.module_key] = r.enabled;
   for (const mod of MODULES) if (mod.essential) map[mod.key] = true;
   return map;
+}
+
+/** Escolhas de acesso por perfil feitas pelo administrador do órgão. */
+export function useAccessOverrides() {
+  return useQuery({
+    queryKey: ["org-role-access"],
+    staleTime: 1000 * 60,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("org_role_access")
+        .select("module_key, role, allowed");
+      if (error) throw error;
+      const out: Record<string, Record<string, boolean>> = {};
+      for (const r of data ?? []) (out[r.module_key] ??= {})[r.role] = r.allowed;
+      return out as Record<string, Partial<Record<import("@/lib/frotagov").AppRole, boolean>>>;
+    },
+  });
 }
 
 /** Mapa de módulos habilitados para o órgão em contexto. */

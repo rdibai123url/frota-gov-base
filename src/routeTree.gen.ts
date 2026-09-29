@@ -51,6 +51,7 @@ import { Route as AuthenticatedOrgaoRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 import { Route as AuthenticatedPatrimonioRouteImport } from './routes/_authenticated/patrimonio'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedPerfisAcessoRouteImport } from './routes/_authenticated/perfis-acesso'
 import { Route as AuthenticatedPesquisaPrecosRouteImport } from './routes/_authenticated/pesquisa-precos'
 import { Route as AuthenticatedPlanosManutencaoRouteImport } from './routes/_authenticated/planos-manutencao'
 import { Route as AuthenticatedPlataformaRouteImport } from './routes/_authenticated/plataforma'
@@ -303,6 +304,12 @@ const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPerfisAcessoRoute =
+  AuthenticatedPerfisAcessoRouteImport.update({
+    id: '/perfis-acesso',
+    path: '/perfis-acesso',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPesquisaPrecosRoute =
   AuthenticatedPesquisaPrecosRouteImport.update({
     id: '/pesquisa-precos',
@@ -483,6 +490,7 @@ export interface FileRoutesByFullPath {
   '/painel': typeof AuthenticatedPainelRoute
   '/patrimonio': typeof AuthenticatedPatrimonioRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/perfis-acesso': typeof AuthenticatedPerfisAcessoRoute
   '/pesquisa-precos': typeof AuthenticatedPesquisaPrecosRoute
   '/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/plataforma': typeof AuthenticatedPlataformaRoute
@@ -551,6 +559,7 @@ export interface FileRoutesByTo {
   '/painel': typeof AuthenticatedPainelRoute
   '/patrimonio': typeof AuthenticatedPatrimonioRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/perfis-acesso': typeof AuthenticatedPerfisAcessoRoute
   '/pesquisa-precos': typeof AuthenticatedPesquisaPrecosRoute
   '/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/plataforma': typeof AuthenticatedPlataformaRoute
@@ -621,6 +630,7 @@ export interface FileRoutesById {
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
   '/_authenticated/patrimonio': typeof AuthenticatedPatrimonioRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/perfis-acesso': typeof AuthenticatedPerfisAcessoRoute
   '/_authenticated/pesquisa-precos': typeof AuthenticatedPesquisaPrecosRoute
   '/_authenticated/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/_authenticated/plataforma': typeof AuthenticatedPlataformaRoute
@@ -691,6 +701,7 @@ export interface FileRouteTypes {
     | '/painel'
     | '/patrimonio'
     | '/perfil'
+    | '/perfis-acesso'
     | '/pesquisa-precos'
     | '/planos-manutencao'
     | '/plataforma'
@@ -759,6 +770,7 @@ export interface FileRouteTypes {
     | '/painel'
     | '/patrimonio'
     | '/perfil'
+    | '/perfis-acesso'
     | '/pesquisa-precos'
     | '/planos-manutencao'
     | '/plataforma'
@@ -828,6 +840,7 @@ export interface FileRouteTypes {
     | '/_authenticated/painel'
     | '/_authenticated/patrimonio'
     | '/_authenticated/perfil'
+    | '/_authenticated/perfis-acesso'
     | '/_authenticated/pesquisa-precos'
     | '/_authenticated/planos-manutencao'
     | '/_authenticated/plataforma'
@@ -1167,6 +1180,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPerfilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/perfis-acesso': {
+      id: '/_authenticated/perfis-acesso'
+      path: '/perfis-acesso'
+      fullPath: '/perfis-acesso'
+      preLoaderRoute: typeof AuthenticatedPerfisAcessoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/pesquisa-precos': {
       id: '/_authenticated/pesquisa-precos'
       path: '/pesquisa-precos'
@@ -1383,6 +1403,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
   AuthenticatedPatrimonioRoute: typeof AuthenticatedPatrimonioRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedPerfisAcessoRoute: typeof AuthenticatedPerfisAcessoRoute
   AuthenticatedPesquisaPrecosRoute: typeof AuthenticatedPesquisaPrecosRoute
   AuthenticatedPlanosManutencaoRoute: typeof AuthenticatedPlanosManutencaoRoute
   AuthenticatedPlataformaRoute: typeof AuthenticatedPlataformaRoute
@@ -1440,6 +1461,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
   AuthenticatedPatrimonioRoute: AuthenticatedPatrimonioRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedPerfisAcessoRoute: AuthenticatedPerfisAcessoRoute,
   AuthenticatedPesquisaPrecosRoute: AuthenticatedPesquisaPrecosRoute,
   AuthenticatedPlanosManutencaoRoute: AuthenticatedPlanosManutencaoRoute,
   AuthenticatedPlataformaRoute: AuthenticatedPlataformaRoute,

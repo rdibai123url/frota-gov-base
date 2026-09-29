@@ -42,7 +42,7 @@ before(async () => {
   const files = (await readdir(new URL("supabase/migrations/", root)))
     .filter((f) => f.endsWith(".sql"))
     .sort();
-  assert.equal(files.length, 125);
+  assert.equal(files.length, 126);
   for (const file of files) {
     if (file.startsWith("20260925") && !historicalTriggers) {
       historicalTriggers = (
@@ -68,7 +68,7 @@ after(async () => {
   await db.close();
 });
 
-test("111 migrations históricas + 9 novas aplicam sem erro", async () => {
+test("111 migrations históricas + 10 novas aplicam sem erro", async () => {
   const { rows } = await db.query(
     "SELECT count(*)::int n FROM information_schema.tables WHERE table_schema='public'",
   );
@@ -456,5 +456,22 @@ test("assinatura eletrônica: imutável, código único e conferência pública"
       (organization_id, doc_type, doc_id, doc_label, doc_hash, signer_id, signer_name, verification_code)
       VALUES ('${org}', 'ordem_servico', '${id(998)}', 'OS', 'curto', '${id(997)}', 'Fulano', 'QQQQ0000')`),
     /doc_hash/,
+  );
+});
+
+test("perfis de acesso: administrador nunca é bloqueado e cada tela/perfil é único", async () => {
+  await db.exec("ALTER TABLE public.org_role_access DISABLE TRIGGER ALL");
+  const org = id(1001);
+  await db.exec(`INSERT INTO public.org_role_access (organization_id, module_key, role, allowed)
+    VALUES ('${org}', 'faturamento', 'operator', false)`);
+  await assert.rejects(
+    db.exec(`INSERT INTO public.org_role_access (organization_id, module_key, role, allowed)
+      VALUES ('${org}', 'faturamento', 'operator', true)`),
+    /duplicate key/,
+  );
+  await assert.rejects(
+    db.exec(`INSERT INTO public.org_role_access (organization_id, module_key, role, allowed)
+      VALUES ('${org}', 'usuarios', 'org_admin', false)`),
+    /org_role_access_admin_chk/,
   );
 });

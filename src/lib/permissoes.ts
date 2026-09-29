@@ -27,6 +27,7 @@ export const MODULE_ROLES: Record<string, AppRole[]> = {
   integracoes: ADMIN,
   "chaves-api": ADMIN,
   backup: ADMIN,
+  "perfis-acesso": ADMIN,
   // dinheiro e contratos: gestão e controle interno
   contratos: SEM_OPERADOR,
   empenhos: SEM_OPERADOR,
@@ -45,9 +46,28 @@ export const MODULE_ROLES: Record<string, AppRole[]> = {
   sustentabilidade: SEM_OPERADOR,
 };
 
-/** O perfil pode abrir a tela deste módulo? (módulo sem regra = liberado). */
-export function roleCanOpen(moduleKey: string, roles: AppRole[]): boolean {
+/** Escolhas do administrador do órgão: módulo → perfil → liberado ou não. */
+export type AccessOverrides = Record<string, Partial<Record<AppRole, boolean>>>;
+
+/** Padrão do sistema para um perfil abrir a tela (módulo sem regra = liberado). */
+export function defaultAllows(moduleKey: string, role: AppRole): boolean {
   const allowed = MODULE_ROLES[moduleKey];
-  if (!allowed) return true;
-  return roles.some((r) => allowed.includes(r));
+  return !allowed || allowed.includes(role);
 }
+
+/**
+ * O usuário pode abrir a tela deste módulo?
+ * Vale a escolha do administrador do órgão para o perfil; sem escolha, vale o padrão.
+ * Com vários perfis, basta um deles permitir.
+ */
+export function roleCanOpen(
+  moduleKey: string,
+  roles: AppRole[],
+  overrides: AccessOverrides = {},
+): boolean {
+  if (roles.length === 0) return !MODULE_ROLES[moduleKey];
+  return roles.some((r) => overrides[moduleKey]?.[r] ?? defaultAllows(moduleKey, r));
+}
+
+/** Telas que o administrador não pode fechar para si mesmo. */
+export const ALWAYS_OPEN = ["painel", "perfis-acesso", "usuarios", "orgao"];
