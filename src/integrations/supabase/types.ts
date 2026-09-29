@@ -416,6 +416,66 @@ export type Database = {
           },
         ];
       };
+      approval_limits: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          max_value: number;
+          notes: string | null;
+          organization_id: string;
+          role: Database["public"]["Enums"]["app_role"];
+          scope: string;
+          unit_id: string | null;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          max_value: number;
+          notes?: string | null;
+          organization_id: string;
+          role: Database["public"]["Enums"]["app_role"];
+          scope?: string;
+          unit_id?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          max_value?: number;
+          notes?: string | null;
+          organization_id?: string;
+          role?: Database["public"]["Enums"]["app_role"];
+          scope?: string;
+          unit_id?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "approval_limits_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "approval_limits_unit_id_fkey";
+            columns: ["unit_id"];
+            isOneToOne: false;
+            referencedRelation: "units";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       asset_card_uses: {
         Row: {
           card_id: string;
@@ -1360,6 +1420,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "budget_references_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      cleaning_rules: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          max_per_month: number | null;
+          min_interval_days: number;
+          notes: string | null;
+          organization_id: string;
+          updated_at: string;
+          updated_by: string | null;
+          vehicle_type: string | null;
+        };
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          max_per_month?: number | null;
+          min_interval_days?: number;
+          notes?: string | null;
+          organization_id: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          vehicle_type?: string | null;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          max_per_month?: number | null;
+          min_interval_days?: number;
+          notes?: string | null;
+          organization_id?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          vehicle_type?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "cleaning_rules_organization_id_fkey";
             columns: ["organization_id"];
             isOneToOne: false;
             referencedRelation: "organizations";
@@ -3192,6 +3302,8 @@ export type Database = {
           updated_at: string;
           updated_by: string | null;
           zip_code: string | null;
+          environmental_compliant: boolean;
+          environmental_note: string | null;
         };
         Insert: {
           active?: boolean;
@@ -3223,6 +3335,8 @@ export type Database = {
           updated_at?: string;
           updated_by?: string | null;
           zip_code?: string | null;
+          environmental_compliant?: boolean;
+          environmental_note?: string | null;
         };
         Update: {
           active?: boolean;
@@ -3254,6 +3368,8 @@ export type Database = {
           updated_at?: string;
           updated_by?: string | null;
           zip_code?: string | null;
+          environmental_compliant?: boolean;
+          environmental_note?: string | null;
         };
         Relationships: [
           {
@@ -4858,6 +4974,59 @@ export type Database = {
           },
         ];
       };
+      labor_time_standards: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          notes: string | null;
+          organization_id: string;
+          service_name: string;
+          source: string;
+          standard_hours: number;
+          updated_at: string;
+          updated_by: string | null;
+          vehicle_type: string | null;
+        };
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          notes?: string | null;
+          organization_id: string;
+          service_name: string;
+          source?: string;
+          standard_hours: number;
+          updated_at?: string;
+          updated_by?: string | null;
+          vehicle_type?: string | null;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          notes?: string | null;
+          organization_id?: string;
+          service_name?: string;
+          source?: string;
+          standard_hours?: number;
+          updated_at?: string;
+          updated_by?: string | null;
+          vehicle_type?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "labor_time_standards_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       ldap_directories: {
         Row: {
           active: boolean;
@@ -5067,6 +5236,56 @@ export type Database = {
           },
         ];
       };
+      maintenance_deadlines: {
+        Row: {
+          active: boolean;
+          business_days: number;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          kind: Database["public"]["Enums"]["maintenance_kind"] | null;
+          notes: string | null;
+          organization_id: string;
+          updated_at: string;
+          updated_by: string | null;
+          vehicle_type: string | null;
+        };
+        Insert: {
+          active?: boolean;
+          business_days: number;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          kind?: Database["public"]["Enums"]["maintenance_kind"] | null;
+          notes?: string | null;
+          organization_id: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          vehicle_type?: string | null;
+        };
+        Update: {
+          active?: boolean;
+          business_days?: number;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          kind?: Database["public"]["Enums"]["maintenance_kind"] | null;
+          notes?: string | null;
+          organization_id?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          vehicle_type?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_deadlines_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       maintenance_parts: {
         Row: {
           contract_item_id: string | null;
@@ -5090,6 +5309,9 @@ export type Database = {
           vehicle_id: string;
           warranty_days: number | null;
           warranty_until: string | null;
+          part_origin: string;
+          origin_note: string | null;
+          replaced_destination: string;
         };
         Insert: {
           contract_item_id?: string | null;
@@ -5113,6 +5335,9 @@ export type Database = {
           vehicle_id: string;
           warranty_days?: number | null;
           warranty_until?: string | null;
+          part_origin?: string;
+          origin_note?: string | null;
+          replaced_destination?: string;
         };
         Update: {
           contract_item_id?: string | null;
@@ -5136,6 +5361,9 @@ export type Database = {
           vehicle_id?: string;
           warranty_days?: number | null;
           warranty_until?: string | null;
+          part_origin?: string;
+          origin_note?: string | null;
+          replaced_destination?: string;
         };
         Relationships: [
           {
@@ -5375,6 +5603,10 @@ export type Database = {
           vehicle_id: string;
           warranty_days: number | null;
           warranty_until: string | null;
+          entry_inspection: string | null;
+          exit_inspection: string | null;
+          pickup_person: string | null;
+          promised_return_at: string | null;
         };
         Insert: {
           accident_id?: string | null;
@@ -5418,6 +5650,10 @@ export type Database = {
           vehicle_id: string;
           warranty_days?: number | null;
           warranty_until?: string | null;
+          entry_inspection?: string | null;
+          exit_inspection?: string | null;
+          pickup_person?: string | null;
+          promised_return_at?: string | null;
         };
         Update: {
           accident_id?: string | null;
@@ -5461,6 +5697,10 @@ export type Database = {
           vehicle_id?: string;
           warranty_days?: number | null;
           warranty_until?: string | null;
+          entry_inspection?: string | null;
+          exit_inspection?: string | null;
+          pickup_person?: string | null;
+          promised_return_at?: string | null;
         };
         Relationships: [
           {
@@ -5731,6 +5971,8 @@ export type Database = {
           updated_at: string;
           updated_by: string | null;
           warranty_lead_days: number;
+          max_labor_hour_value: number | null;
+          block_above_max_hour_value: boolean;
         };
         Insert: {
           created_at?: string;
@@ -5742,6 +5984,8 @@ export type Database = {
           updated_at?: string;
           updated_by?: string | null;
           warranty_lead_days?: number;
+          max_labor_hour_value?: number | null;
+          block_above_max_hour_value?: boolean;
         };
         Update: {
           created_at?: string;
@@ -5753,6 +5997,8 @@ export type Database = {
           updated_at?: string;
           updated_by?: string | null;
           warranty_lead_days?: number;
+          max_labor_hour_value?: number | null;
+          block_above_max_hour_value?: boolean;
         };
         Relationships: [
           {
@@ -7179,6 +7425,8 @@ export type Database = {
           valid_until: string | null;
           warranty_days: number | null;
           workshop_id: string;
+          parts_origin: string;
+          parts_origin_note: string | null;
         };
         Insert: {
           attachment_path?: string | null;
@@ -7212,6 +7460,8 @@ export type Database = {
           valid_until?: string | null;
           warranty_days?: number | null;
           workshop_id: string;
+          parts_origin?: string;
+          parts_origin_note?: string | null;
         };
         Update: {
           attachment_path?: string | null;
@@ -7245,6 +7495,8 @@ export type Database = {
           valid_until?: string | null;
           warranty_days?: number | null;
           workshop_id?: string;
+          parts_origin?: string;
+          parts_origin_note?: string | null;
         };
         Relationships: [
           {
@@ -10514,6 +10766,8 @@ export type Database = {
           vehicle_type: string | null;
           year_manufacture: number | null;
           year_model: number | null;
+          factory_warranty_until: string | null;
+          factory_warranty_km: number | null;
         };
         Insert: {
           acquisition_date?: string | null;
@@ -10576,6 +10830,8 @@ export type Database = {
           vehicle_type?: string | null;
           year_manufacture?: number | null;
           year_model?: number | null;
+          factory_warranty_until?: string | null;
+          factory_warranty_km?: number | null;
         };
         Update: {
           acquisition_date?: string | null;
@@ -10638,6 +10894,8 @@ export type Database = {
           vehicle_type?: string | null;
           year_manufacture?: number | null;
           year_model?: number | null;
+          factory_warranty_until?: string | null;
+          factory_warranty_km?: number | null;
         };
         Relationships: [
           {
@@ -11010,6 +11268,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      approval_limit_for: {
+        Args: { _org: string; _unit?: string; _user: string };
+        Returns: number;
+      };
       reserve_checklist_photo: {
         Args: { _checklist: string; _mime: string; _size: number };
         Returns: Json;

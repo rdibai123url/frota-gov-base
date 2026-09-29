@@ -94,6 +94,8 @@ const schema = z.object({
   color: z.string().trim().max(40).optional(),
   tank_capacity: z.string().trim().optional(),
   current_km: z.string().trim().optional(),
+  factory_warranty_until: z.string().trim().optional(),
+  factory_warranty_km: z.string().trim().optional(),
   hour_meter: z.string().trim().optional(),
   notes: z.string().trim().max(2000).optional(),
 });
@@ -272,6 +274,8 @@ function Veiculos() {
       tank_capacity: num(d.tank_capacity),
       current_km: currentKm,
       hour_meter: hourMeter,
+      factory_warranty_until: d.factory_warranty_until || null,
+      factory_warranty_km: num(d.factory_warranty_km),
       // A unidade só muda pelo fluxo de movimentação patrimonial (Frota → Movimentação patrimonial).
       ...(editing ? {} : { unit_id: safeUnitId }),
       status,
@@ -720,6 +724,25 @@ function Veiculos() {
                   inputMode="decimal"
                   min="0"
                   defaultValue={editing?.hour_meter ?? ""}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="factory_warranty_until">Garantia de fábrica até</Label>
+                <Input
+                  id="factory_warranty_until"
+                  name="factory_warranty_until"
+                  type="date"
+                  defaultValue={editing?.factory_warranty_until ?? ""}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="factory_warranty_km">Garantia de fábrica até (km)</Label>
+                <Input
+                  id="factory_warranty_km"
+                  name="factory_warranty_km"
+                  inputMode="decimal"
+                  min="0"
+                  defaultValue={editing?.factory_warranty_km ?? ""}
                 />
               </div>
               <div className="space-y-1.5">

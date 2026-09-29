@@ -42,7 +42,7 @@ before(async () => {
   const files = (await readdir(new URL("supabase/migrations/", root)))
     .filter((f) => f.endsWith(".sql"))
     .sort();
-  assert.equal(files.length, 120);
+  assert.equal(files.length, 121);
   for (const file of files) {
     if (file.startsWith("20260925") && !historicalTriggers) {
       historicalTriggers = (
@@ -168,6 +168,76 @@ test("checks de valores recusam dados inconsistentes", async () => {
                VALUES ('${A}', 'T-2', 1900, current_date, 1000)`),
       /commitments_exercise_range/,
     );
+  } finally {
+    await db.exec("SET session_replication_role = DEFAULT");
+  }
+});
+
+test("fase 2: tabelas, colunas e gatilhos de manutenção avançada existem", async () => {
+  const tables = (
+    await db.query(
+      "SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name = ANY($1)",
+      [["approval_limits", "labor_time_standards", "maintenance_deadlines", "cleaning_rules"]],
+    )
+  ).rows;
+  assert.equal(tables.length, 4);
+  const cols = (
+    await db.query(
+      "SELECT table_name||'.'||column_name c FROM information_schema.columns WHERE table_schema='public' AND (table_name||'.'||column_name) = ANY($1)",
+      [
+        [
+          "maintenance_records.entry_inspection",
+          "maintenance_records.pickup_person",
+          "maintenance_parts.part_origin",
+          "quotation_proposals.parts_origin",
+          "vehicles.factory_warranty_until",
+          "external_entities.environmental_compliant",
+          "maintenance_settings.max_labor_hour_value",
+        ],
+      ],
+    )
+  ).rows;
+  assert.equal(cols.length, 7);
+});
+
+test("peça paralela ou recondicionada exige justificativa", async () => {
+  await db.exec(`
+    CREATE TEMP TABLE t_peca(origem text, nota text);
+    CREATE TRIGGER t_guard BEFORE INSERT ON t_peca
+    FOR EACH ROW EXECUTE FUNCTION public.guard_part_origin('origem', 'nota');
+  `);
+  await db.exec("INSERT INTO t_peca VALUES ('genuina', NULL), ('original', NULL)");
+  await db.exec("INSERT INTO t_peca VALUES ('paralela', 'Aprovada pelo gestor: mais barata')");
+  await assert.rejects(db.exec("INSERT INTO t_peca VALUES ('paralela', NULL)"), /paralela/);
+  await assert.rejects(
+    db.exec("INSERT INTO t_peca VALUES ('recondicionada', '  ')"),
+    /recondicionada/,
+  );
+});
+
+test("alçada: sem limite cadastrado não restringe; com limite aplica ao perfil", async () => {
+  const org = id(900);
+  const gestor = id(901);
+  const admin = id(902);
+  await db.exec("SET session_replication_role = replica");
+  try {
+    await db.exec(`INSERT INTO public.user_roles (user_id, role, organization_id) VALUES
+      ('${gestor}', 'fleet_manager', '${org}'), ('${admin}', 'org_admin', '${org}')`);
+    const semLimite = await db.query(
+      `SELECT public.approval_limit_for('${gestor}', '${org}', NULL) v`,
+    );
+    assert.equal(semLimite.rows[0].v, null);
+
+    await db.exec(`INSERT INTO public.approval_limits (organization_id, role, scope, max_value)
+      VALUES ('${org}', 'fleet_manager', 'manutencao', 5000)`);
+    const comLimite = await db.query(
+      `SELECT public.approval_limit_for('${gestor}', '${org}', NULL) v`,
+    );
+    assert.equal(Number(comLimite.rows[0].v), 5000);
+    const adminLivre = await db.query(
+      `SELECT public.approval_limit_for('${admin}', '${org}', NULL) v`,
+    );
+    assert.equal(adminLivre.rows[0].v, null);
   } finally {
     await db.exec("SET session_replication_role = DEFAULT");
   }

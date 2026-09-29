@@ -100,6 +100,7 @@ const schema = z.object({
   phone: z.string().trim().max(40).optional(),
   email: z.string().trim().max(160).optional(),
   notes: z.string().trim().max(600).optional(),
+  environmental_note: z.string().trim().max(300).optional(),
 });
 
 function Entidades() {
@@ -112,6 +113,7 @@ function Entidades() {
   const [kind, setKind] = useState<EntityKind>("pj");
   const [categories, setCategories] = useState<string[]>([]);
   const [active, setActive] = useState(true);
+  const [envOk, setEnvOk] = useState(false);
   const [search, setSearch] = useState("");
   const [fCategory, setFCategory] = useState(ALL);
   const [saving, setSaving] = useState(false);
@@ -132,6 +134,7 @@ function Entidades() {
     setKind("pj");
     setCategories([]);
     setActive(true);
+    setEnvOk(false);
     setOpen(true);
   }
 
@@ -140,6 +143,7 @@ function Entidades() {
     setKind(e.kind);
     setCategories(e.categories ?? []);
     setActive(e.active);
+    setEnvOk(e.environmental_compliant ?? false);
     setOpen(true);
   }
 
@@ -180,6 +184,8 @@ function Entidades() {
         email: d.email || null,
         notes: d.notes || null,
         active,
+        environmental_compliant: envOk,
+        environmental_note: envOk ? d.environmental_note || null : null,
       };
       const before = editing
         ? {
@@ -407,6 +413,31 @@ function Entidades() {
                   fornecedor e oficina.
                 </p>
               </div>
+              {(categories.includes("oficina") ||
+                categories.includes("concessionaria") ||
+                categories.includes("lava_jato")) && (
+                <div className="space-y-2 rounded-md border p-3 sm:col-span-2">
+                  <div className="flex items-center gap-2">
+                    <Switch id="env_ok" checked={envOk} onCheckedChange={setEnvOk} />
+                    <Label htmlFor="env_ok">Atende aos requisitos ambientais</Label>
+                  </div>
+                  {envOk && (
+                    <div>
+                      <Label htmlFor="environmental_note">Licença ou comprovação</Label>
+                      <Input
+                        id="environmental_note"
+                        name="environmental_note"
+                        placeholder="Ex.: licença ambiental nº, tratamento de efluentes"
+                        defaultValue={editing?.environmental_note ?? ""}
+                      />
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Serve para dar preferência a oficinas e lavagens que descartam resíduos
+                    corretamente.
+                  </p>
+                </div>
+              )}
               <div className="sm:col-span-2">
                 <Label htmlFor="address">Endereço</Label>
                 <Input id="address" name="address" defaultValue={editing?.address ?? ""} />

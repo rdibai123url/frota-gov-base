@@ -82,6 +82,11 @@ import {
   type QuotationRow,
   type QuotationStatus,
 } from "@/lib/frotagov";
+import {
+  findStandardHours,
+  useLaborTimeStandards,
+  useMaintenanceSettingsFull,
+} from "@/lib/manutencao-avancada";
 
 export const Route = createFileRoute("/_authenticated/cotacoes")({
   head: () => ({
@@ -491,6 +496,48 @@ function QuotationDetail({
   const [sourceFilter, setSourceFilter] = useState<"todas" | "manual" | "link">("todas");
 
   const kind = asQuotationKind(quotation.quotation_kind);
+  const { data: laborSettings } = useMaintenanceSettingsFull();
+  const { data: laborStandards = [] } = useLaborTimeStandards();
+  const { data: allVehicles = [] } = useVehicles();
+  const quotationVehicleType =
+    allVehicles.find((v) => v.id === quotation.vehicle_id)?.vehicle_type ?? null;
+
+  /** Avisos de preço da mão de obra contra as regras do órgão. */
+  function laborAlerts(p: ProposalRow): string[] {
+    const out: string[] = [];
+    const hours = Number(p.labor_hours);
+    const hourValue = Number(p.labor_hour_value);
+    const max = laborSettings?.max_labor_hour_value;
+    if (max != null && hourValue > Number(max)) {
+      out.push(
+        "Valor da hora (" +
+          brl(hourValue) +
+          ") acima do máximo do órgão (" +
+          brl(Number(max)) +
+          ").",
+      );
+    }
+    const std = findStandardHours(
+      laborStandards,
+      quotation.description + " " + (quotation.specialty ?? ""),
+      quotationVehicleType,
+    );
+    if (std && hours > Number(std.standard_hours)) {
+      out.push(
+        "Horas propostas (" +
+          num(hours, 2) +
+          " h) acima do tempo padrão de “" +
+          std.service_name +
+          "” (" +
+          num(Number(std.standard_hours), 2) +
+          " h, " +
+          std.source +
+          ").",
+      );
+    }
+    return out;
+  }
+
   const [draft, setDraft] = useState<ProposalDraft>(() => emptyProposalDraft());
 
   /** Ao trocar de processo, o rascunho parte dos itens solicitados. */
@@ -793,6 +840,18 @@ function QuotationDetail({
   async function approve() {
     if (!selected) {
       toast.error("Selecione a proposta vencedora.");
+      return;
+    }
+    const chosen = proposals.find((p) => p.id === selected);
+    if (
+      chosen &&
+      laborSettings?.block_above_max_hour_value &&
+      laborSettings.max_labor_hour_value != null &&
+      Number(chosen.labor_hour_value) > Number(laborSettings.max_labor_hour_value)
+    ) {
+      toast.error(
+        "O valor da hora desta proposta está acima do máximo definido pelo órgão. Escolha outra proposta ou ajuste a regra.",
+      );
       return;
     }
     setBusy(true);
@@ -1112,6 +1171,15 @@ function QuotationDetail({
                 Líquido <strong>{brl(netOf(p))}</strong>
                 {p.disqualify_reason ? ` · Desclassificada: ${p.disqualify_reason}` : ""}
               </p>
+              {laborAlerts(p).map((msg) => (
+                <p
+                  key={msg}
+                  role="alert"
+                  className="mt-1 rounded border border-amber-300 bg-amber-50 px-2 py-1 text-xs text-amber-900"
+                >
+                  {msg}
+                </p>
+              ))}
               {itemsByProposal(p.id).length > 0 && (
                 <Table>
                   <TableHeader>

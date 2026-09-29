@@ -34,6 +34,7 @@ import { Route as AuthenticatedEquipamentosRouteImport } from './routes/_authent
 import { Route as AuthenticatedExportacaoRouteImport } from './routes/_authenticated/exportacao'
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
 import { Route as AuthenticatedFuncionariosRouteImport } from './routes/_authenticated/funcionarios'
+import { Route as AuthenticatedGarantiasRouteImport } from './routes/_authenticated/garantias'
 import { Route as AuthenticatedHistoricoVeiculoRouteImport } from './routes/_authenticated/historico-veiculo'
 import { Route as AuthenticatedIntegracoesRouteImport } from './routes/_authenticated/integracoes'
 import { Route as AuthenticatedInteligenciaRouteImport } from './routes/_authenticated/inteligencia'
@@ -50,11 +51,13 @@ import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedPatrimonioRouteImport } from './routes/_authenticated/patrimonio'
 import { Route as AuthenticatedPecasRouteImport } from './routes/_authenticated/pecas'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedPesquisaPrecosRouteImport } from './routes/_authenticated/pesquisa-precos'
 import { Route as AuthenticatedPlanosManutencaoRouteImport } from './routes/_authenticated/planos-manutencao'
 import { Route as AuthenticatedPlataformaRouteImport } from './routes/_authenticated/plataforma'
 import { Route as AuthenticatedPneusRouteImport } from './routes/_authenticated/pneus'
 import { Route as AuthenticatedPortalCredenciadoRouteImport } from './routes/_authenticated/portal-credenciado'
 import { Route as AuthenticatedRedeCredenciadaRouteImport } from './routes/_authenticated/rede-credenciada'
+import { Route as AuthenticatedRegrasManutencaoRouteImport } from './routes/_authenticated/regras-manutencao'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as AuthenticatedSegurosRouteImport } from './routes/_authenticated/seguros'
 import { Route as AuthenticatedSinistrosRouteImport } from './routes/_authenticated/sinistros'
@@ -209,6 +212,11 @@ const AuthenticatedFuncionariosRoute =
     path: '/funcionarios',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedGarantiasRoute = AuthenticatedGarantiasRouteImport.update({
+  id: '/garantias',
+  path: '/garantias',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedHistoricoVeiculoRoute =
   AuthenticatedHistoricoVeiculoRouteImport.update({
     id: '/historico-veiculo',
@@ -294,6 +302,12 @@ const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPesquisaPrecosRoute =
+  AuthenticatedPesquisaPrecosRouteImport.update({
+    id: '/pesquisa-precos',
+    path: '/pesquisa-precos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPlanosManutencaoRoute =
   AuthenticatedPlanosManutencaoRouteImport.update({
     id: '/planos-manutencao',
@@ -320,6 +334,12 @@ const AuthenticatedRedeCredenciadaRoute =
   AuthenticatedRedeCredenciadaRouteImport.update({
     id: '/rede-credenciada',
     path: '/rede-credenciada',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedRegrasManutencaoRoute =
+  AuthenticatedRegrasManutencaoRouteImport.update({
+    id: '/regras-manutencao',
+    path: '/regras-manutencao',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedRelatoriosRoute = AuthenticatedRelatoriosRouteImport.update({
@@ -439,6 +459,7 @@ export interface FileRoutesByFullPath {
   '/exportacao': typeof AuthenticatedExportacaoRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/funcionarios': typeof AuthenticatedFuncionariosRoute
+  '/garantias': typeof AuthenticatedGarantiasRoute
   '/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/integracoes': typeof AuthenticatedIntegracoesRoute
   '/inteligencia': typeof AuthenticatedInteligenciaRoute
@@ -455,11 +476,13 @@ export interface FileRoutesByFullPath {
   '/patrimonio': typeof AuthenticatedPatrimonioRoute
   '/pecas': typeof AuthenticatedPecasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/pesquisa-precos': typeof AuthenticatedPesquisaPrecosRoute
   '/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/plataforma': typeof AuthenticatedPlataformaRoute
   '/pneus': typeof AuthenticatedPneusRoute
   '/portal-credenciado': typeof AuthenticatedPortalCredenciadoRoute
   '/rede-credenciada': typeof AuthenticatedRedeCredenciadaRoute
+  '/regras-manutencao': typeof AuthenticatedRegrasManutencaoRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/seguros': typeof AuthenticatedSegurosRoute
   '/sinistros': typeof AuthenticatedSinistrosRoute
@@ -503,6 +526,7 @@ export interface FileRoutesByTo {
   '/exportacao': typeof AuthenticatedExportacaoRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/funcionarios': typeof AuthenticatedFuncionariosRoute
+  '/garantias': typeof AuthenticatedGarantiasRoute
   '/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/integracoes': typeof AuthenticatedIntegracoesRoute
   '/inteligencia': typeof AuthenticatedInteligenciaRoute
@@ -519,11 +543,13 @@ export interface FileRoutesByTo {
   '/patrimonio': typeof AuthenticatedPatrimonioRoute
   '/pecas': typeof AuthenticatedPecasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/pesquisa-precos': typeof AuthenticatedPesquisaPrecosRoute
   '/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/plataforma': typeof AuthenticatedPlataformaRoute
   '/pneus': typeof AuthenticatedPneusRoute
   '/portal-credenciado': typeof AuthenticatedPortalCredenciadoRoute
   '/rede-credenciada': typeof AuthenticatedRedeCredenciadaRoute
+  '/regras-manutencao': typeof AuthenticatedRegrasManutencaoRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/seguros': typeof AuthenticatedSegurosRoute
   '/sinistros': typeof AuthenticatedSinistrosRoute
@@ -569,6 +595,7 @@ export interface FileRoutesById {
   '/_authenticated/exportacao': typeof AuthenticatedExportacaoRoute
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/_authenticated/funcionarios': typeof AuthenticatedFuncionariosRoute
+  '/_authenticated/garantias': typeof AuthenticatedGarantiasRoute
   '/_authenticated/historico-veiculo': typeof AuthenticatedHistoricoVeiculoRoute
   '/_authenticated/integracoes': typeof AuthenticatedIntegracoesRoute
   '/_authenticated/inteligencia': typeof AuthenticatedInteligenciaRoute
@@ -585,11 +612,13 @@ export interface FileRoutesById {
   '/_authenticated/patrimonio': typeof AuthenticatedPatrimonioRoute
   '/_authenticated/pecas': typeof AuthenticatedPecasRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/pesquisa-precos': typeof AuthenticatedPesquisaPrecosRoute
   '/_authenticated/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/_authenticated/plataforma': typeof AuthenticatedPlataformaRoute
   '/_authenticated/pneus': typeof AuthenticatedPneusRoute
   '/_authenticated/portal-credenciado': typeof AuthenticatedPortalCredenciadoRoute
   '/_authenticated/rede-credenciada': typeof AuthenticatedRedeCredenciadaRoute
+  '/_authenticated/regras-manutencao': typeof AuthenticatedRegrasManutencaoRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
   '/_authenticated/seguros': typeof AuthenticatedSegurosRoute
   '/_authenticated/sinistros': typeof AuthenticatedSinistrosRoute
@@ -635,6 +664,7 @@ export interface FileRouteTypes {
     | '/exportacao'
     | '/fornecedores'
     | '/funcionarios'
+    | '/garantias'
     | '/historico-veiculo'
     | '/integracoes'
     | '/inteligencia'
@@ -651,11 +681,13 @@ export interface FileRouteTypes {
     | '/patrimonio'
     | '/pecas'
     | '/perfil'
+    | '/pesquisa-precos'
     | '/planos-manutencao'
     | '/plataforma'
     | '/pneus'
     | '/portal-credenciado'
     | '/rede-credenciada'
+    | '/regras-manutencao'
     | '/relatorios'
     | '/seguros'
     | '/sinistros'
@@ -699,6 +731,7 @@ export interface FileRouteTypes {
     | '/exportacao'
     | '/fornecedores'
     | '/funcionarios'
+    | '/garantias'
     | '/historico-veiculo'
     | '/integracoes'
     | '/inteligencia'
@@ -715,11 +748,13 @@ export interface FileRouteTypes {
     | '/patrimonio'
     | '/pecas'
     | '/perfil'
+    | '/pesquisa-precos'
     | '/planos-manutencao'
     | '/plataforma'
     | '/pneus'
     | '/portal-credenciado'
     | '/rede-credenciada'
+    | '/regras-manutencao'
     | '/relatorios'
     | '/seguros'
     | '/sinistros'
@@ -764,6 +799,7 @@ export interface FileRouteTypes {
     | '/_authenticated/exportacao'
     | '/_authenticated/fornecedores'
     | '/_authenticated/funcionarios'
+    | '/_authenticated/garantias'
     | '/_authenticated/historico-veiculo'
     | '/_authenticated/integracoes'
     | '/_authenticated/inteligencia'
@@ -780,11 +816,13 @@ export interface FileRouteTypes {
     | '/_authenticated/patrimonio'
     | '/_authenticated/pecas'
     | '/_authenticated/perfil'
+    | '/_authenticated/pesquisa-precos'
     | '/_authenticated/planos-manutencao'
     | '/_authenticated/plataforma'
     | '/_authenticated/pneus'
     | '/_authenticated/portal-credenciado'
     | '/_authenticated/rede-credenciada'
+    | '/_authenticated/regras-manutencao'
     | '/_authenticated/relatorios'
     | '/_authenticated/seguros'
     | '/_authenticated/sinistros'
@@ -995,6 +1033,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFuncionariosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/garantias': {
+      id: '/_authenticated/garantias'
+      path: '/garantias'
+      fullPath: '/garantias'
+      preLoaderRoute: typeof AuthenticatedGarantiasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/historico-veiculo': {
       id: '/_authenticated/historico-veiculo'
       path: '/historico-veiculo'
@@ -1107,6 +1152,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPerfilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/pesquisa-precos': {
+      id: '/_authenticated/pesquisa-precos'
+      path: '/pesquisa-precos'
+      fullPath: '/pesquisa-precos'
+      preLoaderRoute: typeof AuthenticatedPesquisaPrecosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/planos-manutencao': {
       id: '/_authenticated/planos-manutencao'
       path: '/planos-manutencao'
@@ -1140,6 +1192,13 @@ declare module '@tanstack/react-router' {
       path: '/rede-credenciada'
       fullPath: '/rede-credenciada'
       preLoaderRoute: typeof AuthenticatedRedeCredenciadaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/regras-manutencao': {
+      id: '/_authenticated/regras-manutencao'
+      path: '/regras-manutencao'
+      fullPath: '/regras-manutencao'
+      preLoaderRoute: typeof AuthenticatedRegrasManutencaoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/relatorios': {
@@ -1286,6 +1345,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedExportacaoRoute: typeof AuthenticatedExportacaoRoute
   AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
   AuthenticatedFuncionariosRoute: typeof AuthenticatedFuncionariosRoute
+  AuthenticatedGarantiasRoute: typeof AuthenticatedGarantiasRoute
   AuthenticatedHistoricoVeiculoRoute: typeof AuthenticatedHistoricoVeiculoRoute
   AuthenticatedIntegracoesRoute: typeof AuthenticatedIntegracoesRoute
   AuthenticatedInteligenciaRoute: typeof AuthenticatedInteligenciaRoute
@@ -1302,11 +1362,13 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPatrimonioRoute: typeof AuthenticatedPatrimonioRoute
   AuthenticatedPecasRoute: typeof AuthenticatedPecasRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedPesquisaPrecosRoute: typeof AuthenticatedPesquisaPrecosRoute
   AuthenticatedPlanosManutencaoRoute: typeof AuthenticatedPlanosManutencaoRoute
   AuthenticatedPlataformaRoute: typeof AuthenticatedPlataformaRoute
   AuthenticatedPneusRoute: typeof AuthenticatedPneusRoute
   AuthenticatedPortalCredenciadoRoute: typeof AuthenticatedPortalCredenciadoRoute
   AuthenticatedRedeCredenciadaRoute: typeof AuthenticatedRedeCredenciadaRoute
+  AuthenticatedRegrasManutencaoRoute: typeof AuthenticatedRegrasManutencaoRoute
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
   AuthenticatedSegurosRoute: typeof AuthenticatedSegurosRoute
   AuthenticatedSinistrosRoute: typeof AuthenticatedSinistrosRoute
@@ -1341,6 +1403,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedExportacaoRoute: AuthenticatedExportacaoRoute,
   AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,
   AuthenticatedFuncionariosRoute: AuthenticatedFuncionariosRoute,
+  AuthenticatedGarantiasRoute: AuthenticatedGarantiasRoute,
   AuthenticatedHistoricoVeiculoRoute: AuthenticatedHistoricoVeiculoRoute,
   AuthenticatedIntegracoesRoute: AuthenticatedIntegracoesRoute,
   AuthenticatedInteligenciaRoute: AuthenticatedInteligenciaRoute,
@@ -1357,11 +1420,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPatrimonioRoute: AuthenticatedPatrimonioRoute,
   AuthenticatedPecasRoute: AuthenticatedPecasRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedPesquisaPrecosRoute: AuthenticatedPesquisaPrecosRoute,
   AuthenticatedPlanosManutencaoRoute: AuthenticatedPlanosManutencaoRoute,
   AuthenticatedPlataformaRoute: AuthenticatedPlataformaRoute,
   AuthenticatedPneusRoute: AuthenticatedPneusRoute,
   AuthenticatedPortalCredenciadoRoute: AuthenticatedPortalCredenciadoRoute,
   AuthenticatedRedeCredenciadaRoute: AuthenticatedRedeCredenciadaRoute,
+  AuthenticatedRegrasManutencaoRoute: AuthenticatedRegrasManutencaoRoute,
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
   AuthenticatedSegurosRoute: AuthenticatedSegurosRoute,
   AuthenticatedSinistrosRoute: AuthenticatedSinistrosRoute,

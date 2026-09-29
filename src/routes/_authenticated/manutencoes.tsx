@@ -72,7 +72,33 @@ import {
   type MaintenanceRecordRow,
   type MaintenanceRequestRow,
   type MaintenanceRequestStatus,
+  useExternalEntities,
 } from "@/lib/frotagov";
+import { onlyDigits } from "@/lib/format";
+import {
+  PART_DESTINATIONS,
+  PART_ORIGINS,
+  addBusinessDays,
+  originNeedsNote,
+  resolveDeadlineDays,
+  useMaintenanceDeadlines,
+} from "@/lib/manutencao-avancada";
+
+/** Converte uma data para o formato de campos datetime-local (horário local). */
+function toLocalInput(d: Date) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return (
+    d.getFullYear() +
+    "-" +
+    pad(d.getMonth() + 1) +
+    "-" +
+    pad(d.getDate()) +
+    "T" +
+    pad(d.getHours()) +
+    ":" +
+    pad(d.getMinutes())
+  );
+}
 
 export const Route = createFileRoute("/_authenticated/manutencoes")({
   head: () => ({
@@ -132,6 +158,10 @@ const recordSchema = z.object({
   invoice_number: z.string().trim().max(60).optional(),
   warranty_days: z.string().optional(),
   notes: z.string().trim().max(1000).optional(),
+  entry_inspection: z.string().trim().max(1000).optional(),
+  exit_inspection: z.string().trim().max(1000).optional(),
+  pickup_person: z.string().trim().max(160).optional(),
+  promised_return_at: z.string().optional(),
 });
 
 function Manutencoes() {
@@ -147,6 +177,8 @@ function Manutencoes() {
   const { data: commitments = [] } = useCommitments();
   const { data: quotas = [] } = useQuotas();
   const { data: catalog = [] } = usePartsCatalog();
+  const { data: entities = [] } = useExternalEntities();
+  const { data: deadlines = [] } = useMaintenanceDeadlines();
   const { canManageFleet, canWrite, orgId, userId, userName } = usePerms();
   const invalidate = useInvalidate();
 
@@ -190,6 +222,8 @@ function Manutencoes() {
   const [partId, setPartId] = useState(NONE);
   const [partItem, setPartItem] = useState(NONE);
   const [partQty, setPartQty] = useState("1");
+  const [partOrigin, setPartOrigin] = useState<string>("genuina");
+  const [partDest, setPartDest] = useState<string>("nao_aplicavel");
 
   const [recCancelOpen, setRecCancelOpen] = useState(false);
   const [recCancelTarget, setRecCancelTarget] = useState<MaintenanceRecordRow | null>(null);
@@ -443,6 +477,33 @@ function Manutencoes() {
     setRecOpen(true);
   }
 
+  /* Fase 2 — prazo de devolução e garantia de fábrica */
+  const recVehicleRow =
+    recVehicle === NONE ? null : (vehicles.find((v) => v.id === recVehicle) ?? null);
+  const deadlineDays = resolveDeadlineDays(deadlines, recVehicleRow?.vehicle_type ?? null, recKind);
+  const suggestedReturn =
+    deadlineDays !== null && !editingRec
+      ? toLocalInput(addBusinessDays(new Date(), deadlineDays))
+      : "";
+  const factoryWarrantyActive = (() => {
+    if (!recVehicleRow) return false;
+    const until = recVehicleRow.factory_warranty_until;
+    const kmLimit = recVehicleRow.factory_warranty_km;
+    if (!until && kmLimit == null) return false;
+    const dateOk = !until || new Date(until + "T23:59:59") >= new Date();
+    const kmOk = kmLimit == null || Number(recVehicleRow.current_km ?? 0) <= Number(kmLimit);
+    return dateOk && kmOk;
+  })();
+  const recSupplierRow = suppliers.find((s) => s.id === recSupplier) ?? null;
+  const recSupplierEntity = recSupplierRow?.cnpj
+    ? (entities.find((e) => onlyDigits(e.document) === onlyDigits(recSupplierRow.cnpj)) ?? null)
+    : null;
+  const supplierIsDealer = (recSupplierEntity?.categories ?? []).includes("concessionaria");
+  const factoryWarningText =
+    factoryWarrantyActive && !supplierIsDealer
+      ? "Este veículo ainda está em garantia de fábrica. Para não perder a garantia, o serviço deve ser feito em concessionária autorizada da marca."
+      : "";
+
   async function submitRec(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const parsed = recordSchema.safeParse(Object.fromEntries(new FormData(e.currentTarget)));
@@ -515,6 +576,12 @@ function Manutencoes() {
       invoice_number: d.invoice_number || null,
       warranty_days: d.warranty_days ? Number(d.warranty_days) : null,
       notes: d.notes || null,
+      entry_inspection: d.entry_inspection || null,
+      exit_inspection: d.exit_inspection || null,
+      pickup_person: d.pickup_person || null,
+      promised_return_at: d.promised_return_at
+        ? new Date(d.promised_return_at).toISOString()
+        : null,
       /* Metadados financeiros derivados: mantidos para relatórios e integrações, sem digitação na tela operacional. */
       cost_center_id: recCenter === NONE ? null : recCenter,
       commitment_id: recCommitment === NONE ? null : recCommitment,
@@ -664,6 +731,14 @@ function Manutencoes() {
       toast.error("A quantidade deve ser maior que zero.");
       return;
     }
+    if (originNeedsNote(partOrigin) && !String(form.get("origin_note") ?? "").trim()) {
+      toast.error(
+        partOrigin === "paralela"
+          ? "Peça paralela exige a justificativa e a aprovação do gestor da frota."
+          : "Peça recondicionada só é permitida em caráter excepcional, com justificativa.",
+      );
+      return;
+    }
     const { error } = await supabase.from("maintenance_parts").insert({
       organization_id: orgId!,
       maintenance_record_id: partsTarget.id,
@@ -676,6 +751,9 @@ function Manutencoes() {
       odometer_km: partsTarget.odometer_km,
       warranty_days: form.get("warranty_days") ? Number(form.get("warranty_days")) : null,
       notes: String(form.get("notes") ?? "") || null,
+      part_origin: partOrigin,
+      origin_note: String(form.get("origin_note") ?? "").trim() || null,
+      replaced_destination: partDest,
       created_by: userId,
     });
     if (error) {
@@ -687,6 +765,8 @@ function Manutencoes() {
     setPartId(NONE);
     setPartItem(NONE);
     setPartQty("1");
+    setPartOrigin("genuina");
+    setPartDest("nao_aplicavel");
     e.currentTarget.reset();
   }
 
@@ -1440,6 +1520,63 @@ function Manutencoes() {
                   defaultValue={editingRec?.other_value ?? ""}
                 />
               </div>
+              <div>
+                <Label htmlFor="promised_return_at">Devolução prometida</Label>
+                <Input
+                  key={recVehicle + "-" + recKind}
+                  id="promised_return_at"
+                  name="promised_return_at"
+                  type="datetime-local"
+                  defaultValue={
+                    editingRec?.promised_return_at
+                      ? editingRec.promised_return_at.slice(0, 16)
+                      : suggestedReturn
+                  }
+                />
+                {deadlineDays !== null && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Regra do órgão: {deadlineDays} dia(s) útil(eis) para devolver o veículo.
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="pickup_person">Quem retirou o veículo</Label>
+                <Input
+                  id="pickup_person"
+                  name="pickup_person"
+                  defaultValue={editingRec?.pickup_person ?? ""}
+                />
+              </div>
+              <div className="grid gap-4 sm:col-span-3 sm:grid-cols-2">
+                <div>
+                  <Label htmlFor="entry_inspection">Inspeção na entrada na oficina</Label>
+                  <Textarea
+                    id="entry_inspection"
+                    name="entry_inspection"
+                    rows={2}
+                    placeholder="Avarias, nível de combustível, itens no veículo"
+                    defaultValue={editingRec?.entry_inspection ?? ""}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="exit_inspection">Inspeção na saída da oficina</Label>
+                  <Textarea
+                    id="exit_inspection"
+                    name="exit_inspection"
+                    rows={2}
+                    placeholder="Conferência do serviço, limpeza, peças devolvidas"
+                    defaultValue={editingRec?.exit_inspection ?? ""}
+                  />
+                </div>
+              </div>
+              {factoryWarningText && (
+                <div
+                  role="alert"
+                  className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 sm:col-span-3"
+                >
+                  {factoryWarningText}
+                </div>
+              )}
 
               {/* Bloco 5.3 — mão de obra por contrato ou compra direta */}
               <div className="sm:col-span-3 rounded-lg border bg-muted/20 p-3">
@@ -1754,6 +1891,46 @@ function Manutencoes() {
                 <Label htmlFor="warranty_days">Garantia (dias)</Label>
                 <Input id="warranty_days" name="warranty_days" inputMode="numeric" />
               </div>
+              <div>
+                <Label>Origem da peça</Label>
+                <Select value={partOrigin} onValueChange={setPartOrigin}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PART_ORIGINS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Peça substituída</Label>
+                <Select value={partDest} onValueChange={setPartDest}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PART_DESTINATIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {originNeedsNote(partOrigin) && (
+                <div className="sm:col-span-3">
+                  <Label htmlFor="origin_note">Justificativa aprovada pelo gestor *</Label>
+                  <Input
+                    id="origin_note"
+                    name="origin_note"
+                    placeholder="Ex.: original indisponível; paralela mais barata, aprovada pelo gestor"
+                  />
+                </div>
+              )}
               <div className="sm:col-span-3">
                 <Label htmlFor="notes">Observações</Label>
                 <Input id="notes" name="notes" />
