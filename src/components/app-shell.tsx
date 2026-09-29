@@ -3,6 +3,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard,
+  CalendarDays,
   IdCard,
   Truck,
   Building2,
@@ -78,6 +79,7 @@ const NAV: NavGroup[] = [
       { to: "/equipamentos", label: "Máquinas e equipamentos" },
       { to: "/motorista", label: "Área do motorista" },
       { to: "/escala", label: "Escala de motoristas" },
+      { to: "/minha-escala", label: "Minha escala" },
       { to: "/utilizacao", label: "Utilização e reservas" },
       { to: "/disponibilidade", label: "Disponibilidade da Frota" },
       { to: "/rastreamento", label: "Rastreamento" },
@@ -753,7 +755,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 const TAB_BAR: { to: string; label: string; icon: typeof Truck }[] = [
   { to: "/painel", label: "Início", icon: LayoutDashboard },
   { to: "/veiculos", label: "Veículos", icon: Truck },
-  { to: "/abastecimentos", label: "Abastecer", icon: Fuel },
+  { to: "/minha-escala", label: "Escala", icon: CalendarDays },
   { to: "/motorista", label: "Motorista", icon: IdCard },
 ];
 

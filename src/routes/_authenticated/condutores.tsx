@@ -113,6 +113,7 @@ function Condutores() {
       if (fStatus === "inativo" && d.active) return false;
       if (fStatus === "cnh_vencida" && cnhState(d.license_expiry) !== "vencida") return false;
       if (fStatus === "cnh_a_vencer" && cnhState(d.license_expiry) !== "a_vencer") return false;
+      if (fStatus === "afastado" && !d.current_absence) return false;
       if (t) {
         const hay = [d.full_name, d.registration_number, d.license_number, d.email]
           .filter(Boolean)
@@ -130,6 +131,7 @@ function Condutores() {
 
   const vencidas = drivers.filter((d) => cnhState(d.license_expiry) === "vencida").length;
   const aVencer = drivers.filter((d) => cnhState(d.license_expiry) === "a_vencer").length;
+  const afastados = drivers.filter((d) => d.current_absence).length;
 
   return (
     <>
@@ -144,6 +146,23 @@ function Condutores() {
           ) : undefined
         }
       />
+
+      <div className="mb-4 flex flex-wrap items-center gap-3 rounded-lg border bg-card p-3 text-sm shadow-card">
+        <CalendarOff className="size-4 shrink-0" />
+        <span>
+          <strong>Afastamentos:</strong> use o botão <strong>Afastamento</strong> na linha do
+          motorista para registrar férias, licença, INSS ou atestado (até 15 dias) e a previsão de
+          retorno.{" "}
+          {afastados > 0
+            ? `${afastados} condutor(es) afastado(s) agora.`
+            : "Nenhum condutor afastado agora."}
+        </span>
+        {afastados > 0 && (
+          <Button size="sm" variant="outline" onClick={() => setFStatus("afastado")}>
+            Ver afastados
+          </Button>
+        )}
+      </div>
 
       {(vencidas > 0 || aVencer > 0) && (
         <div className="mb-4 flex flex-wrap gap-3 rounded-lg border border-warning/40 bg-warning/10 p-4 text-sm">
@@ -196,6 +215,7 @@ function Condutores() {
               <SelectItem value="inativo">Inativos</SelectItem>
               <SelectItem value="cnh_vencida">CNH vencida</SelectItem>
               <SelectItem value="cnh_a_vencer">CNH a vencer</SelectItem>
+              <SelectItem value="afastado">Afastados agora</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -276,13 +296,14 @@ function Condutores() {
                 </TableCell>
                 <TableCell className="whitespace-nowrap">
                   <Button
-                    variant="ghost"
-                    size="icon"
+                    variant={d.current_absence ? "default" : "outline"}
+                    size="sm"
+                    className="gap-1.5"
                     aria-label={`Afastamento de ${d.full_name}`}
                     title="Afastamento (férias, licença, INSS, atestado)"
                     onClick={() => setAbsenceOf(d.id)}
                   >
-                    <CalendarOff className="size-4" />
+                    <CalendarOff className="size-4" /> Afastamento
                   </Button>
                   {perms.canWrite && (
                     <Button

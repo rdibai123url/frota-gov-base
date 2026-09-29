@@ -45,6 +45,7 @@ import { Route as AuthenticatedLimpezaRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedManutencoesRouteImport } from './routes/_authenticated/manutencoes'
 import { Route as AuthenticatedMapaRedeRouteImport } from './routes/_authenticated/mapa-rede'
 import { Route as AuthenticatedMigracaoRouteImport } from './routes/_authenticated/migracao'
+import { Route as AuthenticatedMinhaEscalaRouteImport } from './routes/_authenticated/minha-escala'
 import { Route as AuthenticatedMotoristaRouteImport } from './routes/_authenticated/motorista'
 import { Route as AuthenticatedMultasRouteImport } from './routes/_authenticated/multas'
 import { Route as AuthenticatedObrigacoesRouteImport } from './routes/_authenticated/obrigacoes'
@@ -276,6 +277,12 @@ const AuthenticatedMigracaoRoute = AuthenticatedMigracaoRouteImport.update({
   path: '/migracao',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMinhaEscalaRoute =
+  AuthenticatedMinhaEscalaRouteImport.update({
+    id: '/minha-escala',
+    path: '/minha-escala',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMotoristaRoute = AuthenticatedMotoristaRouteImport.update({
   id: '/motorista',
   path: '/motorista',
@@ -503,6 +510,7 @@ export interface FileRoutesByFullPath {
   '/manutencoes': typeof AuthenticatedManutencoesRoute
   '/mapa-rede': typeof AuthenticatedMapaRedeRoute
   '/migracao': typeof AuthenticatedMigracaoRoute
+  '/minha-escala': typeof AuthenticatedMinhaEscalaRoute
   '/motorista': typeof AuthenticatedMotoristaRoute
   '/multas': typeof AuthenticatedMultasRoute
   '/obrigacoes': typeof AuthenticatedObrigacoesRoute
@@ -575,6 +583,7 @@ export interface FileRoutesByTo {
   '/manutencoes': typeof AuthenticatedManutencoesRoute
   '/mapa-rede': typeof AuthenticatedMapaRedeRoute
   '/migracao': typeof AuthenticatedMigracaoRoute
+  '/minha-escala': typeof AuthenticatedMinhaEscalaRoute
   '/motorista': typeof AuthenticatedMotoristaRoute
   '/multas': typeof AuthenticatedMultasRoute
   '/obrigacoes': typeof AuthenticatedObrigacoesRoute
@@ -649,6 +658,7 @@ export interface FileRoutesById {
   '/_authenticated/manutencoes': typeof AuthenticatedManutencoesRoute
   '/_authenticated/mapa-rede': typeof AuthenticatedMapaRedeRoute
   '/_authenticated/migracao': typeof AuthenticatedMigracaoRoute
+  '/_authenticated/minha-escala': typeof AuthenticatedMinhaEscalaRoute
   '/_authenticated/motorista': typeof AuthenticatedMotoristaRoute
   '/_authenticated/multas': typeof AuthenticatedMultasRoute
   '/_authenticated/obrigacoes': typeof AuthenticatedObrigacoesRoute
@@ -723,6 +733,7 @@ export interface FileRouteTypes {
     | '/manutencoes'
     | '/mapa-rede'
     | '/migracao'
+    | '/minha-escala'
     | '/motorista'
     | '/multas'
     | '/obrigacoes'
@@ -795,6 +806,7 @@ export interface FileRouteTypes {
     | '/manutencoes'
     | '/mapa-rede'
     | '/migracao'
+    | '/minha-escala'
     | '/motorista'
     | '/multas'
     | '/obrigacoes'
@@ -868,6 +880,7 @@ export interface FileRouteTypes {
     | '/_authenticated/manutencoes'
     | '/_authenticated/mapa-rede'
     | '/_authenticated/migracao'
+    | '/_authenticated/minha-escala'
     | '/_authenticated/motorista'
     | '/_authenticated/multas'
     | '/_authenticated/obrigacoes'
@@ -1175,6 +1188,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMigracaoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/minha-escala': {
+      id: '/_authenticated/minha-escala'
+      path: '/minha-escala'
+      fullPath: '/minha-escala'
+      preLoaderRoute: typeof AuthenticatedMinhaEscalaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/motorista': {
       id: '/_authenticated/motorista'
       path: '/motorista'
@@ -1455,6 +1475,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedManutencoesRoute: typeof AuthenticatedManutencoesRoute
   AuthenticatedMapaRedeRoute: typeof AuthenticatedMapaRedeRoute
   AuthenticatedMigracaoRoute: typeof AuthenticatedMigracaoRoute
+  AuthenticatedMinhaEscalaRoute: typeof AuthenticatedMinhaEscalaRoute
   AuthenticatedMotoristaRoute: typeof AuthenticatedMotoristaRoute
   AuthenticatedMultasRoute: typeof AuthenticatedMultasRoute
   AuthenticatedObrigacoesRoute: typeof AuthenticatedObrigacoesRoute
@@ -1516,6 +1537,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedManutencoesRoute: AuthenticatedManutencoesRoute,
   AuthenticatedMapaRedeRoute: AuthenticatedMapaRedeRoute,
   AuthenticatedMigracaoRoute: AuthenticatedMigracaoRoute,
+  AuthenticatedMinhaEscalaRoute: AuthenticatedMinhaEscalaRoute,
   AuthenticatedMotoristaRoute: AuthenticatedMotoristaRoute,
   AuthenticatedMultasRoute: AuthenticatedMultasRoute,
   AuthenticatedObrigacoesRoute: AuthenticatedObrigacoesRoute,

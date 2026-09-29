@@ -114,6 +114,31 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       "Somente o administrador do órgão altera os acessos.",
     ],
   ),
+  "/minha-escala": t(
+    "Minha escala",
+    "Mostra ao motorista os dias, os horários e a unidade em que ele está escalado, pelo celular.",
+    [
+      "Veja no calendário os dias de trabalho do mês, em azul.",
+      "Use as setas para ver o mês anterior ou o próximo.",
+      "Em “Próximos turnos” aparecem o dia, a unidade, o horário de início e de término.",
+    ],
+    [
+      {
+        label: "Turnos e horas no mês",
+        description: "Quantidade de turnos e soma das horas da escala do mês.",
+        tags: CALC,
+      },
+      {
+        label: "Dias em amarelo",
+        description: "Dias em que você está afastado (férias, licença, INSS ou atestado).",
+        tags: AUTO,
+      },
+    ],
+    [
+      "Para aparecer aqui, o seu usuário precisa estar ligado ao seu cadastro em Condutores.",
+      "A escala é montada pelo gestor; você só consulta.",
+    ],
+  ),
   "/escala": t(
     "Escala de motoristas",
     "Monta, mês a mês, a escala dos motoristas de cada unidade de plantão (ex.: SAMU — unidade X), com os dias de trabalho, o horário de início e a carga horária de 8, 12 ou 24 horas.",

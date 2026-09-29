@@ -37,6 +37,8 @@ function useMinhasViagens(userId: string | null) {
         .from("drivers")
         .select("id, full_name, license_expiry, license_categories, active")
         .eq("user_id", userId as string)
+        .order("active", { ascending: false })
+        .limit(1)
         .maybeSingle();
       if (dErr) throw dErr;
       if (!driver) return { driver: null, usages: [] as UsageRow[] };
