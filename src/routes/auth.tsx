@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { FleetIllustration } from "@/components/illustrations";
 import { PasswordInput } from "@/components/password-input";
 import { useEffect, useState } from "react";
 import { BrandMark } from "@/components/brand-mark";
@@ -197,11 +198,12 @@ function AuthPage() {
           <BrandMark className="size-11" />
           <p className="gov-title text-2xl">Dibai Fleet</p>
         </div>
+        <FleetIllustration className="relative -mb-4 max-w-md opacity-95" />
         <div className="relative max-w-lg space-y-6">
           <h1 className="gov-title text-4xl leading-tight">
             Toda a sua frota sob controle, do abastecimento à prestação de contas.
           </h1>
-          <ul className="space-y-3 text-[15px] text-white/85">
+          <ul className="space-y-3 text-[0.9375rem] text-white/85">
             {[
               "Abastecimento, manutenção, viagens e checklist em um só lugar",
               "Contratos, empenhos e cotas com bloqueio automático de saldo",

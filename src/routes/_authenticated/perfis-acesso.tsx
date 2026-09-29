@@ -149,7 +149,7 @@ function PerfisAcesso() {
                             />
                             {changed && (
                               <span
-                                className="ml-1 text-[10px] text-primary"
+                                className="ml-1 text-[0.625rem] text-primary"
                                 title="Ajustado pelo administrador"
                               >
                                 ●

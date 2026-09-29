@@ -60,6 +60,7 @@ import { useEmbedded } from "@/components/embedded";
 import { setReportBranding } from "@/lib/reports";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { BrandMark } from "@/components/brand-mark";
+import { applyBrandTheme } from "@/lib/tema-cliente";
 
 type NavLeaf = { to: string; label: string };
 type NavGroup = { id: string; label: string; icon: typeof Truck; to?: string; items?: NavLeaf[] };
@@ -240,6 +241,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { data: me } = useProfile();
   const { data: brasao } = useBrasaoUrl(org?.logo_url);
   const { isSuperAdmin } = useIsSuperAdmin();
+  // Tema de cores do cliente, montado a partir da cor da marca cadastrada em "Dados do órgão".
+  useEffect(() => applyBrandTheme(org?.brand_color), [org?.brand_color]);
+
   // O cabeçalho de todos os relatórios usa nome, CNPJ, endereço e logotipo do órgão/empresa.
   useEffect(() => {
     if (!org) return;
@@ -324,7 +328,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         {!compact && (
           <div className="min-w-0 leading-tight">
             <p className="gov-title text-lg">Dibai Fleet</p>
-            <p className="truncate text-[11px] uppercase tracking-widest opacity-70">
+            <p className="truncate text-[0.6875rem] uppercase tracking-widest opacity-70">
               Gestão de frotas e ativos
             </p>
           </div>
@@ -379,7 +383,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 to={group.to}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "relative flex items-center gap-3 rounded-md px-3 py-2 text-[13.5px] transition-colors",
+                  "relative flex items-center gap-3 rounded-md px-3 py-2 text-[0.8438rem] transition-colors",
                   active
                     ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-sidebar-primary"
                     : "text-sidebar-foreground/75 hover:bg-white/6 hover:text-sidebar-accent-foreground",
@@ -389,7 +393,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <group.icon className="size-4 shrink-0" />
                 <span className="truncate">{group.label}</span>
                 {group.id === "alertas" && openAlerts > 0 && (
-                  <span className="ml-auto rounded-full bg-warning/20 px-2 py-0.5 text-[11px] font-semibold text-warning">
+                  <span className="ml-auto rounded-full bg-warning/20 px-2 py-0.5 text-[0.6875rem] font-semibold text-warning">
                     {openAlerts}
                   </span>
                 )}
@@ -405,7 +409,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 aria-expanded={expanded}
                 onClick={() => setOpenGroup(expanded ? null : group.id)}
                 className={cn(
-                  "flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-[13.5px] transition-colors hover:bg-white/6",
+                  "flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-[0.8438rem] transition-colors hover:bg-white/6",
                   inGroup
                     ? "font-semibold text-sidebar-accent-foreground"
                     : "text-sidebar-foreground/75 hover:text-sidebar-accent-foreground",
@@ -427,7 +431,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                         to={leaf.to}
                         onClick={() => setOpen(false)}
                         className={cn(
-                          "relative block truncate rounded-md px-3 py-1.5 text-[13px] transition-colors",
+                          "relative block truncate rounded-md px-3 py-1.5 text-[0.8125rem] transition-colors",
                           active
                             ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground before:absolute before:inset-y-1 before:-left-[13px] before:w-[3px] before:rounded-full before:bg-sidebar-primary"
                             : "text-sidebar-foreground/70 hover:bg-white/6 hover:text-sidebar-accent-foreground",
@@ -549,10 +553,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
             )}
             <div className="min-w-0 leading-tight">
-              <p className="gov-title truncate text-[14.5px]">
+              <p className="gov-title truncate text-[0.9063rem]">
                 {org?.legal_name ?? "Órgão não configurado"}
               </p>
-              <p className="truncate text-[12px] text-muted-foreground">
+              <p className="truncate text-[0.75rem] text-muted-foreground">
                 {[org?.short_name, org?.city, org?.state].filter(Boolean).join(" · ") ||
                   "Complete os dados do órgão"}
               </p>
@@ -562,11 +566,13 @@ export function AppShell({ children }: { children: ReactNode }) {
               <button
                 type="button"
                 onClick={() => setSearchOpen(true)}
-                className="hidden h-8 items-center gap-2 rounded-md border border-border bg-surface px-2.5 text-[12.5px] text-muted-foreground transition-colors hover:bg-muted md:flex"
+                className="hidden h-8 items-center gap-2 rounded-md border border-border bg-surface px-2.5 text-[0.7813rem] text-muted-foreground transition-colors hover:bg-muted md:flex"
               >
                 <Search className="size-3.5" />
                 <span>Buscar tela…</span>
-                <kbd className="rounded border border-border bg-card px-1 text-[10px]">Ctrl K</kbd>
+                <kbd className="rounded border border-border bg-card px-1 text-[0.625rem]">
+                  Ctrl K
+                </kbd>
               </button>
               <Button
                 variant="ghost"
@@ -603,7 +609,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <DropdownMenuContent align="end" className="w-60">
                   <DropdownMenuLabel className="truncate">
                     {me?.profile?.full_name || me?.email}
-                    <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+                    <span className="mt-0.5 block text-[0.6875rem] font-normal text-muted-foreground">
                       {primaryRoleLabel}
                     </span>
                   </DropdownMenuLabel>
@@ -634,7 +640,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                     }}
                   >
                     <span>{t.label}</span>
-                    <span className="ml-auto text-[11px] text-muted-foreground">{t.group}</span>
+                    <span className="ml-auto text-[0.6875rem] text-muted-foreground">
+                      {t.group}
+                    </span>
                   </CommandItem>
                 ))}
               </CommandGroup>
@@ -642,7 +650,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </CommandDialog>
 
           {isDemoOrg && (
-            <div className="flex items-center gap-2.5 border-b border-warning/25 bg-warning/8 px-4 py-2 text-[13px] text-foreground sm:px-6">
+            <div className="flex items-center gap-2.5 border-b border-warning/25 bg-warning/8 px-4 py-2 text-[0.8125rem] text-foreground sm:px-6">
               <Info className="size-4 shrink-0 text-warning" />
               <p className="min-w-0">
                 <span className="font-semibold">Ambiente de demonstração.</span> Os dados exibidos
@@ -683,7 +691,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           )}
 
           <main className="flex-1 px-4 py-5 sm:px-6 lg:px-7">
-            <div className="mx-auto w-full max-w-[1500px]">
+            <div
+              key={pathname}
+              className="animate-rise mx-auto w-full max-w-[96rem] min-[1900px]:max-w-[118rem]"
+            >
               {noAccess ? (
                 <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-8 text-center">
                   <h1 className="gov-title text-xl">Você não tem acesso a esta tela</h1>
@@ -749,7 +760,7 @@ export function PageHeader({
     return (
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         {description ? (
-          <p className="max-w-3xl text-[13.5px] text-muted-foreground">{description}</p>
+          <p className="max-w-3xl text-[0.8438rem] text-muted-foreground">{description}</p>
         ) : (
           <span />
         )}
@@ -763,7 +774,7 @@ export function PageHeader({
       {trail && (
         <nav
           aria-label="Trilha de navegação"
-          className="mb-1.5 text-[12.5px] text-muted-foreground"
+          className="mb-1.5 text-[0.7813rem] text-muted-foreground"
         >
           <span>{trail.group}</span>
           {trail.leaf && (
@@ -783,7 +794,7 @@ export function PageHeader({
             <HelpButton pathname={pathname} {...(helpKey ? { topicKey: helpKey } : {})} />
           </div>
           {description && (
-            <p className="mt-1.5 max-w-3xl text-[13.5px] text-muted-foreground">{description}</p>
+            <p className="mt-1.5 max-w-3xl text-[0.8438rem] text-muted-foreground">{description}</p>
           )}
         </div>
         {action && <div className="flex flex-wrap items-center gap-2">{action}</div>}

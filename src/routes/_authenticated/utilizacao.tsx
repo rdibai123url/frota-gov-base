@@ -891,7 +891,7 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
                   }}
                   placeholder="Calcule a rota ou informe"
                 />
-                <p className="mt-1 text-[11px] text-muted-foreground">
+                <p className="mt-1 text-[0.6875rem] text-muted-foreground">
                   {DISTANCE_SOURCE_LABEL[distanceSource]}
                 </p>
               </div>
@@ -904,7 +904,7 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
                   onChange={(e) => setFuelPrice(e.target.value)}
                   placeholder="Ex.: 6,29"
                 />
-                <p className="mt-1 text-[11px] text-muted-foreground">
+                <p className="mt-1 text-[0.6875rem] text-muted-foreground">
                   Usado apenas para estimar o custo.
                 </p>
               </div>
@@ -915,7 +915,7 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
                   className="bg-muted/50"
                   value={consumption.kmpl ? `${num(consumption.kmpl, 2)} km/l` : "—"}
                 />
-                <p className="mt-1 text-[11px] text-muted-foreground">
+                <p className="mt-1 text-[0.6875rem] text-muted-foreground">
                   {consumption.source
                     ? CONSUMPTION_SOURCE_LABEL[consumption.source]
                     : consumption.note}
@@ -948,7 +948,7 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
               </div>
             </div>
 
-            <p className="mt-2 text-[11px] text-muted-foreground">
+            <p className="mt-2 text-[0.6875rem] text-muted-foreground">
               {routeNote ||
                 "Valores estimados para planejamento. A quilometragem oficial continua sendo a registrada na saída e no retorno."}
             </p>

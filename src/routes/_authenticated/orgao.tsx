@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { applyBrandTheme, dominantColor, isHex } from "@/lib/tema-cliente";
 import { useRef, useState } from "react";
 import { Landmark, Upload } from "lucide-react";
 import { toast } from "sonner";
@@ -86,6 +87,7 @@ function Orgao() {
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const [brandColor, setBrandColor] = useState<string | null | undefined>(undefined);
 
   const canWrite = (me?.roles ?? []).some((r) => WRITE_ROLES.includes(r));
   const type = orgType ?? org?.org_type ?? "prefeitura";
@@ -162,6 +164,7 @@ function Orgao() {
         email: d.email || null,
         website: d.website || null,
         logo_url: logoPath,
+        ...(brandColor !== undefined ? { brand_color: brandColor } : {}),
         authority_name: d.authority_name || null,
         authority_role: authRole === NONE ? null : authRole,
         authority_cpf: cpfDigits || null,
@@ -334,6 +337,61 @@ function Orgao() {
                 PNG, JPG ou SVG de até 5 MB. O arquivo fica em armazenamento privado e é exibido no
                 cabeçalho do sistema.
               </p>
+            </div>
+          </div>
+
+          <div className="mt-5 border-t pt-4">
+            <h3 className="text-sm font-semibold">Cor do sistema</h3>
+            <p className="mb-3 max-w-2xl text-xs text-muted-foreground">
+              O menu, os botões e os gráficos usam a cor da sua marca. Escolha a cor ou use “Sugerir
+              pela logomarca”. Salve os dados do órgão para aplicar.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <input
+                type="color"
+                aria-label="Cor da marca"
+                className="h-10 w-14 cursor-pointer rounded-md border bg-card p-1"
+                value={
+                  isHex(brandColor === undefined ? org.brand_color : brandColor)
+                    ? ((brandColor === undefined ? org.brand_color : brandColor) as string)
+                    : "#0b2545"
+                }
+                disabled={!canWrite}
+                onChange={(e) => {
+                  setBrandColor(e.target.value);
+                  applyBrandTheme(e.target.value);
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!canWrite || !(preview || brasao)}
+                onClick={async () => {
+                  const c = await dominantColor((preview ?? brasao) as string);
+                  if (!c) {
+                    toast.info(
+                      "Não foi possível descobrir a cor da logomarca. Escolha a cor manualmente.",
+                    );
+                    return;
+                  }
+                  setBrandColor(c);
+                  applyBrandTheme(c);
+                  toast.success("Cor sugerida pela logomarca. Confira e salve.");
+                }}
+              >
+                Sugerir pela logomarca
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={!canWrite}
+                onClick={() => {
+                  setBrandColor(null);
+                  applyBrandTheme(null);
+                }}
+              >
+                Usar o padrão
+              </Button>
             </div>
           </div>
         </section>

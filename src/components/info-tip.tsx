@@ -26,14 +26,14 @@ export function InfoTip({ help, className }: { help: DashHelp | undefined; class
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 space-y-2 text-sm leading-relaxed">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          <p className="text-[0.6875rem] font-semibold uppercase tracking-wide text-muted-foreground">
             O que é
           </p>
           <p>{help.what}</p>
         </div>
         {help.calc && (
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <p className="text-[0.6875rem] font-semibold uppercase tracking-wide text-muted-foreground">
               Como é calculado
             </p>
             <p>{help.calc}</p>
@@ -41,7 +41,7 @@ export function InfoTip({ help, className }: { help: DashHelp | undefined; class
         )}
         {help.action && (
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <p className="text-[0.6875rem] font-semibold uppercase tracking-wide text-muted-foreground">
               O que fazer
             </p>
             <p>{help.action}</p>

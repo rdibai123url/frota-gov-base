@@ -93,7 +93,7 @@ function Verificar() {
               {TYPE_LABEL[result.doc_type] ?? result.doc_type}: {result.doc_label}
             </p>
             <p>Órgão: {result.organization_name}</p>
-            <p className="break-all font-mono text-[11px] text-muted-foreground">
+            <p className="break-all font-mono text-[0.6875rem] text-muted-foreground">
               Resumo do documento: {result.doc_hash}
             </p>
           </div>

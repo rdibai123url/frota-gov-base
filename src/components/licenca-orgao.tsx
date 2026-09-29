@@ -89,7 +89,7 @@ export function LicencaOrgao({ orgId }: { orgId: string }) {
   return (
     <div className="space-y-3 rounded-lg border bg-card p-4 shadow-card">
       <h3 className="text-base font-semibold">Licença e plano</h3>
-      <p className="text-[13px] text-muted-foreground">
+      <p className="text-[0.8125rem] text-muted-foreground">
         Deixe os limites em branco para não limitar. Ao atingir o limite, o sistema impede novos
         cadastros de veículos ou de usuários e avisa para solicitar ampliação.
       </p>

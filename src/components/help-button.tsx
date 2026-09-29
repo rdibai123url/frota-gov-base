@@ -25,7 +25,7 @@ const TAG_STYLE: Record<FieldTag, string> = {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-2">
-      <h3 className="gov-title text-[13px] uppercase tracking-wider text-muted-foreground">
+      <h3 className="gov-title text-[0.8125rem] uppercase tracking-wider text-muted-foreground">
         {title}
       </h3>
       {children}
@@ -44,7 +44,7 @@ export function HelpContent({ topic }: { topic: HelpTopic }) {
         <ol className="space-y-2">
           {topic.steps.map((step, i) => (
             <li key={step} className="flex gap-3">
-              <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground">
+              <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-primary text-[0.6875rem] font-semibold text-primary-foreground">
                 {i + 1}
               </span>
               <span className="min-w-0">{step}</span>
@@ -65,7 +65,7 @@ export function HelpContent({ topic }: { topic: HelpTopic }) {
                       key={tag}
                       variant="outline"
                       className={cn(
-                        "rounded-full px-2 py-0 text-[10px] font-medium",
+                        "rounded-full px-2 py-0 text-[0.625rem] font-medium",
                         TAG_STYLE[tag],
                       )}
                     >

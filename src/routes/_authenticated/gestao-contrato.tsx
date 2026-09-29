@@ -214,7 +214,7 @@ function Ocorrencias({ contractId, canEdit }: { contractId: string; canEdit: boo
       <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold">Histórico de gerenciamento</h2>
-          <p className="mt-1 max-w-3xl text-[13px] text-muted-foreground">
+          <p className="mt-1 max-w-3xl text-[0.8125rem] text-muted-foreground">
             Todas as ocorrências, notificações, advertências e atestos do contrato, com prazo de
             correção e resolução.
           </p>
@@ -494,7 +494,7 @@ function Imr({ contractId, canEdit }: { contractId: string; canEdit: boolean }) 
             <h2 className="flex items-center gap-2 text-base font-semibold">
               <Gauge className="size-5" /> Indicadores de nível de serviço
             </h2>
-            <p className="mt-1 max-w-3xl text-[13px] text-muted-foreground">
+            <p className="mt-1 max-w-3xl text-[0.8125rem] text-muted-foreground">
               Cada indicador tem meta e peso. A nota do mês (0 a 10) é a média ponderada dos
               indicadores dentro de cada bloco e dos blocos entre si.
             </p>
@@ -933,7 +933,7 @@ function RelatorioFinal({
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold">Relatório final de execução</h2>
-          <p className="mt-1 max-w-3xl text-[13px] text-muted-foreground">
+          <p className="mt-1 max-w-3xl text-[0.8125rem] text-muted-foreground">
             Resumo do contrato para o atesto: valores faturados, glosas, ocorrências e apurações do
             IMR.
           </p>

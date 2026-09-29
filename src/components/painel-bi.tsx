@@ -239,7 +239,7 @@ export default function PainelBI({ months }: { months: number }) {
         </p>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2 min-[1700px]:grid-cols-3">
         <ChartCard title="Custo por mês" helpKey="custoMes">
           {view.count === 0 ? (
             <EmptyChart text="Sem gastos registrados no período." />

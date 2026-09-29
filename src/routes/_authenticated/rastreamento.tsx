@@ -500,7 +500,7 @@ function Rastreadores() {
         <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold">Rastreadores vinculados</h2>
-            <p className="mt-1 max-w-3xl text-[13px] text-muted-foreground">
+            <p className="mt-1 max-w-3xl text-[0.8125rem] text-muted-foreground">
               Cada rastreador recebe um token secreto, mostrado uma única vez. O fornecedor do
               rastreamento usa esse token para enviar as posições ao sistema.
             </p>
@@ -556,7 +556,7 @@ function Rastreadores() {
 
       <div className="rounded-lg border bg-card p-4 shadow-card">
         <h2 className="text-base font-semibold">Como o fornecedor envia os dados</h2>
-        <p className="mt-1 mb-3 text-[13px] text-muted-foreground">
+        <p className="mt-1 mb-3 text-[0.8125rem] text-muted-foreground">
           Entregue ao fornecedor do rastreamento o token e este modelo de envio (uma chamada por
           posição). Campos aceitos: lat, lng (obrigatórios), speed_kmh, ignition, battery_v,
           heading, odometer_km e recorded_at.
@@ -762,7 +762,7 @@ function Regras() {
 
       <div className="rounded-lg border bg-card p-4 shadow-card">
         <h2 className="mb-1 text-base font-semibold">Áreas permitidas (cercas virtuais)</h2>
-        <p className="mb-3 text-[13px] text-muted-foreground">
+        <p className="mb-3 text-[0.8125rem] text-muted-foreground">
           O sistema avisa quando um veículo entra ou sai de uma área circular. Use latitude e
           longitude do centro (ex.: -23,5505 e -46,6333) e o raio em metros.
         </p>

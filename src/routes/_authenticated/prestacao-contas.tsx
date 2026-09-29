@@ -157,8 +157,8 @@ function PrestacaoContas() {
         {DATASETS.map((ds) => (
           <div key={ds.key} className="rounded-lg border bg-card p-4 shadow-card">
             <h2 className="text-sm font-semibold">{ds.label}</h2>
-            <p className="mt-1 text-[13px] text-muted-foreground">{ds.description}</p>
-            <p className="mt-1 text-[11px] text-muted-foreground">
+            <p className="mt-1 text-[0.8125rem] text-muted-foreground">{ds.description}</p>
+            <p className="mt-1 text-[0.6875rem] text-muted-foreground">
               Campos: {ds.columns.map((c) => c.label).join(", ")}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -178,7 +178,7 @@ function PrestacaoContas() {
           </div>
         ))}
       </div>
-      <p className="text-[12px] text-muted-foreground">
+      <p className="text-[0.75rem] text-muted-foreground">
         Cada Tribunal de Contas tem seu leiaute oficial. Este pacote usa o leiaute padrão do Dibai
         Fleet; se o seu órgão for obrigado a um leiaute específico, o mapeamento é feito sobre estes
         mesmos campos.

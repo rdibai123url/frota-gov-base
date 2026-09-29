@@ -96,7 +96,7 @@ export function ChartCard({
   children: ReactNode;
 }) {
   return (
-    <div className="rounded-lg border bg-card p-4 shadow-card">
+    <div className="card-lift animate-rise rounded-xl border bg-card p-4 shadow-card">
       <div className="mb-3 flex items-start justify-between gap-2">
         <h3 className="text-sm font-semibold text-foreground">{title}</h3>
         <InfoTip help={CHART_HELP[helpKey]} />

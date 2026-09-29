@@ -188,7 +188,7 @@ function Avisos() {
         defaultValue={String(value)}
         disabled={!canManageFinance}
       />
-      {hint && <p className="text-[11px] text-muted-foreground">{hint}</p>}
+      {hint && <p className="text-[0.6875rem] text-muted-foreground">{hint}</p>}
     </div>
   );
 
@@ -268,7 +268,7 @@ function Avisos() {
             ))}
           </TableBody>
         </Table>
-        <p className="mt-2 text-[12px] text-muted-foreground">
+        <p className="mt-2 text-[0.75rem] text-muted-foreground">
           O botão do WhatsApp abre o seu WhatsApp com a mensagem pronta; você confirma o envio. O
           envio automático pelo WhatsApp exige um serviço pago de mensagens e não está ligado.
         </p>
@@ -280,7 +280,7 @@ function Avisos() {
         className="space-y-4 rounded-lg border bg-card p-4 shadow-card"
       >
         <h2 className="text-base font-semibold">Aviso automático por e-mail</h2>
-        <p className="max-w-3xl text-[13px] text-muted-foreground">
+        <p className="max-w-3xl text-[0.8125rem] text-muted-foreground">
           O sistema envia um resumo para os e-mails abaixo quando houver algo vencendo. Para o envio
           funcionar, o e-mail do órgão precisa estar configurado (provedor, remetente e senha) pelo
           administrador.

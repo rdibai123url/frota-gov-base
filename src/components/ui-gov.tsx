@@ -8,6 +8,7 @@
  * vazio e erro.
  */
 import { type ReactNode } from "react";
+import { EmptyIllustration } from "@/components/illustrations";
 import { InfoTip } from "@/components/info-tip";
 import type { DashHelp } from "@/lib/ajuda-dashboard";
 import { AlertTriangle, Filter, Inbox, RotateCcw, X } from "lucide-react";
@@ -112,7 +113,7 @@ export function StatusBadge({
     <span
       title={title ?? label}
       className={cn(
-        "inline-flex max-w-full items-center gap-1.5 truncate rounded-full border px-2 py-0.5 text-[11px] font-medium leading-4",
+        "inline-flex max-w-full items-center gap-1.5 truncate rounded-full border px-2 py-0.5 text-[0.6875rem] font-medium leading-4",
         TONE_CLASS[t],
         className,
       )}
@@ -156,7 +157,9 @@ export function KpiCard({
         {icon ? <span className="shrink-0 text-muted-foreground">{icon}</span> : null}
       </div>
       <p className="gov-title mt-1 text-lg leading-tight tabular-nums xl:text-xl">{value}</p>
-      {hint ? <p className="mt-0.5 truncate text-[11px] text-muted-foreground">{hint}</p> : null}
+      {hint ? (
+        <p className="mt-0.5 truncate text-[0.6875rem] text-muted-foreground">{hint}</p>
+      ) : null}
       <span
         aria-hidden
         className={cn("absolute inset-x-0 bottom-0 h-[3px] rounded-b-lg", TONE_BAR[tone])}
@@ -165,7 +168,7 @@ export function KpiCard({
   );
 
   const base =
-    "relative overflow-hidden rounded-lg border border-border bg-card px-3.5 pb-3 pt-3 text-left shadow-card";
+    "card-lift relative overflow-hidden rounded-xl border border-border bg-card px-3.5 pb-3 pt-3 text-left shadow-card animate-rise";
 
   const card = !onClick ? (
     <div className={cn(base, "h-full", className)}>{body}</div>
@@ -378,9 +381,13 @@ export function EmptyState({
 }) {
   return (
     <div className="rounded-lg border border-dashed bg-card px-6 py-12 text-center">
-      <div className="mx-auto grid size-10 place-items-center rounded-full bg-muted text-muted-foreground">
-        {icon ?? <Inbox className="size-5" />}
-      </div>
+      {icon ? (
+        <div className="mx-auto grid size-10 place-items-center rounded-full bg-muted text-muted-foreground">
+          {icon}
+        </div>
+      ) : (
+        <EmptyIllustration />
+      )}
       <p className="gov-title mt-3 text-base">{title}</p>
       {description ? (
         <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">{description}</p>
@@ -441,7 +448,7 @@ export function SectionCard({
         <div className="min-w-0">
           <h2 className="gov-title truncate text-sm">{title}</h2>
           {description ? (
-            <p className="truncate text-[11px] text-muted-foreground">{description}</p>
+            <p className="truncate text-[0.6875rem] text-muted-foreground">{description}</p>
           ) : null}
         </div>
         {action ? <div className="flex shrink-0 items-center gap-1.5">{action}</div> : null}

@@ -42,7 +42,7 @@ before(async () => {
   const files = (await readdir(new URL("supabase/migrations/", root)))
     .filter((f) => f.endsWith(".sql"))
     .sort();
-  assert.equal(files.length, 128);
+  assert.equal(files.length, 129);
   for (const file of files) {
     if (file.startsWith("20260925") && !historicalTriggers) {
       historicalTriggers = (
@@ -68,7 +68,7 @@ after(async () => {
   await db.close();
 });
 
-test("111 migrations históricas + 12 novas aplicam sem erro", async () => {
+test("111 migrations históricas + 13 novas aplicam sem erro", async () => {
   const { rows } = await db.query(
     "SELECT count(*)::int n FROM information_schema.tables WHERE table_schema='public'",
   );
@@ -500,4 +500,13 @@ test("licença: plano limita a quantidade de veículos por órgão", async () =>
   );
   // outro órgão, sem plano cadastrado, não tem limite
   await db.exec(`INSERT INTO public.vehicles (organization_id, plate) VALUES ('${id(1031)}', 'DDD4D44'), ('${id(1031)}', 'EEE5E55'), ('${id(1031)}', 'FFF6F66')`);
+});
+
+test("cor da marca: só aceita hexadecimal de 6 dígitos", async () => {
+  await db.exec("ALTER TABLE public.organizations DISABLE TRIGGER ALL");
+  await db.exec(`INSERT INTO public.organizations (id, legal_name, brand_color) VALUES ('${id(1040)}', 'Org Cor', '#0b2545')`);
+  await assert.rejects(
+    db.exec(`UPDATE public.organizations SET brand_color = 'azul' WHERE id = '${id(1040)}'`),
+    /organizations_brand_color_chk/,
+  );
 });

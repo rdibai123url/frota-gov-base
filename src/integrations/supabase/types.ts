@@ -6907,6 +6907,7 @@ export type Database = {
           updated_by: string | null;
           website: string | null;
           zip_code: string | null;
+          brand_color: string | null;
         };
         Insert: {
           address?: string | null;
@@ -6932,6 +6933,7 @@ export type Database = {
           updated_by?: string | null;
           website?: string | null;
           zip_code?: string | null;
+          brand_color?: string | null;
         };
         Update: {
           address?: string | null;
@@ -6957,6 +6959,7 @@ export type Database = {
           updated_by?: string | null;
           website?: string | null;
           zip_code?: string | null;
+          brand_color?: string | null;
         };
         Relationships: [];
       };

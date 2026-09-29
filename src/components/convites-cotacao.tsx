@@ -292,7 +292,7 @@ export function ConvitesCotacao({
                       {i.email ?? "sem e-mail"}
                     </span>
                     {i.is_manual && (
-                      <Badge variant="outline" className="mt-1 text-[10px]">
+                      <Badge variant="outline" className="mt-1 text-[0.625rem]">
                         E-mail avulso
                       </Badge>
                     )}

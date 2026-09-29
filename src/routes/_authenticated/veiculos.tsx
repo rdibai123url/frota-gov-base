@@ -440,7 +440,7 @@ function Veiculos() {
                 <TableCell className="font-medium">
                   {v.plate}
                   {v.is_private_server_vehicle && (
-                    <Badge variant="outline" className="ml-2 align-middle text-[10px]">
+                    <Badge variant="outline" className="ml-2 align-middle text-[0.625rem]">
                       Servidor · cota
                     </Badge>
                   )}

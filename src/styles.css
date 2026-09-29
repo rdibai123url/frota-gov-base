@@ -11,7 +11,6 @@
  * Tipografia: Inter (interface) + Inter Tight (títulos).
  */
 
-
 @theme inline {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Inter Tight", "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -166,21 +165,33 @@
   --surface-strong: #10213f;
 }
 
-
 @layer base {
   * {
     border-color: var(--color-border);
   }
 
-  /* Escala geral: 16px no celular/tablet, 15px em notebook e desktop (mais informação por tela). */
-  html {
-    font-size: 16px;
-    -webkit-text-size-adjust: 100%;
+  /*
+   * Escala automática pela largura da tela: celular e tablet 16px; notebook de 15" (1366 px) ≈ 14px;
+   * 17" (1600 px) ≈ 15px; monitores de 19" a 24" (1920 px) ≈ 16px; telas grandes até 16,5px.
+   * O usuário pode ajustar em "Tamanho da tela" (compacto, automático ou grande).
+   */
+  :root {
+    --fs: 16px;
   }
   @media (min-width: 1024px) {
-    html {
-      font-size: 15px;
+    :root {
+      --fs: clamp(14px, calc(10.2px + 0.29vw), 16.5px);
     }
+  }
+  html {
+    font-size: var(--fs);
+    -webkit-text-size-adjust: 100%;
+  }
+  html[data-tamanho="compacto"] {
+    font-size: calc(var(--fs) * 0.9);
+  }
+  html[data-tamanho="grande"] {
+    font-size: calc(var(--fs) * 1.12);
   }
 
   body {
@@ -190,8 +201,16 @@
     font-size: 0.95rem;
     -webkit-font-smoothing: antialiased;
     background-image:
-      radial-gradient(900px 380px at 100% -80px, color-mix(in oklab, var(--color-primary) 7%, transparent), transparent),
-      radial-gradient(700px 320px at -10% 0, color-mix(in oklab, var(--color-primary) 4%, transparent), transparent);
+      radial-gradient(
+        900px 380px at 100% -80px,
+        color-mix(in oklab, var(--color-primary) 7%, transparent),
+        transparent
+      ),
+      radial-gradient(
+        700px 320px at -10% 0,
+        color-mix(in oklab, var(--color-primary) 4%, transparent),
+        transparent
+      );
     background-repeat: no-repeat;
   }
 
@@ -236,7 +255,6 @@
   }
 }
 
-
 @utility gov-title {
   font-family: var(--font-display);
   font-weight: 700;
@@ -264,7 +282,7 @@
 /* Rótulo de seção/coluna no padrão ERP: curto, alto e discreto. */
 @utility gov-label {
   font-family: var(--font-display);
-  font-size: 11.5px;
+  font-size: 0.72rem;
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: 0.05em;
@@ -291,7 +309,7 @@
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 13.5px;
+  font-size: 0.84rem;
 
   & thead th {
     position: sticky;
@@ -300,7 +318,7 @@
     background: var(--color-surface-strong);
     padding: 9px 12px;
     text-align: left;
-    font-size: 11.5px;
+    font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -395,5 +413,30 @@
   }
   table.responsive-table tbody td:not([data-label]) {
     justify-content: flex-end;
+  }
+}
+
+/* Movimento sutil: entrada suave dos blocos. Desligado para quem prefere menos animação. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@utility animate-rise {
+  animation: rise 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }

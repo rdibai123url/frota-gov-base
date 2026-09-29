@@ -56,7 +56,7 @@ import {
 } from "@/lib/frotagov";
 import { useDiaries } from "@/lib/diarias";
 
-const grid = "grid gap-4 lg:grid-cols-2";
+const grid = "grid gap-4 lg:grid-cols-2 min-[1700px]:grid-cols-3";
 
 function PieBox({ data }: { data: { name: string; value: number }[] }) {
   const list = data.filter((d) => d.value > 0);

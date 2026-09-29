@@ -178,7 +178,7 @@ function ResetPasswordPage() {
                   minLength={8}
                   required
                 />
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-[0.6875rem] text-muted-foreground">
                   Mínimo de 10 caracteres, com maiúscula, minúscula e número.
                 </p>
               </div>
