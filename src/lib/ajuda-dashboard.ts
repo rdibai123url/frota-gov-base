@@ -291,6 +291,11 @@ export const CHART_HELP: Record<string, DashHelp> = {
     "Soma combustível, manutenção e limpeza de cada veículo.",
     "Veículo muito caro pode estar velho demais: avalie trocar ou vender.",
   ),
+  cpk: h(
+    "Quanto cada veículo custa para rodar um quilômetro (CPK). É o número mais usado para comparar veículos e decidir o que vale a pena manter.",
+    "Soma de combustível, manutenção e limpeza do veículo dividida pelos quilômetros rodados no período. Os km vêm do hodômetro informado nos abastecimentos (maior menos menor).",
+    "Veículos no topo custam mais por km: verifique consumo, manutenção frequente e possibilidade de troca. Para o cálculo funcionar, informe o hodômetro em todo abastecimento.",
+  ),
   situacaoFrota: h(
     "Quantos veículos estão em cada situação: ativo, em manutenção, parado etc.",
     "Conta os veículos por situação cadastrada.",

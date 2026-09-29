@@ -53,10 +53,13 @@ type Cost = {
   unitId: string | null;
 };
 
+type Odo = { vehicleId: string; unitId: string | null; km: number };
+type CostData = { costs: Cost[]; odo: Odo[] };
+
 function useCosts(months: number) {
   return useQuery({
     queryKey: ["bi-costs", months],
-    queryFn: async (): Promise<Cost[]> => {
+    queryFn: async (): Promise<CostData> => {
       const from = new Date();
       from.setDate(1);
       from.setMonth(from.getMonth() - (months - 1));
@@ -64,7 +67,7 @@ function useCosts(months: number) {
       const [f, m, c] = await Promise.all([
         supabase
           .from("fuelings")
-          .select("fueled_at, total_value, vehicle_id, unit_id")
+          .select("fueled_at, total_value, vehicle_id, unit_id, odometer_km")
           .eq("status", "valido")
           .gte("fueled_at", start)
           .limit(10000),
@@ -109,7 +112,10 @@ function useCosts(months: number) {
           vehicleId: r.vehicle_id,
           unitId: r.unit_id,
         });
-      return costs;
+      const odo: Odo[] = f.data
+        .filter((r) => Number(r.odometer_km ?? 0) > 0)
+        .map((r) => ({ vehicleId: r.vehicle_id, unitId: r.unit_id, km: Number(r.odometer_km) }));
+      return { costs, odo };
     },
   });
 }
@@ -121,7 +127,7 @@ export default function PainelBI({ months }: { months: number }) {
   const { data: vehicles = [] } = useVehicles();
 
   const view = useMemo(() => {
-    const costs = (data ?? []).filter((c) => unitId === ALL || c.unitId === unitId);
+    const costs = (data?.costs ?? []).filter((c) => unitId === ALL || c.unitId === unitId);
     const keys = monthKeys(months);
     const monthly = keys.map((k) => {
       const row = { mes: monthLabel(k), combustivel: 0, manutencao: 0, limpeza: 0 };
@@ -133,6 +139,29 @@ export default function PainelBI({ months }: { months: number }) {
       name: k === "combustivel" ? "Combustível" : k === "manutencao" ? "Manutenção" : "Limpeza",
       value: costs.filter((c) => c.kind === k).reduce((s, c) => s + c.value, 0),
     }));
+    const odoByVehicle = new Map<string, { min: number; max: number }>();
+    for (const o of data?.odo ?? []) {
+      if (unitId !== ALL && o.unitId !== unitId) continue;
+      const cur = odoByVehicle.get(o.vehicleId) ?? { min: o.km, max: o.km };
+      cur.min = Math.min(cur.min, o.km);
+      cur.max = Math.max(cur.max, o.km);
+      odoByVehicle.set(o.vehicleId, cur);
+    }
+    const costByVehicle = new Map<string, number>();
+    for (const c of costs)
+      costByVehicle.set(c.vehicleId, (costByVehicle.get(c.vehicleId) ?? 0) + c.value);
+    let cpkCost = 0;
+    let cpkKm = 0;
+    const cpkRows: { id: string; cpk: number }[] = [];
+    for (const [id, o] of odoByVehicle) {
+      const km = o.max - o.min;
+      const cost = costByVehicle.get(id) ?? 0;
+      if (km > 0 && cost > 0) {
+        cpkCost += cost;
+        cpkKm += km;
+        cpkRows.push({ id, cpk: cost / km });
+      }
+    }
     const unitName = (id: string | null) => {
       const u = units.find((x) => x.id === id);
       return u ? u.acronym || u.name : "Sem unidade";
@@ -165,6 +194,12 @@ export default function PainelBI({ months }: { months: number }) {
         8,
       ),
       count: costs.length,
+      cpk: cpkKm > 0 ? cpkCost / cpkKm : null,
+      cpkKm,
+      cpkByVehicle: cpkRows
+        .sort((a, b) => b.cpk - a.cpk)
+        .slice(0, 10)
+        .map((r) => ({ name: vehName(r.id), value: Number(r.cpk.toFixed(2)) })),
     };
   }, [data, unitId, months, units, vehicles]);
 
@@ -194,6 +229,12 @@ export default function PainelBI({ months }: { months: number }) {
           Custo do período: <strong className="text-foreground">{brl(view.total)}</strong>
           {view.vehiclesWithCost > 0 && (
             <> · média por veículo {brl(view.total / view.vehiclesWithCost)}</>
+          )}
+          {view.cpk !== null && (
+            <>
+              {" "}
+              · custo por km <strong className="text-foreground">{brl(view.cpk)}</strong>
+            </>
           )}
         </p>
       </div>
@@ -268,6 +309,22 @@ export default function PainelBI({ months }: { months: number }) {
                 <YAxis type="category" dataKey="name" fontSize={12} width={80} />
                 <Tooltip formatter={money} />
                 <Bar dataKey="value" name="Custo" fill={BI_COLORS.blue} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </ChartCard>
+
+        <ChartCard title="Custo por km rodado — veículos mais caros (R$/km)" helpKey="cpk">
+          {view.cpkByVehicle.length === 0 ? (
+            <EmptyChart text="Registre o hodômetro nos abastecimentos para calcular o custo por km." />
+          ) : (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={view.cpkByVehicle} layout="vertical" margin={{ left: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
+                <XAxis type="number" fontSize={12} />
+                <YAxis type="category" dataKey="name" fontSize={12} width={80} />
+                <Tooltip formatter={(v) => `${money(v)} por km`} />
+                <Bar dataKey="value" name="R$/km" fill={BI_COLORS.amber} />
               </BarChart>
             </ResponsiveContainer>
           )}
