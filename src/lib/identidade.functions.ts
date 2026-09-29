@@ -183,7 +183,7 @@ export const testLdapDirectory = createServerFn({ method: "POST" })
 
 const LOGIN_METHODS = ["senha", "oidc", "saml", "ldap", "recuperacao"] as const;
 type LoginMethod = (typeof LOGIN_METHODS)[number];
-const EMAIL_SHAPE = /^[^s@]{1,100}@[^s@]{1,100}.[^s@]{2,30}$/;
+const EMAIL_SHAPE = /^[^\s@]{1,100}@[^\s@]{1,100}\.[^\s@]{2,30}$/;
 
 /** Registra tentativa de acesso (sem tokens nem senhas) para auditoria. */
 export const recordLoginEvent = createServerFn({ method: "POST" })
@@ -227,6 +227,40 @@ export const recordLoginEvent = createServerFn({ method: "POST" })
       user_agent: (getRequestHeader("user-agent") ?? "").slice(0, 300) || null,
     });
     return { ok: true };
+  });
+
+const LOCK_MAX_FAILS = 5;
+const LOCK_WINDOW_MIN = 15;
+
+/** Informa se o e-mail está temporariamente bloqueado por tentativas de senha erradas. */
+export const checkLoginLock = createServerFn({ method: "POST" })
+  .inputValidator((input: { email?: string }) => {
+    const email = typeof input?.email === "string" ? input.email.trim().toLowerCase() : "";
+    if (!EMAIL_SHAPE.test(email)) throw new Error("E-mail inválido.");
+    return { email };
+  })
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const since = new Date(Date.now() - LOCK_WINDOW_MIN * 60_000).toISOString();
+    // conta só as falhas depois do último acesso bem-sucedido
+    const { data: okRow } = await supabaseAdmin
+      .from("auth_login_events")
+      .select("created_at")
+      .ilike("email", data.email)
+      .eq("success", true)
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    const from = okRow?.[0]?.created_at ?? since;
+    const { count } = await supabaseAdmin
+      .from("auth_login_events")
+      .select("id", { count: "exact", head: true })
+      .ilike("email", data.email)
+      .eq("success", false)
+      .eq("method", "senha")
+      .gt("created_at", from);
+    const locked = (count ?? 0) >= LOCK_MAX_FAILS;
+    return { locked, minutes: LOCK_WINDOW_MIN };
   });
 
 /** Lista pública (sem segredos) dos logins institucionais ativos de um domínio. */

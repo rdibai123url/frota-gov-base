@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { passwordProblem } from "@/lib/validacoes";
 import { useEffect, useState } from "react";
 import { KeyRound, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
@@ -87,8 +88,9 @@ function ResetPasswordPage() {
     const form = new FormData(e.currentTarget);
     const password = String(form.get("password") || "");
     const confirm = String(form.get("confirm") || "");
-    if (password.length < 8) {
-      toast.error("A nova senha deve ter ao menos 8 caracteres.");
+    const problem = passwordProblem(password);
+    if (problem) {
+      toast.error(problem);
       return;
     }
     if (password !== confirm) {

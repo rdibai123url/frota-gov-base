@@ -9,7 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
-import { listInstitutionalLogins, recordLoginEvent } from "@/lib/identidade.functions";
+import {
+  checkLoginLock,
+  listInstitutionalLogins,
+  recordLoginEvent,
+} from "@/lib/identidade.functions";
 
 export const Route = createFileRoute("/auth")({
   // Renderização apenas no cliente: evita divergência de hidratação causada pelo
@@ -52,6 +56,7 @@ function AuthPage() {
   >([]);
   const listLogins = useServerFn(listInstitutionalLogins);
   const logLogin = useServerFn(recordLoginEvent);
+  const lockCheck = useServerFn(checkLoginLock);
 
   // Logins institucionais ativos do órgão (quando houver). Sem provedor
   // configurado, apenas o acesso padrão é exibido.
@@ -134,14 +139,36 @@ function AuthPage() {
     }
 
     setLoading(true);
+    try {
+      const lock = await lockCheck({ data: { email: parsed.data.email } });
+      if (lock.locked) {
+        setLoading(false);
+        toast.error(
+          `Muitas tentativas com senha incorreta. Aguarde ${lock.minutes} minutos ou use "Esqueci minha senha".`,
+        );
+        return;
+      }
+    } catch {
+      /* falha na verificação não impede o acesso legítimo */
+    }
     const { error } = await supabase.auth.signInWithPassword(parsed.data);
     setLoading(false);
     if (error) {
       console.error("Erro de login Supabase:", error);
-      toast.error(`Erro no login: ${error.message}`);
+      logLogin({
+        data: {
+          email: parsed.data.email,
+          method: "senha",
+          success: false,
+          reason: "senha incorreta",
+        },
+      }).catch(() => undefined);
+      toast.error("E-mail ou senha incorretos.");
       return;
     }
-    await logLogin({ data: { email: parsed.data.email, method: "senha", success: true } });
+    logLogin({ data: { email: parsed.data.email, method: "senha", success: true } }).catch(
+      () => undefined,
+    );
     navigate({ to: "/painel", replace: true });
   }
 

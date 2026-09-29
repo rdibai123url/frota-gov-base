@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { passwordProblem } from "@/lib/validacoes";
 import { useState } from "react";
 import { KeyRound, UserRound } from "lucide-react";
 import { toast } from "sonner";
@@ -44,8 +45,9 @@ function PerfilPage() {
       toast.error("Informe a senha atual.");
       return;
     }
-    if (password.length < 8) {
-      toast.error("A nova senha deve ter ao menos 8 caracteres.");
+    const problem = passwordProblem(password);
+    if (problem) {
+      toast.error(problem);
       return;
     }
     if (password === current) {

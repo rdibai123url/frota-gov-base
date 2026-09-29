@@ -50,3 +50,20 @@ export function friendlyDbError(error: DbErrorLike, fallback = "Não foi possív
     return fallback;
   return message || fallback;
 }
+
+/** Regras de senha do FrotaGov: 10+ caracteres, maiúscula, minúscula e número. */
+export const PASSWORD_HINT =
+  "Mínimo de 10 caracteres, com letra maiúscula, letra minúscula e número.";
+
+const COMMON_PASSWORDS = ["senha12345", "1234567890", "password12", "frotagov123", "mudar12345"];
+
+/** Devolve a mensagem do problema encontrado, ou null se a senha é aceitável. */
+export function passwordProblem(password: string): string | null {
+  if (password.length < 10) return "A senha deve ter ao menos 10 caracteres.";
+  if (password.length > 72) return "A senha pode ter no máximo 72 caracteres.";
+  if (!/[a-z]/.test(password)) return "A senha deve ter ao menos uma letra minúscula.";
+  if (!/[A-Z]/.test(password)) return "A senha deve ter ao menos uma letra maiúscula.";
+  if (!/[0-9]/.test(password)) return "A senha deve ter ao menos um número.";
+  if (COMMON_PASSWORDS.includes(password.toLowerCase())) return "Essa senha é muito comum.";
+  return null;
+}
