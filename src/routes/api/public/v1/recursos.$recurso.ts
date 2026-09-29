@@ -164,23 +164,6 @@ const RESOURCES: Record<
     dateColumn: "updated_at",
   },
 
-  ofp: {
-    table: "supply_orders",
-    scope: "almoxarifado:read",
-    columns:
-      "id, code, status, supplier_id, contract_id, created_at, issued_at, max_value, reserved_value, consumed_value",
-    order: "created_at",
-    dateColumn: "created_at",
-  },
-
-  estoque: {
-    table: "stock_balances",
-    scope: "almoxarifado:read",
-    columns: "id, warehouse_id, part_id, quantity, reserved_quantity, min_quantity, average_cost",
-    order: "part_id",
-    dateColumn: "updated_at",
-  },
-
   multas: {
     table: "traffic_fines",
     scope: "legal:read",

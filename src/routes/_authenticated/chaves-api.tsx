@@ -58,8 +58,11 @@ const SCOPES = [
     description: "Abastecimentos e autorizações.",
   },
   { value: "contratos:read", label: "Contratos", description: "Contratos, itens e empenhos." },
-  { value: "manutencao:read", label: "Manutenção", description: "Manutenções, OS, peças e pneus." },
-  { value: "almoxarifado:read", label: "Almoxarifado", description: "OFP e saldos de estoque." },
+  {
+    value: "manutencao:read",
+    label: "Manutenção",
+    description: "Manutenções, ordens de serviço e pneus.",
+  },
   {
     value: "legal:read",
     label: "Legal / obrigações",
