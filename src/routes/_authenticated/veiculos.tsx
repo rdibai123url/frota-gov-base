@@ -1,3 +1,4 @@
+import { useFeature } from "@/lib/modulos";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Plus, Pencil, Search, History } from "lucide-react";
@@ -149,7 +150,9 @@ function Veiculos() {
     };
   }, [contracts, leaseContract]);
 
-  const canWrite = Boolean(perms.orgId) && (me?.roles ?? []).some((r) => WRITE_ROLES.includes(r));
+  const cadastroOn = useFeature("veiculos.cadastro");
+  const canWrite =
+    cadastroOn && Boolean(perms.orgId) && (me?.roles ?? []).some((r) => WRITE_ROLES.includes(r));
   const unitName = (id: string | null) => units.find((u) => u.id === id)?.name ?? "—";
 
   const filtered = useMemo(() => {

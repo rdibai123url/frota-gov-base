@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/app-shell";
@@ -124,7 +124,7 @@ function PorPerfil() {
           </TableHeader>
           <TableBody>
             {groups.map((g) => (
-              <>
+              <Fragment key={`grp-${g}`}>
                 <TableRow key={`g-${g}`} className="bg-muted/40">
                   <TableCell
                     colSpan={ROLES.length + 1}
@@ -163,7 +163,7 @@ function PorPerfil() {
                       })}
                     </TableRow>
                   ))}
-              </>
+              </Fragment>
             ))}
           </TableBody>
         </Table>

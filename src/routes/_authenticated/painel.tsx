@@ -42,6 +42,7 @@ import {
 import { KpiCard, type StatusTone } from "@/components/ui-gov";
 import { useDiaries, diaryIndicators } from "@/lib/diarias";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useModuleMap } from "@/lib/modulos";
 import {
   authorizationBalance,
   brl,
@@ -148,6 +149,8 @@ const BiAdministrativo = lazy(() =>
 );
 
 function Painel() {
+  const { map: modMap } = useModuleMap();
+  const on = (k: string) => modMap[k] !== false;
   const [biMonths, setBiMonths] = useState(6);
   const { data: vehicles = [], isLoading } = useVehicles();
   const { data: units = [] } = useUnits();
@@ -365,9 +368,11 @@ function Painel() {
       <Tabs defaultValue="geral">
         <TabsList className="flex h-auto justify-start gap-1 bg-surface p-1">
           <TabsTrigger value="geral">Visão geral</TabsTrigger>
-          <TabsTrigger value="abastecimento">Abastecimento</TabsTrigger>
-          <TabsTrigger value="manutencao">Manutenção</TabsTrigger>
-          <TabsTrigger value="financeiro">Financeiro / Contratual</TabsTrigger>
+          {on("abastecimentos") && <TabsTrigger value="abastecimento">Abastecimento</TabsTrigger>}
+          {on("manutencoes") && <TabsTrigger value="manutencao">Manutenção</TabsTrigger>}
+          {(on("contratos") || on("empenhos") || on("cotas")) && (
+            <TabsTrigger value="financeiro">Financeiro / Contratual</TabsTrigger>
+          )}
           <TabsTrigger value="administrativo">Administrativo / Legal</TabsTrigger>
         </TabsList>
 
