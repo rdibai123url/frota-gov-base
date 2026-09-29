@@ -54,7 +54,7 @@ import {
   ROLE_LABELS,
 } from "@/lib/frotagov";
 import { useIsSuperAdmin, usePlatformSession, usePlatformContextActions } from "@/lib/platform";
-import { moduleForPath, useAccessOverrides, useModuleMap } from "@/lib/modulos";
+import { moduleForPath, useAccessOverrides, useModuleMap, useMyModuleAccess } from "@/lib/modulos";
 import { roleCanOpen } from "@/lib/permissoes";
 import { useEmbedded } from "@/components/embedded";
 import { setReportBranding } from "@/lib/reports";
@@ -265,6 +265,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { exitOrg } = usePlatformContextActions();
   const { map: modules, isLoading: modulesLoading } = useModuleMap();
   const { data: overrides } = useAccessOverrides();
+  const { data: myAccess } = useMyModuleAccess();
   /** Contador de alertas abertos: destaca o item do menu enquanto houver pendência. */
   const { data: openAlerts = 0 } = useOpenAlertCount();
 
@@ -278,7 +279,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       const mod = moduleForPath(leaf.to);
       if (!mod) return true;
       if (modules[mod.key] === false) return false;
-      return isSuperAdmin || roleCanOpen(mod.key, me?.roles ?? [], overrides ?? {});
+      return isSuperAdmin || roleCanOpen(mod.key, me?.roles ?? [], overrides ?? {}, myAccess ?? {});
     });
     return items.length ? { ...group, items } : null;
   }).filter((g): g is NavGroup => g !== null);
@@ -291,7 +292,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     !!me &&
     !!currentModule &&
     !isSuperAdmin &&
-    !roleCanOpen(currentModule.key, me.roles ?? [], overrides ?? {});
+    !roleCanOpen(currentModule.key, me.roles ?? [], overrides ?? {}, myAccess ?? {});
 
   async function handleSignOut() {
     await queryClient.cancelQueries();

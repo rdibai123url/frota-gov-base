@@ -696,7 +696,11 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
                 {drivers.map((d) => (
                   <SelectItem key={d.id} value={d.id} disabled={!driverEligible(d)}>
                     {d.full_name}
-                    {!driverEligible(d) ? " (indisponível)" : ""}
+                    {d.current_absence
+                      ? " (afastado)"
+                      : !driverEligible(d)
+                        ? " (indisponível)"
+                        : ""}
                   </SelectItem>
                 ))}
               </SelectContent>

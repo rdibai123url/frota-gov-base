@@ -8,7 +8,7 @@ import { Suspense, lazy, useState, type ComponentType } from "react";
 import { EmbeddedContext } from "@/components/embedded";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProfile, type AppRole } from "@/lib/frotagov";
-import { useAccessOverrides, useModuleMap } from "@/lib/modulos";
+import { useAccessOverrides, useModuleMap, useMyModuleAccess } from "@/lib/modulos";
 import { roleCanOpen, type AccessOverrides } from "@/lib/permissoes";
 
 type HubTab = { value: string; label: string; moduleKey: string; Panel: ComponentType };
@@ -18,8 +18,16 @@ function TabHub(props: { tabs: HubTab[]; initial: string }) {
   const { data: me } = useProfile();
   const { isLoading } = useModuleMap();
   const { data: overrides, isLoading: loadingAccess } = useAccessOverrides();
-  if (!me || isLoading || loadingAccess) return null;
-  return <TabHubReady {...props} roles={me.roles ?? []} overrides={overrides ?? {}} />;
+  const { data: myAccess, isLoading: loadingMine } = useMyModuleAccess();
+  if (!me || isLoading || loadingAccess || loadingMine) return null;
+  return (
+    <TabHubReady
+      {...props}
+      roles={me.roles ?? []}
+      overrides={overrides ?? {}}
+      mine={myAccess ?? {}}
+    />
+  );
 }
 
 function TabHubReady({
@@ -27,17 +35,20 @@ function TabHubReady({
   initial,
   roles,
   overrides,
+  mine,
 }: {
   tabs: HubTab[];
   initial: string;
   roles: AppRole[];
   overrides: AccessOverrides;
+  mine: Record<string, boolean>;
 }) {
   const { map } = useModuleMap();
   const isSuper = roles.includes("super_admin");
 
   const visible = tabs.filter(
-    (t) => map[t.moduleKey] !== false && (isSuper || roleCanOpen(t.moduleKey, roles, overrides)),
+    (t) =>
+      map[t.moduleKey] !== false && (isSuper || roleCanOpen(t.moduleKey, roles, overrides, mine)),
   );
   const first = visible.find((t) => t.value === initial)?.value ?? visible[0]?.value ?? initial;
   const [tab, setTab] = useState(first);

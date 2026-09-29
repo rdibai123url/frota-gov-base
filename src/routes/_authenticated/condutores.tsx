@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Search, Pencil, IdCard, Plane } from "lucide-react";
+import { Plus, Search, Pencil, IdCard, Plane, CalendarOff } from "lucide-react";
 import { toast } from "sonner";
 import { isValidEmail } from "@/lib/validacoes";
 
 import { CpfInput } from "@/components/form-fields";
 import { PageHeader } from "@/components/app-shell";
+import { AfastamentoDialog } from "@/components/afastamento-condutor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,6 +39,7 @@ import {
 import {
   CNH_CATEGORIES,
   CNH_LABELS,
+  ABSENCE_REASONS,
   DRIVER_BONDS,
   cnhState,
   dateBR,
@@ -100,6 +102,7 @@ function Condutores() {
   const [editing, setEditing] = useState<DriverRow | null>(null);
   const [openNew, setOpenNew] = useState(false);
   const [history, setHistory] = useState<string | null>(null);
+  const [absenceOf, setAbsenceOf] = useState<string | null>(null);
   const { data: diaries = [] } = useDiaries();
 
   const filtered = useMemo(() => {
@@ -241,10 +244,22 @@ function Condutores() {
                   <CnhBadge expiry={d.license_expiry} />
                 </TableCell>
                 <TableCell>
-                  {d.active ? (
-                    <Badge variant="default">Ativo</Badge>
-                  ) : (
+                  {!d.active ? (
                     <Badge variant="outline">Inativo</Badge>
+                  ) : d.current_absence ? (
+                    <Badge
+                      variant="outline"
+                      className="border-amber-500/60 text-amber-700 dark:text-amber-400"
+                    >
+                      Afastado ·{" "}
+                      {ABSENCE_REASONS.find((r) => r.value === d.current_absence?.reason)?.label ??
+                        d.current_absence.reason}
+                      {d.current_absence.expected_return
+                        ? ` até ${dateBR(d.current_absence.expected_return)}`
+                        : ""}
+                    </Badge>
+                  ) : (
+                    <Badge variant="default">Ativo</Badge>
                   )}
                 </TableCell>
                 <TableCell>
@@ -259,7 +274,16 @@ function Condutores() {
                     {diaries.filter((x) => x.beneficiary_driver_id === d.id).length}
                   </Button>
                 </TableCell>
-                <TableCell>
+                <TableCell className="whitespace-nowrap">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={`Afastamento de ${d.full_name}`}
+                    title="Afastamento (férias, licença, INSS, atestado)"
+                    onClick={() => setAbsenceOf(d.id)}
+                  >
+                    <CalendarOff className="size-4" />
+                  </Button>
                   {perms.canWrite && (
                     <Button
                       variant="ghost"
@@ -301,6 +325,13 @@ function Condutores() {
             </Button>
           </div>
         </div>
+      )}
+
+      {absenceOf && drivers.find((x) => x.id === absenceOf) && (
+        <AfastamentoDialog
+          driver={drivers.find((x) => x.id === absenceOf) as DriverRow}
+          onClose={() => setAbsenceOf(null)}
+        />
       )}
 
       {history && (

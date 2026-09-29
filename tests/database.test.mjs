@@ -42,7 +42,7 @@ before(async () => {
   const files = (await readdir(new URL("supabase/migrations/", root)))
     .filter((f) => f.endsWith(".sql"))
     .sort();
-  assert.equal(files.length, 129);
+  assert.equal(files.length, 132);
   for (const file of files) {
     if (file.startsWith("20260925") && !historicalTriggers) {
       historicalTriggers = (
@@ -68,7 +68,7 @@ after(async () => {
   await db.close();
 });
 
-test("111 migrations históricas + 13 novas aplicam sem erro", async () => {
+test("111 migrations históricas + 16 novas aplicam sem erro", async () => {
   const { rows } = await db.query(
     "SELECT count(*)::int n FROM information_schema.tables WHERE table_schema='public'",
   );
@@ -508,5 +508,81 @@ test("cor da marca: só aceita hexadecimal de 6 dígitos", async () => {
   await assert.rejects(
     db.exec(`UPDATE public.organizations SET brand_color = 'azul' WHERE id = '${id(1040)}'`),
     /organizations_brand_color_chk/,
+  );
+});
+
+test("afastamento: volta sozinho na data de retorno e trava agenda e escala", async () => {
+  const org = id(1050);
+  const drv = id(1051);
+  for (const t of ["driver_absences", "duty_shifts", "duty_units", "vehicle_usages"])
+    await db.exec(`ALTER TABLE public.${t} DISABLE TRIGGER ALL`);
+  await db.exec("ALTER TABLE public.duty_shifts ENABLE TRIGGER guard_duty_shift");
+  await db.exec("ALTER TABLE public.vehicle_usages ENABLE TRIGGER guard_driver_absence_usage");
+
+  // férias de 10 dias a partir de ontem, retorno em 9 dias
+  await db.exec(`INSERT INTO public.driver_absences (organization_id, driver_id, reason, start_date, expected_return)
+    VALUES ('${org}', '${drv}', 'ferias', current_date - 1, current_date + 9)`);
+  const q = async (offset) =>
+    (await db.query(`SELECT public.driver_absence_on('${drv}', current_date + ${offset}) r`)).rows[0].r;
+  assert.equal(await q(0), "ferias");
+  assert.equal(await q(8), "ferias");
+  assert.equal(await q(9), null); // no dia do retorno já está disponível
+  assert.equal(await q(-5), null); // antes do início
+
+  await assert.rejects(
+    db.exec(`INSERT INTO public.vehicle_usages (organization_id, vehicle_id, driver_id, planned_departure)
+      VALUES ('${org}', '${id(1052)}', '${drv}', now() + interval '2 days')`),
+    /afastado \(férias\)/,
+  );
+  await db.exec(`INSERT INTO public.vehicle_usages (organization_id, vehicle_id, driver_id, planned_departure)
+    VALUES ('${org}', '${id(1052)}', '${drv}', now() + interval '12 days')`);
+
+  // atestado exige prazo de até 15 dias
+  await assert.rejects(
+    db.exec(`INSERT INTO public.driver_absences (organization_id, driver_id, reason, start_date, expected_return)
+      VALUES ('${org}', '${id(1053)}', 'atestado', current_date, current_date + 20)`),
+    /driver_absences_atestado_chk/,
+  );
+  await assert.rejects(
+    db.exec(`INSERT INTO public.driver_absences (organization_id, driver_id, reason, start_date)
+      VALUES ('${org}', '${id(1053)}', 'atestado', current_date)`),
+    /driver_absences_atestado_chk/,
+  );
+
+  // retorno antecipado registrado libera o motorista
+  await db.exec(`UPDATE public.driver_absences SET returned_at = current_date WHERE driver_id = '${drv}'`);
+  assert.equal(await q(0), null);
+
+  // escala: 24 h, sem sobreposição do mesmo motorista
+  const unit = id(1054);
+  await db.exec(`INSERT INTO public.duty_shifts (organization_id, duty_unit_id, driver_id, shift_date, start_time, hours)
+    VALUES ('${org}', '${unit}', '${drv}', current_date + 20, '07:00', 24)`);
+  await assert.rejects(
+    db.exec(`INSERT INTO public.duty_shifts (organization_id, duty_unit_id, driver_id, shift_date, start_time, hours)
+      VALUES ('${org}', '${id(1055)}', '${drv}', current_date + 20, '19:00', 12)`),
+    /já tem outro turno/,
+  );
+  await db.exec(`INSERT INTO public.duty_shifts (organization_id, duty_unit_id, driver_id, shift_date, start_time, hours)
+    VALUES ('${org}', '${unit}', '${drv}', current_date + 21, '07:00', 12)`); // começa quando o de 24 h termina
+  await assert.rejects(
+    db.exec(`INSERT INTO public.duty_shifts (organization_id, duty_unit_id, driver_id, shift_date, start_time, hours)
+      VALUES ('${org}', '${unit}', '${drv}', current_date + 25, '07:00', 10)`),
+    /duty_shifts_hours_check/,
+  );
+});
+
+test("acesso por usuário: telas essenciais não podem ser bloqueadas", async () => {
+  await db.exec("ALTER TABLE public.user_module_access DISABLE TRIGGER ALL");
+  await db.exec(`INSERT INTO public.user_module_access (organization_id, user_id, module_key, allowed)
+    VALUES ('${id(1060)}', '${id(1061)}', 'faturamento', true)`);
+  await assert.rejects(
+    db.exec(`INSERT INTO public.user_module_access (organization_id, user_id, module_key, allowed)
+      VALUES ('${id(1060)}', '${id(1061)}', 'painel', false)`),
+    /user_module_access_essential_chk/,
+  );
+  await assert.rejects(
+    db.exec(`INSERT INTO public.user_module_access (organization_id, user_id, module_key, allowed)
+      VALUES ('${id(1060)}', '${id(1061)}', 'faturamento', false)`),
+    /duplicate key/,
   );
 });

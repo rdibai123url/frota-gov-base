@@ -174,6 +174,27 @@ export function useAccessOverrides() {
   });
 }
 
+/** Escolhas de acesso feitas pelo gestor especificamente para o usuário logado. */
+export function useMyModuleAccess() {
+  return useQuery({
+    queryKey: ["my-module-access"],
+    staleTime: 1000 * 60,
+    queryFn: async () => {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user) return {} as Record<string, boolean>;
+      const { data, error } = await supabase
+        .from("user_module_access")
+        .select("module_key, allowed")
+        .eq("user_id", auth.user.id);
+      // sem a tabela (ambiente ainda não atualizado) vale o padrão do perfil
+      if (error) return {} as Record<string, boolean>;
+      const out: Record<string, boolean> = {};
+      for (const r of data ?? []) out[r.module_key] = r.allowed;
+      return out;
+    },
+  });
+}
+
 /** Mapa de módulos habilitados para o órgão em contexto. */
 export function useModuleMap() {
   const { data: rows = [], isLoading } = useOrganizationModules();

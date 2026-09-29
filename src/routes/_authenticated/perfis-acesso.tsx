@@ -4,6 +4,9 @@ import { toast } from "sonner";
 
 import { PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
+import { AcessoPorUsuario } from "@/components/acesso-por-usuario";
+import { EmbeddedContext } from "@/components/embedded";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -33,13 +36,13 @@ export const Route = createFileRoute("/_authenticated/perfis-acesso")({
       },
     ],
   }),
-  component: PerfisAcesso,
+  component: PerfisAcessoPagina,
 });
 
 /** Perfis ajustáveis (o administrador do órgão sempre tem acesso). */
 const ROLES: AppRole[] = ["fleet_manager", "unit_manager", "operator", "auditor"];
 
-function PerfisAcesso() {
+function PorPerfil() {
   const { data: overrides = {} } = useAccessOverrides();
   const { map: enabled } = useModuleMap();
   const { orgId, userId, roles } = usePerms();
@@ -165,6 +168,31 @@ function PerfisAcesso() {
           </TableBody>
         </Table>
       </div>
+    </div>
+  );
+}
+
+function PerfisAcessoPagina() {
+  return (
+    <div className="space-y-4">
+      <PageHeader
+        title="Perfis de acesso"
+        description="Escolha quais telas cada perfil e cada usuário pode abrir. O administrador do órgão sempre tem acesso a tudo."
+      />
+      <Tabs defaultValue="perfil" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="perfil">Por perfil</TabsTrigger>
+          <TabsTrigger value="usuario">Por usuário</TabsTrigger>
+        </TabsList>
+        <TabsContent value="perfil" className="mt-0">
+          <EmbeddedContext.Provider value={true}>
+            <PorPerfil />
+          </EmbeddedContext.Provider>
+        </TabsContent>
+        <TabsContent value="usuario" className="mt-0">
+          <AcessoPorUsuario />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

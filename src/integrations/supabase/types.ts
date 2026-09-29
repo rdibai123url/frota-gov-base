@@ -3224,6 +3224,63 @@ export type Database = {
           },
         ];
       };
+      driver_absences: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          driver_id: string;
+          expected_return: string | null;
+          id: string;
+          notes: string | null;
+          organization_id: string;
+          reason: string;
+          returned_at: string | null;
+          start_date: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          driver_id: string;
+          expected_return?: string | null;
+          id?: string;
+          notes?: string | null;
+          organization_id: string;
+          reason: string;
+          returned_at?: string | null;
+          start_date?: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          driver_id?: string;
+          expected_return?: string | null;
+          id?: string;
+          notes?: string | null;
+          organization_id?: string;
+          reason?: string;
+          returned_at?: string | null;
+          start_date?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "driver_absences_driver_id_fkey";
+            columns: ["driver_id"];
+            isOneToOne: false;
+            referencedRelation: "drivers";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "driver_absences_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       drivers: {
         Row: {
           active: boolean;
@@ -3307,6 +3364,108 @@ export type Database = {
             columns: ["unit_id"];
             isOneToOne: false;
             referencedRelation: "units";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      duty_shifts: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          driver_id: string;
+          duty_unit_id: string;
+          hours: number;
+          id: string;
+          notes: string | null;
+          organization_id: string;
+          shift_date: string;
+          start_time: string;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          driver_id: string;
+          duty_unit_id: string;
+          hours: number;
+          id?: string;
+          notes?: string | null;
+          organization_id: string;
+          shift_date: string;
+          start_time: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          driver_id?: string;
+          duty_unit_id?: string;
+          hours?: number;
+          id?: string;
+          notes?: string | null;
+          organization_id?: string;
+          shift_date?: string;
+          start_time?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "duty_shifts_driver_id_fkey";
+            columns: ["driver_id"];
+            isOneToOne: false;
+            referencedRelation: "drivers";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "duty_shifts_duty_unit_id_fkey";
+            columns: ["duty_unit_id"];
+            isOneToOne: false;
+            referencedRelation: "duty_units";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "duty_shifts_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      duty_units: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          name: string;
+          notes: string | null;
+          organization_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          name: string;
+          notes?: string | null;
+          organization_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          name?: string;
+          notes?: string | null;
+          organization_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "duty_units_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
             referencedColumns: ["id"];
           },
         ];
@@ -10957,6 +11116,51 @@ export type Database = {
             columns: ["organization_id"];
             isOneToOne: false;
             referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      user_module_access: {
+        Row: {
+          allowed: boolean;
+          id: string;
+          module_key: string;
+          organization_id: string;
+          updated_at: string;
+          updated_by: string | null;
+          user_id: string;
+        };
+        Insert: {
+          allowed: boolean;
+          id?: string;
+          module_key: string;
+          organization_id: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          user_id: string;
+        };
+        Update: {
+          allowed?: boolean;
+          id?: string;
+          module_key?: string;
+          organization_id?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_module_access_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "user_module_access_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
         ];

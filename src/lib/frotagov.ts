@@ -735,7 +735,45 @@ export type UsageStatus = Database["public"]["Enums"]["usage_status"];
 export type FuelAuthStatus = Database["public"]["Enums"]["fuel_auth_status"];
 export type LimitScope = Database["public"]["Enums"]["limit_scope"];
 
-export type DriverRow = Driver & { unit: Pick<Unit, "id" | "name" | "acronym"> | null };
+export const ABSENCE_REASONS = [
+  { value: "ferias", label: "Férias" },
+  { value: "licenca", label: "Licença" },
+  { value: "inss", label: "INSS" },
+  { value: "atestado", label: "Atestado (até 15 dias)" },
+] as const;
+
+export type DriverAbsence = {
+  id: string;
+  driver_id: string;
+  reason: string;
+  start_date: string;
+  expected_return: string | null;
+  returned_at: string | null;
+  notes: string | null;
+};
+
+/** Afastamento em vigor na data (o motorista volta sozinho na data de retorno). */
+export function currentAbsence(
+  absences: DriverAbsence[] | null | undefined,
+  on: string = new Date().toISOString().slice(0, 10),
+): DriverAbsence | null {
+  return (
+    (absences ?? [])
+      .filter(
+        (a) =>
+          on >= a.start_date &&
+          (!a.returned_at || on < a.returned_at) &&
+          (!a.expected_return || on < a.expected_return),
+      )
+      .sort((x, y) => y.start_date.localeCompare(x.start_date))[0] ?? null
+  );
+}
+
+export type DriverRow = Driver & {
+  unit: Pick<Unit, "id" | "name" | "acronym"> | null;
+  absences?: DriverAbsence[];
+  current_absence?: DriverAbsence | null;
+};
 
 export type UsageRow = VehicleUsage & {
   vehicle: Pick<Vehicle, "id" | "plate" | "asset_code" | "status"> | null;
@@ -825,8 +863,10 @@ export const CNH_LABELS: Record<CnhState, string> = {
 };
 
 /** Condutor apto a nova autorização/utilização. */
-export function driverEligible(d: Pick<Driver, "active" | "license_expiry">) {
-  return d.active && cnhState(d.license_expiry) !== "vencida";
+export function driverEligible(
+  d: Pick<Driver, "active" | "license_expiry"> & { current_absence?: DriverAbsence | null },
+) {
+  return d.active && cnhState(d.license_expiry) !== "vencida" && !d.current_absence;
 }
 
 export function authorizationBalance(
@@ -853,7 +893,19 @@ export function useDrivers() {
         .select("*, unit:units(id, name, acronym)")
         .order("full_name");
       if (error) throw error;
-      return (data ?? []) as unknown as DriverRow[];
+      // afastamentos: se a tabela ainda não existir no ambiente, o cadastro continua funcionando
+      const { data: abs } = await supabase
+        .from("driver_absences")
+        .select("id, driver_id, reason, start_date, expected_return, returned_at, notes")
+        .order("start_date", { ascending: false })
+        .limit(5000);
+      const byDriver = new Map<string, DriverAbsence[]>();
+      for (const a of (abs ?? []) as DriverAbsence[])
+        byDriver.set(a.driver_id, [...(byDriver.get(a.driver_id) ?? []), a]);
+      return ((data ?? []) as unknown as DriverRow[]).map((d) => {
+        const list = byDriver.get(d.id) ?? [];
+        return { ...d, absences: list, current_absence: currentAbsence(list) };
+      });
     },
   });
 }

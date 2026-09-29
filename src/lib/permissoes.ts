@@ -58,14 +58,19 @@ export function defaultAllows(moduleKey: string, role: AppRole): boolean {
 
 /**
  * O usuário pode abrir a tela deste módulo?
- * Vale a escolha do administrador do órgão para o perfil; sem escolha, vale o padrão.
+ * Ordem: escolha do gestor para o usuário > escolha do órgão para o perfil > padrão do sistema.
  * Com vários perfis, basta um deles permitir.
  */
 export function roleCanOpen(
   moduleKey: string,
   roles: AppRole[],
   overrides: AccessOverrides = {},
+  userOverrides: Record<string, boolean> = {},
 ): boolean {
+  if (ALWAYS_OPEN.includes(moduleKey)) return true;
+  // escolha do gestor para esta pessoa vale mais que qualquer regra de perfil
+  const mine = userOverrides[moduleKey];
+  if (mine !== undefined) return mine;
   if (roles.length === 0) return !MODULE_ROLES[moduleKey];
   return roles.some((r) => overrides[moduleKey]?.[r] ?? defaultAllows(moduleKey, r));
 }
