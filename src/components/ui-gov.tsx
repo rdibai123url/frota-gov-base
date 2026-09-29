@@ -8,6 +8,8 @@
  * vazio e erro.
  */
 import { type ReactNode } from "react";
+import { InfoTip } from "@/components/info-tip";
+import type { DashHelp } from "@/lib/ajuda-dashboard";
 import { AlertTriangle, Filter, Inbox, RotateCcw, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -133,7 +135,9 @@ export function KpiCard({
   icon,
   onClick,
   className,
+  help,
 }: {
+  help?: DashHelp | undefined;
   label: string;
   value: ReactNode;
   hint?: string | undefined;
@@ -146,7 +150,7 @@ export function KpiCard({
   const body = (
     <>
       <div className="flex items-start justify-between gap-2">
-        <p className="gov-label truncate" title={label}>
+        <p className="gov-label line-clamp-2 leading-tight" title={label}>
           {label}
         </p>
         {icon ? <span className="shrink-0 text-muted-foreground">{icon}</span> : null}
@@ -163,20 +167,28 @@ export function KpiCard({
   const base =
     "relative overflow-hidden rounded-lg border border-border bg-card px-3.5 pb-3 pt-3 text-left shadow-card";
 
-  if (!onClick) return <div className={cn(base, className)}>{body}</div>;
-
-  return (
+  const card = !onClick ? (
+    <div className={cn(base, "h-full", className)}>{body}</div>
+  ) : (
     <button
       type="button"
       onClick={onClick}
       className={cn(
         base,
-        "cursor-pointer transition-colors hover:border-muted-foreground/40 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "h-full w-full cursor-pointer transition-colors hover:border-muted-foreground/40 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         className,
       )}
     >
       {body}
     </button>
+  );
+
+  if (!help) return card;
+  return (
+    <div className="relative">
+      {card}
+      <InfoTip help={help} className="absolute bottom-2 right-2" />
+    </div>
   );
 }
 

@@ -1,5 +1,5 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Suspense, lazy, useMemo } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Suspense, lazy, useMemo, useState } from "react";
 import {
   Truck,
   Wrench,
@@ -7,16 +7,13 @@ import {
   Users,
   CircleCheck,
   Landmark,
-  ArrowRight,
   Fuel,
   Droplets,
   Banknote,
   BellRing,
-  Store,
   IdCard,
   Plane,
   Ticket,
-  CalendarClock,
   FileText,
   Wallet,
   PiggyBank,
@@ -34,7 +31,15 @@ import {
 } from "lucide-react";
 
 import { PageHeader } from "@/components/app-shell";
-import { EmptyState, KpiCard, SectionCard, type StatusTone } from "@/components/ui-gov";
+import { DASH_HELP, TAB_HELP } from "@/lib/ajuda-dashboard";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { KpiCard, type StatusTone } from "@/components/ui-gov";
 import { useDiaries, diaryIndicators } from "@/lib/diarias";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -123,115 +128,27 @@ function StatCard({
       tone={kpiTone}
       icon={<Icon className="size-4" />}
       onClick={to ? () => navigate({ to }) : undefined}
+      help={DASH_HELP[label]}
     />
   );
 }
 
-const SHORTCUTS = [
-  {
-    to: "/abastecimentos",
-    label: "Abastecimentos",
-    text: "Registrar e consultar abastecimentos",
-    icon: Fuel,
-  },
-  { to: "/veiculos", label: "Veículos", text: "Cadastrar e consultar a frota", icon: Truck },
-  {
-    to: "/condutores",
-    label: "Condutores",
-    text: "Habilitação e vínculo dos condutores",
-    icon: IdCard,
-  },
-  {
-    to: "/utilizacao",
-    label: "Utilização e reservas",
-    text: "Reservas, saídas e retornos de veículos",
-    icon: CalendarClock,
-  },
-  {
-    to: "/autorizacoes",
-    label: "Autorizações",
-    text: "Autorizar abastecimentos antes da compra",
-    icon: Ticket,
-  },
-  {
-    to: "/contratos",
-    label: "Contratos",
-    text: "Contratos, itens e saldos contratuais",
-    icon: FileText,
-  },
-  { to: "/empenhos", label: "Empenhos", text: "Empenhos e saldos orçamentários", icon: Wallet },
-  {
-    to: "/cotas",
-    label: "Cotas e saldos",
-    text: "Cotas financeiras e quantitativas",
-    icon: PiggyBank,
-  },
-  {
-    to: "/centros-custo",
-    label: "Centros de Custo",
-    text: "Centros de custo do órgão e das unidades",
-    icon: Coins,
-  },
-  {
-    to: "/fornecedores",
-    label: "Fornecedores / Postos",
-    text: "Postos habilitados para o órgão",
-    icon: Store,
-  },
-  {
-    to: "/combustiveis",
-    label: "Combustíveis",
-    text: "Tipos de combustível do órgão",
-    icon: Droplets,
-  },
-  {
-    to: "/unidades",
-    label: "Secretarias / Unidades",
-    text: "Estrutura administrativa do órgão",
-    icon: Building2,
-  },
-  { to: "/usuarios", label: "Usuários", text: "Perfis e permissões de acesso", icon: Users },
-  {
-    to: "/multas",
-    label: "Multas e infrações",
-    text: "Autos de infração, defesa e responsabilidade",
-    icon: FileWarning,
-  },
-  {
-    to: "/sinistros",
-    label: "Acidentes e sinistros",
-    text: "Ocorrências, seguradora e indisponibilidade",
-    icon: AlertTriangle,
-  },
-  {
-    to: "/seguros",
-    label: "Seguros",
-    text: "Apólices, vigências e veículos cobertos",
-    icon: ShieldCheck,
-  },
-  {
-    to: "/obrigacoes",
-    label: "Obrigações legais",
-    text: "Licenciamento, IPVA, inspeções e ANTT",
-    icon: FileCheck2,
-  },
-  {
-    to: "/patrimonio",
-    label: "Movimentação patrimonial",
-    text: "Cessões, remanejamentos, baixas e leilões",
-    icon: ArrowLeftRight,
-  },
-  {
-    to: "/orgao",
-    label: "Dados do Órgão",
-    text: "Identificação institucional e brasão",
-    icon: Landmark,
-  },
-] as const;
-
 const PainelBI = lazy(() => import("@/components/painel-bi"));
+const BiAbastecimento = lazy(() =>
+  import("@/components/painel-bi-abas").then((m) => ({ default: m.BiAbastecimento })),
+);
+const BiManutencao = lazy(() =>
+  import("@/components/painel-bi-abas").then((m) => ({ default: m.BiManutencao })),
+);
+const BiFinanceiro = lazy(() =>
+  import("@/components/painel-bi-abas").then((m) => ({ default: m.BiFinanceiro })),
+);
+const BiAdministrativo = lazy(() =>
+  import("@/components/painel-bi-abas").then((m) => ({ default: m.BiAdministrativo })),
+);
 
 function Painel() {
+  const [biMonths, setBiMonths] = useState(6);
   const { data: vehicles = [], isLoading } = useVehicles();
   const { data: units = [] } = useUnits();
   const { data: users = [] } = useOrgUsers();
@@ -420,25 +337,6 @@ function Painel() {
     };
   }, [fines, accidents, policies, obligations, movements]);
 
-  const ultimos6 = useMemo(() => {
-    const base = new Date();
-    return Array.from({ length: 6 }, (_, i) => {
-      const d = new Date(base.getFullYear(), base.getMonth() - (5 - i), 1);
-      const next = new Date(d.getFullYear(), d.getMonth() + 1, 1);
-      const list = fuelings.filter((f) => {
-        const t = new Date(f.fueled_at);
-        return f.status === "valido" && t >= d && t < next;
-      });
-      return {
-        label: d.toLocaleDateString("pt-BR", { month: "short" }),
-        total: list.reduce((s, f) => s + Number(f.total_value ?? 0), 0),
-        quantity: onlyFuelRows(list, fuelProducts).reduce((s, f) => s + Number(f.quantity ?? 0), 0),
-      };
-    });
-  }, [fuelings, fuelProducts]);
-
-  const maxTotal = Math.max(...ultimos6.map((m) => m.total), 0);
-
   return (
     <>
       <PageHeader
@@ -450,6 +348,20 @@ function Painel() {
         }
       />
 
+      <div className="mb-4 flex items-center gap-2 text-sm">
+        <span className="text-muted-foreground">Período dos gráficos:</span>
+        <Select value={String(biMonths)} onValueChange={(v) => setBiMonths(Number(v))}>
+          <SelectTrigger className="h-8 w-44">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="3">Últimos 3 meses</SelectItem>
+            <SelectItem value="6">Últimos 6 meses</SelectItem>
+            <SelectItem value="12">Últimos 12 meses</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       <Tabs defaultValue="geral">
         <TabsList className="flex h-auto flex-wrap justify-start gap-1 bg-surface p-1">
           <TabsTrigger value="geral">Visão geral</TabsTrigger>
@@ -457,16 +369,10 @@ function Painel() {
           <TabsTrigger value="manutencao">Manutenção</TabsTrigger>
           <TabsTrigger value="financeiro">Financeiro / Contratual</TabsTrigger>
           <TabsTrigger value="administrativo">Administrativo / Legal</TabsTrigger>
-          <TabsTrigger value="bi">BI</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="bi" className="pt-5">
-          <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Carregando…</div>}>
-            <PainelBI />
-          </Suspense>
-        </TabsContent>
-
         <TabsContent value="geral" className="pt-5">
+          <p className="mb-4 max-w-3xl text-sm text-muted-foreground">{TAB_HELP["geral"]}</p>
           <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5">
             <StatCard
               label="Total de veículos"
@@ -496,9 +402,17 @@ function Painel() {
             />
             <StatCard label="Usuários" value={users.length} icon={Users} to="/usuarios" />
           </div>
+          <Suspense
+            fallback={<div className="p-6 text-sm text-muted-foreground">Carregando gráficos…</div>}
+          >
+            <PainelBI months={biMonths} />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="abastecimento" className="pt-5">
+          <p className="mb-4 max-w-3xl text-sm text-muted-foreground">
+            {TAB_HELP["abastecimento"]}
+          </p>
           <h2 className="gov-label mb-2.5">Abastecimento no mês</h2>
           <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5">
             <StatCard
@@ -553,9 +467,15 @@ function Painel() {
               tone="success"
             />
           </div>
+          <Suspense
+            fallback={<div className="p-6 text-sm text-muted-foreground">Carregando gráficos…</div>}
+          >
+            <BiAbastecimento months={biMonths} />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="manutencao" className="pt-5">
+          <p className="mb-4 max-w-3xl text-sm text-muted-foreground">{TAB_HELP["manutencao"]}</p>
           <h2 className="gov-label mb-2.5">Manutenção, peças e pneus</h2>
 
           <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-6">
@@ -652,9 +572,15 @@ function Painel() {
               icon={Banknote}
             />
           </div>
+          <Suspense
+            fallback={<div className="p-6 text-sm text-muted-foreground">Carregando gráficos…</div>}
+          >
+            <BiManutencao months={biMonths} />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="financeiro" className="pt-5">
+          <p className="mb-4 max-w-3xl text-sm text-muted-foreground">{TAB_HELP["financeiro"]}</p>
           <h2 className="gov-label mb-2.5">Execução orçamentária</h2>
 
           <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-6">
@@ -695,9 +621,17 @@ function Painel() {
               tone={financeiro.contratosAVencer > 0 ? "warning" : "default"}
             />
           </div>
+          <Suspense
+            fallback={<div className="p-6 text-sm text-muted-foreground">Carregando gráficos…</div>}
+          >
+            <BiFinanceiro />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="administrativo" className="pt-5">
+          <p className="mb-4 max-w-3xl text-sm text-muted-foreground">
+            {TAB_HELP["administrativo"]}
+          </p>
           <h2 className="gov-label mb-2.5">Gestão administrativa, legal e patrimonial</h2>
 
           <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 xl:grid-cols-4">
@@ -771,67 +705,13 @@ function Painel() {
               icon={Banknote}
             />
           </div>
+          <Suspense
+            fallback={<div className="p-6 text-sm text-muted-foreground">Carregando gráficos…</div>}
+          >
+            <BiAdministrativo months={biMonths} />
+          </Suspense>
         </TabsContent>
       </Tabs>
-
-      <div className="mt-7">
-        <SectionCard
-          title="Gasto com abastecimento — últimos 6 meses"
-          description="Valores dos abastecimentos válidos; passe o cursor para ver a quantidade."
-          action={
-            <Link
-              to="/abastecimentos"
-              className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-            >
-              Ver abastecimentos <ArrowRight className="size-3.5" />
-            </Link>
-          }
-        >
-          {maxTotal === 0 ? (
-            <EmptyState
-              title="Ainda não há abastecimentos registrados"
-              description="Assim que o primeiro abastecimento for lançado, o histórico dos últimos seis meses aparece aqui."
-              icon={<Fuel className="size-5" />}
-            />
-          ) : (
-            <div className="flex h-52 items-end gap-2 sm:gap-4">
-              {ultimos6.map((m) => (
-                <div key={m.label} className="group flex flex-1 flex-col items-center gap-2">
-                  <span className="text-[11px] tabular-nums text-muted-foreground">
-                    {m.total > 0 ? brl(m.total) : ""}
-                  </span>
-                  <div
-                    className="w-full rounded-t-md bg-primary/75 transition-colors group-hover:bg-primary"
-                    style={{ height: `${Math.max(4, (m.total / maxTotal) * 150)}px` }}
-                    title={`${num(m.quantity, 2)} abastecidos em ${m.label}`}
-                  />
-                  <span className="text-xs capitalize text-muted-foreground">{m.label}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </SectionCard>
-      </div>
-
-      <h2 className="gov-label mb-2.5 mt-7">Atalhos das telas mais usadas</h2>
-      <div className="grid gap-2 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {SHORTCUTS.map((s) => (
-          <Link
-            key={s.to}
-            to={s.to}
-            className="group flex items-center gap-2.5 rounded-lg border bg-card px-3 py-2.5 shadow-card transition-colors hover:border-primary/40 hover:bg-accent/40"
-          >
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-              <s.icon className="size-4" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="gov-title block truncate text-[13px]">{s.label}</span>
-              <span className="block truncate text-[11px] text-muted-foreground">{s.text}</span>
-            </span>
-            <ArrowRight className="size-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-          </Link>
-        ))}
-      </div>
     </>
   );
 }
