@@ -227,7 +227,27 @@ const escapeHtml = (v: unknown) =>
  * (brasão, cabeçalho institucional, filtros, emissor e data/hora).
  * O usuário pode salvar em PDF pela própria caixa de impressão.
  */
-export function printReport(meta: ReportMeta, columns: ReportColumn[], rows: ReportRow[]) {
+export type PrintOptions = {
+  /** Colunas centralizadas (ex.: dias do mês). */
+  centerKeys?: string[];
+  /** Colunas sombreadas (ex.: sábados e domingos). */
+  shadeKeys?: string[];
+  /** Fonte menor, para tabelas largas (calendário do mês). */
+  compact?: boolean;
+  /** Linhas de assinatura no final. */
+  signatures?: string[];
+};
+
+export function printReport(
+  meta: ReportMeta,
+  columns: ReportColumn[],
+  rows: ReportRow[],
+  options: PrintOptions = {},
+) {
+  const center = new Set(options.centerKeys ?? []);
+  const shade = new Set(options.shadeKeys ?? []);
+  const cls = (key: string) =>
+    [center.has(key) ? "c" : "", shade.has(key) ? "we" : ""].filter(Boolean).join(" ");
   const filters = (meta.filters ?? []).filter((f) => f.value);
   const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8" />
 <title>${escapeHtml(meta.title)}</title>
@@ -242,7 +262,11 @@ export function printReport(meta: ReportMeta, columns: ReportColumn[], rows: Rep
   h2 { font-size: 11pt; font-weight: 600; margin: 0 0 4px; color: #3b4a66; }
   .meta { font-size: 8.5pt; color: #48566f; }
   .grid { margin-top: 6px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px 16px; font-size: 8.5pt; color: #48566f; }
-  table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+  table { width: 100%; border-collapse: collapse; font-size: ${options.compact ? "7.5pt" : "8.5pt"}; }
+  td.c, th.c { text-align: center; padding-left: 2px; padding-right: 2px; }
+  td.we, th.we { background: #e6ecf6 !important; }
+  .sign { display: flex; gap: 40px; margin-top: 34px; }
+  .sign div { flex: 1; border-top: 1px solid #12203a; padding-top: 4px; text-align: center; font-size: 8.5pt; }
   th, td { border: 1px solid #c9d2e0; padding: 4px 6px; text-align: left; vertical-align: top; }
   th { background: #eef2f8; font-weight: 600; }
   thead { display: table-header-group; }
@@ -268,17 +292,18 @@ export function printReport(meta: ReportMeta, columns: ReportColumn[], rows: Rep
     ${filters.length ? `<div style="grid-column: span 3"><strong>Filtros aplicados:</strong> ${filters.map((f) => `${escapeHtml(f.label)}: ${escapeHtml(f.value)}`).join(" · ")}</div>` : ""}
   </div>
 </header>
-<table><thead><tr>${columns.map((c) => `<th>${escapeHtml(c.label)}</th>`).join("")}</tr></thead>
+<table><thead><tr>${columns.map((c) => `<th class="${cls(c.key)}">${escapeHtml(c.label)}</th>`).join("")}</tr></thead>
 <tbody>${
     rows.length
       ? rows
           .map(
             (r) =>
-              `<tr>${columns.map((c) => `<td>${escapeHtml(r[c.key] ?? "—")}</td>`).join("")}</tr>`,
+              `<tr>${columns.map((c) => `<td class="${cls(c.key)}">${escapeHtml(r[c.key] ?? "—")}</td>`).join("")}</tr>`,
           )
           .join("")
       : `<tr><td colspan="${Math.max(1, columns.length)}">Nenhum dado para os filtros informados.</td></tr>`
   }</tbody></table>
+${(options.signatures ?? []).length ? `<div class="sign">${(options.signatures ?? []).map((x) => `<div>${escapeHtml(x)}</div>`).join("")}</div>` : ""}
 <footer>Documento gerado eletronicamente pelo Dibai Fleet — Gestão de frotas e ativos.</footer>
 <script>window.onload = function () { setTimeout(function () { window.print(); }, 350); };</script>
 </body></html>`;

@@ -58,6 +58,15 @@ export const Route = createFileRoute("/_authenticated/escala")({
 });
 
 const WEEK = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
+const WEEK_LONG = [
+  "domingo",
+  "segunda-feira",
+  "terça-feira",
+  "quarta-feira",
+  "quinta-feira",
+  "sexta-feira",
+  "sábado",
+];
 const thisMonth = () => new Date().toISOString().slice(0, 7);
 
 function Escala() {
@@ -73,6 +82,10 @@ function Escala() {
 
   // montagem
   const [building, setBuilding] = useState(false);
+  const [printOpen, setPrintOpen] = useState(false);
+  const [printMode, setPrintMode] = useState<"um" | "varios" | "todos">("todos");
+  const [printOne, setPrintOne] = useState("");
+  const [printMany, setPrintMany] = useState<Set<string>>(new Set());
   const [driverId, setDriverId] = useState("");
   const [days, setDays] = useState<Set<string>>(new Set());
   const [start, setStart] = useState("07:00");
@@ -214,39 +227,108 @@ function Escala() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shifts, drivers]);
 
-  function print() {
+  /** Motoristas que têm turno no mês (só eles entram nas opções de impressão). */
+  const scaled = byDriver.map(([id]) => id);
+
+  function runPrint() {
     if (!unit) return;
-    const rows = byDriver.flatMap(([id, list]) =>
-      list.map((s) => ({
-        motorista: driverName(id),
-        data: new Date(`${s.shift_date}T12:00:00`).toLocaleDateString("pt-BR"),
-        dia: WEEK[new Date(`${s.shift_date}T12:00:00`).getDay()] ?? "",
-        inicio: hhmm(s.start_time),
-        termino: `${endTime(s.start_time, s.hours).text}${endTime(s.start_time, s.hours).nextDay ? " (dia seguinte)" : ""}`,
-        carga: `${s.hours} h`,
-      })),
-    );
-    const ok = printReport(
-      {
-        title: `Escala de motoristas — ${unit.name}`,
-        organization: org?.legal_name ?? null,
-        subtitle: `Mês de referência: ${String(range.month).padStart(2, "0")}/${range.year}`,
-        period: `${String(range.month).padStart(2, "0")}/${range.year}`,
-        filters: [{ label: "Unidade de plantão", value: unit.name }],
-      },
-      [
-        { key: "data", label: "Data" },
-        { key: "dia", label: "Dia" },
-        { key: "motorista", label: "Motorista" },
-        { key: "inicio", label: "Início" },
-        { key: "termino", label: "Término" },
-        { key: "carga", label: "Carga horária" },
+    const ids =
+      printMode === "todos"
+        ? scaled
+        : printMode === "um"
+          ? printOne
+            ? [printOne]
+            : []
+          : scaled.filter((id) => printMany.has(id));
+    if (ids.length === 0) {
+      toast.error(printMode === "um" ? "Escolha o motorista." : "Marque pelo menos um motorista.");
+      return;
+    }
+    const mm = String(range.month).padStart(2, "0");
+    const meta = {
+      title: `Escala de motoristas — ${unit.name}`,
+      organization: org?.legal_name ?? null,
+      subtitle: `Mês de referência: ${mm}/${range.year}`,
+      unit: unit.name,
+      period: `${mm}/${range.year}`,
+      filters: [
+        { label: "Unidade de plantão", value: unit.name },
+        {
+          label: "Motoristas",
+          value: printMode === "todos" ? "Todos" : ids.map((id) => driverName(id)).join(", "),
+        },
       ],
-      rows.sort((a, b) =>
-        a.data.split("/").reverse().join("").localeCompare(b.data.split("/").reverse().join("")),
-      ),
-    );
+    };
+    let ok = false;
+    if (printMode === "um") {
+      const id = ids[0] as string;
+      const list = shifts.filter((x) => x.driver_id === id);
+      ok = printReport(
+        { ...meta, title: `Escala de ${driverName(id)} — ${unit.name}` },
+        [
+          { key: "data", label: "Data" },
+          { key: "dia", label: "Dia da semana" },
+          { key: "inicio", label: "Início" },
+          { key: "termino", label: "Término" },
+          { key: "carga", label: "Carga horária" },
+        ],
+        [
+          ...list.map((x) => {
+            const e = endTime(x.start_time, x.hours);
+            const d = new Date(`${x.shift_date}T12:00:00`);
+            return {
+              data: d.toLocaleDateString("pt-BR"),
+              dia: WEEK_LONG[d.getDay()] ?? "",
+              inicio: hhmm(x.start_time),
+              termino: `${e.text}${e.nextDay ? " (dia seguinte)" : ""}`,
+              carga: `${x.hours} h`,
+            };
+          }),
+          {
+            data: `Total: ${list.length} turno(s)`,
+            dia: "",
+            inicio: "",
+            termino: "",
+            carga: `${list.reduce((sum, x) => sum + x.hours, 0)} h`,
+          },
+        ],
+        { signatures: [driverName(id), "Responsável pela escala"] },
+      );
+    } else {
+      const dayCols = monthDays.map((d) => ({
+        key: `d${d.day}`,
+        label: `${d.day}\n${WEEK[d.dow] ?? ""}`,
+      }));
+      const rows = ids.map((id) => {
+        const list = shifts.filter((x) => x.driver_id === id);
+        const row: Record<string, string | number> = { motorista: driverName(id) };
+        for (const d of monthDays) {
+          const sh = list.find((x) => x.shift_date === d.iso);
+          row[`d${d.day}`] = sh ? `${sh.hours}h` : "";
+        }
+        row["turnos"] = list.length;
+        row["horas"] = list.reduce((sum, x) => sum + x.hours, 0);
+        return row;
+      });
+      ok = printReport(
+        meta,
+        [
+          { key: "motorista", label: "Motorista" },
+          ...dayCols,
+          { key: "turnos", label: "Turnos" },
+          { key: "horas", label: "Horas" },
+        ],
+        rows,
+        {
+          compact: true,
+          centerKeys: [...dayCols.map((c) => c.key), "turnos", "horas"],
+          shadeKeys: monthDays.filter((d) => d.dow === 0 || d.dow === 6).map((d) => `d${d.day}`),
+          signatures: ["Responsável pela escala", "Chefia imediata"],
+        },
+      );
+    }
     if (!ok) toast.error("Permita a abertura de janelas para imprimir.");
+    else setPrintOpen(false);
   }
 
   return (
@@ -302,7 +384,7 @@ function Escala() {
               variant="outline"
               className="gap-2"
               disabled={shifts.length === 0}
-              onClick={print}
+              onClick={() => setPrintOpen(true)}
             >
               <Printer className="size-4" /> Imprimir escala de{" "}
               {String(range.month).padStart(2, "0")}/{range.year}
@@ -551,7 +633,7 @@ function Escala() {
                   size="sm"
                   className="gap-2"
                   disabled={shifts.length === 0}
-                  onClick={print}
+                  onClick={() => setPrintOpen(true)}
                 >
                   <Printer className="size-4" /> Imprimir escala
                 </Button>
@@ -639,6 +721,109 @@ function Escala() {
           )}
         </div>
       )}
+
+      <Dialog open={printOpen} onOpenChange={setPrintOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Imprimir escala</DialogTitle>
+            <DialogDescription>
+              Folha A4 na horizontal, com o cabeçalho do órgão. Escolha o que imprimir.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            {(
+              [
+                [
+                  "todos",
+                  "Escala mensal de todos os motoristas",
+                  "Uma linha por motorista, com os dias do mês.",
+                ],
+                [
+                  "varios",
+                  "Escala de vários motoristas",
+                  "Você marca quais motoristas entram na folha.",
+                ],
+                [
+                  "um",
+                  "Escala de um motorista específico",
+                  "Lista com data, dia da semana, início e término.",
+                ],
+              ] as const
+            ).map(([value, title, hint]) => (
+              <label
+                key={value}
+                className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 ${printMode === value ? "border-primary bg-primary/5" : ""}`}
+              >
+                <input
+                  type="radio"
+                  name="print-mode"
+                  className="mt-1"
+                  checked={printMode === value}
+                  onChange={() => setPrintMode(value)}
+                />
+                <span>
+                  <span className="block text-sm font-semibold">{title}</span>
+                  <span className="block text-xs font-normal text-muted-foreground">{hint}</span>
+                </span>
+              </label>
+            ))}
+
+            {printMode === "um" && (
+              <div className="space-y-1.5">
+                <Label>Motorista</Label>
+                <Select value={printOne} onValueChange={setPrintOne}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Escolha o motorista" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {scaled.map((id) => (
+                      <SelectItem key={id} value={id}>
+                        {driverName(id)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            {printMode === "varios" && (
+              <div className="max-h-56 space-y-1 overflow-y-auto rounded-lg border p-2">
+                {scaled.map((id) => (
+                  <label
+                    key={id}
+                    className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={printMany.has(id)}
+                      onChange={(e) =>
+                        setPrintMany((prev) => {
+                          const next = new Set(prev);
+                          if (e.target.checked) next.add(id);
+                          else next.delete(id);
+                          return next;
+                        })
+                      }
+                    />
+                    {driverName(id)}
+                  </label>
+                ))}
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Só aparecem motoristas com turno em {String(range.month).padStart(2, "0")}/
+              {range.year}.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPrintOpen(false)}>
+              Cancelar
+            </Button>
+            <Button className="gap-2" onClick={runPrint}>
+              <Printer className="size-4" /> Imprimir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={newUnit} onOpenChange={setNewUnit}>
         <DialogContent className="max-w-md">

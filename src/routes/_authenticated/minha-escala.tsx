@@ -37,6 +37,7 @@ function useMinhaEscala(userId: string | null, month: string) {
   return useQuery({
     queryKey: ["minha-escala", userId, month],
     enabled: Boolean(userId),
+    placeholderData: (prev) => prev,
     queryFn: async () => {
       const { data: driver, error: dErr } = await supabase
         .from("drivers")
@@ -77,10 +78,10 @@ function MinhaEscala() {
   const lead = new Date(range.year, range.month - 1, 1).getDay();
   const upcoming = (data?.shifts ?? []).filter((s) => s.shift_date >= todayIso);
   const totalHours = (data?.shifts ?? []).reduce((sum, s) => sum + s.hours, 0);
-  const label = new Date(range.year, range.month - 1, 1).toLocaleDateString("pt-BR", {
+  const monthName = new Date(range.year, range.month - 1, 1).toLocaleDateString("pt-BR", {
     month: "long",
-    year: "numeric",
   });
+  const label = `${monthName.charAt(0).toUpperCase()}${monthName.slice(1)} de ${range.year}`;
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
@@ -89,7 +90,7 @@ function MinhaEscala() {
         description="Veja os dias, os horários e a unidade em que você está escalado."
       />
 
-      {isLoading && <p className="text-sm text-muted-foreground">Carregando…</p>}
+      {isLoading && !data && <p className="text-sm text-muted-foreground">Carregando…</p>}
 
       {!isLoading && !data?.driver && (
         <div className="rounded-lg border bg-card p-6 text-sm shadow-card">
@@ -114,7 +115,19 @@ function MinhaEscala() {
             >
               <ChevronLeft className="size-5" />
             </Button>
-            <p className="text-base font-semibold capitalize">{label}</p>
+            <label className="relative flex-1 cursor-pointer text-center">
+              <span className="text-base font-semibold">{label}</span>
+              <span className="block text-[0.65rem] font-normal text-muted-foreground">
+                toque para escolher outro mês
+              </span>
+              <input
+                type="month"
+                aria-label="Escolher o mês"
+                value={month}
+                onChange={(e) => e.target.value && setMonth(e.target.value)}
+                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+              />
+            </label>
             <Button
               variant="ghost"
               size="icon"
