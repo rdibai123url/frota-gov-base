@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { SignatureButton } from "@/components/signature-button";
 import { useMemo, useState } from "react";
 import { Ban, CheckCircle2, FileText, Plus, Printer, Wallet } from "lucide-react";
 import { toast } from "sonner";
@@ -771,9 +772,17 @@ function InvoiceDetail({ invoice, onClose }: { invoice: InvoiceRow | null; onClo
         </div>
 
         <DialogFooter className="flex-wrap gap-2 sm:justify-between">
-          <Button variant="outline" onClick={print} className="gap-2">
-            <Printer className="size-4" /> Imprimir
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={print} className="gap-2">
+              <Printer className="size-4" /> Imprimir
+            </Button>
+            <SignatureButton
+              docType="fatura"
+              docId={invoice.id}
+              title={`a fatura ${invoice.code ?? ""}`}
+              variant="outline"
+            />
+          </div>
           <div className="flex flex-wrap gap-2">
             {canManageFinance && !closed && (
               <Button variant="outline" onClick={() => setCancelOpen(true)} disabled={busy}>

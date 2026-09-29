@@ -1,4 +1,5 @@
 import { ListPagination, usePaged } from "@/components/list-pagination";
+import { SignatureButton } from "@/components/signature-button";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { FileCheck2, Plus, Printer, Upload } from "lucide-react";
@@ -717,6 +718,11 @@ function ServiceOrderDetail({
         <Button variant="outline" size="sm" onClick={print} className="gap-2">
           <Printer className="size-4" /> Imprimir
         </Button>
+        <SignatureButton
+          docType="ordem_servico"
+          docId={order.id}
+          title={`a ordem de serviço ${order.code ?? ""}`}
+        />
         {canManage && !closed && (
           <>
             {order.status === "emitida" && (

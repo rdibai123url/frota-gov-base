@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
+import { Route as VerificarRouteImport } from './routes/verificar'
 import { Route as AuthenticatedAbastecimentosRouteImport } from './routes/_authenticated/abastecimentos'
 import { Route as AuthenticatedAlertasRouteImport } from './routes/_authenticated/alertas'
 import { Route as AuthenticatedAutorizacoesRouteImport } from './routes/_authenticated/autorizacoes'
@@ -93,6 +94,11 @@ const AuthRoute = AuthRouteImport.update({
 const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
   id: '/redefinir-senha',
   path: '/redefinir-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerificarRoute = VerificarRouteImport.update({
+  id: '/verificar',
+  path: '/verificar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAbastecimentosRoute =
@@ -439,6 +445,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/verificar': typeof VerificarRoute
   '/abastecimentos': typeof AuthenticatedAbastecimentosRoute
   '/alertas': typeof AuthenticatedAlertasRoute
   '/autorizacoes': typeof AuthenticatedAutorizacoesRoute
@@ -506,6 +513,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/verificar': typeof VerificarRoute
   '/abastecimentos': typeof AuthenticatedAbastecimentosRoute
   '/alertas': typeof AuthenticatedAlertasRoute
   '/autorizacoes': typeof AuthenticatedAutorizacoesRoute
@@ -575,6 +583,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/verificar': typeof VerificarRoute
   '/_authenticated/abastecimentos': typeof AuthenticatedAbastecimentosRoute
   '/_authenticated/alertas': typeof AuthenticatedAlertasRoute
   '/_authenticated/autorizacoes': typeof AuthenticatedAutorizacoesRoute
@@ -644,6 +653,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/redefinir-senha'
+    | '/verificar'
     | '/abastecimentos'
     | '/alertas'
     | '/autorizacoes'
@@ -711,6 +721,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/redefinir-senha'
+    | '/verificar'
     | '/abastecimentos'
     | '/alertas'
     | '/autorizacoes'
@@ -779,6 +790,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/redefinir-senha'
+    | '/verificar'
     | '/_authenticated/abastecimentos'
     | '/_authenticated/alertas'
     | '/_authenticated/autorizacoes'
@@ -848,6 +860,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
+  VerificarRoute: typeof VerificarRoute
   CotacaoTokenRoute: typeof CotacaoTokenRoute
   TransparenciaSlugRoute: typeof TransparenciaSlugRoute
   ApiPublicHooksAvisosDiariosRoute: typeof ApiPublicHooksAvisosDiariosRoute
@@ -886,6 +899,13 @@ declare module '@tanstack/react-router' {
       path: '/redefinir-senha'
       fullPath: '/redefinir-senha'
       preLoaderRoute: typeof RedefinirSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verificar': {
+      id: '/verificar'
+      path: '/verificar'
+      fullPath: '/verificar'
+      preLoaderRoute: typeof VerificarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/abastecimentos': {
@@ -1447,6 +1467,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
+  VerificarRoute: VerificarRoute,
   CotacaoTokenRoute: CotacaoTokenRoute,
   TransparenciaSlugRoute: TransparenciaSlugRoute,
   ApiPublicHooksAvisosDiariosRoute: ApiPublicHooksAvisosDiariosRoute,

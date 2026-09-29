@@ -42,7 +42,7 @@ before(async () => {
   const files = (await readdir(new URL("supabase/migrations/", root)))
     .filter((f) => f.endsWith(".sql"))
     .sort();
-  assert.equal(files.length, 124);
+  assert.equal(files.length, 125);
   for (const file of files) {
     if (file.startsWith("20260925") && !historicalTriggers) {
       historicalTriggers = (
@@ -68,7 +68,7 @@ after(async () => {
   await db.close();
 });
 
-test("111 migrations históricas + 8 novas aplicam sem erro", async () => {
+test("111 migrations históricas + 9 novas aplicam sem erro", async () => {
   const { rows } = await db.query(
     "SELECT count(*)::int n FROM information_schema.tables WHERE table_schema='public'",
   );
@@ -427,4 +427,34 @@ test("avisos de vencimento: lista CNH e seguro vencendo conforme os prazos", asy
   await db.exec(`INSERT INTO public.notification_settings (organization_id, cnh_days) VALUES ('${org}', 250)`);
   const r2 = await db.query(`SELECT count(*)::int n FROM public.notification_items('${org}') WHERE kind='cnh'`);
   assert.equal(r2.rows[0].n, 3);
+});
+
+test("assinatura eletrônica: imutável, código único e conferência pública", async () => {
+  const org = id(995);
+  await db.exec("ALTER TABLE public.electronic_signatures DISABLE TRIGGER USER");
+  await db.exec("ALTER TABLE public.electronic_signatures DISABLE TRIGGER ALL");
+  await db.exec("ALTER TABLE public.electronic_signatures ENABLE TRIGGER electronic_signatures_no_change");
+  await db.exec(`INSERT INTO public.electronic_signatures
+    (organization_id, doc_type, doc_id, doc_label, doc_hash, signer_id, signer_name, verification_code)
+    VALUES ('${org}', 'ordem_servico', '${id(996)}', 'OS-2026-0001', '${"a".repeat(64)}', '${id(997)}', 'Fulano', 'ABCD1234')`);
+  await assert.rejects(
+    db.exec(`UPDATE public.electronic_signatures SET signer_name='X' WHERE verification_code='ABCD1234'`),
+    /não podem ser alteradas/,
+  );
+  await assert.rejects(
+    db.exec(`DELETE FROM public.electronic_signatures WHERE verification_code='ABCD1234'`),
+    /não podem ser alteradas/,
+  );
+  await assert.rejects(
+    db.exec(`INSERT INTO public.electronic_signatures
+      (organization_id, doc_type, doc_id, doc_label, doc_hash, signer_id, signer_name, verification_code)
+      VALUES ('${org}', 'ordem_servico', '${id(996)}', 'OS', '${"b".repeat(64)}', '${id(997)}', 'Fulano', 'ZZZZ0000')`),
+    /duplicate key/,
+  );
+  await assert.rejects(
+    db.exec(`INSERT INTO public.electronic_signatures
+      (organization_id, doc_type, doc_id, doc_label, doc_hash, signer_id, signer_name, verification_code)
+      VALUES ('${org}', 'ordem_servico', '${id(998)}', 'OS', 'curto', '${id(997)}', 'Fulano', 'QQQQ0000')`),
+    /doc_hash/,
+  );
 });

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { SignatureButton } from "@/components/signature-button";
 import { useMemo, useState } from "react";
 import { Gauge, Plus, Printer } from "lucide-react";
 import { toast } from "sonner";
@@ -275,7 +276,13 @@ function Ocorrencias({ contractId, canEdit }: { contractId: string; canEdit: boo
                     {OCCURRENCE_STATUS[r.status] ?? r.status}
                   </Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell className="space-x-1 whitespace-nowrap">
+                  <SignatureButton
+                    docType="contrato_ocorrencia"
+                    docId={r.id}
+                    title="este registro"
+                    variant="ghost"
+                  />
                   {canEdit && r.status === "aberta" && (
                     <Button size="sm" variant="outline" onClick={() => setResolveId(r.id)}>
                       Resolver

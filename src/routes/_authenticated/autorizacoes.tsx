@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { SignatureButton } from "@/components/signature-button";
 import { useEffect, useMemo, useState } from "react";
 import { Plus, Search, QrCode, Ban, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
@@ -917,6 +918,12 @@ function AuthorizationDetail({ auth, onClose }: { auth: AuthorizationRow; onClos
           <Button variant="outline" onClick={onClose}>
             Fechar
           </Button>
+          <SignatureButton
+            docType="autorizacao_abastecimento"
+            docId={auth.id}
+            title={`a autorização ${auth.code ?? ""}`}
+            variant="outline"
+          />
           <Button onClick={() => window.print()}>Imprimir</Button>
         </DialogFooter>
       </DialogContent>

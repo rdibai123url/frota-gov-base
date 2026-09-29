@@ -3311,6 +3311,65 @@ export type Database = {
           },
         ];
       };
+      electronic_signatures: {
+        Row: {
+          doc_hash: string;
+          doc_id: string;
+          doc_label: string;
+          doc_type: string;
+          id: string;
+          ip_address: string | null;
+          organization_id: string;
+          signed_at: string;
+          signer_id: string;
+          signer_name: string;
+          signer_role: string | null;
+          statement: string;
+          user_agent: string | null;
+          verification_code: string;
+        };
+        Insert: {
+          doc_hash: string;
+          doc_id: string;
+          doc_label: string;
+          doc_type: string;
+          id?: string;
+          ip_address?: string | null;
+          organization_id: string;
+          signed_at?: string;
+          signer_id: string;
+          signer_name: string;
+          signer_role?: string | null;
+          statement?: string;
+          user_agent?: string | null;
+          verification_code: string;
+        };
+        Update: {
+          doc_hash?: string;
+          doc_id?: string;
+          doc_label?: string;
+          doc_type?: string;
+          id?: string;
+          ip_address?: string | null;
+          organization_id?: string;
+          signed_at?: string;
+          signer_id?: string;
+          signer_name?: string;
+          signer_role?: string | null;
+          statement?: string;
+          user_agent?: string | null;
+          verification_code?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "electronic_signatures_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       emission_factors: {
         Row: {
           active: boolean;
@@ -12073,7 +12132,17 @@ export type Database = {
       };
       imr_auto_metric: { Args: { _metric: string; _month: string }; Returns: number };
       imr_final_grade: { Args: { _contract: string; _month: string }; Returns: number };
-      notification_items: { Args: { _org: string }; Returns: { kind: string; title: string; detail: string; due_date: string; days: number; phone: string | null }[] };
+      notification_items: {
+        Args: { _org: string };
+        Returns: {
+          kind: string;
+          title: string;
+          detail: string;
+          due_date: string;
+          days: number;
+          phone: string | null;
+        }[];
+      };
       reserve_checklist_photo: {
         Args: { _checklist: string; _mime: string; _size: number };
         Returns: Json;
@@ -12623,6 +12692,18 @@ export type Database = {
         Returns: Json;
       };
       unit_scope_ok: { Args: { _unit: string }; Returns: boolean };
+      verify_signature: {
+        Args: { _code: string };
+        Returns: {
+          doc_type: string;
+          doc_label: string;
+          signer_name: string;
+          signer_role: string | null;
+          signed_at: string;
+          doc_hash: string;
+          organization_name: string;
+        }[];
+      };
     };
     Enums: {
       accident_kind:
