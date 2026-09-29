@@ -157,6 +157,7 @@ const NAV: NavGroup[] = [
       { to: "/inteligencia", label: "Inteligência da frota" },
       { to: "/relatorios", label: "Relatórios avançados" },
       { to: "/avisos", label: "Avisos de vencimento" },
+      { to: "/prestacao-contas", label: "Prestação de contas" },
       { to: "/sustentabilidade", label: "Sustentabilidade da frota" },
     ],
   },

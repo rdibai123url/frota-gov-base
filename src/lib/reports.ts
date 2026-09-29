@@ -97,12 +97,7 @@ function csvCell(value: unknown) {
 }
 
 /** Exporta CSV (separador ";", compatível com Excel pt-BR) com cabeçalho institucional. */
-export function exportReportCsv(
-  filename: string,
-  columns: ReportColumn[],
-  rows: ReportRow[],
-  meta?: ReportMeta,
-) {
+export function reportCsvText(columns: ReportColumn[], rows: ReportRow[], meta?: ReportMeta) {
   const parts: string[] = [];
   if (meta) {
     for (const [k, v] of headerLines(meta, rows.length)) parts.push(`${csvCell(k)};${csvCell(v)}`);
@@ -111,7 +106,16 @@ export function exportReportCsv(
   parts.push(columns.map((c) => csvCell(c.label)).join(";"));
   for (const r of rows) parts.push(columns.map((c) => csvCell(r[c.key])).join(";"));
 
-  const blob = new Blob(["\uFEFF" + parts.join("\n")], { type: "text/csv;charset=utf-8" });
+  return "\uFEFF" + parts.join("\n");
+}
+
+export function exportReportCsv(
+  filename: string,
+  columns: ReportColumn[],
+  rows: ReportRow[],
+  meta?: ReportMeta,
+) {
+  const blob = new Blob([reportCsvText(columns, rows, meta)], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
@@ -137,12 +141,7 @@ const xmlText = (v: unknown) =>
     .replace(/>/g, "&gt;");
 
 /** Exporta XML (UTF-8) com o cabeçalho institucional e uma <linha> por registro. */
-export function exportReportXml(
-  filename: string,
-  columns: ReportColumn[],
-  rows: ReportRow[],
-  meta?: ReportMeta,
-) {
+export function reportXmlText(columns: ReportColumn[], rows: ReportRow[], meta?: ReportMeta) {
   const tags = columns.map((c, i) => xmlTag(c.label, i));
   const out: string[] = ['<?xml version="1.0" encoding="UTF-8"?>', "<relatorio>"];
   if (meta) {
@@ -165,7 +164,18 @@ export function exportReportXml(
     out.push("    </linha>");
   }
   out.push("  </linhas>", "</relatorio>");
-  const blob = new Blob([out.join("\n")], { type: "application/xml;charset=utf-8" });
+  return out.join("\n");
+}
+
+export function exportReportXml(
+  filename: string,
+  columns: ReportColumn[],
+  rows: ReportRow[],
+  meta?: ReportMeta,
+) {
+  const blob = new Blob([reportXmlText(columns, rows, meta)], {
+    type: "application/xml;charset=utf-8",
+  });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;

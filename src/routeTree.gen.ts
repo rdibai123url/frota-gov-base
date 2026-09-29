@@ -56,6 +56,7 @@ import { Route as AuthenticatedPesquisaPrecosRouteImport } from './routes/_authe
 import { Route as AuthenticatedPlanosManutencaoRouteImport } from './routes/_authenticated/planos-manutencao'
 import { Route as AuthenticatedPlataformaRouteImport } from './routes/_authenticated/plataforma'
 import { Route as AuthenticatedPneusRouteImport } from './routes/_authenticated/pneus'
+import { Route as AuthenticatedPrestacaoContasRouteImport } from './routes/_authenticated/prestacao-contas'
 import { Route as AuthenticatedRastreamentoRouteImport } from './routes/_authenticated/rastreamento'
 import { Route as AuthenticatedRedeCredenciadaRouteImport } from './routes/_authenticated/rede-credenciada'
 import { Route as AuthenticatedRegrasManutencaoRouteImport } from './routes/_authenticated/regras-manutencao'
@@ -332,6 +333,12 @@ const AuthenticatedPneusRoute = AuthenticatedPneusRouteImport.update({
   path: '/pneus',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPrestacaoContasRoute =
+  AuthenticatedPrestacaoContasRouteImport.update({
+    id: '/prestacao-contas',
+    path: '/prestacao-contas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedRastreamentoRoute =
   AuthenticatedRastreamentoRouteImport.update({
     id: '/rastreamento',
@@ -495,6 +502,7 @@ export interface FileRoutesByFullPath {
   '/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/plataforma': typeof AuthenticatedPlataformaRoute
   '/pneus': typeof AuthenticatedPneusRoute
+  '/prestacao-contas': typeof AuthenticatedPrestacaoContasRoute
   '/rastreamento': typeof AuthenticatedRastreamentoRoute
   '/rede-credenciada': typeof AuthenticatedRedeCredenciadaRoute
   '/regras-manutencao': typeof AuthenticatedRegrasManutencaoRoute
@@ -564,6 +572,7 @@ export interface FileRoutesByTo {
   '/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/plataforma': typeof AuthenticatedPlataformaRoute
   '/pneus': typeof AuthenticatedPneusRoute
+  '/prestacao-contas': typeof AuthenticatedPrestacaoContasRoute
   '/rastreamento': typeof AuthenticatedRastreamentoRoute
   '/rede-credenciada': typeof AuthenticatedRedeCredenciadaRoute
   '/regras-manutencao': typeof AuthenticatedRegrasManutencaoRoute
@@ -635,6 +644,7 @@ export interface FileRoutesById {
   '/_authenticated/planos-manutencao': typeof AuthenticatedPlanosManutencaoRoute
   '/_authenticated/plataforma': typeof AuthenticatedPlataformaRoute
   '/_authenticated/pneus': typeof AuthenticatedPneusRoute
+  '/_authenticated/prestacao-contas': typeof AuthenticatedPrestacaoContasRoute
   '/_authenticated/rastreamento': typeof AuthenticatedRastreamentoRoute
   '/_authenticated/rede-credenciada': typeof AuthenticatedRedeCredenciadaRoute
   '/_authenticated/regras-manutencao': typeof AuthenticatedRegrasManutencaoRoute
@@ -706,6 +716,7 @@ export interface FileRouteTypes {
     | '/planos-manutencao'
     | '/plataforma'
     | '/pneus'
+    | '/prestacao-contas'
     | '/rastreamento'
     | '/rede-credenciada'
     | '/regras-manutencao'
@@ -775,6 +786,7 @@ export interface FileRouteTypes {
     | '/planos-manutencao'
     | '/plataforma'
     | '/pneus'
+    | '/prestacao-contas'
     | '/rastreamento'
     | '/rede-credenciada'
     | '/regras-manutencao'
@@ -845,6 +857,7 @@ export interface FileRouteTypes {
     | '/_authenticated/planos-manutencao'
     | '/_authenticated/plataforma'
     | '/_authenticated/pneus'
+    | '/_authenticated/prestacao-contas'
     | '/_authenticated/rastreamento'
     | '/_authenticated/rede-credenciada'
     | '/_authenticated/regras-manutencao'
@@ -1215,6 +1228,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPneusRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/prestacao-contas': {
+      id: '/_authenticated/prestacao-contas'
+      path: '/prestacao-contas'
+      fullPath: '/prestacao-contas'
+      preLoaderRoute: typeof AuthenticatedPrestacaoContasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/rastreamento': {
       id: '/_authenticated/rastreamento'
       path: '/rastreamento'
@@ -1408,6 +1428,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPlanosManutencaoRoute: typeof AuthenticatedPlanosManutencaoRoute
   AuthenticatedPlataformaRoute: typeof AuthenticatedPlataformaRoute
   AuthenticatedPneusRoute: typeof AuthenticatedPneusRoute
+  AuthenticatedPrestacaoContasRoute: typeof AuthenticatedPrestacaoContasRoute
   AuthenticatedRastreamentoRoute: typeof AuthenticatedRastreamentoRoute
   AuthenticatedRedeCredenciadaRoute: typeof AuthenticatedRedeCredenciadaRoute
   AuthenticatedRegrasManutencaoRoute: typeof AuthenticatedRegrasManutencaoRoute
@@ -1466,6 +1487,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPlanosManutencaoRoute: AuthenticatedPlanosManutencaoRoute,
   AuthenticatedPlataformaRoute: AuthenticatedPlataformaRoute,
   AuthenticatedPneusRoute: AuthenticatedPneusRoute,
+  AuthenticatedPrestacaoContasRoute: AuthenticatedPrestacaoContasRoute,
   AuthenticatedRastreamentoRoute: AuthenticatedRastreamentoRoute,
   AuthenticatedRedeCredenciadaRoute: AuthenticatedRedeCredenciadaRoute,
   AuthenticatedRegrasManutencaoRoute: AuthenticatedRegrasManutencaoRoute,

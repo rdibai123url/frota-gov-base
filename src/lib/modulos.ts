@@ -82,6 +82,7 @@ export const MODULES: ModuleDef[] = [
   m("inteligencia", "Inteligência da frota", "Relatórios e análises"),
   m("relatorios", "Relatórios avançados", "Relatórios e análises"),
   m("avisos", "Avisos de vencimento", "Relatórios e análises"),
+  m("prestacao-contas", "Prestação de contas", "Relatórios e análises"),
   m("sustentabilidade", "Sustentabilidade da frota", "Relatórios e análises"),
   m("transparencia", "Portal da Transparência", "Integrações e dados abertos"),
   m("integracoes", "Central de Integrações", "Integrações e dados abertos"),

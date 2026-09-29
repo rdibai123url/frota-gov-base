@@ -28,6 +28,7 @@ export const MODULE_ROLES: Record<string, AppRole[]> = {
   "chaves-api": ADMIN,
   backup: ADMIN,
   "perfis-acesso": ADMIN,
+  "prestacao-contas": SEM_OPERADOR,
   // dinheiro e contratos: gestão e controle interno
   contratos: SEM_OPERADOR,
   empenhos: SEM_OPERADOR,
