@@ -75,6 +75,7 @@ const NAV: NavGroup[] = [
       { to: "/veiculos", label: "Veículos" },
       { to: "/equipamentos", label: "Máquinas e equipamentos" },
       { to: "/motorista", label: "Área do motorista" },
+      { to: "/escala", label: "Escala de motoristas" },
       { to: "/utilizacao", label: "Utilização e reservas" },
       { to: "/disponibilidade", label: "Disponibilidade da Frota" },
       { to: "/rastreamento", label: "Rastreamento" },

@@ -31,6 +31,7 @@ import { Route as AuthenticatedDisponibilidadeRouteImport } from './routes/_auth
 import { Route as AuthenticatedEmpenhosRouteImport } from './routes/_authenticated/empenhos'
 import { Route as AuthenticatedEntidadesExternasRouteImport } from './routes/_authenticated/entidades-externas'
 import { Route as AuthenticatedEquipamentosRouteImport } from './routes/_authenticated/equipamentos'
+import { Route as AuthenticatedEscalaRouteImport } from './routes/_authenticated/escala'
 import { Route as AuthenticatedExportacaoRouteImport } from './routes/_authenticated/exportacao'
 import { Route as AuthenticatedFaturamentoRouteImport } from './routes/_authenticated/faturamento'
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
@@ -197,6 +198,11 @@ const AuthenticatedEquipamentosRoute =
     path: '/equipamentos',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedEscalaRoute = AuthenticatedEscalaRouteImport.update({
+  id: '/escala',
+  path: '/escala',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedExportacaoRoute = AuthenticatedExportacaoRouteImport.update({
   id: '/exportacao',
   path: '/exportacao',
@@ -483,6 +489,7 @@ export interface FileRoutesByFullPath {
   '/empenhos': typeof AuthenticatedEmpenhosRoute
   '/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
   '/equipamentos': typeof AuthenticatedEquipamentosRoute
+  '/escala': typeof AuthenticatedEscalaRoute
   '/exportacao': typeof AuthenticatedExportacaoRoute
   '/faturamento': typeof AuthenticatedFaturamentoRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
@@ -554,6 +561,7 @@ export interface FileRoutesByTo {
   '/empenhos': typeof AuthenticatedEmpenhosRoute
   '/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
   '/equipamentos': typeof AuthenticatedEquipamentosRoute
+  '/escala': typeof AuthenticatedEscalaRoute
   '/exportacao': typeof AuthenticatedExportacaoRoute
   '/faturamento': typeof AuthenticatedFaturamentoRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
@@ -627,6 +635,7 @@ export interface FileRoutesById {
   '/_authenticated/empenhos': typeof AuthenticatedEmpenhosRoute
   '/_authenticated/entidades-externas': typeof AuthenticatedEntidadesExternasRoute
   '/_authenticated/equipamentos': typeof AuthenticatedEquipamentosRoute
+  '/_authenticated/escala': typeof AuthenticatedEscalaRoute
   '/_authenticated/exportacao': typeof AuthenticatedExportacaoRoute
   '/_authenticated/faturamento': typeof AuthenticatedFaturamentoRoute
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
@@ -700,6 +709,7 @@ export interface FileRouteTypes {
     | '/empenhos'
     | '/entidades-externas'
     | '/equipamentos'
+    | '/escala'
     | '/exportacao'
     | '/faturamento'
     | '/fornecedores'
@@ -771,6 +781,7 @@ export interface FileRouteTypes {
     | '/empenhos'
     | '/entidades-externas'
     | '/equipamentos'
+    | '/escala'
     | '/exportacao'
     | '/faturamento'
     | '/fornecedores'
@@ -843,6 +854,7 @@ export interface FileRouteTypes {
     | '/_authenticated/empenhos'
     | '/_authenticated/entidades-externas'
     | '/_authenticated/equipamentos'
+    | '/_authenticated/escala'
     | '/_authenticated/exportacao'
     | '/_authenticated/faturamento'
     | '/_authenticated/fornecedores'
@@ -1063,6 +1075,13 @@ declare module '@tanstack/react-router' {
       path: '/equipamentos'
       fullPath: '/equipamentos'
       preLoaderRoute: typeof AuthenticatedEquipamentosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/escala': {
+      id: '/_authenticated/escala'
+      path: '/escala'
+      fullPath: '/escala'
+      preLoaderRoute: typeof AuthenticatedEscalaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/exportacao': {
@@ -1422,6 +1441,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEmpenhosRoute: typeof AuthenticatedEmpenhosRoute
   AuthenticatedEntidadesExternasRoute: typeof AuthenticatedEntidadesExternasRoute
   AuthenticatedEquipamentosRoute: typeof AuthenticatedEquipamentosRoute
+  AuthenticatedEscalaRoute: typeof AuthenticatedEscalaRoute
   AuthenticatedExportacaoRoute: typeof AuthenticatedExportacaoRoute
   AuthenticatedFaturamentoRoute: typeof AuthenticatedFaturamentoRoute
   AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
@@ -1482,6 +1502,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEmpenhosRoute: AuthenticatedEmpenhosRoute,
   AuthenticatedEntidadesExternasRoute: AuthenticatedEntidadesExternasRoute,
   AuthenticatedEquipamentosRoute: AuthenticatedEquipamentosRoute,
+  AuthenticatedEscalaRoute: AuthenticatedEscalaRoute,
   AuthenticatedExportacaoRoute: AuthenticatedExportacaoRoute,
   AuthenticatedFaturamentoRoute: AuthenticatedFaturamentoRoute,
   AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,

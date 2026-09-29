@@ -39,6 +39,7 @@ export const MODULES: ModuleDef[] = [
   m("veiculos", "Veículos", "Frota", ["/veiculo/"]),
   m("equipamentos", "Máquinas e equipamentos", "Frota"),
   m("motorista", "Área do motorista", "Frota"),
+  m("escala", "Escala de motoristas", "Frota"),
   m("utilizacao", "Utilização e reservas", "Frota"),
   m("disponibilidade", "Disponibilidade da Frota", "Frota"),
   m("diarias", "Diárias", "Frota"),

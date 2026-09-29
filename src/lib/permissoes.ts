@@ -29,6 +29,7 @@ export const MODULE_ROLES: Record<string, AppRole[]> = {
   backup: ADMIN,
   "perfis-acesso": ADMIN,
   "prestacao-contas": SEM_OPERADOR,
+  escala: SEM_OPERADOR,
   // dinheiro e contratos: gestão e controle interno
   contratos: SEM_OPERADOR,
   empenhos: SEM_OPERADOR,
