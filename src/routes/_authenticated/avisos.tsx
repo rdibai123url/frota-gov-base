@@ -33,7 +33,7 @@ import { dateBR, dateTimeBR, dbMessage, useInvalidate, usePerms } from "@/lib/fr
 export const Route = createFileRoute("/_authenticated/avisos")({
   head: () => ({
     meta: [
-      { title: "Avisos de vencimento — FrotaGov" },
+      { title: "Avisos de vencimento — Dibai Fleet" },
       {
         name: "description",
         content:
@@ -66,7 +66,7 @@ const whenText = (d: number) =>
   d < 0 ? `venceu há ${Math.abs(d)} dia(s)` : d === 0 ? "vence hoje" : `vence em ${d} dia(s)`;
 
 const waText = (i: Item) =>
-  `FrotaGov: ${i.title} — ${i.detail}, ${whenText(i.days)} (${dateBR(i.due_date)}). Por favor, regularize.`;
+  `Dibai Fleet: ${i.title} — ${i.detail}, ${whenText(i.days)} (${dateBR(i.due_date)}). Por favor, regularize.`;
 
 function Avisos() {
   const { orgId, canManageFinance, userId } = usePerms();
@@ -174,8 +174,8 @@ function Avisos() {
   }
 
   const summary = list.length
-    ? `FrotaGov — ${list.length} aviso(s):\n` +
-      list.map((i) => `• ${waText(i).replace("FrotaGov: ", "")}`).join("\n")
+    ? `Dibai Fleet — ${list.length} aviso(s):\n` +
+      list.map((i) => `• ${waText(i).replace("Dibai Fleet: ", "")}`).join("\n")
     : "";
 
   const field = (id: string, label: string, value: number, hint?: string) => (

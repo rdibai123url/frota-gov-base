@@ -1,5 +1,5 @@
 /**
- * FrotaGov — serviço de geocodificação desacoplado (Etapa 2).
+ * Dibai Fleet — serviço de geocodificação desacoplado (Etapa 2).
  *
  * Provedor padrão: OpenStreetMap / Nominatim (uso livre, sem API paga),
  * respeitando a política de uso: identificação por User-Agent, uma consulta
@@ -53,7 +53,7 @@ async function fetchWithTimeout(url: string) {
     return await fetch(url, {
       signal: ctrl.signal,
       headers: {
-        "User-Agent": "FrotaGov/10.7 (gestao de frota publica; contato via sistema)",
+        "User-Agent": "Dibai Fleet/10.7 (gestao de frota publica; contato via sistema)",
         Accept: "application/json",
       },
     });

@@ -46,14 +46,14 @@ import {
 export const Route = createFileRoute("/_authenticated/centros-custo")({
   head: () => ({
     meta: [
-      { title: "Centros de Custo — FrotaGov" },
+      { title: "Centros de Custo — Dibai Fleet" },
       {
         name: "description",
         content:
           "Centros de custo do órgão vinculados às secretarias e unidades, base para empenhos, cotas e autorizações de abastecimento.",
       },
-      { property: "og:title", content: "Centros de Custo — FrotaGov" },
-      { property: "og:description", content: "Estrutura de centros de custo da frota pública." },
+      { property: "og:title", content: "Centros de Custo — Dibai Fleet" },
+      { property: "og:description", content: "Estrutura de centros de custo da frota." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

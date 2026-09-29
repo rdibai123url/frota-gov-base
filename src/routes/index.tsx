@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "FrotaGov — Gestão de frotas para órgãos públicos" },
+      { title: "Dibai Fleet — Gestão de frotas para órgãos públicos" },
       {
         name: "description",
         content:
           "Plataforma para prefeituras, câmaras, consórcios e autarquias gerirem veículos, secretarias e usuários com isolamento total de dados por órgão.",
       },
-      { property: "og:title", content: "FrotaGov — Gestão de frotas para órgãos públicos" },
+      { property: "og:title", content: "Dibai Fleet — Gestão de frotas para órgãos públicos" },
       {
         property: "og:description",
         content:
@@ -56,7 +56,7 @@ function Landing() {
             <div className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <ShieldCheck className="size-5" />
             </div>
-            <span className="gov-title text-lg">FrotaGov</span>
+            <span className="gov-title text-lg">Dibai Fleet</span>
           </div>
           <Button asChild size="sm">
             <Link to="/auth">Acessar o sistema</Link>
@@ -72,7 +72,7 @@ function Landing() {
           Gestão de frotas para prefeituras, câmaras, consórcios e autarquias
         </h1>
         <p className="mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg">
-          O FrotaGov centraliza o cadastro do órgão, das secretarias e da frota, com controle de
+          O Dibai Fleet centraliza o cadastro do órgão, das secretarias e da frota, com controle de
           acesso por perfil e isolamento total dos dados de cada organização.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
@@ -96,7 +96,7 @@ function Landing() {
       </section>
 
       <footer className="border-t py-8 text-center text-xs text-muted-foreground">
-        FrotaGov · Fase 1 — base funcional para gestão de frotas públicas
+        Dibai Fleet — gestão de frotas e ativos
       </footer>
     </div>
   );

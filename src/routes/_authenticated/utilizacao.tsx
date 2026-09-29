@@ -79,14 +79,14 @@ import { VehicleChecklistPanel } from "@/components/vehicle-checklist";
 export const Route = createFileRoute("/_authenticated/utilizacao")({
   head: () => ({
     meta: [
-      { title: "Utilização e reservas — FrotaGov" },
+      { title: "Utilização e reservas — Dibai Fleet" },
       {
         name: "description",
         content:
           "Reserva, autorização, saída e retorno de veículos oficiais com controle de conflitos de agenda, condutor responsável e quilometragem.",
       },
-      { property: "og:title", content: "Utilização e reservas — FrotaGov" },
-      { property: "og:description", content: "Controle de uso e reserva da frota pública." },
+      { property: "og:title", content: "Utilização e reservas — Dibai Fleet" },
+      { property: "og:description", content: "Controle de uso e reserva da frota." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

@@ -63,7 +63,7 @@ const FrotaMap = lazy(() => import("@/components/frota-map"));
 export const Route = createFileRoute("/_authenticated/rastreamento")({
   head: () => ({
     meta: [
-      { title: "Rastreamento — FrotaGov" },
+      { title: "Rastreamento — Dibai Fleet" },
       {
         name: "description",
         content:

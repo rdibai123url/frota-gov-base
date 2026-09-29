@@ -41,7 +41,7 @@ export function renderDigest(orgName: string, items: AvisoItem[]) {
   const groups = new Map<string, AvisoItem[]>();
   for (const it of items) groups.set(it.kind, [...(groups.get(it.kind) ?? []), it]);
 
-  const textLines: string[] = [`FrotaGov — avisos de vencimento de ${orgName}`, ""];
+  const textLines: string[] = [`Dibai Fleet — avisos de vencimento de ${orgName}`, ""];
   let html = `<div style="font-family:Arial,sans-serif;color:#0f1f38;max-width:640px">
   <h2 style="color:#0b2545;margin:0 0 4px">Avisos de vencimento</h2>
   <p style="margin:0 0 16px;color:#5b6b82">${esc(orgName)} — ${items.length} item(ns) precisam de atenção.</p>`;
@@ -59,7 +59,7 @@ export function renderDigest(orgName: string, items: AvisoItem[]) {
     html += "</ul>";
     textLines.push("");
   }
-  html += `<p style="margin-top:22px;font-size:12px;color:#5b6b82">Mensagem automática do FrotaGov. Os prazos de aviso são ajustados na tela “Avisos de vencimento”.</p></div>`;
+  html += `<p style="margin-top:22px;font-size:12px;color:#5b6b82">Mensagem automática do Dibai Fleet. Os prazos de aviso são ajustados na tela “Avisos de vencimento”.</p></div>`;
   return { html, text: textLines.join("\n") };
 }
 
@@ -174,7 +174,7 @@ export async function sendDigest(orgId: string, force: boolean): Promise<SendRes
     try {
       await sendEmail(settings, secret, {
         to,
-        subject: `FrotaGov — ${items.length} aviso(s) de vencimento`,
+        subject: `Dibai Fleet — ${items.length} aviso(s) de vencimento`,
         html,
         text,
       });

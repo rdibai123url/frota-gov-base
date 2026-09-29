@@ -62,7 +62,7 @@ import {
 export const Route = createFileRoute("/_authenticated/regras-manutencao")({
   head: () => ({
     meta: [
-      { title: "Regras de manutenção — FrotaGov" },
+      { title: "Regras de manutenção — Dibai Fleet" },
       {
         name: "description",
         content:

@@ -91,16 +91,16 @@ import {
 export const Route = createFileRoute("/_authenticated/cotacoes")({
   head: () => ({
     meta: [
-      { title: "Cotações de manutenção — FrotaGov" },
+      { title: "Cotações de manutenção — Dibai Fleet" },
       {
         name: "description",
         content:
           "Processos eletrônicos de cotação com oficinas credenciadas, recebimento de propostas, mapa comparativo e aprovação auditada.",
       },
-      { property: "og:title", content: "Cotações de manutenção — FrotaGov" },
+      { property: "og:title", content: "Cotações de manutenção — Dibai Fleet" },
       {
         property: "og:description",
-        content: "Cotação eletrônica de serviços de manutenção da frota pública.",
+        content: "Cotação eletrônica de serviços de manutenção da frota.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

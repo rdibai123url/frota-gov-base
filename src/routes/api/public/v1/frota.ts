@@ -1,4 +1,4 @@
-/** API pública versionada do FrotaGov — leitura autenticada por chave do órgão. */
+/** API pública versionada do Dibai Fleet — leitura autenticada por chave do órgão. */
 import { createFileRoute } from "@tanstack/react-router";
 
 async function sha256(value: string) {

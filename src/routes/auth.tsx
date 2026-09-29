@@ -22,12 +22,12 @@ export const Route = createFileRoute("/auth")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Acesso ao sistema — FrotaGov" },
+      { title: "Acesso ao sistema — Dibai Fleet" },
       {
         name: "description",
-        content: "Entre no FrotaGov ou cadastre seu órgão público para gerir a frota.",
+        content: "Entre no Dibai Fleet ou cadastre seu órgão público para gerir a frota.",
       },
-      { property: "og:title", content: "Acesso ao sistema — FrotaGov" },
+      { property: "og:title", content: "Acesso ao sistema — Dibai Fleet" },
       {
         property: "og:description",
         content: "Autenticação segura para gestores de frota de órgãos públicos.",
@@ -195,8 +195,8 @@ function AuthPage() {
               <ShieldCheck className="size-5" />
             </div>
             <div>
-              <p className="gov-title text-xl">FrotaGov</p>
-              <p className="text-xs text-muted-foreground">Gestão de frotas públicas</p>
+              <p className="gov-title text-xl">Dibai Fleet</p>
+              <p className="text-xs text-muted-foreground">Gestão de frotas e ativos</p>
             </div>
           </Link>
 

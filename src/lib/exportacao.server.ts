@@ -457,7 +457,7 @@ export async function buildFullExport(
 
   const manifest = {
     esquema: { nome: "frotagov-exportacao-completa", versao: EXPORT_SCHEMA_VERSION },
-    aplicacao: { nome: "FrotaGov", versao: EXPORT_APP_VERSION },
+    aplicacao: { nome: "Dibai Fleet", versao: EXPORT_APP_VERSION },
     orgao: {
       id: organization.id,
       razao_social: organization.legal_name,
@@ -481,13 +481,13 @@ export async function buildFullExport(
   zipFiles["manifesto_exportacao.json"] = strToU8(JSON.stringify(manifest, null, 2));
   zipFiles["LEIA-ME.txt"] = strToU8(
     [
-      "FrotaGov — Exportação completa de dados",
+      "Dibai Fleet — Exportação completa de dados",
       "=======================================",
       `Órgão: ${organization.legal_name}${organization.short_name ? ` (${organization.short_name})` : ""}`,
       `CNPJ: ${organization.cnpj ?? "não informado"}`,
       `Gerada em: ${brDate(generatedAt.toISOString())} (${generatedAt.toISOString()})`,
       `Solicitada por: ${requester.name}${requester.email ? ` <${requester.email}>` : ""}`,
-      `Versão do FrotaGov: ${EXPORT_APP_VERSION} | Esquema da exportação: ${EXPORT_SCHEMA_VERSION}`,
+      `Versão do Dibai Fleet: ${EXPORT_APP_VERSION} | Esquema da exportação: ${EXPORT_SCHEMA_VERSION}`,
       "",
       `Arquivos: ${manifestFiles.length + 2} | Registros: ${recordCount}`,
       `CSV em ${CSV_ENCODING}, delimitador "${CSV_DELIMITER}", quebra de linha CRLF.`,
@@ -512,7 +512,7 @@ export async function buildFullExport(
     2,
     "0",
   )}_${String(generatedAt.getHours()).padStart(2, "0")}${String(generatedAt.getMinutes()).padStart(2, "0")}`;
-  const fileName = `FrotaGov_Exportacao_Completa_${slugify(organization.short_name ?? organization.legal_name)}_${stamp}.zip`;
+  const fileName = `DibaiFleet_Exportacao_Completa_${slugify(organization.short_name ?? organization.legal_name)}_${stamp}.zip`;
 
   return {
     fileName,

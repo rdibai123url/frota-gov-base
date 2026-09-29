@@ -1,5 +1,5 @@
 /**
- * Bloco D — motor de backup externo diário do FrotaGov.
+ * Bloco D — motor de backup externo diário do Dibai Fleet.
  *
  * Executa exclusivamente no servidor. Nunca grava, devolve ou registra em log
  * qualquer credencial: as chaves ficam em segredos de ambiente e apenas o

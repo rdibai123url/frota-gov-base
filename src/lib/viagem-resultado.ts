@@ -1,5 +1,5 @@
 /**
- * FrotaGov — fechamento de viagem ("Planejado x Realizado").
+ * Dibai Fleet — fechamento de viagem ("Planejado x Realizado").
  *
  * Regras de honestidade do cálculo:
  * - a quilometragem oficial vem SEMPRE do odômetro (retorno − saída);

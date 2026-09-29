@@ -65,13 +65,13 @@ import {
 export const Route = createFileRoute("/_authenticated/funcionarios")({
   head: () => ({
     meta: [
-      { title: "Funcionários do órgão — FrotaGov" },
+      { title: "Funcionários do órgão — Dibai Fleet" },
       {
         name: "description",
         content:
           "Cadastro das pessoas do órgão e de suas funções institucionais — fiscal e gestor de contrato, autorizador, almoxarifado, direção e condutores — com ou sem acesso ao sistema.",
       },
-      { property: "og:title", content: "Funcionários do órgão — FrotaGov" },
+      { property: "og:title", content: "Funcionários do órgão — Dibai Fleet" },
       {
         property: "og:description",
         content:

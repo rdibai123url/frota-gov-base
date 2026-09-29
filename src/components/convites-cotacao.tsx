@@ -1,5 +1,5 @@
 /**
- * FrotaGov — convites de cotação por e-mail.
+ * Dibai Fleet — convites de cotação por e-mail.
  *
  * Permite selecionar oficinas e fornecedores já cadastrados (busca por nome,
  * CNPJ e e-mail), acrescentar e-mails avulsos, revisar a lista antes do envio

@@ -58,16 +58,16 @@ import {
 export const Route = createFileRoute("/_authenticated/veiculos")({
   head: () => ({
     meta: [
-      { title: "Veículos da frota — FrotaGov" },
+      { title: "Veículos da frota — Dibai Fleet" },
       {
         name: "description",
         content:
           "Cadastro e consulta dos veículos e equipamentos da frota do órgão, com vínculo à secretaria responsável.",
       },
-      { property: "og:title", content: "Veículos da frota — FrotaGov" },
+      { property: "og:title", content: "Veículos da frota — Dibai Fleet" },
       {
         property: "og:description",
-        content: "Gerencie os veículos e equipamentos da frota pública.",
+        content: "Gerencie os veículos e equipamentos da frota.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

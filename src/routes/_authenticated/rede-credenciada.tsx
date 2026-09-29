@@ -63,13 +63,13 @@ import { CompanyDialog } from "@/routes/_authenticated/fornecedores";
 export const Route = createFileRoute("/_authenticated/rede-credenciada")({
   head: () => ({
     meta: [
-      { title: "Oficinas e prestadores do órgão — FrotaGov" },
+      { title: "Oficinas e prestadores do órgão — Dibai Fleet" },
       {
         name: "description",
         content:
           "Cadastro próprio do órgão de oficinas e prestadores, com especialidades, marcas atendidas, vigência e documentos.",
       },
-      { property: "og:title", content: "Oficinas e prestadores do órgão — FrotaGov" },
+      { property: "og:title", content: "Oficinas e prestadores do órgão — Dibai Fleet" },
       {
         property: "og:description",
         content: "Oficinas e prestadores cadastrados pelo próprio órgão para manutenção da frota.",
@@ -248,7 +248,7 @@ function RedeCredenciada() {
     <>
       <PageHeader
         title="Oficinas e prestadores do órgão"
-        description="Lista formada apenas pelas empresas cadastradas pelo próprio órgão com contrato ou credenciamento vigente de manutenção e higienização. O FrotaGov não fornece prestadores; o cadastro da empresa é feito em Pessoas e Empresas Externas."
+        description="Lista formada apenas pelas empresas cadastradas pelo próprio órgão com contrato ou credenciamento vigente de manutenção e higienização. O Dibai Fleet não fornece prestadores; o cadastro da empresa é feito em Pessoas e Empresas Externas."
         action={
           <Button asChild variant="outline" className="gap-2">
             <Link to="/entidades-externas">

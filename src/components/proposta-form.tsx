@@ -1,5 +1,5 @@
 /**
- * FrotaGov — campos da proposta de cotação.
+ * Dibai Fleet — campos da proposta de cotação.
  *
  * O mesmo formulário atende o lançamento manual (tela de Cotações) e a
  * resposta pública do fornecedor por link, mudando conforme o tipo da cotação

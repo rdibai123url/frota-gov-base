@@ -63,13 +63,13 @@ import {
 export const Route = createFileRoute("/_authenticated/cotas-servidor")({
   head: () => ({
     meta: [
-      { title: "Cotas de combustível de servidor — FrotaGov" },
+      { title: "Cotas de combustível de servidor — Dibai Fleet" },
       {
         name: "description",
         content:
           "Cotas de combustível concedidas a veículos particulares de servidores: beneficiário, periodicidade, consumo do ciclo e saldo restante.",
       },
-      { property: "og:title", content: "Cotas de combustível de servidor — FrotaGov" },
+      { property: "og:title", content: "Cotas de combustível de servidor — Dibai Fleet" },
       {
         property: "og:description",
         content:

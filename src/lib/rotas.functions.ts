@@ -1,5 +1,5 @@
 /**
- * FrotaGov — cálculo de rota planejada entre origem e destino de uma viagem.
+ * Dibai Fleet — cálculo de rota planejada entre origem e destino de uma viagem.
  *
  * Não é rastreamento: o sistema não sabe por onde o veículo passou. O que se
  * calcula aqui é a rota rodoviária provável entre dois endereços informados no
@@ -53,7 +53,7 @@ function config() {
   };
 }
 
-const UA = "FrotaGov (gestao de frota publica; contato via sistema)";
+const UA = "Dibai Fleet (gestao de frota publica; contato via sistema)";
 
 async function getJson(url: string) {
   const ctrl = new AbortController();

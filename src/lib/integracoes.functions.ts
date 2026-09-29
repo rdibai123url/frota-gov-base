@@ -123,7 +123,7 @@ export const sendWebhookTest = createServerFn({ method: "POST" })
       event: "teste.conexao",
       sent_at: new Date().toISOString(),
       organization_id: endpoint.organization_id,
-      data: { mensagem: "Evento de teste emitido pelo FrotaGov." },
+      data: { mensagem: "Evento de teste emitido pelo Dibai Fleet." },
     };
     const body = JSON.stringify(payload);
     const secret = endpoint.secret_name ? process.env[endpoint.secret_name] : undefined;

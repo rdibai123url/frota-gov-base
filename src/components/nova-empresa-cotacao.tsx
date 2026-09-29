@@ -1,5 +1,5 @@
 /**
- * FrotaGov — cadastro rápido de empresa a partir da cotação.
+ * Dibai Fleet — cadastro rápido de empresa a partir da cotação.
  *
  * Grava no mesmo cadastro de prestadores do órgão (public.workshops), respeitando
  * organization_id e RLS. Não cria base paralela.

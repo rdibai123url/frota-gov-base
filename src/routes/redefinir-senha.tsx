@@ -14,13 +14,16 @@ export const Route = createFileRoute("/redefinir-senha")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Redefinir senha — FrotaGov" },
+      { title: "Redefinir senha — Dibai Fleet" },
       {
         name: "description",
-        content: "Defina uma nova senha de acesso ao FrotaGov com segurança.",
+        content: "Defina uma nova senha de acesso ao Dibai Fleet com segurança.",
       },
-      { property: "og:title", content: "Redefinir senha — FrotaGov" },
-      { property: "og:description", content: "Página segura de redefinição de senha do FrotaGov." },
+      { property: "og:title", content: "Redefinir senha — Dibai Fleet" },
+      {
+        property: "og:description",
+        content: "Página segura de redefinição de senha do Dibai Fleet.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -119,8 +122,8 @@ function ResetPasswordPage() {
             <ShieldCheck className="size-5" />
           </div>
           <div>
-            <p className="gov-title text-xl">FrotaGov</p>
-            <p className="text-xs text-muted-foreground">Gestão de frotas públicas</p>
+            <p className="gov-title text-xl">Dibai Fleet</p>
+            <p className="text-xs text-muted-foreground">Gestão de frotas e ativos</p>
           </div>
         </Link>
 

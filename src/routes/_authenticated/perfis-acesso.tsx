@@ -26,7 +26,7 @@ import { ALWAYS_OPEN, defaultAllows } from "@/lib/permissoes";
 export const Route = createFileRoute("/_authenticated/perfis-acesso")({
   head: () => ({
     meta: [
-      { title: "Perfis de acesso — FrotaGov" },
+      { title: "Perfis de acesso — Dibai Fleet" },
       {
         name: "description",
         content: "Escolha quais telas cada perfil de usuário pode abrir no seu órgão.",

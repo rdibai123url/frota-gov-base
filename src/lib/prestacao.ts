@@ -1,5 +1,5 @@
 /**
- * Prestação de contas: pacotes de dados por exercício (ano) em layout padronizado do FrotaGov,
+ * Prestação de contas: pacotes de dados por exercício (ano) em layout padronizado do Dibai Fleet,
  * prontos para enviar ao Tribunal de Contas, à controladoria ou ao órgão de auditoria.
  *
  * Cada Tribunal de Contas tem seu próprio leiaute oficial. Estes pacotes trazem os dados na

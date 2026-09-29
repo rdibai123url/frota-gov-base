@@ -58,13 +58,13 @@ import {
 export const Route = createFileRoute("/_authenticated/seguros")({
   head: () => ({
     meta: [
-      { title: "Seguros da Frota — FrotaGov" },
+      { title: "Seguros da Frota — Dibai Fleet" },
       {
         name: "description",
         content:
-          "Apólices de seguro da frota pública: seguradora, vigência, prêmio, franquias, coberturas, veículos cobertos e renovações.",
+          "Apólices de seguro da frota: seguradora, vigência, prêmio, franquias, coberturas, veículos cobertos e renovações.",
       },
-      { property: "og:title", content: "Seguros da Frota — FrotaGov" },
+      { property: "og:title", content: "Seguros da Frota — Dibai Fleet" },
       {
         property: "og:description",
         content: "Controle de apólices e alertas de vencimento de seguro.",

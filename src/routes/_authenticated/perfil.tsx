@@ -14,13 +14,16 @@ import { supabase, useProfile, ROLE_LABELS } from "@/lib/frotagov";
 export const Route = createFileRoute("/_authenticated/perfil")({
   head: () => ({
     meta: [
-      { title: "Perfil e segurança — FrotaGov" },
+      { title: "Perfil e segurança — Dibai Fleet" },
       {
         name: "description",
-        content: "Consulte seus dados de acesso e altere a senha da sua conta no FrotaGov.",
+        content: "Consulte seus dados de acesso e altere a senha da sua conta no Dibai Fleet.",
       },
-      { property: "og:title", content: "Perfil e segurança — FrotaGov" },
-      { property: "og:description", content: "Dados do usuário e alteração de senha no FrotaGov." },
+      { property: "og:title", content: "Perfil e segurança — Dibai Fleet" },
+      {
+        property: "og:description",
+        content: "Dados do usuário e alteração de senha no Dibai Fleet.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

@@ -75,14 +75,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "FrotaGov — Gestão de frotas públicas" },
+      { title: "Dibai Fleet — Gestão de frotas públicas" },
       {
         name: "description",
         content:
           "Plataforma de gestão de frotas para prefeituras, câmaras, consórcios e autarquias, com controle por órgão, unidades e veículos.",
       },
-      { name: "author", content: "FrotaGov" },
-      { property: "og:title", content: "FrotaGov — Gestão de frotas públicas" },
+      { name: "author", content: "Dibai Fleet" },
+      { property: "og:title", content: "Dibai Fleet — Gestão de frotas públicas" },
       {
         property: "og:description",
         content: "Gestão de frotas de órgãos públicos com isolamento por organização.",
@@ -92,7 +92,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "theme-color", content: "#0b2545" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
-      { name: "apple-mobile-web-app-title", content: "FrotaGov" },
+      { name: "apple-mobile-web-app-title", content: "Dibai Fleet" },
     ],
     scripts: [{ children: THEME_BOOT_SCRIPT }],
     links: [

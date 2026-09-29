@@ -51,7 +51,7 @@ export function friendlyDbError(error: DbErrorLike, fallback = "Não foi possív
   return message || fallback;
 }
 
-/** Regras de senha do FrotaGov: 10+ caracteres, maiúscula, minúscula e número. */
+/** Regras de senha do Dibai Fleet: 10+ caracteres, maiúscula, minúscula e número. */
 export const PASSWORD_HINT =
   "Mínimo de 10 caracteres, com letra maiúscula, letra minúscula e número.";
 

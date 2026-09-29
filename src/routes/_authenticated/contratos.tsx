@@ -91,16 +91,16 @@ import { employeesByFunction, useEmployees } from "@/lib/pessoas";
 export const Route = createFileRoute("/_authenticated/contratos")({
   head: () => ({
     meta: [
-      { title: "Contratos — FrotaGov" },
+      { title: "Contratos — Dibai Fleet" },
       {
         name: "description",
         content:
           "Contratos administrativos de combustíveis e materiais da frota: vigência, valores, itens contratados, saldo e execução.",
       },
-      { property: "og:title", content: "Contratos — FrotaGov" },
+      { property: "og:title", content: "Contratos — Dibai Fleet" },
       {
         property: "og:description",
-        content: "Gestão de contratos e saldos contratuais da frota pública.",
+        content: "Gestão de contratos e saldos contratuais da frota.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

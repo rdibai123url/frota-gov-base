@@ -1,5 +1,5 @@
 /**
- * FrotaGov — Fornecedores e Postos (operacional).
+ * Dibai Fleet — Fornecedores e Postos (operacional).
  *
  * Bloco 3: esta tela não cadastra empresa. Ela lista automaticamente as
  * empresas do cadastro mestre que possuem contrato vigente compatível com
@@ -43,13 +43,13 @@ import {
 export const Route = createFileRoute("/_authenticated/fornecedores")({
   head: () => ({
     meta: [
-      { title: "Fornecedores e Postos — FrotaGov" },
+      { title: "Fornecedores e Postos — Dibai Fleet" },
       {
         name: "description",
         content:
           "Empresas com contrato vigente de combustível, derivados, peças, pneus e demais fornecimentos da frota do órgão.",
       },
-      { property: "og:title", content: "Fornecedores e Postos — FrotaGov" },
+      { property: "og:title", content: "Fornecedores e Postos — Dibai Fleet" },
       {
         property: "og:description",
         content: "Relação operacional de postos e fornecedores derivada dos contratos vigentes.",

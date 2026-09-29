@@ -64,16 +64,16 @@ import {
 export const Route = createFileRoute("/_authenticated/sustentabilidade")({
   head: () => ({
     meta: [
-      { title: "Sustentabilidade da Frota — FrotaGov" },
+      { title: "Sustentabilidade da Frota — Dibai Fleet" },
       {
         name: "description",
         content:
           "Painel ESG do órgão: litros por combustível, evolução mensal, participação de renováveis e estimativa de emissões de CO2e com fatores parametrizáveis.",
       },
-      { property: "og:title", content: "Sustentabilidade da Frota — FrotaGov" },
+      { property: "og:title", content: "Sustentabilidade da Frota — Dibai Fleet" },
       {
         property: "og:description",
-        content: "Indicadores ambientais da frota pública com estimativa de CO2e por combustível.",
+        content: "Indicadores ambientais da frota com estimativa de CO2e por combustível.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -103,13 +103,13 @@ function toLocalInput(d: Date) {
 export const Route = createFileRoute("/_authenticated/manutencoes")({
   head: () => ({
     meta: [
-      { title: "Manutenções — FrotaGov" },
+      { title: "Manutenções — Dibai Fleet" },
       {
         name: "description",
         content:
           "Solicitações e registros de manutenção preventiva e corretiva da frota, com oficina, peças, valores, garantia e origem do recurso.",
       },
-      { property: "og:title", content: "Manutenções — FrotaGov" },
+      { property: "og:title", content: "Manutenções — Dibai Fleet" },
       {
         property: "og:description",
         content: "Controle de manutenções, custos e indisponibilidade de veículos.",

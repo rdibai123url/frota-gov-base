@@ -65,13 +65,13 @@ import {
 export const Route = createFileRoute("/_authenticated/sinistros")({
   head: () => ({
     meta: [
-      { title: "Acidentes e Sinistros — FrotaGov" },
+      { title: "Acidentes e Sinistros — Dibai Fleet" },
       {
         name: "description",
         content:
-          "Registro de acidentes e sinistros da frota pública: boletim de ocorrência, terceiros, vítimas, seguradora, franquia e reparos.",
+          "Registro de acidentes e sinistros da frota: boletim de ocorrência, terceiros, vítimas, seguradora, franquia e reparos.",
       },
-      { property: "og:title", content: "Acidentes e Sinistros — FrotaGov" },
+      { property: "og:title", content: "Acidentes e Sinistros — Dibai Fleet" },
       {
         property: "og:description",
         content: "Apuração de sinistros com indisponibilidade e vínculo a manutenções.",

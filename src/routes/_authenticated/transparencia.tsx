@@ -65,16 +65,16 @@ import {
 export const Route = createFileRoute("/_authenticated/transparencia")({
   head: () => ({
     meta: [
-      { title: "Portal da Transparência — FrotaGov" },
+      { title: "Portal da Transparência — Dibai Fleet" },
       {
         name: "description",
         content:
           "Fechamento mensal por competência, publicação versionada, chamados de reabertura e integração com o portal municipal.",
       },
-      { property: "og:title", content: "Portal da Transparência — FrotaGov" },
+      { property: "og:title", content: "Portal da Transparência — Dibai Fleet" },
       {
         property: "og:description",
-        content: "Publicação mensal auditável de dados agregados da frota pública.",
+        content: "Publicação mensal auditável de dados agregados da frota.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -545,7 +545,7 @@ function Historico() {
               <TableRow>
                 <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
                   Nenhuma tentativa registrada. Com a integração desativada, a publicação ocorre
-                  apenas no Portal FrotaGov.
+                  apenas no Portal Dibai Fleet.
                 </TableCell>
               </TableRow>
             )}
@@ -793,7 +793,7 @@ function Integracao({ canManage }: { canManage: boolean }) {
   return (
     <div className="max-w-3xl space-y-4">
       <div className="space-y-4 rounded-lg border bg-card p-5 shadow-card">
-        <h2 className="gov-title text-base">Portal FrotaGov (publicação própria)</h2>
+        <h2 className="gov-title text-base">Portal Dibai Fleet (publicação própria)</h2>
         <div className="flex items-center justify-between rounded-md border p-3">
           <div>
             <Label>Publicação ativa</Label>
@@ -859,7 +859,7 @@ function Integracao({ canManage }: { canManage: boolean }) {
         <h2 className="gov-title text-base">Envio ao Portal da Transparência do município</h2>
         <p className="text-sm text-muted-foreground">
           Configuração por órgão. Com a integração desativada ou não configurada, o fechamento
-          continua publicando normalmente no Portal FrotaGov.
+          continua publicando normalmente no Portal Dibai Fleet.
         </p>
 
         <div className="space-y-1.5">

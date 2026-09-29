@@ -61,13 +61,13 @@ import {
 export const Route = createFileRoute("/_authenticated/empenhos")({
   head: () => ({
     meta: [
-      { title: "Empenhos — FrotaGov" },
+      { title: "Empenhos — Dibai Fleet" },
       {
         name: "description",
         content:
           "Empenhos orçamentários da frota: dotação, fonte de recurso, elemento de despesa, valor empenhado, consumido e saldo disponível.",
       },
-      { property: "og:title", content: "Empenhos — FrotaGov" },
+      { property: "og:title", content: "Empenhos — Dibai Fleet" },
       {
         property: "og:description",
         content: "Controle de empenhos e saldos orçamentários do órgão.",

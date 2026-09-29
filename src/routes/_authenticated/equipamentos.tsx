@@ -56,16 +56,16 @@ import {
 export const Route = createFileRoute("/_authenticated/equipamentos")({
   head: () => ({
     meta: [
-      { title: "Máquinas e equipamentos — FrotaGov" },
+      { title: "Máquinas e equipamentos — Dibai Fleet" },
       {
         name: "description",
         content:
           "Cadastro de máquinas pesadas, tratores, implementos, geradores e demais equipamentos do órgão, com horímetro, patrimônio e forma de propriedade.",
       },
-      { property: "og:title", content: "Máquinas e equipamentos — FrotaGov" },
+      { property: "og:title", content: "Máquinas e equipamentos — Dibai Fleet" },
       {
         property: "og:description",
-        content: "Controle patrimonial e operacional de máquinas e equipamentos da frota pública.",
+        content: "Controle patrimonial e operacional de máquinas e equipamentos da frota.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

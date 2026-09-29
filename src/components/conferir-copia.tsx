@@ -48,7 +48,7 @@ export function ConferirCopia() {
       if (!manifestRaw) {
         out.push({
           ok: false,
-          text: "Não há manifesto (manifesto_exportacao.json): não é uma cópia completa do FrotaGov.",
+          text: "Não há manifesto (manifesto_exportacao.json): não é uma cópia completa do Dibai Fleet.",
         });
       } else {
         const manifest = JSON.parse(strFromU8(manifestRaw)) as {

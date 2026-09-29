@@ -75,14 +75,14 @@ import {
 export const Route = createFileRoute("/_authenticated/autorizacoes")({
   head: () => ({
     meta: [
-      { title: "Autorizações de abastecimento — FrotaGov" },
+      { title: "Autorizações de abastecimento — Dibai Fleet" },
       {
         name: "description",
         content:
           "Emissão e controle de autorizações prévias de abastecimento com limites de litros e valor, validade, código de segurança e QR Code sem dados pessoais.",
       },
-      { property: "og:title", content: "Autorizações de abastecimento — FrotaGov" },
-      { property: "og:description", content: "Controle prévio do abastecimento da frota pública." },
+      { property: "og:title", content: "Autorizações de abastecimento — Dibai Fleet" },
+      { property: "og:description", content: "Controle prévio do abastecimento da frota." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

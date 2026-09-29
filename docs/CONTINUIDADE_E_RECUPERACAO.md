@@ -1,4 +1,4 @@
-# FrotaGov — Continuidade do serviço e recuperação de dados
+# Dibai Fleet — Continuidade do serviço e recuperação de dados
 
 Este documento descreve, em linguagem simples, como os dados do órgão são protegidos e o que fazer
 em caso de falha. Ele serve de apoio em licitações, auditorias e no dia a dia do órgão.
@@ -14,7 +14,7 @@ em caso de falha. Ele serve de apoio em licitações, auditorias e no dia a dia 
 | Camada | Quem faz | Frequência | Onde fica |
 |---|---|---|---|
 | Cópia do provedor do banco | Automática, conforme o plano contratado no provedor | Diária (planos pagos) | Provedor (Supabase) |
-| Backup externo do FrotaGov | Automática, configurada pelo Super Admin | Diária | Destino externo do órgão (SFTP ou S3) e/ou plataforma |
+| Backup externo do Dibai Fleet | Automática, configurada pelo Super Admin | Diária | Destino externo do órgão (SFTP ou S3) e/ou plataforma |
 | **Cópia completa baixada pelo órgão** | O próprio órgão, no botão *Exportar dados* | Quando quiser (recomendado: mensal) | Computador ou servidor do órgão |
 
 A cópia completa contém todos os módulos em planilhas (CSV) e arquivos JSON, um **manifesto** com a

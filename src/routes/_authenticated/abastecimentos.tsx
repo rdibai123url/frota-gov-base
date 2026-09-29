@@ -85,13 +85,13 @@ import { useEmployees } from "@/lib/pessoas";
 export const Route = createFileRoute("/_authenticated/abastecimentos")({
   head: () => ({
     meta: [
-      { title: "Abastecimentos — FrotaGov" },
+      { title: "Abastecimentos — Dibai Fleet" },
       {
         name: "description",
         content:
-          "Registro e histórico de abastecimentos da frota pública, com validações automáticas, alertas e cancelamento auditado.",
+          "Registro e histórico de abastecimentos da frota, com validações automáticas, alertas e cancelamento auditado.",
       },
-      { property: "og:title", content: "Abastecimentos — FrotaGov" },
+      { property: "og:title", content: "Abastecimentos — Dibai Fleet" },
       {
         property: "og:description",
         content: "Controle diário de abastecimentos da frota do órgão.",

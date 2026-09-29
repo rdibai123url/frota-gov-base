@@ -19,7 +19,7 @@ import { brl, dateBR, supabase } from "@/lib/frotagov";
 export const Route = createFileRoute("/_authenticated/pesquisa-precos")({
   head: () => ({
     meta: [
-      { title: "Pesquisa de preços — FrotaGov" },
+      { title: "Pesquisa de preços — Dibai Fleet" },
       {
         name: "description",
         content:

@@ -85,16 +85,16 @@ import {
 export const Route = createFileRoute("/_authenticated/veiculo/$id")({
   head: () => ({
     meta: [
-      { title: "Histórico do veículo — FrotaGov" },
+      { title: "Histórico do veículo — Dibai Fleet" },
       {
         name: "description",
         content:
           "Histórico completo do veículo: utilizações, abastecimentos, autorizações, manutenções, peças, pneus e mudanças de situação.",
       },
-      { property: "og:title", content: "Histórico do veículo — FrotaGov" },
+      { property: "og:title", content: "Histórico do veículo — Dibai Fleet" },
       {
         property: "og:description",
-        content: "Linha do tempo completa do veículo na frota pública.",
+        content: "Linha do tempo completa do veículo na frota.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

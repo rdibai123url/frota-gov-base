@@ -1,5 +1,5 @@
 /**
- * FrotaGov — convites de cotação por e-mail (servidor).
+ * Dibai Fleet — convites de cotação por e-mail (servidor).
  *
  * Todo o fluxo é executado no servidor:
  *  - o `organization_id` é sempre lido da própria cotação (nunca do cliente);

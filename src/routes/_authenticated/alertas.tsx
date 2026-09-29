@@ -48,13 +48,13 @@ import {
 export const Route = createFileRoute("/_authenticated/alertas")({
   head: () => ({
     meta: [
-      { title: "Alertas e Inconsistências — FrotaGov" },
+      { title: "Alertas e Inconsistências — Dibai Fleet" },
       {
         name: "description",
         content:
           "Ocorrências detectadas nos abastecimentos: combustível incompatível, tanque excedido, duplicidades e abastecimentos próximos.",
       },
-      { property: "og:title", content: "Alertas e Inconsistências — FrotaGov" },
+      { property: "og:title", content: "Alertas e Inconsistências — Dibai Fleet" },
       {
         property: "og:description",
         content: "Acompanhe as inconsistências de abastecimento do órgão.",

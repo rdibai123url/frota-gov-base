@@ -1,4 +1,4 @@
-/* Service worker do FrotaGov.
+/* Service worker do Dibai Fleet.
  * Guarda só arquivos estáticos (imagens, fontes, scripts versionados) para abrir mais rápido
  * e mostra uma página amigável quando não há internet. Dados do sistema (API, Supabase,
  * páginas autenticadas) NUNCA são guardados: passam sempre pela rede. */

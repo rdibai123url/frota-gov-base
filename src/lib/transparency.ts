@@ -62,7 +62,7 @@ export const REQUEST_LABELS: Record<Database["public"]["Enums"]["reopen_request_
   };
 
 export const MODE_LABELS: Record<IntegrationMode, string> = {
-  desativada: "Desativada (publica apenas no Portal FrotaGov)",
+  desativada: "Desativada (publica apenas no Portal Dibai Fleet)",
   api: "API do portal municipal (requisição autenticada)",
   webhook: "Webhook do portal municipal",
   arquivo: "Exportação de arquivo para o portal municipal",

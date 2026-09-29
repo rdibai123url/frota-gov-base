@@ -1,8 +1,8 @@
 /**
- * FrotaGov — validação do endereço público usado nos links enviados a
+ * Dibai Fleet — validação do endereço público usado nos links enviados a
  * fornecedores externos (convites de cotação).
  *
- * Regra: o fornecedor não tem login do FrotaGov e abre o link de fora da rede
+ * Regra: o fornecedor não tem login do Dibai Fleet e abre o link de fora da rede
  * do órgão. Endereços de desenvolvimento, pré-visualização do editor ou de rede
  * interna NUNCA podem ser copiados nem enviados.
  *

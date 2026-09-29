@@ -66,13 +66,13 @@ import {
 export const Route = createFileRoute("/_authenticated/entidades-externas")({
   head: () => ({
     meta: [
-      { title: "Pessoas e Empresas Externas — FrotaGov" },
+      { title: "Pessoas e Empresas Externas — Dibai Fleet" },
       {
         name: "description",
         content:
           "Cadastro mestre de pessoas físicas e jurídicas externas — fornecedores, postos, oficinas, lava-jatos, seguradoras, locadoras, terceiros e cedentes — reutilizado por toda a gestão da frota.",
       },
-      { property: "og:title", content: "Pessoas e Empresas Externas — FrotaGov" },
+      { property: "og:title", content: "Pessoas e Empresas Externas — Dibai Fleet" },
       {
         property: "og:description",
         content:

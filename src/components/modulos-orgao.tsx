@@ -1,4 +1,4 @@
-/** Bloco 6.1 — Super Admin habilita/desabilita módulos do FrotaGov por órgão. */
+/** Bloco 6.1 — Super Admin habilita/desabilita módulos do Dibai Fleet por órgão. */
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 

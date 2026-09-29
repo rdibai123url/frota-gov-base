@@ -275,8 +275,8 @@ export function MatrixTab({ organization }: { organization?: string | null }) {
             onClick={() => {
               printReport(
                 {
-                  title: "Matriz de Funcionalidades — FrotaGov " + APP_VERSION,
-                  organization: organization || "FrotaGov",
+                  title: "Matriz de Funcionalidades — Dibai Fleet " + APP_VERSION,
+                  organization: organization || "Dibai Fleet",
                   subtitle: "Documento técnico de apoio a processos licitatórios",
                   filters: [
                     { label: "Módulo", value: module === "todos" ? "Todos" : module },

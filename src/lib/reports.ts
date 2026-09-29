@@ -1,5 +1,5 @@
 /**
- * Fase 9 — exportações padronizadas dos relatórios do FrotaGov.
+ * Fase 9 — exportações padronizadas dos relatórios do Dibai Fleet.
  * CSV (Excel pt-BR), XLSX nativo e impressão/PDF com cabeçalho institucional.
  *
  * Todo relatório (tela, impressão e exportações) carrega o mesmo cabeçalho:
@@ -71,7 +71,7 @@ const safeName = (name: string) =>
 /** Linhas do cabeçalho institucional usadas em CSV e XLSX. */
 export function headerLines(meta: ReportMeta, total: number): [string, string][] {
   const lines: [string, string][] = [
-    ["Órgão", meta.organization || branding.name || "FrotaGov"],
+    ["Órgão", meta.organization || branding.name || "Dibai Fleet"],
     ...(branding.cnpj ? ([["CNPJ", branding.cnpj]] as [string, string][]) : []),
     ...(branding.address ? ([["Endereço", branding.address]] as [string, string][]) : []),
     ["Relatório", meta.title],
@@ -253,7 +253,7 @@ export function printReport(meta: ReportMeta, columns: ReportColumn[], rows: Rep
   <div class="top">
     ${meta.logoUrl || branding.logoUrl ? `<img class="brasao" src="${escapeHtml(meta.logoUrl || branding.logoUrl)}" alt="Logotipo" />` : ""}
     <div>
-      <h1>${escapeHtml(meta.organization || branding.name || "FrotaGov")}</h1>
+      <h1>${escapeHtml(meta.organization || branding.name || "Dibai Fleet")}</h1>
       ${identityLine() ? `<div class="meta">${escapeHtml(identityLine())}</div>` : ""}
       <h2>${escapeHtml(meta.title)}</h2>
       ${meta.subtitle ? `<div class="meta">${escapeHtml(meta.subtitle)}</div>` : ""}
@@ -279,7 +279,7 @@ export function printReport(meta: ReportMeta, columns: ReportColumn[], rows: Rep
           .join("")
       : `<tr><td colspan="${Math.max(1, columns.length)}">Nenhum dado para os filtros informados.</td></tr>`
   }</tbody></table>
-<footer>FrotaGov — Sistema de gestão de frotas públicas. Documento gerado eletronicamente.</footer>
+<footer>Documento gerado eletronicamente pelo Dibai Fleet — Gestão de frotas e ativos.</footer>
 <script>window.onload = function () { setTimeout(function () { window.print(); }, 350); };</script>
 </body></html>`;
 
@@ -332,7 +332,7 @@ export function printDocument(meta: {
 <header>
   ${meta.logoUrl || branding.logoUrl ? `<img class="brasao" src="${escapeHtml(meta.logoUrl || branding.logoUrl)}" alt="Logotipo" />` : ""}
   <div>
-    <h1>${escapeHtml(meta.organization || branding.name || "FrotaGov")}</h1>
+    <h1>${escapeHtml(meta.organization || branding.name || "Dibai Fleet")}</h1>
     ${identityLine() ? `<div style="font-size:9pt;color:#48566f">${escapeHtml(identityLine())}</div>` : ""}
     <h2>${escapeHtml(meta.title)}</h2>
     ${meta.subtitle ? `<div style="font-size:9pt;color:#48566f">${escapeHtml(meta.subtitle)}</div>` : ""}
@@ -342,7 +342,7 @@ export function printDocument(meta: {
 <dl>${fields.map((f) => `<div><dt>${escapeHtml(f.label)}</dt><dd>${escapeHtml(f.value)}</dd></div>`).join("")}</dl>
 <div class="notes"><strong style="font-size:8.5pt">Observações</strong><br />${escapeHtml(meta.notes || "—")}</div>
 <div class="sign">${signatures.map((s) => `<div>${escapeHtml(s)}</div>`).join("")}</div>
-<footer>Emitido em ${escapeHtml(stamp())}${meta.issuedBy ? ` por ${escapeHtml(meta.issuedBy)}` : ""} — FrotaGov. Documento gerado eletronicamente.</footer>
+<footer>Emitido em ${escapeHtml(stamp())}${meta.issuedBy ? ` por ${escapeHtml(meta.issuedBy)}` : ""} — Dibai Fleet. Documento gerado eletronicamente.</footer>
 <script>window.onload = function () { setTimeout(function () { window.print(); }, 350); };</script>
 </body></html>`;
   const win = window.open("", "_blank", "width=900,height=1000");

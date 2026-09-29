@@ -70,16 +70,16 @@ import { useQuotations } from "@/lib/frotagov";
 export const Route = createFileRoute("/_authenticated/ordens-servico")({
   head: () => ({
     meta: [
-      { title: "Ordens de Serviço — FrotaGov" },
+      { title: "Ordens de Serviço — Dibai Fleet" },
       {
         name: "description",
         content:
           "Ordens de serviço eletrônicas emitidas aos prestadores cadastrados pelo próprio órgão, com peças aprovadas, prazos, garantias, origem do recurso e controle de execução.",
       },
-      { property: "og:title", content: "Ordens de Serviço — FrotaGov" },
+      { property: "og:title", content: "Ordens de Serviço — Dibai Fleet" },
       {
         property: "og:description",
-        content: "Emissão e acompanhamento de ordens de serviço da frota pública.",
+        content: "Emissão e acompanhamento de ordens de serviço da frota.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

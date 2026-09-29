@@ -58,13 +58,13 @@ import {
 export const Route = createFileRoute("/_authenticated/obrigacoes")({
   head: () => ({
     meta: [
-      { title: "Obrigações Legais do Veículo — FrotaGov" },
+      { title: "Obrigações Legais do Veículo — Dibai Fleet" },
       {
         name: "description",
         content:
           "Licenciamento, IPVA, inspeções, tacógrafo, ANTT e demais obrigações legais dos veículos, com vencimentos, valores e anexos.",
       },
-      { property: "og:title", content: "Obrigações Legais do Veículo — FrotaGov" },
+      { property: "og:title", content: "Obrigações Legais do Veículo — Dibai Fleet" },
       {
         property: "og:description",
         content: "Documentos e obrigações legais da frota com alertas de vencimento.",

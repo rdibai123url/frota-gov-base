@@ -1,5 +1,5 @@
 /**
- * FrotaGov — apoio de geocodificação no cliente.
+ * Dibai Fleet — apoio de geocodificação no cliente.
  *
  * Chama o serviço de servidor (Nominatim + cache) e grava o resultado no
  * cadastro correspondente. Todas as gravações passam pelas políticas de

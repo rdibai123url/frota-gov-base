@@ -68,7 +68,7 @@ import { printReport } from "@/lib/reports";
 export const Route = createFileRoute("/_authenticated/gestao-contrato")({
   head: () => ({
     meta: [
-      { title: "Gestão do contrato — FrotaGov" },
+      { title: "Gestão do contrato — Dibai Fleet" },
       {
         name: "description",
         content:

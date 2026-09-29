@@ -1,5 +1,5 @@
 /**
- * Ajuda contextual do FrotaGov.
+ * Ajuda contextual do Dibai Fleet.
  *
  * Estrutura única e centralizada com o conteúdo do botão "i" exibido ao lado do
  * título de cada página. Nenhum texto de ajuda deve ser duplicado nas telas:
@@ -219,7 +219,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       },
     ],
     [
-      "Cada Tribunal de Contas tem seu leiaute; este pacote usa o padrão do FrotaGov e pode ser mapeado quando exigido.",
+      "Cada Tribunal de Contas tem seu leiaute; este pacote usa o padrão do Dibai Fleet e pode ser mapeado quando exigido.",
     ],
   ),
   "/perfis-acesso": t(
@@ -1265,7 +1265,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
 
   "/rede-credenciada": t(
     "Oficinas e prestadores do órgão",
-    "Para que serve: reúne as oficinas e prestadores cadastrados pelo próprio órgão, com serviços atendidos, endereço e posição no mapa. O FrotaGov não disponibiliza prestadores; nada aqui é compartilhado com outros órgãos.",
+    "Para que serve: reúne as oficinas e prestadores cadastrados pelo próprio órgão, com serviços atendidos, endereço e posição no mapa. O Dibai Fleet não disponibiliza prestadores; nada aqui é compartilhado com outros órgãos.",
     [
       "Cadastre a oficina do seu órgão com CNPJ e endereço.",
       "Indique os serviços atendidos.",

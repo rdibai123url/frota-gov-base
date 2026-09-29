@@ -50,13 +50,13 @@ import { CredentialDialog } from "@/components/credential-dialog";
 export const Route = createFileRoute("/_authenticated/usuarios")({
   head: () => ({
     meta: [
-      { title: "Usuários e permissões — FrotaGov" },
+      { title: "Usuários e permissões — Dibai Fleet" },
       {
         name: "description",
         content:
           "Gestão dos usuários do órgão e dos perfis de acesso: administrador, gestor de frota, responsável de unidade, operador e fiscal.",
       },
-      { property: "og:title", content: "Usuários e permissões — FrotaGov" },
+      { property: "og:title", content: "Usuários e permissões — Dibai Fleet" },
       {
         property: "og:description",
         content: "Controle os acessos e perfis dos usuários do órgão.",

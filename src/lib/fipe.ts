@@ -11,7 +11,7 @@ import type { Database } from "@/integrations/supabase/types";
 export type MarketValueRow = Database["public"]["Tables"]["asset_market_values"]["Row"];
 
 export const FIPE_DISCLAIMER =
-  "Consulta à Tabela FIPE via provedor configurado pelo órgão. O FrotaGov não é a FIPE e não emite valores oficiais.";
+  "Consulta à Tabela FIPE via provedor configurado pelo órgão. O Dibai Fleet não é a FIPE e não emite valores oficiais.";
 
 export const FIPE_KINDS = [
   { value: "carros", label: "Carros e utilitários leves" },

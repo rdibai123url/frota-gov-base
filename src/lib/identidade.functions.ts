@@ -131,7 +131,7 @@ export const testLdapDirectory = createServerFn({ method: "POST" })
 
     if (!dir.gateway_url) {
       message =
-        "O acesso ao diretório exige um gateway seguro publicado pelo órgão (o servidor do FrotaGov não abre conexão LDAP direta).";
+        "O acesso ao diretório exige um gateway seguro publicado pelo órgão (o servidor do Dibai Fleet não abre conexão LDAP direta).";
     } else if (!secret) {
       message =
         "Integração disponível mediante contratação/credenciais do órgão: a senha de leitura ainda não foi cadastrada no servidor.";

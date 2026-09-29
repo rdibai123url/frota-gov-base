@@ -1,5 +1,5 @@
 /**
- * FrotaGov — camada de domínio (Fase 1).
+ * Dibai Fleet — camada de domínio (Fase 1).
  * Concentra tipos, rótulos e acesso a dados para facilitar a evolução do sistema.
  * Todo acesso é filtrado por organização (multi-tenant) via políticas do banco.
  */

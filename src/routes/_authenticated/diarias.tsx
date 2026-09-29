@@ -68,16 +68,16 @@ import {
 export const Route = createFileRoute("/_authenticated/diarias")({
   head: () => ({
     meta: [
-      { title: "Diárias — FrotaGov" },
+      { title: "Diárias — Dibai Fleet" },
       {
         name: "description",
         content:
           "Requisição de Diária (RD) e Comprovação de Diária (CD) de servidores em viagem oficial, com autorização, valor por extenso e prestação de contas.",
       },
-      { property: "og:title", content: "Diárias — FrotaGov" },
+      { property: "og:title", content: "Diárias — Dibai Fleet" },
       {
         property: "og:description",
-        content: "Controle de diárias e prestação de contas da frota pública.",
+        content: "Controle de diárias e prestação de contas da frota.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -208,7 +208,7 @@ section { margin-top:14px; } .t { font-weight:700; font-size:10pt; border-bottom
 footer { margin-top:18px; font-size:8pt; color:#6b7890; }
 </style></head><body>
 <header>${brasao ? `<img class="brasao" src="${esc(brasao)}" alt="Brasão" />` : ""}
-<div><h1>${esc(org?.legal_name || "FrotaGov")}</h1><h2>Requisição de Diária — ${esc(d.code)} / Exercício ${esc(d.exercise)}</h2></div></header>
+<div><h1>${esc(org?.legal_name || "Dibai Fleet")}</h1><h2>Requisição de Diária — ${esc(d.code)} / Exercício ${esc(d.exercise)}</h2></div></header>
 <section><div class="t">Beneficiário</div><div class="g">
 ${line("Nome", d.beneficiary_name)}${line("Cargo / função", d.beneficiary_role)}
 ${line("CPF", d.beneficiary_cpf ? formatCPF(d.beneficiary_cpf) : "—")}${line("Unidade requisitante", d.unit?.name)}
@@ -229,7 +229,7 @@ ${line("Empenho", commitments.find((c) => c.id === d.commitment_id)?.number)}
 <div class="full">${line("Prazo / período de aplicação", d.application_period)}</div>
 <div class="full">${line("Observações", d.notes)}</div></div></section>
 <div class="sig"><div>Servidor beneficiário</div><div>Autoridade concedente</div></div>
-<footer>Documento gerado eletronicamente pelo FrotaGov em ${esc(new Date().toLocaleString("pt-BR"))}. Autorização registrada por ${esc(d.authorized_by_name || "—")} em ${esc(dt(d.authorized_at))}.</footer>
+<footer>Documento gerado eletronicamente pelo Dibai Fleet em ${esc(new Date().toLocaleString("pt-BR"))}. Autorização registrada por ${esc(d.authorized_by_name || "—")} em ${esc(dt(d.authorized_at))}.</footer>
 <script>window.onload=function(){setTimeout(function(){window.print()},350)}</script></body></html>`;
     const w = window.open("", "_blank", "width=1000,height=800");
     if (!w) {

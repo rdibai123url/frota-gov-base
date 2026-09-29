@@ -68,13 +68,13 @@ import {
 export const Route = createFileRoute("/_authenticated/limpeza")({
   head: () => ({
     meta: [
-      { title: "Limpeza da frota — FrotaGov" },
+      { title: "Limpeza da frota — Dibai Fleet" },
       {
         name: "description",
         content:
           "Registro de lavagem e higienização de veículos oficiais, com tipos de serviço, fornecedor, contrato, empenho, cota, valores e comprovantes.",
       },
-      { property: "og:title", content: "Limpeza da frota — FrotaGov" },
+      { property: "og:title", content: "Limpeza da frota — Dibai Fleet" },
       {
         property: "og:description",
         content: "Controle dos serviços de limpeza e higienização dos veículos do órgão.",
@@ -169,7 +169,7 @@ function Limpeza() {
 
   function printCleaning(c: VehicleCleaningRow) {
     const ok = printDocument({
-      organization: org?.short_name || org?.legal_name || "FrotaGov",
+      organization: org?.short_name || org?.legal_name || "Dibai Fleet",
       logoUrl: org?.logo_url ?? null,
       title: "Autorização de limpeza / higienização de veículo",
       subtitle: "Apresentar no estabelecimento prestador",

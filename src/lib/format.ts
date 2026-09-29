@@ -1,5 +1,5 @@
 /**
- * FrotaGov — padrão global de formatação (pt-BR).
+ * Dibai Fleet — padrão global de formatação (pt-BR).
  *
  * Regras obrigatórias em todo o sistema:
  *  - Valores monetários: milhar com ponto, decimal com vírgula, sempre 2 casas.

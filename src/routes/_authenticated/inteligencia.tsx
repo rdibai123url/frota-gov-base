@@ -107,16 +107,16 @@ import {
 export const Route = createFileRoute("/_authenticated/inteligencia")({
   head: () => ({
     meta: [
-      { title: "Inteligência da Frota — FrotaGov" },
+      { title: "Inteligência da Frota — Dibai Fleet" },
       {
         name: "description",
         content:
           "Médias de consumo km/L e L/h, desvios de parâmetro, rankings, evolução de despesas, custo total de propriedade e economicidade de veículos e equipamentos.",
       },
-      { property: "og:title", content: "Inteligência da Frota — FrotaGov" },
+      { property: "og:title", content: "Inteligência da Frota — Dibai Fleet" },
       {
         property: "og:description",
-        content: "Painéis institucionais de consumo, custos e economicidade da frota pública.",
+        content: "Painéis institucionais de consumo, custos e economicidade da frota.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -300,7 +300,7 @@ function Inteligencia() {
   function metaFor(title: string): ReportMeta {
     return {
       title,
-      organization: org?.legal_name ?? "FrotaGov",
+      organization: org?.legal_name ?? "Dibai Fleet",
       logoUrl: logoUrl ?? null,
       subtitle: org?.short_name ?? null,
       unit: unitName,

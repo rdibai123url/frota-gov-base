@@ -1,5 +1,5 @@
 /**
- * FrotaGov — biblioteca de apresentação própria (identidade de ERP público).
+ * Dibai Fleet — biblioteca de apresentação própria (identidade de ERP público).
  *
  * Aqui vive apenas apresentação: nenhum destes componentes conhece regra de
  * negócio, consulta banco ou decide permissão. O objetivo é dar às telas

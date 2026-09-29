@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * FrotaGov — design system institucional "Cinza Institucional Público".
+ * Dibai Fleet — design system institucional "Cinza Institucional Público".
  * Paleta: grafite (ação e navegação), cinzas neutros (estrutura e leitura),
  * branco (superfícies). Vermelho é reservado a erro, exclusão e alerta crítico.
  * Tipografia: Inter (interface) + Inter Tight (títulos).
@@ -62,7 +62,7 @@
   --shadow-card: 0 1px 1px rgb(17 24 39 / 4%), 0 1px 3px rgb(17 24 39 / 5%);
   --shadow-panel: 0 8px 28px rgb(17 24 39 / 10%);
   --shadow-focus: 0 0 0 3px color-mix(in oklab, var(--ring) 22%, transparent);
-  /* Estados operacionais — vocabulário visual único do FrotaGov. */
+  /* Estados operacionais — vocabulário visual único do Dibai Fleet. */
   --color-status-ok: var(--status-ok);
   --color-status-info: var(--status-info);
   --color-status-warn: var(--status-warn);

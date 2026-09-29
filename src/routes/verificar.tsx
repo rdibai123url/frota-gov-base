@@ -10,11 +10,11 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/verificar")({
   head: () => ({
     meta: [
-      { title: "Conferir assinatura — FrotaGov" },
+      { title: "Conferir assinatura — Dibai Fleet" },
       {
         name: "description",
         content:
-          "Confira se uma assinatura eletrônica do FrotaGov é verdadeira, informando o código impresso no documento.",
+          "Confira se uma assinatura eletrônica do Dibai Fleet é verdadeira, informando o código impresso no documento.",
       },
       { name: "robots", content: "noindex" },
     ],

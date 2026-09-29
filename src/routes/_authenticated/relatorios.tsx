@@ -67,13 +67,13 @@ import {
 export const Route = createFileRoute("/_authenticated/relatorios")({
   head: () => ({
     meta: [
-      { title: "Relatórios avançados — FrotaGov" },
+      { title: "Relatórios avançados — Dibai Fleet" },
       {
         name: "description",
         content:
           "Relatórios gerenciais de frota, abastecimento, manutenção, utilização, contratos e custos por veículo, com exportação em CSV, Excel e PDF.",
       },
-      { property: "og:title", content: "Relatórios avançados — FrotaGov" },
+      { property: "og:title", content: "Relatórios avançados — Dibai Fleet" },
       {
         property: "og:description",
         content: "Consolide custos, consumo e utilização da frota e exporte os resultados.",
@@ -1105,7 +1105,7 @@ function Relatorios() {
 
   const meta: ReportMeta = {
     title: reportLabel,
-    organization: org?.legal_name ?? "FrotaGov",
+    organization: org?.legal_name ?? "Dibai Fleet",
     logoUrl: logoUrl ?? null,
     subtitle: org?.short_name ?? null,
     unit: caps.unit ? unitName : "Não se aplica",

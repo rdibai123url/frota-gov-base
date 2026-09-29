@@ -63,13 +63,13 @@ import {
 export const Route = createFileRoute("/_authenticated/multas")({
   head: () => ({
     meta: [
-      { title: "Multas e Infrações — FrotaGov" },
+      { title: "Multas e Infrações — Dibai Fleet" },
       {
         name: "description",
         content:
-          "Controle de autos de infração da frota pública: órgão autuador, enquadramento, valores, defesa, responsabilidade e anexos.",
+          "Controle de autos de infração da frota: órgão autuador, enquadramento, valores, defesa, responsabilidade e anexos.",
       },
-      { property: "og:title", content: "Multas e Infrações — FrotaGov" },
+      { property: "og:title", content: "Multas e Infrações — Dibai Fleet" },
       {
         property: "og:description",
         content: "Gestão de multas de trânsito dos veículos do órgão.",

@@ -86,9 +86,9 @@ import {
 export const Route = createFileRoute("/_authenticated/painel")({
   head: () => ({
     meta: [
-      { title: "Painel — FrotaGov" },
+      { title: "Painel — Dibai Fleet" },
       { name: "description", content: "Visão geral da frota, unidades e usuários do órgão." },
-      { property: "og:title", content: "Painel — FrotaGov" },
+      { property: "og:title", content: "Painel — Dibai Fleet" },
       { property: "og:description", content: "Indicadores iniciais da frota do órgão público." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

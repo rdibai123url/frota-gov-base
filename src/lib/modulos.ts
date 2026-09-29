@@ -1,7 +1,7 @@
 /**
  * Bloco 6.1 — Matriz de módulos por órgão.
  *
- * Cada módulo corresponde a uma tela (rota) do FrotaGov. A ausência de linha em
+ * Cada módulo corresponde a uma tela (rota) do Dibai Fleet. A ausência de linha em
  * `organization_modules` significa "usar o padrão do módulo": habilitado, exceto
  * os módulos listados em DEFAULT_DISABLED, que nascem desabilitados para órgãos novos.
  */

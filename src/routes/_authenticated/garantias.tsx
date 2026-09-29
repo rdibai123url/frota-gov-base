@@ -26,7 +26,7 @@ import { useWarranties, type WarrantyRow } from "@/lib/manutencao-avancada";
 export const Route = createFileRoute("/_authenticated/garantias")({
   head: () => ({
     meta: [
-      { title: "Garantias — FrotaGov" },
+      { title: "Garantias — Dibai Fleet" },
       {
         name: "description",
         content:

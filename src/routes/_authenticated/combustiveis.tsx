@@ -48,13 +48,13 @@ import {
 export const Route = createFileRoute("/_authenticated/combustiveis")({
   head: () => ({
     meta: [
-      { title: "Combustíveis e produtos automotivos — FrotaGov" },
+      { title: "Combustíveis e produtos automotivos — Dibai Fleet" },
       {
         name: "description",
         content:
           "Cadastro de combustíveis, óleos lubrificantes, fluidos e aditivos utilizados pela frota do órgão, com categoria, unidade padrão e situação.",
       },
-      { property: "og:title", content: "Combustíveis e produtos automotivos — FrotaGov" },
+      { property: "og:title", content: "Combustíveis e produtos automotivos — Dibai Fleet" },
       {
         property: "og:description",
         content: "Combustíveis e produtos automotivos do órgão público.",

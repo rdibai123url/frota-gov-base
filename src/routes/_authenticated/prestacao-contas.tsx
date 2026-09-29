@@ -29,7 +29,7 @@ import {
 export const Route = createFileRoute("/_authenticated/prestacao-contas")({
   head: () => ({
     meta: [
-      { title: "Prestação de contas — FrotaGov" },
+      { title: "Prestação de contas — Dibai Fleet" },
       {
         name: "description",
         content:
@@ -49,7 +49,7 @@ function PrestacaoContas() {
 
   const meta = (ds: Dataset, count: number): ReportMeta => ({
     title: `Prestação de contas ${year} — ${ds.label}`,
-    organization: org?.legal_name ?? "FrotaGov",
+    organization: org?.legal_name ?? "Dibai Fleet",
     subtitle: org?.short_name ?? null,
     unit: "Todas",
     period: `Exercício ${year}`,
@@ -103,7 +103,7 @@ function PrestacaoContas() {
           "Conteúdo (cada conjunto em CSV, separado por ponto e vírgula, e em XML):",
           ...resumo.map((r) => `- ${r}`),
           "",
-          "Valores em reais, datas no formato AAAA-MM-DD. Este é o leiaute padrão do FrotaGov;",
+          "Valores em reais, datas no formato AAAA-MM-DD. Este é o leiaute padrão do Dibai Fleet;",
           "quando o Tribunal de Contas exigir leiaute próprio, o mapeamento é feito sobre estes campos.",
         ].join("\n"),
       );
@@ -179,9 +179,9 @@ function PrestacaoContas() {
         ))}
       </div>
       <p className="text-[12px] text-muted-foreground">
-        Cada Tribunal de Contas tem seu leiaute oficial. Este pacote usa o leiaute padrão do
-        FrotaGov; se o seu órgão for obrigado a um leiaute específico, o mapeamento é feito sobre
-        estes mesmos campos.
+        Cada Tribunal de Contas tem seu leiaute oficial. Este pacote usa o leiaute padrão do Dibai
+        Fleet; se o seu órgão for obrigado a um leiaute específico, o mapeamento é feito sobre estes
+        mesmos campos.
       </p>
     </div>
   );

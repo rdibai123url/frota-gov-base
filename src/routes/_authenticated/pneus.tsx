@@ -59,14 +59,14 @@ import {
 export const Route = createFileRoute("/_authenticated/pneus")({
   head: () => ({
     meta: [
-      { title: "Pneus — FrotaGov" },
+      { title: "Pneus — Dibai Fleet" },
       {
         name: "description",
         content:
           "Controle individual de pneus por código: marca, medida, DOT, vida útil, situação, veículo e posição, com histórico completo de movimentações.",
       },
-      { property: "og:title", content: "Pneus — FrotaGov" },
-      { property: "og:description", content: "Gestão individualizada de pneus da frota pública." },
+      { property: "og:title", content: "Pneus — Dibai Fleet" },
+      { property: "og:description", content: "Gestão individualizada de pneus da frota." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

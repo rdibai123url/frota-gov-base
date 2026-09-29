@@ -1,5 +1,5 @@
 /**
- * FrotaGov — cadastros mestres de pessoas.
+ * Dibai Fleet — cadastros mestres de pessoas.
  *
  * Duas entidades distintas e complementares:
  *  - `employees` (Funcionários): pessoas do próprio órgão, existam ou não com login.

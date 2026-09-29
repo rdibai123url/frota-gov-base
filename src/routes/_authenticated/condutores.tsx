@@ -58,14 +58,14 @@ import { useDiaries, DIARY_STATUS } from "@/lib/diarias";
 export const Route = createFileRoute("/_authenticated/condutores")({
   head: () => ({
     meta: [
-      { title: "Condutores — FrotaGov" },
+      { title: "Condutores — Dibai Fleet" },
       {
         name: "description",
         content:
           "Cadastro estruturado de condutores do órgão, com matrícula funcional, vínculo, unidade e controle de validade da CNH.",
       },
-      { property: "og:title", content: "Condutores — FrotaGov" },
-      { property: "og:description", content: "Gestão de condutores habilitados da frota pública." },
+      { property: "og:title", content: "Condutores — Dibai Fleet" },
+      { property: "og:description", content: "Gestão de condutores habilitados da frota." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

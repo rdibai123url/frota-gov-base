@@ -36,13 +36,13 @@ import {
 export const Route = createFileRoute("/_authenticated/orgao")({
   head: () => ({
     meta: [
-      { title: "Dados do Órgão — FrotaGov" },
+      { title: "Dados do Órgão — Dibai Fleet" },
       {
         name: "description",
         content:
           "Cadastro institucional do órgão: identificação, endereço, contatos, brasão e autoridade responsável.",
       },
-      { property: "og:title", content: "Dados do Órgão — FrotaGov" },
+      { property: "og:title", content: "Dados do Órgão — Dibai Fleet" },
       {
         property: "og:description",
         content: "Mantenha atualizados os dados institucionais do órgão.",

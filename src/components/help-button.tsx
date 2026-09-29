@@ -146,7 +146,7 @@ export function HelpButton({ pathname, topicKey }: { pathname: string; topicKey?
               <Info className="size-4 text-primary" />
               {topic.title}
             </SheetTitle>
-            <SheetDescription>Ajuda desta tela do FrotaGov</SheetDescription>
+            <SheetDescription>Ajuda desta tela do Dibai Fleet</SheetDescription>
           </SheetHeader>
           <div className="mt-4">
             <HelpContent topic={topic} />

@@ -1,7 +1,7 @@
 {
-  "name": "FrotaGov — Gestão de frotas públicas",
-  "short_name": "FrotaGov",
-  "description": "Abastecimento, manutenção, viagens e rede credenciada da frota do órgão, no celular.",
+  "name": "Dibai Fleet — Gestão de frotas e ativos",
+  "short_name": "Dibai Fleet",
+  "description": "Abastecimento, manutenção, viagens e checklist da frota, no celular.",
   "id": "/",
   "start_url": "/painel",
   "scope": "/",

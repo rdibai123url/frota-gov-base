@@ -326,9 +326,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
         {!compact && (
           <div className="min-w-0 leading-tight">
-            <p className="gov-title text-lg">FrotaGov</p>
+            <p className="gov-title text-lg">Dibai Fleet</p>
             <p className="truncate text-[11px] uppercase tracking-widest opacity-70">
-              Gestão de frotas públicas
+              Gestão de frotas e ativos
             </p>
           </div>
         )}
@@ -623,7 +623,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </header>
 
           <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
-            <CommandInput placeholder="Buscar tela do FrotaGov…" />
+            <CommandInput placeholder="Buscar tela do Dibai Fleet…" />
             <CommandList>
               <CommandEmpty>Nenhuma tela encontrada.</CommandEmpty>
               <CommandGroup heading="Telas disponíveis para este órgão">
