@@ -32,13 +32,13 @@ import { useApiKeys } from "@/lib/platform";
 export const Route = createFileRoute("/_authenticated/chaves-api")({
   head: () => ({
     meta: [
-      { title: "Chaves de API — FrotaGov" },
+      { title: "Chaves de API — Dibai Fleet" },
       {
         name: "description",
         content:
-          "Emita e revogue chaves de integração por órgão para consumir a API versionada do FrotaGov com escopos de leitura controlados.",
+          "Emita e revogue chaves de integração por órgão para consumir a API versionada do Dibai Fleet com escopos de leitura controlados.",
       },
-      { property: "og:title", content: "Chaves de API — FrotaGov" },
+      { property: "og:title", content: "Chaves de API — Dibai Fleet" },
       {
         property: "og:description",
         content: "Integrações seguras com chaves por órgão e escopos controlados.",
@@ -58,8 +58,11 @@ const SCOPES = [
     description: "Abastecimentos e autorizações.",
   },
   { value: "contratos:read", label: "Contratos", description: "Contratos, itens e empenhos." },
-  { value: "manutencao:read", label: "Manutenção", description: "Manutenções, OS, peças e pneus." },
-  { value: "almoxarifado:read", label: "Almoxarifado", description: "OFP e saldos de estoque." },
+  {
+    value: "manutencao:read",
+    label: "Manutenção",
+    description: "Manutenções, ordens de serviço e pneus.",
+  },
   {
     value: "legal:read",
     label: "Legal / obrigações",

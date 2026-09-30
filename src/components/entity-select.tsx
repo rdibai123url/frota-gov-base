@@ -1,5 +1,5 @@
 /**
- * FrotaGov — seleção pesquisável reutilizável.
+ * Dibai Fleet — seleção pesquisável reutilizável.
  *
  * Substitui as listas suspensas longas por um campo com busca, descrição
  * secundária, estado de carregamento, estado vazio compreensível e atalho

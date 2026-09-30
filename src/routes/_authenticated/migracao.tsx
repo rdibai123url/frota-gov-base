@@ -6,16 +6,16 @@ import { ImportMigrationTab } from "@/components/import-migration";
 export const Route = createFileRoute("/_authenticated/migracao")({
   head: () => ({
     meta: [
-      { title: "Migração de dados — FrotaGov" },
+      { title: "Migração de dados — Dibai Fleet" },
       {
         name: "description",
         content:
           "Importação de dados legados por tipo individual: cadastros básicos, contratos e orçamento, operação e registros legais e patrimoniais.",
       },
-      { property: "og:title", content: "Migração de dados — FrotaGov" },
+      { property: "og:title", content: "Migração de dados — Dibai Fleet" },
       {
         property: "og:description",
-        content: "Implantação e migração de dados por tipo individual no FrotaGov.",
+        content: "Implantação e migração de dados por tipo individual no Dibai Fleet.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

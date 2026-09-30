@@ -1,4 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { PasswordInput } from "@/components/password-input";
+import { passwordProblem } from "@/lib/validacoes";
 import { useEffect, useState } from "react";
 import { KeyRound, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
@@ -12,13 +14,16 @@ export const Route = createFileRoute("/redefinir-senha")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Redefinir senha — FrotaGov" },
+      { title: "Redefinir senha — Dibai Fleet" },
       {
         name: "description",
-        content: "Defina uma nova senha de acesso ao FrotaGov com segurança.",
+        content: "Defina uma nova senha de acesso ao Dibai Fleet com segurança.",
       },
-      { property: "og:title", content: "Redefinir senha — FrotaGov" },
-      { property: "og:description", content: "Página segura de redefinição de senha do FrotaGov." },
+      { property: "og:title", content: "Redefinir senha — Dibai Fleet" },
+      {
+        property: "og:description",
+        content: "Página segura de redefinição de senha do Dibai Fleet.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -87,8 +92,9 @@ function ResetPasswordPage() {
     const form = new FormData(e.currentTarget);
     const password = String(form.get("password") || "");
     const confirm = String(form.get("confirm") || "");
-    if (password.length < 8) {
-      toast.error("A nova senha deve ter ao menos 8 caracteres.");
+    const problem = passwordProblem(password);
+    if (problem) {
+      toast.error(problem);
       return;
     }
     if (password !== confirm) {
@@ -116,8 +122,8 @@ function ResetPasswordPage() {
             <ShieldCheck className="size-5" />
           </div>
           <div>
-            <p className="gov-title text-xl">FrotaGov</p>
-            <p className="text-xs text-muted-foreground">Gestão de frotas públicas</p>
+            <p className="gov-title text-xl">Dibai Fleet</p>
+            <p className="text-xs text-muted-foreground">Gestão de frotas e ativos</p>
           </div>
         </Link>
 
@@ -165,22 +171,22 @@ function ResetPasswordPage() {
             <form onSubmit={onSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="rs-pass">Nova senha</Label>
-                <Input
+                <PasswordInput
                   id="rs-pass"
                   name="password"
-                  type="password"
                   autoComplete="new-password"
                   minLength={8}
                   required
                 />
-                <p className="text-[11px] text-muted-foreground">Mínimo de 8 caracteres.</p>
+                <p className="text-[0.6875rem] text-muted-foreground">
+                  Mínimo de 10 caracteres, com maiúscula, minúscula e número.
+                </p>
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="rs-confirm">Confirmar nova senha</Label>
-                <Input
+                <PasswordInput
                   id="rs-confirm"
                   name="confirm"
-                  type="password"
                   autoComplete="new-password"
                   minLength={8}
                   required

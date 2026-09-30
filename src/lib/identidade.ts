@@ -5,7 +5,7 @@
  * - Segredos (client secret, senha de bind, certificados privados) ficam
  *   somente no servidor; aqui guardamos apenas o NOME do segredo.
  * - Sem credencial válida o provedor fica desativado e o login padrão do
- *   FrotaGov continua funcionando normalmente.
+ *   Dibai Fleet continua funcionando normalmente.
  * - O histórico de acesso nunca registra tokens, senhas ou códigos.
  */
 import { useQuery } from "@tanstack/react-query";

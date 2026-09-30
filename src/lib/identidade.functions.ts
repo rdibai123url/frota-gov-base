@@ -14,7 +14,8 @@ async function timedFetch(url: string, init?: RequestInit) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   try {
-    return await fetch(url, { ...init, signal: ctrl.signal });
+    const { safeFetch } = await import("./safe-fetch.server");
+    return await safeFetch(url, { ...init, signal: ctrl.signal });
   } finally {
     clearTimeout(timer);
   }
@@ -130,7 +131,7 @@ export const testLdapDirectory = createServerFn({ method: "POST" })
 
     if (!dir.gateway_url) {
       message =
-        "O acesso ao diretório exige um gateway seguro publicado pelo órgão (o servidor do FrotaGov não abre conexão LDAP direta).";
+        "O acesso ao diretório exige um gateway seguro publicado pelo órgão (o servidor do Dibai Fleet não abre conexão LDAP direta).";
     } else if (!secret) {
       message =
         "Integração disponível mediante contratação/credenciais do órgão: a senha de leitura ainda não foi cadastrada no servidor.";
@@ -180,32 +181,105 @@ export const testLdapDirectory = createServerFn({ method: "POST" })
     return { ok, message };
   });
 
+const LOGIN_METHODS = ["senha", "oidc", "saml", "ldap", "recuperacao"] as const;
+type LoginMethod = (typeof LOGIN_METHODS)[number];
+const EMAIL_SHAPE = /^[^\s@]{1,100}@[^\s@]{1,100}\.[^\s@]{2,30}$/;
+
 /** Registra tentativa de acesso (sem tokens nem senhas) para auditoria. */
 export const recordLoginEvent = createServerFn({ method: "POST" })
   .inputValidator(
-    (input: { email?: string; method: string; success: boolean; reason?: string }) => input,
+    (input: { email?: string; method: string; success: boolean; reason?: string }) => {
+      if (!LOGIN_METHODS.includes(input?.method as LoginMethod))
+        throw new Error("Método de acesso inválido.");
+      if (typeof input.success !== "boolean") throw new Error("Resultado inválido.");
+      const email = typeof input.email === "string" ? input.email.trim().slice(0, 200) : "";
+      if (email && !EMAIL_SHAPE.test(email)) throw new Error("E-mail inválido.");
+      return {
+        email,
+        method: input.method as LoginMethod,
+        success: input.success,
+        reason: typeof input.reason === "string" ? input.reason.slice(0, 300) : "",
+      };
+    },
   )
   .handler(async ({ data }) => {
+    const { getRequestHeader } = await import("@tanstack/react-start/server");
+    const { clientIp, rateLimited } = await import("./rate-limit.server");
+    const ip = clientIp((n) => getRequestHeader(n));
+    // Excesso é descartado em silêncio: o login do usuário nunca é bloqueado por isso.
+    if (rateLimited(`login-event:${ip}`, 30)) return { ok: true };
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const since = new Date(Date.now() - 60_000).toISOString();
+    const { count } = await supabaseAdmin
+      .from("auth_login_events")
+      .select("id", { count: "exact", head: true })
+      .eq("ip_address", ip)
+      .gte("created_at", since);
+    if ((count ?? 0) >= 30) return { ok: true };
+
     await supabaseAdmin.from("auth_login_events").insert({
-      email: (data.email ?? "").slice(0, 200) || null,
+      email: data.email || null,
       method: data.method,
       success: data.success,
-      reason: (data.reason ?? "").slice(0, 300) || null,
+      reason: data.reason || null,
+      ip_address: ip,
+      user_agent: (getRequestHeader("user-agent") ?? "").slice(0, 300) || null,
     });
     return { ok: true };
   });
 
+const LOCK_MAX_FAILS = 5;
+const LOCK_WINDOW_MIN = 15;
+
+/** Informa se o e-mail está temporariamente bloqueado por tentativas de senha erradas. */
+export const checkLoginLock = createServerFn({ method: "POST" })
+  .inputValidator((input: { email?: string }) => {
+    const email = typeof input?.email === "string" ? input.email.trim().toLowerCase() : "";
+    if (!EMAIL_SHAPE.test(email)) throw new Error("E-mail inválido.");
+    return { email };
+  })
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const since = new Date(Date.now() - LOCK_WINDOW_MIN * 60_000).toISOString();
+    // conta só as falhas depois do último acesso bem-sucedido
+    const { data: okRow } = await supabaseAdmin
+      .from("auth_login_events")
+      .select("created_at")
+      .ilike("email", data.email)
+      .eq("success", true)
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    const from = okRow?.[0]?.created_at ?? since;
+    const { count } = await supabaseAdmin
+      .from("auth_login_events")
+      .select("id", { count: "exact", head: true })
+      .ilike("email", data.email)
+      .eq("success", false)
+      .eq("method", "senha")
+      .gt("created_at", from);
+    const locked = (count ?? 0) >= LOCK_MAX_FAILS;
+    return { locked, minutes: LOCK_WINDOW_MIN };
+  });
+
 /** Lista pública (sem segredos) dos logins institucionais ativos de um domínio. */
 export const listInstitutionalLogins = createServerFn({ method: "POST" })
-  .inputValidator((input: { email?: string } | undefined) => input ?? {})
+  .inputValidator((input: { email?: string } | undefined) => ({
+    email: typeof input?.email === "string" ? input.email.slice(0, 200) : undefined,
+  }))
   .handler(async ({ data }) => {
+    const { getRequestHeader } = await import("@tanstack/react-start/server");
+    const { clientIp, rateLimited } = await import("./rate-limit.server");
+    if (rateLimited(`sso-list:${clientIp((n) => getRequestHeader(n))}`, 60)) return [];
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows } = await supabaseAdmin
       .from("sso_providers")
       .select("id, display_name, protocol, allowed_domains, active, status")
       .eq("active", true)
-      .in("status", ["ativo", "configurado"]);
+      .in("status", ["ativo", "configurado"])
+      .limit(50);
     const domain = (data.email ?? "").split("@")[1]?.toLowerCase();
     const list = (rows ?? []).filter((p) => {
       const domains = (p.allowed_domains ?? []) as string[];

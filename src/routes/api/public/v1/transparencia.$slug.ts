@@ -79,7 +79,13 @@ export const Route = createFileRoute("/api/public/v1/transparencia/$slug")({
         const publications = (pubs ?? []) as PublicationWithPeriod[];
 
         const competencias = publications
-          .filter((p) => p.period)
+          .filter(
+            (
+              p,
+            ): p is PublicationWithPeriod & {
+              period: NonNullable<PublicationWithPeriod["period"]>;
+            } => !!p.period,
+          )
           .map((p) => ({
             competencia: `${String(p.period.month).padStart(2, "0")}/${p.period.year}`,
             chave: `${p.period.year}-${String(p.period.month).padStart(2, "0")}`,
@@ -96,11 +102,12 @@ export const Route = createFileRoute("/api/public/v1/transparencia/$slug")({
               p.period &&
               `${p.period.year}-${String(p.period.month).padStart(2, "0")}` === compParam,
           );
-          if (!found) return json({ error: "Competência não publicada." }, 404);
+          if (!found?.period) return json({ error: "Competência não publicada." }, 404);
+          const foundPeriod = found.period;
           return json({
             orgao: org ?? null,
             apresentacao: settings.headline ?? null,
-            competencia: `${String(found.period.month).padStart(2, "0")}/${found.period.year}`,
+            competencia: `${String(foundPeriod.month).padStart(2, "0")}/${foundPeriod.year}`,
             versao: found.version,
             publicado_em: found.published_at,
             competencias_publicadas: competencias,

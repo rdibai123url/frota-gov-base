@@ -6,6 +6,8 @@
  * por exemplo) sem duplicar cadastro, e não precisa ter contrato para existir.
  */
 import { ListPagination, usePaged } from "@/components/list-pagination";
+import { useServerFn } from "@tanstack/react-start";
+import { consultarCnpj } from "@/lib/cnpj.functions";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Building, Pencil, Plus } from "lucide-react";
@@ -66,13 +68,13 @@ import {
 export const Route = createFileRoute("/_authenticated/entidades-externas")({
   head: () => ({
     meta: [
-      { title: "Pessoas e Empresas Externas — FrotaGov" },
+      { title: "Pessoas e Empresas Externas — Dibai Fleet" },
       {
         name: "description",
         content:
           "Cadastro mestre de pessoas físicas e jurídicas externas — fornecedores, postos, oficinas, lava-jatos, seguradoras, locadoras, terceiros e cedentes — reutilizado por toda a gestão da frota.",
       },
-      { property: "og:title", content: "Pessoas e Empresas Externas — FrotaGov" },
+      { property: "og:title", content: "Pessoas e Empresas Externas — Dibai Fleet" },
       {
         property: "og:description",
         content:
@@ -100,6 +102,7 @@ const schema = z.object({
   phone: z.string().trim().max(40).optional(),
   email: z.string().trim().max(160).optional(),
   notes: z.string().trim().max(600).optional(),
+  environmental_note: z.string().trim().max(300).optional(),
 });
 
 function Entidades() {
@@ -112,9 +115,46 @@ function Entidades() {
   const [kind, setKind] = useState<EntityKind>("pj");
   const [categories, setCategories] = useState<string[]>([]);
   const [active, setActive] = useState(true);
+  const [envOk, setEnvOk] = useState(false);
   const [search, setSearch] = useState("");
   const [fCategory, setFCategory] = useState(ALL);
   const [saving, setSaving] = useState(false);
+  const [lookingUp, setLookingUp] = useState(false);
+  const lookupCnpj = useServerFn(consultarCnpj);
+
+  /** Preenche os campos do formulário (não controlados) com os dados da Receita Federal. */
+  async function fillFromCnpj() {
+    const doc = (document.getElementById("document") as HTMLInputElement | null)?.value ?? "";
+    setLookingUp(true);
+    try {
+      const c = await lookupCnpj({ data: { cnpj: doc } });
+      const put = (id: string, value: string) => {
+        const el = document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement | null;
+        if (!el || !value) return;
+        const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement : HTMLInputElement;
+        Object.getOwnPropertyDescriptor(proto.prototype, "value")?.set?.call(el, value);
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+      };
+      put("name", c.razao_social);
+      put("trade_name", c.nome_fantasia);
+      put("address", [c.logradouro, c.numero, c.complemento].filter(Boolean).join(", "));
+      put("district", c.bairro);
+      put("city", c.municipio);
+      put("state", c.uf);
+      put("zip_code", c.cep);
+      put("phone", c.telefone);
+      put("email", c.email);
+      toast.success(
+        c.situacao && c.situacao.toUpperCase() !== "ATIVA"
+          ? `Dados preenchidos. Atenção: situação cadastral ${c.situacao}.`
+          : "Dados preenchidos pela Receita Federal. Confira antes de salvar.",
+      );
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível consultar o CNPJ.");
+    } finally {
+      setLookingUp(false);
+    }
+  }
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -132,6 +172,7 @@ function Entidades() {
     setKind("pj");
     setCategories([]);
     setActive(true);
+    setEnvOk(false);
     setOpen(true);
   }
 
@@ -140,6 +181,7 @@ function Entidades() {
     setKind(e.kind);
     setCategories(e.categories ?? []);
     setActive(e.active);
+    setEnvOk(e.environmental_compliant ?? false);
     setOpen(true);
   }
 
@@ -180,6 +222,8 @@ function Entidades() {
         email: d.email || null,
         notes: d.notes || null,
         active,
+        environmental_compliant: envOk,
+        environmental_note: envOk ? d.environmental_note || null : null,
       };
       const before = editing
         ? {
@@ -370,7 +414,22 @@ function Entidades() {
               <div>
                 <Label htmlFor="document">{kind === "pj" ? "CNPJ" : "CPF"}</Label>
                 {kind === "pj" ? (
-                  <CnpjInput id="document" name="document" defaultValue={editing?.document ?? ""} />
+                  <div className="flex gap-2">
+                    <CnpjInput
+                      id="document"
+                      name="document"
+                      defaultValue={editing?.document ?? ""}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="shrink-0"
+                      onClick={fillFromCnpj}
+                      disabled={lookingUp}
+                    >
+                      {lookingUp ? "Buscando…" : "Buscar dados"}
+                    </Button>
+                  </div>
                 ) : (
                   <CpfInput id="document" name="document" defaultValue={editing?.document ?? ""} />
                 )}
@@ -407,6 +466,31 @@ function Entidades() {
                   fornecedor e oficina.
                 </p>
               </div>
+              {(categories.includes("oficina") ||
+                categories.includes("concessionaria") ||
+                categories.includes("lava_jato")) && (
+                <div className="space-y-2 rounded-md border p-3 sm:col-span-2">
+                  <div className="flex items-center gap-2">
+                    <Switch id="env_ok" checked={envOk} onCheckedChange={setEnvOk} />
+                    <Label htmlFor="env_ok">Atende aos requisitos ambientais</Label>
+                  </div>
+                  {envOk && (
+                    <div>
+                      <Label htmlFor="environmental_note">Licença ou comprovação</Label>
+                      <Input
+                        id="environmental_note"
+                        name="environmental_note"
+                        placeholder="Ex.: licença ambiental nº, tratamento de efluentes"
+                        defaultValue={editing?.environmental_note ?? ""}
+                      />
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Serve para dar preferência a oficinas e lavagens que descartam resíduos
+                    corretamente.
+                  </p>
+                </div>
+              )}
               <div className="sm:col-span-2">
                 <Label htmlFor="address">Endereço</Label>
                 <Input id="address" name="address" defaultValue={editing?.address ?? ""} />

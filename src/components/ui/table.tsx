@@ -2,12 +2,54 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * No celular a tabela vira uma lista de cartões: cada linha mostra "COLUNA: valor".
+ * Os rótulos são copiados do cabeçalho para cada célula (e refeitos quando as linhas mudam).
+ */
+function useMobileLabels(table: React.RefObject<HTMLTableElement | null>) {
+  React.useEffect(() => {
+    const el = table.current;
+    if (!el) return;
+    const apply = () => {
+      const labels = Array.from(el.querySelectorAll("thead th")).map(
+        (th) => th.textContent?.trim() ?? "",
+      );
+      el.querySelectorAll("tbody tr").forEach((tr) => {
+        let col = 0;
+        Array.from(tr.children).forEach((cell) => {
+          const span = Number((cell as HTMLTableCellElement).colSpan || 1);
+          const text = span === 1 ? labels[col] : "";
+          if (text) cell.setAttribute("data-label", text);
+          else cell.removeAttribute("data-label");
+          col += span;
+        });
+      });
+    };
+    apply();
+    const observer = new MutationObserver(apply);
+    observer.observe(el, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [table]);
+}
+
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
-  ({ className, ...props }, ref) => (
-    <div className="relative w-full overflow-auto">
-      <table ref={ref} className={cn("w-full caption-bottom text-sm", className)} {...props} />
-    </div>
-  ),
+  ({ className, ...props }, ref) => {
+    const inner = React.useRef<HTMLTableElement | null>(null);
+    useMobileLabels(inner);
+    return (
+      <div className="relative w-full overflow-auto">
+        <table
+          ref={(node) => {
+            inner.current = node;
+            if (typeof ref === "function") ref(node);
+            else if (ref) (ref as React.MutableRefObject<HTMLTableElement | null>).current = node;
+          }}
+          className={cn("responsive-table w-full caption-bottom text-sm", className)}
+          {...props}
+        />
+      </div>
+    );
+  },
 );
 Table.displayName = "Table";
 
@@ -64,7 +106,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-9 whitespace-nowrap px-3 text-left align-middle text-[11.5px] font-semibold uppercase tracking-[0.04em] text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+      "h-9 whitespace-nowrap px-3 text-left align-middle text-[0.7188rem] font-semibold uppercase tracking-[0.04em] text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
       className,
     )}
     {...props}

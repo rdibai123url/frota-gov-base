@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AvisoPreventiva } from "@/components/aviso-preventiva";
+import { MoneyInput } from "@/components/form-fields";
 import { useMemo, useState } from "react";
 import {
   Plus,
@@ -73,20 +75,20 @@ import {
   useVehicleConsumption,
 } from "@/lib/viagens";
 import { Switch } from "@/components/ui/switch";
-import { brl } from "@/lib/frotagov";
+import { brl, parseBRNumber } from "@/lib/frotagov";
 import { VehicleChecklistPanel } from "@/components/vehicle-checklist";
 
 export const Route = createFileRoute("/_authenticated/utilizacao")({
   head: () => ({
     meta: [
-      { title: "Utilização e reservas — FrotaGov" },
+      { title: "Utilização e reservas — Dibai Fleet" },
       {
         name: "description",
         content:
           "Reserva, autorização, saída e retorno de veículos oficiais com controle de conflitos de agenda, condutor responsável e quilometragem.",
       },
-      { property: "og:title", content: "Utilização e reservas — FrotaGov" },
-      { property: "og:description", content: "Controle de uso e reserva da frota pública." },
+      { property: "og:title", content: "Utilização e reservas — Dibai Fleet" },
+      { property: "og:description", content: "Controle de uso e reserva da frota." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -426,6 +428,9 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
   const [purpose, setPurpose] = useState("");
   const [startKm, setStartKm] = useState("");
   const [passengers, setPassengers] = useState("");
+  const [cargo, setCargo] = useState("");
+  const [toll, setToll] = useState("");
+  const [otherCosts, setOtherCosts] = useState("");
   const [notes, setNotes] = useState("");
   const [justification, setJustification] = useState("");
   const [saving, setSaving] = useState(false);
@@ -565,6 +570,21 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
         level: "erro",
         message: `Conflito de reserva com a utilização ${conflict.code} (${dateTimeBR(conflict.planned_departure)}).`,
       });
+
+    const driverConflict = driver
+      ? usages.find((u) => {
+          if (u.driver_id !== driver.id) return false;
+          if (["cancelada", "concluida"].includes(u.status)) return false;
+          const a = new Date(u.planned_departure).getTime();
+          const b = new Date(u.planned_return ?? u.planned_departure).getTime();
+          return ini <= b && fim >= a;
+        })
+      : undefined;
+    if (driverConflict)
+      issues.push({
+        level: "erro",
+        message: `O condutor já está na utilização ${driverConflict.code} (${dateTimeBR(driverConflict.planned_departure)}).`,
+      });
   }
 
   const needsJustification = vehicle?.status === "manutencao";
@@ -602,6 +622,9 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
         .split(/[,;\n]/)
         .map((p) => p.trim())
         .filter(Boolean),
+      cargo_description: cargo.trim() || null,
+      toll_value: parseBRNumber(toll) || 0,
+      other_trip_costs: parseBRNumber(otherCosts) || 0,
       notes: notes.trim() || null,
       round_trip: roundTrip,
       estimated_distance_km: trip.totalKm,
@@ -657,6 +680,7 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
               </SelectContent>
             </Select>
           </div>
+          {vehicleId !== NONE && <AvisoPreventiva vehicleId={vehicleId} />}
           <div>
             <Label>Unidade (do veículo)</Label>
             <Input value={unit?.name ?? "—"} readOnly className="bg-muted/50" />
@@ -672,7 +696,11 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
                 {drivers.map((d) => (
                   <SelectItem key={d.id} value={d.id} disabled={!driverEligible(d)}>
                     {d.full_name}
-                    {!driverEligible(d) ? " (indisponível)" : ""}
+                    {d.current_absence
+                      ? " (afastado)"
+                      : !driverEligible(d)
+                        ? " (indisponível)"
+                        : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -867,7 +895,7 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
                   }}
                   placeholder="Calcule a rota ou informe"
                 />
-                <p className="mt-1 text-[11px] text-muted-foreground">
+                <p className="mt-1 text-[0.6875rem] text-muted-foreground">
                   {DISTANCE_SOURCE_LABEL[distanceSource]}
                 </p>
               </div>
@@ -880,7 +908,7 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
                   onChange={(e) => setFuelPrice(e.target.value)}
                   placeholder="Ex.: 6,29"
                 />
-                <p className="mt-1 text-[11px] text-muted-foreground">
+                <p className="mt-1 text-[0.6875rem] text-muted-foreground">
                   Usado apenas para estimar o custo.
                 </p>
               </div>
@@ -891,7 +919,7 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
                   className="bg-muted/50"
                   value={consumption.kmpl ? `${num(consumption.kmpl, 2)} km/l` : "—"}
                 />
-                <p className="mt-1 text-[11px] text-muted-foreground">
+                <p className="mt-1 text-[0.6875rem] text-muted-foreground">
                   {consumption.source
                     ? CONSUMPTION_SOURCE_LABEL[consumption.source]
                     : consumption.note}
@@ -924,7 +952,7 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
               </div>
             </div>
 
-            <p className="mt-2 text-[11px] text-muted-foreground">
+            <p className="mt-2 text-[0.6875rem] text-muted-foreground">
               {routeNote ||
                 "Valores estimados para planejamento. A quilometragem oficial continua sendo a registrada na saída e no retorno."}
             </p>
@@ -937,6 +965,24 @@ function NewUsageDialog({ onClose, onSaved }: { onClose: () => void; onSaved: ()
           <div className="sm:col-span-2">
             <Label htmlFor="pas">Passageiros (separe por vírgula)</Label>
             <Input id="pas" value={passengers} onChange={(e) => setPassengers(e.target.value)} />
+          </div>
+          <div className="sm:col-span-2">
+            <Label htmlFor="carga">Carga ou pessoas transportadas</Label>
+            <Input
+              id="carga"
+              value={cargo}
+              maxLength={300}
+              placeholder="Ex.: merenda escolar, 3 pacientes, material de obra"
+              onChange={(e) => setCargo(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="pedagio">Pedágio (R$)</Label>
+            <MoneyInput id="pedagio" value={toll} onValueChange={setToll} />
+          </div>
+          <div>
+            <Label htmlFor="outros-custos">Outros custos da viagem (R$)</Label>
+            <MoneyInput id="outros-custos" value={otherCosts} onValueChange={setOtherCosts} />
           </div>
           <div className="sm:col-span-2">
             <Label htmlFor="obs">Observações / eventos</Label>
@@ -1072,6 +1118,18 @@ function TripResultBlock({ usage }: { usage: UsageRow }) {
           result.liters != null ? `${num(result.liters, 2)} L` : "—",
         )}
         {cell("Valor abastecido na viagem", result.value != null ? brl(result.value) : "—")}
+        {cell(
+          "Pedágio e outros custos",
+          brl(Number(usage.toll_value ?? 0) + Number(usage.other_trip_costs ?? 0)),
+        )}
+        {cell(
+          "Custo real da viagem",
+          brl(
+            (result.value ?? 0) +
+              Number(usage.toll_value ?? 0) +
+              Number(usage.other_trip_costs ?? 0),
+          ),
+        )}
         {cell("Preço médio por litro", result.avgPrice != null ? brl(result.avgPrice) : "—")}
         {cell(
           "Litros estimados",
@@ -1181,6 +1239,9 @@ function UsageDetail({ usage, onClose }: { usage: UsageRow; onClose: () => void 
     ["KM inicial", usage.start_km != null ? num(usage.start_km, 0) : "—"],
     ["KM final", usage.end_km != null ? num(usage.end_km, 0) : "—"],
     ["Passageiros", (usage.passengers ?? []).join(", ") || "—"],
+    ["Carga / pessoas transportadas", usage.cargo_description ?? "—"],
+    ["Pedágio", brl(Number(usage.toll_value ?? 0))],
+    ["Outros custos da viagem", brl(Number(usage.other_trip_costs ?? 0))],
     ["Observações", usage.notes ?? "—"],
     ["Justificativa (manutenção)", usage.maintenance_justification ?? "—"],
     ["Motivo do cancelamento", usage.cancel_reason ?? "—"],

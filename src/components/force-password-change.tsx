@@ -1,4 +1,6 @@
 import { useState, type ReactNode } from "react";
+import { PasswordInput } from "@/components/password-input";
+import { passwordProblem } from "@/lib/validacoes";
 import { KeyRound } from "lucide-react";
 import { toast } from "sonner";
 
@@ -21,8 +23,9 @@ export function ForcePasswordChange({ children }: { children: ReactNode }) {
     const form = new FormData(e.currentTarget);
     const password = String(form.get("password") || "");
     const confirm = String(form.get("confirm") || "");
-    if (password.length < 8) {
-      toast.error("A nova senha deve ter ao menos 8 caracteres.");
+    const problem = passwordProblem(password);
+    if (problem) {
+      toast.error(problem);
       return;
     }
     if (password !== confirm) {
@@ -63,23 +66,11 @@ export function ForcePasswordChange({ children }: { children: ReactNode }) {
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="password">Nova senha</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="new-password"
-              required
-            />
+            <PasswordInput id="password" name="password" autoComplete="new-password" required />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="confirm">Confirmar nova senha</Label>
-            <Input
-              id="confirm"
-              name="confirm"
-              type="password"
-              autoComplete="new-password"
-              required
-            />
+            <PasswordInput id="confirm" name="confirm" autoComplete="new-password" required />
           </div>
           <Button type="submit" className="w-full" disabled={saving}>
             Salvar nova senha

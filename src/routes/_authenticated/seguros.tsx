@@ -58,13 +58,13 @@ import {
 export const Route = createFileRoute("/_authenticated/seguros")({
   head: () => ({
     meta: [
-      { title: "Seguros da Frota — FrotaGov" },
+      { title: "Seguros da Frota — Dibai Fleet" },
       {
         name: "description",
         content:
-          "Apólices de seguro da frota pública: seguradora, vigência, prêmio, franquias, coberturas, veículos cobertos e renovações.",
+          "Apólices de seguro da frota: seguradora, vigência, prêmio, franquias, coberturas, veículos cobertos e renovações.",
       },
-      { property: "og:title", content: "Seguros da Frota — FrotaGov" },
+      { property: "og:title", content: "Seguros da Frota — Dibai Fleet" },
       {
         property: "og:description",
         content: "Controle de apólices e alertas de vencimento de seguro.",
@@ -159,6 +159,17 @@ function Seguros() {
       toast.error("O fim da vigência deve ser posterior ao início.");
       return;
     }
+    if (covered.length === 0) {
+      toast.error("Selecione ao menos um veículo coberto pela apólice.");
+      return;
+    }
+    const numero = d.policy_number.trim().toLowerCase();
+    if (
+      policies.some((p) => p.id !== editing?.id && p.policy_number.trim().toLowerCase() === numero)
+    ) {
+      toast.error("Já existe uma apólice com esse número.");
+      return;
+    }
     setSaving(true);
     let uploadedAttachment: string | null = null;
     try {
@@ -177,7 +188,7 @@ function Seguros() {
        * O cast é temporário até a próxima regeneração dos tipos TypeScript
        * do Supabase incluir a RPC insurance_policy_save_atomic.
        */
-      const callRpc = supabase.rpc as unknown as (
+      const callRpc = supabase.rpc.bind(supabase) as unknown as (
         functionName: string,
         args: Record<string, unknown>,
       ) => Promise<{ data: string | null; error: { message: string; code?: string } | null }>;

@@ -67,13 +67,13 @@ const RedeMap = lazy(() => import("@/components/rede-map"));
 export const Route = createFileRoute("/_authenticated/mapa-rede")({
   head: () => ({
     meta: [
-      { title: "Mapa dos prestadores do órgão — FrotaGov" },
+      { title: "Mapa dos prestadores do órgão — Dibai Fleet" },
       {
         name: "description",
         content:
           "Mapa interativo com postos, oficinas e credenciados do órgão, busca por proximidade, filtros por tipo de atendimento e situação.",
       },
-      { property: "og:title", content: "Mapa dos prestadores do órgão — FrotaGov" },
+      { property: "og:title", content: "Mapa dos prestadores do órgão — Dibai Fleet" },
       {
         property: "og:description",
         content:

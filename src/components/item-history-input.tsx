@@ -1,5 +1,5 @@
 /**
- * FrotaGov — campo de descrição de item/serviço com sugestões do histórico.
+ * Dibai Fleet — campo de descrição de item/serviço com sugestões do histórico.
  *
  * Ao digitar, consulta o histórico do PRÓPRIO órgão (cotações, propostas,
  * catálogo de peças, ordens de serviço, manutenções, contratos e ordens de

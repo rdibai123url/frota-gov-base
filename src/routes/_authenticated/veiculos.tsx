@@ -1,7 +1,9 @@
+import { useFeature } from "@/lib/modulos";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Plus, Pencil, Search, History } from "lucide-react";
 import { toast } from "sonner";
+import { isValidRenavam } from "@/lib/validacoes";
 import { z } from "zod";
 
 import { LitersInput } from "@/components/form-fields";
@@ -57,16 +59,16 @@ import {
 export const Route = createFileRoute("/_authenticated/veiculos")({
   head: () => ({
     meta: [
-      { title: "Veículos da frota — FrotaGov" },
+      { title: "Veículos da frota — Dibai Fleet" },
       {
         name: "description",
         content:
           "Cadastro e consulta dos veículos e equipamentos da frota do órgão, com vínculo à secretaria responsável.",
       },
-      { property: "og:title", content: "Veículos da frota — FrotaGov" },
+      { property: "og:title", content: "Veículos da frota — Dibai Fleet" },
       {
         property: "og:description",
-        content: "Gerencie os veículos e equipamentos da frota pública.",
+        content: "Gerencie os veículos e equipamentos da frota.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -93,6 +95,8 @@ const schema = z.object({
   color: z.string().trim().max(40).optional(),
   tank_capacity: z.string().trim().optional(),
   current_km: z.string().trim().optional(),
+  factory_warranty_until: z.string().trim().optional(),
+  factory_warranty_km: z.string().trim().optional(),
   hour_meter: z.string().trim().optional(),
   notes: z.string().trim().max(2000).optional(),
 });
@@ -146,7 +150,9 @@ function Veiculos() {
     };
   }, [contracts, leaseContract]);
 
-  const canWrite = Boolean(perms.orgId) && (me?.roles ?? []).some((r) => WRITE_ROLES.includes(r));
+  const cadastroOn = useFeature("veiculos.cadastro");
+  const canWrite =
+    cadastroOn && Boolean(perms.orgId) && (me?.roles ?? []).some((r) => WRITE_ROLES.includes(r));
   const unitName = (id: string | null) => units.find((u) => u.id === id)?.name ?? "—";
 
   const filtered = useMemo(() => {
@@ -205,6 +211,17 @@ function Veiculos() {
     }
     const d = parsed.data;
 
+    if (!isValidRenavam(d.renavam)) {
+      toast.error("O Renavam deve ter de 9 a 11 números.");
+      return;
+    }
+    const yearMan = num(d.year_manufacture);
+    const yearMod = num(d.year_model);
+    if (yearMan !== null && yearMod !== null && yearMod < yearMan) {
+      toast.error("O ano do modelo não pode ser anterior ao ano de fabricação.");
+      return;
+    }
+
     if (acquisitionKind === "locado" && leaseContract === NONE) {
       toast.error("Veículo locado exige contrato de locação vinculado.");
       return;
@@ -260,6 +277,8 @@ function Veiculos() {
       tank_capacity: num(d.tank_capacity),
       current_km: currentKm,
       hour_meter: hourMeter,
+      factory_warranty_until: d.factory_warranty_until || null,
+      factory_warranty_km: num(d.factory_warranty_km),
       // A unidade só muda pelo fluxo de movimentação patrimonial (Frota → Movimentação patrimonial).
       ...(editing ? {} : { unit_id: safeUnitId }),
       status,
@@ -424,7 +443,7 @@ function Veiculos() {
                 <TableCell className="font-medium">
                   {v.plate}
                   {v.is_private_server_vehicle && (
-                    <Badge variant="outline" className="ml-2 align-middle text-[10px]">
+                    <Badge variant="outline" className="ml-2 align-middle text-[0.625rem]">
                       Servidor · cota
                     </Badge>
                   )}
@@ -708,6 +727,25 @@ function Veiculos() {
                   inputMode="decimal"
                   min="0"
                   defaultValue={editing?.hour_meter ?? ""}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="factory_warranty_until">Garantia de fábrica até</Label>
+                <Input
+                  id="factory_warranty_until"
+                  name="factory_warranty_until"
+                  type="date"
+                  defaultValue={editing?.factory_warranty_until ?? ""}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="factory_warranty_km">Garantia de fábrica até (km)</Label>
+                <Input
+                  id="factory_warranty_km"
+                  name="factory_warranty_km"
+                  inputMode="decimal"
+                  min="0"
+                  defaultValue={editing?.factory_warranty_km ?? ""}
                 />
               </div>
               <div className="space-y-1.5">

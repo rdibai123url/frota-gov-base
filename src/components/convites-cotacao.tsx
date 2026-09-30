@@ -1,5 +1,5 @@
 /**
- * FrotaGov — convites de cotação por e-mail.
+ * Dibai Fleet — convites de cotação por e-mail.
  *
  * Permite selecionar oficinas e fornecedores já cadastrados (busca por nome,
  * CNPJ e e-mail), acrescentar e-mails avulsos, revisar a lista antes do envio
@@ -7,6 +7,7 @@
  * servidor; nenhuma credencial de e-mail trafega para o navegador.
  */
 import { useEffect, useMemo, useState } from "react";
+import { PasswordInput } from "@/components/password-input";
 import { useQuery } from "@tanstack/react-query";
 import {
   AlertTriangle,
@@ -291,7 +292,7 @@ export function ConvitesCotacao({
                       {i.email ?? "sem e-mail"}
                     </span>
                     {i.is_manual && (
-                      <Badge variant="outline" className="mt-1 text-[10px]">
+                      <Badge variant="outline" className="mt-1 text-[0.625rem]">
                         E-mail avulso
                       </Badge>
                     )}
@@ -815,9 +816,8 @@ function ConfiguracaoEmailDialog({
               <Label htmlFor="secret">
                 {provider === "smtp" ? "Senha do usuário SMTP" : "Chave de API do provedor"}
               </Label>
-              <Input
+              <PasswordInput
                 id="secret"
-                type="password"
                 autoComplete="new-password"
                 value={secret}
                 onChange={(e) => setSecret(e.target.value)}

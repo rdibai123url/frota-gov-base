@@ -1,0 +1,24 @@
+{
+  "name": "Dibai Fleet — Gestão de frotas e ativos",
+  "short_name": "Dibai Fleet",
+  "description": "Abastecimento, manutenção, viagens e checklist da frota, no celular.",
+  "id": "/",
+  "start_url": "/painel",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "pt-BR",
+  "background_color": "#ffffff",
+  "theme_color": "#0b2545",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Rede credenciada", "url": "/rede-credenciada" },
+    { "name": "Abastecimentos", "url": "/abastecimentos" },
+    { "name": "Manutenções", "url": "/manutencoes" }
+  ]
+}

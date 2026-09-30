@@ -47,6 +47,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useModuleMap } from "@/lib/modulos";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ACCIDENT_KINDS,
@@ -85,16 +86,16 @@ import {
 export const Route = createFileRoute("/_authenticated/veiculo/$id")({
   head: () => ({
     meta: [
-      { title: "Histórico do veículo — FrotaGov" },
+      { title: "Histórico do veículo — Dibai Fleet" },
       {
         name: "description",
         content:
           "Histórico completo do veículo: utilizações, abastecimentos, autorizações, manutenções, peças, pneus e mudanças de situação.",
       },
-      { property: "og:title", content: "Histórico do veículo — FrotaGov" },
+      { property: "og:title", content: "Histórico do veículo — Dibai Fleet" },
       {
         property: "og:description",
-        content: "Linha do tempo completa do veículo na frota pública.",
+        content: "Linha do tempo completa do veículo na frota.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -104,6 +105,8 @@ export const Route = createFileRoute("/_authenticated/veiculo/$id")({
 });
 
 function HistoricoVeiculo() {
+  const { map: modMap } = useModuleMap();
+  const on = (k: string) => modMap[k] !== false;
   const { id } = Route.useParams();
   const { data: vehicles = [] } = useVehicles();
   const { data: usages = [] } = useVehicleUsages();
@@ -580,20 +583,22 @@ function HistoricoVeiculo() {
           <Tabs defaultValue="linha">
             <TabsList className="mb-4 flex-wrap">
               <TabsTrigger value="linha">Linha do tempo</TabsTrigger>
-              <TabsTrigger value="manutencoes">Manutenções</TabsTrigger>
-              <TabsTrigger value="limpeza">Limpeza</TabsTrigger>
-              <TabsTrigger value="pecas">Peças</TabsTrigger>
-              <TabsTrigger value="pneus">Pneus</TabsTrigger>
+              {on("manutencoes") && <TabsTrigger value="manutencoes">Manutenções</TabsTrigger>}
+              {on("limpeza") && <TabsTrigger value="limpeza">Limpeza</TabsTrigger>}
+              {on("manutencoes") && <TabsTrigger value="pecas">Peças</TabsTrigger>}
+              {on("pneus") && <TabsTrigger value="pneus">Pneus</TabsTrigger>}
               <TabsTrigger value="valor">Valor de mercado</TabsTrigger>
-              <TabsTrigger value="abastecimentos">Abastecimentos</TabsTrigger>
-              <TabsTrigger value="autorizacoes">Autorizações</TabsTrigger>
-              <TabsTrigger value="utilizacoes">Utilizações</TabsTrigger>
+              {on("abastecimentos") && (
+                <TabsTrigger value="abastecimentos">Abastecimentos</TabsTrigger>
+              )}
+              {on("autorizacoes") && <TabsTrigger value="autorizacoes">Autorizações</TabsTrigger>}
+              {on("utilizacao") && <TabsTrigger value="utilizacoes">Utilizações</TabsTrigger>}
               <TabsTrigger value="checklists">Checklists</TabsTrigger>
-              <TabsTrigger value="diarias">Diárias</TabsTrigger>
-              <TabsTrigger value="multas">Multas</TabsTrigger>
-              <TabsTrigger value="sinistros">Sinistros</TabsTrigger>
-              <TabsTrigger value="patrimonio">Patrimônio</TabsTrigger>
-              <TabsTrigger value="obrigacoes">Obrigações</TabsTrigger>
+              {on("diarias") && <TabsTrigger value="diarias">Diárias</TabsTrigger>}
+              {on("multas") && <TabsTrigger value="multas">Multas</TabsTrigger>}
+              {on("sinistros") && <TabsTrigger value="sinistros">Sinistros</TabsTrigger>}
+              {on("patrimonio") && <TabsTrigger value="patrimonio">Patrimônio</TabsTrigger>}
+              {on("obrigacoes") && <TabsTrigger value="obrigacoes">Obrigações</TabsTrigger>}
               <TabsTrigger value="situacao">Situação</TabsTrigger>
             </TabsList>
 

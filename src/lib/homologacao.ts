@@ -1,5 +1,5 @@
 /**
- * Fase 9 — base de conhecimento da homologação do FrotaGov.
+ * Fase 9 — base de conhecimento da homologação do Dibai Fleet.
  * Conteúdo estático usado pelas telas "Documentação / Homologação" e
  * "Matriz de Funcionalidades", exclusivas do Super Admin.
  */
@@ -180,7 +180,7 @@ export type ModuleInfo = {
 };
 
 export const ACTIVE_MODULES: ModuleInfo[] = [
-  { module: "Painel executivo", route: "/painel", status: "ativo" },
+  { module: "Dashboard", route: "/painel", status: "ativo" },
   { module: "Veículos e frota", route: "/veiculos", status: "ativo" },
   { module: "Utilização e reservas", route: "/utilizacao", status: "ativo" },
   { module: "Condutores", route: "/condutores", status: "ativo" },
@@ -191,7 +191,6 @@ export const ACTIVE_MODULES: ModuleInfo[] = [
   { module: "Autorização de abastecimento", route: "/autorizacoes", status: "ativo" },
   { module: "Abastecimentos", route: "/abastecimentos", status: "ativo" },
   { module: "Manutenção preventiva e corretiva", route: "/manutencoes", status: "ativo" },
-  { module: "Peças e pneus", route: "/pecas", status: "ativo" },
   { module: "Rede credenciada", route: "/rede-credenciada", status: "ativo" },
   { module: "Cotações", route: "/cotacoes", status: "ativo" },
   { module: "Ordens de serviço", route: "/ordens-servico", status: "ativo" },
@@ -236,13 +235,6 @@ export const ACTIVE_MODULES: ModuleInfo[] = [
     note: "Bens sem placa, com horímetro e identificação patrimonial.",
   },
   { module: "Inteligência de consumo e custos", route: "/inteligencia", status: "ativo" },
-  {
-    module: "Rede credenciada digital",
-    route: "/credenciados",
-    status: "ativo",
-    note: "Portal do credenciado, cartão virtual do bem e captura operacional.",
-  },
-  { module: "Peças, almoxarifado e OFP", route: "/almoxarifado", status: "ativo" },
   {
     module: "Exportação integral de dados",
     route: "/exportacao",
@@ -582,7 +574,7 @@ export const FEATURE_MATRIX: MatrixRow[] = [
     module: "Abastecimento",
     feature: "Cartão magnético físico, POS e adquirência",
     status: "Fora do núcleo",
-    note: "Não faz parte do núcleo do FrotaGov: o sistema não é adquirente nem meio de pagamento e não processa transações bancárias.",
+    note: "Não faz parte do núcleo do Dibai Fleet: o sistema não é adquirente nem meio de pagamento e não processa transações bancárias.",
     evidence: "—",
   },
   {
@@ -806,7 +798,7 @@ export const FEATURE_MATRIX: MatrixRow[] = [
     module: "Integrações",
     feature: "Autenticação corporativa LDAP/SSO",
     status: "Depende de credencial",
-    note: "Conector configurável por órgão; a autenticação padrão do FrotaGov continua como fallback enquanto não houver provedor ativo.",
+    note: "Conector configurável por órgão; a autenticação padrão do Dibai Fleet continua como fallback enquanto não houver provedor ativo.",
     evidence: "/integracoes → Conectores",
   },
   {
@@ -1031,7 +1023,7 @@ export const KNOWN_LIMITATIONS: string[] = [
   "Com destino SFTP o envio final é feito pelo agente instalado no servidor do órgão; o servidor da aplicação não abre conexões SSH.",
   "O pacote de backup inclui todos os dados do órgão e o inventário dos anexos (caminho, tamanho e data); os arquivos binários permanecem no armazenamento privado da plataforma.",
   "Não há autenticação em dois fatores nem assinatura digital de documentos.",
-  "O FrotaGov não é adquirente nem meio de pagamento: cartão físico, terminal POS, adquirência e processamento bancário não fazem parte do núcleo; o cartão virtual do bem apenas identifica e autoriza o atendimento na rede credenciada.",
+  "O Dibai Fleet não é adquirente nem meio de pagamento: cartão físico, terminal POS, adquirência e processamento bancário não fazem parte do núcleo; o cartão virtual do bem apenas identifica e autoriza o atendimento na rede credenciada.",
   "Os conectores de DETRAN, SIAFIC, LDAP/SSO e FIPE estão estruturados e testáveis, mas dependem de convênio e credenciais do órgão; enquanto não houver credencial válida o conector permanece como não configurado e a ação fica desabilitada.",
   "Os indicadores de sustentabilidade são estimativas calculadas a partir dos fatores de emissão cadastrados; não são medições diretas de emissão.",
   "A distância no mapa da rede credenciada é aproximada, calculada em linha reta entre coordenadas, e não considera rotas nem trânsito.",

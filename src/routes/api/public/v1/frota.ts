@@ -1,9 +1,18 @@
-/** API pública versionada do FrotaGov — leitura autenticada por chave do órgão. */
+/** API pública versionada do Dibai Fleet — leitura autenticada por chave do órgão. */
 import { createFileRoute } from "@tanstack/react-router";
 
 async function sha256(value: string) {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Compara hashes em tempo constante. */
+async function hashesMatch(a: string, b: string | null) {
+  if (!b) return false;
+  const { timingSafeEqual } = await import("node:crypto");
+  const x = Buffer.from(a);
+  const y = Buffer.from(b);
+  return x.length === y.length && timingSafeEqual(x, y);
 }
 
 const json = (body: unknown, status = 200) =>
@@ -34,7 +43,8 @@ export const Route = createFileRoute("/api/public/v1/frota")({
         if (!key || key.revoked_at) return json({ error: "Chave inválida ou revogada." }, 401);
         if (key.expires_at && new Date(key.expires_at) < new Date())
           return json({ error: "Chave expirada." }, 401);
-        if ((await sha256(apiKey)) !== key.key_hash) return json({ error: "Chave inválida." }, 401);
+        if (!(await hashesMatch(await sha256(apiKey), key.key_hash)))
+          return json({ error: "Chave inválida." }, 401);
 
         const scopes = (key.scopes as string[] | null) ?? [];
         if (scopes.length && !scopes.includes("frota:read") && !scopes.includes("*"))

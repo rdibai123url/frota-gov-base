@@ -1,5 +1,5 @@
 /**
- * FrotaGov — cadastros mestres de pessoas.
+ * Dibai Fleet — cadastros mestres de pessoas.
  *
  * Duas entidades distintas e complementares:
  *  - `employees` (Funcionários): pessoas do próprio órgão, existam ou não com login.
@@ -48,6 +48,9 @@ export const ENTITY_CATEGORIES: { value: string; label: string }[] = [
   { value: "fornecedor", label: "Fornecedor" },
   { value: "posto", label: "Posto de combustível" },
   { value: "oficina", label: "Oficina" },
+  { value: "concessionaria", label: "Concessionária autorizada" },
+  { value: "guincho", label: "Guincho / reboque 24 h" },
+  { value: "chaveiro", label: "Chaveiro" },
   { value: "lava_jato", label: "Lava-jato / higienização" },
   { value: "seguradora", label: "Seguradora" },
   { value: "locadora", label: "Locadora" },

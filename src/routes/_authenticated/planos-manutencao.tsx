@@ -56,13 +56,13 @@ import {
 export const Route = createFileRoute("/_authenticated/planos-manutencao")({
   head: () => ({
     meta: [
-      { title: "Planos de manutenção preventiva — FrotaGov" },
+      { title: "Planos de manutenção preventiva — Dibai Fleet" },
       {
         name: "description",
         content:
           "Planos preventivos por veículo ou tipo de veículo, com periodicidade por quilometragem, horímetro e meses, tolerâncias e situação de vencimento.",
       },
-      { property: "og:title", content: "Planos de manutenção preventiva — FrotaGov" },
+      { property: "og:title", content: "Planos de manutenção preventiva — Dibai Fleet" },
       {
         property: "og:description",
         content: "Periodicidade preventiva da frota por KM, horímetro e prazo.",

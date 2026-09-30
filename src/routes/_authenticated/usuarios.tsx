@@ -50,13 +50,13 @@ import { CredentialDialog } from "@/components/credential-dialog";
 export const Route = createFileRoute("/_authenticated/usuarios")({
   head: () => ({
     meta: [
-      { title: "Usuários e permissões — FrotaGov" },
+      { title: "Usuários e permissões — Dibai Fleet" },
       {
         name: "description",
         content:
           "Gestão dos usuários do órgão e dos perfis de acesso: administrador, gestor de frota, responsável de unidade, operador e fiscal.",
       },
-      { property: "og:title", content: "Usuários e permissões — FrotaGov" },
+      { property: "og:title", content: "Usuários e permissões — Dibai Fleet" },
       {
         property: "og:description",
         content: "Controle os acessos e perfis dos usuários do órgão.",
@@ -190,7 +190,7 @@ function Usuarios() {
      * consegue alterar papel, unidade ou situação de acesso.
      */
     if (canManage) {
-      const callRpc = supabase.rpc as unknown as (
+      const callRpc = supabase.rpc.bind(supabase) as unknown as (
         functionName: string,
         args: Record<string, unknown>,
       ) => Promise<{ data: null; error: { message: string } | null }>;

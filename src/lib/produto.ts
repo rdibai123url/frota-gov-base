@@ -1,5 +1,5 @@
 /**
- * Rodada 3 — Etapa 6: auditoria funcional e de experiência do FrotaGov.
+ * Rodada 3 — Etapa 6: auditoria funcional e de experiência do Dibai Fleet.
  *
  * Conteúdo estático usado pela aba "Auditoria e lançamento" (Super Admin).
  * Nenhum dado ou histórico é apagado: as decisões previstas aqui são de
@@ -7,7 +7,7 @@
  */
 
 export const LAUNCH_VERSION = "11.0.0";
-export const LAUNCH_NAME = "FrotaGov 11.0.0 — Versão de Lançamento";
+export const LAUNCH_NAME = "Dibai Fleet 11.0.0 — Versão de Lançamento";
 
 export const CLASSIFICATIONS = [
   "Essencial",

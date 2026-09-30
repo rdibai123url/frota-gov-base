@@ -1,8 +1,10 @@
+import { useFeature } from "@/lib/modulos";
 import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Ban, FileWarning, Paperclip, Pencil, Plus, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { isFutureDate } from "@/lib/validacoes";
 import { z } from "zod";
 
 import { PageHeader } from "@/components/app-shell";
@@ -62,13 +64,13 @@ import {
 export const Route = createFileRoute("/_authenticated/multas")({
   head: () => ({
     meta: [
-      { title: "Multas e Infrações — FrotaGov" },
+      { title: "Multas e Infrações — Dibai Fleet" },
       {
         name: "description",
         content:
-          "Controle de autos de infração da frota pública: órgão autuador, enquadramento, valores, defesa, responsabilidade e anexos.",
+          "Controle de autos de infração da frota: órgão autuador, enquadramento, valores, defesa, responsabilidade e anexos.",
       },
-      { property: "og:title", content: "Multas e Infrações — FrotaGov" },
+      { property: "og:title", content: "Multas e Infrações — Dibai Fleet" },
       {
         property: "og:description",
         content: "Gestão de multas de trânsito dos veículos do órgão.",
@@ -107,6 +109,7 @@ const numOrNull = (v: string | undefined) => {
 const OPEN_STATUS: FineStatus[] = ["recebida", "em_analise", "defesa_apresentada", "indeferida"];
 
 function Multas() {
+  const regOn = useFeature("multas.registrar");
   const { data: fines = [], isLoading } = useTrafficFines();
   const { data: vehicles = [] } = useVehicles();
   const { data: drivers = [] } = useDrivers();
@@ -223,6 +226,16 @@ function Multas() {
       return;
     }
     const d = parsed.data;
+    if (isFutureDate(d.occurred_at)) {
+      toast.error("A data e a hora da infração não podem estar no futuro.");
+      return;
+    }
+    const valorMulta = numOrNull(d.amount) ?? 0;
+    const valorDesconto = numOrNull(d.discount_amount);
+    if (valorDesconto !== null && valorDesconto > valorMulta) {
+      toast.error("O valor com desconto não pode ser maior que o valor da multa.");
+      return;
+    }
     setSaving(true);
     const uploadedPaths: string[] = [];
     try {
@@ -327,7 +340,7 @@ function Multas() {
         title="Multas e infrações"
         description="Autos de infração dos veículos do órgão, com defesa, responsabilidade e comprovantes. Registros nunca são excluídos."
         action={
-          canRegister && orgId ? (
+          canRegister && orgId && regOn ? (
             <Button onClick={openNew} className="gap-2">
               <Plus className="size-4" /> Nova multa
             </Button>

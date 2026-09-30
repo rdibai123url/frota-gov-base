@@ -20,7 +20,8 @@ async function fetchWithTimeout(url: string, init: RequestInit, ms: number) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), ms);
   try {
-    return await fetch(url, { ...init, signal: ctrl.signal });
+    const { safeFetch } = await import("./safe-fetch.server");
+    return await safeFetch(url, { ...init, signal: ctrl.signal });
   } finally {
     clearTimeout(timer);
   }
@@ -122,7 +123,7 @@ export const sendWebhookTest = createServerFn({ method: "POST" })
       event: "teste.conexao",
       sent_at: new Date().toISOString(),
       organization_id: endpoint.organization_id,
-      data: { mensagem: "Evento de teste emitido pelo FrotaGov." },
+      data: { mensagem: "Evento de teste emitido pelo Dibai Fleet." },
     };
     const body = JSON.stringify(payload);
     const secret = endpoint.secret_name ? process.env[endpoint.secret_name] : undefined;

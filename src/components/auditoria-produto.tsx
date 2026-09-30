@@ -153,7 +153,7 @@ export function AuditTab({ organization }: { organization?: string | null }) {
               printReport(
                 {
                   title: "Auditoria funcional e antes/depois — " + LAUNCH_NAME,
-                  organization: organization || "FrotaGov",
+                  organization: organization || "Dibai Fleet",
                   subtitle: "Simplificação sem perda de aderência, controle ou auditoria",
                   filters: [
                     {

@@ -1,4 +1,5 @@
 import { ListPagination, usePaged } from "@/components/list-pagination";
+import { CotasHub } from "@/components/hubs";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Plus, Pencil, PiggyBank, TrendingUp, History } from "lucide-react";
@@ -62,22 +63,22 @@ import {
 export const Route = createFileRoute("/_authenticated/cotas")({
   head: () => ({
     meta: [
-      { title: "Cotas e saldos — FrotaGov" },
+      { title: "Cotas e saldos — Dibai Fleet" },
       {
         name: "description",
         content:
           "Cotas financeiras e quantitativas por contrato, item, empenho, centro de custo ou unidade, com reservas, consumo, saldo e suplementações.",
       },
-      { property: "og:title", content: "Cotas e saldos — FrotaGov" },
+      { property: "og:title", content: "Cotas e saldos — Dibai Fleet" },
       {
         property: "og:description",
-        content: "Controle de cotas, reservas e saldos disponíveis da frota pública.",
+        content: "Controle de cotas, reservas e saldos disponíveis da frota.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Cotas,
+  component: CotasRoute,
 });
 
 const ALL = "__all__";
@@ -96,7 +97,7 @@ function amountOf(q: QuotaRow, v: number) {
   return q.quota_type === "financeira" ? brl(v) : `${num(v, 3)} ${q.measure_unit}`;
 }
 
-function Cotas() {
+export function CotasPanel() {
   const { data: quotas = [], isLoading } = useQuotas();
   const { data: contracts = [] } = useContracts();
   const { data: items = [] } = useContractItems();
@@ -771,4 +772,9 @@ function Cotas() {
       </Dialog>
     </>
   );
+}
+
+/** Esta tela agora aparece dentro de uma tela com abas. */
+function CotasRoute() {
+  return <CotasHub />;
 }

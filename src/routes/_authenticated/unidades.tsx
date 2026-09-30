@@ -49,13 +49,13 @@ import {
 export const Route = createFileRoute("/_authenticated/unidades")({
   head: () => ({
     meta: [
-      { title: "Secretarias e Unidades — FrotaGov" },
+      { title: "Secretarias e Unidades — Dibai Fleet" },
       {
         name: "description",
         content:
           "Cadastro da estrutura administrativa do órgão: secretarias, departamentos, diretorias e unidades.",
       },
-      { property: "og:title", content: "Secretarias e Unidades — FrotaGov" },
+      { property: "og:title", content: "Secretarias e Unidades — Dibai Fleet" },
       {
         property: "og:description",
         content: "Gerencie a estrutura administrativa vinculada ao órgão.",

@@ -59,16 +59,16 @@ import { CredentialDialog } from "@/components/credential-dialog";
 export const Route = createFileRoute("/_authenticated/plataforma")({
   head: () => ({
     meta: [
-      { title: "Administração da Plataforma — FrotaGov" },
+      { title: "Administração da Plataforma — Dibai Fleet" },
       {
         name: "description",
         content:
           "Área exclusiva do Super Admin: órgãos cadastrados, administradores globais, logs de auditoria e configurações da plataforma.",
       },
-      { property: "og:title", content: "Administração da Plataforma — FrotaGov" },
+      { property: "og:title", content: "Administração da Plataforma — Dibai Fleet" },
       {
         property: "og:description",
-        content: "Gestão multi-órgão, logs globais e configurações do FrotaGov.",
+        content: "Gestão multi-órgão, logs globais e configurações do Dibai Fleet.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -183,10 +183,10 @@ function Plataforma() {
           />
         </TabsContent>
         <TabsContent value="matriz" className="pt-5">
-          <MatrixTab organization="FrotaGov" />
+          <MatrixTab organization="Dibai Fleet" />
         </TabsContent>
         <TabsContent value="auditoria" className="pt-5">
-          <AuditTab organization="FrotaGov" />
+          <AuditTab organization="Dibai Fleet" />
         </TabsContent>
       </Tabs>
     </>
@@ -810,7 +810,7 @@ function SettingsTab() {
     const { error } = await supabase.from("platform_settings").upsert({
       id: true,
       log_retention_days: retention,
-      platform_name: String(form.get("platform_name") || "FrotaGov"),
+      platform_name: String(form.get("platform_name") || "Dibai Fleet"),
       support_email: String(form.get("support_email") || "") || null,
       updated_by: auth.user?.id ?? null,
       updated_at: new Date().toISOString(),
@@ -835,7 +835,7 @@ function SettingsTab() {
           <Input
             id="platform_name"
             name="platform_name"
-            defaultValue={settings?.platform_name ?? "FrotaGov"}
+            defaultValue={settings?.platform_name ?? "Dibai Fleet"}
           />
         </div>
         <div className="space-y-1.5">

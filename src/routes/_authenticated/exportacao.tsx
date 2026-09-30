@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ConferirCopia } from "@/components/conferir-copia";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Database, Download, Loader2, ShieldCheck } from "lucide-react";
@@ -15,13 +16,13 @@ import { runFullExport, type FullExportResponse } from "@/lib/exportacao.functio
 export const Route = createFileRoute("/_authenticated/exportacao")({
   head: () => ({
     meta: [
-      { title: "Exportar dados — FrotaGov" },
+      { title: "Exportar dados — Dibai Fleet" },
       {
         name: "description",
         content:
           "Exportação integral dos dados do órgão em um único arquivo ZIP com CSV e JSON, para migração, auditoria e integração com outros sistemas.",
       },
-      { property: "og:title", content: "Exportar dados — FrotaGov" },
+      { property: "og:title", content: "Exportar dados — Dibai Fleet" },
       {
         property: "og:description",
         content:
@@ -115,7 +116,7 @@ function Exportacao() {
                 Exportação completa
               </CardTitle>
               <CardDescription>
-                Um único arquivo compactado (.zip) com todos os módulos do FrotaGov: planilhas em
+                Um único arquivo compactado (.zip) com todos os módulos do Dibai Fleet: planilhas em
                 CSV (Excel, LibreOffice e Google Planilhas) e arquivos JSON das estruturas mais
                 complexas. Inclui registros ativos, inativos, históricos e cancelados, com os
                 identificadores necessários para reconstruir os vínculos em outro sistema.
@@ -196,6 +197,9 @@ function Exportacao() {
               </p>
             </CardContent>
           </Card>
+          <div className="lg:col-span-3">
+            <ConferirCopia />
+          </div>
         </div>
       )}
     </div>

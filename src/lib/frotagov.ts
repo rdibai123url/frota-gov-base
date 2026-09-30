@@ -1,11 +1,12 @@
 /**
- * FrotaGov — camada de domínio (Fase 1).
+ * Dibai Fleet — camada de domínio (Fase 1).
  * Concentra tipos, rótulos e acesso a dados para facilitar a evolução do sistema.
  * Todo acesso é filtrado por organização (multi-tenant) via políticas do banco.
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import { friendlyDbError } from "@/lib/validacoes";
 
 export type AppRole = Database["public"]["Enums"]["app_role"];
 export type OrgType = Database["public"]["Enums"]["org_type"];
@@ -613,7 +614,16 @@ export function evaluateFueling(draft: FuelingDraft, history: FuelingRow[]): Rul
     issues.push({
       level: "info",
       type: "fornecedor_ausente",
-      message: "Nenhum fornecedor informado neste registro.",
+      message:
+        "Nenhum fornecedor informado neste registro. Só aparecem postos com contrato vigente vinculado.",
+    });
+  }
+
+  if (draft.fueledAt && draft.fueledAt.getTime() > Date.now() + 5 * 60_000) {
+    issues.push({
+      level: "erro",
+      type: "data_futura",
+      message: "A data e a hora do abastecimento não podem estar no futuro.",
     });
   }
 
@@ -725,7 +735,45 @@ export type UsageStatus = Database["public"]["Enums"]["usage_status"];
 export type FuelAuthStatus = Database["public"]["Enums"]["fuel_auth_status"];
 export type LimitScope = Database["public"]["Enums"]["limit_scope"];
 
-export type DriverRow = Driver & { unit: Pick<Unit, "id" | "name" | "acronym"> | null };
+export const ABSENCE_REASONS = [
+  { value: "ferias", label: "Férias" },
+  { value: "licenca", label: "Licença" },
+  { value: "inss", label: "INSS" },
+  { value: "atestado", label: "Atestado (até 15 dias)" },
+] as const;
+
+export type DriverAbsence = {
+  id: string;
+  driver_id: string;
+  reason: string;
+  start_date: string;
+  expected_return: string | null;
+  returned_at: string | null;
+  notes: string | null;
+};
+
+/** Afastamento em vigor na data (o motorista volta sozinho na data de retorno). */
+export function currentAbsence(
+  absences: DriverAbsence[] | null | undefined,
+  on: string = new Date().toISOString().slice(0, 10),
+): DriverAbsence | null {
+  return (
+    (absences ?? [])
+      .filter(
+        (a) =>
+          on >= a.start_date &&
+          (!a.returned_at || on < a.returned_at) &&
+          (!a.expected_return || on < a.expected_return),
+      )
+      .sort((x, y) => y.start_date.localeCompare(x.start_date))[0] ?? null
+  );
+}
+
+export type DriverRow = Driver & {
+  unit: Pick<Unit, "id" | "name" | "acronym"> | null;
+  absences?: DriverAbsence[];
+  current_absence?: DriverAbsence | null;
+};
 
 export type UsageRow = VehicleUsage & {
   vehicle: Pick<Vehicle, "id" | "plate" | "asset_code" | "status"> | null;
@@ -815,8 +863,10 @@ export const CNH_LABELS: Record<CnhState, string> = {
 };
 
 /** Condutor apto a nova autorização/utilização. */
-export function driverEligible(d: Pick<Driver, "active" | "license_expiry">) {
-  return d.active && cnhState(d.license_expiry) !== "vencida";
+export function driverEligible(
+  d: Pick<Driver, "active" | "license_expiry"> & { current_absence?: DriverAbsence | null },
+) {
+  return d.active && cnhState(d.license_expiry) !== "vencida" && !d.current_absence;
 }
 
 export function authorizationBalance(
@@ -843,7 +893,19 @@ export function useDrivers() {
         .select("*, unit:units(id, name, acronym)")
         .order("full_name");
       if (error) throw error;
-      return (data ?? []) as unknown as DriverRow[];
+      // afastamentos: se a tabela ainda não existir no ambiente, o cadastro continua funcionando
+      const { data: abs } = await supabase
+        .from("driver_absences")
+        .select("id, driver_id, reason, start_date, expected_return, returned_at, notes")
+        .order("start_date", { ascending: false })
+        .limit(5000);
+      const byDriver = new Map<string, DriverAbsence[]>();
+      for (const a of (abs ?? []) as DriverAbsence[])
+        byDriver.set(a.driver_id, [...(byDriver.get(a.driver_id) ?? []), a]);
+      return ((data ?? []) as unknown as DriverRow[]).map((d) => {
+        const list = byDriver.get(d.id) ?? [];
+        return { ...d, absences: list, current_absence: currentAbsence(list) };
+      });
     },
   });
 }
@@ -1105,7 +1167,15 @@ export const daysUntil = (iso: string | null | undefined) =>
 
 /** Extrai a mensagem amigável de um erro do banco. */
 export function dbMessage(e: unknown) {
-  const m = (e as { message?: string } | null)?.message ?? "";
+  const err = e as { code?: string; message?: string } | null;
+  const m = err?.message ?? "";
+  if (
+    err?.code === "23505" ||
+    err?.code === "23503" ||
+    err?.code === "23514" ||
+    /duplicate key value|violates (foreign key|check) constraint/i.test(m)
+  )
+    return friendlyDbError(err);
   return (
     m.replace(
       /^.*?(?=Saldo|Limite|Autoriza|Contrato|Empenho|Cota|Item|Ve[íi]culo|Condutor)/s,

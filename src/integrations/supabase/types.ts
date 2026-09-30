@@ -416,6 +416,66 @@ export type Database = {
           },
         ];
       };
+      approval_limits: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          max_value: number;
+          notes: string | null;
+          organization_id: string;
+          role: Database["public"]["Enums"]["app_role"];
+          scope: string;
+          unit_id: string | null;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          max_value: number;
+          notes?: string | null;
+          organization_id: string;
+          role: Database["public"]["Enums"]["app_role"];
+          scope?: string;
+          unit_id?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          max_value?: number;
+          notes?: string | null;
+          organization_id?: string;
+          role?: Database["public"]["Enums"]["app_role"];
+          scope?: string;
+          unit_id?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "approval_limits_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "approval_limits_unit_id_fkey";
+            columns: ["unit_id"];
+            isOneToOne: false;
+            referencedRelation: "units";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       asset_card_uses: {
         Row: {
           card_id: string;
@@ -1189,6 +1249,191 @@ export type Database = {
           },
         ];
       };
+      billing_invoice_items: {
+        Row: {
+          amount: number;
+          created_at: string;
+          created_by: string | null;
+          description: string;
+          glosa_reason: string | null;
+          glosa_value: number;
+          id: string;
+          invoice_id: string;
+          organization_id: string;
+          service_date: string | null;
+          source_id: string | null;
+          source_type: string;
+          updated_at: string;
+          vehicle_id: string | null;
+        };
+        Insert: {
+          amount: number;
+          created_at?: string;
+          created_by?: string | null;
+          description: string;
+          glosa_reason?: string | null;
+          glosa_value?: number;
+          id?: string;
+          invoice_id: string;
+          organization_id: string;
+          service_date?: string | null;
+          source_id?: string | null;
+          source_type: string;
+          updated_at?: string;
+          vehicle_id?: string | null;
+        };
+        Update: {
+          amount?: number;
+          created_at?: string;
+          created_by?: string | null;
+          description?: string;
+          glosa_reason?: string | null;
+          glosa_value?: number;
+          id?: string;
+          invoice_id?: string;
+          organization_id?: string;
+          service_date?: string | null;
+          source_id?: string | null;
+          source_type?: string;
+          updated_at?: string;
+          vehicle_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "billing_invoice_items_invoice_id_fkey";
+            columns: ["invoice_id"];
+            isOneToOne: false;
+            referencedRelation: "billing_invoices";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "billing_invoice_items_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "billing_invoice_items_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      billing_invoices: {
+        Row: {
+          admin_fee_percent: number;
+          admin_fee_value: number;
+          cancel_reason: string | null;
+          code: string | null;
+          contract_id: string | null;
+          created_at: string;
+          created_by: string | null;
+          due_date: string | null;
+          glosa_total: number;
+          id: string;
+          items_total: number;
+          net_total: number;
+          nf_date: string | null;
+          nf_number: string | null;
+          nf_value: number | null;
+          notes: string | null;
+          organization_id: string;
+          paid_at: string | null;
+          period_end: string;
+          period_start: string;
+          reference_month: string;
+          status: string;
+          supplier_id: string | null;
+          updated_at: string;
+          updated_by: string | null;
+          withholding_note: string | null;
+          withholding_value: number;
+        };
+        Insert: {
+          admin_fee_percent?: number;
+          admin_fee_value?: number;
+          cancel_reason?: string | null;
+          code?: string | null;
+          contract_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          due_date?: string | null;
+          glosa_total?: number;
+          id?: string;
+          items_total?: number;
+          net_total?: number;
+          nf_date?: string | null;
+          nf_number?: string | null;
+          nf_value?: number | null;
+          notes?: string | null;
+          organization_id: string;
+          paid_at?: string | null;
+          period_end: string;
+          period_start: string;
+          reference_month: string;
+          status?: string;
+          supplier_id?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+          withholding_note?: string | null;
+          withholding_value?: number;
+        };
+        Update: {
+          admin_fee_percent?: number;
+          admin_fee_value?: number;
+          cancel_reason?: string | null;
+          code?: string | null;
+          contract_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          due_date?: string | null;
+          glosa_total?: number;
+          id?: string;
+          items_total?: number;
+          net_total?: number;
+          nf_date?: string | null;
+          nf_number?: string | null;
+          nf_value?: number | null;
+          notes?: string | null;
+          organization_id?: string;
+          paid_at?: string | null;
+          period_end?: string;
+          period_start?: string;
+          reference_month?: string;
+          status?: string;
+          supplier_id?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+          withholding_note?: string | null;
+          withholding_value?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "billing_invoices_contract_id_fkey";
+            columns: ["contract_id"];
+            isOneToOne: false;
+            referencedRelation: "contracts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "billing_invoices_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "billing_invoices_supplier_id_fkey";
+            columns: ["supplier_id"];
+            isOneToOne: false;
+            referencedRelation: "suppliers";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       budget_movements: {
         Row: {
           authorization_id: string | null;
@@ -1360,6 +1605,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "budget_references_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      cleaning_rules: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          max_per_month: number | null;
+          min_interval_days: number;
+          notes: string | null;
+          organization_id: string;
+          updated_at: string;
+          updated_by: string | null;
+          vehicle_type: string | null;
+        };
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          max_per_month?: number | null;
+          min_interval_days?: number;
+          notes?: string | null;
+          organization_id: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          vehicle_type?: string | null;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          max_per_month?: number | null;
+          min_interval_days?: number;
+          notes?: string | null;
+          organization_id?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          vehicle_type?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "cleaning_rules_organization_id_fkey";
             columns: ["organization_id"];
             isOneToOne: false;
             referencedRelation: "organizations";
@@ -2079,6 +2374,78 @@ export type Database = {
         };
         Relationships: [];
       };
+      contract_occurrences: {
+        Row: {
+          author_role: string;
+          contract_id: string;
+          created_at: string;
+          created_by: string | null;
+          created_by_name: string | null;
+          deadline_at: string | null;
+          description: string;
+          id: string;
+          kind: string;
+          occurred_at: string;
+          organization_id: string;
+          resolution: string | null;
+          resolved_at: string | null;
+          status: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          author_role?: string;
+          contract_id: string;
+          created_at?: string;
+          created_by?: string | null;
+          created_by_name?: string | null;
+          deadline_at?: string | null;
+          description: string;
+          id?: string;
+          kind?: string;
+          occurred_at?: string;
+          organization_id: string;
+          resolution?: string | null;
+          resolved_at?: string | null;
+          status?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          author_role?: string;
+          contract_id?: string;
+          created_at?: string;
+          created_by?: string | null;
+          created_by_name?: string | null;
+          deadline_at?: string | null;
+          description?: string;
+          id?: string;
+          kind?: string;
+          occurred_at?: string;
+          organization_id?: string;
+          resolution?: string | null;
+          resolved_at?: string | null;
+          status?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "contract_occurrences_contract_id_fkey";
+            columns: ["contract_id"];
+            isOneToOne: false;
+            referencedRelation: "contracts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contract_occurrences_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       contract_periods: {
         Row: {
           balance_value: number | null;
@@ -2199,6 +2566,7 @@ export type Database = {
           valid_from: string | null;
           valid_to: string | null;
           value_from_items: boolean;
+          admin_fee_percent: number | null;
         };
         Insert: {
           allows_amendment?: boolean;
@@ -2234,6 +2602,7 @@ export type Database = {
           valid_from?: string | null;
           valid_to?: string | null;
           value_from_items?: boolean;
+          admin_fee_percent?: number | null;
         };
         Update: {
           allows_amendment?: boolean;
@@ -2269,6 +2638,7 @@ export type Database = {
           valid_from?: string | null;
           valid_to?: string | null;
           value_from_items?: boolean;
+          admin_fee_percent?: number | null;
         };
         Relationships: [
           {
@@ -2854,6 +3224,63 @@ export type Database = {
           },
         ];
       };
+      driver_absences: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          driver_id: string;
+          expected_return: string | null;
+          id: string;
+          notes: string | null;
+          organization_id: string;
+          reason: string;
+          returned_at: string | null;
+          start_date: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          driver_id: string;
+          expected_return?: string | null;
+          id?: string;
+          notes?: string | null;
+          organization_id: string;
+          reason: string;
+          returned_at?: string | null;
+          start_date?: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          driver_id?: string;
+          expected_return?: string | null;
+          id?: string;
+          notes?: string | null;
+          organization_id?: string;
+          reason?: string;
+          returned_at?: string | null;
+          start_date?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "driver_absences_driver_id_fkey";
+            columns: ["driver_id"];
+            isOneToOne: false;
+            referencedRelation: "drivers";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "driver_absences_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       drivers: {
         Row: {
           active: boolean;
@@ -2937,6 +3364,167 @@ export type Database = {
             columns: ["unit_id"];
             isOneToOne: false;
             referencedRelation: "units";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      duty_shifts: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          driver_id: string;
+          duty_unit_id: string;
+          hours: number;
+          id: string;
+          notes: string | null;
+          organization_id: string;
+          shift_date: string;
+          start_time: string;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          driver_id: string;
+          duty_unit_id: string;
+          hours: number;
+          id?: string;
+          notes?: string | null;
+          organization_id: string;
+          shift_date: string;
+          start_time: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          driver_id?: string;
+          duty_unit_id?: string;
+          hours?: number;
+          id?: string;
+          notes?: string | null;
+          organization_id?: string;
+          shift_date?: string;
+          start_time?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "duty_shifts_driver_id_fkey";
+            columns: ["driver_id"];
+            isOneToOne: false;
+            referencedRelation: "drivers";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "duty_shifts_duty_unit_id_fkey";
+            columns: ["duty_unit_id"];
+            isOneToOne: false;
+            referencedRelation: "duty_units";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "duty_shifts_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      duty_units: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          name: string;
+          notes: string | null;
+          organization_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          name: string;
+          notes?: string | null;
+          organization_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          name?: string;
+          notes?: string | null;
+          organization_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "duty_units_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      electronic_signatures: {
+        Row: {
+          doc_hash: string;
+          doc_id: string;
+          doc_label: string;
+          doc_type: string;
+          id: string;
+          ip_address: string | null;
+          organization_id: string;
+          signed_at: string;
+          signer_id: string;
+          signer_name: string;
+          signer_role: string | null;
+          statement: string;
+          user_agent: string | null;
+          verification_code: string;
+        };
+        Insert: {
+          doc_hash: string;
+          doc_id: string;
+          doc_label: string;
+          doc_type: string;
+          id?: string;
+          ip_address?: string | null;
+          organization_id: string;
+          signed_at?: string;
+          signer_id: string;
+          signer_name: string;
+          signer_role?: string | null;
+          statement?: string;
+          user_agent?: string | null;
+          verification_code: string;
+        };
+        Update: {
+          doc_hash?: string;
+          doc_id?: string;
+          doc_label?: string;
+          doc_type?: string;
+          id?: string;
+          ip_address?: string | null;
+          organization_id?: string;
+          signed_at?: string;
+          signer_id?: string;
+          signer_name?: string;
+          signer_role?: string | null;
+          statement?: string;
+          user_agent?: string | null;
+          verification_code?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "electronic_signatures_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
             referencedColumns: ["id"];
           },
         ];
@@ -3192,6 +3780,8 @@ export type Database = {
           updated_at: string;
           updated_by: string | null;
           zip_code: string | null;
+          environmental_compliant: boolean;
+          environmental_note: string | null;
         };
         Insert: {
           active?: boolean;
@@ -3223,6 +3813,8 @@ export type Database = {
           updated_at?: string;
           updated_by?: string | null;
           zip_code?: string | null;
+          environmental_compliant?: boolean;
+          environmental_note?: string | null;
         };
         Update: {
           active?: boolean;
@@ -3254,6 +3846,8 @@ export type Database = {
           updated_at?: string;
           updated_by?: string | null;
           zip_code?: string | null;
+          environmental_compliant?: boolean;
+          environmental_note?: string | null;
         };
         Relationships: [
           {
@@ -4858,6 +5452,59 @@ export type Database = {
           },
         ];
       };
+      labor_time_standards: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          notes: string | null;
+          organization_id: string;
+          service_name: string;
+          source: string;
+          standard_hours: number;
+          updated_at: string;
+          updated_by: string | null;
+          vehicle_type: string | null;
+        };
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          notes?: string | null;
+          organization_id: string;
+          service_name: string;
+          source?: string;
+          standard_hours: number;
+          updated_at?: string;
+          updated_by?: string | null;
+          vehicle_type?: string | null;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          notes?: string | null;
+          organization_id?: string;
+          service_name?: string;
+          source?: string;
+          standard_hours?: number;
+          updated_at?: string;
+          updated_by?: string | null;
+          vehicle_type?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "labor_time_standards_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       ldap_directories: {
         Row: {
           active: boolean;
@@ -5067,6 +5714,56 @@ export type Database = {
           },
         ];
       };
+      maintenance_deadlines: {
+        Row: {
+          active: boolean;
+          business_days: number;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          kind: Database["public"]["Enums"]["maintenance_kind"] | null;
+          notes: string | null;
+          organization_id: string;
+          updated_at: string;
+          updated_by: string | null;
+          vehicle_type: string | null;
+        };
+        Insert: {
+          active?: boolean;
+          business_days: number;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          kind?: Database["public"]["Enums"]["maintenance_kind"] | null;
+          notes?: string | null;
+          organization_id: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          vehicle_type?: string | null;
+        };
+        Update: {
+          active?: boolean;
+          business_days?: number;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          kind?: Database["public"]["Enums"]["maintenance_kind"] | null;
+          notes?: string | null;
+          organization_id?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          vehicle_type?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_deadlines_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       maintenance_parts: {
         Row: {
           contract_item_id: string | null;
@@ -5090,6 +5787,9 @@ export type Database = {
           vehicle_id: string;
           warranty_days: number | null;
           warranty_until: string | null;
+          part_origin: string;
+          origin_note: string | null;
+          replaced_destination: string;
         };
         Insert: {
           contract_item_id?: string | null;
@@ -5113,6 +5813,9 @@ export type Database = {
           vehicle_id: string;
           warranty_days?: number | null;
           warranty_until?: string | null;
+          part_origin?: string;
+          origin_note?: string | null;
+          replaced_destination?: string;
         };
         Update: {
           contract_item_id?: string | null;
@@ -5136,6 +5839,9 @@ export type Database = {
           vehicle_id?: string;
           warranty_days?: number | null;
           warranty_until?: string | null;
+          part_origin?: string;
+          origin_note?: string | null;
+          replaced_destination?: string;
         };
         Relationships: [
           {
@@ -5375,6 +6081,10 @@ export type Database = {
           vehicle_id: string;
           warranty_days: number | null;
           warranty_until: string | null;
+          entry_inspection: string | null;
+          exit_inspection: string | null;
+          pickup_person: string | null;
+          promised_return_at: string | null;
         };
         Insert: {
           accident_id?: string | null;
@@ -5418,6 +6128,10 @@ export type Database = {
           vehicle_id: string;
           warranty_days?: number | null;
           warranty_until?: string | null;
+          entry_inspection?: string | null;
+          exit_inspection?: string | null;
+          pickup_person?: string | null;
+          promised_return_at?: string | null;
         };
         Update: {
           accident_id?: string | null;
@@ -5461,6 +6175,10 @@ export type Database = {
           vehicle_id?: string;
           warranty_days?: number | null;
           warranty_until?: string | null;
+          entry_inspection?: string | null;
+          exit_inspection?: string | null;
+          pickup_person?: string | null;
+          promised_return_at?: string | null;
         };
         Relationships: [
           {
@@ -5731,6 +6449,8 @@ export type Database = {
           updated_at: string;
           updated_by: string | null;
           warranty_lead_days: number;
+          max_labor_hour_value: number | null;
+          block_above_max_hour_value: boolean;
         };
         Insert: {
           created_at?: string;
@@ -5742,6 +6462,8 @@ export type Database = {
           updated_at?: string;
           updated_by?: string | null;
           warranty_lead_days?: number;
+          max_labor_hour_value?: number | null;
+          block_above_max_hour_value?: boolean;
         };
         Update: {
           created_at?: string;
@@ -5753,6 +6475,8 @@ export type Database = {
           updated_at?: string;
           updated_by?: string | null;
           warranty_lead_days?: number;
+          max_labor_hour_value?: number | null;
+          block_above_max_hour_value?: boolean;
         };
         Relationships: [
           {
@@ -5820,6 +6544,112 @@ export type Database = {
             columns: ["vehicle_id"];
             isOneToOne: false;
             referencedRelation: "vehicles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      notification_log: {
+        Row: {
+          channel: string;
+          created_at: string;
+          id: string;
+          items_count: number;
+          message: string | null;
+          organization_id: string;
+          recipients_count: number;
+          status: string;
+        };
+        Insert: {
+          channel?: string;
+          created_at?: string;
+          id?: string;
+          items_count?: number;
+          message?: string | null;
+          organization_id: string;
+          recipients_count?: number;
+          status: string;
+        };
+        Update: {
+          channel?: string;
+          created_at?: string;
+          id?: string;
+          items_count?: number;
+          message?: string | null;
+          organization_id?: string;
+          recipients_count?: number;
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notification_log_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      notification_settings: {
+        Row: {
+          cnh_days: number;
+          contract_days: number;
+          created_at: string;
+          email_enabled: boolean;
+          frequency: string;
+          id: string;
+          insurance_days: number;
+          last_sent_at: string | null;
+          obligation_days: number;
+          organization_id: string;
+          preventive_days: number;
+          preventive_km: number;
+          recipients: string[];
+          updated_at: string;
+          updated_by: string | null;
+          warranty_days: number;
+        };
+        Insert: {
+          cnh_days?: number;
+          contract_days?: number;
+          created_at?: string;
+          email_enabled?: boolean;
+          frequency?: string;
+          id?: string;
+          insurance_days?: number;
+          last_sent_at?: string | null;
+          obligation_days?: number;
+          organization_id: string;
+          preventive_days?: number;
+          preventive_km?: number;
+          recipients?: string[];
+          updated_at?: string;
+          updated_by?: string | null;
+          warranty_days?: number;
+        };
+        Update: {
+          cnh_days?: number;
+          contract_days?: number;
+          created_at?: string;
+          email_enabled?: boolean;
+          frequency?: string;
+          id?: string;
+          insurance_days?: number;
+          last_sent_at?: string | null;
+          obligation_days?: number;
+          organization_id?: string;
+          preventive_days?: number;
+          preventive_km?: number;
+          recipients?: string[];
+          updated_at?: string;
+          updated_by?: string | null;
+          warranty_days?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notification_settings_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
             referencedColumns: ["id"];
           },
         ];
@@ -6088,6 +6918,85 @@ export type Database = {
           },
         ];
       };
+      org_role_access: {
+        Row: {
+          allowed: boolean;
+          id: string;
+          module_key: string;
+          organization_id: string;
+          role: Database["public"]["Enums"]["app_role"];
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          allowed: boolean;
+          id?: string;
+          module_key: string;
+          organization_id: string;
+          role: Database["public"]["Enums"]["app_role"];
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          allowed?: boolean;
+          id?: string;
+          module_key?: string;
+          organization_id?: string;
+          role?: Database["public"]["Enums"]["app_role"];
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "org_role_access_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      organization_license: {
+        Row: {
+          max_users: number | null;
+          max_vehicles: number | null;
+          notes: string | null;
+          organization_id: string;
+          plan_name: string;
+          updated_at: string;
+          updated_by: string | null;
+          valid_until: string | null;
+        };
+        Insert: {
+          max_users?: number | null;
+          max_vehicles?: number | null;
+          notes?: string | null;
+          organization_id: string;
+          plan_name?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          valid_until?: string | null;
+        };
+        Update: {
+          max_users?: number | null;
+          max_vehicles?: number | null;
+          notes?: string | null;
+          organization_id?: string;
+          plan_name?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          valid_until?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "organization_license_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       organization_modules: {
         Row: {
           created_at: string;
@@ -6157,6 +7066,7 @@ export type Database = {
           updated_by: string | null;
           website: string | null;
           zip_code: string | null;
+          brand_color: string | null;
         };
         Insert: {
           address?: string | null;
@@ -6182,6 +7092,7 @@ export type Database = {
           updated_by?: string | null;
           website?: string | null;
           zip_code?: string | null;
+          brand_color?: string | null;
         };
         Update: {
           address?: string | null;
@@ -6207,6 +7118,7 @@ export type Database = {
           updated_by?: string | null;
           website?: string | null;
           zip_code?: string | null;
+          brand_color?: string | null;
         };
         Relationships: [];
       };
@@ -7179,6 +8091,8 @@ export type Database = {
           valid_until: string | null;
           warranty_days: number | null;
           workshop_id: string;
+          parts_origin: string;
+          parts_origin_note: string | null;
         };
         Insert: {
           attachment_path?: string | null;
@@ -7212,6 +8126,8 @@ export type Database = {
           valid_until?: string | null;
           warranty_days?: number | null;
           workshop_id: string;
+          parts_origin?: string;
+          parts_origin_note?: string | null;
         };
         Update: {
           attachment_path?: string | null;
@@ -7245,6 +8161,8 @@ export type Database = {
           valid_until?: string | null;
           warranty_days?: number | null;
           workshop_id?: string;
+          parts_origin?: string;
+          parts_origin_note?: string | null;
         };
         Relationships: [
           {
@@ -7461,6 +8379,7 @@ export type Database = {
       };
       route_cache: {
         Row: {
+          organization_id: string;
           cache_key: string;
           created_at: string;
           destination_lat: number;
@@ -7476,6 +8395,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          organization_id: string;
           cache_key: string;
           created_at?: string;
           destination_lat: number;
@@ -7491,6 +8411,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          organization_id?: string;
           cache_key?: string;
           created_at?: string;
           destination_lat?: number;
@@ -7613,6 +8534,151 @@ export type Database = {
             columns: ["vehicle_id"];
             isOneToOne: false;
             referencedRelation: "vehicles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      service_level_indicators: {
+        Row: {
+          active: boolean;
+          auto_metric: string;
+          block: string;
+          block_weight: number;
+          code: string;
+          contract_id: string;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          kind: string;
+          name: string;
+          notes: string | null;
+          organization_id: string;
+          target_value: number;
+          updated_at: string;
+          updated_by: string | null;
+          weight_in_block: number;
+        };
+        Insert: {
+          active?: boolean;
+          auto_metric?: string;
+          block?: string;
+          block_weight?: number;
+          code: string;
+          contract_id: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          kind?: string;
+          name: string;
+          notes?: string | null;
+          organization_id: string;
+          target_value: number;
+          updated_at?: string;
+          updated_by?: string | null;
+          weight_in_block?: number;
+        };
+        Update: {
+          active?: boolean;
+          auto_metric?: string;
+          block?: string;
+          block_weight?: number;
+          code?: string;
+          contract_id?: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          kind?: string;
+          name?: string;
+          notes?: string | null;
+          organization_id?: string;
+          target_value?: number;
+          updated_at?: string;
+          updated_by?: string | null;
+          weight_in_block?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "service_level_indicators_contract_id_fkey";
+            columns: ["contract_id"];
+            isOneToOne: false;
+            referencedRelation: "contracts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "service_level_indicators_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      service_level_results: {
+        Row: {
+          contract_id: string;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          indicator_id: string;
+          measured_value: number;
+          notes: string | null;
+          organization_id: string;
+          reference_month: string;
+          score: number;
+          source: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          contract_id: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          indicator_id: string;
+          measured_value: number;
+          notes?: string | null;
+          organization_id: string;
+          reference_month: string;
+          score?: number;
+          source?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          contract_id?: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          indicator_id?: string;
+          measured_value?: number;
+          notes?: string | null;
+          organization_id?: string;
+          reference_month?: string;
+          score?: number;
+          source?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "service_level_results_contract_id_fkey";
+            columns: ["contract_id"];
+            isOneToOne: false;
+            referencedRelation: "contracts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "service_level_results_indicator_id_fkey";
+            columns: ["indicator_id"];
+            isOneToOne: false;
+            referencedRelation: "service_level_indicators";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "service_level_results_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
             referencedColumns: ["id"];
           },
         ];
@@ -9192,6 +10258,294 @@ export type Database = {
           },
         ];
       };
+      tracking_alerts: {
+        Row: {
+          acknowledged_at: string | null;
+          acknowledged_by: string | null;
+          created_at: string;
+          id: string;
+          kind: string;
+          message: string;
+          occurred_at: string;
+          organization_id: string;
+          position_id: string | null;
+          vehicle_id: string;
+        };
+        Insert: {
+          acknowledged_at?: string | null;
+          acknowledged_by?: string | null;
+          created_at?: string;
+          id?: string;
+          kind: string;
+          message: string;
+          occurred_at?: string;
+          organization_id: string;
+          position_id?: string | null;
+          vehicle_id: string;
+        };
+        Update: {
+          acknowledged_at?: string | null;
+          acknowledged_by?: string | null;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          message?: string;
+          occurred_at?: string;
+          organization_id?: string;
+          position_id?: string | null;
+          vehicle_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tracking_alerts_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tracking_alerts_position_id_fkey";
+            columns: ["position_id"];
+            isOneToOne: false;
+            referencedRelation: "tracking_positions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tracking_alerts_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tracking_devices: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          created_by: string | null;
+          device_identifier: string | null;
+          id: string;
+          last_seen_at: string | null;
+          notes: string | null;
+          organization_id: string;
+          provider: string | null;
+          token_hash: string;
+          updated_at: string;
+          updated_by: string | null;
+          vehicle_id: string;
+        };
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          device_identifier?: string | null;
+          id?: string;
+          last_seen_at?: string | null;
+          notes?: string | null;
+          organization_id: string;
+          provider?: string | null;
+          token_hash: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          vehicle_id: string;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          device_identifier?: string | null;
+          id?: string;
+          last_seen_at?: string | null;
+          notes?: string | null;
+          organization_id?: string;
+          provider?: string | null;
+          token_hash?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          vehicle_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tracking_devices_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tracking_devices_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tracking_geofences: {
+        Row: {
+          active: boolean;
+          alert_on: string;
+          center_lat: number;
+          center_lng: number;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          name: string;
+          organization_id: string;
+          radius_m: number;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          active?: boolean;
+          alert_on?: string;
+          center_lat: number;
+          center_lng: number;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          name: string;
+          organization_id: string;
+          radius_m: number;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          active?: boolean;
+          alert_on?: string;
+          center_lat?: number;
+          center_lng?: number;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          name?: string;
+          organization_id?: string;
+          radius_m?: number;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tracking_geofences_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tracking_positions: {
+        Row: {
+          battery_v: number | null;
+          created_at: string;
+          device_id: string;
+          heading: number | null;
+          id: string;
+          ignition: boolean | null;
+          latitude: number;
+          longitude: number;
+          odometer_km: number | null;
+          organization_id: string;
+          recorded_at: string;
+          speed_kmh: number | null;
+          vehicle_id: string;
+        };
+        Insert: {
+          battery_v?: number | null;
+          created_at?: string;
+          device_id: string;
+          heading?: number | null;
+          id?: string;
+          ignition?: boolean | null;
+          latitude: number;
+          longitude: number;
+          odometer_km?: number | null;
+          organization_id: string;
+          recorded_at: string;
+          speed_kmh?: number | null;
+          vehicle_id: string;
+        };
+        Update: {
+          battery_v?: number | null;
+          created_at?: string;
+          device_id?: string;
+          heading?: number | null;
+          id?: string;
+          ignition?: boolean | null;
+          latitude?: number;
+          longitude?: number;
+          odometer_km?: number | null;
+          organization_id?: string;
+          recorded_at?: string;
+          speed_kmh?: number | null;
+          vehicle_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tracking_positions_device_id_fkey";
+            columns: ["device_id"];
+            isOneToOne: false;
+            referencedRelation: "tracking_devices";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tracking_positions_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tracking_positions_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tracking_settings: {
+        Row: {
+          created_at: string;
+          id: string;
+          low_battery_v: number;
+          max_speed_kmh: number;
+          offline_minutes: number;
+          organization_id: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          low_battery_v?: number;
+          max_speed_kmh?: number;
+          offline_minutes?: number;
+          organization_id: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          low_battery_v?: number;
+          max_speed_kmh?: number;
+          offline_minutes?: number;
+          organization_id?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tracking_settings_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       traffic_fines: {
         Row: {
           amount: number;
@@ -9766,6 +11120,51 @@ export type Database = {
           },
         ];
       };
+      user_module_access: {
+        Row: {
+          allowed: boolean;
+          id: string;
+          module_key: string;
+          organization_id: string;
+          updated_at: string;
+          updated_by: string | null;
+          user_id: string;
+        };
+        Insert: {
+          allowed: boolean;
+          id?: string;
+          module_key: string;
+          organization_id: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          user_id: string;
+        };
+        Update: {
+          allowed?: boolean;
+          id?: string;
+          module_key?: string;
+          organization_id?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_module_access_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "user_module_access_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       user_roles: {
         Row: {
           created_at: string;
@@ -10301,6 +11700,9 @@ export type Database = {
           updated_by: string | null;
           vehicle_id: string;
           vehicle_updated: boolean;
+          cargo_description: string | null;
+          toll_value: number;
+          other_trip_costs: number;
         };
         Insert: {
           actual_departure?: string | null;
@@ -10352,6 +11754,9 @@ export type Database = {
           updated_by?: string | null;
           vehicle_id: string;
           vehicle_updated?: boolean;
+          cargo_description?: string | null;
+          toll_value?: number;
+          other_trip_costs?: number;
         };
         Update: {
           actual_departure?: string | null;
@@ -10403,6 +11808,9 @@ export type Database = {
           updated_by?: string | null;
           vehicle_id?: string;
           vehicle_updated?: boolean;
+          cargo_description?: string | null;
+          toll_value?: number;
+          other_trip_costs?: number;
         };
         Relationships: [
           {
@@ -10511,6 +11919,8 @@ export type Database = {
           vehicle_type: string | null;
           year_manufacture: number | null;
           year_model: number | null;
+          factory_warranty_until: string | null;
+          factory_warranty_km: number | null;
         };
         Insert: {
           acquisition_date?: string | null;
@@ -10573,6 +11983,8 @@ export type Database = {
           vehicle_type?: string | null;
           year_manufacture?: number | null;
           year_model?: number | null;
+          factory_warranty_until?: string | null;
+          factory_warranty_km?: number | null;
         };
         Update: {
           acquisition_date?: string | null;
@@ -10635,6 +12047,8 @@ export type Database = {
           vehicle_type?: string | null;
           year_manufacture?: number | null;
           year_model?: number | null;
+          factory_warranty_until?: string | null;
+          factory_warranty_km?: number | null;
         };
         Relationships: [
           {
@@ -11007,6 +12421,30 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      approval_limit_for: {
+        Args: { _org: string; _unit?: string; _user: string };
+        Returns: number;
+      };
+      imr_auto_metric: { Args: { _metric: string; _month: string }; Returns: number };
+      imr_final_grade: { Args: { _contract: string; _month: string }; Returns: number };
+      notification_items: {
+        Args: { _org: string };
+        Returns: {
+          kind: string;
+          title: string;
+          detail: string;
+          due_date: string;
+          days: number;
+          phone: string | null;
+        }[];
+      };
+      reserve_checklist_photo: {
+        Args: { _checklist: string; _mime: string; _size: number };
+        Returns: Json;
+      };
+      confirm_checklist_photo: { Args: { _upload: string }; Returns: string };
+      cancel_checklist_photo_upload: { Args: { _upload: string }; Returns: boolean };
+
       active_org_id: { Args: never; Returns: string };
       active_server_quota: {
         Args: { _at: string; _vehicle: string };
@@ -11539,6 +12977,7 @@ export type Database = {
         Returns: undefined;
       };
       supply_order_issue: { Args: { _order: string }; Returns: undefined };
+      tracking_ingest: { Args: { _token: string; _payload: Json }; Returns: Json };
       transparency_period_is_closed: {
         Args: { _at: string; _org: string };
         Returns: boolean;
@@ -11548,6 +12987,18 @@ export type Database = {
         Returns: Json;
       };
       unit_scope_ok: { Args: { _unit: string }; Returns: boolean };
+      verify_signature: {
+        Args: { _code: string };
+        Returns: {
+          doc_type: string;
+          doc_label: string;
+          signer_name: string;
+          signer_role: string | null;
+          signed_at: string;
+          doc_hash: string;
+          organization_name: string;
+        }[];
+      };
     };
     Enums: {
       accident_kind:

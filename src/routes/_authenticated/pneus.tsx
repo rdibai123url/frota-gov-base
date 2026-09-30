@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { PageHeader } from "@/components/app-shell";
+import { PneusAnalise } from "@/components/pneus-analise";
 import { MoneyInput } from "@/components/form-fields";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -58,14 +59,14 @@ import {
 export const Route = createFileRoute("/_authenticated/pneus")({
   head: () => ({
     meta: [
-      { title: "Pneus — FrotaGov" },
+      { title: "Pneus — Dibai Fleet" },
       {
         name: "description",
         content:
           "Controle individual de pneus por código: marca, medida, DOT, vida útil, situação, veículo e posição, com histórico completo de movimentações.",
       },
-      { property: "og:title", content: "Pneus — FrotaGov" },
-      { property: "og:description", content: "Gestão individualizada de pneus da frota pública." },
+      { property: "og:title", content: "Pneus — Dibai Fleet" },
+      { property: "og:description", content: "Gestão individualizada de pneus da frota." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -312,8 +313,8 @@ export function Pneus({ embedded = false }: { embedded?: boolean } = {}) {
     <>
       {!embedded && (
         <PageHeader
-          title="Pneus"
-          description="Cada pneu é controlado individualmente por código, com posição no veículo e histórico de movimentações."
+          title="Controle de pneus"
+          description="Cada pneu é controlado por código: onde está instalado, quantos km rodou, com que frequência é trocado e quando chega ao fim da vida útil."
           action={
             canManageFleet && orgId ? (
               <Button onClick={openNew} className="gap-2">
@@ -323,6 +324,8 @@ export function Pneus({ embedded = false }: { embedded?: boolean } = {}) {
           }
         />
       )}
+
+      {!embedded && <PneusAnalise />}
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[

@@ -20,6 +20,15 @@ async function sha256(value: string) {
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+/** Compara hashes em tempo constante. */
+async function hashesMatch(a: string, b: string | null) {
+  if (!b) return false;
+  const { timingSafeEqual } = await import("node:crypto");
+  const x = Buffer.from(a);
+  const y = Buffer.from(b);
+  return x.length === y.length && timingSafeEqual(x, y);
+}
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -155,23 +164,6 @@ const RESOURCES: Record<
     dateColumn: "updated_at",
   },
 
-  ofp: {
-    table: "supply_orders",
-    scope: "almoxarifado:read",
-    columns:
-      "id, code, status, supplier_id, contract_id, created_at, issued_at, max_value, reserved_value, consumed_value",
-    order: "created_at",
-    dateColumn: "created_at",
-  },
-
-  estoque: {
-    table: "stock_balances",
-    scope: "almoxarifado:read",
-    columns: "id, warehouse_id, part_id, quantity, reserved_quantity, min_quantity, average_cost",
-    order: "part_id",
-    dateColumn: "updated_at",
-  },
-
   multas: {
     table: "traffic_fines",
     scope: "legal:read",
@@ -278,7 +270,7 @@ export const Route = createFileRoute("/api/public/v1/recursos/$recurso")({
           );
         }
 
-        if ((await sha256(apiKey)) !== key.key_hash) {
+        if (!(await hashesMatch(await sha256(apiKey), key.key_hash))) {
           return json(
             {
               error: "Chave inválida.",

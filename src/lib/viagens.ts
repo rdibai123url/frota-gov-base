@@ -1,5 +1,5 @@
 /**
- * FrotaGov — inteligência de viagens (estimativa antes da saída).
+ * Dibai Fleet — inteligência de viagens (estimativa antes da saída).
  *
  * A partir da rota planejada (distância) e do consumo do próprio veículo,
  * estima litros e custo da viagem. Nada aqui inventa número: se não houver

@@ -1,4 +1,5 @@
 import { ListPagination, usePaged } from "@/components/list-pagination";
+import { TerceirosHub } from "@/components/hubs";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Building2, FileText, Pencil, Upload } from "lucide-react";
@@ -63,13 +64,13 @@ import { CompanyDialog } from "@/routes/_authenticated/fornecedores";
 export const Route = createFileRoute("/_authenticated/rede-credenciada")({
   head: () => ({
     meta: [
-      { title: "Oficinas e prestadores do órgão — FrotaGov" },
+      { title: "Oficinas e prestadores do órgão — Dibai Fleet" },
       {
         name: "description",
         content:
           "Cadastro próprio do órgão de oficinas e prestadores, com especialidades, marcas atendidas, vigência e documentos.",
       },
-      { property: "og:title", content: "Oficinas e prestadores do órgão — FrotaGov" },
+      { property: "og:title", content: "Oficinas e prestadores do órgão — Dibai Fleet" },
       {
         property: "og:description",
         content: "Oficinas e prestadores cadastrados pelo próprio órgão para manutenção da frota.",
@@ -78,7 +79,7 @@ export const Route = createFileRoute("/_authenticated/rede-credenciada")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: RedeCredenciada,
+  component: RedeCredenciadaRoute,
 });
 
 const ALL = "__all__";
@@ -102,7 +103,7 @@ const schema = z.object({
   longitude: z.string().trim().max(24).optional(),
 });
 
-function RedeCredenciada() {
+export function RedeCredenciadaPanel() {
   const { data: workshops = [], isLoading } = useWorkshops();
   const { canManageFleet, orgId, userId } = usePerms();
   const invalidate = useInvalidate();
@@ -248,7 +249,7 @@ function RedeCredenciada() {
     <>
       <PageHeader
         title="Oficinas e prestadores do órgão"
-        description="Lista formada apenas pelas empresas cadastradas pelo próprio órgão com contrato ou credenciamento vigente de manutenção e higienização. O FrotaGov não fornece prestadores; o cadastro da empresa é feito em Pessoas e Empresas Externas."
+        description="Lista formada apenas pelas empresas cadastradas pelo próprio órgão com contrato ou credenciamento vigente de manutenção e higienização. O Dibai Fleet não fornece prestadores; o cadastro da empresa é feito em Pessoas e Empresas Externas."
         action={
           <Button asChild variant="outline" className="gap-2">
             <Link to="/entidades-externas">
@@ -699,4 +700,9 @@ function NetworkFromContracts() {
       <CompanyDialog company={detail} onClose={() => setDetail(null)} />
     </>
   );
+}
+
+/** Esta tela agora aparece dentro de uma tela com abas. */
+function RedeCredenciadaRoute() {
+  return <TerceirosHub />;
 }

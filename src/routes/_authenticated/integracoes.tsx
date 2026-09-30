@@ -1,6 +1,6 @@
 /**
  * Fase 10 — Bloco 5: Central de Integrações.
- * DETRAN, SIAFIC/contabilidade, LDAP/SSO, FIPE, Webhooks e API FrotaGov.
+ * DETRAN, SIAFIC/contabilidade, LDAP/SSO, FIPE, Webhooks e API Dibai Fleet.
  * Segredos nunca são exibidos: guardamos apenas o nome do segredo do servidor.
  */
 import { createFileRoute } from "@tanstack/react-router";
@@ -80,13 +80,13 @@ import { LdapPanel, LoginEventsPanel, SsoPanel } from "@/components/integracao-i
 export const Route = createFileRoute("/_authenticated/integracoes")({
   head: () => ({
     meta: [
-      { title: "Central de Integrações — FrotaGov" },
+      { title: "Central de Integrações — Dibai Fleet" },
       {
         name: "description",
         content:
-          "Conectores do órgão para DETRAN, SIAFIC/contabilidade, LDAP/SSO, FIPE, webhooks e API do FrotaGov, com situação, ambiente, testes e histórico técnico.",
+          "Conectores do órgão para DETRAN, SIAFIC/contabilidade, LDAP/SSO, FIPE, webhooks e API do Dibai Fleet, com situação, ambiente, testes e histórico técnico.",
       },
-      { property: "og:title", content: "Central de Integrações — FrotaGov" },
+      { property: "og:title", content: "Central de Integrações — Dibai Fleet" },
       {
         property: "og:description",
         content: "Conectores, mapeamentos e webhooks do órgão em uma única área.",
@@ -353,8 +353,8 @@ function Integracoes() {
               <DialogHeader>
                 <DialogTitle>Configurar {CONNECTOR_META[editing.kind].label}</DialogTitle>
                 <DialogDescription>
-                  Informe apenas o <strong>nome</strong> do segredo cadastrado no servidor. O
-                  FrotaGov nunca armazena nem exibe o valor do segredo.
+                  Informe apenas o <strong>nome</strong> do segredo cadastrado no servidor. O Dibai
+                  Fleet nunca armazena nem exibe o valor do segredo.
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={onSaveConnector} className="space-y-4">
@@ -463,7 +463,7 @@ function DetranPanel({ connector }: { connector?: Connector | undefined }) {
               <TableRow>
                 <TableHead>Campo do DETRAN</TableHead>
                 <TableHead>Descrição</TableHead>
-                <TableHead>Campo no FrotaGov</TableHead>
+                <TableHead>Campo no Dibai Fleet</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

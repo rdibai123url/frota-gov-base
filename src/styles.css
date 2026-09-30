@@ -5,12 +5,11 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * FrotaGov — design system institucional "Cinza Institucional Público".
+ * Dibai Fleet — design system institucional "Cinza Institucional Público".
  * Paleta: grafite (ação e navegação), cinzas neutros (estrutura e leitura),
  * branco (superfícies). Vermelho é reservado a erro, exclusão e alerta crítico.
  * Tipografia: Inter (interface) + Inter Tight (títulos).
  */
-
 
 @theme inline {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -59,10 +58,10 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --shadow-card: 0 1px 1px rgb(17 24 39 / 4%), 0 1px 3px rgb(17 24 39 / 5%);
-  --shadow-panel: 0 8px 28px rgb(17 24 39 / 10%);
+  --shadow-card: 0 1px 2px rgb(11 37 69 / 5%), 0 6px 16px -8px rgb(11 37 69 / 12%);
+  --shadow-panel: 0 18px 44px -12px rgb(11 37 69 / 22%);
   --shadow-focus: 0 0 0 3px color-mix(in oklab, var(--ring) 22%, transparent);
-  /* Estados operacionais — vocabulário visual único do FrotaGov. */
+  /* Estados operacionais — vocabulário visual único do Dibai Fleet. */
   --color-status-ok: var(--status-ok);
   --color-status-info: var(--status-info);
   --color-status-warn: var(--status-warn);
@@ -74,110 +73,151 @@
 }
 
 :root {
-  --radius: 0.4375rem;
-  --background: #f3f4f6;
-  --foreground: #1f2937;
+  --radius: 0.625rem;
+  --background: #f4f7fb;
+  --foreground: #0f1f38;
   --card: #ffffff;
-  --card-foreground: #1f2937;
+  --card-foreground: #0f1f38;
   --popover: #ffffff;
-  --popover-foreground: #1f2937;
-  --primary: #374151;
+  --popover-foreground: #0f1f38;
+  --primary: #0b2545;
   --primary-foreground: #ffffff;
-  --secondary: #f3f4f6;
-  --secondary-foreground: #374151;
-  --muted: #f3f4f6;
-  --muted-foreground: #6b7280;
-  --accent: #eef2f7;
-  --accent-foreground: #2d3748;
+  --secondary: #eaf0f8;
+  --secondary-foreground: #0b2545;
+  --muted: #eef3f9;
+  --muted-foreground: #5b6b82;
+  --accent: #e3ecf8;
+  --accent-foreground: #0b2545;
   --destructive: #c53030;
   --destructive-foreground: #ffffff;
   --success: #2e7d32;
   --success-foreground: #ffffff;
   --warning: #b7791f;
   --warning-foreground: #ffffff;
-  --border: #d1d5db;
-  --input: #d1d5db;
-  --ring: #4b5563;
-  --chart-1: #374151;
-  --chart-2: #9ca3af;
-  --chart-3: #4a5568;
+  --border: #d6e0ee;
+  --input: #c9d6e8;
+  --ring: #1d4ed8;
+  --chart-1: #0b2545;
+  --chart-2: #3b82f6;
+  --chart-3: #1d4ed8;
   --chart-4: #b7791f;
   --chart-5: #2e7d32;
-  --sidebar: #2d3748;
-  --sidebar-foreground: #e5e7eb;
-  --sidebar-primary: #cbd5e1;
-  --sidebar-primary-foreground: #1f2937;
-  --sidebar-accent: #4b5563;
+  --sidebar: #0b2545;
+  --sidebar-foreground: #dbe6f5;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #0b2545;
+  --sidebar-accent: #173a6b;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #3f4a5a;
-  --sidebar-ring: #9ca3af;
+  --sidebar-border: #173a6b;
+  --sidebar-ring: #7fb0ff;
   --status-ok: #2e7d32;
-  --status-info: #4a5568;
+  --status-info: #1d4ed8;
   --status-warn: #b7791f;
   --status-danger: #c53030;
   --status-neutral: #6b7280;
-  --surface: #f9fafb;
-  --surface-strong: #f3f4f6;
+  --surface: #f8fafd;
+  --surface-strong: #eef3f9;
 }
 
 .dark {
-  --background: #111827;
-  --foreground: #e5e7eb;
-  --card: #1a2230;
-  --card-foreground: #e5e7eb;
-  --popover: #1a2230;
-  --popover-foreground: #e5e7eb;
-  --primary: #cbd5e1;
-  --primary-foreground: #1f2937;
-  --secondary: #273142;
-  --secondary-foreground: #e5e7eb;
-  --muted: #273142;
-  --muted-foreground: #9ca3af;
-  --accent: #2f3a4c;
-  --accent-foreground: #f3f4f6;
+  --background: #08111f;
+  --foreground: #e6edf7;
+  --card: #0e1c33;
+  --card-foreground: #e6edf7;
+  --popover: #0e1c33;
+  --popover-foreground: #e6edf7;
+  --primary: #5b9bff;
+  --primary-foreground: #06111f;
+  --secondary: #14284a;
+  --secondary-foreground: #e6edf7;
+  --muted: #14284a;
+  --muted-foreground: #93a4bf;
+  --accent: #183056;
+  --accent-foreground: #f1f5fb;
   --destructive: #e05252;
-  --destructive-foreground: #1f2937;
+  --destructive-foreground: #06111f;
   --success: #4caf50;
-  --success-foreground: #10231a;
+  --success-foreground: #06170f;
   --warning: #d69e2e;
-  --warning-foreground: #1f2937;
-  --border: #37415180;
-  --input: #4b5563;
-  --ring: #9ca3af;
-  --chart-1: #cbd5e1;
-  --chart-2: #6b7280;
-  --chart-3: #94a3b8;
+  --warning-foreground: #06111f;
+  --border: #223a63;
+  --input: #2a4573;
+  --ring: #5b9bff;
+  --chart-1: #5b9bff;
+  --chart-2: #93c5fd;
+  --chart-3: #3b82f6;
   --chart-4: #d69e2e;
   --chart-5: #4caf50;
-  --sidebar: #171f2b;
-  --sidebar-foreground: #d1d5db;
-  --sidebar-primary: #cbd5e1;
-  --sidebar-primary-foreground: #1f2937;
-  --sidebar-accent: #374151;
+  --sidebar: #050d1a;
+  --sidebar-foreground: #c9d6ea;
+  --sidebar-primary: #5b9bff;
+  --sidebar-primary-foreground: #06111f;
+  --sidebar-accent: #12284a;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #2b3544;
-  --sidebar-ring: #9ca3af;
+  --sidebar-border: #12284a;
+  --sidebar-ring: #5b9bff;
   --status-ok: #4caf50;
-  --status-info: #a0aec0;
+  --status-info: #5b9bff;
   --status-warn: #d69e2e;
   --status-danger: #e05252;
-  --status-neutral: #9ca3af;
-  --surface: #1a2230;
-  --surface-strong: #222c3c;
+  --status-neutral: #93a4bf;
+  --surface: #0b1830;
+  --surface-strong: #10213f;
 }
-
 
 @layer base {
   * {
     border-color: var(--color-border);
   }
 
+  /*
+   * Escala automática pela largura da tela: celular e tablet 16px; notebook de 15" (1366 px) ≈ 14px;
+   * 17" (1600 px) ≈ 15px; monitores de 19" a 24" (1920 px) ≈ 16px; telas grandes até 16,5px.
+   * O usuário pode ajustar em "Tamanho da tela" (compacto, automático ou grande).
+   */
+  :root {
+    --fs: 16px;
+  }
+  @media (min-width: 1024px) {
+    :root {
+      --fs: clamp(14px, calc(10.2px + 0.29vw), 16.5px);
+    }
+  }
+  html {
+    font-size: var(--fs);
+    -webkit-text-size-adjust: 100%;
+  }
+  html[data-tamanho="menor"] {
+    font-size: calc(var(--fs) * 0.82);
+  }
+  html[data-tamanho="compacto"] {
+    font-size: calc(var(--fs) * 0.9);
+  }
+  html[data-tamanho="grande"] {
+    font-size: calc(var(--fs) * 1.12);
+  }
+  html[data-tamanho="maior"] {
+    font-size: calc(var(--fs) * 1.25);
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    font-size: 14.5px;
+    font-size: 0.95rem;
     -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(
+        900px 380px at 100% -80px,
+        color-mix(in oklab, var(--color-primary) 7%, transparent),
+        transparent
+      ),
+      radial-gradient(
+        700px 320px at -10% 0,
+        color-mix(in oklab, var(--color-primary) 4%, transparent),
+        transparent
+      );
+    background-repeat: no-repeat;
   }
 
   h1,
@@ -190,7 +230,7 @@
   }
 
   label {
-    font-size: 12.5px;
+    font-size: 0.8rem;
     font-weight: 600;
   }
 
@@ -201,7 +241,7 @@
 
   /* Densidade e legibilidade padrão de tabelas institucionais */
   table {
-    font-size: 13.5px;
+    font-size: 0.86rem;
   }
 
   table th {
@@ -221,17 +261,16 @@
   }
 }
 
-
 @utility gov-title {
   font-family: var(--font-display);
   font-weight: 700;
   letter-spacing: -0.012em;
 }
 
-/* Título de página: 26–30px, peso 700. */
+/* Título de página: 22–25px conforme a largura da tela, peso 700. */
 @utility gov-page-title {
   font-family: var(--font-display);
-  font-size: 27px;
+  font-size: clamp(1.35rem, 1.1rem + 0.7vw, 1.65rem);
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.02em;
@@ -240,7 +279,7 @@
 /* Título de seção: 18–20px. */
 @utility gov-section-title {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 1.1rem;
   font-weight: 650;
   line-height: 1.25;
   letter-spacing: -0.012em;
@@ -249,7 +288,7 @@
 /* Rótulo de seção/coluna no padrão ERP: curto, alto e discreto. */
 @utility gov-label {
   font-family: var(--font-display);
-  font-size: 11.5px;
+  font-size: 0.72rem;
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: 0.05em;
@@ -276,7 +315,7 @@
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 13.5px;
+  font-size: 0.84rem;
 
   & thead th {
     position: sticky;
@@ -285,7 +324,7 @@
     background: var(--color-surface-strong);
     padding: 9px 12px;
     text-align: left;
-    font-size: 11.5px;
+    font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -302,5 +341,108 @@
 
   & tbody tr:hover td {
     background: var(--color-accent);
+  }
+}
+
+/* Menu lateral com profundidade: degradê suave e brilho discreto no topo. */
+@utility sidebar-surface {
+  background-color: var(--color-sidebar);
+  background-image:
+    radial-gradient(420px 220px at 0 0, color-mix(in oklab, #2f6df6 22%, transparent), transparent),
+    linear-gradient(180deg, transparent, color-mix(in oklab, black 22%, transparent));
+}
+
+/* Cartão de indicador/gráfico com realce ao passar o mouse. */
+@utility card-lift {
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+  &:hover {
+    box-shadow: 0 10px 28px -14px rgb(11 37 69 / 28%);
+  }
+}
+
+/* Alvos de toque confortáveis no celular. */
+@media (max-width: 767px) {
+  button,
+  [role="tab"],
+  [role="menuitem"],
+  select {
+    min-height: 40px;
+  }
+}
+
+/* Tabelas como cartões no celular. */
+@media (max-width: 767px) {
+  table.responsive-table,
+  table.responsive-table tbody {
+    display: block;
+    width: 100%;
+  }
+  table.responsive-table thead {
+    display: none;
+  }
+  table.responsive-table tbody tr {
+    display: block;
+    margin: 0 0 0.75rem;
+    padding: 0.35rem 0.85rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    background: var(--color-card);
+    box-shadow: var(--shadow-card);
+  }
+  table.responsive-table tbody td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.45rem 0 !important;
+    border: 0 !important;
+    text-align: right;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  table.responsive-table tbody td[data-label]::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    max-width: 45%;
+    text-align: left;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-muted-foreground);
+  }
+  table.responsive-table tbody td[colspan] {
+    justify-content: center;
+    text-align: center;
+  }
+  table.responsive-table tbody td:not([data-label]) {
+    justify-content: flex-end;
+  }
+}
+
+/* Movimento sutil: entrada suave dos blocos. Desligado para quem prefere menos animação. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@utility animate-rise {
+  animation: rise 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }

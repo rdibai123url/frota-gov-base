@@ -1,5 +1,5 @@
 /**
- * Fase 9 — exportações padronizadas dos relatórios do FrotaGov.
+ * Fase 9 — exportações padronizadas dos relatórios do Dibai Fleet.
  * CSV (Excel pt-BR), XLSX nativo e impressão/PDF com cabeçalho institucional.
  *
  * Todo relatório (tela, impressão e exportações) carrega o mesmo cabeçalho:
@@ -29,6 +29,35 @@ export type ReportMeta = {
   filters?: { label: string; value: string }[];
 };
 
+/** Identidade do órgão/empresa que aparece no cabeçalho de todos os relatórios. */
+export type ReportBranding = {
+  name?: string | null;
+  cnpj?: string | null;
+  address?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  logoUrl?: string | null;
+};
+
+let branding: ReportBranding = {};
+
+/** Definido uma vez pelo aplicativo (a partir de "Dados do Órgão"); os relatórios usam automaticamente. */
+export function setReportBranding(b: ReportBranding) {
+  branding = b;
+}
+
+/** CNPJ, endereço e contato numa linha só, para o cabeçalho impresso. */
+function identityLine() {
+  return [
+    branding.cnpj ? `CNPJ ${branding.cnpj}` : "",
+    branding.address ?? "",
+    branding.phone ? `Tel. ${branding.phone}` : "",
+    branding.email ?? "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
 const stamp = () => new Date().toLocaleString("pt-BR");
 
 const safeName = (name: string) =>
@@ -42,7 +71,9 @@ const safeName = (name: string) =>
 /** Linhas do cabeçalho institucional usadas em CSV e XLSX. */
 export function headerLines(meta: ReportMeta, total: number): [string, string][] {
   const lines: [string, string][] = [
-    ["Órgão", meta.organization || "FrotaGov"],
+    ["Órgão", meta.organization || branding.name || "Dibai Fleet"],
+    ...(branding.cnpj ? ([["CNPJ", branding.cnpj]] as [string, string][]) : []),
+    ...(branding.address ? ([["Endereço", branding.address]] as [string, string][]) : []),
     ["Relatório", meta.title],
   ];
   if (meta.subtitle) lines.push(["Descrição", meta.subtitle]);
@@ -97,12 +128,7 @@ function csvCell(value: unknown) {
 }
 
 /** Exporta CSV (separador ";", compatível com Excel pt-BR) com cabeçalho institucional. */
-export function exportReportCsv(
-  filename: string,
-  columns: ReportColumn[],
-  rows: ReportRow[],
-  meta?: ReportMeta,
-) {
+export function reportCsvText(columns: ReportColumn[], rows: ReportRow[], meta?: ReportMeta) {
   const parts: string[] = [];
   if (meta) {
     for (const [k, v] of headerLines(meta, rows.length)) parts.push(`${csvCell(k)};${csvCell(v)}`);
@@ -111,11 +137,80 @@ export function exportReportCsv(
   parts.push(columns.map((c) => csvCell(c.label)).join(";"));
   for (const r of rows) parts.push(columns.map((c) => csvCell(r[c.key])).join(";"));
 
-  const blob = new Blob(["\uFEFF" + parts.join("\n")], { type: "text/csv;charset=utf-8" });
+  return "\uFEFF" + parts.join("\n");
+}
+
+export function exportReportCsv(
+  filename: string,
+  columns: ReportColumn[],
+  rows: ReportRow[],
+  meta?: ReportMeta,
+) {
+  const blob = new Blob([reportCsvText(columns, rows, meta)], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
   link.download = `${safeName(filename)}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+const xmlTag = (label: string, index: number) => {
+  const base = label
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Za-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return /^[A-Za-z]/.test(base) ? base : "campo_" + (index + 1);
+};
+const xmlText = (v: unknown) =>
+  String(v ?? "")
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+/** Exporta XML (UTF-8) com o cabeçalho institucional e uma <linha> por registro. */
+export function reportXmlText(columns: ReportColumn[], rows: ReportRow[], meta?: ReportMeta) {
+  const tags = columns.map((c, i) => xmlTag(c.label, i));
+  const out: string[] = ['<?xml version="1.0" encoding="UTF-8"?>', "<relatorio>"];
+  if (meta) {
+    out.push("  <cabecalho>");
+    for (const [k, v] of headerLines(meta, rows.length)) {
+      out.push(
+        '    <item rotulo="' + xmlText(k).replace(/"/g, "&quot;") + '">' + xmlText(v) + "</item>",
+      );
+    }
+    out.push("  </cabecalho>");
+  }
+  out.push("  <linhas>");
+  for (const r of rows) {
+    out.push("    <linha>");
+    columns.forEach((c, i) => {
+      const value = r[c.key];
+      const text = typeof value === "object" && value !== null ? JSON.stringify(value) : value;
+      out.push("      <" + tags[i] + ">" + xmlText(text) + "</" + tags[i] + ">");
+    });
+    out.push("    </linha>");
+  }
+  out.push("  </linhas>", "</relatorio>");
+  return out.join("\n");
+}
+
+export function exportReportXml(
+  filename: string,
+  columns: ReportColumn[],
+  rows: ReportRow[],
+  meta?: ReportMeta,
+) {
+  const blob = new Blob([reportXmlText(columns, rows, meta)], {
+    type: "application/xml;charset=utf-8",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = safeName(filename) + ".xml";
   link.click();
   URL.revokeObjectURL(url);
 }
@@ -132,7 +227,27 @@ const escapeHtml = (v: unknown) =>
  * (brasão, cabeçalho institucional, filtros, emissor e data/hora).
  * O usuário pode salvar em PDF pela própria caixa de impressão.
  */
-export function printReport(meta: ReportMeta, columns: ReportColumn[], rows: ReportRow[]) {
+export type PrintOptions = {
+  /** Colunas centralizadas (ex.: dias do mês). */
+  centerKeys?: string[];
+  /** Colunas sombreadas (ex.: sábados e domingos). */
+  shadeKeys?: string[];
+  /** Fonte menor, para tabelas largas (calendário do mês). */
+  compact?: boolean;
+  /** Linhas de assinatura no final. */
+  signatures?: string[];
+};
+
+export function printReport(
+  meta: ReportMeta,
+  columns: ReportColumn[],
+  rows: ReportRow[],
+  options: PrintOptions = {},
+) {
+  const center = new Set(options.centerKeys ?? []);
+  const shade = new Set(options.shadeKeys ?? []);
+  const cls = (key: string) =>
+    [center.has(key) ? "c" : "", shade.has(key) ? "we" : ""].filter(Boolean).join(" ");
   const filters = (meta.filters ?? []).filter((f) => f.value);
   const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8" />
 <title>${escapeHtml(meta.title)}</title>
@@ -147,7 +262,11 @@ export function printReport(meta: ReportMeta, columns: ReportColumn[], rows: Rep
   h2 { font-size: 11pt; font-weight: 600; margin: 0 0 4px; color: #3b4a66; }
   .meta { font-size: 8.5pt; color: #48566f; }
   .grid { margin-top: 6px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px 16px; font-size: 8.5pt; color: #48566f; }
-  table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+  table { width: 100%; border-collapse: collapse; font-size: ${options.compact ? "7.5pt" : "8.5pt"}; }
+  td.c, th.c { text-align: center; padding-left: 2px; padding-right: 2px; }
+  td.we, th.we { background: #e6ecf6 !important; }
+  .sign { display: flex; gap: 40px; margin-top: 34px; }
+  .sign div { flex: 1; border-top: 1px solid #12203a; padding-top: 4px; text-align: center; font-size: 8.5pt; }
   th, td { border: 1px solid #c9d2e0; padding: 4px 6px; text-align: left; vertical-align: top; }
   th { background: #eef2f8; font-weight: 600; }
   thead { display: table-header-group; }
@@ -156,9 +275,10 @@ export function printReport(meta: ReportMeta, columns: ReportColumn[], rows: Rep
 </style></head><body>
 <header>
   <div class="top">
-    ${meta.logoUrl ? `<img class="brasao" src="${escapeHtml(meta.logoUrl)}" alt="Brasão do órgão" />` : ""}
+    ${meta.logoUrl || branding.logoUrl ? `<img class="brasao" src="${escapeHtml(meta.logoUrl || branding.logoUrl)}" alt="Logotipo" />` : ""}
     <div>
-      <h1>${escapeHtml(meta.organization || "FrotaGov")}</h1>
+      <h1>${escapeHtml(meta.organization || branding.name || "Dibai Fleet")}</h1>
+      ${identityLine() ? `<div class="meta">${escapeHtml(identityLine())}</div>` : ""}
       <h2>${escapeHtml(meta.title)}</h2>
       ${meta.subtitle ? `<div class="meta">${escapeHtml(meta.subtitle)}</div>` : ""}
     </div>
@@ -172,18 +292,19 @@ export function printReport(meta: ReportMeta, columns: ReportColumn[], rows: Rep
     ${filters.length ? `<div style="grid-column: span 3"><strong>Filtros aplicados:</strong> ${filters.map((f) => `${escapeHtml(f.label)}: ${escapeHtml(f.value)}`).join(" · ")}</div>` : ""}
   </div>
 </header>
-<table><thead><tr>${columns.map((c) => `<th>${escapeHtml(c.label)}</th>`).join("")}</tr></thead>
+<table><thead><tr>${columns.map((c) => `<th class="${cls(c.key)}">${escapeHtml(c.label)}</th>`).join("")}</tr></thead>
 <tbody>${
     rows.length
       ? rows
           .map(
             (r) =>
-              `<tr>${columns.map((c) => `<td>${escapeHtml(r[c.key] ?? "—")}</td>`).join("")}</tr>`,
+              `<tr>${columns.map((c) => `<td class="${cls(c.key)}">${escapeHtml(r[c.key] ?? "—")}</td>`).join("")}</tr>`,
           )
           .join("")
       : `<tr><td colspan="${Math.max(1, columns.length)}">Nenhum dado para os filtros informados.</td></tr>`
   }</tbody></table>
-<footer>FrotaGov — Sistema de gestão de frotas públicas. Documento gerado eletronicamente.</footer>
+${(options.signatures ?? []).length ? `<div class="sign">${(options.signatures ?? []).map((x) => `<div>${escapeHtml(x)}</div>`).join("")}</div>` : ""}
+<footer>Documento gerado eletronicamente pelo Dibai Fleet — Gestão de frotas e ativos.</footer>
 <script>window.onload = function () { setTimeout(function () { window.print(); }, 350); };</script>
 </body></html>`;
 
@@ -234,9 +355,10 @@ export function printDocument(meta: {
   footer { margin-top: 26px; font-size: 8pt; color: #6b7890; }
 </style></head><body>
 <header>
-  ${meta.logoUrl ? `<img class="brasao" src="${escapeHtml(meta.logoUrl)}" alt="Brasão do órgão" />` : ""}
+  ${meta.logoUrl || branding.logoUrl ? `<img class="brasao" src="${escapeHtml(meta.logoUrl || branding.logoUrl)}" alt="Logotipo" />` : ""}
   <div>
-    <h1>${escapeHtml(meta.organization || "FrotaGov")}</h1>
+    <h1>${escapeHtml(meta.organization || branding.name || "Dibai Fleet")}</h1>
+    ${identityLine() ? `<div style="font-size:9pt;color:#48566f">${escapeHtml(identityLine())}</div>` : ""}
     <h2>${escapeHtml(meta.title)}</h2>
     ${meta.subtitle ? `<div style="font-size:9pt;color:#48566f">${escapeHtml(meta.subtitle)}</div>` : ""}
     ${meta.code ? `<div class="code">Documento nº ${escapeHtml(meta.code)}</div>` : ""}
@@ -245,7 +367,7 @@ export function printDocument(meta: {
 <dl>${fields.map((f) => `<div><dt>${escapeHtml(f.label)}</dt><dd>${escapeHtml(f.value)}</dd></div>`).join("")}</dl>
 <div class="notes"><strong style="font-size:8.5pt">Observações</strong><br />${escapeHtml(meta.notes || "—")}</div>
 <div class="sign">${signatures.map((s) => `<div>${escapeHtml(s)}</div>`).join("")}</div>
-<footer>Emitido em ${escapeHtml(stamp())}${meta.issuedBy ? ` por ${escapeHtml(meta.issuedBy)}` : ""} — FrotaGov. Documento gerado eletronicamente.</footer>
+<footer>Emitido em ${escapeHtml(stamp())}${meta.issuedBy ? ` por ${escapeHtml(meta.issuedBy)}` : ""} — Dibai Fleet. Documento gerado eletronicamente.</footer>
 <script>window.onload = function () { setTimeout(function () { window.print(); }, 350); };</script>
 </body></html>`;
   const win = window.open("", "_blank", "width=900,height=1000");

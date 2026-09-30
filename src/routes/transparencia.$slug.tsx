@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TransparenciaGrafico } from "@/components/transparencia-grafico";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Download, Landmark } from "lucide-react";
@@ -8,16 +9,16 @@ import { formatMoney, formatLiters } from "@/lib/format";
 export const Route = createFileRoute("/transparencia/$slug")({
   head: ({ params }) => ({
     meta: [
-      { title: `Transparência da frota pública — ${params.slug} | FrotaGov` },
+      { title: `Transparência da frota — ${params.slug} | Dibai Fleet` },
       {
         name: "description",
         content:
           "Dados abertos e agregados da frota do órgão público: quantidade de veículos, consumo de combustível, manutenções e contratos.",
       },
-      { property: "og:title", content: "Transparência da frota pública — FrotaGov" },
+      { property: "og:title", content: "Transparência da frota — Dibai Fleet" },
       {
         property: "og:description",
-        content: "Indicadores agregados da frota pública, sem dados pessoais.",
+        content: "Indicadores agregados da frota, sem dados pessoais.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -59,9 +60,18 @@ type Payload = {
     por_situacao: Record<string, number>;
     por_categoria: Record<string, number>;
   };
-  abastecimento?: { registros: number; litros: number; valor_total: number };
-  manutencao?: { registros: number; valor_total: number };
-  limpeza?: { registros: number; valor_total: number };
+  abastecimento?: {
+    registros: number;
+    litros: number;
+    valor_total: number;
+    por_mes?: { mes: string; valor: number }[];
+  };
+  manutencao?: {
+    registros: number;
+    valor_total: number;
+    por_mes?: { mes: string; valor: number }[];
+  };
+  limpeza?: { registros: number; valor_total: number; por_mes?: { mes: string; valor: number }[] };
   competencia?: string;
   versao?: number;
   publicado_em?: string;
@@ -121,7 +131,7 @@ function PortalTransparencia() {
       <div className="mx-auto max-w-2xl px-5 py-20 text-center">
         <h1 className="gov-title text-2xl">Portal indisponível</h1>
         <p className="mt-3 text-muted-foreground">
-          Este órgão não possui publicação de dados abertos ativa no FrotaGov.
+          Este órgão não possui publicação de dados abertos ativa no Dibai Fleet.
         </p>
       </div>
     );
@@ -261,6 +271,12 @@ function PortalTransparencia() {
             ))}
           </div>
         </section>
+
+        <TransparenciaGrafico
+          abastecimento={data.abastecimento?.por_mes}
+          manutencao={data.manutencao?.por_mes}
+          limpeza={data.limpeza?.por_mes}
+        />
 
         {data.frota && (
           <section className="rounded-lg border bg-card p-5 shadow-card">

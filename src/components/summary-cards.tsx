@@ -13,7 +13,7 @@ export function SummaryCards({ cards, className }: { cards: SummaryCard[]; class
       {cards.map((c) => (
         <div key={c.label} className="rounded-lg border bg-card px-3 py-2.5 shadow-card">
           <p
-            className="truncate text-[11px] uppercase tracking-wide text-muted-foreground"
+            className="truncate text-[0.6875rem] uppercase tracking-wide text-muted-foreground"
             title={c.label}
           >
             {c.label}
@@ -24,7 +24,9 @@ export function SummaryCards({ cards, className }: { cards: SummaryCard[]; class
           >
             {c.value}
           </p>
-          {c.hint ? <p className="mt-0.5 text-[11px] text-muted-foreground">{c.hint}</p> : null}
+          {c.hint ? (
+            <p className="mt-0.5 text-[0.6875rem] text-muted-foreground">{c.hint}</p>
+          ) : null}
         </div>
       ))}
     </div>

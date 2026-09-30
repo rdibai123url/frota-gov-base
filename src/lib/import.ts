@@ -1626,7 +1626,7 @@ const slug = (v: string) =>
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_|_$/g, "");
 
-/** Sugere o mapeamento coluna do arquivo → campo do FrotaGov. */
+/** Sugere o mapeamento coluna do arquivo → campo do Dibai Fleet. */
 export function suggestMapping(headers: string[], mod: ImportModule): Record<string, string> {
   const map: Record<string, string> = {};
   const used = new Set<string>();
@@ -1693,7 +1693,7 @@ function exampleFor(f: ImportField) {
 export function fieldHint(f: ImportField) {
   const parts: string[] = [];
   if (f.required) parts.push("obrigatório");
-  if (f.ref) parts.push("deve existir no FrotaGov");
+  if (f.ref) parts.push("deve existir no Dibai Fleet");
   if (f.type === "money") parts.push("valor no padrão 1.234,56");
   if (f.type === "liters") parts.push("litros no padrão 1.234,5678");
   if (f.type === "date" || f.type === "datetime") parts.push("data dd/mm/aaaa");
@@ -1997,7 +1997,7 @@ export function validateRows({
             field: field.key,
             label: field.label,
             value,
-            reason: `Não encontrado no FrotaGov. Importe ${refLabel(field.ref)} antes deste módulo.`,
+            reason: `Não encontrado no Dibai Fleet. Importe ${refLabel(field.ref)} antes deste módulo.`,
             level: field.required ? "erro" : "aviso",
           });
           if (field.required) continue;

@@ -1,7 +1,7 @@
 /**
  * Bloco 6.1 — Matriz de módulos por órgão.
  *
- * Cada módulo corresponde a uma tela (rota) do FrotaGov. A ausência de linha em
+ * Cada módulo corresponde a uma tela (rota) do Dibai Fleet. A ausência de linha em
  * `organization_modules` significa "usar o padrão do módulo": habilitado, exceto
  * os módulos listados em DEFAULT_DISABLED, que nascem desabilitados para órgãos novos.
  */
@@ -35,9 +35,12 @@ const m = (
 });
 
 export const MODULES: ModuleDef[] = [
-  m("painel", "Painel", "Painel", [], true),
+  m("painel", "Dashboard", "Dashboard", [], true),
   m("veiculos", "Veículos", "Frota", ["/veiculo/"]),
   m("equipamentos", "Máquinas e equipamentos", "Frota"),
+  m("motorista", "Área do motorista", "Frota"),
+  m("escala", "Escala de motoristas", "Frota"),
+  m("minha-escala", "Minha escala", "Frota"),
   m("utilizacao", "Utilização e reservas", "Frota"),
   m("disponibilidade", "Disponibilidade da Frota", "Frota"),
   m("diarias", "Diárias", "Frota"),
@@ -55,16 +58,18 @@ export const MODULES: ModuleDef[] = [
   m("manutencoes", "Manutenções", "Manutenção"),
   m("planos-manutencao", "Planos preventivos", "Manutenção"),
   m("limpeza", "Limpeza da frota", "Manutenção"),
-  m("pecas", "Peças e acessórios", "Manutenção"),
-  m("almoxarifado", "Almoxarifado", "Manutenção"),
+  m("garantias", "Garantias", "Manutenção"),
+  m("pesquisa-precos", "Pesquisa de preços", "Manutenção"),
+  m("regras-manutencao", "Regras de manutenção", "Manutenção"),
+  m("pneus", "Controle de pneus", "Manutenção"),
   m("rede-credenciada", "Oficinas e prestadores do órgão", "Prestadores e compras"),
-  m("credenciados", "Credenciados do órgão e cartão virtual", "Prestadores e compras"),
-  m("portal-credenciado", "Portal do credenciado", "Prestadores e compras"),
   m("mapa-rede", "Mapa dos prestadores do órgão", "Prestadores e compras"),
   m("cotacoes", "Cotações", "Prestadores e compras", ["/cotacao/"]),
   m("ordens-servico", "Ordens de Serviço", "Prestadores e compras", ["/ordem-servico/"]),
-  m("ofp", "Ordens de fornecimento (OFP)", "Prestadores e compras"),
   m("contratos", "Contratos", "Contratos e Orçamento"),
+  m("rastreamento", "Rastreamento", "Frota"),
+  m("faturamento", "Faturamento", "Contratos e Orçamento"),
+  m("gestao-contrato", "Gestão do contrato (IMR)", "Contratos e Orçamento"),
   m("empenhos", "Empenhos", "Contratos e Orçamento"),
   m("cotas", "Cotas e saldos", "Contratos e Orçamento"),
   m("centros-custo", "Centros de Custo", "Contratos e Orçamento"),
@@ -74,10 +79,13 @@ export const MODULES: ModuleDef[] = [
   m("funcionarios", "Funcionários", "Cadastros"),
   m("entidades-externas", "Pessoas e Empresas Externas", "Cadastros"),
   m("usuarios", "Usuários e Permissões", "Cadastros", [], true),
+  m("perfis-acesso", "Perfis de acesso", "Cadastros", [], true),
   m("migracao", "Migração de dados", "Cadastros"),
   m("exportacao", "Exportar dados", "Cadastros"),
   m("inteligencia", "Inteligência da frota", "Relatórios e análises"),
   m("relatorios", "Relatórios avançados", "Relatórios e análises"),
+  m("avisos", "Avisos de vencimento", "Relatórios e análises"),
+  m("prestacao-contas", "Prestação de contas", "Relatórios e análises"),
   m("sustentabilidade", "Sustentabilidade da frota", "Relatórios e análises"),
   m("transparencia", "Portal da Transparência", "Integrações e dados abertos"),
   m("integracoes", "Central de Integrações", "Integrações e dados abertos"),
@@ -85,10 +93,120 @@ export const MODULES: ModuleDef[] = [
   m("alertas", "Alertas e inconsistências", "Alertas"),
 ];
 
-/** Módulos que nascem DESABILITADOS para órgãos novos (Bloco 6.1). */
-export const DEFAULT_DISABLED = ["credenciados", "portal-credenciado"];
+/** Módulos que nascem DESABILITADOS: o Super Admin ativa por órgão quando o órgão precisar. */
+export const DEFAULT_DISABLED = [
+  "equipamentos",
+  "regras-manutencao",
+  "faturamento",
+  "gestao-contrato",
+  "rastreamento",
+  "integracoes",
+  "chaves-api",
+];
 
 export const MODULE_GROUPS = Array.from(new Set(MODULES.map((x) => x.group)));
+
+/**
+ * Funções dentro das abas. O Super Admin pode desligar uma função sem desligar a aba inteira.
+ * Ficam guardadas em organization_modules com a chave `fn:<função>`; sem linha, a função está ligada.
+ */
+export type FeatureDef = { key: string; module: string; label: string; hint: string };
+
+export const FEATURES: FeatureDef[] = [
+  {
+    key: "condutores.afastamento",
+    module: "condutores",
+    label: "Afastamentos (férias, licença, INSS, atestado)",
+    hint: "Botão Afastamento e filtro “Afastados agora”",
+  },
+  {
+    key: "escala.imprimir",
+    module: "escala",
+    label: "Imprimir a escala",
+    hint: "Botão de impressão da escala em A4",
+  },
+  {
+    key: "relatorios.exportar",
+    module: "relatorios",
+    label: "Exportar relatórios (CSV, Excel, XML e PDF)",
+    hint: "Desligado, o relatório só pode ser visto na tela",
+  },
+  {
+    key: "abastecimentos.registrar",
+    module: "abastecimentos",
+    label: "Registrar abastecimentos",
+    hint: "Desligado, a tela fica somente para consulta",
+  },
+  {
+    key: "manutencoes.registrar",
+    module: "manutencoes",
+    label: "Registrar manutenções",
+    hint: "Desligado, a tela fica somente para consulta",
+  },
+  {
+    key: "multas.registrar",
+    module: "multas",
+    label: "Registrar multas",
+    hint: "Desligado, a tela fica somente para consulta",
+  },
+  {
+    key: "veiculos.cadastro",
+    module: "veiculos",
+    label: "Cadastrar e editar veículos",
+    hint: "Desligado, a tela fica somente para consulta",
+  },
+];
+
+export const featureModuleKey = (key: string) => `fn:${key}`;
+
+/** Pacotes prontos: o Super Admin escolhe o que o órgão contratou com um clique. */
+export const MODULE_PRESETS: {
+  id: string;
+  label: string;
+  description: string;
+  groups: string[];
+}[] = [
+  {
+    id: "gestao-frota",
+    label: "Somente gestão de frota",
+    description:
+      "Veículos, condutores, escala, utilização e relatórios. Desliga abastecimento, manutenção, prestadores, contratos e orçamento.",
+    groups: ["Dashboard", "Frota", "Cadastros", "Relatórios e análises", "Alertas"],
+  },
+  {
+    id: "frota-abast",
+    label: "Frota + abastecimento",
+    description: "Gestão de frota mais autorizações e controle de abastecimento.",
+    groups: [
+      "Dashboard",
+      "Frota",
+      "Abastecimento",
+      "Cadastros",
+      "Relatórios e análises",
+      "Alertas",
+    ],
+  },
+  {
+    id: "frota-abast-manut",
+    label: "Frota + abastecimento + manutenção",
+    description: "Sem prestadores, contratos e orçamento.",
+    groups: [
+      "Dashboard",
+      "Frota",
+      "Abastecimento",
+      "Manutenção",
+      "Cadastros",
+      "Relatórios e análises",
+      "Alertas",
+    ],
+  },
+  {
+    id: "completo",
+    label: "Sistema completo",
+    description: "Todas as abas (as que nascem desligadas continuam desligadas).",
+    groups: MODULES.map((x) => x.group),
+  },
+];
 
 export function moduleDefault(key: string) {
   return !DEFAULT_DISABLED.includes(key);
@@ -141,6 +259,54 @@ export function buildModuleMap(rows: ModuleRow[]): Record<string, boolean> {
   for (const r of rows) map[r.module_key] = r.enabled;
   for (const mod of MODULES) if (mod.essential) map[mod.key] = true;
   return map;
+}
+
+/** Escolhas de acesso por perfil feitas pelo administrador do órgão. */
+export function useAccessOverrides() {
+  return useQuery({
+    queryKey: ["org-role-access"],
+    staleTime: 1000 * 60,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("org_role_access")
+        .select("module_key, role, allowed");
+      if (error) throw error;
+      const out: Record<string, Record<string, boolean>> = {};
+      for (const r of data ?? []) (out[r.module_key] ??= {})[r.role] = r.allowed;
+      return out as Record<string, Partial<Record<import("@/lib/frotagov").AppRole, boolean>>>;
+    },
+  });
+}
+
+/** Escolhas de acesso feitas pelo gestor especificamente para o usuário logado. */
+export function useMyModuleAccess() {
+  return useQuery({
+    queryKey: ["my-module-access"],
+    staleTime: 1000 * 60,
+    queryFn: async () => {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user) return {} as Record<string, boolean>;
+      const { data, error } = await supabase
+        .from("user_module_access")
+        .select("module_key, allowed")
+        .eq("user_id", auth.user.id);
+      // sem a tabela (ambiente ainda não atualizado) vale o padrão do perfil
+      if (error) return {} as Record<string, boolean>;
+      const out: Record<string, boolean> = {};
+      for (const r of data ?? []) out[r.module_key] = r.allowed;
+      return out;
+    },
+  });
+}
+
+/** Diz se uma função de aba está ligada (sem configuração, está ligada). */
+export function featureOn(map: Record<string, boolean>, key: string) {
+  return map[featureModuleKey(key)] !== false;
+}
+
+export function useFeature(key: string) {
+  const { map } = useModuleMap();
+  return featureOn(map, key);
 }
 
 /** Mapa de módulos habilitados para o órgão em contexto. */

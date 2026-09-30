@@ -722,7 +722,7 @@ function ImportWizard({ orgId }: { orgId: string }) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Campo do FrotaGov</TableHead>
+                  <TableHead>Campo do Dibai Fleet</TableHead>
                   <TableHead>Coluna do arquivo</TableHead>
                   <TableHead>Regra</TableHead>
                 </TableRow>

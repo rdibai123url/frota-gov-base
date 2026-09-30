@@ -1,7 +1,7 @@
 /**
  * Rodada 2 — Etapa 3: Consulta à Tabela FIPE via provedor configurado.
  *
- * Importante: o FrotaGov não é a FIPE nem um canal oficial dela. Toda consulta
+ * Importante: o Dibai Fleet não é a FIPE nem um canal oficial dela. Toda consulta
  * é feita a um provedor público configurado pelo órgão (por padrão
  * https://fipe.api.br), e o resultado é sempre identificado como
  * "Consulta à Tabela FIPE via provedor configurado".

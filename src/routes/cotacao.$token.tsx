@@ -41,13 +41,13 @@ const dateTime = (iso: string) =>
 export const Route = createFileRoute("/cotacao/$token")({
   head: () => ({
     meta: [
-      { title: "Responder cotação — FrotaGov" },
+      { title: "Responder cotação — Dibai Fleet" },
       {
         name: "description",
         content: "Página segura para o fornecedor apresentar proposta em cotação de órgão público.",
       },
       { name: "robots", content: "noindex, nofollow" },
-      { property: "og:title", content: "Responder cotação — FrotaGov" },
+      { property: "og:title", content: "Responder cotação — Dibai Fleet" },
       { property: "og:description", content: "Envio de proposta por fornecedor convidado." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

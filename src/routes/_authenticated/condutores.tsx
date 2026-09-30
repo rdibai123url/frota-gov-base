@@ -1,10 +1,13 @@
+import { useFeature } from "@/lib/modulos";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Search, Pencil, IdCard, Plane } from "lucide-react";
+import { Plus, Search, Pencil, IdCard, Plane, CalendarOff } from "lucide-react";
 import { toast } from "sonner";
+import { isValidEmail } from "@/lib/validacoes";
 
 import { CpfInput } from "@/components/form-fields";
 import { PageHeader } from "@/components/app-shell";
+import { AfastamentoDialog } from "@/components/afastamento-condutor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,6 +40,7 @@ import {
 import {
   CNH_CATEGORIES,
   CNH_LABELS,
+  ABSENCE_REASONS,
   DRIVER_BONDS,
   cnhState,
   dateBR,
@@ -48,6 +52,7 @@ import {
   useDrivers,
   useInvalidate,
   usePerms,
+  useOrgUsers,
   useUnits,
   type DriverRow,
 } from "@/lib/frotagov";
@@ -57,14 +62,14 @@ import { useDiaries, DIARY_STATUS } from "@/lib/diarias";
 export const Route = createFileRoute("/_authenticated/condutores")({
   head: () => ({
     meta: [
-      { title: "Condutores — FrotaGov" },
+      { title: "Condutores — Dibai Fleet" },
       {
         name: "description",
         content:
           "Cadastro estruturado de condutores do órgão, com matrícula funcional, vínculo, unidade e controle de validade da CNH.",
       },
-      { property: "og:title", content: "Condutores — FrotaGov" },
-      { property: "og:description", content: "Gestão de condutores habilitados da frota pública." },
+      { property: "og:title", content: "Condutores — Dibai Fleet" },
+      { property: "og:description", content: "Gestão de condutores habilitados da frota." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -86,6 +91,7 @@ function CnhBadge({ expiry }: { expiry: string | null }) {
 }
 
 function Condutores() {
+  const absenceOn = useFeature("condutores.afastamento");
   const { data: drivers = [], isLoading } = useDrivers();
   const { data: units = [] } = useUnits();
   const perms = usePerms();
@@ -98,6 +104,7 @@ function Condutores() {
   const [editing, setEditing] = useState<DriverRow | null>(null);
   const [openNew, setOpenNew] = useState(false);
   const [history, setHistory] = useState<string | null>(null);
+  const [absenceOf, setAbsenceOf] = useState<string | null>(null);
   const { data: diaries = [] } = useDiaries();
 
   const filtered = useMemo(() => {
@@ -108,6 +115,7 @@ function Condutores() {
       if (fStatus === "inativo" && d.active) return false;
       if (fStatus === "cnh_vencida" && cnhState(d.license_expiry) !== "vencida") return false;
       if (fStatus === "cnh_a_vencer" && cnhState(d.license_expiry) !== "a_vencer") return false;
+      if (fStatus === "afastado" && !d.current_absence) return false;
       if (t) {
         const hay = [d.full_name, d.registration_number, d.license_number, d.email]
           .filter(Boolean)
@@ -125,6 +133,7 @@ function Condutores() {
 
   const vencidas = drivers.filter((d) => cnhState(d.license_expiry) === "vencida").length;
   const aVencer = drivers.filter((d) => cnhState(d.license_expiry) === "a_vencer").length;
+  const afastados = drivers.filter((d) => d.current_absence).length;
 
   return (
     <>
@@ -139,6 +148,23 @@ function Condutores() {
           ) : undefined
         }
       />
+
+      <div className="mb-4 flex flex-wrap items-center gap-3 rounded-lg border bg-card p-3 text-sm shadow-card">
+        <CalendarOff className="size-4 shrink-0" />
+        <span>
+          <strong>Afastamentos:</strong> use o botão <strong>Afastamento</strong> na linha do
+          motorista para registrar férias, licença, INSS ou atestado (até 15 dias) e a previsão de
+          retorno.{" "}
+          {afastados > 0
+            ? `${afastados} condutor(es) afastado(s) agora.`
+            : "Nenhum condutor afastado agora."}
+        </span>
+        {afastados > 0 && (
+          <Button size="sm" variant="outline" onClick={() => setFStatus("afastado")}>
+            Ver afastados
+          </Button>
+        )}
+      </div>
 
       {(vencidas > 0 || aVencer > 0) && (
         <div className="mb-4 flex flex-wrap gap-3 rounded-lg border border-warning/40 bg-warning/10 p-4 text-sm">
@@ -191,6 +217,7 @@ function Condutores() {
               <SelectItem value="inativo">Inativos</SelectItem>
               <SelectItem value="cnh_vencida">CNH vencida</SelectItem>
               <SelectItem value="cnh_a_vencer">CNH a vencer</SelectItem>
+              {absenceOn && <SelectItem value="afastado">Afastados agora</SelectItem>}
             </SelectContent>
           </Select>
         </div>
@@ -239,10 +266,22 @@ function Condutores() {
                   <CnhBadge expiry={d.license_expiry} />
                 </TableCell>
                 <TableCell>
-                  {d.active ? (
-                    <Badge variant="default">Ativo</Badge>
-                  ) : (
+                  {!d.active ? (
                     <Badge variant="outline">Inativo</Badge>
+                  ) : d.current_absence ? (
+                    <Badge
+                      variant="outline"
+                      className="border-amber-500/60 text-amber-700 dark:text-amber-400"
+                    >
+                      Afastado ·{" "}
+                      {ABSENCE_REASONS.find((r) => r.value === d.current_absence?.reason)?.label ??
+                        d.current_absence.reason}
+                      {d.current_absence.expected_return
+                        ? ` até ${dateBR(d.current_absence.expected_return)}`
+                        : ""}
+                    </Badge>
+                  ) : (
+                    <Badge variant="default">Ativo</Badge>
                   )}
                 </TableCell>
                 <TableCell>
@@ -257,7 +296,19 @@ function Condutores() {
                     {diaries.filter((x) => x.beneficiary_driver_id === d.id).length}
                   </Button>
                 </TableCell>
-                <TableCell>
+                <TableCell className="whitespace-nowrap">
+                  {absenceOn && (
+                    <Button
+                      variant={d.current_absence ? "default" : "outline"}
+                      size="sm"
+                      className="gap-1.5"
+                      aria-label={`Afastamento de ${d.full_name}`}
+                      title="Afastamento (férias, licença, INSS, atestado)"
+                      onClick={() => setAbsenceOf(d.id)}
+                    >
+                      <CalendarOff className="size-4" /> Afastamento
+                    </Button>
+                  )}
                   {perms.canWrite && (
                     <Button
                       variant="ghost"
@@ -299,6 +350,13 @@ function Condutores() {
             </Button>
           </div>
         </div>
+      )}
+
+      {absenceOf && drivers.find((x) => x.id === absenceOf) && (
+        <AfastamentoDialog
+          driver={drivers.find((x) => x.id === absenceOf) as DriverRow}
+          onClose={() => setAbsenceOf(null)}
+        />
       )}
 
       {history && (
@@ -379,6 +437,8 @@ function DriverDialog({
   const [cpf, setCpf] = useState(driver?.cpf ? maskCPF(driver.cpf) : "");
   const [registration, setRegistration] = useState(driver?.registration_number ?? "");
   const [unitId, setUnitId] = useState(driver?.unit_id ?? NONE);
+  const [userId, setUserId] = useState(driver?.user_id ?? NONE);
+  const { data: orgUsers = [] } = useOrgUsers();
   const [bond, setBond] = useState(driver?.bond_type ?? "efetivo");
   const [phone, setPhone] = useState(driver?.phone ?? "");
   const [email, setEmail] = useState(driver?.email ?? "");
@@ -404,6 +464,10 @@ function DriverDialog({
       toast.error("CPF inválido.");
       return;
     }
+    if (!isValidEmail(email)) {
+      toast.error("Informe um e-mail válido.");
+      return;
+    }
     if (!perms.orgId) {
       toast.error("Seu usuário não está vinculado a um órgão.");
       return;
@@ -413,6 +477,7 @@ function DriverDialog({
     const payload = {
       organization_id: perms.orgId,
       unit_id: unitId === NONE ? null : unitId,
+      user_id: userId === NONE ? null : userId,
       full_name: fullName.trim(),
       cpf: cpfDigits || null,
       registration_number: registration.trim() || null,
@@ -484,6 +549,22 @@ function DriverDialog({
                 {units.map((u) => (
                   <SelectItem key={u.id} value={u.id}>
                     {u.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Usuário do sistema (para a Área do motorista)</Label>
+            <Select value={userId} onValueChange={setUserId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sem acesso ao sistema" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>Sem acesso ao sistema</SelectItem>
+                {orgUsers.map((u) => (
+                  <SelectItem key={u.id} value={u.id}>
+                    {u.full_name || u.email}
                   </SelectItem>
                 ))}
               </SelectContent>

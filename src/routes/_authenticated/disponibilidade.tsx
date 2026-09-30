@@ -40,16 +40,15 @@ import {
 export const Route = createFileRoute("/_authenticated/disponibilidade")({
   head: () => ({
     meta: [
-      { title: "Disponibilidade da Frota — FrotaGov" },
+      { title: "Disponibilidade da Frota — Dibai Fleet" },
       {
         name: "description",
         content: "Visão operacional da disponibilidade de veículos e equipamentos do órgão.",
       },
-      { property: "og:title", content: "Disponibilidade da Frota — FrotaGov" },
+      { property: "og:title", content: "Disponibilidade da Frota — Dibai Fleet" },
       {
         property: "og:description",
-        content:
-          "Situações derivadas de usos, reservas, manutenções e obrigações da frota pública.",
+        content: "Situações derivadas de usos, reservas, manutenções e obrigações da frota.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -273,7 +273,7 @@ export function VeiculoDadosOficiais({ vehicleId }: { vehicleId: string }) {
                 <TableRow>
                   <TableHead className="w-10" />
                   <TableHead>Dado</TableHead>
-                  <TableHead>No FrotaGov</TableHead>
+                  <TableHead>No Dibai Fleet</TableHead>
                   <TableHead>Na base nacional</TableHead>
                 </TableRow>
               </TableHeader>

@@ -3,6 +3,8 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard,
+  CalendarDays,
+  IdCard,
   Truck,
   Building2,
   Landmark,
@@ -52,15 +54,22 @@ import {
   useOrganization,
   useProfile,
   ROLE_LABELS,
+  type AppRole,
 } from "@/lib/frotagov";
 import { useIsSuperAdmin, usePlatformSession, usePlatformContextActions } from "@/lib/platform";
-import { moduleForPath, useModuleMap } from "@/lib/modulos";
+import { moduleForPath, useAccessOverrides, useModuleMap, useMyModuleAccess } from "@/lib/modulos";
+import { roleCanOpen, type AccessOverrides } from "@/lib/permissoes";
+import { useEmbedded } from "@/components/embedded";
+import { setReportBranding } from "@/lib/reports";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { BrandMark } from "@/components/brand-mark";
+import { applyBrandTheme } from "@/lib/tema-cliente";
 
 type NavLeaf = { to: string; label: string };
 type NavGroup = { id: string; label: string; icon: typeof Truck; to?: string; items?: NavLeaf[] };
 
 const NAV: NavGroup[] = [
-  { id: "painel", label: "Painel", icon: LayoutDashboard, to: "/painel" },
+  { id: "painel", label: "Dashboard", icon: LayoutDashboard, to: "/painel" },
   {
     id: "frota",
     label: "Frota",
@@ -68,8 +77,12 @@ const NAV: NavGroup[] = [
     items: [
       { to: "/veiculos", label: "Veículos" },
       { to: "/equipamentos", label: "Máquinas e equipamentos" },
+      { to: "/motorista", label: "Área do motorista" },
+      { to: "/escala", label: "Escala de motoristas" },
+      { to: "/minha-escala", label: "Minha escala" },
       { to: "/utilizacao", label: "Utilização e reservas" },
       { to: "/disponibilidade", label: "Disponibilidade da Frota" },
+      { to: "/rastreamento", label: "Rastreamento" },
       { to: "/diarias", label: "Diárias" },
       { to: "/multas", label: "Multas e infrações" },
       { to: "/sinistros", label: "Acidentes e sinistros" },
@@ -88,8 +101,6 @@ const NAV: NavGroup[] = [
       { to: "/autorizacoes", label: "Autorizações" },
       { to: "/abastecimentos", label: "Abastecimentos" },
       { to: "/combustiveis", label: "Combustíveis" },
-      { to: "/cotas-servidor", label: "Cotas de servidor" },
-      { to: "/fornecedores", label: "Fornecedores / Postos" },
     ],
   },
   {
@@ -100,8 +111,8 @@ const NAV: NavGroup[] = [
       { to: "/manutencoes", label: "Manutenções" },
       { to: "/planos-manutencao", label: "Planos preventivos" },
       { to: "/limpeza", label: "Limpeza da frota" },
-      { to: "/pecas", label: "Peças e acessórios" },
-      { to: "/almoxarifado", label: "Almoxarifado" },
+      { to: "/garantias", label: "Garantias, preços e regras" },
+      { to: "/pneus", label: "Controle de pneus" },
     ],
   },
   {
@@ -109,9 +120,7 @@ const NAV: NavGroup[] = [
     label: "Prestadores e compras",
     icon: ClipboardList,
     items: [
-      { to: "/rede-credenciada", label: "Oficinas e prestadores do órgão" },
-      { to: "/credenciados", label: "Credenciados do órgão e cartão virtual" },
-      { to: "/portal-credenciado", label: "Portal do credenciado" },
+      { to: "/rede-credenciada", label: "Oficinas e fornecedores" },
       { to: "/mapa-rede", label: "Mapa dos prestadores do órgão" },
       { to: "/cotacoes", label: "Cotações" },
       { to: "/ordens-servico", label: "Ordens de Serviço" },
@@ -123,6 +132,8 @@ const NAV: NavGroup[] = [
     icon: FileText,
     items: [
       { to: "/contratos", label: "Contratos" },
+      { to: "/faturamento", label: "Faturamento" },
+      { to: "/gestao-contrato", label: "Gestão do contrato (IMR)" },
       { to: "/empenhos", label: "Empenhos" },
       { to: "/cotas", label: "Cotas e saldos" },
       { to: "/centros-custo", label: "Centros de Custo" },
@@ -139,6 +150,7 @@ const NAV: NavGroup[] = [
       { to: "/funcionarios", label: "Funcionários" },
       { to: "/entidades-externas", label: "Pessoas e Empresas Externas" },
       { to: "/usuarios", label: "Usuários e Permissões" },
+      { to: "/perfis-acesso", label: "Perfis de acesso" },
       { to: "/migracao", label: "Migração de dados" },
       { to: "/exportacao", label: "Exportar dados" },
     ],
@@ -151,6 +163,8 @@ const NAV: NavGroup[] = [
     items: [
       { to: "/inteligencia", label: "Inteligência da frota" },
       { to: "/relatorios", label: "Relatórios avançados" },
+      { to: "/avisos", label: "Avisos de vencimento" },
+      { to: "/prestacao-contas", label: "Prestação de contas" },
       { to: "/sustentabilidade", label: "Sustentabilidade da frota" },
     ],
   },
@@ -232,9 +246,31 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { data: me } = useProfile();
   const { data: brasao } = useBrasaoUrl(org?.logo_url);
   const { isSuperAdmin } = useIsSuperAdmin();
+  // Tema de cores do cliente, montado a partir da cor da marca cadastrada em "Dados do órgão".
+  useEffect(() => applyBrandTheme(org?.brand_color), [org?.brand_color]);
+
+  // O cabeçalho de todos os relatórios usa nome, CNPJ, endereço e logotipo do órgão/empresa.
+  useEffect(() => {
+    if (!org) return;
+    setReportBranding({
+      name: org.legal_name,
+      cnpj: org.cnpj,
+      address: [
+        org.address,
+        org.city && org.state ? `${org.city}/${org.state}` : (org.city ?? org.state),
+      ]
+        .filter(Boolean)
+        .join(", "),
+      phone: org.phone,
+      email: org.email,
+      logoUrl: brasao ?? null,
+    });
+  }, [org, brasao]);
   const { data: platformSession } = usePlatformSession();
   const { exitOrg } = usePlatformContextActions();
   const { map: modules, isLoading: modulesLoading } = useModuleMap();
+  const { data: overrides } = useAccessOverrides();
+  const { data: myAccess } = useMyModuleAccess();
   /** Contador de alertas abertos: destaca o item do menu enquanto houver pendência. */
   const { data: openAlerts = 0 } = useOpenAlertCount();
 
@@ -246,7 +282,9 @@ export function AppShell({ children }: { children: ReactNode }) {
     }
     const items = (group.items ?? []).filter((leaf) => {
       const mod = moduleForPath(leaf.to);
-      return !mod || modules[mod.key] !== false;
+      if (!mod) return true;
+      if (modules[mod.key] === false) return false;
+      return isSuperAdmin || roleCanOpen(mod.key, me?.roles ?? [], overrides ?? {}, myAccess ?? {});
     });
     return items.length ? { ...group, items } : null;
   }).filter((g): g is NavGroup => g !== null);
@@ -255,6 +293,11 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const currentModule = moduleForPath(pathname);
   const blocked = !modulesLoading && !!currentModule && modules[currentModule.key] === false;
+  const noAccess =
+    !!me &&
+    !!currentModule &&
+    !isSuperAdmin &&
+    !roleCanOpen(currentModule.key, me.roles ?? [], overrides ?? {}, myAccess ?? {});
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -280,21 +323,19 @@ export function AppShell({ children }: { children: ReactNode }) {
    * dica ao passar o mouse). O modo compacto libera largura para as tabelas.
    */
   const renderSidebar = (compact: boolean) => (
-    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
+    <div className="sidebar-surface flex h-full flex-col text-sidebar-foreground">
       <div
         className={cn(
           "flex items-center gap-3 border-b border-sidebar-border py-4",
           compact ? "justify-center px-2" : "px-4",
         )}
       >
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-          <ShieldCheck className="size-5" />
-        </div>
+        <BrandMark className="size-9 shadow-md" />
         {!compact && (
           <div className="min-w-0 leading-tight">
-            <p className="gov-title text-lg">FrotaGov</p>
-            <p className="truncate text-[11px] uppercase tracking-widest opacity-70">
-              Gestão de frotas públicas
+            <p className="gov-title text-lg">Dibai Fleet</p>
+            <p className="truncate text-[0.6875rem] uppercase tracking-widest opacity-70">
+              Gestão de frotas e ativos
             </p>
           </div>
         )}
@@ -348,7 +389,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 to={group.to}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "relative flex items-center gap-3 rounded-md px-3 py-2 text-[13.5px] transition-colors",
+                  "relative flex items-center gap-3 rounded-md px-3 py-2 text-[0.8438rem] transition-colors",
                   active
                     ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-sidebar-primary"
                     : "text-sidebar-foreground/75 hover:bg-white/6 hover:text-sidebar-accent-foreground",
@@ -358,7 +399,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <group.icon className="size-4 shrink-0" />
                 <span className="truncate">{group.label}</span>
                 {group.id === "alertas" && openAlerts > 0 && (
-                  <span className="ml-auto rounded-full bg-warning/20 px-2 py-0.5 text-[11px] font-semibold text-warning">
+                  <span className="ml-auto rounded-full bg-warning/20 px-2 py-0.5 text-[0.6875rem] font-semibold text-warning">
                     {openAlerts}
                   </span>
                 )}
@@ -374,7 +415,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 aria-expanded={expanded}
                 onClick={() => setOpenGroup(expanded ? null : group.id)}
                 className={cn(
-                  "flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-[13.5px] transition-colors hover:bg-white/6",
+                  "flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-[0.8438rem] transition-colors hover:bg-white/6",
                   inGroup
                     ? "font-semibold text-sidebar-accent-foreground"
                     : "text-sidebar-foreground/75 hover:text-sidebar-accent-foreground",
@@ -396,7 +437,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                         to={leaf.to}
                         onClick={() => setOpen(false)}
                         className={cn(
-                          "relative block truncate rounded-md px-3 py-1.5 text-[13px] transition-colors",
+                          "relative block truncate rounded-md px-3 py-1.5 text-[0.8125rem] transition-colors",
                           active
                             ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground before:absolute before:inset-y-1 before:-left-[13px] before:w-[3px] before:rounded-full before:bg-sidebar-primary"
                             : "text-sidebar-foreground/70 hover:bg-white/6 hover:text-sidebar-accent-foreground",
@@ -469,8 +510,13 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         {open && (
           <div className="fixed inset-0 z-50 lg:hidden">
-            <div className="absolute inset-0 bg-foreground/40" onClick={() => setOpen(false)} />
-            <div className="absolute inset-y-0 left-0 w-72">{renderSidebar(false)}</div>
+            <div
+              className="animate-in fade-in absolute inset-0 bg-foreground/45 backdrop-blur-[2px] duration-200"
+              onClick={() => setOpen(false)}
+            />
+            <div className="animate-in slide-in-from-left absolute inset-y-0 left-0 w-[80vw] max-w-72 shadow-2xl duration-200">
+              {renderSidebar(false)}
+            </div>
             <Button
               variant="secondary"
               size="icon"
@@ -483,7 +529,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         )}
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-card px-4 sm:px-6">
+          <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-card/85 px-4 backdrop-blur-md supports-[backdrop-filter]:bg-card/70 sm:px-6">
             <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setOpen(true)}>
               <Menu className="size-5" />
             </Button>
@@ -518,10 +564,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
             )}
             <div className="min-w-0 leading-tight">
-              <p className="gov-title truncate text-[14.5px]">
+              <p className="gov-title truncate text-[0.9063rem]">
                 {org?.legal_name ?? "Órgão não configurado"}
               </p>
-              <p className="truncate text-[12px] text-muted-foreground">
+              <p className="truncate text-[0.75rem] text-muted-foreground">
                 {[org?.short_name, org?.city, org?.state].filter(Boolean).join(" · ") ||
                   "Complete os dados do órgão"}
               </p>
@@ -531,11 +577,13 @@ export function AppShell({ children }: { children: ReactNode }) {
               <button
                 type="button"
                 onClick={() => setSearchOpen(true)}
-                className="hidden h-8 items-center gap-2 rounded-md border border-border bg-surface px-2.5 text-[12.5px] text-muted-foreground transition-colors hover:bg-muted md:flex"
+                className="hidden h-8 items-center gap-2 rounded-md border border-border bg-surface px-2.5 text-[0.7813rem] text-muted-foreground transition-colors hover:bg-muted md:flex"
               >
                 <Search className="size-3.5" />
                 <span>Buscar tela…</span>
-                <kbd className="rounded border border-border bg-card px-1 text-[10px]">Ctrl K</kbd>
+                <kbd className="rounded border border-border bg-card px-1 text-[0.625rem]">
+                  Ctrl K
+                </kbd>
               </button>
               <Button
                 variant="ghost"
@@ -561,6 +609,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <TooltipContent>Alertas e inconsistências</TooltipContent>
               </Tooltip>
 
+              <ThemeToggle />
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" aria-label="Sua conta">
@@ -570,7 +620,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <DropdownMenuContent align="end" className="w-60">
                   <DropdownMenuLabel className="truncate">
                     {me?.profile?.full_name || me?.email}
-                    <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+                    <span className="mt-0.5 block text-[0.6875rem] font-normal text-muted-foreground">
                       {primaryRoleLabel}
                     </span>
                   </DropdownMenuLabel>
@@ -587,7 +637,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </header>
 
           <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
-            <CommandInput placeholder="Buscar tela do FrotaGov…" />
+            <CommandInput placeholder="Buscar tela do Dibai Fleet…" />
             <CommandList>
               <CommandEmpty>Nenhuma tela encontrada.</CommandEmpty>
               <CommandGroup heading="Telas disponíveis para este órgão">
@@ -601,7 +651,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                     }}
                   >
                     <span>{t.label}</span>
-                    <span className="ml-auto text-[11px] text-muted-foreground">{t.group}</span>
+                    <span className="ml-auto text-[0.6875rem] text-muted-foreground">
+                      {t.group}
+                    </span>
                   </CommandItem>
                 ))}
               </CommandGroup>
@@ -609,7 +661,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </CommandDialog>
 
           {isDemoOrg && (
-            <div className="flex items-center gap-2.5 border-b border-warning/25 bg-warning/8 px-4 py-2 text-[13px] text-foreground sm:px-6">
+            <div className="flex items-center gap-2.5 border-b border-warning/25 bg-warning/8 px-4 py-2 text-[0.8125rem] text-foreground sm:px-6">
               <Info className="size-4 shrink-0 text-warning" />
               <p className="min-w-0">
                 <span className="font-semibold">Ambiente de demonstração.</span> Os dados exibidos
@@ -649,9 +701,24 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           )}
 
-          <main className="flex-1 px-4 py-5 sm:px-6 lg:px-7">
-            <div className="mx-auto w-full max-w-[1500px]">
-              {blocked ? (
+          <main className="flex-1 px-4 pb-24 pt-5 sm:px-6 lg:px-7 lg:pb-5">
+            <div
+              key={pathname}
+              className="animate-rise mx-auto w-full max-w-[96rem] min-[1900px]:max-w-[118rem]"
+            >
+              {noAccess ? (
+                <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-8 text-center">
+                  <h1 className="gov-title text-xl">Você não tem acesso a esta tela</h1>
+                  <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
+                    O seu perfil ({primaryRoleLabel}) não inclui a tela{" "}
+                    <strong>{currentModule?.label}</strong>. Se você precisa dela, peça ao
+                    administrador do órgão para ajustar o seu perfil.
+                  </p>
+                  <Button className="mt-5" onClick={() => navigate({ to: "/painel" })}>
+                    Voltar ao Dashboard
+                  </Button>
+                </div>
+              ) : blocked ? (
                 <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-8 text-center">
                   <h1 className="gov-title text-xl">Módulo indisponível para este órgão</h1>
                   <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
@@ -671,7 +738,93 @@ export function AppShell({ children }: { children: ReactNode }) {
           </main>
         </div>
       </div>
+
+      <MobileTabBar
+        modules={modules}
+        roles={me?.roles ?? []}
+        overrides={overrides ?? {}}
+        mine={myAccess ?? {}}
+        isSuperAdmin={isSuperAdmin}
+        pathname={pathname}
+        onMenu={() => setOpen(true)}
+      />
     </TooltipProvider>
+  );
+}
+
+const TAB_BAR: { to: string; label: string; icon: typeof Truck }[] = [
+  { to: "/painel", label: "Início", icon: LayoutDashboard },
+  { to: "/veiculos", label: "Veículos", icon: Truck },
+  { to: "/minha-escala", label: "Escala", icon: CalendarDays },
+  { to: "/motorista", label: "Motorista", icon: IdCard },
+];
+
+/** Barra de atalhos no rodapé do celular: os 4 lugares mais usados e o botão "Menu". */
+function MobileTabBar({
+  modules,
+  roles,
+  overrides,
+  mine,
+  isSuperAdmin,
+  pathname,
+  onMenu,
+}: {
+  modules: Record<string, boolean>;
+  roles: AppRole[];
+  overrides: AccessOverrides;
+  mine: Record<string, boolean>;
+  isSuperAdmin: boolean;
+  pathname: string;
+  onMenu: () => void;
+}) {
+  const items = TAB_BAR.filter((i) => {
+    const mod = moduleForPath(i.to);
+    if (!mod) return true;
+    if (modules[mod.key] === false) return false;
+    return isSuperAdmin || roleCanOpen(mod.key, roles, overrides, mine);
+  });
+  return (
+    <nav
+      aria-label="Navegação rápida"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/90 pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_20px_-12px_rgb(0_0_0/0.35)] backdrop-blur-md lg:hidden"
+    >
+      <ul className="mx-auto flex max-w-lg items-stretch justify-around">
+        {items.map((i) => {
+          const active = pathname === i.to || pathname.startsWith(`${i.to}/`);
+          return (
+            <li key={i.to} className="flex-1">
+              <Link
+                to={i.to}
+                className={cn(
+                  "flex min-h-14 flex-col items-center justify-center gap-0.5 text-[0.68rem] font-medium transition-colors",
+                  active ? "text-primary" : "text-muted-foreground",
+                )}
+              >
+                <i.icon className={cn("size-5", active && "scale-110")} />
+                {i.label}
+                <span
+                  className={cn(
+                    "mt-0.5 h-0.5 w-6 rounded-full transition-colors",
+                    active ? "bg-primary" : "bg-transparent",
+                  )}
+                />
+              </Link>
+            </li>
+          );
+        })}
+        <li className="flex-1">
+          <button
+            type="button"
+            onClick={onMenu}
+            className="flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-[0.68rem] font-medium text-muted-foreground"
+          >
+            <Menu className="size-5" />
+            Menu
+            <span className="mt-0.5 h-0.5 w-6" />
+          </button>
+        </li>
+      </ul>
+    </nav>
   );
 }
 
@@ -698,13 +851,27 @@ export function PageHeader({
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const trail = useBreadcrumb(pathname);
+  const embedded = useEmbedded();
+
+  if (embedded) {
+    return (
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        {description ? (
+          <p className="max-w-3xl text-[0.8438rem] text-muted-foreground">{description}</p>
+        ) : (
+          <span />
+        )}
+        {action && <div className="flex flex-wrap items-center gap-2">{action}</div>}
+      </div>
+    );
+  }
 
   return (
     <div className="mb-5 border-b border-border pb-4">
       {trail && (
         <nav
           aria-label="Trilha de navegação"
-          className="mb-1.5 text-[12.5px] text-muted-foreground"
+          className="mb-1.5 text-[0.7813rem] text-muted-foreground"
         >
           <span>{trail.group}</span>
           {trail.leaf && (
@@ -724,7 +891,7 @@ export function PageHeader({
             <HelpButton pathname={pathname} {...(helpKey ? { topicKey: helpKey } : {})} />
           </div>
           {description && (
-            <p className="mt-1.5 max-w-3xl text-[13.5px] text-muted-foreground">{description}</p>
+            <p className="mt-1.5 max-w-3xl text-[0.8438rem] text-muted-foreground">{description}</p>
           )}
         </div>
         {action && <div className="flex flex-wrap items-center gap-2">{action}</div>}

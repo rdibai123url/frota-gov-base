@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Paperclip, Pencil, Plus, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { isFutureDate } from "@/lib/validacoes";
 import { z } from "zod";
 
 import { PageHeader } from "@/components/app-shell";
@@ -64,13 +65,13 @@ import {
 export const Route = createFileRoute("/_authenticated/sinistros")({
   head: () => ({
     meta: [
-      { title: "Acidentes e Sinistros — FrotaGov" },
+      { title: "Acidentes e Sinistros — Dibai Fleet" },
       {
         name: "description",
         content:
-          "Registro de acidentes e sinistros da frota pública: boletim de ocorrência, terceiros, vítimas, seguradora, franquia e reparos.",
+          "Registro de acidentes e sinistros da frota: boletim de ocorrência, terceiros, vítimas, seguradora, franquia e reparos.",
       },
-      { property: "og:title", content: "Acidentes e Sinistros — FrotaGov" },
+      { property: "og:title", content: "Acidentes e Sinistros — Dibai Fleet" },
       {
         property: "og:description",
         content: "Apuração de sinistros com indisponibilidade e vínculo a manutenções.",
@@ -225,6 +226,10 @@ function Sinistros() {
       return;
     }
     const d = parsed.data;
+    if (isFutureDate(d.occurred_at)) {
+      toast.error("A data e a hora do sinistro não podem estar no futuro.");
+      return;
+    }
     setSaving(true);
     const uploaded: string[] = [];
     try {

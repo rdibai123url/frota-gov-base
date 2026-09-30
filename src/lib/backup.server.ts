@@ -1,5 +1,5 @@
 /**
- * Bloco D — motor de backup externo diário do FrotaGov.
+ * Bloco D — motor de backup externo diário do Dibai Fleet.
  *
  * Executa exclusivamente no servidor. Nunca grava, devolve ou registra em log
  * qualquer credencial: as chaves ficam em segredos de ambiente e apenas o
@@ -358,6 +358,14 @@ export async function s3Request(
   };
   if (body) headers["content-type"] = "application/json";
 
+  if (settings.s3_endpoint) {
+    const { safeFetch } = await import("./safe-fetch.server");
+    return safeFetch(url, {
+      method,
+      headers,
+      ...(body ? { body: body as unknown as BodyInit } : {}),
+    });
+  }
   return fetch(url, { method, headers, ...(body ? { body: body as unknown as BodyInit } : {}) });
 }
 

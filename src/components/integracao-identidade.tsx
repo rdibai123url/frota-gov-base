@@ -119,7 +119,7 @@ export function SsoPanel() {
         <div>
           <CardTitle>Login institucional (OIDC / SAML)</CardTitle>
           <p className="mt-1 text-sm text-muted-foreground">
-            O login por e-mail e senha do FrotaGov continua sempre disponível. Sem credenciais
+            O login por e-mail e senha do Dibai Fleet continua sempre disponível. Sem credenciais
             cadastradas no servidor, o provedor fica desativado: {NO_CREDENTIALS_NOTICE}
           </p>
         </div>

@@ -48,13 +48,13 @@ import {
 export const Route = createFileRoute("/_authenticated/combustiveis")({
   head: () => ({
     meta: [
-      { title: "Combustíveis e produtos automotivos — FrotaGov" },
+      { title: "Combustíveis e produtos automotivos — Dibai Fleet" },
       {
         name: "description",
         content:
           "Cadastro de combustíveis, óleos lubrificantes, fluidos e aditivos utilizados pela frota do órgão, com categoria, unidade padrão e situação.",
       },
-      { property: "og:title", content: "Combustíveis e produtos automotivos — FrotaGov" },
+      { property: "og:title", content: "Combustíveis e produtos automotivos — Dibai Fleet" },
       {
         property: "og:description",
         content: "Combustíveis e produtos automotivos do órgão público.",
@@ -114,6 +114,13 @@ function Combustiveis() {
     const parsed = schema.safeParse(Object.fromEntries(new FormData(e.currentTarget)));
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos");
+      return;
+    }
+    const nomeNormalizado = parsed.data.name.trim().toLowerCase();
+    if (
+      fuels.some((f) => f.id !== editing?.id && f.name.trim().toLowerCase() === nomeNormalizado)
+    ) {
+      toast.error("Já existe um combustível com esse nome.");
       return;
     }
     setSaving(true);

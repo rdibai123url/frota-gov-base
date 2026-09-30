@@ -91,16 +91,16 @@ import { employeesByFunction, useEmployees } from "@/lib/pessoas";
 export const Route = createFileRoute("/_authenticated/contratos")({
   head: () => ({
     meta: [
-      { title: "Contratos — FrotaGov" },
+      { title: "Contratos — Dibai Fleet" },
       {
         name: "description",
         content:
           "Contratos administrativos de combustíveis e materiais da frota: vigência, valores, itens contratados, saldo e execução.",
       },
-      { property: "og:title", content: "Contratos — FrotaGov" },
+      { property: "og:title", content: "Contratos — Dibai Fleet" },
       {
         property: "og:description",
-        content: "Gestão de contratos e saldos contratuais da frota pública.",
+        content: "Gestão de contratos e saldos contratuais da frota.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -135,6 +135,7 @@ const contractSchema = z.object({
   valid_to: z.string().optional(),
   initial_value: z.string().optional(),
   current_value: z.string().optional(),
+  admin_fee_percent: z.string().optional(),
   notes: z.string().trim().max(600).optional(),
 });
 
@@ -290,6 +291,10 @@ function Contratos() {
     }
 
     if (status === "vigente") {
+      if (!entityId) {
+        toast.error("Para deixar o contrato vigente, informe a empresa contratada.");
+        return;
+      }
       if (!d.signed_at) {
         toast.error("Para deixar o contrato vigente, informe a data de assinatura.");
         return;
@@ -339,6 +344,9 @@ function Contratos() {
       valid_to: d.valid_to || null,
       initial_value: initialValue,
       current_value: currentValue,
+      admin_fee_percent: d.admin_fee_percent?.trim()
+        ? Number(d.admin_fee_percent.replace(/./g, "").replace(",", "."))
+        : null,
       status: status as ContractRow["status"],
       notes: d.notes || null,
       attachment_path: attachment,
@@ -985,6 +993,20 @@ function Contratos() {
                 />
               </div>
               <div>
+                <Label htmlFor="admin_fee_percent">Taxa de administração (%)</Label>
+                <Input
+                  id="admin_fee_percent"
+                  name="admin_fee_percent"
+                  inputMode="decimal"
+                  placeholder="Ex.: 3,5 ou -2,1"
+                  defaultValue={
+                    editing?.admin_fee_percent != null
+                      ? String(editing.admin_fee_percent).replace(".", ",")
+                      : ""
+                  }
+                />
+              </div>
+              <div>
                 <Label htmlFor="valid_from">
                   Início da vigência{status === "vigente" ? " *" : ""}
                 </Label>
@@ -997,6 +1019,20 @@ function Contratos() {
                 />
               </div>
               <div>
+                <Label htmlFor="admin_fee_percent">Taxa de administração (%)</Label>
+                <Input
+                  id="admin_fee_percent"
+                  name="admin_fee_percent"
+                  inputMode="decimal"
+                  placeholder="Ex.: 3,5 ou -2,1"
+                  defaultValue={
+                    editing?.admin_fee_percent != null
+                      ? String(editing.admin_fee_percent).replace(".", ",")
+                      : ""
+                  }
+                />
+              </div>
+              <div>
                 <Label htmlFor="valid_to">Fim da vigência{status === "vigente" ? " *" : ""}</Label>
                 <Input
                   id="valid_to"
@@ -1004,6 +1040,20 @@ function Contratos() {
                   type="date"
                   defaultValue={editing?.valid_to ?? ""}
                   required={status === "vigente"}
+                />
+              </div>
+              <div>
+                <Label htmlFor="admin_fee_percent">Taxa de administração (%)</Label>
+                <Input
+                  id="admin_fee_percent"
+                  name="admin_fee_percent"
+                  inputMode="decimal"
+                  placeholder="Ex.: 3,5 ou -2,1"
+                  defaultValue={
+                    editing?.admin_fee_percent != null
+                      ? String(editing.admin_fee_percent).replace(".", ",")
+                      : ""
+                  }
                 />
               </div>
               <div>
@@ -1023,6 +1073,20 @@ function Contratos() {
                   name="current_value"
                   defaultValue={editing ? Number(editing.current_value) : ""}
                   required={status === "vigente"}
+                />
+              </div>
+              <div>
+                <Label htmlFor="admin_fee_percent">Taxa de administração (%)</Label>
+                <Input
+                  id="admin_fee_percent"
+                  name="admin_fee_percent"
+                  inputMode="decimal"
+                  placeholder="Ex.: 3,5 ou -2,1"
+                  defaultValue={
+                    editing?.admin_fee_percent != null
+                      ? String(editing.admin_fee_percent).replace(".", ",")
+                      : ""
+                  }
                 />
               </div>
               <div className="sm:col-span-3 flex items-start gap-2 rounded-md border p-3">

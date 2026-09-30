@@ -66,13 +66,13 @@ type VehicleStatus = Database["public"]["Enums"]["vehicle_status"];
 export const Route = createFileRoute("/_authenticated/patrimonio")({
   head: () => ({
     meta: [
-      { title: "Movimentação Patrimonial — FrotaGov" },
+      { title: "Movimentação Patrimonial — Dibai Fleet" },
       {
         name: "description",
         content:
           "Cessões, locações, remanejamentos, doações, leilões, alienações e baixas dos veículos do órgão, com termo imprimível e histórico.",
       },
-      { property: "og:title", content: "Movimentação Patrimonial — FrotaGov" },
+      { property: "og:title", content: "Movimentação Patrimonial — Dibai Fleet" },
       {
         property: "og:description",
         content: "Controle patrimonial dos veículos públicos com rastreabilidade total.",

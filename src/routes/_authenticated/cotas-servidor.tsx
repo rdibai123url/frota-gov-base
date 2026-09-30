@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { CotasHub } from "@/components/hubs";
 import { useMemo, useState } from "react";
 import { Plus, Pencil, Fuel, Upload, ExternalLink, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
@@ -63,13 +64,13 @@ import {
 export const Route = createFileRoute("/_authenticated/cotas-servidor")({
   head: () => ({
     meta: [
-      { title: "Cotas de combustível de servidor — FrotaGov" },
+      { title: "Cotas de combustível de servidor — Dibai Fleet" },
       {
         name: "description",
         content:
           "Cotas de combustível concedidas a veículos particulares de servidores: beneficiário, periodicidade, consumo do ciclo e saldo restante.",
       },
-      { property: "og:title", content: "Cotas de combustível de servidor — FrotaGov" },
+      { property: "og:title", content: "Cotas de combustível de servidor — Dibai Fleet" },
       {
         property: "og:description",
         content:
@@ -79,7 +80,7 @@ export const Route = createFileRoute("/_authenticated/cotas-servidor")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: CotasServidor,
+  component: CotasServidorRoute,
 });
 
 const ALL = "__all__";
@@ -108,7 +109,7 @@ function StatusBadge({ status }: { status: ServerQuotaStatus }) {
   );
 }
 
-function CotasServidor() {
+export function CotasServidorPanel() {
   const { data: quotas = [], isLoading } = useServerFuelQuotas();
   const { data: fuelings = [] } = useServerQuotaFuelings();
   const { data: vehicles = [] } = useVehicles();
@@ -657,4 +658,9 @@ function CotasServidor() {
       </Dialog>
     </>
   );
+}
+
+/** Esta tela agora aparece dentro de uma tela com abas. */
+function CotasServidorRoute() {
+  return <CotasHub initial="servidor" />;
 }

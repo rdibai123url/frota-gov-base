@@ -1,5 +1,5 @@
 /**
- * Campos reutilizáveis com o padrão global de formatação do FrotaGov.
+ * Campos reutilizáveis com o padrão global de formatação do Dibai Fleet.
  * Use sempre estes componentes em vez de <Input> cru para valores, litros, CPF e CNPJ.
  */
 import * as React from "react";

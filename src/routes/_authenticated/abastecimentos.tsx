@@ -1,3 +1,4 @@
+import { useFeature } from "@/lib/modulos";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -85,13 +86,13 @@ import { useEmployees } from "@/lib/pessoas";
 export const Route = createFileRoute("/_authenticated/abastecimentos")({
   head: () => ({
     meta: [
-      { title: "Abastecimentos — FrotaGov" },
+      { title: "Abastecimentos — Dibai Fleet" },
       {
         name: "description",
         content:
-          "Registro e histórico de abastecimentos da frota pública, com validações automáticas, alertas e cancelamento auditado.",
+          "Registro e histórico de abastecimentos da frota, com validações automáticas, alertas e cancelamento auditado.",
       },
-      { property: "og:title", content: "Abastecimentos — FrotaGov" },
+      { property: "og:title", content: "Abastecimentos — Dibai Fleet" },
       {
         property: "og:description",
         content: "Controle diário de abastecimentos da frota do órgão.",
@@ -140,6 +141,7 @@ function IssueList({ issues }: { issues: RuleIssue[] }) {
 }
 
 function Abastecimentos() {
+  const regOn = useFeature("abastecimentos.registrar");
   const { data: fuelings = [], isLoading } = useFuelings();
   const { data: vehicles = [] } = useVehicles();
   const { data: units = [] } = useUnits();
@@ -200,7 +202,7 @@ function Abastecimentos() {
         title="Abastecimentos"
         description="Histórico completo dos abastecimentos da frota, com validações e trilha de auditoria."
         action={
-          perms.canRegister ? (
+          perms.canRegister && regOn ? (
             <Button className="gap-2" onClick={() => setOpenNew(true)}>
               <Plus className="size-4" /> Novo abastecimento
             </Button>

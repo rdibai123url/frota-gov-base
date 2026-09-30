@@ -1,5 +1,5 @@
 /**
- * FrotaGov — convites de cotação por e-mail (servidor).
+ * Dibai Fleet — convites de cotação por e-mail (servidor).
  *
  * Todo o fluxo é executado no servidor:
  *  - o `organization_id` é sempre lido da própria cotação (nunca do cliente);
@@ -13,6 +13,7 @@ import { getRequestHeader } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   checkSettings,
+  loadOrgEmailSettings,
   renderInviteEmail,
   sendEmail,
   type EmailSettings,
@@ -272,41 +273,6 @@ export const createInvites = createServerFn({ method: "POST" })
     return { created, skipped };
   });
 
-async function loadSettings(orgId: string) {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin
-    .from("org_email_settings")
-    .select(
-      "provider, enabled, from_name, from_email, reply_to, smtp_host, smtp_port, smtp_secure, smtp_user, has_secret, public_base_url",
-    )
-    .eq("organization_id", orgId)
-    .maybeSingle();
-  if (!data)
-    return {
-      settings: null as EmailSettings | null,
-      secret: "",
-      publicBaseUrl: null as string | null,
-    };
-  const { data: secretRow } = await supabaseAdmin
-    .from("org_email_secrets")
-    .select("secret")
-    .eq("organization_id", orgId)
-    .maybeSingle();
-  const publicBaseUrl = (data as { public_base_url?: string | null }).public_base_url ?? null;
-  const settings = data as EmailSettings;
-  let secret = secretRow?.secret ?? "";
-  // Chave da plataforma (painel de Integrações): usada apenas quando o órgão
-  // escolheu Resend e ainda não cadastrou uma chave própria.
-  if (!secret && settings.provider === "resend") {
-    const platform = process.env["RESEND_API_KEY"] ?? "";
-    if (platform) {
-      secret = platform;
-      settings.has_secret = true;
-    }
-  }
-  return { settings, secret, publicBaseUrl };
-}
-
 /** Dispara (ou reenvia) convites — sempre um e-mail individual por destinatário. */
 export const sendInvites = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -323,7 +289,9 @@ export const sendInvites = createServerFn({ method: "POST" })
     const { data: allowed } = await supabase.rpc("can_manage_maintenance");
     if (!allowed) throw new Error("Sem permissão para enviar convites desta cotação.");
 
-    const { settings, secret, publicBaseUrl } = await loadSettings(quotation.organization_id);
+    const { settings, secret, publicBaseUrl } = await loadOrgEmailSettings(
+      quotation.organization_id,
+    );
     const problem = checkSettings(settings);
     if (problem || !settings)
       return {
@@ -450,7 +418,7 @@ export const issueInviteLink = createServerFn({ method: "POST" })
     if (!mayLink) throw new Error("Sem permissão para gerar o link deste convite.");
     const deadline =
       (invite.quotation as { deadline_at: string | null } | null)?.deadline_at ?? null;
-    const { publicBaseUrl } = await loadSettings(invite.organization_id);
+    const { publicBaseUrl } = await loadOrgEmailSettings(invite.organization_id);
     // Sem endereço público não há link possível: não gira o token nem devolve link.
     if (!resolveBase(publicBaseUrl).isPublic) {
       return {
@@ -727,7 +695,7 @@ export const submitProposalByToken = createServerFn({ method: "POST" })
      * O cast é temporário até a próxima regeneração dos tipos TypeScript
      * do Supabase incluir a RPC quotation_proposal_submit_atomic.
      */
-    const callRpc = supabaseAdmin.rpc as unknown as (
+    const callRpc = supabaseAdmin.rpc.bind(supabaseAdmin) as unknown as (
       functionName: string,
       args: Record<string, unknown>,
     ) => Promise<{ data: string | null; error: { message: string } | null }>;

@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AvisoPreventiva } from "@/components/aviso-preventiva";
+import { SignatureButton } from "@/components/signature-button";
 import { useEffect, useMemo, useState } from "react";
 import { Plus, Search, QrCode, Ban, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
@@ -74,14 +76,14 @@ import {
 export const Route = createFileRoute("/_authenticated/autorizacoes")({
   head: () => ({
     meta: [
-      { title: "Autorizações de abastecimento — FrotaGov" },
+      { title: "Autorizações de abastecimento — Dibai Fleet" },
       {
         name: "description",
         content:
           "Emissão e controle de autorizações prévias de abastecimento com limites de litros e valor, validade, código de segurança e QR Code sem dados pessoais.",
       },
-      { property: "og:title", content: "Autorizações de abastecimento — FrotaGov" },
-      { property: "og:description", content: "Controle prévio do abastecimento da frota pública." },
+      { property: "og:title", content: "Autorizações de abastecimento — Dibai Fleet" },
+      { property: "og:description", content: "Controle prévio do abastecimento da frota." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -528,6 +530,7 @@ function NewAuthorizationDialog({
               </SelectContent>
             </Select>
           </div>
+          {vehicleId !== NONE && <AvisoPreventiva vehicleId={vehicleId} />}
           <div>
             <Label>Unidade (automática)</Label>
             <Input value={unit?.name ?? "—"} readOnly className="bg-muted/50" />
@@ -543,7 +546,11 @@ function NewAuthorizationDialog({
                 {drivers.map((d) => (
                   <SelectItem key={d.id} value={d.id} disabled={!driverEligible(d)}>
                     {d.full_name}
-                    {!driverEligible(d) ? " (indisponível)" : ""}
+                    {d.current_absence
+                      ? " (afastado)"
+                      : !driverEligible(d)
+                        ? " (indisponível)"
+                        : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -917,6 +924,12 @@ function AuthorizationDetail({ auth, onClose }: { auth: AuthorizationRow; onClos
           <Button variant="outline" onClick={onClose}>
             Fechar
           </Button>
+          <SignatureButton
+            docType="autorizacao_abastecimento"
+            docId={auth.id}
+            title={`a autorização ${auth.code ?? ""}`}
+            variant="outline"
+          />
           <Button onClick={() => window.print()}>Imprimir</Button>
         </DialogFooter>
       </DialogContent>

@@ -19,16 +19,16 @@ import { VEHICLE_STATUS, label, useVehicles } from "@/lib/frotagov";
 export const Route = createFileRoute("/_authenticated/historico-veiculo")({
   head: () => ({
     meta: [
-      { title: "Histórico do veículo — FrotaGov" },
+      { title: "Histórico do veículo — Dibai Fleet" },
       {
         name: "description",
         content:
           "Selecione um veículo da frota para consultar utilizações, abastecimentos, autorizações, manutenções, peças, pneus e mudanças de situação.",
       },
-      { property: "og:title", content: "Histórico do veículo — FrotaGov" },
+      { property: "og:title", content: "Histórico do veículo — Dibai Fleet" },
       {
         property: "og:description",
-        content: "Consulta do histórico completo de cada veículo da frota pública.",
+        content: "Consulta do histórico completo de cada veículo da frota.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

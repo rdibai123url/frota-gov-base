@@ -7,9 +7,10 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { THEME_BOOT_SCRIPT } from "@/components/theme-toggle";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -74,27 +75,36 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "FrotaGov — Gestão de frotas públicas" },
+      { title: "Dibai Fleet — Gestão de frotas públicas" },
       {
         name: "description",
         content:
           "Plataforma de gestão de frotas para prefeituras, câmaras, consórcios e autarquias, com controle por órgão, unidades e veículos.",
       },
-      { name: "author", content: "FrotaGov" },
-      { property: "og:title", content: "FrotaGov — Gestão de frotas públicas" },
+      { name: "author", content: "Dibai Fleet" },
+      { property: "og:title", content: "Dibai Fleet — Gestão de frotas públicas" },
       {
         property: "og:description",
         content: "Gestão de frotas de órgãos públicos com isolamento por organização.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "theme-color", content: "#0b2545" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: "Dibai Fleet" },
     ],
+    scripts: [{ children: THEME_BOOT_SCRIPT }],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/icon.svg", type: "image/svg+xml" },
+      { rel: "icon", href: "/icon-32.png", type: "image/png", sizes: "32x32" },
+      { rel: "shortcut icon", href: "/favicon.ico" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/icon-180.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -125,6 +135,13 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  // App instalável (PWA): registra o service worker só em produção.
+  useEffect(() => {
+    if (import.meta.env.PROD && "serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+    }
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

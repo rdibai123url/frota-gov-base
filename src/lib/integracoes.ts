@@ -71,7 +71,7 @@ export const CONNECTOR_META: Record<
   ldap_sso: {
     label: "LDAP / SSO corporativo",
     description:
-      "Autenticação corporativa por OIDC ou SAML (LDAP somente por gateway seguro). O login padrão do FrotaGov continua disponível como alternativa.",
+      "Autenticação corporativa por OIDC ou SAML (LDAP somente por gateway seguro). O login padrão do Dibai Fleet continua disponível como alternativa.",
     fields: [
       { key: "protocolo", label: "Protocolo (OIDC/SAML)", placeholder: "OIDC" },
       { key: "issuer", label: "Issuer / Metadata URL" },
@@ -107,7 +107,7 @@ export const CONNECTOR_META: Record<
   oidc: {
     label: "SSO — OIDC",
     description:
-      "Login institucional por OpenID Connect. Segredos ficam somente no servidor; o login padrão do FrotaGov permanece disponível.",
+      "Login institucional por OpenID Connect. Segredos ficam somente no servidor; o login padrão do Dibai Fleet permanece disponível.",
     fields: [
       { key: "issuer", label: "Issuer / Discovery URL" },
       { key: "client_id", label: "Client ID" },
@@ -143,12 +143,12 @@ export const CONNECTOR_META: Record<
   webhook: {
     label: "Webhooks",
     description:
-      "Notificações automáticas para sistemas do órgão a cada evento relevante do FrotaGov, com assinatura HMAC e reenvio automático.",
+      "Notificações automáticas para sistemas do órgão a cada evento relevante do Dibai Fleet, com assinatura HMAC e reenvio automático.",
     fields: [],
     testable: false,
   },
   api: {
-    label: "API FrotaGov",
+    label: "API Dibai Fleet",
     description:
       "API REST somente leitura, autenticada por chave do órgão, com escopos, paginação, filtros e auditoria.",
     fields: [{ key: "rate_limit", label: "Limite por minuto", placeholder: "120" }],
@@ -191,7 +191,7 @@ export const SIAFIC_ENTITIES = [
   "manutencoes",
 ] as const;
 
-/** Campos do DETRAN mapeados para o cadastro do FrotaGov. */
+/** Campos do DETRAN mapeados para o cadastro do Dibai Fleet. */
 export const DETRAN_FIELD_MAP: { detran: string; label: string; vehicle: string | null }[] = [
   { detran: "placa", label: "Placa", vehicle: "plate" },
   { detran: "renavam", label: "RENAVAM", vehicle: "renavam" },

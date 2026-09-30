@@ -6,6 +6,7 @@
  * órgão (tabela `emission_factors`) — nunca medição real.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { SustentabilidadeVeiculo } from "@/components/sustentabilidade-veiculo";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -63,16 +64,16 @@ import {
 export const Route = createFileRoute("/_authenticated/sustentabilidade")({
   head: () => ({
     meta: [
-      { title: "Sustentabilidade da Frota — FrotaGov" },
+      { title: "Sustentabilidade da Frota — Dibai Fleet" },
       {
         name: "description",
         content:
           "Painel ESG do órgão: litros por combustível, evolução mensal, participação de renováveis e estimativa de emissões de CO2e com fatores parametrizáveis.",
       },
-      { property: "og:title", content: "Sustentabilidade da Frota — FrotaGov" },
+      { property: "og:title", content: "Sustentabilidade da Frota — Dibai Fleet" },
       {
         property: "og:description",
-        content: "Indicadores ambientais da frota pública com estimativa de CO2e por combustível.",
+        content: "Indicadores ambientais da frota com estimativa de CO2e por combustível.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -213,6 +214,7 @@ function Sustentabilidade() {
       <Tabs defaultValue="painel" className="space-y-4">
         <TabsList>
           <TabsTrigger value="painel">Painel</TabsTrigger>
+          <TabsTrigger value="veiculo">Por veículo</TabsTrigger>
           <TabsTrigger value="fatores">Fatores de emissão</TabsTrigger>
         </TabsList>
 
@@ -405,6 +407,10 @@ function Sustentabilidade() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="veiculo">
+          <SustentabilidadeVeiculo from={from} to={to} factors={factors} />
         </TabsContent>
 
         <TabsContent value="fatores">

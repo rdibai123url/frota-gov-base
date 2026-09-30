@@ -1,5 +1,5 @@
 /**
- * FrotaGov — Fornecedores e Postos (operacional).
+ * Dibai Fleet — Fornecedores e Postos (operacional).
  *
  * Bloco 3: esta tela não cadastra empresa. Ela lista automaticamente as
  * empresas do cadastro mestre que possuem contrato vigente compatível com
@@ -7,6 +7,7 @@
  * O cadastro de empresas continua em Pessoas e Empresas Externas.
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { TerceirosHub } from "@/components/hubs";
 import { useMemo, useState } from "react";
 import { Building2, FileText, MapPin, Search } from "lucide-react";
 
@@ -43,13 +44,13 @@ import {
 export const Route = createFileRoute("/_authenticated/fornecedores")({
   head: () => ({
     meta: [
-      { title: "Fornecedores e Postos — FrotaGov" },
+      { title: "Fornecedores e Postos — Dibai Fleet" },
       {
         name: "description",
         content:
           "Empresas com contrato vigente de combustível, derivados, peças, pneus e demais fornecimentos da frota do órgão.",
       },
-      { property: "og:title", content: "Fornecedores e Postos — FrotaGov" },
+      { property: "og:title", content: "Fornecedores e Postos — Dibai Fleet" },
       {
         property: "og:description",
         content: "Relação operacional de postos e fornecedores derivada dos contratos vigentes.",
@@ -58,12 +59,12 @@ export const Route = createFileRoute("/_authenticated/fornecedores")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Fornecedores,
+  component: FornecedoresRoute,
 });
 
 const CATS: NetworkCategory[] = ["combustivel", "pecas", "pneus", "outro"];
 
-function Fornecedores() {
+export function FornecedoresPanel() {
   const { companies, isLoading } = useNetworkCompanies(CATS);
   const [q, setQ] = useState("");
   const [detail, setDetail] = useState<NetworkCompany | null>(null);
@@ -283,4 +284,9 @@ export function CompanyDialog({
       </DialogContent>
     </Dialog>
   );
+}
+
+/** Esta tela agora aparece dentro de uma tela com abas. */
+function FornecedoresRoute() {
+  return <TerceirosHub initial="fornecedores" />;
 }

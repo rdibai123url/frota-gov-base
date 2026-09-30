@@ -1,5 +1,5 @@
 /**
- * FrotaGov — regras compartilhadas do módulo de Cotações.
+ * Dibai Fleet — regras compartilhadas do módulo de Cotações.
  *
  * Os mesmos cálculos são usados no lançamento manual, na resposta pública por
  * link e na conferência do servidor. O banco recalcula tudo antes de gravar

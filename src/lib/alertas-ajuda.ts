@@ -1,5 +1,5 @@
 /**
- * FrotaGov — orientação dos alertas e inconsistências.
+ * Dibai Fleet — orientação dos alertas e inconsistências.
  *
  * Dois comportamentos:
  * - ORIENTATIVO: aviso que não depende de corrigir um dado para o sistema

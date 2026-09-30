@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { PasswordInput } from "@/components/password-input";
+import { passwordProblem } from "@/lib/validacoes";
 import { useState } from "react";
 import { KeyRound, UserRound } from "lucide-react";
 import { toast } from "sonner";
@@ -12,13 +14,16 @@ import { supabase, useProfile, ROLE_LABELS } from "@/lib/frotagov";
 export const Route = createFileRoute("/_authenticated/perfil")({
   head: () => ({
     meta: [
-      { title: "Perfil e segurança — FrotaGov" },
+      { title: "Perfil e segurança — Dibai Fleet" },
       {
         name: "description",
-        content: "Consulte seus dados de acesso e altere a senha da sua conta no FrotaGov.",
+        content: "Consulte seus dados de acesso e altere a senha da sua conta no Dibai Fleet.",
       },
-      { property: "og:title", content: "Perfil e segurança — FrotaGov" },
-      { property: "og:description", content: "Dados do usuário e alteração de senha no FrotaGov." },
+      { property: "og:title", content: "Perfil e segurança — Dibai Fleet" },
+      {
+        property: "og:description",
+        content: "Dados do usuário e alteração de senha no Dibai Fleet.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -44,8 +49,9 @@ function PerfilPage() {
       toast.error("Informe a senha atual.");
       return;
     }
-    if (password.length < 8) {
-      toast.error("A nova senha deve ter ao menos 8 caracteres.");
+    const problem = passwordProblem(password);
+    if (problem) {
+      toast.error(problem);
       return;
     }
     if (password === current) {
@@ -125,32 +131,31 @@ function PerfilPage() {
         <form onSubmit={onSubmit} className="max-w-md space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="pf-current">Senha atual</Label>
-            <Input
+            <PasswordInput
               id="pf-current"
               name="current"
-              type="password"
               autoComplete="current-password"
               required
             />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="pf-pass">Nova senha</Label>
-            <Input
+            <PasswordInput
               id="pf-pass"
               name="password"
-              type="password"
               autoComplete="new-password"
               minLength={8}
               required
             />
-            <p className="text-[11px] text-muted-foreground">Mínimo de 8 caracteres.</p>
+            <p className="text-[0.6875rem] text-muted-foreground">
+              Mínimo de 10 caracteres, com maiúscula, minúscula e número.
+            </p>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="pf-confirm">Confirmar nova senha</Label>
-            <Input
+            <PasswordInput
               id="pf-confirm"
               name="confirm"
-              type="password"
               autoComplete="new-password"
               minLength={8}
               required

@@ -1,5 +1,5 @@
 /**
- * Ajuda contextual do FrotaGov.
+ * Ajuda contextual do Dibai Fleet.
  *
  * Estrutura única e centralizada com o conteúdo do botão "i" exibido ao lado do
  * título de cada página. Nenhum texto de ajuda deve ser duplicado nas telas:
@@ -9,8 +9,7 @@
  * internos, sem nomes de tabelas, sem segredos, credenciais ou consultas.
  */
 
-export type FieldTag =
-  "Obrigatório" | "Automático" | "Calculado" | "Condicional" | "Depende de integração";
+export type FieldTag = "Obrigatório" | "Automático" | "Calculado" | "Condicional";
 
 export type HelpField = {
   label: string;
@@ -46,36 +45,445 @@ const REQ: FieldTag[] = ["Obrigatório"];
 const AUTO: FieldTag[] = ["Automático"];
 const CALC: FieldTag[] = ["Calculado"];
 const COND: FieldTag[] = ["Condicional"];
-const EXT: FieldTag[] = ["Depende de integração"];
 
 export const HELP_TOPICS: Record<string, HelpTopic> = {
-  "/painel": t(
-    "Painel executivo",
-    "Reúne os números do momento da frota: quantidade de bens, gastos, consumo, pendências e alertas, para acompanhamento rápido pela gestão.",
+  "/condutores": t(
+    "Condutores / Motoristas",
+    "Cadastro dos motoristas autorizados a dirigir, com habilitação (CNH), validade e situação. Também registra os afastamentos (férias, licença, INSS e atestado).",
     [
-      "Confira os cartões de indicadores no topo.",
-      "Use os filtros de período para comparar meses.",
-      "Clique em um indicador ou alerta para abrir a tela detalhada correspondente.",
+      "Clique em “Novo condutor” e preencha nome, CPF, secretaria, vínculo e os dados da CNH.",
+      "Informe a categoria e a validade da CNH: o sistema avisa antes de vencer e bloqueia o condutor com CNH vencida.",
+      "Se o motorista for usar o sistema pelo celular, escolha o “Usuário do sistema” dele.",
+      "Quando um motorista se afastar, clique no ícone de calendário da linha, escolha o motivo e informe a previsão de retorno.",
+    ],
+    [
+      { label: "Nome e CPF", description: "Identificação do motorista.", tags: REQ },
+      {
+        label: "Categoria e validade da CNH",
+        description:
+          "A validade gera aviso antes do vencimento; CNH vencida impede novas viagens e autorizações.",
+        tags: REQ,
+      },
+      {
+        label: "Vínculo",
+        description: "Efetivo, comissionado, contratado, terceirizado ou outro.",
+        tags: REQ,
+      },
+      {
+        label: "Usuário do sistema",
+        description:
+          "Liga o motorista ao login dele para a Área do motorista. Deixe em branco se ele não acessa o sistema.",
+        tags: COND,
+      },
+      {
+        label: "Situação",
+        description:
+          "Somente condutores ativos aparecem nas listas de viagem, autorização e escala.",
+      },
+      {
+        label: "Afastamento",
+        description:
+          "Motivo (férias, licença, INSS ou atestado de até 15 dias), data de início e previsão de retorno. Na data de retorno o motorista volta sozinho a ficar disponível.",
+      },
+    ],
+    [
+      "Atestado tem no máximo 15 dias e exige a data de retorno.",
+      "Motorista afastado não pode ser escolhido em viagens, autorizações de abastecimento nem na escala; o banco também recusa.",
+      "Sem previsão de retorno, o motorista continua afastado até você clicar em “Registrar retorno agora”.",
+    ],
+  ),
+  "/perfis-acesso": t(
+    "Perfis de acesso",
+    "Define quais telas cada perfil e cada usuário pode abrir. Todo usuário novo começa com o acesso do perfil dele; o gestor pode liberar mais ou menos telas para uma pessoa em particular.",
+    [
+      "Na aba “Por perfil”, marque ou desmarque as telas de cada perfil (gestor de frota, responsável de unidade, operador, fiscal).",
+      "Na aba “Por usuário”, escolha a pessoa e ligue ou desligue cada tela só para ela.",
+      "O rótulo “ajustado para este usuário” mostra o que foi mudado em relação ao perfil.",
+      "Use “Voltar ao acesso do perfil” (ou “Voltar ao padrão”) para desfazer os ajustes.",
+    ],
+    [
+      { label: "Por perfil", description: "Vale para todos que têm aquele perfil." },
+      {
+        label: "Por usuário",
+        description: "Vale só para a pessoa escolhida e tem prioridade sobre o perfil.",
+      },
+    ],
+    [
+      "Dashboard, Perfis de acesso, Usuários e Dados do órgão nunca são bloqueados.",
+      "Esconder a tela não substitui a segurança do sistema: o que cada perfil pode gravar continua limitado.",
+      "Somente o administrador do órgão altera os acessos.",
+    ],
+  ),
+  "/minha-escala": t(
+    "Minha escala",
+    "Mostra ao motorista os dias, os horários e a unidade em que ele está escalado, pelo celular.",
+    [
+      "Veja no calendário os dias de trabalho do mês, em azul.",
+      "Use as setas para ver o mês anterior ou o próximo.",
+      "Em “Próximos turnos” aparecem o dia, a unidade, o horário de início e de término.",
     ],
     [
       {
-        label: "Período",
-        description: "Define o intervalo usado por todos os indicadores da tela.",
-      },
-      {
-        label: "Indicadores de custo",
-        description:
-          "Somam despesas lançadas no período (abastecimento, manutenção e demais custos).",
+        label: "Turnos e horas no mês",
+        description: "Quantidade de turnos e soma das horas da escala do mês.",
         tags: CALC,
       },
       {
-        label: "Pendências e alertas",
-        description:
-          "Contagem de itens que exigem ação, como documentos vencidos e inconsistências.",
+        label: "Dias em amarelo",
+        description: "Dias em que você está afastado (férias, licença, INSS ou atestado).",
         tags: AUTO,
       },
     ],
-    ["Os valores refletem apenas lançamentos do órgão em que você está conectado."],
+    [
+      "Para aparecer aqui, o seu usuário precisa estar ligado ao seu cadastro em Condutores.",
+      "A escala é montada pelo gestor; você só consulta.",
+    ],
+  ),
+  "/escala": t(
+    "Escala de motoristas",
+    "Monta, mês a mês, a escala dos motoristas de cada unidade de plantão (ex.: SAMU — unidade X), com os dias de trabalho, o horário de início e a carga horária de 8, 12 ou 24 horas.",
+    [
+      "Cadastre a unidade de plantão em “Nova unidade de plantão”.",
+      "Escolha a unidade e o mês.",
+      "Na aba “Montar escala”, escolha o motorista na lista, o horário de início e a carga horária (8, 12 ou 24 horas). O término é calculado.",
+      "Marque no calendário os dias em que ele trabalha (ou use os atalhos: dias úteis, fins de semana, dia sim dia não) e clique em Salvar.",
+      "Na aba “Escala do mês”, veja todos os motoristas e imprima a escala.",
+    ],
+    [
+      {
+        label: "Unidade de plantão",
+        description: "Local ou serviço que precisa de motorista em escala.",
+        tags: REQ,
+      },
+      { label: "Horário de início", description: "Hora em que o turno começa.", tags: REQ },
+      {
+        label: "Carga horária",
+        description:
+          "8, 12 ou 24 horas. O horário de término é calculado (24 h termina no dia seguinte).",
+        tags: REQ,
+      },
+      {
+        label: "Dias de trabalho",
+        description:
+          "Dias marcados no calendário. Dias em verde já têm turno; dias riscados são de afastamento do motorista.",
+        tags: REQ,
+      },
+    ],
+    [
+      "O motorista não pode ser escalado em dia de afastamento nem em dois turnos ao mesmo tempo.",
+      "Para remover um turno, passe o mouse sobre ele na aba “Escala do mês” e clique.",
+    ],
+  ),
+  "/motorista": t(
+    "Área do motorista",
+    "Tela simples para quem dirige: mostra as suas viagens autorizadas, permite fazer o checklist do veículo com fotos e leva ao registro de abastecimento e de ocorrência.",
+    [
+      "Confira se a sua CNH está em dia (o aviso aparece no alto).",
+      "Na viagem do dia, faça o checklist de saída antes de sair e o de retorno ao voltar, tirando fotos de qualquer problema.",
+      "Use “Registrar abastecimento” depois de abastecer e “Registrar ocorrência” em caso de acidente ou defeito.",
+    ],
+    [
+      {
+        label: "Viagem",
+        description: "Veículo, trajeto e horário previsto de saída, definidos por quem autorizou.",
+        tags: AUTO,
+      },
+      {
+        label: "Checklist",
+        description:
+          "Lista de itens do veículo. Marque OK ou Com problema; fotos ajudam a comprovar o estado.",
+        tags: COND,
+      },
+    ],
+    ["Para aparecer aqui, o seu usuário precisa estar ligado ao seu cadastro em Condutores."],
+  ),
+  "/painel": t(
+    "Dashboard",
+    "Mostra, em números e gráficos, como está a frota do órgão: quantos veículos rodam, quanto se gasta, o que está vencendo e o que precisa de atenção.",
+    [
+      "Escolha o período dos gráficos no alto da tela (3, 6 ou 12 meses).",
+      "Use as abas para ver cada assunto: Visão geral, Abastecimento, Manutenção, Financeiro / Contratual e Administrativo / Legal.",
+      "Clique no ícone “i” de qualquer número ou gráfico para ler o que ele significa e o que fazer.",
+      "Clique em um cartão para abrir a tela com os detalhes.",
+    ],
+    [
+      {
+        label: "Cartões com números",
+        description: "Resumo do momento; o “i” de cada um explica como o número é calculado.",
+        tags: CALC,
+      },
+      {
+        label: "Gráficos",
+        description: "Mostram a evolução dos gastos e a divisão por secretaria, veículo e tipo.",
+        tags: CALC,
+      },
+      {
+        label: "Período dos gráficos",
+        description: "Define quantos meses aparecem nos gráficos de todas as abas.",
+      },
+    ],
+    [
+      "Os números refletem apenas os dados do seu órgão.",
+      "Não é preciso preencher nada nesta tela.",
+    ],
+  ),
+  "/pneus": t(
+    "Controle de pneus",
+    "Controla cada pneu da frota: onde está instalado, quantos quilômetros já rodou, com que frequência é trocado e quando está chegando ao fim da vida útil.",
+    [
+      "Cadastre cada pneu com código, marca, medida e vida útil esperada em km.",
+      "Para colocar o pneu no veículo, use “Movimentar” e informe veículo, posição e o km do veículo.",
+      "Ao retirar, informe o km e o motivo (desgaste, furo, rodízio etc.). O sistema calcula os km rodados.",
+      "No alto da tela, acompanhe as trocas dos últimos 12 meses e os pneus perto do fim.",
+    ],
+    [
+      {
+        label: "Código do pneu",
+        description: "Número de fogo ou etiqueta; não pode repetir.",
+        tags: REQ,
+      },
+      {
+        label: "Vida útil esperada (km)",
+        description: "Quantos km o fabricante indica. É a base do aviso de fim de vida.",
+        tags: COND,
+      },
+      {
+        label: "KM na instalação / retirada",
+        description:
+          "Hodômetro do veículo nesses dois momentos; a diferença é o quanto o pneu rodou.",
+        tags: COND,
+      },
+      {
+        label: "Posição",
+        description: "Onde o pneu está (dianteiro esquerdo, traseiro direito, estepe etc.).",
+      },
+    ],
+    ["O km da retirada não pode ser menor que o da instalação."],
+    ["Pneu com 85% ou mais da vida útil aparece em “perto do fim”."],
+  ),
+  "/sustentabilidade": t(
+    "Sustentabilidade da frota",
+    "Estima quanto a frota emite de gás de efeito estufa e quanto usa de combustível renovável, para o órgão acompanhar e reduzir o impacto ambiental.",
+    [
+      "Na aba Painel, escolha o período e veja litros, emissões e evolução mensal.",
+      "Na aba Por veículo, escolha um veículo para ver as emissões, o km/L e a comparação com a média da frota.",
+      "Na aba Fatores de emissão, confira ou ajuste os fatores de cada combustível.",
+    ],
+    [
+      {
+        label: "CO2e estimado",
+        description:
+          "Litros abastecidos vezes o fator de emissão do combustível. É estimativa, não medição.",
+        tags: CALC,
+      },
+      {
+        label: "Fator de emissão",
+        description: "Quantos kg de CO2e cada litro produz. Pode ser ajustado pelo órgão.",
+        tags: COND,
+      },
+      {
+        label: "Km por litro",
+        description: "Consumo do veículo, calculado pelos hodômetros dos abastecimentos.",
+        tags: CALC,
+      },
+    ],
+    [
+      "Para calcular o km/L e a emissão por 100 km é preciso informar o hodômetro nos abastecimentos.",
+    ],
+  ),
+  "/exportacao": t(
+    "Exportar dados",
+    "Baixa uma cópia completa dos dados do órgão em um único arquivo e permite conferir se a cópia guardada está inteira.",
+    [
+      "Clique em “Exportar todos os dados” e aguarde o arquivo ser gerado.",
+      "Anote a soma de verificação (SHA-256) mostrada na tela e guarde o arquivo em dois lugares.",
+      "Para testar uma cópia antiga, use “Conferir uma cópia já baixada”: escolha o arquivo e, se quiser, cole a soma anotada.",
+    ],
+    [
+      {
+        label: "Arquivo .zip",
+        description: "Contém planilhas (CSV), arquivos JSON, um manifesto e um LEIA-ME.",
+        tags: AUTO,
+      },
+      {
+        label: "Soma de verificação",
+        description:
+          "Código que muda se o arquivo for alterado; serve para provar que a cópia está intacta.",
+        tags: AUTO,
+      },
+    ],
+    [
+      "Nenhuma senha, token ou chave é incluída no arquivo.",
+      "Recomenda-se baixar e conferir a cópia todo mês.",
+    ],
+  ),
+  "/avisos": t(
+    "Avisos de vencimento",
+    "Mostra o que está vencido ou perto de vencer (CNH, seguro, contrato, revisão, licenciamento, garantia) e envia um resumo por e-mail, para ninguém perder prazo.",
+    [
+      "Veja na primeira caixa tudo o que precisa de atenção agora.",
+      "Para avisar um motorista, clique em “Avisar” e o WhatsApp abre com a mensagem pronta.",
+      "Na segunda caixa, ligue o aviso por e-mail, escreva os e-mails que recebem e escolha a frequência.",
+      "Ajuste com quantos dias de antecedência cada tipo de aviso deve aparecer e salve.",
+      "Use “Enviar resumo agora” para testar.",
+    ],
+    [
+      {
+        label: "E-mails que recebem",
+        description: "Um ou mais e-mails, separados por vírgula ou por linha.",
+        tags: COND,
+      },
+      {
+        label: "Frequência",
+        description: "Toda segunda-feira ou todos os dias. Só envia quando há algo vencendo.",
+      },
+      {
+        label: "Dias de antecedência",
+        description: "Quantos dias antes do vencimento o item passa a aparecer.",
+      },
+    ],
+    [
+      "O envio por e-mail exige que o e-mail do órgão esteja configurado pelo administrador.",
+      "O WhatsApp abre com a mensagem pronta; quem confirma o envio é você.",
+    ],
+  ),
+  "/prestacao-contas": t(
+    "Prestação de contas",
+    "Gera os dados do exercício em arquivos prontos para o Tribunal de Contas, a controladoria ou a auditoria.",
+    [
+      "Escolha o exercício (ano).",
+      "Clique em “Baixar pacote completo (ZIP)” para receber tudo, ou baixe cada conjunto em CSV, XML ou Excel.",
+      "Envie os arquivos ao órgão de controle conforme a orientação dele.",
+    ],
+    [
+      {
+        label: "Exercício",
+        description: "O ano dos dados. Empenhos usam o ano do empenho; os demais, a data do fato.",
+        tags: REQ,
+      },
+      {
+        label: "Conjuntos",
+        description: "Bens, abastecimentos, manutenções, contratos, empenhos, multas e sinistros.",
+      },
+    ],
+    [
+      "Cada Tribunal de Contas tem seu leiaute; este pacote usa o padrão do Dibai Fleet e pode ser mapeado quando exigido.",
+    ],
+  ),
+  "/rastreamento": t(
+    "Rastreamento",
+    "Mostra onde estão os veículos com rastreador, quais estão em movimento, parados ou sem sinal, e avisa sobre excesso de velocidade, bateria baixa e saída de áreas permitidas.",
+    [
+      "Em Rastreadores, vincule cada rastreador a um veículo e entregue o token ao fornecedor do rastreamento.",
+      "Em Áreas e limites, defina a velocidade máxima e as áreas permitidas (raio em metros).",
+      "Acompanhe o mapa, os alertas e o trajeto de cada veículo.",
+    ],
+    [
+      {
+        label: "Token do rastreador",
+        description:
+          "Senha do rastreador, mostrada uma única vez. Guarde e entregue ao fornecedor.",
+        tags: AUTO,
+      },
+      {
+        label: "Velocidade máxima",
+        description: "Acima dela o sistema gera um alerta.",
+        tags: COND,
+      },
+      {
+        label: "Área permitida",
+        description:
+          "Círculo com centro (latitude e longitude) e raio. O sistema avisa ao sair ou entrar.",
+        tags: COND,
+      },
+    ],
+    ["A tela só existe para órgãos em que o administrador da plataforma ligou o módulo."],
+  ),
+  "/faturamento": t(
+    "Faturamento",
+    "Fecha o mês de cada contrato de gerenciamento: reúne abastecimentos, manutenções e lavagens, aplica glosas e taxa de administração e calcula o valor a pagar.",
+    [
+      "Clique em “Nova fatura”, escolha o contrato e o mês e informe a taxa de administração (pode ser negativa).",
+      "Confira os itens; para discordar de um valor, aplique uma glosa com o motivo.",
+      "Informe a nota fiscal para marcar como conferida e, depois do pagamento, marque como paga.",
+    ],
+    [
+      {
+        label: "Taxa de administração",
+        description: "Percentual sobre o valor conferido. Pode ser negativa (desconto).",
+        tags: COND,
+      },
+      { label: "Glosa", description: "Valor não aceito, sempre com motivo.", tags: COND },
+      {
+        label: "Líquido",
+        description: "Valor conferido mais a taxa, menos retenções.",
+        tags: CALC,
+      },
+    ],
+    ["Fatura paga não pode ser alterada nem apagada.", "Uma operação só entra em uma fatura."],
+  ),
+  "/gestao-contrato": t(
+    "Gestão do contrato (IMR)",
+    "Registra a fiscalização do contrato e acompanha a nota mensal de qualidade do serviço (IMR).",
+    [
+      "Na aba Ocorrências, registre notificações, advertências e atestos, com prazo e resolução.",
+      "Na aba Indicadores, carregue o modelo, ajuste metas e pesos e lance o resultado de cada mês.",
+      "Veja a nota final do mês e a faixa (ótimo, bom, regular, insatisfatório).",
+      "Na aba Relatório final, imprima o resumo para o atesto.",
+    ],
+    [
+      {
+        label: "Meta e peso",
+        description: "A meta é o resultado esperado; o peso diz o quanto o indicador vale na nota.",
+      },
+      {
+        label: "Nota do mês",
+        description: "De 0 a 10, calculada pelos pesos dos indicadores.",
+        tags: CALC,
+      },
+    ],
+    ["Só é usada por órgãos que gerenciam contrato de gerenciamento de frota."],
+  ),
+  "/regras-manutencao": t(
+    "Regras de manutenção",
+    "Define os limites do órgão para manutenção: quem aprova até que valor, tempos padrão de serviço, teto do valor da hora de mão de obra, prazos de devolução e regras de lavagem.",
+    [
+      "Escolha a aba da regra que quer cadastrar.",
+      "Preencha os campos e salve; a regra passa a valer nas próximas manutenções.",
+    ],
+    [
+      {
+        label: "Alçada",
+        description: "Até que valor cada perfil pode aprovar uma ordem de serviço.",
+      },
+      {
+        label: "Tempo padrão",
+        description: "Horas normais de um serviço, usadas para conferir o orçamento.",
+      },
+    ],
+    ["Serve para órgãos com regras formais de aprovação."],
+  ),
+  "/garantias": t(
+    "Garantias, preços e regras",
+    "Lista peças e serviços que ainda estão na garantia, para o órgão exigir o reparo sem pagar de novo.",
+    [
+      "Consulte os itens em garantia por veículo.",
+      "Se o defeito voltar dentro do prazo, cobre a oficina com base nesta lista.",
+    ],
+    undefined,
+    [
+      "A garantia vem da manutenção registrada (dias de garantia) e da garantia de fábrica do veículo.",
+    ],
+  ),
+  "/pesquisa-precos": t(
+    "Pesquisa de preços",
+    "Mostra quanto o órgão já pagou por uma peça ou serviço, para comparar antes de aprovar novos orçamentos.",
+    [
+      "Digite o nome da peça ou do serviço.",
+      "Compare os valores pagos, as datas e os fornecedores.",
+    ],
+    undefined,
+    ["Os preços vêm dos registros do próprio órgão."],
   ),
 
   "/veiculos": t(
@@ -91,13 +499,11 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       {
         label: "Renavam / Chassi",
         description: "Identificadores oficiais; usados na consulta de dados oficiais.",
-        tags: ["Depende de integração"],
       },
       {
         label: "Marca, modelo e ano",
         description:
           "Podem ser preenchidos automaticamente pela consulta de dados oficiais ou pela tabela de referência de preços.",
-        tags: EXT,
       },
       {
         label: "Tipo de medidor",
@@ -492,7 +898,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
   ),
 
   "/obrigacoes": t(
-    "Obrigações legais e documentos",
+    "Obrigações legais",
     "Acompanhamento de licenciamento, IPVA, vistorias, certificados e demais documentos obrigatórios da frota.",
     [
       "Cadastre a obrigação e o vencimento.",
@@ -626,7 +1032,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
   ),
 
   "/autorizacoes": t(
-    "Autorizações de abastecimento",
+    "Autorizações",
     "Emite a autorização prévia de abastecimento, reservando quantidade ou valor no contrato, empenho e cota antes do consumo.",
     [
       "Clique em Nova autorização e escolha o bem e o combustível.",
@@ -726,7 +1132,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
   ),
 
   "/combustiveis": t(
-    "Combustíveis e produtos automotivos",
+    "Combustíveis",
     "Cadastro dos produtos abastecíveis e insumos automotivos usados nas autorizações, contratos e relatórios.",
     [
       "Cadastre o produto com nome e unidade de medida.",
@@ -817,7 +1223,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
         label: "Latitude / longitude",
         description:
           "Buscadas automaticamente pelo endereço; corrija manualmente quando o endereço não for localizado. O sistema nunca estima coordenadas.",
-        tags: ["Automático", "Depende de integração"],
+        tags: AUTO,
       },
       {
         label: "Situação",
@@ -935,7 +1341,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
   ),
 
   "/planos-manutencao": t(
-    "Planos de manutenção preventiva",
+    "Planos preventivos",
     "Define os intervalos de revisão por quilometragem, horas ou tempo, gerando avisos automáticos de manutenção vencida ou próxima.",
     [
       "Crie o plano e escolha os bens ou o tipo de bem.",
@@ -983,215 +1389,9 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   ),
 
-  "/pecas": t(
-    "Peças e acessórios",
-    "Catálogo de peças e acessórios com códigos, valores de referência e compatibilidade com os bens da frota.",
-    [
-      "Cadastre a peça com descrição e código.",
-      "Use a aba de compatibilidade para vincular modelos atendidos.",
-      "Consulte antes de emitir ordens de fornecimento.",
-    ],
-    [
-      {
-        label: "Código e descrição",
-        description: "Identificação usada no estoque, nas ordens de fornecimento e nas cotações.",
-        tags: REQ,
-      },
-      {
-        label: "Unidade de medida",
-        description: "Peça, jogo, litro, metro; deve ser a mesma usada nas compras e no estoque.",
-        tags: REQ,
-      },
-      {
-        label: "Valor de referência",
-        description:
-          "Preço estimado para conferência; não substitui o preço do item contratual, que sempre prevalece na execução.",
-      },
-      {
-        label: "Compatibilidade",
-        description:
-          "Relaciona marcas e modelos atendidos; pode ser ajustada manualmente quando o catálogo não cobrir o caso.",
-        tags: COND,
-      },
-    ],
-    [
-      "Peça incompatível com o bem gera aviso ao ser incluída em ordem ou manutenção.",
-      "Na execução de manutenção por contrato, a peça só pode ser consumida se existir item de contrato com saldo.",
-    ],
-  ),
-
-  "/ofp": t(
-    "Ordens de Fornecimento de Peças",
-    "Emite, acompanha e encerra ordens de fornecimento de peças, com itens, quantidades, valores e entrega.",
-    [
-      "Crie a ordem informando fornecedor e bem de destino.",
-      "Inclua os itens com quantidade e valor.",
-      "Emita, acompanhe a entrega e finalize ou cancele.",
-    ],
-    [
-      {
-        label: "Fornecedor",
-        description:
-          "Empresa do cadastro de pessoas e empresas externas; com contrato, apenas fornecedores do contrato aparecem.",
-        tags: ["Obrigatório", "Condicional"],
-      },
-      {
-        label: "Contrato e item",
-        description:
-          "Quando a compra é por contrato, o item define a peça e o valor unitário, que não é editável.",
-        tags: ["Condicional", "Automático"],
-      },
-      {
-        label: "Itens da ordem",
-        description: "Cada linha traz peça, quantidade e valor unitário.",
-        tags: REQ,
-      },
-      {
-        label: "Valor total",
-        description: "Soma de quantidade × valor unitário de todos os itens.",
-        tags: CALC,
-      },
-      {
-        label: "Recebimento",
-        description:
-          "Ao registrar a entrega, a quantidade recebida entra automaticamente no estoque do depósito indicado.",
-        tags: AUTO,
-      },
-      {
-        label: "Situação",
-        description:
-          "Rascunho, aguardando aprovação, aprovada, parcialmente atendida, atendida, rejeitada ou cancelada.",
-        tags: AUTO,
-      },
-    ],
-    [
-      "Não é possível pedir acima do saldo do item contratual.",
-      "Ordens já atendidas ficam bloqueadas para edição; use cancelamento com justificativa.",
-    ],
-  ),
-
-  "/almoxarifado": t(
-    "Almoxarifado",
-    "Controle de estoque de peças e insumos: entradas, saídas, reservas, saldos por depósito e inventário.",
-    [
-      "Cadastre depósitos e saldos iniciais.",
-      "Registre entradas e saídas de material; a entrada por compra nasce do recebimento da ordem de fornecimento.",
-      "Use a transferência entre depósitos para mover um ou vários itens em uma única operação.",
-      "Use o inventário para conferência periódica.",
-    ],
-    [
-      {
-        label: "Depósito",
-        description:
-          "Local físico do estoque; a transferência exige depósito de origem e de destino diferentes.",
-        tags: REQ,
-      },
-      {
-        label: "Saldo disponível",
-        description: "Saldo em estoque menos as reservas ativas.",
-        tags: CALC,
-      },
-      {
-        label: "Movimentação",
-        description: "Entrada, saída, ajuste ou transferência; sempre com justificativa.",
-        tags: REQ,
-      },
-      {
-        label: "Transferência multi-item",
-        description:
-          "Permite incluir várias linhas de item e quantidade; cada linha é validada e registrada individualmente na auditoria.",
-        tags: COND,
-      },
-    ],
-    [
-      "Saídas e transferências acima do saldo disponível são bloqueadas.",
-      "Entradas excepcionais (saldo inicial, devolução, doação, ajuste e correção) exigem justificativa e ficam registradas na auditoria.",
-    ],
-  ),
-
-  "/almoxarifado/transferencias": t(
-    "Transferência entre depósitos",
-    "Move itens de um depósito para outro sem alterar o patrimônio total do estoque. Uma única operação pode transferir vários itens.",
-    [
-      "Selecione o depósito de origem e o de destino (precisam ser diferentes).",
-      "Acrescente uma linha por item, informando a peça e a quantidade.",
-      "Confira o saldo disponível mostrado em cada linha e confirme a transferência.",
-    ],
-    [
-      {
-        label: "Depósito de origem",
-        description: "De onde o material sai; o saldo disponível é mostrado por item.",
-        tags: REQ,
-      },
-      {
-        label: "Depósito de destino",
-        description: "Para onde o material vai; deve ser diferente da origem.",
-        tags: REQ,
-      },
-      {
-        label: "Itens e quantidades",
-        description:
-          "Várias linhas na mesma operação; cada linha é validada e registrada individualmente.",
-        tags: REQ,
-      },
-      {
-        label: "Justificativa",
-        description: "Motivo da movimentação; fica no histórico para auditoria.",
-        tags: REQ,
-      },
-      {
-        label: "Saldo após a operação",
-        description: "Baixado na origem e acrescido no destino no momento da confirmação.",
-        tags: AUTO,
-      },
-    ],
-    [
-      "Transferência acima do saldo disponível (saldo em estoque menos reservas) é bloqueada.",
-      "A operação não altera custo médio total: apenas muda a localização do material.",
-    ],
-  ),
-
-  "/pneus": t(
-    "Pneus",
-    "Gestão do ciclo de vida dos pneus: aquisição, instalação por posição, rodízio, recapagem e descarte.",
-    [
-      "Cadastre o pneu com número de série e medidas.",
-      "Instale no bem indicando a posição.",
-      "Registre rodízios, recapagens e o descarte final.",
-    ],
-    [
-      {
-        label: "Número de série / fogo",
-        description: "Identificação única do pneu; não se repete no órgão.",
-        tags: REQ,
-      },
-      {
-        label: "Medida e marca",
-        description: "Usadas na conferência de compatibilidade com o bem.",
-        tags: REQ,
-      },
-      {
-        label: "Bem e posição",
-        description: "Informados na instalação; a posição indica o eixo/lado ocupado.",
-        tags: COND,
-      },
-      {
-        label: "Situação",
-        description: "Estoque, instalado, em reparo, recapagem, descartado ou baixado.",
-        tags: AUTO,
-      },
-      {
-        label: "Vida útil percorrida",
-        description:
-          "Quilometragem acumulada do bem durante o período em que o pneu esteve instalado.",
-        tags: CALC,
-      },
-    ],
-  ),
-
   "/rede-credenciada": t(
-    "Oficinas e prestadores do órgão",
-    "Para que serve: reúne as oficinas e prestadores cadastrados pelo próprio órgão, com serviços atendidos, endereço e posição no mapa. O FrotaGov não disponibiliza prestadores; nada aqui é compartilhado com outros órgãos.",
+    "Oficinas e fornecedores",
+    "Para que serve: reúne as oficinas e prestadores cadastrados pelo próprio órgão, com serviços atendidos, endereço e posição no mapa. O Dibai Fleet não disponibiliza prestadores; nada aqui é compartilhado com outros órgãos.",
     [
       "Cadastre a oficina do seu órgão com CNPJ e endereço.",
       "Indique os serviços atendidos.",
@@ -1212,7 +1412,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
         label: "Endereço e localização",
         description:
           "A posição no mapa vem do endereço; pode ser corrigida manualmente quando não localizada.",
-        tags: ["Automático", "Depende de integração"],
+        tags: AUTO,
       },
       {
         label: "Situação",
@@ -1223,57 +1423,6 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     [
       "Para execução por contrato, a oficina também precisa constar como contratada no contrato vigente.",
     ],
-  ),
-
-  "/credenciados": t(
-    "Credenciados do órgão e cartão virtual",
-    "Para que serve: gerencia as empresas cadastradas ou convidadas pelo próprio órgão e o cartão virtual do bem, usado para identificar veículo e autorização no atendimento.",
-    [
-      "Cadastre o parceiro e os usuários que acessarão o portal.",
-      "Gere o cartão virtual do bem.",
-      "Acompanhe os atendimentos capturados pelo parceiro.",
-    ],
-    [
-      {
-        label: "Parceiro",
-        description:
-          "Empresa cadastrada ou convidada pelo próprio órgão, responsável pelo atendimento. Não existe catálogo público de empresas.",
-        tags: REQ,
-      },
-      {
-        label: "Cartão virtual",
-        description: "Código de identificação do bem, apresentado no atendimento.",
-        tags: AUTO,
-      },
-      {
-        label: "Usuários do parceiro",
-        description: "Acessam apenas os dados do próprio credenciamento.",
-        tags: COND,
-      },
-    ],
-    [
-      "O cartão virtual identifica o bem; não é meio de pagamento e não realiza transação bancária.",
-      "Cartões inativos não permitem captura de atendimento.",
-    ],
-  ),
-
-  "/portal-credenciado": t(
-    "Portal do credenciado",
-    "Para que serve: área usada pela empresa cadastrada ou convidada pelo órgão para validar o cartão do bem e registrar o atendimento de abastecimento ou manutenção. O acesso é apenas por convite do órgão, sem descoberta pública.",
-    [
-      "Informe ou leia o código do cartão virtual.",
-      "Confira os dados do bem e da autorização.",
-      "Registre o atendimento com quantidade, valor e marcação do medidor.",
-    ],
-    [
-      {
-        label: "Código do cartão",
-        description: "Identifica o bem e a autorização válida.",
-        tags: REQ,
-      },
-      { label: "Dados do bem", description: "Exibidos após a validação do cartão.", tags: AUTO },
-    ],
-    ["Cartões vencidos, inativos ou sem autorização válida não permitem registrar atendimento."],
   ),
 
   "/mapa-rede": t(
@@ -1294,7 +1443,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
         label: "Pontos no mapa",
         description:
           "Alimentados automaticamente pelos cadastros, contratos e credenciamentos do próprio órgão. O sistema não traz prestadores prontos nem dados de outros órgãos.",
-        tags: ["Automático", "Depende de integração"],
+        tags: AUTO,
       },
       {
         label: "Localização pendente",
@@ -1434,7 +1583,6 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
         label: "Envio de e-mail",
         description:
           "Depende do provedor de envio configurado pelo órgão; sem configuração o sistema avisa e oferece o link.",
-        tags: EXT,
       },
       {
         label: "Copiar link",
@@ -1989,7 +2137,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
   ),
 
   "/centros-custo": t(
-    "Centros de custo",
+    "Centros de Custo",
     "Define para onde a despesa da frota é apropriada, permitindo apurar custo por área, programa ou projeto.",
     [
       "Cadastre o centro de custo com código e nome.",
@@ -2097,7 +2245,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
         label: "Endereço e coordenadas",
         description:
           "A localização é buscada pelo endereço; pode ser corrigida manualmente quando não for encontrada.",
-        tags: ["Automático", "Depende de integração"],
+        tags: AUTO,
       },
     ],
     [
@@ -2106,54 +2254,8 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   ),
 
-  "/condutores": t(
-    "Condutores / Motoristas",
-    "Cadastro dos condutores autorizados, com habilitação, categoria, validade e situação.",
-    [
-      "Cadastre o condutor com nome e documento.",
-      "Informe número, categoria e validade da habilitação.",
-      "Mantenha a situação atualizada.",
-    ],
-    [
-      {
-        label: "Pessoa",
-        description:
-          "Selecione o servidor já cadastrado em Funcionários; nome, matrícula e unidade vêm desse cadastro e não são digitados aqui.",
-        tags: ["Obrigatório", "Automático"],
-      },
-      {
-        label: "Número e categoria da habilitação",
-        description:
-          "Informe conforme o documento. A categoria precisa ser compatível com o bem que o condutor vai conduzir.",
-        tags: REQ,
-      },
-      {
-        label: "Validade da habilitação",
-        description:
-          "Gera aviso antes do vencimento; habilitação vencida bloqueia novas utilizações.",
-        tags: REQ,
-      },
-      {
-        label: "Vínculo",
-        description:
-          "Efetivo, comissionado, contratado, terceirizado ou outro; usado em relatórios e na conferência de responsabilidade.",
-        tags: REQ,
-      },
-      {
-        label: "Situação",
-        description:
-          "Somente condutores ativos aparecem nas listas de utilização, diárias e indicação de multa.",
-        tags: REQ,
-      },
-    ],
-    [
-      "O condutor precisa existir antes no cadastro de pessoas: esta tela apenas acrescenta os dados de habilitação.",
-      "O histórico de utilização do condutor alimenta a sugestão de condutor nas multas e o filtro Condutor → Veículo nos relatórios.",
-    ],
-  ),
-
   "/entidades-externas": t(
-    "Pessoas e empresas externas",
+    "Pessoas e Empresas Externas",
     "Cadastro único de quem não é servidor do órgão: empresas fornecedoras, oficinas, postos, órgãos parceiros, consórcios e pessoas físicas externas. Todas as demais telas selecionam a partir daqui.",
     [
       "Escolha se é pessoa física ou jurídica e informe CPF/CNPJ, nome ou razão social.",
@@ -2187,7 +2289,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
         label: "Endereço e coordenadas",
         description:
           "A posição no mapa é buscada pelo endereço; se não for encontrada, informe latitude e longitude manualmente.",
-        tags: ["Automático", "Depende de integração"],
+        tags: AUTO,
       },
       {
         label: "Situação",
@@ -2247,7 +2349,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
   ),
 
   "/usuarios": t(
-    "Usuários e permissões",
+    "Usuários e Permissões",
     "Gestão dos usuários do órgão e dos perfis de acesso que determinam o que cada pessoa pode ver e fazer.",
     [
       "Cadastre o usuário com nome e e-mail institucional.",
@@ -2303,39 +2405,6 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       },
     ],
     ["A importação só grava depois da confirmação; nada é alterado durante a conferência."],
-  ),
-
-  "/exportacao": t(
-    "Exportar dados",
-    "Gera um pacote completo com todos os dados do órgão, para migração, auditoria ou uso em outros sistemas.",
-    [
-      "Clique em Exportar todos os dados.",
-      "Aguarde a geração e acompanhe o progresso.",
-      "Baixe o arquivo compactado gerado.",
-    ],
-    [
-      {
-        label: "Resumo do pacote",
-        description: "Lista os conjuntos de dados e a quantidade de registros que serão incluídos.",
-        tags: AUTO,
-      },
-      {
-        label: "Progresso",
-        description: "Acompanha a geração; em bases grandes o processo pode levar alguns minutos.",
-        tags: AUTO,
-      },
-      {
-        label: "Arquivo final",
-        description:
-          "Pacote compactado com planilhas, versão em formato de dados e documento de conferência.",
-        tags: AUTO,
-      },
-    ],
-    [
-      "A exportação traz apenas dados do órgão em que você está conectado.",
-      "Senhas, chaves, certificados e credenciais nunca são incluídos no pacote.",
-      "O acesso é restrito aos perfis de administração e auditoria; cada tentativa fica registrada.",
-    ],
   ),
 
   "/inteligencia": t(
@@ -2415,29 +2484,6 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   ),
 
-  "/sustentabilidade": t(
-    "Sustentabilidade da Frota",
-    "Estima emissões e eficiência energética da frota a partir do consumo registrado, apoiando metas ambientais.",
-    [
-      "Escolha o período de apuração.",
-      "Confira as emissões estimadas por tipo de combustível.",
-      "Compare a evolução entre períodos.",
-    ],
-    [
-      {
-        label: "Emissão estimada",
-        description: "Consumo multiplicado pelo fator de emissão do combustível.",
-        tags: CALC,
-      },
-      {
-        label: "Fatores de emissão",
-        description: "Valores de referência utilizados no cálculo.",
-        tags: AUTO,
-      },
-    ],
-    ["Os números são estimativas de referência, não medições diretas."],
-  ),
-
   "/transparencia": t(
     "Portal da Transparência",
     "Publica dados abertos da frota para consulta pública, com controle do que é divulgado.",
@@ -2471,7 +2517,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       {
         label: "Credenciais do provedor",
         description: "Cadastradas em área protegida; nunca são exibidas novamente nem exportadas.",
-        tags: ["Obrigatório", "Depende de integração"],
+        tags: REQ,
       },
       {
         label: "Situação da integração",
@@ -2591,7 +2637,7 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
       {
         label: "Valor de mercado",
         description: "Referencial obtido da tabela de preços quando o bem estiver vinculado.",
-        tags: ["Automático", "Depende de integração"],
+        tags: AUTO,
       },
       { label: "Custos acumulados", description: "Somatório dos lançamentos do bem.", tags: CALC },
     ],
