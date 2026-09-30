@@ -132,6 +132,24 @@ export const FEATURES: FeatureDef[] = [
     hint: "Desligado, o relatório só pode ser visto na tela",
   },
   {
+    key: "abastecimentos.registrar",
+    module: "abastecimentos",
+    label: "Registrar abastecimentos",
+    hint: "Desligado, a tela fica somente para consulta",
+  },
+  {
+    key: "manutencoes.registrar",
+    module: "manutencoes",
+    label: "Registrar manutenções",
+    hint: "Desligado, a tela fica somente para consulta",
+  },
+  {
+    key: "multas.registrar",
+    module: "multas",
+    label: "Registrar multas",
+    hint: "Desligado, a tela fica somente para consulta",
+  },
+  {
     key: "veiculos.cadastro",
     module: "veiculos",
     label: "Cadastrar e editar veículos",

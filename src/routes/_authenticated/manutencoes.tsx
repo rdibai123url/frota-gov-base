@@ -1,3 +1,4 @@
+import { useFeature } from "@/lib/modulos";
 import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
@@ -165,6 +166,7 @@ const recordSchema = z.object({
 });
 
 function Manutencoes() {
+  const regOn = useFeature("manutencoes.registrar");
   const { data: requests = [], isLoading } = useMaintenanceRequests();
   const { data: records = [] } = useMaintenanceRecords();
   const { data: vehicles = [] } = useVehicles();
@@ -780,7 +782,7 @@ function Manutencoes() {
         title="Manutenções"
         description="Solicitações, execução, peças e custos — veículos em manutenção ficam indisponíveis para reservas e abastecimentos."
         action={
-          canWrite && orgId ? (
+          canWrite && orgId && regOn ? (
             <div className="flex gap-2">
               <Button variant="outline" onClick={openNewReq} className="gap-2">
                 <Plus className="size-4" /> Nova solicitação

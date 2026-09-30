@@ -1,3 +1,4 @@
+import { useFeature } from "@/lib/modulos";
 import { ListPagination, usePaged } from "@/components/list-pagination";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
@@ -108,6 +109,7 @@ const numOrNull = (v: string | undefined) => {
 const OPEN_STATUS: FineStatus[] = ["recebida", "em_analise", "defesa_apresentada", "indeferida"];
 
 function Multas() {
+  const regOn = useFeature("multas.registrar");
   const { data: fines = [], isLoading } = useTrafficFines();
   const { data: vehicles = [] } = useVehicles();
   const { data: drivers = [] } = useDrivers();
@@ -338,7 +340,7 @@ function Multas() {
         title="Multas e infrações"
         description="Autos de infração dos veículos do órgão, com defesa, responsabilidade e comprovantes. Registros nunca são excluídos."
         action={
-          canRegister && orgId ? (
+          canRegister && orgId && regOn ? (
             <Button onClick={openNew} className="gap-2">
               <Plus className="size-4" /> Nova multa
             </Button>
